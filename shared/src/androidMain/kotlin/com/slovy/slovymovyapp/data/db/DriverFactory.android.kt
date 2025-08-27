@@ -9,6 +9,12 @@ actual class DriverFactory actual constructor(private val androidContext: Any?) 
     actual fun createDriver(dbName: String): SqlDriver {
         val ctx = androidContext as? Context
             ?: error("Android Context is required to create database driver on Android")
-        return AndroidSqliteDriver(AppDatabase.Schema, ctx, dbName)
+        
+        val driver = AndroidSqliteDriver(AppDatabase.Schema, ctx, dbName)
+        
+        // Ensure schema is created for a new database (consistency with JVM implementation)
+        AppDatabase.Schema.create(driver)
+        
+        return driver
     }
 }

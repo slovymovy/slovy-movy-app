@@ -1,6 +1,6 @@
 package com.slovy.slovymovyapp
 
-//TODO: delete me
+// Platform-specific greeting functionality
 class Greeting {
     private val platform = getPlatform()
 

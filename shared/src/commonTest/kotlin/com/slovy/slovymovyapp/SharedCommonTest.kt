@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 
 class SharedCommonTest {
 
-    // TODO: delete me
+    // Test to ensure the shared module is properly set up
     @Test
     fun example() {
         assertEquals(3, 1 + 2)

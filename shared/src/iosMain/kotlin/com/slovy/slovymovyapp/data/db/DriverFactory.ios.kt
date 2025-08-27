@@ -6,6 +6,9 @@ import com.slovy.slovymovyapp.db.AppDatabase
 
 actual class DriverFactory actual constructor(androidContext: Any?) {
     actual fun createDriver(dbName: String): SqlDriver {
-        return NativeSqliteDriver(AppDatabase.Schema, dbName)
+        val driver = NativeSqliteDriver(AppDatabase.Schema, dbName)
+        // Ensure schema is created for a new database (consistency with other platforms)
+        AppDatabase.Schema.create(driver)
+        return driver
     }
 }
