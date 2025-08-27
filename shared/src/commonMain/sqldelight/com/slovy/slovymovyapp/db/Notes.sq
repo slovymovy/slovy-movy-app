@@ -1,0 +1,15 @@
+-- Notes queries
+
+insertNote:
+INSERT OR REPLACE INTO notes(id, title, content, created_at)
+VALUES (?, ?, ?, ?);
+
+selectAll:
+SELECT id, title, content, created_at FROM notes
+ORDER BY created_at DESC;
+
+selectById:
+SELECT id, title, content, created_at FROM notes WHERE id = ?;
+
+deleteById:
+DELETE FROM notes WHERE id = ?;

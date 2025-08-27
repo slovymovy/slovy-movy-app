@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp
 
+//TODO: delete me
 class Greeting {
     private val platform = getPlatform()
 
