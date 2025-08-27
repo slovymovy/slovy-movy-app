@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 
 class ComposeAppCommonTest {
 
-    // Test to ensure the composeApp module is properly set up
+    // TODO: remove me
     @Test
     fun example() {
         assertEquals(3, 1 + 2)

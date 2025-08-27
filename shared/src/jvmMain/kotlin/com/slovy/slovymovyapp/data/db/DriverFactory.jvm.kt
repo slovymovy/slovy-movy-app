@@ -7,7 +7,7 @@ import com.slovy.slovymovyapp.db.AppDatabase
 actual class DriverFactory actual constructor(androidContext: Any?) {
     actual fun createDriver(dbName: String): SqlDriver {
         // Use in-memory if requested, otherwise a file-backed DB
-        val connectionString = if (dbName == DatabaseConstants.IN_MEMORY_DATABASE_NAME) {
+        val connectionString = if (dbName == ":memory:") {
             "jdbc:sqlite::memory:"
         } else {
             "jdbc:sqlite:$dbName"

@@ -2,7 +2,6 @@ package com.slovy.slovymovyapp
 
 import com.slovy.slovymovyapp.data.db.DriverFactory
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
-import com.slovy.slovymovyapp.data.db.DatabaseConstants
 import com.slovy.slovymovyapp.data.notes.Note
 import com.slovy.slovymovyapp.data.notes.NotesRepository
 import com.slovy.slovymovyapp.db.AppDatabase
@@ -14,7 +13,7 @@ import kotlin.test.assertNull
 class NotesRepositoryJvmTest {
     @Test
     fun insert_and_query_and_delete_note() {
-        val driver = DriverFactory(null).createDriver(DatabaseConstants.IN_MEMORY_DATABASE_NAME)
+        val driver = DriverFactory(null).createDriver(":memory:")
         val db: AppDatabase = DatabaseProvider.createDatabase(driver)
         val repo = NotesRepository(db)
 
