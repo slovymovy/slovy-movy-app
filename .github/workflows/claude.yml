@@ -47,7 +47,6 @@ jobs:
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_tools: "Bash(bash*),Bash(./gradlew:*),Bash(find:*),Bash(grep:*),Bash(mkdir:*),Bash(./setup-hooks.sh:*),Bash(rg:*),Edit,Replace,NotebookEditCell"
