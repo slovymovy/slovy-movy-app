@@ -47,6 +47,8 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.kotlinx.serializationJson)
+            implementation(libs.sqldelight.runtime)
             implementation(projects.shared)
         }
         commonTest.dependencies {
@@ -95,7 +97,6 @@ dependencies {
     androidTestImplementation(libs.androidx.testExt.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.junit)
-    androidTestImplementation(libs.sqldelight.sqliteDriver)
 }
 
 compose.desktop {

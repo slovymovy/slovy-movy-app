@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(welcomeText: String) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -25,7 +25,7 @@ fun HomeScreen() {
                 style = MaterialTheme.typography.headlineMedium
             )
             Text(
-                text = "Welcome to your new Multiplatform app!",
+                text = welcomeText,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 12.dp)
             )

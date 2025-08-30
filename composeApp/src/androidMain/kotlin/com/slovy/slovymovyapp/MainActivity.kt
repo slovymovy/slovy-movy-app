@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.db.DriverFactory
-import com.slovy.slovymovyapp.data.notes.NotesRepository
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,8 +16,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val driver = DriverFactory(this).createDriver("app.db")
             val db = DatabaseProvider.createDatabase(driver)
-            val repo = NotesRepository(db)
-            App(repository = repo)
+            val repo = SettingsRepository(db)
+            App(repo)
         }
     }
 }
