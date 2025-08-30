@@ -1,14 +1,15 @@
 package com.slovy.slovymovyapp
 
 import androidx.compose.runtime.Composable
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import com.slovy.slovymovyapp.data.settings.Setting
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.ui.HomeScreen
-
-// Minimalized: original app code removed for fresh start.
+import kotlinx.serialization.json.jsonPrimitive
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun App() {
+fun App(settingsRepository: SettingsRepository) {
     // Minimal app from scratch: just show the Home screen
-    HomeScreen()
+    HomeScreen(settingsRepository.getById(Setting.Name.WELCOME_MESSAGE)?.value?.jsonPrimitive?.content.toString())
 }

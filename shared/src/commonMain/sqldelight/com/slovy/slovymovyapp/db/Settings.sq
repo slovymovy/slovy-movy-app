@@ -1,0 +1,24 @@
+-- Initial migration: create settings table
+CREATE TABLE settings (
+  id TEXT AS com.slovy.slovymovyapp.data.settings.Setting.Name NOT NULL PRIMARY KEY,
+  json_value TEXT AS kotlinx.serialization.json.JsonElement NOT NULL CHECK (json_valid(json_value))
+);
+
+-- See com.slovy.slovymovyapp.data.settings.Setttings.kt
+INSERT INTO settings (id, json_value) VALUES ('WELCOME_MESSAGE', '"Hello, world!"');
+
+-- Settings queries
+
+insertSetting:
+INSERT OR REPLACE INTO settings(id, json_value)
+VALUES (?, ?);
+
+selectAll:
+SELECT id, json_value FROM settings
+ORDER BY id;
+
+selectById:
+SELECT id, json_value FROM settings WHERE id = ?;
+
+deleteById:
+DELETE FROM settings WHERE id = ?;

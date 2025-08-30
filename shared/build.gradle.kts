@@ -4,6 +4,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.sqldelight)
+    alias(libs.plugins.serialization)
 }
 
 kotlin {
@@ -14,6 +16,11 @@ kotlin {
         }
     }
 
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -22,10 +29,32 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // put your Multiplatform dependencies here
+            implementation(libs.sqldelight.runtime)
+            implementation(libs.kotlinx.serializationJson)
+        }
+        androidMain.dependencies {
+            implementation(libs.sqldelight.androidDriver)
+        }
+        iosMain.dependencies {
+            implementation(libs.sqldelight.nativeDriver)
+        }
+        jvmMain.dependencies {
+            implementation(libs.sqldelight.sqliteDriver)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+    }
+}
+
+val databaseName = "AppDatabase"
+sqldelight {
+    databases {
+        create(databaseName) {
+            packageName.set("com.slovy.slovymovyapp.db")
+            deriveSchemaFromMigrations.set(false)
+            verifyMigrations.set(false)
+            verifyDefinitions.set(false)
         }
     }
 }
@@ -39,5 +68,12 @@ android {
     }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+}
+
+// Disable SqlDelight verification tasks on Windows due to https://github.com/sqldelight/sqldelight/issues/5312
+if (System.getProperty("os.name").lowercase().contains("windows")) {
+    tasks.matching { it.name.startsWith("verify") && it.name.contains(databaseName) }.configureEach {
+        enabled = false
     }
 }

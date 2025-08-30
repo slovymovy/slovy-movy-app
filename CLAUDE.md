@@ -6,7 +6,7 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **shared**: KMP shared library
 - **server**: JVM Ktor server
 
-**Stack**: Gradle, Kotlin, Compose Multiplatform, AGP, Ktor
+**Stack**: Gradle, Kotlin, Compose Multiplatform, AGP, Ktor, SqlDelight
 
 ## Build Commands
 **WSL Note**: Use `cmd.exe /c gradlew.bat` prefix (Windows paths in output)
@@ -19,14 +19,17 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 
 ### Module-Specific Tasks
 - **Shared tests**: `gradlew :shared:allTests`
-- **ComposeApp tests**: `gradlew :composeApp:allTests`
+- **ComposeApp tests**: `gradlew :composeApp:allTests` 
+- **Android instrumented tests**: `gradlew :composeApp:connectedAndroidTest`
 - **Server tests**: `gradlew :server:test`
 - **Android APK**: `gradlew :composeApp:assembleDebug`
 - **Desktop distribution**: `gradlew :composeApp:packageDistributionForCurrentOS`
 
 ## Test Structure
 - **shared**: `shared/src/commonTest` (kotlin-test)
+  - Platform-specific: `shared/src/jvmTest`, `shared/src/iosTest`
 - **composeApp**: `composeApp/src/commonTest` (kotlin-test)
+  - Android instrumented: `composeApp/src/androidTest` (androidx.test)
 - **server**: `server/src/test` (ktor-server-test-host, kotlin-test-junit)
 
 ## Configuration
@@ -41,6 +44,12 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **Compose UI**: composeApp/src/commonMain
 - **Android namespace**: com.slovy.slovymovyapp
 - **Server main**: com.slovy.slovymovyapp.ApplicationKt
+
+## Database (SqlDelight)
+- **Schema**: `shared/src/commonMain/sqldelight/com/slovy/slovymovyapp/db/`
+- **Migrations**: `shared/src/commonMain/sqldelight/com/slovy/slovymovyapp/db/migrations/`
+- **Repository pattern**: `NotesRepository` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/notes/`
+- **Platform drivers**: DriverFactory implementations for Android/iOS/JVM
 
 ## Key Notes
 - Module accessors: :composeApp, :shared, :server
