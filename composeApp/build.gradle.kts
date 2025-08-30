@@ -95,6 +95,7 @@ dependencies {
     androidTestImplementation(libs.androidx.testExt.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.sqldelight.sqliteDriver)
 }
 
 compose.desktop {

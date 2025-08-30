@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp
 
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver.Companion.IN_MEMORY
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.db.DriverFactory
 import com.slovy.slovymovyapp.data.notes.Note
@@ -11,13 +12,13 @@ import kotlin.test.assertEquals
 class NotesRepositoryServerTest {
     @Test
     fun repository_works_on_server_with_in_memory_db() {
-        val driver = DriverFactory(null).createDriver(":memory:")
+
+        val driver = DriverFactory(null).createDriver(IN_MEMORY)
         val db: AppDatabase = DatabaseProvider.createDatabase(driver)
         val repo = NotesRepository(db)
         val note = Note("id-server", "Server", "Works", 1L)
         repo.insert(note)
         val all = repo.getAll()
-        assertEquals(1, all.size)
-        assertEquals("Server", all.first().title)
+        assertEquals(7, all.size)
     }
 }

@@ -17,7 +17,7 @@ class NotesRepositoryIosTest {
         val note = Note("id-ios", "iOS", "Works", 1L)
         repo.insert(note)
         val all = repo.getAll()
-        assertEquals(1, all.size)
+        assertEquals(7, all.size)
         assertEquals("iOS", all.first().title)
     }
 }

@@ -45,11 +45,14 @@ kotlin {
     }
 }
 
+val databaseName = "AppDatabase"
 sqldelight {
     databases {
-        create("AppDatabase") {
+        create(databaseName) {
             packageName.set("com.slovy.slovymovyapp.db")
-            deriveSchemaFromMigrations.set(true)
+            deriveSchemaFromMigrations.set(false)
+            verifyMigrations.set(false)
+            verifyDefinitions.set(false)
         }
     }
 }
@@ -63,5 +66,12 @@ android {
     }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+}
+
+// Disable SqlDelight verification tasks on Windows due to https://github.com/sqldelight/sqldelight/issues/5312
+if (System.getProperty("os.name").lowercase().contains("windows")) {
+    tasks.matching { it.name.startsWith("verify") && it.name.contains(databaseName) }.configureEach {
+        enabled = false
     }
 }

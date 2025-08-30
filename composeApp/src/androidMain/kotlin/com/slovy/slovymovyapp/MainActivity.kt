@@ -4,8 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import com.slovy.slovymovyapp.data.db.DatabaseProvider
+import com.slovy.slovymovyapp.data.db.DriverFactory
+import com.slovy.slovymovyapp.data.notes.NotesRepository
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,13 +14,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            App()
+            val driver = DriverFactory(this).createDriver("app.db")
+            val db = DatabaseProvider.createDatabase(driver)
+            val repo = NotesRepository(db)
+            App(repository = repo)
         }
     }
-}
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App()
 }
