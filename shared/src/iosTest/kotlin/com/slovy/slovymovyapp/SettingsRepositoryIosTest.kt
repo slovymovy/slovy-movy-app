@@ -5,6 +5,7 @@ import com.slovy.slovymovyapp.data.db.DriverFactory
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -14,10 +15,9 @@ class SettingsRepositoryIosTest {
         val driver = DriverFactory(null).createDriver(":memory:")
         val db: AppDatabase = DatabaseProvider.createDatabase(driver)
         val repo = SettingsRepository(db)
-        val setting = Setting("platform", "{\"name\": \"iOS\"}")
+        val setting = Setting(Setting.Name.TEST_PROPERTY, Json.parseToJsonElement("{\"version\": \"1.0\"}"))
         repo.insert(setting)
-        val all = repo.getAll()
-        assertEquals(1, all.size)
-        assertEquals("platform", all.first().id)
+        val byId = repo.getById(Setting.Name.TEST_PROPERTY)
+        assertEquals(setting, byId)
     }
 }

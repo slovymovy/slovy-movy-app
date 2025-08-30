@@ -2,7 +2,6 @@ package com.slovy.slovymovyapp
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.db.DriverFactory
 import com.slovy.slovymovyapp.data.settings.Setting
@@ -19,7 +18,7 @@ class SettingsRepositoryAndroidInstrumentedTest {
     fun repository_works_on_android_with_real_db() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
-        val driver = DriverFactory(context).createDriver(JdbcSqliteDriver.IN_MEMORY)
+        val driver = DriverFactory(context).createDriver("test.db")
         val db: AppDatabase = DatabaseProvider.createDatabase(driver)
         val repo = SettingsRepository(db)
         val setting = Setting(Setting.Name.TEST_PROPERTY, Json.parseToJsonElement("{\"version\": \"1.0\"}"))

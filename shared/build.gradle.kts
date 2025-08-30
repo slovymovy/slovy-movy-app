@@ -1,3 +1,4 @@
+import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -72,7 +73,7 @@ android {
 }
 
 // Disable SqlDelight verification tasks on Windows due to https://github.com/sqldelight/sqldelight/issues/5312
-if (System.getProperty("os.name").lowercase().contains("windows")) {
+if (OperatingSystem.current().isWindows) {
     tasks.matching { it.name.startsWith("verify") && it.name.contains(databaseName) }.configureEach {
         enabled = false
     }
