@@ -13,7 +13,7 @@ fun main() = application {
 
     Window(
         onCloseRequest = ::exitApplication,
-        title = "slovymovyapp",
+        title = "Open words"
     ) {
         App(repo)
     }
