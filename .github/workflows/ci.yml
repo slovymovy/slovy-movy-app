@@ -9,6 +9,9 @@ on:
 jobs:
   tests-linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        api-level: [ 34 ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,6 +27,18 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+
       - name: Build (all host-available targets)
         run: |
           chmod +x gradlew
@@ -38,15 +53,24 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Run Android instrumentation tests
-        uses: ReactiveCircus/android-emulator-runner@v2
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 36
-          target: google_apis
-          arch: x86_64
-          profile: pixel_7
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot
-          script: ./gradlew connectedDebugAndroidTest
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: ./gradlew connectedCheck
 
   tests-macos:
     runs-on: macos-latest
@@ -65,6 +89,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Build (all host-available targets)
         run: |
           chmod +x gradlew
@@ -74,7 +101,6 @@ jobs:
         env:
           SDK_NAME: iphonesimulator
         run: |
-          chmod +x gradlew
           ./gradlew iosSimulatorArm64Test
 
       - name: Run iOS x64 tests
