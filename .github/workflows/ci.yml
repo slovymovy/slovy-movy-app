@@ -33,9 +33,6 @@ jobs:
       - name: setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: gradle cache
-        uses: gradle/actions/setup-gradle@v3
-
       - name: AVD cache
         uses: actions/cache@v4
         id: avd-cache
@@ -88,9 +85,6 @@ jobs:
 
       - name: setup Gradle
         uses: gradle/actions/setup-gradle@v4
-
-      - name: hradle cache
-        uses: gradle/actions/setup-gradle@v3
 
       - name: check (all host-available targets)
         run: |
