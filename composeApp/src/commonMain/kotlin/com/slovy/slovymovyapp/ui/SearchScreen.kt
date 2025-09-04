@@ -1,26 +1,16 @@
 package com.slovy.slovymovyapp.ui
 
+// Using a simple text button instead of material icons to keep commonMain lightweight
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-// Using a simple text button instead of material icons to keep commonMain lightweight
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 
 private val dictionary = listOf("world", "idea", "bass")
 
@@ -28,11 +18,21 @@ private val dictionary = listOf("world", "idea", "bass")
 @Composable
 fun SearchScreen(
     language: String?,
+    settingsRepository: SettingsRepository,
     onWordSelected: (String) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
     val results = remember(query) { dictionary.filter { it.contains(query.trim(), ignoreCase = true) } }
     var showInfo by remember { mutableStateOf(false) }
+
+    // Build language options: default "All languages" + languages_to_learn from settings
+    val learnList: List<String> = remember {
+        val setting = settingsRepository.getById(com.slovy.slovymovyapp.data.settings.Setting.Name.languages_to_learn)
+        val arr = setting?.value
+        if (arr is kotlinx.serialization.json.JsonArray) arr.map { it.toString().trim('"') } else emptyList()
+    }
+    val languageOptions = remember(learnList) { listOf("All languages") + learnList }
+    var selectedFilter by remember { mutableStateOf("All languages") }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -48,6 +48,23 @@ fun SearchScreen(
             }
         ) { innerPadding ->
             Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+                // Language filter selector
+                Text(
+                    text = "Language: $selectedFilter", modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { /* noop - simple selector shows below */ }
+                        .padding(bottom = 8.dp)
+                )
+                languageOptions.forEach { opt ->
+                    val selected = opt == selectedFilter
+                    Text(
+                        text = (if (selected) "• " else "  ") + opt,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedFilter = opt }
+                            .padding(vertical = 4.dp)
+                    )
+                }
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },

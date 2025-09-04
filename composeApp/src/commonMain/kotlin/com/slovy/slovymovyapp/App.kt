@@ -6,7 +6,6 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.ui.LanguageSelectionScreen
 import com.slovy.slovymovyapp.ui.SearchScreen
 import com.slovy.slovymovyapp.ui.WordDetailScreen
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -23,9 +22,9 @@ fun App(settingsRepository: SettingsRepository) {
     var selectedLanguage by remember { mutableStateOf<String?>(null) }
     var selectedWord by remember { mutableStateOf<String?>(null) }
 
-    // Load persisted language once
+    // Load persisted native language once
     LaunchedEffect(Unit) {
-        val saved = settingsRepository.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
+        val saved = settingsRepository.getById(Setting.Name.native_language)?.value?.jsonPrimitive?.content
         if (saved.isNullOrBlank()) {
             route = Route.LANGUAGE
         } else {
@@ -36,25 +35,23 @@ fun App(settingsRepository: SettingsRepository) {
 
     when (route) {
         Route.LANGUAGE -> LanguageSelectionScreen(
-            onLanguageChosen = { lang ->
-                // Persist selection
-                settingsRepository.insert(
-                    Setting(
-                        id = Setting.Name.LANGUAGE,
-                        value = Json.parseToJsonElement("\"$lang\"")
-                    )
-                )
+            settingsRepository = settingsRepository,
+            onDone = {
+                val lang = settingsRepository.getById(Setting.Name.native_language)?.value?.jsonPrimitive?.content
                 selectedLanguage = lang
                 route = Route.SEARCH
             }
         )
+
         Route.SEARCH -> SearchScreen(
             language = selectedLanguage,
+            settingsRepository = settingsRepository,
             onWordSelected = { word ->
                 selectedWord = word
                 route = Route.DETAIL
             }
         )
+
         Route.DETAIL -> WordDetailScreen(
             language = selectedLanguage,
             word = selectedWord ?: "",

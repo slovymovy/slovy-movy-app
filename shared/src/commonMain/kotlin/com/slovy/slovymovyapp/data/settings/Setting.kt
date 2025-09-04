@@ -12,6 +12,9 @@ import kotlinx.serialization.json.JsonElement
     enum class Name() {
         TEST_PROPERTY,
         WELCOME_MESSAGE,
-        LANGUAGE
+        LANGUAGE,
+        availible_languages,
+        native_language,
+        languages_to_learn
     }
 }
