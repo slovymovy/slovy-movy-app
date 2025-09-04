@@ -13,27 +13,27 @@ jobs:
       matrix:
         api-level: [ 24, 29 ]
     steps:
-      - name: Checkout repository
+      - name: checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Enable KVM group perms
+      - name: enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Setup Java
+      - name: setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
 
-      - name: Setup Gradle
+      - name: setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Gradle cache
+      - name: gradle cache
         uses: gradle/actions/setup-gradle@v3
 
       - name: AVD cache
@@ -45,12 +45,12 @@ jobs:
             ~/.android/adb*
           key: avd-${{ matrix.api-level }}
 
-      - name: Build (all host-available targets)
+      - name: check (all host-available targets)
         run: |
           chmod +x gradlew
-          ./gradlew build
+          ./gradlew check
 
-      - name: Run Android unit tests
+      - name: run Android unit tests
         run: ./gradlew testDebugUnitTest
 
       - name: create AVD and generate snapshot for caching
@@ -75,35 +75,35 @@ jobs:
   tests-macos:
     runs-on: macos-latest
     steps:
-      - name: Checkout repository
+      - name: checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Setup Java
+      - name: setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
 
-      - name: Setup Gradle
+      - name: setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Gradle cache
+      - name: hradle cache
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build (all host-available targets)
+      - name: check (all host-available targets)
         run: |
           chmod +x gradlew
-          ./gradlew build
+          ./gradlew check
 
-      - name: Run iOS simulator tests
+      - name: run iOS simulator tests
         env:
           SDK_NAME: iphonesimulator
         run: |
           ./gradlew iosSimulatorArm64Test
 
-      - name: Run iOS x64 tests
+      - name: run iOS x64 tests
         env:
           SDK_NAME: iphonesimulator
         run: |
