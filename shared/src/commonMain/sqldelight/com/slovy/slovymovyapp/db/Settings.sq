@@ -1,7 +1,7 @@
 -- Initial migration: create settings table
 CREATE TABLE settings (
   id TEXT AS com.slovy.slovymovyapp.data.settings.Setting.Name NOT NULL PRIMARY KEY,
-  json_value TEXT AS kotlinx.serialization.json.JsonElement NOT NULL CHECK (json_valid(json_value))
+  json_value TEXT AS kotlinx.serialization.json.JsonElement NOT NULL
 );
 
 -- See com.slovy.slovymovyapp.data.settings.Setttings.kt
