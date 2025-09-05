@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private fun wordInfo(word: String, language: String?): String {
     // Simple hardcoded descriptions; could be localized
@@ -29,11 +30,12 @@ private fun wordInfo(word: String, language: String?): String {
     return "$langLabel $base"
 }
 
+@Preview
 @Composable
 fun WordDetailScreen(
-    language: String?,
-    word: String,
-    onBack: () -> Unit
+    language: String? = null,
+    word: String = "idea",
+    onBack: () -> Unit = {}
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(

@@ -18,14 +18,14 @@ private enum class Route {
 
 @Composable
 @Preview
-fun App(settingsRepository: SettingsRepository) {
+fun App(settingsRepository: SettingsRepository? = null) {
     var route by remember { mutableStateOf(Route.SEARCH) }
     var selectedLanguage by remember { mutableStateOf<String?>(null) }
     var selectedWord by remember { mutableStateOf<String?>(null) }
 
     // Load persisted language once
     LaunchedEffect(Unit) {
-        val saved = settingsRepository.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
+        val saved = settingsRepository?.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
         if (saved.isNullOrBlank()) {
             route = Route.LANGUAGE
         } else {
@@ -38,7 +38,7 @@ fun App(settingsRepository: SettingsRepository) {
         Route.LANGUAGE -> LanguageSelectionScreen(
             onLanguageChosen = { lang ->
                 // Persist selection
-                settingsRepository.insert(
+                settingsRepository!!.insert(
                     Setting(
                         id = Setting.Name.LANGUAGE,
                         value = Json.parseToJsonElement("\"$lang\"")
