@@ -5,8 +5,8 @@ CREATE TABLE settings (
 );
 
 -- See com.slovy.slovymovyapp.data.settings.Setttings.kt
-INSERT INTO settings (id, json_value) VALUES ('WELCOME_MESSAGE', '"Hello, world!"');
-INSERT INTO settings (id, json_value) VALUES ('availible_languages', '["Russian","Dutch","English"]');
+INSERT OR REPLACE INTO settings (id, json_value) VALUES ('WELCOME_MESSAGE', '"Hello, world!"');
+INSERT OR REPLACE INTO settings (id, json_value) VALUES ('availible_languages', '[{"name":"English","flag":"🇬🇧"},{"name":"Russian","flag":"🇷🇺"},{"name":"Dutch","flag":"🇳🇱"}]');
 
 -- Settings queries
 
