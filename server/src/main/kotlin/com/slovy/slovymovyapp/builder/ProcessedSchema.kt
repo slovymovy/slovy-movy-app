@@ -28,7 +28,7 @@ data class LanguageCardResponseSense(
     val antonyms: List<String> = emptyList(),
     @SerialName("common_phrases") val commonPhrases: List<String> = emptyList(),
     val traits: List<LanguageCardTrait> = emptyList(),
-    @SerialName("target_lang_definition") val targetLangDefinition: String? = null,
+    @SerialName("target_lang_definitions") val targetLangDefinitions: Map<String, String> = emptyMap(),
     val translations: Map<String, List<LanguageCardTranslation>> = emptyMap()
 )
 

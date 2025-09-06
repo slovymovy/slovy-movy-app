@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.builder
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
 import java.io.File
@@ -8,6 +9,7 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class DbExtractedSchemaTest {
+    @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
         ignoreUnknownKeys = false
         isLenient = false

@@ -41,7 +41,9 @@
                             "comment": "разговорное"
                         }
                     ],
-                    "target_lang_definition": "To check something (e.g., a program, device, or product) for functionality, quality, or compliance with requirements. This is a colloquial term derived from the English word 'test'.",
+                    "target_lang_definitions": {
+                        "en": "To check something (e.g., a program, device, or product) for functionality, quality, or compliance with requirements. This is a colloquial term derived from the English word 'test'."
+                    },
                     "translations": {
                         "en": [
                             {

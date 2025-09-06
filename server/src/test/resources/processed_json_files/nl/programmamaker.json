@@ -34,7 +34,10 @@
                         "een programma maken",
                         "als programmamaker werken"
                     ],
-                    "target_lang_definition": "Someone who creates or produces television or radio programs.",
+                    "target_lang_definitions": {
+                        "ru": "Человек, который создает телевизионные или радиопрограммы.",
+                        "en": "Someone who creates or produces television or radio programs."
+                    },
                     "translations": {
                         "ru": [
                             {
@@ -97,7 +100,10 @@
                         "een programma opstellen",
                         "het programma samenstellen"
                     ],
-                    "target_lang_definition": "Someone who draws up a plan, schedule, or series of activities, for example for a festival or event.",
+                    "target_lang_definitions": {
+                        "ru": "Человек, который составляет план, расписание или программу мероприятий.",
+                        "en": "Someone who draws up a plan, schedule, or series of activities, for example for a festival or event."
+                    },
                     "translations": {
                         "ru": [
                             {

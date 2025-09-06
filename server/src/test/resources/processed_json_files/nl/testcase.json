@@ -34,7 +34,10 @@
                         "een testcase zijn",
                         "als testcase dienen"
                     ],
-                    "target_lang_definition": "A specific situation, event, or set of conditions used to test or evaluate something, such as a new product, system, or theory.",
+                    "target_lang_definitions": {
+                        "ru": "Случай или ситуация, используемые для проверки или оценки чего-либо, например, новой системы, процедуры или теории.",
+                        "en": "A specific situation, event, or set of conditions used to test or evaluate something, such as a new product, system, or theory."
+                    },
                     "translations": {
                         "ru": [
                             {
@@ -89,7 +92,10 @@
                         "een juridische testcase",
                         "een testcase aanspannen"
                     ],
-                    "target_lang_definition": "A legal action or lawsuit whose outcome is intended to set a precedent for how similar cases will be decided in the future.",
+                    "target_lang_definitions": {
+                        "ru": "Судебное дело, которое рассматривается с целью создания судебного прецедента или установления правовых принципов для будущих аналогичных дел.",
+                        "en": "A legal action or lawsuit whose outcome is intended to set a precedent for how similar cases will be decided in the future."
+                    },
                     "translations": {
                         "ru": [
                             {

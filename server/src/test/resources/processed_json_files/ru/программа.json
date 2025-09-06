@@ -35,7 +35,9 @@
                         "концертная программа",
                         "развлекательная программа"
                     ],
-                    "target_lang_definition": "A schedule of radio or television broadcasts, or a list of performances at an event like a concert or show.",
+                    "target_lang_definitions": {
+                        "en": "A schedule of radio or television broadcasts, or a list of performances at an event like a concert or show."
+                    },
                     "translations": {
                         "en": [
                             {
@@ -85,7 +87,9 @@
                         "первая программа",
                         "музыкальная программа"
                     ],
-                    "target_lang_definition": "A radio or television broadcast channel.",
+                    "target_lang_definitions": {
+                        "en": "A radio or television broadcast channel."
+                    },
                     "translations": {
                         "en": [
                             {
@@ -136,7 +140,9 @@
                         "разработать программу",
                         "долгосрочная программа"
                     ],
-                    "target_lang_definition": "A pre-arranged plan of actions, activities, or work.",
+                    "target_lang_definitions": {
+                        "en": "A pre-arranged plan of actions, activities, or work."
+                    },
                     "translations": {
                         "en": [
                             {
@@ -194,7 +200,9 @@
                         "установить программу",
                         "написать программу"
                     ],
-                    "target_lang_definition": "A sequence of instructions written in a programming language for a computer to execute.",
+                    "target_lang_definitions": {
+                        "en": "A sequence of instructions written in a programming language for a computer to execute."
+                    },
                     "translations": {
                         "en": [
                             {
@@ -243,7 +251,9 @@
                         "учебная программа",
                         "программа курса"
                     ],
-                    "target_lang_definition": "A document outlining the topics, schedule, and requirements for an academic course.",
+                    "target_lang_definitions": {
+                        "en": "A document outlining the topics, schedule, and requirements for an academic course."
+                    },
                     "translations": {
                         "en": [
                             {
@@ -295,7 +305,9 @@
                         "программа спектакля",
                         "купить программу"
                     ],
-                    "target_lang_definition": "A booklet or leaflet distributed at an event, such as a play or concert, listing the schedule of acts and performers.",
+                    "target_lang_definitions": {
+                        "en": "A booklet or leaflet distributed at an event, such as a play or concert, listing the schedule of acts and performers."
+                    },
                     "translations": {
                         "en": [
                             {
@@ -345,7 +357,9 @@
                         "предвыборная программа",
                         "партийная программа"
                     ],
-                    "target_lang_definition": "A document stating the aims and principles of a political party, organization, or public figure.",
+                    "target_lang_definitions": {
+                        "en": "A document stating the aims and principles of a political party, organization, or public figure."
+                    },
                     "translations": {
                         "en": [
                             {
@@ -398,7 +412,9 @@
                         "образовательная программа",
                         "школьная программа"
                     ],
-                    "target_lang_definition": "The set of courses and content offered by an educational institution; a course of study.",
+                    "target_lang_definitions": {
+                        "en": "The set of courses and content offered by an educational institution; a course of study."
+                    },
                     "translations": {
                         "en": [
                             {
