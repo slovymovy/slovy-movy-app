@@ -1,0 +1,280 @@
+{
+    "word": "testowanie",
+    "lang_code": "pl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "255a50c3-f224-4bc0-a501-f380d0a4ea08",
+                "word": "testowanie",
+                "pos": "noun",
+                "lang_code": "pl",
+                "forms": [
+                    {
+                        "form_id": "8bc1874d-3cbc-4167-9925-86de48ae78cd",
+                        "entry_id": "255a50c3-f224-4bc0-a501-f380d0a4ea08",
+                        "tags": [
+                            "nominative",
+                            "singular"
+                        ],
+                        "form": "testowanie"
+                    },
+                    {
+                        "form_id": "38969467-2f32-4a90-9f05-940196edc6f0",
+                        "entry_id": "255a50c3-f224-4bc0-a501-f380d0a4ea08",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "testowania"
+                    },
+                    {
+                        "form_id": "7ba77cd4-eaa7-4859-9841-ec4c8e214932",
+                        "entry_id": "255a50c3-f224-4bc0-a501-f380d0a4ea08",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "testowaniu"
+                    },
+                    {
+                        "form_id": "8e850014-f5a7-4ee8-9908-5660c3b01f27",
+                        "entry_id": "255a50c3-f224-4bc0-a501-f380d0a4ea08",
+                        "tags": [
+                            "accusative",
+                            "singular"
+                        ],
+                        "form": "testowanie"
+                    },
+                    {
+                        "form_id": "b66e4aa3-ed66-4715-99a2-00a9d1174786",
+                        "entry_id": "255a50c3-f224-4bc0-a501-f380d0a4ea08",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "testowaniem"
+                    },
+                    {
+                        "form_id": "7d03f85e-df4b-480b-aee4-de355b295eb7",
+                        "entry_id": "255a50c3-f224-4bc0-a501-f380d0a4ea08",
+                        "tags": [
+                            "locative",
+                            "singular"
+                        ],
+                        "form": "testowaniu"
+                    },
+                    {
+                        "form_id": "fc7f7847-ed0f-4b97-86fa-bf1947954358",
+                        "entry_id": "255a50c3-f224-4bc0-a501-f380d0a4ea08",
+                        "tags": [
+                            "singular",
+                            "vocative"
+                        ],
+                        "form": "testowanie"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "98d7c7ba-dd70-49f6-a75a-354a54ab4764",
+                        "entry_id": "255a50c3-f224-4bc0-a501-f380d0a4ea08",
+                        "glosses": [
+                            "verbal noun of testować"
+                        ],
+                        "tags": [
+                            "form-of",
+                            "neuter",
+                            "noun-from-verb"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "0cc67ac1-07da-4514-9d17-bcb4a687fdc0",
+                "word": "testowanie",
+                "pos": "noun",
+                "lang_code": "pl",
+                "forms": [
+                    {
+                        "form_id": "94f6f0ef-21f7-43d7-92f8-560c0c8a1a31",
+                        "entry_id": "0cc67ac1-07da-4514-9d17-bcb4a687fdc0",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "testowania"
+                    },
+                    {
+                        "form_id": "5c37d980-a163-4acd-b4aa-f2ada2517b21",
+                        "entry_id": "0cc67ac1-07da-4514-9d17-bcb4a687fdc0",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "testowaniu"
+                    },
+                    {
+                        "form_id": "11494b66-3c7a-4ed0-9c61-94a154352cdc",
+                        "entry_id": "0cc67ac1-07da-4514-9d17-bcb4a687fdc0",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "testowaniem"
+                    },
+                    {
+                        "form_id": "013b76ee-87be-4e36-8195-ab9c9d1ab0b9",
+                        "entry_id": "0cc67ac1-07da-4514-9d17-bcb4a687fdc0",
+                        "tags": [
+                            "locative",
+                            "singular"
+                        ],
+                        "form": "testowaniu"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "bad9e5d0-ee7e-4269-a677-4f3dfd195bb2",
+                        "entry_id": "0cc67ac1-07da-4514-9d17-bcb4a687fdc0",
+                        "glosses": [
+                            "rzecz. odczas. od testować"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "d8bfa447-32fe-4bbd-9daf-99d8fd71ff02",
+                        "source_entry_id": "0cc67ac1-07da-4514-9d17-bcb4a687fdc0",
+                        "source_sense_id": "bad9e5d0-ee7e-4269-a677-4f3dfd195bb2",
+                        "target_lang_word": "testing",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "testing",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "5e1a3249-2d90-42a3-ab1d-c18a2c92f4d0",
+                                        "entry_id": "7414adca-b2ad-45f1-8776-06230db71680",
+                                        "glosses": [
+                                            "Difficult; tough."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "8306637e-98f1-4c9f-b040-96041debc6a5",
+                                                "sense_id": "5e1a3249-2d90-42a3-ab1d-c18a2c92f4d0",
+                                                "text": "England have now gone four games without a win at Wembley, their longest sequence without a victory in 30 years, and still have much work to do to reach Euro 2012 as they prepare for a testing trip to face Bulgaria in Sofia in September."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "testing",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "16f3dcde-882f-464a-8f53-0843847294b2",
+                                        "entry_id": "94b7cb77-680e-438d-9fd5-cf31c0591195",
+                                        "glosses": [
+                                            "The act of conducting a test; trialing, proving."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c15a2224-80a5-4f59-ad0a-2ceca827cdf6",
+                                                "sense_id": "16f3dcde-882f-464a-8f53-0843847294b2",
+                                                "text": "The wilderness testings of Jesus prepare him for ministry in which such temptations and shortcuts will recur."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "testing",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f8731e0a-3d06-4a0f-af1c-98de00309b76",
+                                        "entry_id": "9ae5da0a-cefa-4d04-8fdf-7f82d30df1c0",
+                                        "glosses": [
+                                            "present participle and gerund of test"
+                                        ],
+                                        "tags": [
+                                            "form-of",
+                                            "gerund",
+                                            "participle",
+                                            "present"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "87f1bf1a-c93f-473b-845c-a53aa7ccf5cc",
+                        "source_entry_id": "0cc67ac1-07da-4514-9d17-bcb4a687fdc0",
+                        "source_sense_id": "bad9e5d0-ee7e-4269-a677-4f3dfd195bb2",
+                        "target_lang_word": "тести́рование",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "тести́рование",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "61c5d915-7f30-46bc-a20d-7839d3ab82db",
+                                        "entry_id": "de2931e2-6dec-49b4-abec-d7b600ae6bce",
+                                        "glosses": [
+                                            "действие по значению гл. тестировать; проведение теста, испытание чего-либо"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "9ad8ef8a-6407-4eed-8cc3-5f379383ea98",
+                                                "sense_id": "61c5d915-7f30-46bc-a20d-7839d3ab82db",
+                                                "text": "Мы проводили тестирование на шести образцах."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "4458618e-1306-43b4-b68e-b40d4bb0bc56",
+                                        "entry_id": "de2931e2-6dec-49b4-abec-d7b600ae6bce",
+                                        "glosses": [
+                                            "проверка знаний учащегося при помощи тестов"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "3443647d-d6bb-4827-b015-225f48580ef3",
+                                                "sense_id": "4458618e-1306-43b4-b68e-b40d4bb0bc56",
+                                                "text": "Завтра снова тестирование в школе."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            }
+        ]
+    }
+}

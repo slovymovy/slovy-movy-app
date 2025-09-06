@@ -1,0 +1,1964 @@
+{
+    "word": "программа",
+    "lang_code": "ru",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                "word": "программа",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "63bfe60d-e2c3-4063-a5a8-1a9d2b994c79",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "програ́мма"
+                    },
+                    {
+                        "form_id": "6f9d36b2-2bbd-48e1-9d81-7165e275af87",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "genitive"
+                        ],
+                        "form": "програ́ммы"
+                    },
+                    {
+                        "form_id": "cb372570-6ec0-49fb-8d3b-202e652d706d",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "програ́ммы"
+                    },
+                    {
+                        "form_id": "fd7eda87-b373-4aa3-a88c-dd4e44bb265f",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "програ́мм"
+                    },
+                    {
+                        "form_id": "5e3f5594-bb76-4513-b33f-05935862a237",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "adjective",
+                            "relational"
+                        ],
+                        "form": "програ́ммный"
+                    },
+                    {
+                        "form_id": "ab084649-aeae-4685-992e-9b3cda760e77",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "diminutive"
+                        ],
+                        "form": "програ́мка"
+                    },
+                    {
+                        "form_id": "9c81fd43-c24b-4771-8fe8-46b0d9a18f09",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "diminutive"
+                        ],
+                        "form": "програ́ммка"
+                    },
+                    {
+                        "form_id": "37cb4abf-4498-40fb-bd2e-ec59833abd3f",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "nominative",
+                            "singular"
+                        ],
+                        "form": "програ́мма"
+                    },
+                    {
+                        "form_id": "1c5b21da-e046-4491-8d01-263423b6509a",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "програ́ммы"
+                    },
+                    {
+                        "form_id": "49d110ce-29e8-42ea-896d-45bb515fe90d",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "програ́ммы"
+                    },
+                    {
+                        "form_id": "1a72ccdf-667f-4477-946c-76266db12c85",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "програ́мм"
+                    },
+                    {
+                        "form_id": "47a9d252-3ac4-4d78-bb66-2dac5046a5ac",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "програ́мме"
+                    },
+                    {
+                        "form_id": "e6312d09-1693-4f50-8e19-e4d694f35a28",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "dative",
+                            "plural"
+                        ],
+                        "form": "програ́ммам"
+                    },
+                    {
+                        "form_id": "e7690dc2-7152-480e-8aeb-5fc6b900541f",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "accusative",
+                            "singular"
+                        ],
+                        "form": "програ́мму"
+                    },
+                    {
+                        "form_id": "027e87e8-a001-4e35-8e01-826904e98908",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "accusative",
+                            "plural"
+                        ],
+                        "form": "програ́ммы"
+                    },
+                    {
+                        "form_id": "cb5f931a-f666-4a96-a3ce-98859da85df2",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "програ́ммой"
+                    },
+                    {
+                        "form_id": "f7553f1a-95d8-4c4f-b04a-8e22f2ba340d",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "програ́ммою"
+                    },
+                    {
+                        "form_id": "4c8fdede-c71b-431f-8c2a-d8c0f6fe018a",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "instrumental",
+                            "plural"
+                        ],
+                        "form": "програ́ммами"
+                    },
+                    {
+                        "form_id": "bc28e700-62a3-48eb-9397-121e1e02b01e",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "prepositional",
+                            "singular"
+                        ],
+                        "form": "програ́мме"
+                    },
+                    {
+                        "form_id": "eba6378d-7c6b-4d53-85e5-1d6e48299b7f",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "tags": [
+                            "plural",
+                            "prepositional"
+                        ],
+                        "form": "програ́ммах"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "f254cabc-e7f0-415e-9f1b-53e3e3697e9e",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "glosses": [
+                            "program/programme"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "09d633fa-fd2b-4bce-ac5a-7bcd9e11d0a4",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "glosses": [
+                            "syllabus, curriculum"
+                        ],
+                        "tags": [
+                            "literary"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "c2c96bea-3232-4862-88cc-05b5235a331f",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "glosses": [
+                            "program, agenda"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "de7659e6-1d11-4ae6-9959-47fb7596143f",
+                                "sense_id": "c2c96bea-3232-4862-88cc-05b5235a331f",
+                                "text": "программа скачек",
+                                "english": "race card"
+                            },
+                            {
+                                "example_id": "468183ff-8859-4dfa-86f4-1683a22f19e4",
+                                "sense_id": "c2c96bea-3232-4862-88cc-05b5235a331f",
+                                "text": "театральная программа",
+                                "english": "theatre programme; playbill"
+                            },
+                            {
+                                "example_id": "5ee1fadc-d1b2-43d7-9582-2eb986841625",
+                                "sense_id": "c2c96bea-3232-4862-88cc-05b5235a331f",
+                                "text": "программа передач телевидения",
+                                "english": "TV program; timetable; TV listings;TV guide"
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "faca929f-298c-4ac1-972b-9ba3fb74f005",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "glosses": [
+                            "program, broadcast, show"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "94207a9a-f527-462c-beeb-9e7b27cc1fa3",
+                        "entry_id": "5a4c29d3-0e83-4c6e-8784-45cbf5fff1d9",
+                        "glosses": [
+                            "channel"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "907e9b08-14c3-40df-8703-473c788900f2",
+                                "sense_id": "94207a9a-f527-462c-beeb-9e7b27cc1fa3",
+                                "text": "первая программа",
+                                "english": "channel one"
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [
+            {
+                "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                "word": "программа",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "adf3d5f1-4a6c-4751-9503-75c3bb603ae3",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "nominative",
+                            "singular"
+                        ],
+                        "form": "програ́мма"
+                    },
+                    {
+                        "form_id": "f21a04d6-764e-475d-93cf-6a26e02be98f",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "програ́ммы"
+                    },
+                    {
+                        "form_id": "14e58278-11ce-4f77-896b-899b96157492",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "програ́ммы"
+                    },
+                    {
+                        "form_id": "500b1b65-12fd-4003-8f42-3b25c738898e",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "програ́мм"
+                    },
+                    {
+                        "form_id": "fe6b5e7e-72f0-4b98-8905-e972c2e9091a",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "програ́мме"
+                    },
+                    {
+                        "form_id": "0bc19c6d-04db-4941-9076-c4e85223db7b",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "dative",
+                            "plural"
+                        ],
+                        "form": "програ́ммам"
+                    },
+                    {
+                        "form_id": "f7b37df4-991f-475f-9afc-fb3646522fb1",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "accusative",
+                            "singular"
+                        ],
+                        "form": "програ́мму"
+                    },
+                    {
+                        "form_id": "7c61da77-20e7-4d3a-b2c8-e2a5e62a5d81",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "accusative",
+                            "plural"
+                        ],
+                        "form": "програ́ммы"
+                    },
+                    {
+                        "form_id": "12607144-55ee-485d-876f-98d0ed74df36",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "програ́ммой"
+                    },
+                    {
+                        "form_id": "b0b8abee-6183-4bbe-9716-91256b8bb263",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "програ́ммою"
+                    },
+                    {
+                        "form_id": "940c4f33-83a5-41f3-9eaf-dd6c4c120503",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "instrumental",
+                            "plural"
+                        ],
+                        "form": "програ́ммами"
+                    },
+                    {
+                        "form_id": "8503ec0a-a550-4030-aad1-2950cb6bc0bf",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "prepositional",
+                            "singular"
+                        ],
+                        "form": "програ́мме"
+                    },
+                    {
+                        "form_id": "e429238e-c649-4863-9f49-667baa6c017d",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "tags": [
+                            "prepositional",
+                            "plural"
+                        ],
+                        "form": "програ́ммах"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "glosses": [
+                            "план действия, деятельности, работы"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "debc7634-177b-408c-aed7-cb02015be640",
+                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                "text": "Читатель видит, что для нас именно те произведения и важны, в которых жизнь сказалась сама собою, а не по заранее придуманной автором программе."
+                            },
+                            {
+                                "example_id": "31e19caf-c064-4ab1-9277-9ae739f80b90",
+                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                "text": "Очевидно, Арина Петровна намеревалась буквально выполнить свою программу: содержать постылого в такой мере, чтоб он только не умер с голоду."
+                            },
+                            {
+                                "example_id": "9fd29211-9066-47af-965b-c753c7c6b411",
+                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                "text": "Лизинговая программа рассчитана на 24 месяца, авансовый платёж составляет четверть от стоимости автомобиля."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "glosses": [
+                            "изложение целей и задач организации, партии или отдельного государственного, общественного деятеля"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "a4923bd9-d427-425a-8d52-6715055054c8",
+                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                "text": "У этой партии нет чёткой и внятной программы."
+                            },
+                            {
+                                "example_id": "d1d13e6a-8c53-4f1d-bdb2-25cf040e84dd",
+                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                "text": "Политическая программа нового президента."
+                            },
+                            {
+                                "example_id": "8cd2b78b-469a-46f2-ba80-0fbc0ca0e2f5",
+                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                "text": "Большевистская аграрная программа звала крестьян на революцию против царя и помещиков."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "glosses": [
+                            "краткое изложение содержания и методологических установок курса, предмета, преподаваемого в учебном заведении"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "6c5de37a-c6df-4680-b122-748d12b9b9f0",
+                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                "text": "Программа (курса) по истории."
+                            },
+                            {
+                                "example_id": "329737ad-d3e8-4887-b2a5-8e98b5f7d360",
+                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                "text": "Программа по машиностроению."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "glosses": [
+                            "совокупность дисциплин, преподаваемых в учебном заведении"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "0f4e190e-679e-4916-88ba-dd98b99e9cc2",
+                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                "text": "Расширение (учебных) программ в школах."
+                            },
+                            {
+                                "example_id": "013a4222-bb90-4015-b917-5cdf1113ecd0",
+                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                "text": "Воспитание в детстве было получить негде, а образование Училище живописи не давало, программа общеобразовательных предметов была слаба, да и смотрели на образование, как на пустяки, — были уверены, что художнику нужна только кисть, а образование — вещь второстепенная."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "glosses": [
+                            "расписание передач радио или телевидения, перечень отдельных номеров, исполняемых на вечере, концерте, цирковом представлении"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "ebf45c2b-c474-4914-8c02-1394b7aa3fae",
+                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                "text": "Программа телепередач на завтра."
+                            },
+                            {
+                                "example_id": "1e51736d-b430-4737-ba0f-126cbb339b9a",
+                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                "text": "В программе пианист стоит вторым."
+                            },
+                            {
+                                "example_id": "f4a2a80e-b641-47a5-ad77-fced1191f8c3",
+                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                "text": "Бедняге вятичу или костромичу, взятому от сохи, никогда не приходилось видеть раньше кинематографа, и он решил посмотреть. Купил билет, сел. Просмотрел всю программу — пришёл в такой восторг, что остался снова её смотреть…"
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "glosses": [
+                            "буклет, в котором отражена программа [5] (в театре — краткое описание спектакля, указатель с перечнем исполняемых пьес и действующих лиц в них)"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "278b2179-3019-4a04-86f6-6f25c4f29a78",
+                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                "text": "Перед звонком надо успеть взять программу и бинокль."
+                            },
+                            {
+                                "example_id": "06ccc5d9-3974-47ee-955f-faecdf7b8d75",
+                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                "text": "Программы театров на март."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "glosses": [
+                            "канал радио- и телевещания"
+                        ],
+                        "tags": [
+                            "colloquial"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "3ff49478-d99b-4585-af57-031f80f9767b",
+                                "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                "text": "Переключить телевизор на первую программу."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "glosses": [
+                            "последовательность формализованных инструкций, предназначенная для исполнения устройством управления вычислительной машины, компьютера ."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "1493bf3c-a40e-4896-8001-89489338556f",
+                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                "text": "Составлять программу."
+                            },
+                            {
+                                "example_id": "ce4885f1-178f-4408-97d0-402a0ee5355a",
+                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                "text": "Отлаживать программу"
+                            },
+                            {
+                                "example_id": "50bbcfcd-9e0f-4c74-bebc-342d83b2a5dc",
+                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                "text": "Компьютерная программа. Обучающие (компьютерные) программы. Прикладные программы. Офисные программы"
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "ceeaed40-d19f-4544-9753-e5177e73972a",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "план действия, деятельности, работы",
+                        "target_lang_word": "programme",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "programme",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                        "entry_id": "b6c4e264-1055-4d6c-af13-2d27bc4c2bb1",
+                                        "glosses": [
+                                            "British, New Zealand, and India standard spelling of program."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "fba9a98c-a7dc-40e7-9348-9b2be20ab91b",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "Our programme for today’s exercise class includes swimming and jogging."
+                                            },
+                                            {
+                                                "example_id": "be9eaa82-9933-4303-8bde-d892e486bfb4",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "The programme about Greek architecture starts at 9:00 on Channel 4."
+                                            },
+                                            {
+                                                "example_id": "86793d8f-c1e3-4ed0-8571-caa28900e828",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "ITEC is the Indian Technical and Economic Cooperation Programme."
+                                            },
+                                            {
+                                                "example_id": "e2523f46-0217-48d2-84a8-5753f9fc0a00",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "It had been arranged as part of the day's programme that Mr. Cooke was to drive those who wished to go over the Rise in his new brake."
+                                            },
+                                            {
+                                                "example_id": "117cebe0-7a52-454f-afe7-82fb001c00b8",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "Thus once a computer programme has been prepared, vastly different conditions can be inserted and experimented with at the expense of a few hours of computer time."
+                                            },
+                                            {
+                                                "example_id": "282e4fce-0280-4556-99b9-897e7682f18e",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "It had been sixteen years since the BBC’s Grace Wyndham Goldie wrote her internal memo about luring him back to make sociological/scientific TV programmes. Now a second note had circulated, from the science department, proposing that he should present the Corporation’s next educative megaseries."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "99317ee6-9a30-4a70-af41-03bcd65e6daf",
+                                        "entry_id": "b6c4e264-1055-4d6c-af13-2d27bc4c2bb1",
+                                        "glosses": [
+                                            "Alternative spelling of program (“computer program”)"
+                                        ],
+                                        "tags": [
+                                            "British",
+                                            "alt-of",
+                                            "alternative",
+                                            "rare"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "programme",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "5403f007-56f5-49ab-a8ca-00d6c62e1cad",
+                                        "entry_id": "a2ca4c3f-befe-430e-9da4-746dd5276ce7",
+                                        "glosses": [
+                                            "British standard spelling of program."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "8e242698-12b8-47a9-8d19-7b8d2f785c50",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "план действия, деятельности, работы",
+                        "target_lang_word": "program",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "program",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A set of structured activities; a plan of action."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a3616653-1f1b-42c9-8586-ad4233487858",
+                                                "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                                "text": "get with the program"
+                                            },
+                                            {
+                                                "example_id": "ab02fc62-5cc2-4d63-ad5f-7d29e74aecae",
+                                                "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                                "text": "Our program for today’s exercise class includes swimming and jogging."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a104ee5d-c21a-4803-9fd1-5d550068a9d1",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A leaflet listing information about a play, game or other activity."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "03f4b537-b9fd-4985-9259-58dc673f0e28",
+                                                "sense_id": "a104ee5d-c21a-4803-9fd1-5d550068a9d1",
+                                                "text": "The program consisted of ads for restaurants and the credits of everyone connected with the play."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "fc0a76e8-2aff-4bde-bead-216b95dfb414",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A set of principal goals which are supported by a political party or individual candidate."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "e2d02330-c780-4bc1-b310-794763d40245",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A performance of a show or other broadcast on radio or television."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6b1f529d-6185-43c1-9810-12126ebfeac7",
+                                                "sense_id": "e2d02330-c780-4bc1-b310-794763d40245",
+                                                "text": "Tonight’s program was hosted by Johnny Carson."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "df676583-a500-45d0-895a-85fa127cdf29",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A computer program."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "fe2215a8-903e-495d-a283-4c3c044c8970",
+                                                "sense_id": "df676583-a500-45d0-895a-85fa127cdf29",
+                                                "text": "The program runs on both Linux and Microsoft Windows."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "9198ec53-5b46-406c-b0ec-1990fee842ba",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A particular mindset or method of doing things."
+                                        ],
+                                        "tags": [
+                                            "especially"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "1b26546b-8615-4795-a9d5-1f7d2a8aeaab",
+                                                "sense_id": "9198ec53-5b46-406c-b0ec-1990fee842ba",
+                                                "text": "Ellis: Come on, John, why don’t you get with the program and tell him where the detonators are?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "200cc959-2f34-4efa-b614-354d7fdb3ad2",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A custom tracklist."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "af38ea27-20a6-4702-ae75-466550cb7e47",
+                                                "sense_id": "200cc959-2f34-4efa-b614-354d7fdb3ad2",
+                                                "text": "program playback",
+                                                "english": "playing tracks in a custom order"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "program",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6f682e77-c536-48cb-bc52-3a6b348531d6",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To enter a program or other instructions into (a computer or other electronic device) to instruct it to do a particular task."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "7321b29a-2a2b-4bbb-83da-c3c021a92a9a",
+                                                "sense_id": "6f682e77-c536-48cb-bc52-3a6b348531d6",
+                                                "text": "He programmed the DVR to record his favorite show."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "e415f411-68fb-4bdf-9819-f2aaaf17902d",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To develop (software) by writing program code."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "d68f957b-9057-4c65-97d3-8d8be086fd98",
+                                                "sense_id": "e415f411-68fb-4bdf-9819-f2aaaf17902d",
+                                                "text": "I programmed a small game as a demonstration."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "66e0f765-fa8d-41c6-8ff7-81221e62e55d",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To put together the schedule of an event."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "d02b2ec5-b1c1-4a0d-87c1-d70f2f42c702",
+                                                "sense_id": "66e0f765-fa8d-41c6-8ff7-81221e62e55d",
+                                                "text": "Mary will program Tuesday’s festivities."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "23458449-5fc1-4d9e-b81c-8aafe25e76df",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To schedule the programming; to determine what will be broadcast."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "32d90260-d03a-4e00-a3be-cc223efce865",
+                                                "sense_id": "23458449-5fc1-4d9e-b81c-8aafe25e76df",
+                                                "text": "We program for special audience groups, too, as shown by our Mexican language program each Sunday morning."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To cause to automatically behave in a particular way."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "bd3ed3ca-8f00-4c4c-939e-16d1e9d81b06",
+                                                "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                                "text": "The lab rat was programmed to press the lever when the bell rang."
+                                            },
+                                            {
+                                                "example_id": "34fb04bf-6492-4cf9-bd79-ea89209ba254",
+                                                "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                                "text": "My point was not to commend but to expose her, and her way of thinking. In another place a teenage character worries that her stomach is too big. I, the author don't think her stomach is too big—the character does, because she's been programmed that way."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "5c53a7dc-d00a-4a35-b950-a58460d2d57a",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "план действия, деятельности, работы",
+                        "target_lang_word": "programma",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "programma",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "bd056be0-4f09-4b50-b2d0-7bd28251d2fa",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "applicatie voor de computer"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1dc3425a-afc4-46ec-a653-3e77ef35e467",
+                                                "sense_id": "bd056be0-4f09-4b50-b2d0-7bd28251d2fa",
+                                                "text": "Hij schreef een nieuw programma in C++."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "49fee13c-d372-415a-a62c-789c0e90be18",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "aantal activiteiten voor een bepaalde tijd"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "89067acc-c9fb-4b8a-b26f-9097a0acdba5",
+                                                "sense_id": "49fee13c-d372-415a-a62c-789c0e90be18",
+                                                "text": "We hebben een heel programma om de kinderen bezig te houden."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "31741799-3f81-419f-bab4-ec826fa8d572",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "uitzending op radio of televisie"
+                                        ],
+                                        "tags": [
+                                            "media"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "7ee00ee4-339f-49fd-b202-528040fc4f83",
+                                                "sense_id": "31741799-3f81-419f-bab4-ec826fa8d572",
+                                                "text": "Het journaal is een veelbekeken programma."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "04f47f76-ae33-408b-b5e0-5e737fd0a5db",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "los blaadje met informatie over de uitvoering of het concert dat men bijwoont"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "cb4cbaf2-effe-4071-abdf-d49c7c6b0d22",
+                                                "sense_id": "04f47f76-ae33-408b-b5e0-5e737fd0a5db",
+                                                "text": "Wilt u een programma, meneer?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "6c0e5ae0-ba35-4396-aea8-78ea45e41481",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "onderling afgesproken doelstellingen en plannen"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6d16330a-6d2d-4379-8f2b-b55405c08c69",
+                                                "sense_id": "6c0e5ae0-ba35-4396-aea8-78ea45e41481",
+                                                "text": "Dit past niet binnen het programma van onze partij."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "263b337d-3018-4672-96f7-711106b3be0e",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "план действия, деятельности, работы",
+                        "target_lang_word": "program",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "program",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "a8b7b734-6c37-4c1e-8815-8f382fbc29aa",
+                                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                                        "glosses": [
+                                            "plan działań"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "3a154cfe-3d37-4421-ba73-d7a0f5557e65",
+                                                "sense_id": "a8b7b734-6c37-4c1e-8815-8f382fbc29aa",
+                                                "text": "Pani Bożenko, jaki jest program zajęć na dzisiaj?"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    },
+                                    {
+                                        "sense_id": "446a20e3-28c0-4ca1-9148-b6b28553d329",
+                                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                                        "glosses": [
+                                            "odrębna audycja nadawana przez telewizję lub radio"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "487ae7cd-4394-4784-b3d2-2d70ba3b75a2",
+                                                "sense_id": "446a20e3-28c0-4ca1-9148-b6b28553d329",
+                                                "text": "Bardzo mi się podobał ten program o słoniach."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.2\""
+                                    },
+                                    {
+                                        "sense_id": "a7beeb5b-edc3-4d00-8e1c-bf2aec3746d6",
+                                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                                        "glosses": [
+                                            "stacja telewizyjna"
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "1111a0bb-4cee-4991-936f-5c9b7daac242",
+                                                "sense_id": "a7beeb5b-edc3-4d00-8e1c-bf2aec3746d6",
+                                                "text": "Na którym programie jest mecz?"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.3\""
+                                    },
+                                    {
+                                        "sense_id": "4f50984d-16ea-4cfc-9114-a61cb769c27e",
+                                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                                        "glosses": [
+                                            "zestawienie programów (1.2) na pewien okres, zwykle w czasopiśmie"
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "ba93578f-8e0f-4227-92c7-fa4761411fb2",
+                                                "sense_id": "4f50984d-16ea-4cfc-9114-a61cb769c27e",
+                                                "text": "Zobacz w programie, o której zaczyna się transmisja."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.4\""
+                                    },
+                                    {
+                                        "sense_id": "85610f31-d456-47be-a2ee-ee5a6598d177",
+                                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                                        "glosses": [
+                                            "broszurka z informacjami o sztuce teatralnej lub operowej, rozprowadzana pośród widzów"
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "74261b36-455d-445b-a0a1-28457cdf222c",
+                                                "sense_id": "85610f31-d456-47be-a2ee-ee5a6598d177",
+                                                "text": "W programie napisano, że tę sztukę wystawiono pierwszy raz w 1824 (= tysiąc osiemset dwudziestym czwartym) roku."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.5\""
+                                    },
+                                    {
+                                        "sense_id": "44904835-24a4-454c-aae2-4de785d617c2",
+                                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                                        "glosses": [
+                                            "zestaw komend zrozumiałych dla komputera służących wykonywaniu jakichś zadań"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "848dbc19-efd2-4fd7-a577-7fa8afd7790b",
+                                                "sense_id": "44904835-24a4-454c-aae2-4de785d617c2",
+                                                "text": "Jedyne programy na dysku Bogdana to gry."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.6\""
+                                    },
+                                    {
+                                        "sense_id": "76477862-ca8c-4a7a-8875-d24e346347ba",
+                                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                                        "glosses": [
+                                            "zakres wiedzy objętej nauczaniem szkolnym lub akademickim; wykaz przedmiotów objętych takim nauczaniem"
+                                        ],
+                                        "tags": [
+                                            "also"
+                                        ],
+                                        "examples": [],
+                                        "sense_index_json": "\"1.7\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "6fb77132-bdfb-4c6c-a7e2-398389f02cd0",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "изложение целей и задач организации, партии",
+                        "target_lang_word": "programme",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "programme",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                        "entry_id": "b6c4e264-1055-4d6c-af13-2d27bc4c2bb1",
+                                        "glosses": [
+                                            "British, New Zealand, and India standard spelling of program."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "fba9a98c-a7dc-40e7-9348-9b2be20ab91b",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "Our programme for today’s exercise class includes swimming and jogging."
+                                            },
+                                            {
+                                                "example_id": "be9eaa82-9933-4303-8bde-d892e486bfb4",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "The programme about Greek architecture starts at 9:00 on Channel 4."
+                                            },
+                                            {
+                                                "example_id": "86793d8f-c1e3-4ed0-8571-caa28900e828",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "ITEC is the Indian Technical and Economic Cooperation Programme."
+                                            },
+                                            {
+                                                "example_id": "e2523f46-0217-48d2-84a8-5753f9fc0a00",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "It had been arranged as part of the day's programme that Mr. Cooke was to drive those who wished to go over the Rise in his new brake."
+                                            },
+                                            {
+                                                "example_id": "117cebe0-7a52-454f-afe7-82fb001c00b8",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "Thus once a computer programme has been prepared, vastly different conditions can be inserted and experimented with at the expense of a few hours of computer time."
+                                            },
+                                            {
+                                                "example_id": "282e4fce-0280-4556-99b9-897e7682f18e",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "It had been sixteen years since the BBC’s Grace Wyndham Goldie wrote her internal memo about luring him back to make sociological/scientific TV programmes. Now a second note had circulated, from the science department, proposing that he should present the Corporation’s next educative megaseries."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "99317ee6-9a30-4a70-af41-03bcd65e6daf",
+                                        "entry_id": "b6c4e264-1055-4d6c-af13-2d27bc4c2bb1",
+                                        "glosses": [
+                                            "Alternative spelling of program (“computer program”)"
+                                        ],
+                                        "tags": [
+                                            "British",
+                                            "alt-of",
+                                            "alternative",
+                                            "rare"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "programme",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "5403f007-56f5-49ab-a8ca-00d6c62e1cad",
+                                        "entry_id": "a2ca4c3f-befe-430e-9da4-746dd5276ce7",
+                                        "glosses": [
+                                            "British standard spelling of program."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "0f680ad6-2159-4558-86e3-2563ee33acff",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "краткое изложение содержания и методологических установок учебного курса, предмета",
+                        "target_lang_word": "syllabus",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "syllabus",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "ceb9e5aa-03e9-46e7-a297-b9451fb9c61f",
+                                        "entry_id": "940ea2a5-fc3f-49a3-9100-5c6f1fdcbb37",
+                                        "glosses": [
+                                            "A summary of topics which will be covered during an academic course, or a text or lecture."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "8675cc34-bc80-4b4d-988c-3ab8453f7c76",
+                                                "sense_id": "ceb9e5aa-03e9-46e7-a297-b9451fb9c61f",
+                                                "text": "In the first half of the year, teachers attended the training workshop for the new K-10 Chinese syllabus. In July, almost all the teachers attended the teacher training courses provided by OCAC."
+                                            },
+                                            {
+                                                "example_id": "a644eaab-b782-4bf1-a6aa-8b27cc492b63",
+                                                "sense_id": "ceb9e5aa-03e9-46e7-a297-b9451fb9c61f",
+                                                "text": "‘I checked online for a beginner syllabus,’ she say. ‘A syllabus is a plan for how we would work, what I can teach you.’"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "d422cd0a-9ebb-473b-a0fe-b93bab95dc4e",
+                                        "entry_id": "940ea2a5-fc3f-49a3-9100-5c6f1fdcbb37",
+                                        "glosses": [
+                                            "The headnote of a reported case; the brief statement of the points of law determined prefixed to a reported case."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "1f87d4ad-4e3a-4132-8e2c-0e79a24136da",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "совокупность дисциплин, преподаваемых в учебном заведении",
+                        "target_lang_word": "syllabus",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "syllabus",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "ceb9e5aa-03e9-46e7-a297-b9451fb9c61f",
+                                        "entry_id": "940ea2a5-fc3f-49a3-9100-5c6f1fdcbb37",
+                                        "glosses": [
+                                            "A summary of topics which will be covered during an academic course, or a text or lecture."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "8675cc34-bc80-4b4d-988c-3ab8453f7c76",
+                                                "sense_id": "ceb9e5aa-03e9-46e7-a297-b9451fb9c61f",
+                                                "text": "In the first half of the year, teachers attended the training workshop for the new K-10 Chinese syllabus. In July, almost all the teachers attended the teacher training courses provided by OCAC."
+                                            },
+                                            {
+                                                "example_id": "a644eaab-b782-4bf1-a6aa-8b27cc492b63",
+                                                "sense_id": "ceb9e5aa-03e9-46e7-a297-b9451fb9c61f",
+                                                "text": "‘I checked online for a beginner syllabus,’ she say. ‘A syllabus is a plan for how we would work, what I can teach you.’"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "d422cd0a-9ebb-473b-a0fe-b93bab95dc4e",
+                                        "entry_id": "940ea2a5-fc3f-49a3-9100-5c6f1fdcbb37",
+                                        "glosses": [
+                                            "The headnote of a reported case; the brief statement of the points of law determined prefixed to a reported case."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "1e606a62-97fd-412e-b2d6-419e901a9df9",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "совокупность дисциплин, преподаваемых в учебном заведении",
+                        "target_lang_word": "curriculum",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "curriculum",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "5ee5fdc1-acab-4162-9a8c-7300741cc053",
+                                        "entry_id": "08a818f2-4091-4e1c-ba70-8e2b866b63a9",
+                                        "glosses": [
+                                            "The set of courses, coursework, and content offered at a school or university."
+                                        ],
+                                        "tags": [
+                                            "US"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "8b32a46c-5c07-4d82-824a-075cef2541d4",
+                                                "sense_id": "5ee5fdc1-acab-4162-9a8c-7300741cc053",
+                                                "text": "Perhaps someday my old US history teacher, and men like him, will use The Politically Incorrect Guide to the Great Depression in their courses to balance the many explicitly pro–New Deal and prointerventionist texts and presentations that dominate public-school curricula today."
+                                            },
+                                            {
+                                                "example_id": "a1561677-15dd-4b8f-9b54-deda4a2442d9",
+                                                "sense_id": "5ee5fdc1-acab-4162-9a8c-7300741cc053",
+                                                "text": "But as the effects of climate change have become more visible in recent years, and the breadth of the transformation needed to fight it has become clear, law schools, med schools, literature programs, economics departments and more are incorporating climate into their undergraduate curriculums, grappling with how climate will transform their fields and attempting to prepare students to face those transformations in the labor market."
+                                            },
+                                            {
+                                                "example_id": "7f9c9ac7-5a70-45ed-a942-390cca73f892",
+                                                "sense_id": "5ee5fdc1-acab-4162-9a8c-7300741cc053",
+                                                "text": "Bluebonnet Learning materials will be part of a menu of curriculums available for school districts to use. […] Staci Childs, a member of the board who voted against Bluebonnet, told CNN Friday that although the curriculum is optional, she expects most districts will adopt it given the “huge financial implications” of the incentive."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "7159886e-3ce8-4aa7-a2c0-ef0e779ad727",
+                                        "entry_id": "08a818f2-4091-4e1c-ba70-8e2b866b63a9",
+                                        "glosses": [
+                                            "The set of standards schools are required to teach all students."
+                                        ],
+                                        "tags": [
+                                            "Australia",
+                                            "Canada",
+                                            "UK"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c90417d7-e3e1-42a2-a589-8ada9088347f",
+                                                "sense_id": "7159886e-3ce8-4aa7-a2c0-ef0e779ad727",
+                                                "text": "Drawing on texts recommended in curricula and controlling for two countries with benchmarked curricula improves the external representativeness of the corpus."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "8747b522-bb24-4eb5-b153-a5a4cd89e108",
+                                        "entry_id": "08a818f2-4091-4e1c-ba70-8e2b866b63a9",
+                                        "glosses": [
+                                            "A racecourse; a place for running."
+                                        ],
+                                        "tags": [
+                                            "obsolete"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "3f3cc6a7-d554-4b76-8d73-6965589bda96",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "содержание передач радио или телевидения, перечень отдельных номеров, исполняемых на вечере, концерте",
+                        "target_lang_word": "programme",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "programme",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                        "entry_id": "b6c4e264-1055-4d6c-af13-2d27bc4c2bb1",
+                                        "glosses": [
+                                            "British, New Zealand, and India standard spelling of program."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "fba9a98c-a7dc-40e7-9348-9b2be20ab91b",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "Our programme for today’s exercise class includes swimming and jogging."
+                                            },
+                                            {
+                                                "example_id": "be9eaa82-9933-4303-8bde-d892e486bfb4",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "The programme about Greek architecture starts at 9:00 on Channel 4."
+                                            },
+                                            {
+                                                "example_id": "86793d8f-c1e3-4ed0-8571-caa28900e828",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "ITEC is the Indian Technical and Economic Cooperation Programme."
+                                            },
+                                            {
+                                                "example_id": "e2523f46-0217-48d2-84a8-5753f9fc0a00",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "It had been arranged as part of the day's programme that Mr. Cooke was to drive those who wished to go over the Rise in his new brake."
+                                            },
+                                            {
+                                                "example_id": "117cebe0-7a52-454f-afe7-82fb001c00b8",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "Thus once a computer programme has been prepared, vastly different conditions can be inserted and experimented with at the expense of a few hours of computer time."
+                                            },
+                                            {
+                                                "example_id": "282e4fce-0280-4556-99b9-897e7682f18e",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "It had been sixteen years since the BBC’s Grace Wyndham Goldie wrote her internal memo about luring him back to make sociological/scientific TV programmes. Now a second note had circulated, from the science department, proposing that he should present the Corporation’s next educative megaseries."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "99317ee6-9a30-4a70-af41-03bcd65e6daf",
+                                        "entry_id": "b6c4e264-1055-4d6c-af13-2d27bc4c2bb1",
+                                        "glosses": [
+                                            "Alternative spelling of program (“computer program”)"
+                                        ],
+                                        "tags": [
+                                            "British",
+                                            "alt-of",
+                                            "alternative",
+                                            "rare"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "programme",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "5403f007-56f5-49ab-a8ca-00d6c62e1cad",
+                                        "entry_id": "a2ca4c3f-befe-430e-9da4-746dd5276ce7",
+                                        "glosses": [
+                                            "British standard spelling of program."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "f5487b6f-ed7d-4bae-b30a-260003f73e8b",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "содержание передач радио или телевидения, перечень отдельных номеров, исполняемых на вечере, концерте",
+                        "target_lang_word": "agenda",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "agenda",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "c927850f-17c2-4b5d-bc37-82a04439595b",
+                                        "entry_id": "c9b5a5bf-a707-4bfd-96ab-e05a63fd613e",
+                                        "glosses": [
+                                            "A temporally organized plan for matters to be attended to."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "73814364-a3d3-402b-acd1-c4df4141059b",
+                                                "sense_id": "c927850f-17c2-4b5d-bc37-82a04439595b",
+                                                "text": "Where the Joker preys on our fears of random, irrational acts of terror, Bane has an all-consuming, dictatorial agenda that’s more stable and permanent, a New World Order that’s been planned out with the precision of a military coup."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "2d4358e3-d854-4ef1-bdc9-9ed3be2b7215",
+                                        "entry_id": "c9b5a5bf-a707-4bfd-96ab-e05a63fd613e",
+                                        "glosses": [
+                                            "A list of matters to be taken up (as at a meeting)."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "0d8285d1-ddb3-4011-b3ab-714b990d29a9",
+                                        "entry_id": "c9b5a5bf-a707-4bfd-96ab-e05a63fd613e",
+                                        "glosses": [
+                                            "A notebook used to organize and maintain such plans or lists, an agenda book, an agenda planner."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "2ff98861-4e5d-4bd3-9ff3-324d5a4c4bae",
+                                                "sense_id": "0d8285d1-ddb3-4011-b3ab-714b990d29a9",
+                                                "text": "A homework agenda, sometimes called a student planner, is a notebook often used to help your child keep track of daily homework assignments."
+                                            },
+                                            {
+                                                "example_id": "86ee73d4-7e5c-4acd-ba9e-87659b582f67",
+                                                "sense_id": "0d8285d1-ddb3-4011-b3ab-714b990d29a9",
+                                                "text": "It may be better to simply buy an agenda at the drug store for five dollars, but you need to keep this stuff accurate."
+                                            },
+                                            {
+                                                "example_id": "38fe0d00-c4a7-4ba5-ac72-cad8357d4191",
+                                                "sense_id": "0d8285d1-ddb3-4011-b3ab-714b990d29a9",
+                                                "text": "The children will use an agenda book that the school provides to organize their homework information. Before leaving for home, the children will neatly write their assignments and related directions in their agendas."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "eee7b52c-b7ac-4424-9494-129c4562c114",
+                                        "entry_id": "c9b5a5bf-a707-4bfd-96ab-e05a63fd613e",
+                                        "glosses": [
+                                            "An ulterior motive; a program of various such motives."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "fd69adb8-197d-429f-abdc-184f528882bb",
+                                        "entry_id": "c9b5a5bf-a707-4bfd-96ab-e05a63fd613e",
+                                        "glosses": [
+                                            "A ritual."
+                                        ],
+                                        "tags": [
+                                            "obsolete"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "agenda",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f6d0badc-3b99-438a-a61c-11ef879ebc4d",
+                                        "entry_id": "1a5bf8bb-ef6e-45e7-9aab-115279d8923d",
+                                        "glosses": [
+                                            "plural of agendum"
+                                        ],
+                                        "tags": [
+                                            "archaic",
+                                            "form-of",
+                                            "plural"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "29e49273-0f9a-4152-8e9b-41316ed6bd35",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "буклет с кратким описанием спектакля, концерта",
+                        "target_lang_word": "programme",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "programme",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                        "entry_id": "b6c4e264-1055-4d6c-af13-2d27bc4c2bb1",
+                                        "glosses": [
+                                            "British, New Zealand, and India standard spelling of program."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "fba9a98c-a7dc-40e7-9348-9b2be20ab91b",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "Our programme for today’s exercise class includes swimming and jogging."
+                                            },
+                                            {
+                                                "example_id": "be9eaa82-9933-4303-8bde-d892e486bfb4",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "The programme about Greek architecture starts at 9:00 on Channel 4."
+                                            },
+                                            {
+                                                "example_id": "86793d8f-c1e3-4ed0-8571-caa28900e828",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "ITEC is the Indian Technical and Economic Cooperation Programme."
+                                            },
+                                            {
+                                                "example_id": "e2523f46-0217-48d2-84a8-5753f9fc0a00",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "It had been arranged as part of the day's programme that Mr. Cooke was to drive those who wished to go over the Rise in his new brake."
+                                            },
+                                            {
+                                                "example_id": "117cebe0-7a52-454f-afe7-82fb001c00b8",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "Thus once a computer programme has been prepared, vastly different conditions can be inserted and experimented with at the expense of a few hours of computer time."
+                                            },
+                                            {
+                                                "example_id": "282e4fce-0280-4556-99b9-897e7682f18e",
+                                                "sense_id": "eff4cd54-bbde-4100-a61c-9067a765e64c",
+                                                "text": "It had been sixteen years since the BBC’s Grace Wyndham Goldie wrote her internal memo about luring him back to make sociological/scientific TV programmes. Now a second note had circulated, from the science department, proposing that he should present the Corporation’s next educative megaseries."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "99317ee6-9a30-4a70-af41-03bcd65e6daf",
+                                        "entry_id": "b6c4e264-1055-4d6c-af13-2d27bc4c2bb1",
+                                        "glosses": [
+                                            "Alternative spelling of program (“computer program”)"
+                                        ],
+                                        "tags": [
+                                            "British",
+                                            "alt-of",
+                                            "alternative",
+                                            "rare"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "programme",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "5403f007-56f5-49ab-a8ca-00d6c62e1cad",
+                                        "entry_id": "a2ca4c3f-befe-430e-9da4-746dd5276ce7",
+                                        "glosses": [
+                                            "British standard spelling of program."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "9bcb1646-fd94-44d7-ade7-149b2602b54f",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "буклет с кратким описанием спектакля, концерта",
+                        "target_lang_word": "playbill",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "playbill",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "833d5508-9ba7-43bf-ac90-de79dc1fecf8",
+                                        "entry_id": "099d7435-d427-4c55-9649-c4ff2a611691",
+                                        "glosses": [
+                                            "A poster advertising a theatrical performance."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "0a587838-a19f-49c9-81d8-46745b244af2",
+                                        "entry_id": "099d7435-d427-4c55-9649-c4ff2a611691",
+                                        "glosses": [
+                                            "A program/programme/pamphlet for a theatrical performance."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "f0e9c395-cb80-457a-8816-1a312df69d77",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_description": "последовательность формализованных инструкций для компьютера",
+                        "target_lang_word": "program",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "program",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A set of structured activities; a plan of action."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a3616653-1f1b-42c9-8586-ad4233487858",
+                                                "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                                "text": "get with the program"
+                                            },
+                                            {
+                                                "example_id": "ab02fc62-5cc2-4d63-ad5f-7d29e74aecae",
+                                                "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                                "text": "Our program for today’s exercise class includes swimming and jogging."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a104ee5d-c21a-4803-9fd1-5d550068a9d1",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A leaflet listing information about a play, game or other activity."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "03f4b537-b9fd-4985-9259-58dc673f0e28",
+                                                "sense_id": "a104ee5d-c21a-4803-9fd1-5d550068a9d1",
+                                                "text": "The program consisted of ads for restaurants and the credits of everyone connected with the play."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "fc0a76e8-2aff-4bde-bead-216b95dfb414",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A set of principal goals which are supported by a political party or individual candidate."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "e2d02330-c780-4bc1-b310-794763d40245",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A performance of a show or other broadcast on radio or television."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6b1f529d-6185-43c1-9810-12126ebfeac7",
+                                                "sense_id": "e2d02330-c780-4bc1-b310-794763d40245",
+                                                "text": "Tonight’s program was hosted by Johnny Carson."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "df676583-a500-45d0-895a-85fa127cdf29",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A computer program."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "fe2215a8-903e-495d-a283-4c3c044c8970",
+                                                "sense_id": "df676583-a500-45d0-895a-85fa127cdf29",
+                                                "text": "The program runs on both Linux and Microsoft Windows."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "9198ec53-5b46-406c-b0ec-1990fee842ba",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A particular mindset or method of doing things."
+                                        ],
+                                        "tags": [
+                                            "especially"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "1b26546b-8615-4795-a9d5-1f7d2a8aeaab",
+                                                "sense_id": "9198ec53-5b46-406c-b0ec-1990fee842ba",
+                                                "text": "Ellis: Come on, John, why don’t you get with the program and tell him where the detonators are?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "200cc959-2f34-4efa-b614-354d7fdb3ad2",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A custom tracklist."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "af38ea27-20a6-4702-ae75-466550cb7e47",
+                                                "sense_id": "200cc959-2f34-4efa-b614-354d7fdb3ad2",
+                                                "text": "program playback",
+                                                "english": "playing tracks in a custom order"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "program",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6f682e77-c536-48cb-bc52-3a6b348531d6",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To enter a program or other instructions into (a computer or other electronic device) to instruct it to do a particular task."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "7321b29a-2a2b-4bbb-83da-c3c021a92a9a",
+                                                "sense_id": "6f682e77-c536-48cb-bc52-3a6b348531d6",
+                                                "text": "He programmed the DVR to record his favorite show."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "e415f411-68fb-4bdf-9819-f2aaaf17902d",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To develop (software) by writing program code."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "d68f957b-9057-4c65-97d3-8d8be086fd98",
+                                                "sense_id": "e415f411-68fb-4bdf-9819-f2aaaf17902d",
+                                                "text": "I programmed a small game as a demonstration."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "66e0f765-fa8d-41c6-8ff7-81221e62e55d",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To put together the schedule of an event."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "d02b2ec5-b1c1-4a0d-87c1-d70f2f42c702",
+                                                "sense_id": "66e0f765-fa8d-41c6-8ff7-81221e62e55d",
+                                                "text": "Mary will program Tuesday’s festivities."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "23458449-5fc1-4d9e-b81c-8aafe25e76df",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To schedule the programming; to determine what will be broadcast."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "32d90260-d03a-4e00-a3be-cc223efce865",
+                                                "sense_id": "23458449-5fc1-4d9e-b81c-8aafe25e76df",
+                                                "text": "We program for special audience groups, too, as shown by our Mexican language program each Sunday morning."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To cause to automatically behave in a particular way."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "bd3ed3ca-8f00-4c4c-939e-16d1e9d81b06",
+                                                "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                                "text": "The lab rat was programmed to press the lever when the bell rang."
+                                            },
+                                            {
+                                                "example_id": "34fb04bf-6492-4cf9-bd79-ea89209ba254",
+                                                "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                                "text": "My point was not to commend but to expose her, and her way of thinking. In another place a teenage character worries that her stomach is too big. I, the author don't think her stomach is too big—the character does, because she's been programmed that way."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": [
+                    {
+                        "linkage_id": "378bc671-e97b-43c2-b137-998739f27308",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_ids": [
+                            "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "план"
+                    },
+                    {
+                        "linkage_id": "9881cd1b-210f-437f-880e-313694718d55",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_ids": [
+                            "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "проект"
+                    },
+                    {
+                        "linkage_id": "30a3519c-c796-43e4-ad2c-9c7b5e0b5fa3",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_ids": [
+                            "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "концепция"
+                    },
+                    {
+                        "linkage_id": "3d92227e-0172-4050-9df0-e259a459c980",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_ids": [
+                            "461f3f6d-55ce-4da1-9e1d-324cc97ba60c"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "буклет"
+                    },
+                    {
+                        "linkage_id": "53473a99-caaf-4590-a951-28f6232b659d",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_ids": [
+                            "af3957f5-d648-4f30-8ad4-de9c2e71cb5f"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "канал"
+                    },
+                    {
+                        "linkage_id": "605488d8-8d32-4189-8531-42f14ccb077b",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_ids": [
+                            "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "прога"
+                    },
+                    {
+                        "linkage_id": "df58d977-895d-4fe6-93db-d75291677a5d",
+                        "source_entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                        "source_sense_ids": [
+                            "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "приложение"
+                    }
+                ]
+            }
+        ],
+        "nl-extract.jsonl": [],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "3a5ea4b8-0736-48c2-99d7-6c22cdf3fa3e",
+                "word": "программа",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "7199fba4-24db-4c06-97e8-6c0eee697b92",
+                        "entry_id": "3a5ea4b8-0736-48c2-99d7-6c22cdf3fa3e",
+                        "glosses": [
+                            "program"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ]
+    }
+}

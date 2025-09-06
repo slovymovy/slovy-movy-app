@@ -1,0 +1,115 @@
+{
+    "entries": [
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "5bfa4446-3ce2-40c9-9abd-9c45e325646b",
+                    "sense_definition": "Een geval dat men gebruikt om iets te beproeven of te evalueren.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "testgeval",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De nieuwe software is een echte <w>testcase</w> voor ons team.",
+                            "target_lang_translations": {
+                                "ru": "Новое программное обеспечение — это настоящая <w>проверка на прочность</w> для нашей команды.",
+                                "en": "The new software is a real <w>test case</w> for our team."
+                            }
+                        },
+                        {
+                            "text": "Deze situatie zal dienen als een belangrijke <w>testcase</w> voor de nieuwe regels.",
+                            "target_lang_translations": {
+                                "ru": "Эта ситуация послужит важным <w>пробным камнем</w> для новых правил.",
+                                "en": "This situation will serve as an important <w>test case</w> for the new rules."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "testgeval",
+                        "proefgeval"
+                    ],
+                    "common_phrases": [
+                        "een testcase zijn",
+                        "als testcase dienen"
+                    ],
+                    "target_lang_definition": "A specific situation, event, or set of conditions used to test or evaluate something, such as a new product, system, or theory.",
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "тест-кейс",
+                                "target_lang_sense_clarification": "Прямой эквивалент, часто используется в техническом или IT-контексте для обозначения конкретного набора условий для проверки системы."
+                            },
+                            {
+                                "target_lang_word": "проверка на прочность",
+                                "target_lang_sense_clarification": "Используется в более широком смысле, когда ситуация становится испытанием для людей, отношений или систем."
+                            },
+                            {
+                                "target_lang_word": "пробный камень",
+                                "target_lang_sense_clarification": "Означает средство проверки, испытания истинных качеств, свойств кого-либо или чего-либо."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "test case",
+                                "target_lang_sense_clarification": "Refers to a situation or project used to evaluate a new system, product, or process. Often used in business, science, and technology."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "89a1cfa6-30c4-4924-b5ca-1392ccd2d2ea",
+                    "sense_definition": "Een zaak die men voorlegt aan de rechter om jurisprudentie (rechtsbeginselen) te kunnen schrijven.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "juridische proefzaak",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De advocaat zag de zaak als een belangrijke <w>testcase</w> voor de nieuwe wet.",
+                            "target_lang_translations": {
+                                "ru": "Адвокат рассматривал это дело как важное <w>прецедентное дело</w> для нового закона.",
+                                "en": "The lawyer saw the case as an important <w>test case</w> for the new law."
+                            }
+                        },
+                        {
+                            "text": "Deze rechtszaak kan dienen als een juridische <w>testcase</w> voor soortgelijke situaties in de toekomst.",
+                            "target_lang_translations": {
+                                "ru": "Это судебное разбирательство может послужить юридическим <w>прецедентом</w> для аналогичных ситуаций в будущем.",
+                                "en": "This lawsuit can serve as a legal <w>test case</w> for similar situations in the future."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "proefzaak",
+                        "proefproces"
+                    ],
+                    "common_phrases": [
+                        "een juridische testcase",
+                        "een testcase aanspannen"
+                    ],
+                    "target_lang_definition": "A legal action or lawsuit whose outcome is intended to set a precedent for how similar cases will be decided in the future.",
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "прецедентное дело",
+                                "target_lang_sense_clarification": "Наиболее точный юридический термин для дела, решение по которому становится образцом (прецедентом) для рассмотрения аналогичных дел в будущем."
+                            },
+                            {
+                                "target_lang_word": "пробное дело",
+                                "target_lang_sense_clarification": "Менее формальный вариант, подчеркивающий, что дело используется для проверки или создания новой юридической практики."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "test case",
+                                "target_lang_sense_clarification": "Specifically refers to a legal action brought to court to establish a legal principle or precedent."
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

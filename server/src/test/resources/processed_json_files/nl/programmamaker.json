@@ -1,0 +1,131 @@
+{
+    "entries": [
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "4e9bd9dc-07b8-482c-8b27-275190e59725",
+                    "sense_definition": "Iemand die televisie- of radioprogramma's maakt.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "media_professional",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De bekende <w>programmamaker</w> presenteert vanavond een nieuwe serie.",
+                            "target_lang_translations": {
+                                "ru": "Известный <w>создатель программ</w> сегодня вечером представит новый сериал.",
+                                "en": "The well-known <w>program maker</w> is presenting a new series tonight."
+                            }
+                        },
+                        {
+                            "text": "Als <w>programmamaker</w> moet je creatief zijn om boeiende content te maken.",
+                            "target_lang_translations": {
+                                "ru": "Будучи <w>создателем программ</w>, нужно быть креативным, чтобы делать увлекательный контент.",
+                                "en": "As a <w>program maker</w>, you have to be creative to make engaging content."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "televisiemaker",
+                        "radiomaker"
+                    ],
+                    "common_phrases": [
+                        "een programma maken",
+                        "als programmamaker werken"
+                    ],
+                    "target_lang_definition": "Someone who creates or produces television or radio programs.",
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "создатель программы",
+                                "target_lang_sense_clarification": "Прямой перевод, обозначающий человека, который разрабатывает и создает контент для теле- или радиопередачи."
+                            },
+                            {
+                                "target_lang_word": "продюсер",
+                                "target_lang_sense_clarification": "Часто используется в этом значении, хотя 'продюсер' может также заниматься финансовыми и организационными аспектами, а не только творческими."
+                            },
+                            {
+                                "target_lang_word": "автор программы",
+                                "target_lang_sense_clarification": "Человек, который является автором концепции и сценария программы."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "program maker",
+                                "target_lang_sense_clarification": "A general term for someone who creates content for television or radio, often involved in both creative and production aspects."
+                            },
+                            {
+                                "target_lang_word": "producer",
+                                "target_lang_sense_clarification": "Refers to the person responsible for the financial and managerial aspects of making a TV or radio show."
+                            },
+                            {
+                                "target_lang_word": "creator",
+                                "target_lang_sense_clarification": "A person who creates the concept and often writes the scripts for a show."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "f7fc0627-440b-49dc-8fff-3a9650bd89de",
+                    "sense_definition": "Iemand die een plan, schema of reeks activiteiten opstelt.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "planner",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De <w>programmamaker</w> van het festival heeft een indrukwekkend schema samengesteld.",
+                            "target_lang_translations": {
+                                "ru": "<w>Составитель программы</w> фестиваля подготовил впечатляющее расписание.",
+                                "en": "The festival's <w>programmer</w> has put together an impressive schedule."
+                            }
+                        },
+                        {
+                            "text": "Als <w>programmamaker</w> van het evenement zorgde hij voor een vlekkeloos verloop.",
+                            "target_lang_translations": {
+                                "ru": "Как <w>организатор</w> мероприятия, он обеспечил его безупречное проведение.",
+                                "en": "As the event's <w>organizer</w>, he ensured everything ran smoothly."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "planner",
+                        "organisator"
+                    ],
+                    "common_phrases": [
+                        "een programma opstellen",
+                        "het programma samenstellen"
+                    ],
+                    "target_lang_definition": "Someone who draws up a plan, schedule, or series of activities, for example for a festival or event.",
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "составитель программы",
+                                "target_lang_sense_clarification": "Относится к человеку, который разрабатывает расписание или программу для события, например, фестиваля или конференции."
+                            },
+                            {
+                                "target_lang_word": "организатор",
+                                "target_lang_sense_clarification": "Более общее слово, которое подходит, когда речь идет об организации всего мероприятия, включая составление программы."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "programmer",
+                                "target_lang_sense_clarification": "Specifically for someone who plans the schedule of events, films, or performances for a festival, cinema, or venue."
+                            },
+                            {
+                                "target_lang_word": "organizer",
+                                "target_lang_sense_clarification": "A person who plans and arranges an event or a series of activities."
+                            },
+                            {
+                                "target_lang_word": "planner",
+                                "target_lang_sense_clarification": "A person responsible for planning the details and schedule of an event or program."
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

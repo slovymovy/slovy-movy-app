@@ -1,0 +1,75 @@
+{
+    "word": "programmamaker",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "d917a6d7-580c-4271-9b88-2e1eb98d44d3",
+                "word": "programmamaker",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "699e18a5-f7ca-40a5-a8cf-8aeee7870550",
+                        "entry_id": "d917a6d7-580c-4271-9b88-2e1eb98d44d3",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "programmamakers"
+                    },
+                    {
+                        "form_id": "0ccde013-72ac-4c28-9847-951debfbe2b1",
+                        "entry_id": "d917a6d7-580c-4271-9b88-2e1eb98d44d3",
+                        "tags": [
+                            "diminutive",
+                            "singular"
+                        ],
+                        "form": "programmamakertje"
+                    },
+                    {
+                        "form_id": "4d81c9a8-21aa-4bb2-8a09-ad9705dab522",
+                        "entry_id": "d917a6d7-580c-4271-9b88-2e1eb98d44d3",
+                        "tags": [
+                            "diminutive",
+                            "plural"
+                        ],
+                        "form": "programmamakertjes"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "4e9bd9dc-07b8-482c-8b27-275190e59725",
+                        "entry_id": "d917a6d7-580c-4271-9b88-2e1eb98d44d3",
+                        "glosses": [
+                            "iemand die televisieprogramma's maakt"
+                        ],
+                        "tags": [
+                            "beroep"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "c72e3ab0-1f05-4a3f-a524-9a04fae9019f",
+                                "sense_id": "4e9bd9dc-07b8-482c-8b27-275190e59725",
+                                "text": "Vorige week was er op Catawiki een online-veiling met handschriften en eerste drukken van de verzamelaar, reiziger, schrijver en programmamaker Büch. Onder de parafernalia ook twee ingelijste fineliner-tekeningetjes van Drost: inderdaad fijn en vrolijk."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "f7fc0627-440b-49dc-8fff-3a9650bd89de",
+                        "entry_id": "d917a6d7-580c-4271-9b88-2e1eb98d44d3",
+                        "glosses": [
+                            "iemand die een programma opstelt"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": []
+    }
+}
