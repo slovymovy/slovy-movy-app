@@ -8,6 +8,7 @@ import com.slovy.slovymovyapp.data.dictionary.NameType
 import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import org.apache.commons.lang3.StringUtils
 import java.io.File
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -79,7 +80,7 @@ class JsonIngestionBuilder(private val dbManager: DbManager) {
                     dictQ.insertPosEntry(
                         id = lemmaId,
                         lemma = lemmaWord,
-                        lemma_normalized = normalize(lemmaWord),
+                        lemma_normalized = unaccent(lemmaWord),
                         pos = pos,
                     )
                 }
@@ -98,7 +99,7 @@ class JsonIngestionBuilder(private val dbManager: DbManager) {
                         form_id = formId,
                         lemma_id = lemmaId,
                         form = f.form,
-                        form_normalized = normalize(f.form),
+                        form_normalized = unaccent(f.form),
                     )
                     // tags
                     f.tags.forEach { tag ->
@@ -115,7 +116,7 @@ class JsonIngestionBuilder(private val dbManager: DbManager) {
                     dictQ.insertPosEntry(
                         id = genId,
                         lemma = lemmaWord,
-                        lemma_normalized = normalize(lemmaWord),
+                        lemma_normalized = unaccent(lemmaWord),
                         pos = pos
                     )
                     genId
@@ -200,8 +201,6 @@ class JsonIngestionBuilder(private val dbManager: DbManager) {
         }
     }
 
-    private fun normalize(s: String): String = s.lowercase()
-
     private fun mapPos(pos: String): DictionaryPos = DictionaryPos.valueOf(pos.uppercase())
 
     private fun mapLevel(level: String): LearnerLevel = LearnerLevel.valueOf(level.uppercase());
@@ -240,4 +239,17 @@ fun uuidParse(string: String): Uuid = try {
     // Pad incomplete UUID with zeros to reach required length
     val paddedId = string.padEnd(36, '0')
     Uuid.parse(paddedId)
+}
+
+
+fun unaccent(s: String): String {
+    // Normalize to lowercase first, then handle specific Latin ligatures/letters
+    val lower = s.lowercase()
+    val replaced = lower
+        .replace("æ", "ae")
+        .replace("œ", "oe")
+        .replace("ø", "o")
+        .replace("ł", "l")
+    // Strip remaining accents/diacritics (does not affect Cyrillic)
+    return StringUtils.stripAccents(replaced)
 }

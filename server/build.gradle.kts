@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.ktor.serverNetty)
     implementation(libs.kotlinx.serializationJson)
     implementation(libs.sqldelight.sqliteDriver)
+    implementation(libs.commons.text)
 
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
