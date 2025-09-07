@@ -1,0 +1,866 @@
+{
+  "entries": [
+    {
+      "pos": "noun",
+      "senses": [
+        {
+          "sense_id": "f6691b39-ac88-4711-a3e9-5d1751ce455d",
+          "sense_definition": "Een periode van vijftien minuten, een vierde deel van een uur.",
+          "learner_level": "A1",
+          "frequency": "High",
+          "semantic_group_id": "Tijdseenheid",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Ik ben over een <w>kwartier</w> thuis.",
+              "target_lang_translations": {
+                "ru": "Я буду дома через <w>четверть часа</w>.",
+                "en": "I'll be home in a <w>quarter of an hour</w>."
+              }
+            },
+            {
+              "text": "De vergadering duurt nog een <w>kwartier</w>.",
+              "target_lang_translations": {
+                "ru": "Собрание продлится ещё <w>четверть часа</w>.",
+                "en": "The meeting will last for another <w>fifteen minutes</w>."
+              }
+            },
+            {
+              "text": "Na een <w>kwartier</w> stopte er een oude gedeukte Toyota met een mollige vrouw voorin, die vroeg waar ik naartoe moest.",
+              "target_lang_translations": {
+                "ru": "Через <w>четверть часа</w> остановилась старая помятая Тойота с полной женщиной на переднем сиденье, которая спросила, куда мне нужно.",
+                "en": "After <w>fifteen minutes</w>, an old, dented Toyota pulled up with a plump woman in the front, who asked where I was going."
+              }
+            }
+          ],
+          "common_phrases": [
+            "over een kwartier",
+            "een kwartier later",
+            "een kwartier voor",
+            "een kwartier over"
+          ],
+          "target_lang_definitions": {
+            "ru": "Период времени в пятнадцать минут, четверть часа.",
+            "en": "A period of fifteen minutes; a quarter of an hour."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "четверть часа",
+                "target_lang_sense_clarification": "Наиболее точный и распространенный перевод, буквально 'четверть часа'."
+              },
+              {
+                "target_lang_word": "пятнадцать минут",
+                "target_lang_sense_clarification": "Прямой перевод, указывающий точное количество минут."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "quarter",
+                "target_lang_sense_clarification": "Used to tell time, as in 'a quarter past three' or 'a quarter to four'."
+              },
+              {
+                "target_lang_word": "quarter-hour",
+                "target_lang_sense_clarification": "A more formal or precise way to say fifteen minutes."
+              },
+              {
+                "target_lang_word": "fifteen minutes",
+                "target_lang_sense_clarification": "The most direct and common way to express this duration."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "ad53b482-1cc9-4410-9bee-56e5345a4890",
+          "sense_definition": "Een vierde deel van iets; een kwart.",
+          "learner_level": "A1",
+          "frequency": "High",
+          "semantic_group_id": "Deel",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Hij at een <w>kwartier</w> van de pizza op.",
+              "target_lang_translations": {
+                "ru": "Он съел <w>четверть</w> пиццы.",
+                "en": "He ate a <w>quarter</w> of the pizza."
+              }
+            },
+            {
+              "text": "Een <w>kwartier</w> van de studenten was afwezig.",
+              "target_lang_translations": {
+                "ru": "<w>Четверть</w> студентов отсутствовала.",
+                "en": "A <w>quarter</w> of the students were absent."
+              }
+            }
+          ],
+          "synonyms": [
+            "kwart"
+          ],
+          "common_phrases": [
+            "een kwartier van iets"
+          ],
+          "target_lang_definitions": {
+            "ru": "Четвёртая часть чего-либо; четверть.",
+            "en": "A fourth part of something; a quarter."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "четверть",
+                "target_lang_sense_clarification": "Основное значение, обозначающее одну из четырёх равных частей."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "quarter",
+                "target_lang_sense_clarification": "Refers to one of four equal parts of something, like 'a quarter of the pizza'."
+              },
+              {
+                "target_lang_word": "fourth",
+                "target_lang_sense_clarification": "Similar to quarter, often used as 'a fourth of...'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e720db0f-57fb-48c1-940b-82139de18c21",
+          "sense_definition": "Een verblijfplaats of onderkomen, vaak tijdelijk.",
+          "learner_level": "A2",
+          "frequency": "Middle",
+          "semantic_group_id": "Verblijfplaats",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "De reizigers zochten een warm <w>kwartier</w> voor de nacht.",
+              "target_lang_translations": {
+                "ru": "Путники искали тёплое <w>пристанище</w> на ночь.",
+                "en": "The travelers were looking for warm <w>lodgings</w> for the night."
+              }
+            },
+            {
+              "text": "Na de lange reis namen we onze intrek in een eenvoudig <w>kwartier</w>.",
+              "target_lang_translations": {
+                "ru": "После долгого путешествия мы разместились в простом <w>пристанище</w>.",
+                "en": "After the long journey, we took up our <w>quarters</w> in a simple lodging."
+              }
+            }
+          ],
+          "common_phrases": [
+            "zijn intrek nemen in een kwartier",
+            "in kwartier liggen"
+          ],
+          "target_lang_definitions": {
+            "ru": "Место для проживания или ночлега, часто временное.",
+            "en": "A place to stay or shelter, often temporary; lodging."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "пристанище",
+                "target_lang_sense_clarification": "Обозначает временное убежище или приют, часто для ночлега."
+              },
+              {
+                "target_lang_word": "ночлег",
+                "target_lang_sense_clarification": "Конкретно место для сна на одну ночь."
+              },
+              {
+                "target_lang_word": "кров",
+                "target_lang_sense_clarification": "Более поэтичное слово, означающее убежище, крышу над головой."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "lodging(s)",
+                "target_lang_sense_clarification": "A general term for a temporary place to stay."
+              },
+              {
+                "target_lang_word": "quarters",
+                "target_lang_sense_clarification": "Often used in the plural, refers to a place of residence or accommodation."
+              },
+              {
+                "target_lang_word": "shelter",
+                "target_lang_sense_clarification": "Emphasizes protection, especially for a single night."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "cc70e4c8-c28e-4979-b9c7-86718ae43056",
+          "sense_definition": "Een afgebakend deel van een stad of dorp; een wijk of buurt.",
+          "learner_level": "A2",
+          "frequency": "Middle",
+          "semantic_group_id": "Locatie/Gebied",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Ze woont in het historische <w>kwartier</w> van de stad.",
+              "target_lang_translations": {
+                "ru": "Она живёт в историческом <w>квартале</w> города.",
+                "en": "She lives in the historic <w>quarter</w> of the city."
+              }
+            },
+            {
+              "text": "Dit <w>kwartier</w> staat bekend om zijn gezellige cafés.",
+              "target_lang_translations": {
+                "ru": "Этот <w>квартал</w> известен своими уютными кафе.",
+                "en": "This <w>district</w> is known for its cozy cafés."
+              }
+            }
+          ],
+          "synonyms": [
+            "buurt",
+            "wijk"
+          ],
+          "common_phrases": [
+            "het oude kwartier",
+            "een rustig kwartier"
+          ],
+          "target_lang_definitions": {
+            "ru": "Ограниченная часть города или деревни; район.",
+            "en": "A specific district or neighborhood within a town or city."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "квартал",
+                "target_lang_sense_clarification": "Прямой когнат, часто используется для обозначения исторической или определённой части города."
+              },
+              {
+                "target_lang_word": "район",
+                "target_lang_sense_clarification": "Более общее слово для обозначения части города."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "quarter",
+                "target_lang_sense_clarification": "Often used for specific, named areas, like 'the Latin Quarter'."
+              },
+              {
+                "target_lang_word": "district",
+                "target_lang_sense_clarification": "A general term for an area of a city with a particular character or function."
+              },
+              {
+                "target_lang_word": "neighborhood",
+                "target_lang_sense_clarification": "A more residential area within a city or town."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "23e45828-2fa2-4304-bb8d-c420e51a80ce",
+          "sense_definition": "Een groter gebied of streek.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Locatie/Gebied",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Het <w>kwartier</w> rond de rivier is erg vruchtbaar.",
+              "target_lang_translations": {
+                "ru": "<w>Местность</w> вокруг реки очень плодородна.",
+                "en": "The <w>region</w> around the river is very fertile."
+              }
+            },
+            {
+              "text": "In dit <w>kwartier</w> zijn veel oude tradities bewaard gebleven.",
+              "target_lang_translations": {
+                "ru": "В этом <w>краю</w> сохранилось много старых традиций.",
+                "en": "In this <w>area</w>, many old traditions have been preserved."
+              }
+            }
+          ],
+          "synonyms": [
+            "gebied",
+            "landstreek",
+            "regio",
+            "streek"
+          ],
+          "common_phrases": [
+            "in dit kwartier"
+          ],
+          "target_lang_definitions": {
+            "ru": "Более крупная область или местность.",
+            "en": "A larger area, region, or district."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "местность",
+                "target_lang_sense_clarification": "Общее слово для обозначения определённой территории."
+              },
+              {
+                "target_lang_word": "край",
+                "target_lang_sense_clarification": "Обозначает регион, область, часто с определёнными природными или культурными особенностями."
+              },
+              {
+                "target_lang_word": "область",
+                "target_lang_sense_clarification": "Более формальное слово для региона или территории."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "region",
+                "target_lang_sense_clarification": "A large area of land with specific characteristics."
+              },
+              {
+                "target_lang_word": "district",
+                "target_lang_sense_clarification": "An area defined for administrative or other purposes."
+              },
+              {
+                "target_lang_word": "area",
+                "target_lang_sense_clarification": "A general term for a part of a country or the world."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "93aa4e52-1ff6-4c16-8cc2-7d12995a92d5",
+          "sense_definition": "Tijdelijke huisvesting voor militairen; legering.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Verblijfplaats",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "De soldaten moesten hun <w>kwartier</w> ijlings verlaten.",
+              "target_lang_translations": {
+                "ru": "Солдаты должны были спешно покинуть своё <w>расположение</w>.",
+                "en": "The soldiers had to leave their <w>billet</w> in a hurry."
+              }
+            },
+            {
+              "text": "Het regiment betrok nieuwe <w>kwartieren</w> aan de grens.",
+              "target_lang_translations": {
+                "ru": "Полк занял новые <w>квартиры</w> на границе.",
+                "en": "The regiment occupied new <w>quarters</w> at the border."
+              }
+            }
+          ],
+          "common_phrases": [
+            "in kwartier gaan",
+            "hoofdkwartier"
+          ],
+          "target_lang_definitions": {
+            "ru": "Временное жильё для военнослужащих; расквартирование.",
+            "en": "Temporary housing for soldiers; military lodging."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "квартира",
+                "target_lang_sense_clarification": "Устаревшее военное значение, место расположения войск. Используется во множественном числе 'квартиры'."
+              },
+              {
+                "target_lang_word": "расположение",
+                "target_lang_sense_clarification": "Место, где расквартированы войска."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "billet",
+                "target_lang_sense_clarification": "A specific term for lodging a soldier in a civilian's house or other non-military building."
+              },
+              {
+                "target_lang_word": "quarters",
+                "target_lang_sense_clarification": "A more general term for military accommodation, often used in the plural (e.g., 'officers' quarters')."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "b0838ec5-ce00-4362-b156-9b038c1671ea",
+          "sense_definition": "Elk van de twee fasen van de maan (eerste of laatste kwartier) waarbij de helft van de maan verlicht is.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Astronomie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Bij wassende maan noemt men de 'halve-maan-fase' het eerste <w>kwartier</w>.",
+              "target_lang_translations": {
+                "ru": "При растущей Луне фазу 'половины луны' называют первой <w>четвертью</w>.",
+                "en": "With a waxing moon, the 'half-moon phase' is called the first <w>quarter</w>."
+              }
+            },
+            {
+              "text": "Het laatste <w>kwartier</w> van de maan is zichtbaar voor zonsopgang.",
+              "target_lang_translations": {
+                "ru": "Последняя <w>четверть</w> Луны видна перед восходом солнца.",
+                "en": "The last <w>quarter</w> of the moon is visible before sunrise."
+              }
+            }
+          ],
+          "common_phrases": [
+            "eerste kwartier",
+            "laatste kwartier"
+          ],
+          "target_lang_definitions": {
+            "ru": "Каждая из двух фаз Луны (первая или последняя четверть), когда освещена половина лунного диска.",
+            "en": "Either of the two phases of the moon (first or last quarter) when half of the moon's disk is illuminated."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "четверть",
+                "target_lang_sense_clarification": "Астрономический термин для обозначения фазы Луны."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "quarter",
+                "target_lang_sense_clarification": "Used in phrases like 'first quarter' or 'last quarter' to describe the moon phase."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "50b76245-6190-4c94-a3d3-55db13299ca6",
+          "sense_definition": "Een historisch of bestuurlijk onderdeel van een land of gewest.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Locatie/Gebied",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Het <w>kwartier</w> van Den Bosch was een belangrijk bestuurlijk centrum.",
+              "target_lang_translations": {
+                "ru": "<w>Округ</w> Ден Босх был важным административным центром.",
+                "en": "The <w>Quarter</w> of Den Bosch was an important administrative center."
+              }
+            },
+            {
+              "text": "Vroeger was dit gebied verdeeld in vier <w>kwartieren</w>.",
+              "target_lang_translations": {
+                "ru": "Раньше эта территория была разделена на четыре <w>округа</w>.",
+                "en": "In the past, this area was divided into four <w>districts</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "het kwartier van..."
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "historisch gebruik"
+            },
+            {
+              "trait_type": "regional",
+              "comment": "specifiek voor bepaalde regio's/bestuurlijke indelingen"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Историческая или административная часть страны или области.",
+            "en": "A historical administrative division of a country or province."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "округ",
+                "target_lang_sense_clarification": "Административно-территориальная единица."
+              },
+              {
+                "target_lang_word": "четверть",
+                "target_lang_sense_clarification": "Исторический термин, использовавшийся в некоторых государствах (например, в Московском государстве)."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "quarter",
+                "target_lang_sense_clarification": "A historical term for an administrative division, often one of four."
+              },
+              {
+                "target_lang_word": "district",
+                "target_lang_sense_clarification": "A modern equivalent for an administrative area."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "10a87d67-6c71-401b-b75f-9da419f46d3a",
+          "sense_definition": "Een periode van wachtdienst, met name in militaire context.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Militaire term",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "De soldaat stond zijn <w>kwartier</w> te houden bij de poort.",
+              "target_lang_translations": {
+                "ru": "Солдат нёс <w>караул</w> у ворот.",
+                "en": "The soldier was standing his <w>watch</w> at the gate."
+              }
+            },
+            {
+              "text": "Na twee uur was zijn <w>kwartier</w> voorbij.",
+              "target_lang_translations": {
+                "ru": "Через два часа его <w>вахта</w> закончилась.",
+                "en": "After two hours, his <w>watch</w> was over."
+              }
+            }
+          ],
+          "common_phrases": [
+            "het kwartier houden"
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "minder gangbaar in modern Nederlands"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Период несения караульной службы, особенно в военном контексте.",
+            "en": "A period of guard duty or a watch, especially in a military or naval context."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "вахта",
+                "target_lang_sense_clarification": "В морском флоте: период несения службы."
+              },
+              {
+                "target_lang_word": "караул",
+                "target_lang_sense_clarification": "Обязанность по охране объекта; время несения этой службы."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "watch",
+                "target_lang_sense_clarification": "The most common term for a period of duty, especially on a ship or in the military."
+              },
+              {
+                "target_lang_word": "guard duty",
+                "target_lang_sense_clarification": "Specifically refers to the act of guarding a post."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e44b69db-0c8e-491a-b7b4-593a18038b23",
+          "sense_definition": "Een van de vier delen van een wapenschild.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Heraldiek",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Het wapenschild was verdeeld in vier <w>kwartieren</w>, elk met een eigen symbool.",
+              "target_lang_translations": {
+                "ru": "Гербовый щит был разделён на четыре <w>четверти</w>, каждая со своим символом.",
+                "en": "The coat of arms was divided into four <w>quarters</w>, each with its own symbol."
+              }
+            },
+            {
+              "text": "In het bovenste linker <w>kwartier</w> stond een gouden leeuw.",
+              "target_lang_translations": {
+                "ru": "В верхней левой <w>четверти</w> был изображён золотой лев.",
+                "en": "In the upper left <w>quarter</w> was a golden lion."
+              }
+            }
+          ],
+          "common_phrases": [
+            "het eerste kwartier",
+            "een kwartier met..."
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "gebruikt in de heraldiek"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Одна из четырёх частей гербового щита.",
+            "en": "One of the four divisions of a coat of arms or shield in heraldry."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "четверть",
+                "target_lang_sense_clarification": "Геральдический термин, обозначающий одну из четырёх частей щита."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "quarter",
+                "target_lang_sense_clarification": "The specific heraldic term for one of the four sections of a shield."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "49a268c0-14f0-4f9a-ab0b-395eb1beb056",
+          "sense_definition": "De reeks van voorouders, vaak gebruikt in de genealogie om de afkomst aan te duiden.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Genealogie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Voor de adel was het belangrijk om hun <w>kwartier</w> te kunnen bewijzen.",
+              "target_lang_translations": {
+                "ru": "Для дворянства было важно доказать своё <w>происхождение</w>.",
+                "en": "For the nobility, it was important to be able to prove their <w>lineage</w>."
+              }
+            },
+            {
+              "text": "De <w>kwartierstaat</w> toonde al zijn voorouders tot in de zesde generatie.",
+              "target_lang_translations": {
+                "ru": "Родословная <w>таблица</w> показывала всех его предков до шестого поколения.",
+                "en": "The chart of his <w>lineage</w> showed all his ancestors up to the sixth generation."
+              }
+            }
+          ],
+          "common_phrases": [
+            "kwartierstaat",
+            "zijn kwartier bewijzen"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "gebruikt in de genealogie"
+            },
+            {
+              "trait_type": "dated",
+              "comment": "minder gangbaar in algemeen taalgebruik"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Ряд предков, часто используется в генеалогии для обозначения происхождения.",
+            "en": "The line of ancestors; lineage or pedigree, used in genealogy."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "происхождение",
+                "target_lang_sense_clarification": "Общее слово, обозначающее родословную."
+              },
+              {
+                "target_lang_word": "колено",
+                "target_lang_sense_clarification": "Обозначает поколение в родословной."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "lineage",
+                "target_lang_sense_clarification": "Refers to the line of descent from an ancestor."
+              },
+              {
+                "target_lang_word": "ancestry",
+                "target_lang_sense_clarification": "Refers to one's ancestors or ethnic descent."
+              },
+              {
+                "target_lang_word": "quartering",
+                "target_lang_sense_clarification": "In heraldry and genealogy, it refers to the divisions of a shield representing different family lines."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "99d0325e-afe1-44d0-a49b-26c3d1b17e77",
+          "sense_definition": "Een van de vier hoofddelen waarin een geslacht dier wordt verdeeld (bijv. voor- of achterkwartier).",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Specifieke delen",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "De slager sneed het varken in vier <w>kwartieren</w>.",
+              "target_lang_translations": {
+                "ru": "Мясник разделил свиную тушу на четыре <w>четверти</w>.",
+                "en": "The butcher cut the pig into four <w>quarters</w>."
+              }
+            },
+            {
+              "text": "Het achter<w>kwartier</w> van het rund is het meest waardevol.",
+              "target_lang_translations": {
+                "ru": "Задняя <w>четверть</w> говяжьей туши самая ценная.",
+                "en": "The hind<w>quarter</w> of the beef is the most valuable."
+              }
+            }
+          ],
+          "common_phrases": [
+            "voorkwartier",
+            "achterkwartier"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "gebruikt in de slagerij"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Одна из четырёх основных частей, на которые разделывают тушу животного (напр., передняя или задняя четверть).",
+            "en": "One of the four main sections of a butchered animal carcass (e.g., forequarter or hindquarter)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "четверть",
+                "target_lang_sense_clarification": "Специальный термин в мясном деле, обозначающий четвертую часть туши."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "quarter",
+                "target_lang_sense_clarification": "The standard term in butchery, as in 'forequarter' or 'hindquarter'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "5043e41f-490a-4d1b-b1f0-243ceed227f8",
+          "sense_definition": "Een kwartdeel van een haringvleet (een groot visnet).",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Specifieke delen",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "De vissers controleerden elk <w>kwartier</w> van de vleet op schade.",
+              "target_lang_translations": {
+                "ru": "Рыбаки проверяли каждую <w>четверть</w> невода на наличие повреждений.",
+                "en": "The fishermen checked each <w>quarter</w> of the drift net for damage."
+              }
+            },
+            {
+              "text": "Het <w>kwartier</w> van de haringvleet werd zorgvuldig gerepareerd.",
+              "target_lang_translations": {
+                "ru": "<w>Четверть</w> сельдяного невода была тщательно отремонтирована.",
+                "en": "The <w>quarter</w> of the herring drift net was carefully repaired."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "gebruikt in de visserij"
+            },
+            {
+              "trait_type": "obsolete",
+              "comment": "verwijst naar een verouderd type visnet"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Четвёртая часть сельдяного невода (большой рыболовной сети).",
+            "en": "A quarter section of a large fishing net, such as a herring drift net."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "четверть",
+                "target_lang_sense_clarification": "Устаревший рыболовный термин."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "quarter",
+                "target_lang_sense_clarification": "Used in this highly specific, technical context to mean a section of the net."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "pos": "name",
+      "senses": [
+        {
+          "sense_id": "59713e24-46c7-4e8f-ad9c-01ae4c7879e4",
+          "sense_definition": "Een buurtschap in Zevenaar, Gelderland, Nederland.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Het <w>Kwartier</w> is een kleine nederzetting in de gemeente Zevenaar.",
+              "target_lang_translations": {
+                "ru": "<w>Квартир</w> — это небольшое поселение в общине Зевенар.",
+                "en": "The <w>Kwartier</w> is a small settlement in the municipality of Zevenaar."
+              }
+            },
+            {
+              "text": "De weg naar het <w>Kwartier</w> is smal en landelijk.",
+              "target_lang_translations": {
+                "ru": "Дорога в <w>Квартир</w> узкая и сельская.",
+                "en": "The road to the <w>Kwartier</w> is narrow and rural."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "specifieke plaatsnaam in Gelderland"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Посёлок в общине Зевенар, провинция Гелдерланд, Нидерланды.",
+            "en": "A hamlet in the municipality of Zevenaar, Gelderland, the Netherlands."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Квартир",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерируется."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "Kwartier",
+                "target_lang_sense_clarification": "As a proper noun, the name is not translated."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c8189be5-29e1-4c0c-8a68-187a81e80c22",
+          "sense_definition": "Een buurtschap in Moerdijk, Noord-Brabant, Nederland.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "In Moerdijk ligt ook een buurtschap genaamd <w>Kwartier</w>.",
+              "target_lang_translations": {
+                "ru": "В Мурдейке также есть посёлок под названием <w>Квартир</w>.",
+                "en": "In Moerdijk, there is also a hamlet called <w>Kwartier</w>."
+              }
+            },
+            {
+              "text": "Het <w>Kwartier</w> bij Moerdijk staat bekend om zijn rustige omgeving.",
+              "target_lang_translations": {
+                "ru": "<w>Квартир</w> близ Мурдейка известен своей спокойной обстановкой.",
+                "en": "The <w>Kwartier</w> near Moerdijk is known for its quiet surroundings."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "specifieke plaatsnaam in Noord-Brabant"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Посёлок в общине Мурдейк, провинция Северный Брабант, Нидерланды.",
+            "en": "A hamlet in the municipality of Moerdijk, North Brabant, the Netherlands."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Квартир",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерируется."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "Kwartier",
+                "target_lang_sense_clarification": "As a proper noun, the name is not translated."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

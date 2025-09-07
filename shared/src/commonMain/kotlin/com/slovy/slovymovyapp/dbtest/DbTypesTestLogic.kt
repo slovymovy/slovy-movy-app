@@ -38,17 +38,16 @@ object DbTypesTestLogic {
         val lemma = "Test"
         val lemmaNormalized = "test"
 
-        q.insertPosEntry(id = lemmaId, lemma = lemma, lemma_normalized = lemmaNormalized)
+        q.insertPosEntry(id = lemmaId, lemma = lemma, lemma_normalized = lemmaNormalized, pos = DictionaryPos.VERB)
         val lemmasByWord = q.selectLemmasByWord(lemma.lowercase()).executeAsList()
 
         val formText = "Testing"
         val formNormalized = "testing"
         q.insertForm(
+            form_id = Uuid.random(),
             lemma_id = lemmaId,
-            lemma_id_ = lemmaId,
             form = formText,
             form_normalized = formNormalized,
-            pos = DictionaryPos.VERB,
         )
         val formsByNorm = q.selectFormsByNormalized(formNormalized).executeAsList()
 
@@ -61,7 +60,6 @@ object DbTypesTestLogic {
             frequency = SenseFrequency.MIDDLE,
             semantic_group_id = "sg1",
             name_type = NameType.NO,
-            pos = DictionaryPos.VERB,
         )
         q.insertSenseTrait(sense_id = senseId, trait_type = TraitType.SLANG, comment = "colloquial usage")
         q.insertSenseSynonym(sense_id = senseId, synonym = "probe")

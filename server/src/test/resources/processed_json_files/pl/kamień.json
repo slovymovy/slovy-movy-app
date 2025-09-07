@@ -1,0 +1,2384 @@
+{
+  "entries": [
+    {
+      "pos": "noun",
+      "senses": [
+        {
+          "sense_id": "3480c958-664f-4bbf-b0c1-b396d68202e7",
+          "sense_definition": "Twardy, naturalny fragment skały lub minerału, często używany w budownictwie lub jako narzędzie.",
+          "learner_level": "A1",
+          "frequency": "High",
+          "semantic_group_id": "Fragmenty skał i minerałów",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Rzucił <w>kamieniem</w> w okno i rozbił je.",
+              "target_lang_translations": {
+                "ru": "Он бросил <w>камнем</w> в окно и разбил его."
+              }
+            },
+            {
+              "text": "Ten <w>kamień</w> jest idealny do budowy muru.",
+              "target_lang_translations": {
+                "ru": "Этот <w>камень</w> идеально подходит для строительства стены."
+              }
+            }
+          ],
+          "synonyms": [
+            "skała",
+            "głaz",
+            "reg. śl. kizlok, kiziol"
+          ],
+          "common_phrases": [
+            "rzucać kamieniami",
+            "kamień węgielny"
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "regionalne, śląskie"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Твёрдый, природный обломок скалы или минерала, часто используемый в строительстве или в качестве инструмента."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "камень",
+                "target_lang_sense_clarification": "Основное значение: кусок скалы, минерала. Используется в строительстве, как метательный снаряд и т.д."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "df5a9d4f-7e7b-49b1-80e4-54cbf01498cc",
+          "sense_definition": "Zaciśnięta pięść symbolizująca kamień w grze 'papier, kamień, nożyce'.",
+          "learner_level": "A2",
+          "frequency": "Low",
+          "semantic_group_id": "Gry i zabawy",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "W grze 'papier, kamień, nożyce' <w>kamień</w> bije nożyce.",
+              "target_lang_translations": {
+                "ru": "В игре 'камень, ножницы, бумага' <w>камень</w> бьёт ножницы."
+              }
+            },
+            {
+              "text": "Wybierz <w>kamień</w>, papier albo nożyce.",
+              "target_lang_translations": {
+                "ru": "Выбери <w>камень</w>, ножницы или бумагу."
+              }
+            }
+          ],
+          "common_phrases": [
+            "papier, kamień, nożyce"
+          ],
+          "target_lang_definitions": {
+            "ru": "Сжатый кулак, символизирующий камень в игре 'камень, ножницы, бумага'."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "камень",
+                "target_lang_sense_clarification": "Фигура в игре 'камень, ножницы, бумага', изображаемая сжатым кулаком."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "108c7c09-fc64-48c9-9a6f-7c71ed20874c",
+          "sense_definition": "Twarda pestka wewnątrz niektórych owoców, np. śliwki, brzoskwini.",
+          "learner_level": "A2",
+          "frequency": "Middle",
+          "semantic_group_id": "Części roślin",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Uważaj na <w>kamień</w> w tej śliwce.",
+              "target_lang_translations": {
+                "ru": "Осторожно, в этой сливе <w>косточка</w>."
+              }
+            },
+            {
+              "text": "Wypluł <w>kamień</w> z wiśni.",
+              "target_lang_translations": {
+                "ru": "Он выплюнул <w>косточку</w> из вишни."
+              }
+            }
+          ],
+          "synonyms": [
+            "pestka"
+          ],
+          "common_phrases": [
+            "kamień owocu"
+          ],
+          "target_lang_definitions": {
+            "ru": "Твёрдая косточка внутри некоторых плодов, например, сливы, персика."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "косточка",
+                "target_lang_sense_clarification": "Твёрдая оболочка семени внутри плода (сливы, вишни, персика)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "333519f3-9da1-4bb1-aa9b-f1fda27a3d31",
+          "sense_definition": "Cenny minerał lub skała, która po oszlifowaniu i wypolerowaniu jest używana do wyrobu biżuterii lub ozdób.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Biżuteria i minerały ozdobne",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Ten pierścionek ma piękny <w>kamień</w> szlachetny.",
+              "target_lang_translations": {
+                "ru": "У этого кольца красивый драгоценный <w>камень</w>."
+              }
+            },
+            {
+              "text": "Diament to najtwardszy znany <w>kamień</w>.",
+              "target_lang_translations": {
+                "ru": "Алмаз — это самый твёрдый известный <w>камень</w>."
+              }
+            }
+          ],
+          "synonyms": [
+            "klejnot"
+          ],
+          "common_phrases": [
+            "kamień szlachetny",
+            "kamień półszlachetny"
+          ],
+          "target_lang_definitions": {
+            "ru": "Ценный минерал или порода, которая после огранки и полировки используется для изготовления ювелирных изделий или украшений."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "камень",
+                "target_lang_sense_clarification": "Используется в значении 'драгоценный камень' или 'самоцвет'."
+              },
+              {
+                "target_lang_word": "драгоценный камень",
+                "target_lang_sense_clarification": "Полное, более формальное название для ювелирного камня."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "0c099fe6-1a4e-4bb2-a5fc-7197942d32d5",
+          "sense_definition": "Twardy osad mineralny, który gromadzi się na powierzchniach, np. w czajniku, rurach, lub na zębach.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Osady i złogi",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "W czajniku osadził się <w>kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В чайнике образовалась <w>накипь</w>."
+              }
+            },
+            {
+              "text": "Dentysta usunął mi <w>kamień</w> nazębny.",
+              "target_lang_translations": {
+                "ru": "Стоматолог удалил мне зубной <w>камень</w>."
+              }
+            }
+          ],
+          "synonyms": [
+            "nagar",
+            "kamień kotłowy"
+          ],
+          "common_phrases": [
+            "kamień nazębny",
+            "kamień kotłowy"
+          ],
+          "target_lang_definitions": {
+            "ru": "Твёрдый минеральный осадок, который скапливается на поверхностях, например, в чайнике, трубах или на зубах."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "накипь",
+                "target_lang_sense_clarification": "Осадок в чайнике или трубах от жёсткой воды."
+              },
+              {
+                "target_lang_word": "зубной камень",
+                "target_lang_sense_clarification": "Твёрдый налёт на зубах."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "fe09979a-67ce-40e5-a1b8-4336b2533c99",
+          "sense_definition": "Mały przedmiot, często w kształcie kamienia, używany jako pionek lub element w grach planszowych lub sportach, np. w curlingu.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Elementy gier i sportu",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Przesunął <w>kamień</w> na planszy do go.",
+              "target_lang_translations": {
+                "ru": "Он передвинул <w>камень</w> на доске для го."
+              }
+            },
+            {
+              "text": "Zawodnicy curlingu szlifują lód przed wypuszczeniem <w>kamienia</w>.",
+              "target_lang_translations": {
+                "ru": "Игроки в кёрлинг натирают лёд перед запуском <w>камня</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "kamień do gry w go",
+            "kamień curlingowy"
+          ],
+          "target_lang_definitions": {
+            "ru": "Небольшой предмет, часто в форме камня, используемый как фишка или элемент в настольных играх или спорте, например, в кёрлинге."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "камень",
+                "target_lang_sense_clarification": "Фишка в настольных играх (го, домино) или спортивный снаряд (в кёрлинге)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "0c41513a-fbfe-4219-88c6-8a876497e9df",
+          "sense_definition": "Patologiczny złóg mineralny, który tworzy się w organach wewnętrznych, np. w nerkach lub pęcherzyku żółciowym.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Osady i złogi",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Cierpi na <w>kamienie</w> nerkowe.",
+              "target_lang_translations": {
+                "ru": "Он страдает от почечных <w>камней</w>."
+              }
+            },
+            {
+              "text": "Lekarz zdiagnozował u niej <w>kamienie</w> żółciowe.",
+              "target_lang_translations": {
+                "ru": "Врач диагностировал у неё желчные <w>камни</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "kamienie nerkowe",
+            "kamienie żółciowe"
+          ],
+          "target_lang_definitions": {
+            "ru": "Патологическое минеральное отложение, которое образуется во внутренних органах, например, в почках или желчном пузыре."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "камень",
+                "target_lang_sense_clarification": "Медицинский термин для обозначения твёрдых образований в органах (например, камни в почках)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "eb2cac72-855b-4efc-a655-cbe5c23c4f25",
+          "sense_definition": "Słup lub znak graniczny wykonany z kamienia.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Punkty orientacyjne i znaki",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Stary <w>kamień</w> graniczny wyznaczał koniec posiadłości.",
+              "target_lang_translations": {
+                "ru": "Старый пограничный <w>камень</w> обозначал конец владения."
+              }
+            },
+            {
+              "text": "Na mapie zaznaczono każdy <w>kamień</w> milowy.",
+              "target_lang_translations": {
+                "ru": "На карте отмечен каждый мильный <w>камень</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "kamień graniczny",
+            "kamień milowy"
+          ],
+          "target_lang_definitions": {
+            "ru": "Столб или пограничный знак, сделанный из камня."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "межевой камень",
+                "target_lang_sense_clarification": "Камень, обозначающий границу земельного участка."
+              },
+              {
+                "target_lang_word": "мильный камень",
+                "target_lang_sense_clarification": "Знак, указывающий расстояние, аналог верстового столба."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e0a655c5-0ddb-4d05-813d-2197fdc8d0a4",
+          "sense_definition": "Dawna jednostka masy, używana głównie w krajach anglosaskich, równa około 6,35 kilograma (14 funtów).",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Jednostki miary",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "W Wielkiej Brytanii waga ciała często podawana jest w <w>kamieniach</w> i funtach.",
+              "target_lang_translations": {
+                "ru": "В Великобритании вес тела часто указывается в <w>стоунах</w> и фунтах."
+              }
+            },
+            {
+              "text": "Jego waga wynosiła dwanaście <w>kamieni</w>.",
+              "target_lang_translations": {
+                "ru": "Его вес составлял двенадцать <w>стоунов</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "używane głównie w krajach anglosaskich"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Старая единица массы, используемая в основном в англосаксонских странах, равная примерно 6,35 килограмма (14 фунтов)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "стоун",
+                "target_lang_sense_clarification": "Британская единица измерения массы, равная 14 фунтам."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "8fe7d4fc-888f-4ec0-ab14-2705cdbc6d47",
+          "sense_definition": "Ciężarek używany w pionie murarskim lub innym narzędziu do wyznaczania pionu.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Narzędzia i przyrządy",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Murarz użył <w>kamienia</w> do sprawdzenia pionu ściany.",
+              "target_lang_translations": {
+                "ru": "Каменщик использовал <w>отвес</w> для проверки вертикальности стены."
+              }
+            },
+            {
+              "text": "Ten <w>kamień</w> jest częścią starego przyrządu pomiarowego.",
+              "target_lang_translations": {
+                "ru": "Этот <w>отвес</w> является частью старого измерительного прибора."
+              }
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Грузик, используемый в отвесе каменщика или другом инструменте для определения вертикали."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "отвес",
+                "target_lang_sense_clarification": "Инструмент для проверки вертикальности, состоящий из груза на нити."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "acfe12e8-d13b-40a4-854d-ca431699b993",
+          "sense_definition": "Dawna nazwa skamieliny, czyli szczątków organizmów zachowanych w skałach.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Geologia i paleontologia",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "W muzeum można podziwiać <w>kamienie</w> z prehistorycznymi odciskami.",
+              "target_lang_translations": {
+                "ru": "В музее можно полюбоваться <w>окаменелостями</w> с доисторическими отпечатками."
+              }
+            },
+            {
+              "text": "Ten <w>kamień</w> zawierał doskonale zachowaną skamielinę.",
+              "target_lang_translations": {
+                "ru": "Эта <w>окаменелость</w> содержала прекрасно сохранившееся ископаемое."
+              }
+            }
+          ],
+          "synonyms": [
+            "skamielina"
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название окаменелости, то есть останков организмов, сохранившихся в скальных породах."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "окаменелость",
+                "target_lang_sense_clarification": "Современное название для ископаемых останков."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c4e6cfce-85ac-4fbb-93a3-883bff78aae3",
+          "sense_definition": "Dawna nazwa bursztynu, skamieniałej żywicy drzew iglastych.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Geologia i paleontologia",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Na plaży znaleziono mały <w>kamień</w> bursztynu.",
+              "target_lang_translations": {
+                "ru": "На пляже нашли маленький <w>камень</w> янтаря."
+              }
+            },
+            {
+              "text": "Z tego <w>kamienia</w> robiono piękną biżuterię.",
+              "target_lang_translations": {
+                "ru": "Из этого <w>янтаря</w> делали красивые украшения."
+              }
+            }
+          ],
+          "synonyms": [
+            "bursztyn"
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название янтаря, окаменевшей смолы хвойных деревьев."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "янтарь",
+                "target_lang_sense_clarification": "Современное название окаменевшей ископаемой смолы."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "35b71258-3d98-4c5a-9e6b-d226683655ae",
+          "sense_definition": "Dawna nazwa koralu, morskiego organizmu tworzącego wapienne szkielety.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Biologia morska",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Nurkowie podziwiali podwodny ogród z <w>kamieni</w> koralowych.",
+              "target_lang_translations": {
+                "ru": "Дайверы любовались подводным садом из <w>кораллов</w>."
+              }
+            },
+            {
+              "text": "Ten <w>kamień</w> był kiedyś częścią rafy koralowej.",
+              "target_lang_translations": {
+                "ru": "Этот <w>коралл</w> когда-то был частью кораллового рифа."
+              }
+            }
+          ],
+          "synonyms": [
+            "koral"
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название коралла, морского организма, образующего известковые скелеты."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "коралл",
+                "target_lang_sense_clarification": "Современное название морского полипа или его скелета."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "d2bbd031-dbba-400a-8a1a-48bf3e2e9818",
+          "sense_definition": "Dawna nazwa odważnika, używanego do ważenia na szalach.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Narzędzia i przyrządy",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Kupiec używał <w>kamieni</w> do odważania towarów.",
+              "target_lang_translations": {
+                "ru": "Купец использовал <w>гири</w> для взвешивания товаров."
+              }
+            },
+            {
+              "text": "Ten <w>kamień</w> ważył dokładnie jeden funt.",
+              "target_lang_translations": {
+                "ru": "Эта <w>гиря</w> весила ровно один фунт."
+              }
+            }
+          ],
+          "synonyms": [
+            "odważnik"
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название гири, используемой для взвешивания на весах."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "гиря",
+                "target_lang_sense_clarification": "Металлический груз для взвешивания."
+              },
+              {
+                "target_lang_word": "отвес",
+                "target_lang_sense_clarification": "Устаревшее название эталона веса."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "7f5ca88b-bd10-4dfa-b79b-1e0c5df7fbca",
+          "sense_definition": "Dawna nazwa antymonu, pierwiastka chemicznego z grupy półmetali.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Pierwiastki i minerały",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "W dawnej alchemii <w>kamień</w> filozoficzny miał być związany z przemianą metali.",
+              "target_lang_translations": {
+                "ru": "В древней алхимии философский <w>камень</w> должен был быть связан с превращением металлов."
+              }
+            },
+            {
+              "text": "Antymon był kiedyś nazywany <w>kamieniem</w>.",
+              "target_lang_translations": {
+                "ru": "Сурьму когда-то называли <w>камнем</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa pierwiastka chemicznego"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название сурьмы, химического элемента из группы полуметаллов."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "сурьма",
+                "target_lang_sense_clarification": "Современное название химического элемента (Sb)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "854b5251-03a9-455c-8a5e-852e4edad089",
+          "sense_definition": "Dawna nazwa kalaminy, minerału cynku, używanego m.in. w medycynie.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Pierwiastki i minerały",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "W starych recepturach medycznych często pojawia się <w>kamień</w> kalaminowy.",
+              "target_lang_translations": {
+                "ru": "В старых медицинских рецептах часто встречается каламиновый <w>камень</w>."
+              }
+            },
+            {
+              "text": "Kalamina, czyli <w>kamień</w> galmanowy, była stosowana na podrażnienia skóry.",
+              "target_lang_translations": {
+                "ru": "Каламин, то есть галмейный <w>камень</w>, применялся при раздражениях кожи."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa minerału"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название каламина, минерала цинка, используемого в том числе в медицине."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "каламин",
+                "target_lang_sense_clarification": "Современное название минерала, смеси оксида цинка и оксида железа."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a857527b-3127-4994-ba75-1e5ce6a3b7e4",
+          "sense_definition": "Dawna nazwa rudy miedzi.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Pierwiastki i minerały",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Górnicy wydobywali <w>kamień</w> miedzi z głębi ziemi.",
+              "target_lang_translations": {
+                "ru": "Шахтёры добывали медную <w>руду</w> из глубин земли."
+              }
+            },
+            {
+              "text": "Z tego <w>kamienia</w> wytapiano miedź.",
+              "target_lang_translations": {
+                "ru": "Из этой <w>руды</w> выплавляли медь."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa rudy"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название медной руды."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "медная руда",
+                "target_lang_sense_clarification": "Современное название горной породы, содержащей медь."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "fdac3b17-4080-44fb-8f96-4390a3f93778",
+          "sense_definition": "Dawna nazwa murry, cennego materiału używanego w starożytności do wyrobu naczyń, prawdopodobnie rodzaju fluorytu lub porcelany.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Historia i materiały",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "W starożytnym Rzymie naczynia z <w>kamienia</w> murry były bardzo cenione.",
+              "target_lang_translations": {
+                "ru": "В Древнем Риме сосуды из <w>мурры</w> очень ценились."
+              }
+            },
+            {
+              "text": "Ten <w>kamień</w> był używany do produkcji luksusowych przedmiotów.",
+              "target_lang_translations": {
+                "ru": "Этот <w>материал</w> использовался для производства предметов роскоши."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa materiału"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название мурры, ценного материала, использовавшегося в древности для изготовления сосудов, предположительно, разновидности флюорита или фарфора."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "мурра",
+                "target_lang_sense_clarification": "Название древнего материала, точная природа которого неизвестна."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "68e263e0-e69d-4894-b408-1431db99c91e",
+          "sense_definition": "Dawna nazwa magnesu, minerału o właściwościach magnetycznych.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Pierwiastki i minerały",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Kompas działa dzięki <w>kamieniowi</w> magnetycznemu.",
+              "target_lang_translations": {
+                "ru": "Компас работает благодаря магнитному <w>камню</w>."
+              }
+            },
+            {
+              "text": "Ten <w>kamień</w> przyciągał metalowe przedmioty.",
+              "target_lang_translations": {
+                "ru": "Этот <w>магнит</w> притягивал металлические предметы."
+              }
+            }
+          ],
+          "synonyms": [
+            "magnes"
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa magnesu"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название магнита, минерала с магнитными свойствами."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "магнит",
+                "target_lang_sense_clarification": "Современное название тела, обладающего собственным магнитным полем."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a0ca6ed7-9dde-44ca-893f-689a3208756e",
+          "sense_definition": "Dawna nazwa magnezji (tlenku magnezu) lub rudy manganu.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Pierwiastki i minerały",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "W dawnej chemii <w>kamień</w> magnezjowy był używany do różnych celów.",
+              "target_lang_translations": {
+                "ru": "В старой химии магнезиальный <w>камень</w> использовался для различных целей."
+              }
+            },
+            {
+              "text": "Z tego <w>kamienia</w> pozyskiwano mangan.",
+              "target_lang_translations": {
+                "ru": "Из этой <w>руды</w> получали марганец."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa substancji chemicznych"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название магнезии (оксида магния) или марганцевой руды."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "магнезия",
+                "target_lang_sense_clarification": "Современное название оксида магния."
+              },
+              {
+                "target_lang_word": "марганцевая руда",
+                "target_lang_sense_clarification": "Современное название руды, содержащей марганец."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "0182268e-2aca-45fc-bbe1-fcdb4a52e6dc",
+          "sense_definition": "Dawna nazwa miki, minerału o warstwowej strukturze, używanego jako izolator.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Pierwiastki i minerały",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Przezroczysty <w>kamień</w> był używany jako szyba.",
+              "target_lang_translations": {
+                "ru": "Прозрачная <w>слюда</w> использовалась в качестве оконного стекла."
+              }
+            },
+            {
+              "text": "Mika, czyli <w>kamień</w> szklany, ma charakterystyczne warstwy.",
+              "target_lang_translations": {
+                "ru": "Слюда, то есть стеклянный <w>камень</w>, имеет характерные слои."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa minerału"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название слюды, минерала со слоистой структурой, используемого в качестве изолятора."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "слюда",
+                "target_lang_sense_clarification": "Современное название минерала с листовой структурой."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "15c7a6a5-88f7-4e44-8af1-c3d436bc556c",
+          "sense_definition": "Dawna nazwa ciała stałego, w kontekście chemicznym lub fizycznym.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Fizyka i chemia",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "W dawnej fizyce rozróżniano trzy stany skupienia: ciecz, gaz i <w>kamień</w> (ciało stałe).",
+              "target_lang_translations": {
+                "ru": "В старой физике различали три агрегатных состояния: жидкость, газ и <w>твёрдое тело</w>."
+              }
+            },
+            {
+              "text": "Ten materiał jest w stanie <w>kamienia</w>.",
+              "target_lang_translations": {
+                "ru": "Этот материал находится в <w>твёрдом</w> состоянии."
+              }
+            }
+          ],
+          "synonyms": [
+            "ciało stałe"
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "dawna nazwa"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Устаревшее название твёрдого тела в химическом или физическом контексте."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "твёрдое тело",
+                "target_lang_sense_clarification": "Современный физический термин для одного из агрегатных состояний вещества."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c748362d-4845-4d9e-b93d-0f1ac82ca7e7",
+          "sense_definition": "Regionalna nazwa opakowania zapałek zawierającego 250 pudełek.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Opakowania i miary",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Poprosił w sklepie o <w>kamień</w> zapałek.",
+              "target_lang_translations": {
+                "ru": "Он попросил в магазине <w>упаковку</w> спичек."
+              }
+            },
+            {
+              "text": "Ten <w>kamień</w> zapałek wystarczy na długo.",
+              "target_lang_translations": {
+                "ru": "Этой <w>упаковки</w> спичек хватит надолго."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "regionalna nazwa opakowania zapałek"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Региональное название упаковки спичек, содержащей 250 коробков."
+          },
+          "translations": {
+            "ru": []
+          }
+        },
+        {
+          "sense_id": "7ee36966-56c6-48c3-8b4a-47ca4b43e687",
+          "sense_definition": "Historyczny przedmiot, rodzaj żetonu lub kulki, używany do głosowania w sądach, zwłaszcza przy orzekaniu o winie.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Historia i prawo",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Sędziowie wrzucali <w>kamienie</w> do urny, aby oddać głos.",
+              "target_lang_translations": {
+                "ru": "Судьи бросали <w>камешки</w> в урну, чтобы отдать свой голос."
+              }
+            },
+            {
+              "text": "W starożytnym Rzymie używano <w>kamieni</w> do tajnego głosowania.",
+              "target_lang_translations": {
+                "ru": "В Древнем Риме использовали <w>камешки</w> для тайного голосования."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "historyczny przedmiot do głosowania"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Исторический предмет, вид жетона или шарика, использовавшийся для голосования в судах, особенно при вынесении приговора о виновности."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "камешек для голосования",
+                "target_lang_sense_clarification": "Описательный термин для предмета, использовавшегося при голосовании в древности."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "pos": "name",
+      "senses": [
+        {
+          "sense_id": "09125e36-c466-4532-b126-cad0f005e64d",
+          "sense_definition": "Polskie nazwisko męskie.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Nazwiska",
+          "name_type": "person_name",
+          "examples": [
+            {
+              "text": "Pan <w>Kamień</w> jest moim sąsiadem.",
+              "target_lang_translations": {
+                "ru": "Господин <w>Камень</w> — мой сосед."
+              }
+            },
+            {
+              "text": "Spotkałem dziś Jana <w>Kamienia</w>.",
+              "target_lang_translations": {
+                "ru": "Я встретил сегодня Яна <w>Каменя</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "surname",
+              "comment": "męskie"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Польская мужская фамилия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Фамилия, транслитерированная с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "dee60c67-5b6a-40d4-83b6-b79ba7091514",
+          "sense_definition": "Polskie nazwisko żeńskie.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Nazwiska",
+          "name_type": "person_name",
+          "examples": [
+            {
+              "text": "Pani <w>Kamień</w> pracuje w bibliotece.",
+              "target_lang_translations": {
+                "ru": "Госпожа <w>Камень</w> работает в библиотеке."
+              }
+            },
+            {
+              "text": "Anna <w>Kamień</w> jest znaną artystką.",
+              "target_lang_translations": {
+                "ru": "Анна <w>Камень</w> — известная художница."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "surname",
+              "comment": "żeńskie"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Польская женская фамилия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Фамилия, транслитерированная с польского языка (не склоняется)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c1ea29b6-5d1c-4cd7-8f4e-cdf8c1e44a15",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "cd41faf4-5acd-4f17-b4a6-1c9d3b9543b6",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "dcc899a2-694e-456b-8025-01e479c255ae",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6fbf3d97-81fc-44c5-ae51-dc99c2daaec5",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "09e12154-b8b2-44bc-8452-b52dc6bf3f10",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "7b4018a8-38e1-47c7-93e4-678db82257c7",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e5db3295-9caa-4ad7-97d7-12bedcef0a02",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "893ef20a-2020-46cf-8893-9b8f8cd3b9d5",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c371f436-d3dc-4edc-8111-8ce24df9ac89",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f1c868a0-8a0e-4c2d-b390-fdcd9535d9d",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f133b560-43ea-4ea5-ac6f-5397c6741244",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "24eeffe6-6d6a-4fc4-b05d-d78fed766aa5",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "7a8c3e57-18b9-4729-b906-8f64f4c6b1f7",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f43c3ff3-53a8-4151-87e1-5dc5dcff065d",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "15deae39-4ce0-4e05-b243-3aaea3a7a12d",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "0aeb6ae9-7482-4421-8da8-d83516d83c2e",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e7b96028-5aed-43dd-9c05-60d1c62e19d5",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "74e65969-5f05-47d5-aaf0-8bd947462c0b",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a4b64779-7ea8-4b9b-864b-4fe4dd9c3719",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "562a96a4-1613-47ce-8961-174c5592f0a9",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "069d215e-e4bc-42af-bdb6-253e5f2836f8",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "98fc1d9b-adad-42dc-88ed-6daaffe7f4a0",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "8d13020a-e24c-40eb-bc06-63ced3305623",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e4e740cf-e20a-484f-9de5-756922d32205",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "589d0737-112c-43dc-8242-9fd276da8701",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "404e17ec-1ac2-46a6-808c-87cd462e721f",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "05d0d8e5-e06b-45fc-aee0-d6372dd81e63",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "54af5f61-0e20-447e-a852-db171fce2873",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "02074cae-a784-4f7a-b6c7-a748c16660f2",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "67eb0b53-5d30-47b2-8eeb-424391e1a347",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "24c842f7-bbd6-4f47-a611-4da9ef7686af",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "4109c47f-2f1a-4f1e-b768-48e4416124c7",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "d52d423c-aa24-495d-a68e-e6bf5a54dbdb",
+          "sense_definition": "Nazwa własna wielu miejscowości (wsi lub dzielnic miast) w Polsce.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Województwo lubelskie ma wieś o nazwie <w>Kamień</w>.",
+              "target_lang_translations": {
+                "ru": "В Люблинском воеводстве есть деревня под названием <w>Камень</w>."
+              }
+            },
+            {
+              "text": "Dzielnica <w>Kamień</w> w Częstochowie jest znana z zabytków.",
+              "target_lang_translations": {
+                "ru": "Район <w>Камень</w> в Ченстохове известен своими памятниками."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa miejscowości w Polsce"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное многих населённых пунктов (сёл или районов городов) в Польше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название населённого пункта, транслитерированное с польского языка."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "935a0a25-50ad-4d44-93a7-ee2b894b9915",
+          "sense_definition": "Nazwa własna góry w Rosji, na Płaskowyżu Putorana.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Miejscowości i obiekty geograficzne",
+          "name_type": "geographical_feature",
+          "examples": [
+            {
+              "text": "Góra <w>Kamień</w> to jeden z najwyższych szczytów Płaskowyżu Putorana.",
+              "target_lang_translations": {
+                "ru": "Гора <w>Камень</w> — одна из высочайших вершин плато Путорана."
+              }
+            },
+            {
+              "text": "Wspinaczka na <w>Kamień</w> jest wyzwaniem dla doświadczonych alpinistów.",
+              "target_lang_translations": {
+                "ru": "Восхождение на гору <w>Камень</w> — это вызов для опытных альпинистов."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "nazwa góry w Rosji"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Имя собственное горы в России, на плато Путорана."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Камень",
+                "target_lang_sense_clarification": "Название горы в России."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

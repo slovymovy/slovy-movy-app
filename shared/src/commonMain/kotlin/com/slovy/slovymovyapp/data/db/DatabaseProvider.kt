@@ -57,18 +57,18 @@ object DatabaseProvider {
         driver,
         formAdapter = Form.Adapter(
             lemma_idAdapter = UuidByteArrayColumnAdapter(),
-            posAdapter = DictionaryPosIntColumnAdapter()
+            form_idAdapter = UuidByteArrayColumnAdapter(),
         ),
         form_tagAdapter = Form_tag.Adapter(
             form_idAdapter = UuidByteArrayColumnAdapter(),
         ),
         lemmaAdapter = Lemma.Adapter(
             idAdapter = UuidByteArrayColumnAdapter(),
+            posAdapter = DictionaryPosIntColumnAdapter(),
         ),
         senseAdapter = Sense.Adapter(
             sense_idAdapter = UuidByteArrayColumnAdapter(),
             lemma_idAdapter = UuidByteArrayColumnAdapter(),
-            posAdapter = DictionaryPosIntColumnAdapter(),
             learner_levelAdapter = LearnerLevelIntColumnAdapter(),
             frequencyAdapter = SenseFrequencyIntColumnAdapter(),
             name_typeAdapter = NameTypeIntColumnAdapter()

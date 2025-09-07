@@ -9,22 +9,23 @@ import kotlin.uuid.Uuid;
 -- Dictionary database schema
 CREATE TABLE lemma (
   id BLOB AS Uuid NOT NULL PRIMARY KEY, -- UUID
+  pos INTEGER AS DictionaryPos NOT NULL,
   lemma TEXT NOT NULL,
   lemma_normalized TEXT NOT NULL
 );
 
 -- Word forms belonging to a POS entry
 CREATE TABLE form (
-  pos INTEGER AS DictionaryPos NOT NULL,
   lemma_id BLOB AS Uuid NOT NULL REFERENCES lemma(id) ON DELETE CASCADE,
+  form_id BLOB AS Uuid NOT NULL,
   form TEXT NOT NULL,
   form_normalized TEXT NOT NULL,
-  PRIMARY KEY (lemma_id, pos)
+  PRIMARY KEY (form_id)
 );
 
 -- Tags associated with a word form (normalized list of strings)
 CREATE TABLE form_tag (
-  form_id BLOB AS Uuid NOT NULL REFERENCES form(lemma_id) ON DELETE CASCADE,
+  form_id BLOB AS Uuid NOT NULL REFERENCES form(form_id) ON DELETE CASCADE,
   tag TEXT NOT NULL,
   PRIMARY KEY(form_id, tag)
 );
@@ -33,7 +34,6 @@ CREATE TABLE form_tag (
 CREATE TABLE sense (
   sense_id BLOB AS Uuid NOT NULL PRIMARY KEY,
   lemma_id BLOB AS Uuid NOT NULL REFERENCES lemma(id) ON DELETE CASCADE,
-  pos INTEGER AS DictionaryPos NOT NULL,
   sense_definition TEXT NOT NULL,
   learner_level INTEGER AS LearnerLevel NOT NULL,
   frequency INTEGER AS SenseFrequency NOT NULL,
@@ -89,12 +89,12 @@ CREATE INDEX IF NOT EXISTS idx_form_form_normalized ON form(form_normalized);
 
 -- Queries
 insertPosEntry:
-INSERT INTO lemma(id, lemma, lemma_normalized)
-VALUES (?, ?, ?);
+INSERT INTO lemma(id, lemma, lemma_normalized, pos)
+VALUES (?, ?, ?, ?);
 
 insertForm:
-INSERT INTO form(lemma_id, lemma_id, form, form_normalized, pos)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO form(form_id, lemma_id, form, form_normalized)
+VALUES (?, ?, ?, ?);
 
 insertFormTag:
 INSERT OR IGNORE INTO form_tag(form_id, tag)
@@ -102,8 +102,8 @@ VALUES (?, ?);
 
 insertSense:
 INSERT OR REPLACE INTO sense(
-  sense_id, lemma_id, sense_definition, learner_level, frequency, semantic_group_id, name_type, pos
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+  sense_id, lemma_id, sense_definition, learner_level, frequency, semantic_group_id, name_type
+) VALUES (?, ?, ?, ?, ?, ?, ?);
 
 insertSenseExample:
 INSERT OR REPLACE INTO sense_example(sense_id, example_id, text)

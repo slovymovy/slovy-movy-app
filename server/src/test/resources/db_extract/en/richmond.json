@@ -1,0 +1,741 @@
+{
+  "word": "richmond",
+  "lang_code": "en",
+  "source_file_to_entries": {
+    "raw-wiktextract-data.jsonl": [
+      {
+        "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+        "word": "Richmond",
+        "pos": "name",
+        "lang_code": "en",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "48bb3f1d-0831-450e-8560-5673aae530c1",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Australia:",
+              "A town in the City of Hawkesbury, New South Wales."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "8b8c285a-d208-40c1-811b-a83326fc2e7d",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Australia:",
+              "A town and locality in the Shire of Richmond, Queensland."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "2ae345d2-a910-4e4b-a9d9-be4230e967fb",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Australia:",
+              "An urban inner suburb of Adelaide, South Australia."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "05609189-e30b-4dc2-93e0-64f32d094afc",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Australia:",
+              "A town in Tasmania."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "6c698a2a-7ff5-4754-871e-6eff052ae339",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Australia:",
+              "An inner suburb of Melbourne, Victoria."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "4c1c3040-b5cf-49b4-b6cd-20de1eda4aeb",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Australia:",
+              "An electoral division in New South Wales, Australia"
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "037b1dfa-e9d7-42aa-b54c-d75ae80f3306",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Canada:",
+              "A city on Lulu Island, in Greater Vancouver, British Columbia."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "379e4383-6a2b-4b94-9630-195bdd071c45",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Canada:",
+              "A residential neighbourhood of Calgary, Alberta."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "cdde08f2-440b-4fcf-aa6e-be3699a80358",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Canada:",
+              "A former urban neighbourhood in Halifax, Nova Scotia."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "18f6e73e-7a58-4e4a-89fa-a76fb5171ab0",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Canada:",
+              "A village and former municipality of Ottawa, Ontario."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "f4f6613a-8e48-498b-9ce7-6f90361887db",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Canada:",
+              "A civil parish of Prince County, Prince Edward Island, Canada."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "a65d109a-e72a-42c4-beb6-435cacd3fa11",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Canada:",
+              "A rural community of Prince County, Prince Edward Island."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "99a48f7a-682c-495d-8f76-b6f7dab080e9",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in Canada:",
+              "A town in the region of Estrie, Quebec."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "e67ffcc3-a126-470c-ad5b-7e48f6a0eb73",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "Places in England:",
+              "A town in south-west Greater London (properly Richmond upon Thames) (OS grid ref TQ1875)."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "a540bc90-b8ff-49b7-8dd9-8972cffd675d",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "Places in England:",
+              "A market town and civil parish in North Yorkshire, previously in Richmondshire district (OS grid ref NZ1701)."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "5b4c428a-717a-4251-b94d-9379dbbc22d4",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "Places in England:",
+              "A suburb and ward in Sheffield, South Yorkshire (OS grid ref SK4085)."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "ed051925-9ecf-4396-8dc9-0237a3e7543d",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A townland in County Tipperary, Ireland."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "b7c7dac0-16cc-4094-bd23-b277a4fd83c2",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A market town in Saint Mary parish, Jamaica."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "e55813ab-365c-4290-9a8d-848905e17797",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "Places in New Zealand:",
+              "A town in the north of the South Island, New Zealand, headquarters of Tasman district."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "c2b869a4-9bb8-4cdb-93b3-d154f53c320d",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "Places in New Zealand:",
+              "A minor suburb of Christchurch, New Zealand."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "923482ac-2965-4aee-bd3b-dd8993d74de1",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "Places in New Zealand:",
+              "A small settlement in North Otago district, Otago, New Zealand."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "ad29f811-561a-477b-a644-3117888d5424",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "Places in South Africa:",
+              "A town in the Karoo region, Northern Cape, South Africa."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "2f3c6704-78d7-4dfe-8bdc-126355b0cf1b",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "Places in South Africa:",
+              "A town in KwaZulu-Natal, South Africa."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "c22ae431-b863-4a08-bed4-7c28987af16b",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "An unincorporated community in Dallas County, Alabama, also known as Warrenton."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "cf839856-96ab-41f3-88c4-45239c110ee4",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "An unincorporated community in Little River County, Arkansas."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "8f82d20b-35ab-438a-9aec-019a8d761251",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A sizable port city in Contra Costa County, California."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "b8655376-5336-4698-a8ea-e2b68b851851",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A neighborhood of San Francisco, California; in full, the Richmond District."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "02830fa0-5aea-4b56-9d23-8ddcffd4d0a3",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A village in McHenry County, Illinois."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "8c9fb0d2-3047-4823-b419-37915dd3524a",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A city, the county seat of Wayne County, Indiana."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "920bd1ba-33d6-4520-8960-6d4e49fb32a1",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A tiny city in Franklin County, Kansas."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "f48bdc67-48c5-444e-a325-8eee5ef0c4ee",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A home rule city, the county seat of Madison County, Kentucky."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "b973362d-d155-4770-b96f-a3ef97da1058",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A village in Madison Parish, Louisiana."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "a639cea2-7858-4221-a63b-95af4abab9f8",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A town and census-designated place in Sagadahoc County, Maine."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "9c2abf45-0ee8-48a2-9059-51a56a630b8d",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A town in Berkshire County, Massachusetts."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "6a1a17a6-f773-4b90-a0fd-b9bc85496078",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A city in Macomb County and St. Clair County, Michigan."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "9aea18d5-e967-4498-b8cf-7aeed7d4ae7a",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A small city in Stearns County, Minnesota."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "ee9d0b2f-5673-405f-891d-5948a0b23f3a",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A city, the county seat of Ray County, Missouri."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "e294c3bd-8a2c-4f29-9e0c-b0f029b7014c",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A town in Cheshire County, New Hampshire."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "e247b27d-abf8-4ad5-90e1-57f6c0fa2882",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A town in Ontario County, New York."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "1287a09f-b8f8-4416-a97a-8ad3f2e358cd",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A former borough of New York City; since 1975, the borough of Staten Island."
+            ],
+            "tags": [
+              "archaic"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "78547867-e3cd-46e9-a3ab-7a9e63e3cb47",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A village in Jefferson County, Ohio."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "a0f2b0f6-9075-4071-a55f-3e38b880e398",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "An unincorporated community in Wheeler County, Oregon."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "60bf46a2-9fe8-4f09-9418-d4c4f90bdd77",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A neighborhood of Portland, Oregon."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "c5ab9d62-f570-465d-804d-e8e8e5e54632",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A town in Washington County, Rhode Island."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "11e15ec7-4a0b-455a-ba6f-e5733252f210",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A city, the county seat of Fort Bend County, Texas."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "d48ca8cd-5243-42bb-8bdd-3e80bebf7ba6",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A small city in Cache County, Utah."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "0d9e27e6-c9b4-4391-9516-307ad9d0cf9d",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A town in Chittenden County, Vermont."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "2556596a-2eae-4d77-bbb2-dada74364b55",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "The capital city of Virginia."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "c1f875e8-df0c-407f-b9cf-601f8839d6dd",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A town in Shawano County, Wisconsin."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "62852eda-4428-4a18-9a1a-21166d2e5457",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A town in St. Croix County, Wisconsin."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "cafdb536-9e85-446a-82eb-a1010572eea4",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A town and unincorporated community in Walworth County, Wisconsin."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "75b2c303-ee74-4f65-a401-a0b09e23dd61",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A common place name (Richmonds on Wikipedia):",
+              "A number of places in the United States:",
+              "A number of townships, listed under Richmond Township."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "f536e77f-3ad8-4d37-8dd7-3b7bf982ca36",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "An English dukedom."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "d6878598-aab9-46d8-8267-30a862739696",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A surname derived from the English place name."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "2fe81806-95d3-41e1-bf79-0de7dc17f496",
+                "sense_id": "d6878598-aab9-46d8-8267-30a862739696",
+                "text": "Be cheerful, Richmond; for the wronged souls\nOf butcher'd princes fight in thy behalf:\nKing Henry's issue, Richmond, comforts thee."
+              }
+            ]
+          },
+          {
+            "sense_id": "e40df8e9-5eac-46e7-9197-9c1687ea756c",
+            "entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "glosses": [
+              "A male given name transferred from the surname."
+            ],
+            "tags": [],
+            "examples": []
+          }
+        ],
+        "translations": [
+          {
+            "translation_id": "9420b10e-9f31-452a-bc43-b5e7d65269d1",
+            "source_entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "source_sense_description": "capital of Virginia",
+            "target_lang_word": "Ри́чмонд",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "Ри́чмонд",
+                "target_lang_code": "ru",
+                "target_senses": [
+                  {
+                    "sense_id": "00b1feea-fb15-4703-8ab0-677bb5647eb4",
+                    "entry_id": "f2dcbae6-8f21-43f7-8c73-e73a3ae7e336",
+                    "glosses": [
+                      "город в США"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "97f78b13-7bc0-4f50-b371-2cecd9f6957b",
+            "source_entry_id": "d126a714-ab49-44a8-b3fb-77efbaaa567d",
+            "source_sense_description": "common place name",
+            "target_lang_word": "Ри́чмонд",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "Ри́чмонд",
+                "target_lang_code": "ru",
+                "target_senses": [
+                  {
+                    "sense_id": "00b1feea-fb15-4703-8ab0-677bb5647eb4",
+                    "entry_id": "f2dcbae6-8f21-43f7-8c73-e73a3ae7e336",
+                    "glosses": [
+                      "город в США"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "word_linkages": []
+      }
+    ],
+    "ru-extract.jsonl": [
+      {
+        "entry_id": "585b3dd0-1c48-4cd6-9977-1cd510ca5265",
+        "word": "Richmond",
+        "pos": "noun",
+        "lang_code": "en",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "2d4dff68-daed-4be7-9515-1a71b6b7250a",
+            "entry_id": "585b3dd0-1c48-4cd6-9977-1cd510ca5265",
+            "glosses": [
+              "английская фамилия"
+            ],
+            "tags": [],
+            "examples": []
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      }
+    ],
+    "nl-extract.jsonl": [],
+    "pl-extract.jsonl": [
+      {
+        "entry_id": "87b32553-4653-4546-9da1-b27437cb11a8",
+        "word": "Richmond",
+        "pos": "noun",
+        "lang_code": "en",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "bc9c7c95-49e4-41c8-92b9-ec639deda077",
+            "entry_id": "87b32553-4653-4546-9da1-b27437cb11a8",
+            "glosses": [
+              "stolica stanu Virginia"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.1\""
+          },
+          {
+            "sense_id": "107a6691-5d20-4529-8ed6-31a2c2743774",
+            "entry_id": "87b32553-4653-4546-9da1-b27437cb11a8",
+            "glosses": [
+              "jedna z pięciu dzielnic Nowego Jorku"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.2\""
+          },
+          {
+            "sense_id": "8fea0e59-3a08-412d-a255-80b8d7a4e354",
+            "entry_id": "87b32553-4653-4546-9da1-b27437cb11a8",
+            "glosses": [
+              "imię męskie"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.3\""
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,1381 @@
+{
+  "word": "kwartier",
+  "lang_code": "nl",
+  "source_file_to_entries": {
+    "raw-wiktextract-data.jsonl": [
+      {
+        "entry_id": "f8971a6f-8d79-4154-a643-eee62b477a95",
+        "word": "Kwartier",
+        "pos": "name",
+        "lang_code": "nl",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "59713e24-46c7-4e8f-ad9c-01ae4c7879e4",
+            "entry_id": "f8971a6f-8d79-4154-a643-eee62b477a95",
+            "glosses": [
+              "A hamlet in Zevenaar, Gelderland, Netherlands"
+            ],
+            "tags": [
+              "neuter"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "c8189be5-29e1-4c0c-8a68-187a81e80c22",
+            "entry_id": "f8971a6f-8d79-4154-a643-eee62b477a95",
+            "glosses": [
+              "A hamlet in Moerdijk, North Brabant, Netherlands"
+            ],
+            "tags": [
+              "neuter"
+            ],
+            "examples": []
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+        "word": "kwartier",
+        "pos": "noun",
+        "lang_code": "nl",
+        "forms": [
+          {
+            "form_id": "2bf03245-0970-4cb6-aa4d-ae1cff1b6a55",
+            "entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "tags": [
+              "plural"
+            ],
+            "form": "kwartieren"
+          },
+          {
+            "form_id": "94632186-2cb1-4de4-a209-89f4cffb7f01",
+            "entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "tags": [
+              "diminutive",
+              "neuter"
+            ],
+            "form": "kwartiertje"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "cbf1dc7a-4cf1-4577-a6e6-7e4bba04cc27",
+            "entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "glosses": [
+              "a quarter of an hour, i.e. 15 minutes"
+            ],
+            "tags": [
+              "neuter"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "e720db0f-57fb-48c1-940b-82139de18c21",
+            "entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "glosses": [
+              "the quarter(s) at (a) person(s)'s disposal to live in; one's living quarters"
+            ],
+            "tags": [
+              "neuter"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "cc70e4c8-c28e-4979-b9c7-86718ae43056",
+            "entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "glosses": [
+              "a neighborhood, defined part of a town or city"
+            ],
+            "tags": [
+              "neuter"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "e44b69db-0c8e-491a-b7b4-593a18038b23",
+            "entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "glosses": [
+              "a quarter of an heraldic field"
+            ],
+            "tags": [
+              "neuter"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "49a268c0-14f0-4f9a-ab0b-395eb1beb056",
+            "entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "glosses": [
+              "all of one's ancestors up to a specified degree, indicated by the maximum number of possible ancestors at a given level (2, 4, 8, 16, etc.), generally listed on a document; originally used for nobles whose coats of arms would be displayed on such a document"
+            ],
+            "tags": [
+              "neuter",
+              "plural"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "23e45828-2fa2-4304-bb8d-c420e51a80ce",
+            "entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "glosses": [
+              "a region"
+            ],
+            "tags": [
+              "neuter"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "b26bf80b-6fc3-421c-b458-f1ac13a39920",
+            "entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "glosses": [
+              "Synonym of kwart (“quarter; one-fourth”)"
+            ],
+            "tags": [
+              "archaic",
+              "neuter"
+            ],
+            "examples": []
+          }
+        ],
+        "translations": [],
+        "word_linkages": [
+          {
+            "linkage_id": "adaac57c-2b5b-47d7-b9d2-ad71bcc8cd6d",
+            "source_entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "source_sense_ids": [
+              "cc70e4c8-c28e-4979-b9c7-86718ae43056"
+            ],
+            "linkage_type": "synonyms",
+            "word": "buurt"
+          },
+          {
+            "linkage_id": "ef631d9c-9da0-4b1e-9c40-15403eb09709",
+            "source_entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "source_sense_ids": [
+              "cc70e4c8-c28e-4979-b9c7-86718ae43056"
+            ],
+            "linkage_type": "synonyms",
+            "word": "wijk"
+          },
+          {
+            "linkage_id": "09a0dbc7-a738-4d71-b641-90d329daf667",
+            "source_entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "source_sense_ids": [
+              "23e45828-2fa2-4304-bb8d-c420e51a80ce"
+            ],
+            "linkage_type": "synonyms",
+            "word": "gebied"
+          },
+          {
+            "linkage_id": "999a00cd-90a3-4f50-88cb-82ae4760ea19",
+            "source_entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "source_sense_ids": [
+              "23e45828-2fa2-4304-bb8d-c420e51a80ce"
+            ],
+            "linkage_type": "synonyms",
+            "word": "landstreek"
+          },
+          {
+            "linkage_id": "e664dde5-170c-4a81-b776-3d16cdb2937e",
+            "source_entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "source_sense_ids": [
+              "23e45828-2fa2-4304-bb8d-c420e51a80ce"
+            ],
+            "linkage_type": "synonyms",
+            "word": "regio"
+          },
+          {
+            "linkage_id": "04140e72-8283-4421-aa1e-c9f01bdfd4e9",
+            "source_entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "source_sense_ids": [
+              "23e45828-2fa2-4304-bb8d-c420e51a80ce"
+            ],
+            "linkage_type": "synonyms",
+            "word": "streek"
+          },
+          {
+            "linkage_id": "6352209a-fca4-421e-bb6c-a22a51d53966",
+            "source_entry_id": "30e5dc32-fc64-4dd0-b028-2bd78c0c6896",
+            "source_sense_ids": [
+              "b26bf80b-6fc3-421c-b458-f1ac13a39920"
+            ],
+            "linkage_type": "synonyms",
+            "word": "kwart"
+          }
+        ]
+      }
+    ],
+    "ru-extract.jsonl": [],
+    "nl-extract.jsonl": [
+      {
+        "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+        "word": "kwartier",
+        "pos": "noun",
+        "lang_code": "nl",
+        "forms": [
+          {
+            "form_id": "5645be10-68c9-4ae4-bc92-c700853a3573",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "tags": [
+              "plural"
+            ],
+            "form": "kwartieren"
+          },
+          {
+            "form_id": "4a1c745b-102f-4d69-98ce-663c007816f2",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "tags": [
+              "diminutive",
+              "singular"
+            ],
+            "form": "kwartiertje"
+          },
+          {
+            "form_id": "dfa9cd71-0145-4c26-a12f-673418df44d1",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "tags": [
+              "diminutive",
+              "plural"
+            ],
+            "form": "kwartiertjes"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "f6691b39-ac88-4711-a3e9-5d1751ce455d",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "glosses": [
+              "kwart van een uur"
+            ],
+            "tags": [
+              "tijdrekening"
+            ],
+            "examples": [
+              {
+                "example_id": "b73bb135-c1dc-4ae6-a100-29c7fcd332a7",
+                "sense_id": "f6691b39-ac88-4711-a3e9-5d1751ce455d",
+                "text": "Een kwartier bestaat uit 15 minuten."
+              },
+              {
+                "example_id": "c8b7cd0c-b54d-4192-b0dd-d5fe1cf97321",
+                "sense_id": "f6691b39-ac88-4711-a3e9-5d1751ce455d",
+                "text": "Na een kwartier stopte er een oude gedeukte Toyota met een mollige vrouw voorin, die vroeg waar ik naartoe moest."
+              },
+              {
+                "example_id": "454133e8-ef7f-4941-869a-70c9cecb0893",
+                "sense_id": "f6691b39-ac88-4711-a3e9-5d1751ce455d",
+                "text": "Het verduisteren van de maan begon rond 04.30 uur en een uur later begon de totale eclips. Maar doordat een kwartiertje later de zon alweer opkwam in Nederland, kon alleen de start worden waargenomen."
+              }
+            ]
+          },
+          {
+            "sense_id": "b0838ec5-ce00-4362-b156-9b038c1671ea",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "glosses": [
+              "elk van de twee fasen of schijngestalten van de maan (of een planeet) waarbij het verlichte en het donkere gedeelte even groot zijn, dus bij \\\"halve maan\\"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "88c50185-a6bc-4b12-9d60-5d0275b9a524",
+                "sense_id": "b0838ec5-ce00-4362-b156-9b038c1671ea",
+                "text": "Bij wassende maan noemt men de \"halve-maan-fase\" het eerste kwartier, bij afnemende maan is dat het laatste kwartier"
+              }
+            ]
+          },
+          {
+            "sense_id": "93aa4e52-1ff6-4c16-8cc2-7d12995a92d5",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "glosses": [
+              "tijdelijk onderkomen voor militairen"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "2c2b6f9b-f6f8-4039-b602-10100598568c",
+                "sense_id": "93aa4e52-1ff6-4c16-8cc2-7d12995a92d5",
+                "text": "De soldaten moesten hun kwartier ijlings verlaten."
+              }
+            ]
+          },
+          {
+            "sense_id": "ad53b482-1cc9-4410-9bee-56e5345a4890",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "glosses": [
+              "eenvierde, kwart, kwartdeel, vierendeel"
+            ],
+            "tags": [
+              "obsolete"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "10a87d67-6c71-401b-b75f-9da419f46d3a",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "glosses": [
+              "wacht [3]"
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "5043e41f-490a-4d1b-b1f0-243ceed227f8",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "glosses": [
+              "kwartdeel van een haringvleet"
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "99d0325e-afe1-44d0-a49b-26c3d1b17e77",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "glosses": [
+              "voorste of achterste deel van een slachtdier"
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "a6325a13-abc1-4b4c-af0a-2fe7ee6c1149",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "glosses": [
+              "voorouder vanaf de tweede generatie"
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "50b76245-6190-4c94-a3d3-55db13299ca6",
+            "entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "glosses": [
+              "bestuurlijk onderdeel van een land of gewest"
+            ],
+            "tags": [
+              "historical"
+            ],
+            "examples": [
+              {
+                "example_id": "98ea62c2-d771-4515-bb0e-5ad6804b42df",
+                "sense_id": "50b76245-6190-4c94-a3d3-55db13299ca6",
+                "text": "Het kwartier van Den Bosch."
+              }
+            ]
+          }
+        ],
+        "translations": [
+          {
+            "translation_id": "26b05677-16d4-46b9-a3cc-3c3cdb91f74c",
+            "source_entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "source_sense_id": "f6691b39-ac88-4711-a3e9-5d1751ce455d",
+            "source_sense_description": "kwart uur",
+            "target_lang_word": "quarter-hour",
+            "target_lang_code": "en",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "quarter-hour",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "06c29185-4626-44c6-8d5d-881248a6b7f2",
+                    "entry_id": "66e32b07-8d97-448c-b409-1a4e2491dad9",
+                    "glosses": [
+                      "quarter of an hour; period of time equal to 15 minutes; a quarter."
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "ac2c4837-2bd6-45b6-b291-36adb9692806",
+                        "sense_id": "06c29185-4626-44c6-8d5d-881248a6b7f2",
+                        "text": "These bells chime on the quarter-hour."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "4b0335af-0fea-4eb4-b1d0-a8e3ce8a99ad",
+            "source_entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "source_sense_id": "f6691b39-ac88-4711-a3e9-5d1751ce455d",
+            "source_sense_description": "kwart uur",
+            "target_lang_word": "kwadrans",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "kwadrans",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "9c5938f2-45cd-4063-aea3-0e451282ee62",
+                    "entry_id": "4bd0439a-4548-4184-94ce-1bcd197aa6e7",
+                    "glosses": [
+                      "czwarta część godziny, 15 minut"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "71e825c8-9cd7-452b-a489-ae80cea80f62",
+                        "sense_id": "9c5938f2-45cd-4063-aea3-0e451282ee62",
+                        "text": "U dentysty spędziłam trzy kwadranse, w tym dwa w poczekalni."
+                      }
+                    ],
+                    "sense_index_json": "\"1.1\""
+                  },
+                  {
+                    "sense_id": "c03ea4d8-da4c-49d1-a0b4-ead2fc55fdc7",
+                    "entry_id": "4bd0439a-4548-4184-94ce-1bcd197aa6e7",
+                    "glosses": [
+                      "drobna rzymska moneta rozmienna, także jednostka wagi; czwarta część asa"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "c642e33d-1378-4f3a-99fa-dff44d770441",
+                        "sense_id": "c03ea4d8-da4c-49d1-a0b4-ead2fc55fdc7",
+                        "text": "Pieniądz brązowy, wybijany na zlecenie senatu, stanowiły mosiężne sesterce i dupondiusy oraz miedziane asy i kwadransy"
+                      }
+                    ],
+                    "sense_index_json": "\"1.2\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "ae4e3ab5-42af-4c2a-9091-f01b8d462cb8",
+            "source_entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "source_sense_id": "b0838ec5-ce00-4362-b156-9b038c1671ea",
+            "source_sense_description": "kwartier als maanfase",
+            "target_lang_word": "quarter",
+            "target_lang_code": "en",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "quarter",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "2a7d8493-4f2d-4ba9-b83e-da0e461c9e8d",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "Each of four equal parts into which something can be divided; a fourth part."
+                    ],
+                    "tags": [
+                      "broadly",
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "94cc2737-2248-42c0-9dc2-9b84f07f42bb",
+                        "sense_id": "2a7d8493-4f2d-4ba9-b83e-da0e461c9e8d",
+                        "text": "I ate a quarter of the pizza."
+                      },
+                      {
+                        "example_id": "43d675cb-6383-4ec5-b434-5d844c3bda7d",
+                        "sense_id": "2a7d8493-4f2d-4ba9-b83e-da0e461c9e8d",
+                        "text": "For companies such as Trans Pennine Express, it will be even harder. It has the unwelcome claim to being Britain's worst train operator, with recent statistics from the Office of Rail and Road showing it cancelled nearly a quarter of its services in February, with lack of available train crew a real problem."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "a1e84a34-1b8a-4654-aa8a-f70a0d30373f",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "A measure of capacity used chiefly for grain or coal, varying greatly in quantity by time and location."
+                    ],
+                    "tags": [
+                      "countable",
+                      "historical",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "b2693bb0-63b7-4181-b233-6dfe25488473",
+                        "sense_id": "a1e84a34-1b8a-4654-aa8a-f70a0d30373f",
+                        "text": "One of these is 1 Hen. V, cap. 10, defining the quarter of corn to be eight struck bushels, and putting fines on purveyors who take more."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "09984939-cc64-4dde-b55a-99e11e5475c8",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "A fourth part of a pound; approximately 113 grams."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "47f60b45-24c9-4107-b1bd-2e36ae2cbc7d",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "A measure of length; originally a fourth part of an ell, now chiefly a fourth part of a yard."
+                    ],
+                    "tags": [
+                      "countable",
+                      "historical",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "e01e2cd2-c76c-4656-a02b-9b3d91be3e70",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "A fourth part of the night; one of the watches or divisions of the night."
+                    ],
+                    "tags": [
+                      "countable",
+                      "historical",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "687fbbcd-25dd-4533-8fc3-d44566104dda",
+                        "sense_id": "e01e2cd2-c76c-4656-a02b-9b3d91be3e70",
+                        "text": "And aboute the fourth quartre of the nyght, he cam unto them, walkinge apon the see [...]."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "2c44786e-d4e7-4ae1-b44b-1c2dfab184eb",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "A fourth part of the year; 3 months; a term or season."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "d1a5274f-acaf-432d-a116-6c630633959a",
+                        "sense_id": "2c44786e-d4e7-4ae1-b44b-1c2dfab184eb",
+                        "text": "The FBI began publishing national quarterly crime reports last year, but has not done so for the first two quarters of 2021, stating that they require at least 60% of agencies to submit NIBRS data in order to publish quarterly data."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "8c410b31-3c12-4d1d-9003-17ae15b7bc41",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "A fourth part of an hour; a period of fifteen minutes, especially with reference to the quarter before or after the hour."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "dd877b0b-b779-4051-a172-fb8eb0226f38",
+                        "sense_id": "8c410b31-3c12-4d1d-9003-17ae15b7bc41",
+                        "text": "An interesting feature of the church is the invisible clock, which you can hear thumping away as you enter. Constructed in 1525, it is one of the oldest timepieces in England. It chimes the hours and the quarters, and every three hours it plays a hymn. But it has no faces."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "15487a60-8193-4b2b-9d3a-ae5ce36bd387",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "A fourth part of a hundredweight."
+                    ],
+                    "tags": [
+                      "countable",
+                      "historical",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "f5caacbb-133a-46d4-8cc9-247d9de63995",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "A fourth part of a coat of arms, or the charge on it, larger than a canton and normally on the upper dexter side, formed by a perpendicular line from the top meeting a horizontal line from the side."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "b53ac3b5-fd8f-46fd-97e1-fd395b045b5a",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "A quarter-dollar, divided into 25 cents; the coin of that value minted in the United States or Canada."
+                    ],
+                    "tags": [
+                      "Canada",
+                      "US",
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "d5ca90ea-ce4a-4a62-a2f8-8ea2c8c06cf5",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "One of four equal periods into which a game is divided."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "02132780-9b19-41bc-b18f-f8168e5f7f6c",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A fourth part of something.",
+                      "A quarter of an acre or 40 roods."
+                    ],
+                    "tags": [
+                      "countable",
+                      "historical",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "8dde720c-120a-4f9b-a8b7-a7c001291f42",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "Place or position.",
+                      "A region or place."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "0bd5f3ac-de58-4c38-99b7-0b678561626c",
+                        "sense_id": "8dde720c-120a-4f9b-a8b7-a7c001291f42",
+                        "text": "I am to haste, / And all who under me thir Banners wave, / Homeward with flying march where we possess / The Quarters of the North […]."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "f8e15f12-d6c6-47e0-acda-aa734acc616a",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "Place or position.",
+                      "Each of four parts into which the earth or sky is divided, corresponding to the four cardinal points of the compass."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "13c0cc81-4ad6-412b-9262-ae18115e49c6",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "Place or position.",
+                      "A division or section of a town or city, especially having a particular character of its own, or associated with a particular group etc."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "341fad81-e1f6-4295-bd3b-46cdc018363a",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "Place or position.",
+                      "One's residence or dwelling-place; (in plural) rooms, lodgings, especially as allocated to soldiers or domestic staff."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "297d3917-4f92-4ec1-90d6-07196c1d433e",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "Place or position.",
+                      "A topic or area of endeavour."
+                    ],
+                    "tags": [
+                      "archaic",
+                      "countable",
+                      "figuratively",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "8a6d09a3-7c93-43f0-b00b-362bf9858e92",
+                        "sense_id": "297d3917-4f92-4ec1-90d6-07196c1d433e",
+                        "text": "“I'll tell you something, too,” retorted the captain, duskily flushing. “I wouldn't sail this ship for the man you are, if you went upon your knees. I've dealt with gentlemen up to now.”\n“I can tell you the names of a number of gentlemen you'll never deal with any more, and that's the whole of Longhurst's gang,” said Jim. “I'll put your pipe out in that quarter, my friend. Here, rout out your traps as quick as look at it, and take your vermin along with you. I'll have a captain in, this very night, that's a sailor, and some sailors to work for him.”"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "1487c7bf-363d-4c69-b46a-afeb9efe3816",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "Place or position.",
+                      "The aftmost part of a vessel's side, roughly from the last mast to the stern."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "03afaff6-6ed4-478d-a95c-304433d9bc8d",
+                        "sense_id": "1487c7bf-363d-4c69-b46a-afeb9efe3816",
+                        "text": "I was one morning walking the deck, when Rogers, whose watch it was, sitting upon the quarter, called to me in his usual style, ‘Come here, Bill.’"
+                      },
+                      {
+                        "example_id": "45f4b395-571a-42bb-808e-ed6140fa2a05",
+                        "sense_id": "1487c7bf-363d-4c69-b46a-afeb9efe3816",
+                        "text": "“My men, the schooner coming up on our weather quarter is a Portuguese pirate.”"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "5c5efcf8-0fb9-43ab-837f-b73d391a672f",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "Place or position.",
+                      "The part on either side of a horse's hoof between the toe and heel, the side of its coffin."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "ebb004a7-1e9d-4537-b48e-250617131b93",
+                        "sense_id": "5c5efcf8-0fb9-43ab-837f-b73d391a672f",
+                        "text": "[A]t last she kicked right over the carriage pole and fell down, after giving me a severe blow on my near quarter."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "3dec494d-29ce-4d86-8f11-0fc8257dcf2a",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A section (of a population), especially one having a particular set of values or interests."
+                    ],
+                    "tags": [
+                      "countable",
+                      "often",
+                      "plural",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "3867bf2a-9c6c-4952-8a6a-56f300e200e3",
+                        "sense_id": "3dec494d-29ce-4d86-8f11-0fc8257dcf2a",
+                        "text": "opposition to the policy came from an unexpected quarter, as well as from certain quarters which had historically opposed it"
+                      },
+                      {
+                        "example_id": "81a1dc4c-804f-486c-8987-81910d8840e7",
+                        "sense_id": "3dec494d-29ce-4d86-8f11-0fc8257dcf2a",
+                        "text": "all quarters of the socialist movement; praise from Conservative quarters"
+                      },
+                      {
+                        "example_id": "9194f869-3464-4fa9-aacc-792fa9b20044",
+                        "sense_id": "3dec494d-29ce-4d86-8f11-0fc8257dcf2a",
+                        "text": "It is something to have that sacerdotal position so frankly recognized; but, I repeat, the ground of objection is an extraordinary one, coming as it does from a Liberal quarter in politics."
+                      },
+                      {
+                        "example_id": "7ad79cfc-eb13-4753-9573-2e8ea908b35d",
+                        "sense_id": "3dec494d-29ce-4d86-8f11-0fc8257dcf2a",
+                        "text": "V. Gene Robinson's installation as an Episcopal bishop was greeted largely by silence from gay quarters."
+                      },
+                      {
+                        "example_id": "0713e189-3292-4bc8-a1d9-fb73a162639d",
+                        "sense_id": "3dec494d-29ce-4d86-8f11-0fc8257dcf2a",
+                        "text": "[…] and principled criticism of Obama from black quarters."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "a8f7f632-0c35-42e3-9b21-7c806407a879",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "Relations between people."
+                    ],
+                    "tags": [
+                      "countable",
+                      "obsolete",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "9a62fa19-8786-4712-99a5-b79eaec49650",
+                        "sense_id": "a8f7f632-0c35-42e3-9b21-7c806407a879",
+                        "text": "In quarter, and in terms like bride and groom."
+                      },
+                      {
+                        "example_id": "8d7e19b0-babd-4332-93ca-8776947f4f94",
+                        "sense_id": "a8f7f632-0c35-42e3-9b21-7c806407a879",
+                        "text": "I knew two that were competitors for the secretary's place, […] and yet kept good quarter between themselves."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "04340859-a27b-47e4-b9c9-7a93ce5a6f5f",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "Accommodation given to a defeated opponent; mercy; exemption from being killed."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "5e2f4402-ca30-4c1f-9f3a-c8b734170eeb",
+                        "sense_id": "04340859-a27b-47e4-b9c9-7a93ce5a6f5f",
+                        "text": "Hard fighting and long labour they had still; for the Southrons were bold men and grim, and fierce in despair, and the Easterlings were strong and war-hardened and asked for no quarter."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "27907836-d6fc-4626-9f73-266d4d06f34e",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A quarterback."
+                    ],
+                    "tags": [
+                      "abbreviation",
+                      "archaic",
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "3b9ec10f-df9f-4186-8642-a9adb6a41293",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A quartermaster; a quartermaster sergeant."
+                    ],
+                    "tags": [
+                      "abbreviation",
+                      "archaic",
+                      "countable",
+                      "slang",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "d96a3bd5-6110-41a3-b359-0bebe9f732d5",
+                        "sense_id": "3b9ec10f-df9f-4186-8642-a9adb6a41293",
+                        "text": "Tietjens said: ‘Send the Canadian sergeant-major to me at the double….’ to the quarter."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "ad431f76-5464-4f35-b6d2-b5a6354b8631",
+                    "entry_id": "c35ca2fa-791c-4af8-810d-e0888819d985",
+                    "glosses": [
+                      "A quarterfinal."
+                    ],
+                    "tags": [
+                      "abbreviation",
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  }
+                ]
+              },
+              {
+                "target_word": "quarter",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "0790d679-3f28-4977-af66-657d9321c309",
+                    "entry_id": "c608e720-3e97-43fe-90dc-df8b0a456a3e",
+                    "glosses": [
+                      "Pertaining to an aspect of a quarter."
+                    ],
+                    "tags": [
+                      "not-comparable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "e313cb2c-7036-4886-bda1-62fd2443c54b",
+                    "entry_id": "c608e720-3e97-43fe-90dc-df8b0a456a3e",
+                    "glosses": [
+                      "Consisting of a fourth part, a quarter (¹⁄₄, 25%)."
+                    ],
+                    "tags": [
+                      "not-comparable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "5bd5923a-9fee-4cb4-bde1-28e99e2e5d56",
+                        "sense_id": "e313cb2c-7036-4886-bda1-62fd2443c54b",
+                        "text": "a quarter hour; a quarter century; a quarter note; a quarter pound"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "bdfe10b8-44be-444c-93c7-6f9182b8a56d",
+                    "entry_id": "c608e720-3e97-43fe-90dc-df8b0a456a3e",
+                    "glosses": [
+                      "Related to a three-month term, a quarter of a year."
+                    ],
+                    "tags": [
+                      "not-comparable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "5283a431-0f52-4504-a1c6-deab7990006f",
+                        "sense_id": "bdfe10b8-44be-444c-93c7-6f9182b8a56d",
+                        "text": "A quarter day is one terminating a quarter of the year."
+                      },
+                      {
+                        "example_id": "29e66bad-de97-4fa3-b7a4-eb65d2a8a79a",
+                        "sense_id": "bdfe10b8-44be-444c-93c7-6f9182b8a56d",
+                        "text": "A quarter session is one held quarterly at the end of a quarter."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "target_word": "quarter",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "6c1c1150-3432-46f0-9b6f-0e41bec63bae",
+                    "entry_id": "b9aa5936-714c-4b17-b6c5-4d62a71614f6",
+                    "glosses": [
+                      "To divide into quarters; to divide by four."
+                    ],
+                    "tags": [
+                      "transitive"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "b16b2290-d2d5-4b8c-89cc-dcc93b59f658",
+                    "entry_id": "b9aa5936-714c-4b17-b6c5-4d62a71614f6",
+                    "glosses": [
+                      "To provide housing for military personnel or other equipment."
+                    ],
+                    "tags": [
+                      "transitive"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "a817e19c-a8fb-437b-ba51-2173316e7b9f",
+                        "sense_id": "b16b2290-d2d5-4b8c-89cc-dcc93b59f658",
+                        "text": "Quarter the horses in the third stable."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "45b72f08-f108-45be-b574-d07209b01ca4",
+                    "entry_id": "b9aa5936-714c-4b17-b6c5-4d62a71614f6",
+                    "glosses": [
+                      "To lodge; to have a temporary residence."
+                    ],
+                    "tags": [
+                      "intransitive"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "cfd9d8cb-a443-454c-9963-82b6c7c5fbbe",
+                    "entry_id": "b9aa5936-714c-4b17-b6c5-4d62a71614f6",
+                    "glosses": [
+                      "To quartersaw."
+                    ],
+                    "tags": [
+                      "transitive"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "401f72f4-af8a-459a-b613-7f027e20b36d",
+                        "sense_id": "cfd9d8cb-a443-454c-9963-82b6c7c5fbbe",
+                        "text": "But there is, as in other woods, a great deal of difference between this and the quartered timber."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "3c348d42-5047-4f5e-9e35-0e23bbc92f57",
+                    "entry_id": "b9aa5936-714c-4b17-b6c5-4d62a71614f6",
+                    "glosses": [
+                      "To execute (someone) by tying each limb to a different animal (such as a horse) and driving them in different directions."
+                    ],
+                    "tags": [
+                      "historical",
+                      "transitive"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "2ee53705-4dd2-46b7-9bd4-55492cc20d1b",
+                    "entry_id": "b9aa5936-714c-4b17-b6c5-4d62a71614f6",
+                    "glosses": [
+                      "To display different coats of arms in the quarters of a shield."
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "aada7f21-5d93-46dd-af11-feea4ddb4dd9",
+                        "sense_id": "2ee53705-4dd2-46b7-9bd4-55492cc20d1b",
+                        "text": "It [the Central London Railway] assumed a modest and entirely heraldic device, quartering the arms of the City of London, the parishes of St. George's, Holborn (St. George and the dragon) and St. Marylebone (the Virgin and Child between two lilies […]), and the county of Middlesex, surmounted by the dragon's wing from the City's crest."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "target_word": "quarter",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "eb5e630b-a208-4942-acdc-82c3ceba1643",
+                    "entry_id": "5988d887-6400-48f1-9b88-72afbea978a2",
+                    "glosses": [
+                      "To drive a carriage so as to prevent the wheels from going into the ruts, or so that a rut shall be between the wheels."
+                    ],
+                    "tags": [
+                      "obsolete"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "5744fbbc-a59f-4d20-ae08-41d38cfc4eb5",
+                        "sense_id": "eb5e630b-a208-4942-acdc-82c3ceba1643",
+                        "text": "Every creature that met us would rely upon us for quartering"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "2bac34d0-14c0-452e-995e-8394a258e674",
+            "source_entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "source_sense_id": "93aa4e52-1ff6-4c16-8cc2-7d12995a92d5",
+            "source_sense_description": "legering",
+            "target_lang_word": "billet",
+            "target_lang_code": "en",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "billet",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "3c074163-0b46-479e-b1e0-8e511abdcb62",
+                    "entry_id": "26e6ac67-8b40-47e0-889e-5d5be41d56f6",
+                    "glosses": [
+                      "A short informal letter."
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "f602fc31-82e5-408f-bc48-d64447d14a9e",
+                        "sense_id": "3c074163-0b46-479e-b1e0-8e511abdcb62",
+                        "text": "However, when his cool reflections returned, he plainly perceived that his case was neither mended nor altered by Sophia's billet[…]"
+                      },
+                      {
+                        "example_id": "95e3f99e-fab4-4f0b-b45b-eed89ac03a44",
+                        "sense_id": "3c074163-0b46-479e-b1e0-8e511abdcb62",
+                        "text": "On their return home, however, she was greatly consoled by Lady Mandeville's reading aloud a billet from Edward Lorraine, regretting that unexpected business,..."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "9cafe465-3b1a-4ca2-a2de-845913c1dfa1",
+                    "entry_id": "26e6ac67-8b40-47e0-889e-5d5be41d56f6",
+                    "glosses": [
+                      "A written order to quarter soldiers."
+                    ],
+                    "tags": [],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "38969265-1b71-44ae-ba35-a254cc445526",
+                    "entry_id": "26e6ac67-8b40-47e0-889e-5d5be41d56f6",
+                    "glosses": [
+                      "A sealed ticket for a draw or lottery."
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "97c0ac78-52eb-4c02-9fee-136bae2ccb0f",
+                        "sense_id": "38969265-1b71-44ae-ba35-a254cc445526",
+                        "text": "A murmur of applause and gratitude arose from the crowd, which was soon interrupted by the preparations for distributing the tickets. Four pages, clothed in white and crimson, brought in two massive salvers, whose delicate carving was from the unrivalled graver of Benvenuto Cellini. These were filled with small sealed billets, from which the company were to draw, and afterwards open, in succession. The pages first approached and knelt before the Queens, who each took one of the billets, and then proceeded to distribute the remainder among the rest."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "target_word": "billet",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "22c3580c-7a84-4a48-9a08-a137acf056c2",
+                    "entry_id": "560f0795-2438-4a7a-b85e-6c3fee47cbc0",
+                    "glosses": [
+                      "A place where a soldier is assigned to lodge."
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "c3180f7a-63ca-4a30-aa39-393493e7e298",
+                        "sense_id": "22c3580c-7a84-4a48-9a08-a137acf056c2",
+                        "text": "Nothing was too small to receive attention, if a supervising eye could suggest improvements likely to conduce to the common welfare. Mr. Gordon Burnage, for instance, personally visited dust-bins and back premises, accompanied by a sort of village bailiff, going his round like a commanding officer doing billets."
+                      },
+                      {
+                        "example_id": "2a93721b-0b65-497c-b7fe-a698a11fc59f",
+                        "sense_id": "22c3580c-7a84-4a48-9a08-a137acf056c2",
+                        "text": "17 June 1940: Prime Minister Pétain requests armistice. Germans use the Foucaults’ holiday home as officers’ billet. Foucault steals firewood for school from collaborationist militia. Foucault does well at school, but messes up his summer exams in 1940."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "30ffda98-738c-4371-a3e0-feb7dd09b0ff",
+                    "entry_id": "560f0795-2438-4a7a-b85e-6c3fee47cbc0",
+                    "glosses": [
+                      "Temporary lodgings in a private residence, such as is organised for members of a visiting sports team."
+                    ],
+                    "tags": [],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "e0b375da-8fac-4916-a454-7c9cbb81dc2a",
+                    "entry_id": "560f0795-2438-4a7a-b85e-6c3fee47cbc0",
+                    "glosses": [
+                      "An allocated space or berth in a boat or ship."
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "32cc292a-a253-49ce-bbad-6453f8b3bc48",
+                        "sense_id": "e0b375da-8fac-4916-a454-7c9cbb81dc2a",
+                        "text": "The skipper Mr. Cooke had hired at Far Harbor was a God-fearing man with a luke warm interest in his new billet and employer, and had only been prevailed upon to take charge of the yacht after the offer of an emolument equal to half a year's sea pay of an ensign in the navy."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "68679959-eeb4-4a4b-8494-e6eb3430b43c",
+                    "entry_id": "560f0795-2438-4a7a-b85e-6c3fee47cbc0",
+                    "glosses": [
+                      "Berth; position."
+                    ],
+                    "tags": [
+                      "figuratively"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "659acb6f-5938-4537-908e-2fc00d040aad",
+                        "sense_id": "68679959-eeb4-4a4b-8494-e6eb3430b43c",
+                        "text": "His shafts of satire fly straight to their billet, and there they rankle."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "target_word": "billet",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "c55b7181-7eeb-429f-a655-da0ba3ea6647",
+                    "entry_id": "38ed70a0-4ec7-480a-972a-691840766592",
+                    "glosses": [
+                      "To lodge soldiers, or guests, usually by order."
+                    ],
+                    "tags": [
+                      "transitive"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "7a5d7c00-a9b9-408b-b50b-2f641b8305f8",
+                        "sense_id": "c55b7181-7eeb-429f-a655-da0ba3ea6647",
+                        "text": "Destroy, with entire unpity, raze to the ground, those detestable houses where you billet the progeny of the libertinage of the poor, appalling cloacas, wherefrom there every day spews forth into society a swarm of new-made creatures […]"
+                      },
+                      {
+                        "example_id": "5c4d85f4-2d20-4a47-a56b-c4f67a69ab5b",
+                        "sense_id": "c55b7181-7eeb-429f-a655-da0ba3ea6647",
+                        "text": "Billeted in so antiquated a mansion."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "81c3b0ef-19c9-4665-93e0-5d98301fa37b",
+                    "entry_id": "38ed70a0-4ec7-480a-972a-691840766592",
+                    "glosses": [
+                      "To lodge, or be quartered, in a private house."
+                    ],
+                    "tags": [
+                      "intransitive"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "5767565b-bbaf-41c2-b584-b791455ed71a",
+                    "entry_id": "38ed70a0-4ec7-480a-972a-691840766592",
+                    "glosses": [
+                      "To direct, by a ticket or note, where to lodge."
+                    ],
+                    "tags": [
+                      "transitive"
+                    ],
+                    "examples": []
+                  }
+                ]
+              },
+              {
+                "target_word": "billet",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "73a76976-9903-48d9-9248-1018e87b72bb",
+                    "entry_id": "dbeeb61e-4f89-4de3-9b61-8e36ad896cf6",
+                    "glosses": [
+                      "A semi-finished length of metal."
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "2f385ca0-dfb4-46e1-ba3f-b265765392e9",
+                        "sense_id": "73a76976-9903-48d9-9248-1018e87b72bb",
+                        "text": "The Saturday evening Cardiff-West Wales mail train is still steam-worked, but a most unlikely locomotive used on May 23 was Stanier Class 5 4-6-0 No. 45250 (5A); it returned on May 25 with a train of steel billets."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "e49a9b98-42c3-4e24-bf84-53437e88ea71",
+                    "entry_id": "dbeeb61e-4f89-4de3-9b61-8e36ad896cf6",
+                    "glosses": [
+                      "A short piece of wood, especially one used as firewood."
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "2bd7e85f-edf2-4a9f-8453-bb5964328c74",
+                        "sense_id": "e49a9b98-42c3-4e24-bf84-53437e88ea71",
+                        "text": "They shall beat out my brains with billets."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "b7f4816f-65b3-4027-91e5-69aa90822556",
+                    "entry_id": "dbeeb61e-4f89-4de3-9b61-8e36ad896cf6",
+                    "glosses": [
+                      "A short cutting of sugar cane produced by a harvester or used for planting."
+                    ],
+                    "tags": [],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "28d61cb3-e590-4a64-b40f-26c423eef423",
+                    "entry_id": "dbeeb61e-4f89-4de3-9b61-8e36ad896cf6",
+                    "glosses": [
+                      "A rectangle used as a charge on an escutcheon."
+                    ],
+                    "tags": [],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "7a4e6ef0-fc72-4bf7-a7d1-eb3854ce1ad6",
+                    "entry_id": "dbeeb61e-4f89-4de3-9b61-8e36ad896cf6",
+                    "glosses": [
+                      "An ornament in Norman work, resembling a billet of wood, either square or round."
+                    ],
+                    "tags": [],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "3a4f6913-627b-48b0-b585-609a4a87b923",
+                    "entry_id": "dbeeb61e-4f89-4de3-9b61-8e36ad896cf6",
+                    "glosses": [
+                      "A strap that enters a buckle."
+                    ],
+                    "tags": [],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "d286cde8-3cd5-4bb4-afe9-58b0f6debcf2",
+                    "entry_id": "dbeeb61e-4f89-4de3-9b61-8e36ad896cf6",
+                    "glosses": [
+                      "A loop that receives the end of a buckled strap."
+                    ],
+                    "tags": [],
+                    "examples": []
+                  }
+                ]
+              },
+              {
+                "target_word": "billet",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "aa9a30f1-7b2b-4f7d-b050-c90674149cb3",
+                    "entry_id": "f6c420b8-cf9c-4d86-b917-25a570b9bcf9",
+                    "glosses": [
+                      "Alternative form of billard (“coalfish”)"
+                    ],
+                    "tags": [
+                      "alt-of",
+                      "alternative"
+                    ],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "word_linkages": [
+          {
+            "linkage_id": "0c56a2cd-9f12-4149-a758-47e394af5232",
+            "source_entry_id": "2bf2adc0-a9c7-45ec-898d-4942a06f5bab",
+            "source_sense_ids": [
+              "93aa4e52-1ff6-4c16-8cc2-7d12995a92d5"
+            ],
+            "linkage_type": "synonyms",
+            "word": "légering"
+          }
+        ]
+      }
+    ],
+    "pl-extract.jsonl": []
+  }
+}

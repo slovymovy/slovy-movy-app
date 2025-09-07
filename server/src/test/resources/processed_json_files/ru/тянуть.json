@@ -1,0 +1,1475 @@
+{
+  "entries": [
+    {
+      "pos": "verb",
+      "senses": [
+        {
+          "sense_id": "d805f90c-d9dc-4677-b5dd-dfb1448561c8",
+          "sense_definition": "С усилием перемещать что-либо или кого-либо, приближая к себе или за собой.",
+          "learner_level": "A1",
+          "frequency": "High",
+          "semantic_group_id": "Движение",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Возница, стоя по колени в грязи, изо всех сил <w>тянул</w> лошадь за узду и бранился.",
+              "target_lang_translations": {
+                "en": "The driver, standing knee-deep in mud, <w>was pulling</w> the horse by the bridle with all his might and cursing."
+              }
+            },
+            {
+              "text": "Он осторожно стал <w>тянуть</w> на себя этот листик так, чтобы пригнуть вместе с ним ветку, но и не разорвать листик и успеть цапнуть ветку левой рукой.",
+              "target_lang_translations": {
+                "en": "He carefully began to <w>pull</w> the leaf towards himself, so as to bend the branch with it, but without tearing the leaf, and to manage to grab the branch with his left hand."
+              }
+            },
+            {
+              "text": "Маленький ребёнок <w>тянул</w> маму за руку, показывая на игрушку.",
+              "target_lang_translations": {
+                "en": "The little child <w>was pulling</w> his mom by the hand, pointing at a toy."
+              }
+            }
+          ],
+          "synonyms": [
+            "тащить",
+            "влечь"
+          ],
+          "antonyms": [
+            "толкать"
+          ],
+          "common_phrases": [
+            "тянуть за руку",
+            "тянуть за собой",
+            "тянуть воз"
+          ],
+          "target_lang_definitions": {
+            "en": "To move something towards you or behind you, using force."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "pull",
+                "target_lang_sense_clarification": "The most common and direct translation for applying force to move an object closer."
+              },
+              {
+                "target_lang_word": "drag",
+                "target_lang_sense_clarification": "Implies pulling something heavy or with difficulty, often along a surface."
+              },
+              {
+                "target_lang_word": "draw",
+                "target_lang_sense_clarification": "A more formal or literary word for 'pull', often used for pulling something out of a container (e.g., drawing a sword)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "293ff47e-b0ce-455b-bdb4-72fee40caeb8",
+          "sense_definition": "Иметь определённый вес, весить.",
+          "learner_level": "A2",
+          "frequency": "Middle",
+          "semantic_group_id": "Измерение",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Тюк <w>тянет</w> на десять кило.",
+              "target_lang_translations": {
+                "en": "The bale <w>weighs</w> about ten kilos."
+              }
+            },
+            {
+              "text": "Этот мешок <w>тянет</w> на двадцать килограммов.",
+              "target_lang_translations": {
+                "en": "This sack <w>weighs</w> twenty kilograms."
+              }
+            },
+            {
+              "text": "Рыба <w>тянула</w> на два килограмма.",
+              "target_lang_translations": {
+                "en": "The fish <w>weighed</w> two kilograms."
+              }
+            }
+          ],
+          "synonyms": [
+            "весить"
+          ],
+          "common_phrases": [
+            "тянуть на килограмм",
+            "тянуть на тонну"
+          ],
+          "target_lang_definitions": {
+            "en": "(Colloquial) To have a certain weight."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "weigh",
+                "target_lang_sense_clarification": "The standard verb for stating weight."
+              },
+              {
+                "target_lang_word": "come in at",
+                "target_lang_sense_clarification": "An idiomatic way to express weight, similar to the colloquial Russian usage."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c3379805-ff34-430f-b2bc-82ac059da153",
+          "sense_definition": "Мешкать, медлить, не торопиться с осуществлением чего-либо; замедлять, долго не кончать, медлительно делать что-либо.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Время",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Она понимала, что в таких случаях нельзя <w>тянуть</w> и надо что-то срочно предпринять.",
+              "target_lang_translations": {
+                "en": "She understood that in such cases one couldn't <w>delay</w> and had to do something urgently."
+              }
+            },
+            {
+              "text": "Не <w>тяни</w> время, пора принимать решение.",
+              "target_lang_translations": {
+                "en": "Don't <w>drag it out</w>, it's time to make a decision."
+              }
+            },
+            {
+              "text": "Он всегда <w>тянет</w> с выполнением домашнего задания.",
+              "target_lang_translations": {
+                "en": "He always <w>procrastinates</w> on doing his homework."
+              }
+            }
+          ],
+          "synonyms": [
+            "медлить",
+            "мешкать",
+            "тормозить",
+            "задерживаться"
+          ],
+          "common_phrases": [
+            "тянуть время",
+            "тянуть резину",
+            "тянуть кота за хвост"
+          ],
+          "target_lang_definitions": {
+            "en": "To delay or procrastinate; to take a long time to do something."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "delay",
+                "target_lang_sense_clarification": "To postpone or put off an action or decision."
+              },
+              {
+                "target_lang_word": "drag out",
+                "target_lang_sense_clarification": "To make something take longer than necessary, often used in the idiom 'drag one's feet'."
+              },
+              {
+                "target_lang_word": "procrastinate",
+                "target_lang_sense_clarification": "To intentionally and habitually postpone something that must be done."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "41a5a07f-c33c-457d-a683-ea53f4aff2b1",
+          "sense_definition": "Быть привлекательным, влечь к себе, манить, притягивать, увлекать; испытывать сильное желание чего-либо.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Притяжение",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Где бы ты ни был, тебя всегда <w>тянет</w> на родину, в любимый город, домой.",
+              "target_lang_translations": {
+                "en": "Wherever you are, you always <w>feel drawn</w> to your homeland, your beloved city, your home."
+              }
+            },
+            {
+              "text": "Нормального человека всегда <w>тянет</w> к новым знаниям.",
+              "target_lang_translations": {
+                "en": "A normal person is always <w>drawn</w> to new knowledge."
+              }
+            },
+            {
+              "text": "Меня всегда <w>тянуло</w> к искусству.",
+              "target_lang_translations": {
+                "en": "I was always <w>drawn</w> to art."
+              }
+            }
+          ],
+          "synonyms": [
+            "влечь",
+            "манить",
+            "притягивать",
+            "увлекать",
+            "хотеться",
+            "подмывать",
+            "не терпеться"
+          ],
+          "common_phrases": [
+            "тянуть к чему-либо/кому-либо",
+            "тянет на приключения",
+            "тянет домой"
+          ],
+          "target_lang_definitions": {
+            "en": "To feel a strong attraction or pull towards a place, person, or activity."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "be drawn to",
+                "target_lang_sense_clarification": "To feel an emotional or intellectual attraction to something or someone."
+              },
+              {
+                "target_lang_word": "feel a pull towards",
+                "target_lang_sense_clarification": "To feel an irresistible urge or attraction."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "68c886a2-ba35-4441-8e1a-da2408a0e65d",
+          "sense_definition": "Медленно произносить слова или протяжно, заунывно петь.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Речь/Звук",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Он, когда говорил о чём-нибудь серьёзно, то с напряжением <w>тянул</w> «э-э-э-э».",
+              "target_lang_translations": {
+                "en": "When he spoke about something serious, he would strain and <w>draw out</w> an 'uh-uh-uh-uh'."
+              }
+            },
+            {
+              "text": "Какие-то нищие <w>тянут</w> молебны под окнами.",
+              "target_lang_translations": {
+                "en": "Some beggars are <w>droning</w> prayers under the windows."
+              }
+            },
+            {
+              "text": "Не <w>тяни</w> слова, говори чётче.",
+              "target_lang_translations": {
+                "en": "Don't <w>draw out</w> your words, speak more clearly."
+              }
+            }
+          ],
+          "common_phrases": [
+            "тянуть слова",
+            "тянуть песню",
+            "тянуть гласные"
+          ],
+          "target_lang_definitions": {
+            "en": "To speak or sing slowly and in a drawn-out manner."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "draw out",
+                "target_lang_sense_clarification": "To prolong the sound of words or syllables when speaking."
+              },
+              {
+                "target_lang_word": "drone",
+                "target_lang_sense_clarification": "To sing or speak in a monotonous, droning tone."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c074409e-1c6b-40cc-8ed7-66236fb0bc2f",
+          "sense_definition": "Дуть, приносить откуда-либо запах (также тепло, прохладу и т. п.), пахнуть.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Ощущения",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "От огорода <w>тянуло</w> запахом укропа.",
+              "target_lang_translations": {
+                "en": "From the garden <w>wafted</w> the smell of dill."
+              }
+            },
+            {
+              "text": "Ночной ветер <w>тянул</w> с берега пряной духотой.",
+              "target_lang_translations": {
+                "en": "The night wind <w>blew</w> a spicy stuffiness from the shore."
+              }
+            },
+            {
+              "text": "Из окна <w>тянуло</w> прохладным сквозняком.",
+              "target_lang_translations": {
+                "en": "A cool draft <w>was coming</w> from the window."
+              }
+            }
+          ],
+          "synonyms": [
+            "веять",
+            "нести"
+          ],
+          "common_phrases": [
+            "тянуть сквозняком",
+            "тянуть запахом",
+            "тянуть холодом"
+          ],
+          "target_lang_definitions": {
+            "en": "To be a source of a draft, smell, or temperature change, often coming from an opening like a window or door."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "be a draft",
+                "target_lang_sense_clarification": "Used for air currents. For example, 'a cold draft was coming from the window'."
+              },
+              {
+                "target_lang_word": "waft",
+                "target_lang_sense_clarification": "Used for smells carried on the air."
+              },
+              {
+                "target_lang_word": "blow",
+                "target_lang_sense_clarification": "A more general term for air or a scent moving from a source."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "16566853-acf4-4033-8953-1dbe7b47191b",
+          "sense_definition": "Иметь определённую цену, стоить.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Финансы",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Это кольцо <w>тянет</w> тысяч на десять.",
+              "target_lang_translations": {
+                "en": "This ring <w>is worth</w> about ten thousand."
+              }
+            },
+            {
+              "text": "Ремонт машины <w>тянет</w> на приличную сумму.",
+              "target_lang_translations": {
+                "en": "The car repair <w>will cost</w> a decent amount."
+              }
+            },
+            {
+              "text": "Новый дом <w>тянет</w> на миллион рублей.",
+              "target_lang_translations": {
+                "en": "The new house <w>is worth</w> a million rubles."
+              }
+            }
+          ],
+          "synonyms": [
+            "стоить"
+          ],
+          "common_phrases": [
+            "тянуть на большую сумму",
+            "тянуть на миллион"
+          ],
+          "target_lang_definitions": {
+            "en": "(Colloquial) To be worth or cost a certain amount of money."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "be worth",
+                "target_lang_sense_clarification": "To have a certain monetary value."
+              },
+              {
+                "target_lang_word": "cost",
+                "target_lang_sense_clarification": "To require a certain amount of money for purchase or repair."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "16693189-4721-433b-9800-9e84f81d0250",
+          "sense_definition": "Настойчиво звать, приглашать, заставлять кого-нибудь против его воли идти с собой куда-нибудь.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Принуждение",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Никто ж ведь его силком не <w>тянул</w>.",
+              "target_lang_translations": {
+                "en": "No one <w>dragged</w> him there by force."
+              }
+            },
+            {
+              "text": "<w>Тянуть</w> приятеля в гости.",
+              "target_lang_translations": {
+                "en": "To <w>drag</w> a friend over for a visit."
+              }
+            },
+            {
+              "text": "Она не хотела идти, но её <w>тянули</w> за собой.",
+              "target_lang_translations": {
+                "en": "She didn't want to go, but they <w>were dragging</w> her along."
+              }
+            }
+          ],
+          "common_phrases": [
+            "тянуть силком",
+            "тянуть за собой"
+          ],
+          "target_lang_definitions": {
+            "en": "To insistently try to make someone go somewhere with you, often against their will."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "drag",
+                "target_lang_sense_clarification": "To persuade or force someone to go somewhere they don't want to go."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "2c85de52-2999-4601-954b-ab3f3ab7f1f4",
+          "sense_definition": "Вбирать что-либо откуда-либо, извлекать, втягивать, всасывать (медленно).",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Поглощение",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Насос <w>тянет</w> воду.",
+              "target_lang_translations": {
+                "en": "The pump <w>draws</w> water."
+              }
+            },
+            {
+              "text": "Растение корнями <w>тянет</w> влагу из почвы.",
+              "target_lang_translations": {
+                "en": "The plant <w>draws</w> moisture from the soil with its roots."
+              }
+            },
+            {
+              "text": "Он <w>тянул</w> в себя воздух полной грудью.",
+              "target_lang_translations": {
+                "en": "He <w>was drawing</w> air into his lungs."
+              }
+            }
+          ],
+          "synonyms": [
+            "вбирать",
+            "втягивать",
+            "всасывать",
+            "извлекать",
+            "сосать"
+          ],
+          "common_phrases": [
+            "тянуть воду",
+            "тянуть сок",
+            "тянуть воздух"
+          ],
+          "target_lang_definitions": {
+            "en": "To slowly absorb, suck in, or draw a substance from a source."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "draw",
+                "target_lang_sense_clarification": "To pull in a liquid or gas, like a pump drawing water or a person drawing a breath."
+              },
+              {
+                "target_lang_word": "pull",
+                "target_lang_sense_clarification": "To pull in a liquid or other substance from a source, like a plant from soil."
+              },
+              {
+                "target_lang_word": "suck",
+                "target_lang_sense_clarification": "To extract liquid by creating a vacuum."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "ec546c02-a297-46a3-b6c4-788f1b1fbd77",
+          "sense_definition": "Испытывать желание потянуться, расправить уставшие от однообразного положения руки, ноги, весь корпус.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Физиология",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "После долгого сидения хочется <w>тянуть</w> спину.",
+              "target_lang_translations": {
+                "en": "After sitting for a long time, one's back starts to <w>ache</w>."
+              }
+            },
+            {
+              "text": "Утром он всегда <w>тянет</w> мышцы перед зарядкой.",
+              "target_lang_translations": {
+                "en": "In the morning, he always <w>stretches</w> his muscles before exercising."
+              }
+            }
+          ],
+          "synonyms": [
+            "потягиваться",
+            "тянуться"
+          ],
+          "common_phrases": [
+            "тянуть спину",
+            "тянуть мышцы",
+            "тянуть тело"
+          ],
+          "target_lang_definitions": {
+            "en": "To feel a pulling or aching sensation in the muscles, often creating a desire to stretch."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "ache",
+                "target_lang_sense_clarification": "To experience a dull, persistent pain, often in muscles."
+              },
+              {
+                "target_lang_word": "feel tight",
+                "target_lang_sense_clarification": "To feel a constricting or tense sensation in a muscle."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6cc5c84f-ae18-4f60-b50b-e34ccc8ad557",
+          "sense_definition": "Проводить, прокладывать какое-либо протяженное сооружение (например, кабель, трубу).",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Строительство",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Связисты <w>тянули</w> линию.",
+              "target_lang_translations": {
+                "en": "The signalmen <w>were running</w> a line."
+              }
+            },
+            {
+              "text": "В прошлом году начали <w>тянуть</w> ветку газопровода.",
+              "target_lang_translations": {
+                "en": "Last year they started <w>laying</w> a branch of the gas pipeline."
+              }
+            },
+            {
+              "text": "Рабочие <w>тянули</w> новый кабель через весь город.",
+              "target_lang_translations": {
+                "en": "The workers <w>were running</w> a new cable across the whole city."
+              }
+            }
+          ],
+          "synonyms": [
+            "проводить",
+            "прокладывать"
+          ],
+          "common_phrases": [
+            "тянуть кабель",
+            "тянуть провод",
+            "тянуть линию"
+          ],
+          "target_lang_definitions": {
+            "en": "To install or lay something long, like a cable, pipe, or wire."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "run",
+                "target_lang_sense_clarification": "Commonly used for installing cables or wires."
+              },
+              {
+                "target_lang_word": "lay",
+                "target_lang_sense_clarification": "Commonly used for installing pipes or tracks."
+              },
+              {
+                "target_lang_word": "pull",
+                "target_lang_sense_clarification": "Used when a cable is physically pulled through a conduit or space."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "ce0c6c25-990e-4b33-bbb2-306e56fd160e",
+          "sense_definition": "Вымогать, брать от кого-либо с корыстной целью; требовать сверх меры.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Финансы",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Писцы <w>тянули</w> с посетителей последний грош.",
+              "target_lang_translations": {
+                "en": "The scribes <w>squeezed</w> the last penny out of the visitors."
+              }
+            },
+            {
+              "text": "Он пытался <w>тянуть</w> деньги со своих родственников.",
+              "target_lang_translations": {
+                "en": "He tried to <w>get</w> money from his relatives."
+              }
+            },
+            {
+              "text": "Нельзя <w>тянуть</w> из людей последнее.",
+              "target_lang_translations": {
+                "en": "You can't <w>squeeze</w> the last bit out of people."
+              }
+            }
+          ],
+          "synonyms": [
+            "вымогать"
+          ],
+          "common_phrases": [
+            "тянуть деньги",
+            "тянуть из кого-либо"
+          ],
+          "target_lang_definitions": {
+            "en": "To extort or get something (especially money) from someone through pressure or persistence."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "extort",
+                "target_lang_sense_clarification": "To obtain something, especially money, by force or threats."
+              },
+              {
+                "target_lang_word": "squeeze",
+                "target_lang_sense_clarification": "An informal term for getting money from someone, often with difficulty or pressure."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "8e918d8b-b013-4851-b7d4-bb92c2ef9fa0",
+          "sense_definition": "Походить, соответствовать какому-либо образу, оценке, мере, идеалу.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Соответствие",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Отель неплохой, тихий, спокойный, но на три звезды явно не <w>тянет</w>.",
+              "target_lang_translations": {
+                "en": "The hotel is not bad, quiet, calm, but it clearly <w>doesn't measure up</w> to three stars."
+              }
+            },
+            {
+              "text": "Его знания не <w>тянут</w> на отличную оценку.",
+              "target_lang_translations": {
+                "en": "His knowledge <w>isn't good enough for</w> an excellent grade."
+              }
+            },
+            {
+              "text": "Этот спортсмен вполне <w>тянет</w> на олимпийскую медаль.",
+              "target_lang_translations": {
+                "en": "This athlete is definitely <w>good enough for</w> an Olympic medal."
+              }
+            }
+          ],
+          "common_phrases": [
+            "тянуть на тройку",
+            "не тянуть на звание",
+            "тянуть на медаль"
+          ],
+          "target_lang_definitions": {
+            "en": "(Colloquial) To measure up to or be good enough for a certain standard or level."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "measure up",
+                "target_lang_sense_clarification": "To meet a certain standard or expectation. Often used in the negative."
+              },
+              {
+                "target_lang_word": "be good enough for",
+                "target_lang_sense_clarification": "To be of a sufficient quality or level for something."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "62a30cdc-3ab3-4a7e-bd91-3efd98707096",
+          "sense_definition": "Тяготеть к кому-чему-либо, устремляться, действовать в каком-либо направлении.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Направление",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Беднейшее крестьянство всегда <w>тянуло</w> к пролетариату.",
+              "target_lang_translations": {
+                "en": "The poorest peasantry always <w>gravitated</w> towards the proletariat."
+              }
+            },
+            {
+              "text": "<w>Тянуть</w> на чью-либо сторону.",
+              "target_lang_translations": {
+                "en": "To <w>side</w> with someone."
+              }
+            },
+            {
+              "text": "Его всегда <w>тянуло</w> к морю.",
+              "target_lang_translations": {
+                "en": "He was always <w>drawn</w> to the sea."
+              }
+            }
+          ],
+          "synonyms": [
+            "тяготеть",
+            "устремляться"
+          ],
+          "common_phrases": [
+            "тянуть к центру",
+            "тянуть на чью-либо сторону"
+          ],
+          "target_lang_definitions": {
+            "en": "To gravitate towards or be aligned with a particular group, idea, or direction."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "gravitate towards",
+                "target_lang_sense_clarification": "To be naturally attracted to or move towards a person, place, or idea."
+              },
+              {
+                "target_lang_word": "be drawn to",
+                "target_lang_sense_clarification": "To be inclined or attracted to something. (Similar to sense 41a5a07f)."
+              },
+              {
+                "target_lang_word": "side with",
+                "target_lang_sense_clarification": "To support or align with one side in a conflict or argument."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "76ca4da9-2dc6-404c-a5a2-5401258d2213",
+          "sense_definition": "Привлекать к чему-нибудь (обычно к ответственности, суду).",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Право",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Тянуть</w> к ответу.",
+              "target_lang_translations": {
+                "en": "To <w>hold</w> accountable."
+              }
+            },
+            {
+              "text": "<w>Тянуть</w> к суду.",
+              "target_lang_translations": {
+                "en": "To <w>bring</w> to trial."
+              }
+            },
+            {
+              "text": "Преступника <w>тянули</w> к суду за его деяния.",
+              "target_lang_translations": {
+                "en": "The criminal <w>was brought</w> to trial for his deeds."
+              }
+            }
+          ],
+          "synonyms": [
+            "привлекать"
+          ],
+          "common_phrases": [
+            "тянуть к ответу",
+            "тянуть к суду"
+          ],
+          "target_lang_definitions": {
+            "en": "(Formal/Legal) To bring someone to justice or hold them accountable."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "hold accountable",
+                "target_lang_sense_clarification": "To make someone answer for their actions; to make them take responsibility."
+              },
+              {
+                "target_lang_word": "bring to trial",
+                "target_lang_sense_clarification": "To take someone to court for a crime."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "68621194-f0fd-4c09-9229-4c12e7c30ab0",
+          "sense_definition": "Содействовать, помогать кому-либо в чём-либо, способствовать продвижению.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Помощь",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Взял к себе отца Хрю и <w>тянул</w> его изо всех сил по службе.",
+              "target_lang_translations": {
+                "en": "He took Father Khryu under his wing and <w>was pulling</w> him up the career ladder with all his might."
+              }
+            },
+            {
+              "text": "Он всегда <w>тянет</w> своих друзей, помогая им в карьере.",
+              "target_lang_translations": {
+                "en": "He always <w>helps out</w> his friends, assisting them in their careers."
+              }
+            },
+            {
+              "text": "Начальник <w>тянул</w> его по службе, несмотря на отсутствие опыта.",
+              "target_lang_translations": {
+                "en": "The boss <w>was promoting</w> him, despite his lack of experience."
+              }
+            }
+          ],
+          "synonyms": [
+            "содействовать",
+            "помогать",
+            "способствовать"
+          ],
+          "common_phrases": [
+            "тянуть по службе",
+            "тянуть за уши"
+          ],
+          "target_lang_definitions": {
+            "en": "(Informal) To help someone advance, especially in their career, through influence or support."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "pull strings for",
+                "target_lang_sense_clarification": "To use one's influence to help someone else, often unfairly."
+              },
+              {
+                "target_lang_word": "promote",
+                "target_lang_sense_clarification": "To help someone get a promotion or a better position."
+              },
+              {
+                "target_lang_word": "help out",
+                "target_lang_sense_clarification": "To provide support or assistance to someone."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "78ad379a-fd27-4216-b187-91358a47a11a",
+          "sense_definition": "Успешно справляться с задачей, работой, нагрузкой.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Способность",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "В жару двигатель не <w>тянет</w>, дёргается при разгоне и глохнет.",
+              "target_lang_translations": {
+                "en": "In the heat, the engine <w>can't handle it</w>; it jerks during acceleration and stalls."
+              }
+            },
+            {
+              "text": "Пригласил оператора, а он не <w>тянет</w>.",
+              "target_lang_translations": {
+                "en": "I hired an operator, but he <w>can't handle</w> the job."
+              }
+            },
+            {
+              "text": "Он уже не <w>тянет</w> такую нагрузку на работе.",
+              "target_lang_translations": {
+                "en": "He can no longer <w>handle</w> such a workload at his job."
+              }
+            }
+          ],
+          "common_phrases": [
+            "не тянуть",
+            "тянуть лямку"
+          ],
+          "target_lang_definitions": {
+            "en": "(Informal) To be able to manage a task, workload, or performance requirement. Often used in the negative."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "handle",
+                "target_lang_sense_clarification": "To be capable of dealing with a situation or workload."
+              },
+              {
+                "target_lang_word": "have enough power",
+                "target_lang_sense_clarification": "To have sufficient power or capability to perform a function, especially for engines or machinery."
+              },
+              {
+                "target_lang_word": "cope with",
+                "target_lang_sense_clarification": "To successfully deal with a difficult situation."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "5f46f873-965f-4c83-af83-1d80475db456",
+          "sense_definition": "Изготовлять из металла (проволоку) путём волочения; обрабатывать какой-либо материал, вытягивая его.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Производство",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Тянуть</w> проволоку.",
+              "target_lang_translations": {
+                "en": "To <w>draw</w> wire."
+              }
+            },
+            {
+              "text": "На заводе <w>тянут</w> тонкую медную проволоку.",
+              "target_lang_translations": {
+                "en": "At the factory, they <w>draw</w> thin copper wire."
+              }
+            },
+            {
+              "text": "Мастер учился <w>тянуть</w> серебряную нить для украшений.",
+              "target_lang_translations": {
+                "en": "The craftsman learned to <w>draw</w> silver thread for jewelry."
+              }
+            }
+          ],
+          "common_phrases": [
+            "тянуть проволоку",
+            "тянуть нить"
+          ],
+          "target_lang_definitions": {
+            "en": "To manufacture wire by pulling metal through a die."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "draw",
+                "target_lang_sense_clarification": "The specific technical term for creating wire by pulling it through a die."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a402db86-a9e2-4570-a193-572b4c8eb0d3",
+          "sense_definition": "Вытягивать что-либо вверх, поднимать.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Движение",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Насос <w>тянет</w> воду из скважины.",
+              "target_lang_translations": {
+                "en": "The pump <w>draws</w> water from the well."
+              }
+            },
+            {
+              "text": "С помощью лебёдки они <w>тянули</w> груз вверх.",
+              "target_lang_translations": {
+                "en": "Using a winch, they <w>were pulling</w> the cargo up."
+              }
+            }
+          ],
+          "synonyms": [
+            "подтягивать",
+            "вытягивать"
+          ],
+          "common_phrases": [
+            "тянуть воду из колодца",
+            "тянуть вверх"
+          ],
+          "target_lang_definitions": {
+            "en": "To pull something upwards; to lift or hoist."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "pull up",
+                "target_lang_sense_clarification": "To move something to a higher position using force."
+              },
+              {
+                "target_lang_word": "hoist",
+                "target_lang_sense_clarification": "To lift something heavy, often with ropes or a machine."
+              },
+              {
+                "target_lang_word": "draw up",
+                "target_lang_sense_clarification": "To pull a liquid up from a source, like a well."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "bc88eb8b-ef1f-440e-a9ae-1df9c69da12a",
+          "sense_definition": "Обладать тягой (о трубе, дымоходе, пылесосе и т. п.).",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Техника",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "В трубе много сажи; плохо <w>тянет</w>.",
+              "target_lang_translations": {
+                "en": "There's a lot of soot in the chimney; it <w>doesn't draw</w> well."
+              }
+            },
+            {
+              "text": "Новая печка хорошо <w>тянет</w>.",
+              "target_lang_translations": {
+                "en": "The new stove <w>draws</w> well."
+              }
+            },
+            {
+              "text": "Этот пылесос очень хорошо <w>тянет</w> пыль.",
+              "target_lang_translations": {
+                "en": "This vacuum cleaner <w>has</w> very good <w>suction</w> for dust."
+              }
+            }
+          ],
+          "common_phrases": [
+            "печь хорошо тянет",
+            "дымоход тянет"
+          ],
+          "target_lang_definitions": {
+            "en": "To have a good draft or suction (of a chimney, stove, vacuum cleaner)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "draw",
+                "target_lang_sense_clarification": "Used to describe the ability of a chimney or stove to pull air through it for combustion."
+              },
+              {
+                "target_lang_word": "have good suction",
+                "target_lang_sense_clarification": "To have the force that pulls in air, dust, or liquid."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "02ae822c-ce66-4e9c-8b3e-37837b99b977",
+          "sense_definition": "С трудом поддерживать своё существование, жить.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Жизнь",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Больной ещё <w>тянет</w>.",
+              "target_lang_translations": {
+                "en": "The patient is still <w>hanging on</w>."
+              }
+            },
+            {
+              "text": "Семья еле <w>тянет</w> на одну зарплату.",
+              "target_lang_translations": {
+                "en": "The family is barely <w>getting by</w> on one salary."
+              }
+            },
+            {
+              "text": "Старик <w>тянул</w> своё существование в одиночестве.",
+              "target_lang_translations": {
+                "en": "The old man <w>was scraping by</w> in solitude."
+              }
+            }
+          ],
+          "common_phrases": [
+            "еле тянуть",
+            "тянуть жизнь"
+          ],
+          "target_lang_definitions": {
+            "en": "(Colloquial) To barely manage to survive or get by, often financially or in terms of health."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "hang on",
+                "target_lang_sense_clarification": "To survive with difficulty, especially in terms of health."
+              },
+              {
+                "target_lang_word": "scrape by",
+                "target_lang_sense_clarification": "To manage to live with very little money."
+              },
+              {
+                "target_lang_word": "get by",
+                "target_lang_sense_clarification": "A general term for managing to survive financially."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "52d0a925-3d52-4c44-a19c-54c1ac994d0b",
+          "sense_definition": "Двигаться один за другим, вереницей (о птицах, животных).",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Движение",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Чу! <w>тянут</w> в небе журавли.",
+              "target_lang_translations": {
+                "en": "Hark! Cranes are <w>flying in a line</w> across the sky."
+              }
+            },
+            {
+              "text": "Птицы <w>тянут</w> на юг.",
+              "target_lang_translations": {
+                "en": "The birds are <w>heading</w> south."
+              }
+            },
+            {
+              "text": "Каждую осень стаи гусей <w>тянут</w> на юг.",
+              "target_lang_translations": {
+                "en": "Every autumn, flocks of geese <w>head</w> south."
+              }
+            }
+          ],
+          "synonyms": [
+            "тянуться"
+          ],
+          "common_phrases": [
+            "птицы тянут на юг",
+            "журавли тянут"
+          ],
+          "target_lang_definitions": {
+            "en": "(Of birds or animals) To move in a long line or flock, especially during migration."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "To move towards a destination, especially during migration."
+              },
+              {
+                "target_lang_word": "stream",
+                "target_lang_sense_clarification": "To move in a continuous flow or line."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "d4e12428-0c75-485b-943a-fc881abaa2c1",
+          "sense_definition": "Пить (алкоголь) медленно, пьянствуя.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Питание",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Шампанское стаканами <w>тянул</w>.",
+              "target_lang_translations": {
+                "en": "He <w>was downing</w> champagne by the glass."
+              }
+            },
+            {
+              "text": "Он сидел в баре и медленно <w>тянул</w> пиво.",
+              "target_lang_translations": {
+                "en": "He was sitting in a bar and slowly <w>nursing</w> a beer."
+              }
+            },
+            {
+              "text": "Они <w>тянули</w> коньяк из горлышка бутылки.",
+              "target_lang_translations": {
+                "en": "They <w>were swigging</w> cognac from the neck of the bottle."
+              }
+            }
+          ],
+          "common_phrases": [
+            "тянуть вино",
+            "тянуть водку",
+            "тянуть пиво"
+          ],
+          "traits": [
+            {
+              "trait_type": "colloquial",
+              "comment": "разговорное"
+            }
+          ],
+          "target_lang_definitions": {
+            "en": "(Colloquial) To drink alcohol slowly and continuously; to tipple."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "nurse",
+                "target_lang_sense_clarification": "To drink something slowly, making it last a long time."
+              },
+              {
+                "target_lang_word": "sip",
+                "target_lang_sense_clarification": "To drink in small mouthfuls."
+              },
+              {
+                "target_lang_word": "swig",
+                "target_lang_sense_clarification": "To drink in large gulps, especially from a bottle."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "b73eb042-3b90-4259-8674-c9c9742ea0a9",
+          "sense_definition": "Красть, воровать.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Преступность",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Везде <w>тянет</w> он, что плохо лежит.",
+              "target_lang_translations": {
+                "en": "He <w>swipes</w> anything that isn't nailed down."
+              }
+            },
+            {
+              "text": "Его поймали, когда он пытался <w>тянуть</w> кошелёк из сумки.",
+              "target_lang_translations": {
+                "en": "He was caught when he tried to <w>pinch</w> a wallet from a bag."
+              }
+            },
+            {
+              "text": "Некоторые люди не могут удержаться, чтобы не <w>тянуть</w> чужое.",
+              "target_lang_translations": {
+                "en": "Some people can't resist <w>swiping</w> other people's things."
+              }
+            }
+          ],
+          "synonyms": [
+            "красть",
+            "воровать"
+          ],
+          "common_phrases": [
+            "тянуть из кармана",
+            "тянуть что плохо лежит"
+          ],
+          "traits": [
+            {
+              "trait_type": "colloquial",
+              "comment": "разговорное"
+            }
+          ],
+          "target_lang_definitions": {
+            "en": "(Slang) To steal or pilfer."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "swipe",
+                "target_lang_sense_clarification": "An informal word for stealing something quickly and slyly."
+              },
+              {
+                "target_lang_word": "pinch",
+                "target_lang_sense_clarification": "A British informal term for stealing."
+              },
+              {
+                "target_lang_word": "filch",
+                "target_lang_sense_clarification": "To steal things of small value."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "665ff508-7948-43c3-bc81-296af5101fad",
+          "sense_definition": "Тяготить, заставлять испытывать чувство тяжести, давления.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Ощущения",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Подтяжки <w>тянут</w>.",
+              "target_lang_translations": {
+                "en": "The suspenders are <w>pulling</w>."
+              }
+            },
+            {
+              "text": "Костюм <w>тянет</w> в плечах.",
+              "target_lang_translations": {
+                "en": "The suit <w>is tight</w> in the shoulders."
+              }
+            },
+            {
+              "text": "Старый ремень сильно <w>тянул</w> в талии.",
+              "target_lang_translations": {
+                "en": "The old belt <w>was pulling</w> tightly at the waist."
+              }
+            }
+          ],
+          "synonyms": [
+            "тяготить"
+          ],
+          "common_phrases": [
+            "тянуть плечи",
+            "тянуть пояс",
+            "тянуть в груди"
+          ],
+          "target_lang_definitions": {
+            "en": "(Of clothing) To feel tight or constricting."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "pull",
+                "target_lang_sense_clarification": "To exert a pulling force, causing a tight or constricting feeling."
+              },
+              {
+                "target_lang_word": "be tight",
+                "target_lang_sense_clarification": "To be too small or constricting."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "930511b7-816e-46b1-94d8-0208f4a3670e",
+          "sense_definition": "Принадлежать, относиться, быть в зависимости от кого-чего-либо (обычно о территориях, населении).",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Администрация",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Новгородские пригороды <w>тянули</w> к Великому Новгороду.",
+              "target_lang_translations": {
+                "en": "The Novgorodian suburbs <w>belonged</w> to Veliky Novgorod."
+              }
+            },
+            {
+              "text": "К селу <w>тянули</w> четыре деревни.",
+              "target_lang_translations": {
+                "en": "Four villages <w>were attached</w> to the main village."
+              }
+            },
+            {
+              "text": "Эти земли исторически <w>тянули</w> к соседнему княжеству.",
+              "target_lang_translations": {
+                "en": "These lands historically <w>belonged</w> to the neighboring principality."
+              }
+            }
+          ],
+          "synonyms": [
+            "принадлежать",
+            "относиться"
+          ],
+          "common_phrases": [
+            "тянуть к городу",
+            "тянуть к уезду"
+          ],
+          "traits": [
+            {
+              "trait_type": "archaic",
+              "comment": "историческое"
+            }
+          ],
+          "target_lang_definitions": {
+            "en": "(Archaic/Historical) To belong to or be under the jurisdiction of a larger administrative entity."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "belong to",
+                "target_lang_sense_clarification": "To be the property of or part of a larger group or territory."
+              },
+              {
+                "target_lang_word": "be attached to",
+                "target_lang_sense_clarification": "To be connected with or part of a larger administrative unit."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "09abc7e7-3be8-44ef-8999-424d11b3a309",
+          "sense_definition": "Способствовать развитию чего-нибудь в каком-нибудь направлении (часто в отрицательном смысле).",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Развитие",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Оппортунисты <w>тянули</w> её назад, превращали её в мумию.",
+              "target_lang_translations": {
+                "en": "The opportunists <w>were pulling</w> it back, turning it into a mummy."
+              }
+            },
+            {
+              "text": "Инновации <w>тянут</w> экономику вперёд.",
+              "target_lang_translations": {
+                "en": "Innovations <w>are pulling</w> the economy forward."
+              }
+            },
+            {
+              "text": "Его консервативные взгляды <w>тянули</w> команду назад.",
+              "target_lang_translations": {
+                "en": "His conservative views <w>were holding</w> the team <w>back</w>."
+              }
+            }
+          ],
+          "synonyms": [
+            "способствовать"
+          ],
+          "common_phrases": [
+            "тянуть назад",
+            "тянуть вперёд"
+          ],
+          "target_lang_definitions": {
+            "en": "To influence development in a certain direction, often negatively (to hold back) or positively (to pull forward)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "pull",
+                "target_lang_sense_clarification": "Used with 'forward' or 'back' to indicate influencing progress positively or negatively."
+              },
+              {
+                "target_lang_word": "hold back",
+                "target_lang_sense_clarification": "To impede progress; to be a negative influence."
+              },
+              {
+                "target_lang_word": "drag down",
+                "target_lang_sense_clarification": "To slow down or hinder progress."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "504cf7bd-309c-4591-9d9e-23eef032f4c5",
+          "sense_definition": "Нести повинности, тягло.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "История",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Все едят, да ни один не <w>тянет</w>.",
+              "target_lang_translations": {
+                "en": "Everyone eats, but no one <w>bears the burden</w>."
+              }
+            },
+            {
+              "text": "Крестьяне были вынуждены <w>тянуть</w> тяжёлую повинность.",
+              "target_lang_translations": {
+                "en": "The peasants were forced to <w>bear</w> a heavy <w>duty</w>."
+              }
+            },
+            {
+              "text": "В те времена каждый должен был <w>тянуть</w> свою долю тягла.",
+              "target_lang_translations": {
+                "en": "In those times, everyone had to <w>bear</w> their share of the tax."
+              }
+            }
+          ],
+          "common_phrases": [
+            "тянуть повинность",
+            "тянуть тягло"
+          ],
+          "traits": [
+            {
+              "trait_type": "archaic",
+              "comment": "устаревшее"
+            }
+          ],
+          "target_lang_definitions": {
+            "en": "(Archaic/Historical) To bear a feudal duty or tax (тягло)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "bear",
+                "target_lang_sense_clarification": "To carry a responsibility or burden, such as a tax or obligation."
+              },
+              {
+                "target_lang_word": "perform a duty",
+                "target_lang_sense_clarification": "To fulfill a required service or duty."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

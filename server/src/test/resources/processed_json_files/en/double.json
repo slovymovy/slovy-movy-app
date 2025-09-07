@@ -1,0 +1,2532 @@
+{
+  "entries": [
+    {
+      "pos": "noun",
+      "senses": [
+        {
+          "sense_id": "22903ff2-d4ff-4377-b5ff-a612626215de",
+          "sense_definition": "Twice the number, amount, size, etc.",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Quantity/Amount",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He ordered a <w>double</w> of coffee.",
+              "target_lang_translations": {
+                "ru": "Он заказал <w>двойной</w> кофе."
+              }
+            },
+            {
+              "text": "She asked for a <w>double</w> of everything on her pizza.",
+              "target_lang_translations": {
+                "ru": "Она попросила <w>двойную порцию</w> всего в своей пицце."
+              }
+            }
+          ],
+          "common_phrases": [
+            "pay double",
+            "get a double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Вдвое большее число, количество, размер и т.д."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойная порция",
+                "target_lang_sense_clarification": "Используется для обозначения двойного количества чего-либо, например, еды или напитков."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6cbcc17b-f69a-4365-ba4d-604299e7c9f9",
+          "sense_definition": "A drink with two portions of alcohol.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Quantity/Amount",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He ordered a <w>double</w> whiskey at the bar.",
+              "target_lang_translations": {
+                "ru": "Он заказал <w>двойной</w> виски в баре."
+              }
+            },
+            {
+              "text": "On second thought, make that a <w>double</w>.",
+              "target_lang_translations": {
+                "ru": "Хотя нет, давайте <w>двойной</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "make it a double",
+            "order a double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Напиток с двойной порцией алкоголя."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойной",
+                "target_lang_sense_clarification": "Используется как существительное для обозначения напитка с двойной порцией алкоголя (например, «двойной виски»)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "fcdda643-8ff3-4446-b960-a8094362f3cd",
+          "sense_definition": "A person who resembles and stands in for another person, often for safety purposes.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Person/Copy",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The actor used a stunt <w>double</w> for the dangerous scene.",
+              "target_lang_translations": {
+                "ru": "Актёр использовал каскадёра-<w>дублёра</w> для опасной сцены."
+              }
+            },
+            {
+              "text": "The president was rumored to have a body <w>double</w> for public appearances.",
+              "target_lang_translations": {
+                "ru": "Ходили слухи, что у президента был <w>двойник</w> для публичных выступлений."
+              }
+            }
+          ],
+          "common_phrases": [
+            "body double",
+            "stunt double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Человек, который похож на другого и заменяет его, часто в целях безопасности."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойник",
+                "target_lang_sense_clarification": "Человек, внешне очень похожий на другого; используется для обозначения двойников известных личностей."
+              },
+              {
+                "target_lang_word": "дублёр",
+                "target_lang_sense_clarification": "Человек, заменяющий актёра при выполнении трюков."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "09e42da0-7c6d-4e6e-ae30-f8d51681a335",
+          "sense_definition": "A redundant item for which an identical item already exists.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Person/Copy",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "I have a few <w>doubles</w> of this stamp in my collection.",
+              "target_lang_translations": {
+                "ru": "У меня в коллекции есть несколько <w>повторных экземпляров</w> этой марки."
+              }
+            },
+            {
+              "text": "Before printing, she deleted the <w>doubles</w> from her photo album.",
+              "target_lang_translations": {
+                "ru": "Перед печатью она удалила <w>дубликаты</w> из своего фотоальбома."
+              }
+            }
+          ],
+          "common_phrases": [
+            "have doubles",
+            "delete doubles"
+          ],
+          "target_lang_definitions": {
+            "ru": "Лишний предмет, для которого уже существует идентичный экземпляр."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дубликат",
+                "target_lang_sense_clarification": "Точная копия, второй экземпляр чего-либо (например, в коллекции)."
+              },
+              {
+                "target_lang_word": "повтор",
+                "target_lang_sense_clarification": "Повторяющийся элемент, который является лишним."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "609dc5e5-df5d-4277-b279-4ae48f1a9f71",
+          "sense_definition": "In baseball, a two-base hit.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The batter hit a <w>double</w> to left field.",
+              "target_lang_translations": {
+                "ru": "Отбивающий выбил <w>дабл</w> в левую часть поля."
+              }
+            },
+            {
+              "text": "He hit a <w>double</w> in the bottom of the ninth inning.",
+              "target_lang_translations": {
+                "ru": "Он выбил <w>дабл</w> в конце девятого иннинга."
+              }
+            }
+          ],
+          "common_phrases": [
+            "hit a double",
+            "line drive double"
+          ],
+          "target_lang_definitions": {
+            "ru": "В бейсболе — удар, позволяющий отбивающему достичь второй базы."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дабл",
+                "target_lang_sense_clarification": "Заимствованное слово, используемое в бейсбольной терминологии."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "46c22311-8066-4343-8293-0a29d7958638",
+          "sense_definition": "In sports, the feat of scoring twice in one game.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The striker scored a <w>double</w> in the first half.",
+              "target_lang_translations": {
+                "ru": "Нападающий оформил <w>дубль</w> в первом тайме."
+              }
+            },
+            {
+              "text": "DJ Campbell grabbed a second-half <w>double</w>.",
+              "target_lang_translations": {
+                "ru": "Ди Джей Кэмпбелл оформил <w>дубль</w> во втором тайме."
+              }
+            }
+          ],
+          "common_phrases": [
+            "score a double",
+            "grab a double"
+          ],
+          "target_lang_definitions": {
+            "ru": "В спорте — достижение, когда игрок забивает дважды в одной игре."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дубль",
+                "target_lang_sense_clarification": "Два гола, забитые одним игроком в одном матче (особенно в футболе или хоккее)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "617634bd-45f3-42ce-af4f-89590b7d3173",
+          "sense_definition": "In sports, the feat of winning two events in a single meet or competition.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "She achieved a <w>double</w> by winning both the 100m and 200m races.",
+              "target_lang_translations": {
+                "ru": "Она совершила <w>дубль</w>, выиграв забеги на 100 и 200 метров."
+              }
+            },
+            {
+              "text": "In 1996, Michael Johnson achieved a <w>double</w> by winning both the 200 and 400 meter dashes.",
+              "target_lang_translations": {
+                "ru": "В 1996 году Майкл Джонсон совершил <w>дубль</w>, выиграв забеги на 200 и 400 метров."
+              }
+            }
+          ],
+          "common_phrases": [
+            "achieve a double",
+            "win a double"
+          ],
+          "target_lang_definitions": {
+            "ru": "В спорте — победа в двух разных дисциплинах в рамках одного соревнования."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дубль",
+                "target_lang_sense_clarification": "Победа в двух дисциплинах или соревнованиях."
+              },
+              {
+                "target_lang_word": "двойная победа",
+                "target_lang_sense_clarification": "Более описательный термин для победы в двух соревнованиях."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "2e25a336-01f4-4788-961c-6b35f7759077",
+          "sense_definition": "In sports, two competitions, usually one league and one cup, won by the same team in a single season.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The team is hoping to win the <w>double</w> this season.",
+              "target_lang_translations": {
+                "ru": "Команда надеется выиграть <w>дубль</w> в этом сезоне."
+              }
+            },
+            {
+              "text": "Winning the league and cup is known as achieving the <w>double</w>.",
+              "target_lang_translations": {
+                "ru": "Победа в лиге и кубке известна как <w>дубль</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "win the double",
+            "achieve the double"
+          ],
+          "target_lang_definitions": {
+            "ru": "В спорте — победа одной команды в двух соревнованиях, обычно в лиге и кубке, за один сезон."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дубль",
+                "target_lang_sense_clarification": "Победа команды в национальном чемпионате и кубке в одном сезоне."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c625bcec-6409-41d9-84b8-92f83005f0a4",
+          "sense_definition": "A ghostly apparition of a living person; a doppelgänger.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Person/Copy",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "In folklore, seeing your own <w>double</w> is often considered a bad omen.",
+              "target_lang_translations": {
+                "ru": "В фольклоре встреча со своим <w>двойником</w> часто считается плохим предзнаменованием."
+              }
+            },
+            {
+              "text": "She felt like she had seen her <w>double</w> walking down the street.",
+              "target_lang_translations": {
+                "ru": "Ей показалось, что она видела своего <w>двойника</w>, идущего по улице."
+              }
+            }
+          ],
+          "common_phrases": [
+            "see one's double",
+            "ghostly double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Призрачное явление живого человека; доппельгангер."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойник",
+                "target_lang_sense_clarification": "Мистический двойник человека, часто предвещающий несчастье."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6b7fed99-d567-44a4-9f4a-b119390e6118",
+          "sense_definition": "A sharp turn, especially a return on one's own tracks.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Movement/Turn",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The fox made a sudden <w>double</w> to escape the hounds.",
+              "target_lang_translations": {
+                "ru": "Лиса сделала резкий <w>разворот</w>, чтобы уйти от гончих."
+              }
+            },
+            {
+              "text": "The car took a sharp <w>double</w> around the corner.",
+              "target_lang_translations": {
+                "ru": "Машина сделала резкий <w>разворот</w> за углом."
+              }
+            }
+          ],
+          "common_phrases": [
+            "make a double",
+            "sharp double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Резкий поворот, особенно с возвращением по собственному следу."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "петля",
+                "target_lang_sense_clarification": "Движение по кривой, возвращающее к исходному направлению, чтобы запутать преследователей."
+              },
+              {
+                "target_lang_word": "резкий разворот",
+                "target_lang_sense_clarification": "Резкое изменение направления движения."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a760c723-84de-4440-9374-5538ea5c7ffa",
+          "sense_definition": "In computing, a double-precision floating-point number.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Technical/Specialized",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The calculation requires a <w>double</w> for higher accuracy.",
+              "target_lang_translations": {
+                "ru": "Для большей точности вычисление требует использования типа <w>double</w>."
+              }
+            },
+            {
+              "text": "The sine function returns a <w>double</w>.",
+              "target_lang_translations": {
+                "ru": "Функция синуса возвращает значение типа <w>double</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double precision",
+            "return a double"
+          ],
+          "target_lang_definitions": {
+            "ru": "В информатике — число с плавающей запятой двойной точности."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дабл",
+                "target_lang_sense_clarification": "Заимствованный термин, используемый в программировании для типа данных."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "98eecf22-56bf-432f-8a5c-560acb1d9976",
+          "sense_definition": "A boat for two scullers.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The crew trained in a <w>double</w> for the upcoming regatta.",
+              "target_lang_translations": {
+                "ru": "Экипаж тренировался на <w>двойке</w> перед предстоящей регатой."
+              }
+            },
+            {
+              "text": "They won the race in their new <w>double</w>.",
+              "target_lang_translations": {
+                "ru": "Они выиграли гонку на своей новой <w>двойке</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "rowing double",
+            "two-person double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Лодка для двух гребцов."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойка",
+                "target_lang_sense_clarification": "Спортивная лодка для двух гребцов, особенно в академической гребле."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a7cf07f1-0c8b-444f-83c8-44555f7ab576",
+          "sense_definition": "In card games (bridge), a call that increases certain scoring points if the last preceding bid becomes the contract.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He made a <w>double</w> on their bid, confident they would make the contract.",
+              "target_lang_translations": {
+                "ru": "Он объявил <w>контру</w> на их заявку, будучи уверенным, что они выполнят контракт."
+              }
+            },
+            {
+              "text": "In bridge, a <w>double</w> can significantly change the score.",
+              "target_lang_translations": {
+                "ru": "В бридже <w>контра</w> может значительно изменить счёт."
+              }
+            }
+          ],
+          "common_phrases": [
+            "make a double",
+            "call a double"
+          ],
+          "target_lang_definitions": {
+            "ru": "В карточных играх (бридж) — заявка, которая увеличивает стоимость очков, если последняя заявка становится контрактом."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "контра",
+                "target_lang_sense_clarification": "Термин в бридже, обозначающий заявку, удваивающую стоимость контракта."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "b976064c-3142-4017-a2b6-475523afe386",
+          "sense_definition": "In billiards/snooker, a strike in which the object ball is struck so as to make it rebound against the cushion to an opposite pocket.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He played a difficult <w>double</w> to pot the black ball.",
+              "target_lang_translations": {
+                "ru": "Он сыграл сложный <w>дуплет</w>, чтобы забить чёрный шар."
+              }
+            },
+            {
+              "text": "The player executed a perfect <w>double</w> to win the frame.",
+              "target_lang_translations": {
+                "ru": "Игрок выполнил идеальный <w>дуплет</w>, чтобы выиграть фрейм."
+              }
+            }
+          ],
+          "common_phrases": [
+            "play a double",
+            "execute a double"
+          ],
+          "target_lang_definitions": {
+            "ru": "В бильярде/снукере — удар, при котором прицельный шар отскакивает от борта в противоположную лузу."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дуплет",
+                "target_lang_sense_clarification": "Удар в бильярде, при котором шар забивается в лузу рикошетом от борта."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "9a6b7b04-55fa-49a7-bd42-b6cc3370520b",
+          "sense_definition": "In horse racing, a bet on two horses in different races in which any winnings from the first race are placed on the horse in the later race.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He placed a <w>double</w> on two favorites in different races.",
+              "target_lang_translations": {
+                "ru": "Он сделал ставку-<w>экспресс</w> на двух фаворитов в разных заездах."
+              }
+            },
+            {
+              "text": "Winning a <w>double</w> can lead to significant payouts.",
+              "target_lang_translations": {
+                "ru": "Выигрыш <w>экспресса</w> может привести к значительным выплатам."
+              }
+            }
+          ],
+          "common_phrases": [
+            "place a double",
+            "win a double"
+          ],
+          "target_lang_definitions": {
+            "ru": "В скачках — ставка на двух лошадей в разных заездах, при которой выигрыш от первого заезда ставится на лошадь в следующем."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "экспресс",
+                "target_lang_sense_clarification": "Тип ставки в букмекерских конторах, объединяющий два события."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "799bd736-a00e-4b98-8b9e-a096bd97b428",
+          "sense_definition": "The narrow outermost ring on a dartboard.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "To win, you must hit the <w>double</w> 20.",
+              "target_lang_translations": {
+                "ru": "Чтобы победить, вы должны попасть в <w>удвоение</w> 20."
+              }
+            },
+            {
+              "text": "He aimed for the <w>double</w> to finish the game.",
+              "target_lang_translations": {
+                "ru": "Он целился в <w>удвоение</w>, чтобы закончить игру."
+              }
+            }
+          ],
+          "common_phrases": [
+            "hit the double",
+            "aim for the double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Узкое внешнее кольцо на мишени для дартса."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "удвоение",
+                "target_lang_sense_clarification": "Сектор на мишени для дартса, попадание в который удваивает очки."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "55c6f42e-a8e3-493f-a5c3-72af4868e8c4",
+          "sense_definition": "A hit on this ring (the narrow outermost ring on a dartboard).",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He needed a <w>double</w> to win the game.",
+              "target_lang_translations": {
+                "ru": "Ему нужно было <w>удвоение</w>, чтобы выиграть игру."
+              }
+            },
+            {
+              "text": "That last throw was a perfect <w>double</w>.",
+              "target_lang_translations": {
+                "ru": "Тот последний бросок был идеальным <w>удвоением</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "score a double",
+            "perfect double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Попадание в это кольцо (узкое внешнее кольцо на мишени для дартса)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "удвоение",
+                "target_lang_sense_clarification": "Попадание в сектор удвоения на мишени для дартса."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "0a6281ce-f89b-4375-8e04-607a67d9c53f",
+          "sense_definition": "A tile that has the same value (i.e., the same number of pips) on both sides (in dominoes).",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "She played the <w>double</w> six to block her opponent.",
+              "target_lang_translations": {
+                "ru": "Она походила <w>дублем</w> шесть, чтобы заблокировать своего оппонента."
+              }
+            },
+            {
+              "text": "In dominoes, you can play a <w>double</w> on either end of the chain.",
+              "target_lang_translations": {
+                "ru": "В домино можно ставить <w>дубль</w> с любого конца цепочки."
+              }
+            }
+          ],
+          "common_phrases": [
+            "play a double",
+            "double six"
+          ],
+          "target_lang_definitions": {
+            "ru": "Костяшка домино, у которой на обеих половинках одинаковое количество очков."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дубль",
+                "target_lang_sense_clarification": "Костяшка домино с одинаковым числом очков на обеих половинах (например, «шесть-шесть»)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "bb8b222a-d7d9-42bf-be0b-86caea899db2",
+          "sense_definition": "In cricket, the achievement of 1000 runs and 100 wickets taken in a single season.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Only a few players have achieved the <w>double</w> in cricket history.",
+              "target_lang_translations": {
+                "ru": "Лишь немногие игроки в истории крикета достигали <w>дабла</w>."
+              }
+            },
+            {
+              "text": "He's aiming for the <w>double</w> this season with his batting and bowling.",
+              "target_lang_translations": {
+                "ru": "В этом сезоне он нацелен на <w>дабл</w> благодаря своей игре с битой и подачам."
+              }
+            }
+          ],
+          "common_phrases": [
+            "achieve the double",
+            "cricket double"
+          ],
+          "target_lang_definitions": {
+            "ru": "В крикете — достижение 1000 пробежек и 100 взятых калиток за один сезон."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дабл",
+                "target_lang_sense_clarification": "Термин в крикете, обозначающий выдающееся достижение игрока за сезон."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6781f91b-3a52-42bc-8b95-167abd1e8269",
+          "sense_definition": "A former French coin worth one-sixth of a sou.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Historical Coin",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The old coin was a <w>double</w>, a small denomination from France.",
+              "target_lang_translations": {
+                "ru": "Старая монета была <w>дублем</w>, мелкой разменной монетой из Франции."
+              }
+            },
+            {
+              "text": "He found a rare <w>double</w> from the 18th century.",
+              "target_lang_translations": {
+                "ru": "Он нашёл редкий <w>дубль</w> XVIII века."
+              }
+            }
+          ],
+          "common_phrases": [
+            "old French double",
+            "rare double coin"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "a former French coin"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Бывшая французская монета, равная одной шестой су."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дубль",
+                "target_lang_sense_clarification": "Историческое название французской монеты."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f7010879-c105-4c4e-87c9-da1aebf6fc13",
+          "sense_definition": "A copper coin worth one-eighth of a penny.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Historical Coin",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The old woman remembered when a <w>double</w> could buy a small treat.",
+              "target_lang_translations": {
+                "ru": "Старушка помнила, как на <w>дубль</w> можно было купить маленькое лакомство."
+              }
+            },
+            {
+              "text": "He had an egg-cupful of <w>doubles</w> his mother used to keep.",
+              "target_lang_translations": {
+                "ru": "У него была полная подставка для яиц <w>дублей</w>, которые хранила его мать."
+              }
+            }
+          ],
+          "common_phrases": [
+            "copper double",
+            "old double coin"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "a former British coin"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Медная монета, равная одной восьмой пенни."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дубль",
+                "target_lang_sense_clarification": "Историческое название британской монеты."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "12f33b6b-6f1b-4981-ac22-226e4b6570b4",
+          "sense_definition": "In music, playing the same part on two instruments, alternately.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Technical/Specialized",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The musician performed a <w>double</w> on the flute and clarinet.",
+              "target_lang_translations": {
+                "ru": "Музыкант исполнил <w>дублирование</w> на флейте и кларнете."
+              }
+            },
+            {
+              "text": "The score indicated a <w>double</w> for the woodwind section.",
+              "target_lang_translations": {
+                "ru": "Партитура указывала на <w>дублирование</w> для секции деревянных духовых."
+              }
+            }
+          ],
+          "common_phrases": [
+            "play a double",
+            "musical double"
+          ],
+          "target_lang_definitions": {
+            "ru": "В музыке — попеременное исполнение одной и той же партии на двух инструментах."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дублирование",
+                "target_lang_sense_clarification": "Музыкальный приём, когда одна партия исполняется поочерёдно на разных инструментах."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "19a0820f-efd5-47e3-a1ed-4c8233f9e0f1",
+          "sense_definition": "A double feast (in Christianity).",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Religious Noun",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The church celebrated a <w>double</w> feast on that special day.",
+              "target_lang_translations": {
+                "ru": "В тот особенный день церковь праздновала <w>двойной</w> праздник."
+              }
+            },
+            {
+              "text": "A <w>double</w> feast has a higher liturgical rank.",
+              "target_lang_translations": {
+                "ru": "<w>Двойной</w> праздник имеет более высокий литургический ранг."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double feast day",
+            "celebrate a double feast"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "religious context"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Двойной праздник (в христианстве)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойной праздник",
+                "target_lang_sense_clarification": "Религиозный термин для обозначения праздника высокого ранга."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "4a247181-64dc-427e-bc56-1ec2fb949572",
+          "sense_definition": "A fast marching pace.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Technical/Specialized",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The soldiers moved at the <w>double</w> to reach their position.",
+              "target_lang_translations": {
+                "ru": "Солдаты двинулись <w>беглым шагом</w>, чтобы достичь своей позиции."
+              }
+            },
+            {
+              "text": "He ran at the <w>double</w> to catch the bus.",
+              "target_lang_translations": {
+                "ru": "Он побежал <w>бегом</w>, чтобы успеть на автобус."
+              }
+            }
+          ],
+          "synonyms": [
+            "double-quick"
+          ],
+          "common_phrases": [
+            "at the double",
+            "run at the double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Быстрый темп ходьбы или бега."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "беглый шаг",
+                "target_lang_sense_clarification": "Быстрый, почти беглый шаг, часто в армии."
+              },
+              {
+                "target_lang_word": "бегом",
+                "target_lang_sense_clarification": "Двигаться бегом (используется в выражении 'at the double')."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "67e9cda6-28fd-4024-bbcf-7c5e727a4d3a",
+          "sense_definition": "A secondary instrument with which a musician is skilled.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Technical/Specialized",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The saxophone is a valuable <w>double</w> for a clarinet player.",
+              "target_lang_translations": {
+                "ru": "Саксофон — это ценный <w>второй инструмент</w> для кларнетиста."
+              }
+            },
+            {
+              "text": "Many musicians have a <w>double</w> that they can play professionally.",
+              "target_lang_translations": {
+                "ru": "Многие музыканты владеют <w>вторым инструментом</w>, на котором могут играть профессионально."
+              }
+            }
+          ],
+          "common_phrases": [
+            "play a double",
+            "valuable double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Второй инструмент, которым владеет музыкант."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "второй инструмент",
+                "target_lang_sense_clarification": "Дополнительный музыкальный инструмент, на котором умеет играть исполнитель."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "pos": "verb",
+      "senses": [
+        {
+          "sense_id": "a2721334-d1ec-4943-97f5-20a9ecf43f24",
+          "sense_definition": "To multiply by two.",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Multiply/Increase",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "You need to <w>double</w> the recipe if you want to feed more people.",
+              "target_lang_translations": {
+                "ru": "Нужно <w>удвоить</w> количество ингредиентов в рецепте, если вы хотите накормить больше людей."
+              }
+            },
+            {
+              "text": "The company managed to <w>double</w> its profits this year.",
+              "target_lang_translations": {
+                "ru": "Компании удалось <w>удвоить</w> свою прибыль в этом году."
+              }
+            }
+          ],
+          "synonyms": [
+            "redouble",
+            "duplicate",
+            "double"
+          ],
+          "antonyms": [
+            "halve",
+            "bisect"
+          ],
+          "common_phrases": [
+            "double the amount",
+            "double your money"
+          ],
+          "target_lang_definitions": {
+            "ru": "Умножить на два."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "удваивать",
+                "target_lang_sense_clarification": "Несовершенный вид: увеличивать в два раза (процесс)."
+              },
+              {
+                "target_lang_word": "удвоить",
+                "target_lang_sense_clarification": "Совершенный вид: увеличить в два раза (результат)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "62cabbb1-15fc-4a90-b29d-16a9cbec1388",
+          "sense_definition": "To increase by 100%, to become twice as large in size.",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Multiply/Increase",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The population of the city has <w>doubled</w> in the last decade.",
+              "target_lang_translations": {
+                "ru": "Население города <w>удвоилось</w> за последнее десятилетие."
+              }
+            },
+            {
+              "text": "Our earnings have <w>doubled</w> in the last year.",
+              "target_lang_translations": {
+                "ru": "Наши доходы <w>удвоились</w> за последний год."
+              }
+            }
+          ],
+          "synonyms": [
+            "redouble",
+            "duplicate",
+            "double"
+          ],
+          "antonyms": [
+            "halve",
+            "bisect"
+          ],
+          "common_phrases": [
+            "double in size",
+            "double in price"
+          ],
+          "target_lang_definitions": {
+            "ru": "Увеличиться на 100%, стать вдвое больше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "удваиваться",
+                "target_lang_sense_clarification": "Несовершенный вид: становиться вдвое больше (процесс)."
+              },
+              {
+                "target_lang_word": "удвоиться",
+                "target_lang_sense_clarification": "Совершенный вид: стать вдвое больше (результат)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f4023453-2b53-4343-b5d1-c9c4460a66d6",
+          "sense_definition": "To fold over so as to make two folds.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Fold/Bend",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Please <w>double</w> the paper before putting it in the envelope.",
+              "target_lang_translations": {
+                "ru": "Пожалуйста, <w>сложите</w> бумагу <w>вдвое</w>, прежде чем положить её в конверт."
+              }
+            },
+            {
+              "text": "She <w>doubled</w> the blanket to make it thicker.",
+              "target_lang_translations": {
+                "ru": "Она <w>сложила</w> одеяло <w>вдвое</w>, чтобы сделать его толще."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double over",
+            "double up"
+          ],
+          "target_lang_definitions": {
+            "ru": "Сложить что-либо так, чтобы получилось два слоя."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "складывать вдвое",
+                "target_lang_sense_clarification": "Несовершенный вид: сгибать что-либо пополам."
+              },
+              {
+                "target_lang_word": "сложить вдвое",
+                "target_lang_sense_clarification": "Совершенный вид: согнуть что-либо пополам."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "3151f203-d2ba-4940-a0f5-a6d7a3edd32b",
+          "sense_definition": "To serve a second role or have a second purpose.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Role/Purpose",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The sofa <w>doubles</w> as a bed for guests.",
+              "target_lang_translations": {
+                "ru": "Диван <w>также служит</w> кроватью для гостей."
+              }
+            },
+            {
+              "text": "A spork is a kind of fork that <w>doubles</w> as a spoon.",
+              "target_lang_translations": {
+                "ru": "Спорк — это разновидность вилки, которая <w>также служит</w> ложкой."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double as",
+            "double up"
+          ],
+          "target_lang_definitions": {
+            "ru": "Выполнять вторую роль или иметь второе предназначение."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "также служить",
+                "target_lang_sense_clarification": "Иметь дополнительную функцию (например, «диван также служит кроватью»)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "fa0bae61-ac2b-4770-be7c-53ac951f68ca",
+          "sense_definition": "In baseball, to get a two-base hit.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The batter <w>doubled</w> into the gap in right field.",
+              "target_lang_translations": {
+                "ru": "Отбивающий <w>выбил дабл</w> в свободную зону в правой части поля."
+              }
+            },
+            {
+              "text": "He <w>doubled</w> to lead off the ninth inning.",
+              "target_lang_translations": {
+                "ru": "Он <w>выбил дабл</w> в начале девятого иннинга."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double into",
+            "double off"
+          ],
+          "target_lang_definitions": {
+            "ru": "В бейсболе — совершить удар на две базы."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "выбить дабл",
+                "target_lang_sense_clarification": "Совершить удар в бейсболе, позволяющий достичь второй базы."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6ab89d4b-1938-4138-a46a-cdc8bb8dcc09",
+          "sense_definition": "To go or march at twice the normal speed.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Movement/Direction",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The soldiers were ordered to <w>double</w> to the barracks.",
+              "target_lang_translations": {
+                "ru": "Солдатам приказали <w>бежать</w> в казармы."
+              }
+            },
+            {
+              "text": "You <w>double</w> down to the harbour, my lad.",
+              "target_lang_translations": {
+                "ru": "А ты, парень, <w>беги</w> к гавани."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double time",
+            "double down"
+          ],
+          "target_lang_definitions": {
+            "ru": "Идти или маршировать с удвоенной скоростью."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "бежать",
+                "target_lang_sense_clarification": "Двигаться бегом, очень быстро."
+              },
+              {
+                "target_lang_word": "идти беглым шагом",
+                "target_lang_sense_clarification": "Двигаться ускоренным шагом (военный термин)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "355d90f3-fb0f-4486-a266-41268abce6ba",
+          "sense_definition": "To clench (a fist).",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Fold/Bend",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He <w>doubled</w> his fist in anger.",
+              "target_lang_translations": {
+                "ru": "Он в гневе <w>сжал</w> кулак."
+              }
+            },
+            {
+              "text": "She <w>doubled</w> her fists, ready to fight.",
+              "target_lang_translations": {
+                "ru": "Она <w>сжала</w> кулаки, готовая к бою."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double one's fist",
+            "double a fist"
+          ],
+          "target_lang_definitions": {
+            "ru": "Сжать (кулак)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "сжать",
+                "target_lang_sense_clarification": "Крепко сжать пальцы, образуя кулак."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "88d51002-65b8-44ba-9de3-0bedd4784789",
+          "sense_definition": "To repeat exactly; copy.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Copy/Repeat",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The machine can <w>double</w> the key perfectly.",
+              "target_lang_translations": {
+                "ru": "Станок может идеально <w>сделать дубликат</w> ключа."
+              }
+            },
+            {
+              "text": "He tried to <w>double</w> the original design.",
+              "target_lang_translations": {
+                "ru": "Он пытался <w>скопировать</w> оригинальный дизайн."
+              }
+            }
+          ],
+          "synonyms": [
+            "facsimilize",
+            "duplicate"
+          ],
+          "common_phrases": [
+            "double a part",
+            "double a design"
+          ],
+          "target_lang_definitions": {
+            "ru": "Точно повторить; скопировать."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "сделать дубликат",
+                "target_lang_sense_clarification": "Создать точную копию."
+              },
+              {
+                "target_lang_word": "скопировать",
+                "target_lang_sense_clarification": "Воспроизвести что-либо в точности."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "9121fdf7-c694-4872-9653-eb36d4b67533",
+          "sense_definition": "To act as substitute for (another theatrical performer in a certain role, etc).",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Role/Purpose",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The understudy had to <w>double</w> for the lead actor when he fell ill.",
+              "target_lang_translations": {
+                "ru": "Дублёру пришлось <w>заменять</w> ведущего актёра, когда тот заболел."
+              }
+            },
+            {
+              "text": "She was asked to <w>double</w> the part of her mother.",
+              "target_lang_translations": {
+                "ru": "Её попросили <w>сыграть также</w> роль её матери."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double for",
+            "double a role"
+          ],
+          "target_lang_definitions": {
+            "ru": "Выступать в качестве дублёра (другого театрального исполнителя в определённой роли и т.д.)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дублировать",
+                "target_lang_sense_clarification": "Заменять другого исполнителя, особенно в театре."
+              },
+              {
+                "target_lang_word": "заменять",
+                "target_lang_sense_clarification": "Выполнять чью-либо роль временно."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "afe44536-4373-4797-b114-da11165786ae",
+          "sense_definition": "To play (both one part and another, in the same play, etc).",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Role/Purpose",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The actor had to <w>double</w> two different roles in the play.",
+              "target_lang_translations": {
+                "ru": "Актёру пришлось <w>играть</w> две разные роли в пьесе."
+              }
+            },
+            {
+              "text": "In On the Beat he <w>doubles</w> the parts of a constable and a gang-leader.",
+              "target_lang_translations": {
+                "ru": "В фильме «Так держать... Постовой!» он <w>играет</w> роли констебля и главаря банды."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double roles",
+            "double parts"
+          ],
+          "target_lang_definitions": {
+            "ru": "Исполнять (и одну, и другую роль в одной и той же пьесе и т.д.)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "играть две роли",
+                "target_lang_sense_clarification": "Исполнять две или более роли в одном представлении."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "560269f0-e148-4d30-8d4b-2d0658febc40",
+          "sense_definition": "To turn sharply, following a winding course.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Movement/Direction",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The rabbit <w>doubled</w> back on its tracks to confuse the dog.",
+              "target_lang_translations": {
+                "ru": "Кролик <w>побежал в обратную сторону</w> по своим следам, чтобы запутать собаку."
+              }
+            },
+            {
+              "text": "The path <w>doubled</w> around the mountain.",
+              "target_lang_translations": {
+                "ru": "Тропа <w>извивалась</w> вокруг горы."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double back",
+            "double around"
+          ],
+          "target_lang_definitions": {
+            "ru": "Резко поворачивать, двигаясь по извилистому курсу."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "делать петлю",
+                "target_lang_sense_clarification": "Вернуться по своим следам, чтобы запутать преследователя."
+              },
+              {
+                "target_lang_word": "развернуться",
+                "target_lang_sense_clarification": "Резко изменить направление на противоположное."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "fb0c459f-776c-4680-ad5f-f3ede10122e5",
+          "sense_definition": "To sail around (a headland or other point).",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Movement/Direction",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The ship managed to <w>double</w> the promontory of Carthage despite the storm.",
+              "target_lang_translations": {
+                "ru": "Корабль сумел <w>обогнуть</w> мыс Карфагена, несмотря на шторм."
+              }
+            },
+            {
+              "text": "They hoped to <w>double</w> the point before nightfall.",
+              "target_lang_translations": {
+                "ru": "Они надеялись <w>обогнуть</w> мыс до наступления ночи."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double the cape",
+            "double the point"
+          ],
+          "target_lang_definitions": {
+            "ru": "Обогнуть на корабле (мыс или другую точку)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "обогнуть",
+                "target_lang_sense_clarification": "Проплыть вокруг мыса или выступа суши."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "0f893dc5-f5e2-45bc-bb6c-8fb407807ddf",
+          "sense_definition": "In music, to duplicate (a part) either in unison or at the octave above or below it.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Copy/Repeat",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The composer decided to <w>double</w> the melody with the violins and flutes.",
+              "target_lang_translations": {
+                "ru": "Композитор решил <w>продублировать</w> мелодию скрипками и флейтами."
+              }
+            },
+            {
+              "text": "The bassoon <w>doubled</w> the cello line an octave lower.",
+              "target_lang_translations": {
+                "ru": "Фагот <w>дублировал</w> партию виолончели на октаву ниже."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double a melody",
+            "double a part"
+          ],
+          "target_lang_definitions": {
+            "ru": "В музыке — дублировать (партию) либо в унисон, либо на октаву выше или ниже."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "дублировать",
+                "target_lang_sense_clarification": "Повторять музыкальную партию другим голосом или инструментом."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c787507e-c657-4491-a175-4c770b7a4b93",
+          "sense_definition": "To multiply the strength or effect of by two.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Multiply/Increase",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Some stores <w>double</w> coupons on certain days.",
+              "target_lang_translations": {
+                "ru": "Некоторые магазины <w>удваивают</w> скидку по купонам в определённые дни."
+              }
+            },
+            {
+              "text": "This policy will <w>double</w> the impact of our efforts.",
+              "target_lang_translations": {
+                "ru": "Эта политика <w>удвоит</w> эффект от наших усилий."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double coupons",
+            "double the impact"
+          ],
+          "target_lang_definitions": {
+            "ru": "Увеличить силу или эффект вдвое."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "удваивать",
+                "target_lang_sense_clarification": "Увеличить в два раза."
+              },
+              {
+                "target_lang_word": "усиливать вдвое",
+                "target_lang_sense_clarification": "Усилить что-либо вдвое."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "54a36eab-cff2-40e6-9012-59b367807e54",
+          "sense_definition": "To operate as a double agent.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Role/Purpose",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The spy was suspected of <w>doubling</w> for the enemy.",
+              "target_lang_translations": {
+                "ru": "Шпиона подозревали в том, что он <w>работал</w> на врага."
+              }
+            },
+            {
+              "text": "He was accused of <w>doubling</w> with headquarters' approval.",
+              "target_lang_translations": {
+                "ru": "Его обвинили в том, что он <w>был двойным агентом</w> с одобрения штаба."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double agent",
+            "double for the enemy"
+          ],
+          "target_lang_definitions": {
+            "ru": "Действовать в качестве двойного агента."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "быть двойным агентом",
+                "target_lang_sense_clarification": "Тайно работать на две противоборствующие стороны."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a95cc84a-2c6d-4b3a-80f4-7bcfcdb123dc",
+          "sense_definition": "To be the double of; to exceed by twofold; to contain or be worth twice as much as.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Multiply/Increase",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "His strength seemed to <w>double</w> that of his opponent.",
+              "target_lang_translations": {
+                "ru": "Казалось, его сила <w>вдвое превосходила</w> силу его противника."
+              }
+            },
+            {
+              "text": "The new building will <w>double</w> the capacity of the old one.",
+              "target_lang_translations": {
+                "ru": "Новое здание <w>удвоит</w> вместимость старого."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double that of",
+            "double the capacity"
+          ],
+          "traits": [
+            {
+              "trait_type": "archaic",
+              "comment": "less common in modern usage"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Быть двойником; превосходить вдвое; содержать или стоить вдвое больше."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "превосходить вдвое",
+                "target_lang_sense_clarification": "Быть в два раза больше или сильнее."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "2c354184-4dd5-4b37-a326-22d1da2d7f4f",
+          "sense_definition": "To join or couple.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Copy/Repeat",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The ropes were <w>doubled</w> to provide extra strength.",
+              "target_lang_translations": {
+                "ru": "Верёвки <w>сложили вдвое</w>, чтобы обеспечить дополнительную прочность."
+              }
+            },
+            {
+              "text": "They <w>doubled</w> the wires for a stronger connection.",
+              "target_lang_translations": {
+                "ru": "Они <w>сдвоили</w> провода для более прочного соединения."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double up",
+            "double the wires"
+          ],
+          "target_lang_definitions": {
+            "ru": "Соединять или спаривать."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "сдваивать",
+                "target_lang_sense_clarification": "Соединять два элемента в один."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "281b5bfd-a620-4dd5-b545-7256af72a44d",
+          "sense_definition": "To be capable of performing (upon an additional instrument).",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Specialized Verb",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "She can <w>double</w> on the piano and the guitar.",
+              "target_lang_translations": {
+                "ru": "Она может <w>играть</w> на пианино и на гитаре."
+              }
+            },
+            {
+              "text": "Many jazz musicians <w>double</w> on multiple instruments.",
+              "target_lang_translations": {
+                "ru": "Многие джазовые музыканты <w>играют</w> на нескольких инструментах."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double on an instrument",
+            "double on piano"
+          ],
+          "target_lang_definitions": {
+            "ru": "Быть способным играть (на дополнительном инструменте)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "играть на втором инструменте",
+                "target_lang_sense_clarification": "Владеть и играть на втором музыкальном инструменте."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "08feae4a-8315-4e0f-ae46-5dae4f9d1bc6",
+          "sense_definition": "In card games (bridge), to make a call that will double certain scoring points if the preceding bid becomes the contract.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He decided to <w>double</w> their bid, confident in his hand.",
+              "target_lang_translations": {
+                "ru": "Он решил <w>объявить контру</w> на их заявку, будучи уверенным в своих картах."
+              }
+            },
+            {
+              "text": "In bridge, you can <w>double</w> your opponent's contract.",
+              "target_lang_translations": {
+                "ru": "В бридже вы можете <w>законтрить</w> контракт вашего оппонента."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double a bid",
+            "double the contract"
+          ],
+          "target_lang_definitions": {
+            "ru": "В карточных играх (бридж) — сделать заявку, которая удвоит определённые очки, если предыдущая заявка станет контрактом."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "объявить контру",
+                "target_lang_sense_clarification": "Сделать заявку «контра» в бридже."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "97a98d41-1cc0-4984-b4dd-0bac7241aa14",
+          "sense_definition": "To increase one's commitment or risk, especially when facing a challenge or uncertainty.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Idiomatic",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Despite the setbacks, the company decided to <w>double</w> down on its new strategy.",
+              "target_lang_translations": {
+                "ru": "Несмотря на неудачи, компания решила <w>удвоить</w> усилия в своей новой стратегии."
+              }
+            },
+            {
+              "text": "When faced with criticism, he chose to <w>double</w> down on his beliefs.",
+              "target_lang_translations": {
+                "ru": "Столкнувшись с критикой, он решил <w>ещё твёрже стоять</w> на своих убеждениях."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double down on",
+            "double down on strategy"
+          ],
+          "target_lang_definitions": {
+            "ru": "Увеличить свою приверженность или риск, особенно перед лицом вызова или неопределённости."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "удвоить ставки",
+                "target_lang_sense_clarification": "Идиоматическое выражение: ещё настойчивее продолжать действовать в выбранном направлении, несмотря на риски."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "057ba146-222a-45ea-b960-537e9638dc62",
+          "sense_definition": "In billiards/snooker, to cause (a ball) to rebound from a cushion before entering the pocket.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Sports/Games",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He managed to <w>double</w> the cue ball off the cushion and into the pocket.",
+              "target_lang_translations": {
+                "ru": "Ему удалось <w>забить</w> биток от борта в лузу."
+              }
+            },
+            {
+              "text": "It takes skill to <w>double</w> the ball accurately.",
+              "target_lang_translations": {
+                "ru": "Требуется мастерство, чтобы точно <w>сыграть дуплетом</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double the ball",
+            "double the cue ball"
+          ],
+          "target_lang_definitions": {
+            "ru": "В бильярде/снукере — заставить (шар) отскочить от борта перед попаданием в лузу."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "сыграть дуплетом",
+                "target_lang_sense_clarification": "Забить шар в лузу рикошетом от борта."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "4aebfdb0-8700-4d99-ab26-1590929f1245",
+          "sense_definition": "To unite, as ranks or files, so as to form one from each two.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Copy/Repeat",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The commander ordered the soldiers to <w>double</w> ranks.",
+              "target_lang_translations": {
+                "ru": "Командир приказал солдатам <w>сдвоить</w> ряды."
+              }
+            },
+            {
+              "text": "They <w>doubled</w> the files to make a stronger formation.",
+              "target_lang_translations": {
+                "ru": "Они <w>сдвоили</w> шеренги, чтобы сделать строй более прочным."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double ranks",
+            "double files"
+          ],
+          "target_lang_definitions": {
+            "ru": "Объединять, как ряды или шеренги, чтобы из каждых двух образовать одну."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "сдвоить ряды",
+                "target_lang_sense_clarification": "Военный термин: объединить две шеренги в одну."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6f7ff6ca-f04f-494e-a4b8-eab94e44dcd5",
+          "sense_definition": "To transmit simultaneously on the same channel as another station, either unintentionally or deliberately, causing interference.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Specialized Verb",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Another station was <w>doubling</w> with you, so I couldn't hear your transmission clearly.",
+              "target_lang_translations": {
+                "ru": "Другая станция <w>работала на той же частоте</w>, что и вы, поэтому я не мог чётко слышать вашу передачу."
+              }
+            },
+            {
+              "text": "It's frustrating when someone <w>doubles</w> on the frequency.",
+              "target_lang_translations": {
+                "ru": "Раздражает, когда кто-то <w>создаёт помехи</w> на частоте."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double with",
+            "double on frequency"
+          ],
+          "target_lang_definitions": {
+            "ru": "Передавать одновременно на том же канале, что и другая станция, либо непреднамеренно, либо намеренно, вызывая помехи."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "создавать помехи",
+                "target_lang_sense_clarification": "Создавать помехи в радиоэфире, вещая на той же частоте."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "pos": "adjective",
+      "senses": [
+        {
+          "sense_id": "0586b521-654f-4d53-9ccb-47d80b22af9a",
+          "sense_definition": "Made up of two matching or complementary elements.",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Two/Pair",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The house has <w>double</w> doors at the entrance.",
+              "target_lang_translations": {
+                "ru": "У дома <w>двойные</w> двери на входе."
+              }
+            },
+            {
+              "text": "They bought a <w>double</w> bed for their new apartment.",
+              "target_lang_translations": {
+                "ru": "Они купили <w>двуспальную</w> кровать в свою новую квартиру."
+              }
+            }
+          ],
+          "synonyms": [
+            "binary",
+            "twin",
+            "dual"
+          ],
+          "antonyms": [
+            "half"
+          ],
+          "common_phrases": [
+            "double doors",
+            "double bed"
+          ],
+          "target_lang_definitions": {
+            "ru": "Состоящий из двух одинаковых или дополняющих друг друга элементов."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойной",
+                "target_lang_sense_clarification": "Состоящий из двух частей (например, «двойные двери»)."
+              },
+              {
+                "target_lang_word": "двуспальный",
+                "target_lang_sense_clarification": "Состоящий из пары (например, «двуспальная кровать»)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "34c60656-63f7-4140-8e9c-b6214bb0144b",
+          "sense_definition": "Of twice the quantity.",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Quantity/Amount",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Can I have a <w>double</w> portion of fries, please?",
+              "target_lang_translations": {
+                "ru": "Можно мне, пожалуйста, <w>двойную</w> порцию картошки фри?"
+              }
+            },
+            {
+              "text": "The doctor prescribed a <w>double</w> dose of the medicine.",
+              "target_lang_translations": {
+                "ru": "Врач прописал <w>двойную</w> дозу лекарства."
+              }
+            }
+          ],
+          "synonyms": [
+            "duplicate"
+          ],
+          "antonyms": [
+            "half"
+          ],
+          "common_phrases": [
+            "double portion",
+            "double dose"
+          ],
+          "target_lang_definitions": {
+            "ru": "Вдвое большего количества."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойной",
+                "target_lang_sense_clarification": "В два раза больше по количеству (например, «двойная порция»)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "b10bab7d-ad0d-45c1-b02b-52b647f1b8a3",
+          "sense_definition": "Designed for two (people, cars, etc.).",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Two/Pair",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "We booked a <w>double</w> room for our vacation.",
+              "target_lang_translations": {
+                "ru": "Мы забронировали <w>двухместный</w> номер на время отпуска."
+              }
+            },
+            {
+              "text": "The house has a <w>double</w> garage, so there's plenty of space for two cars.",
+              "target_lang_translations": {
+                "ru": "В доме есть <w>двойной</w> гараж, так что места для двух машин предостаточно."
+              }
+            }
+          ],
+          "synonyms": [
+            "twin",
+            "dual"
+          ],
+          "common_phrases": [
+            "double room",
+            "double garage"
+          ],
+          "target_lang_definitions": {
+            "ru": "Предназначенный для двоих (людей, машин и т.д.)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойной",
+                "target_lang_sense_clarification": "Рассчитанный на двоих (например, «двойной гараж»)."
+              },
+              {
+                "target_lang_word": "двухместный",
+                "target_lang_sense_clarification": "Рассчитанный на двух человек (например, «двухместный номер»)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "b9092da5-2b7c-447f-b5a0-0502c248388c",
+          "sense_definition": "Folded in two; composed of two layers.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Folded/Layers",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "She wore a <w>double</w>-layered coat to stay warm in the snow.",
+              "target_lang_translations": {
+                "ru": "Она надела <w>двухслойное</w> пальто, чтобы не замёрзнуть в снегу."
+              }
+            },
+            {
+              "text": "The fabric was folded <w>double</w> to make it stronger.",
+              "target_lang_translations": {
+                "ru": "Ткань была сложена <w>вдвое</w>, чтобы сделать её прочнее."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double-layered",
+            "double thickness"
+          ],
+          "target_lang_definitions": {
+            "ru": "Сложенный вдвое; состоящий из двух слоёв."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двухслойный",
+                "target_lang_sense_clarification": "Состоящий из двух слоёв материала."
+              },
+              {
+                "target_lang_word": "сложенный вдвое",
+                "target_lang_sense_clarification": "Сложенный пополам."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "948dc9db-8aa1-4a58-b3ef-2922b7d41d10",
+          "sense_definition": "Having two aspects; ambiguous.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Ambiguous/Deceitful",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "His comment had a <w>double</w> meaning, which made some people laugh.",
+              "target_lang_translations": {
+                "ru": "Его комментарий имел <w>двойной</w> смысл, что рассмешило некоторых людей."
+              }
+            },
+            {
+              "text": "The comedian often uses words with a <w>double</w> meaning.",
+              "target_lang_translations": {
+                "ru": "Комик часто использует слова с <w>двойным</w> значением."
+              }
+            }
+          ],
+          "synonyms": [
+            "twofold"
+          ],
+          "common_phrases": [
+            "double meaning",
+            "double entendre"
+          ],
+          "target_lang_definitions": {
+            "ru": "Имеющий два аспекта; двусмысленный."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойной",
+                "target_lang_sense_clarification": "Имеющий два возможных толкования (например, «двойной смысл»)."
+              },
+              {
+                "target_lang_word": "двусмысленный",
+                "target_lang_sense_clarification": "Неоднозначный, допускающий разные трактовки."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "bd9e5af2-40de-4f69-89e4-1bb2c41d2651",
+          "sense_definition": "False, deceitful, or hypocritical.",
+          "learner_level": "C1",
+          "frequency": "Middle",
+          "semantic_group_id": "Ambiguous/Deceitful",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He was accused of leading a <w>double</w> life, pretending to be someone he wasn't.",
+              "target_lang_translations": {
+                "ru": "Его обвинили в ведении <w>двойной</w> жизни, в том, что он притворялся тем, кем не был."
+              }
+            },
+            {
+              "text": "Her <w>double</w> nature made it hard to trust her.",
+              "target_lang_translations": {
+                "ru": "Её <w>двойственная</w> натура мешала ей доверять."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double-dealing",
+            "double-cross"
+          ],
+          "target_lang_definitions": {
+            "ru": "Лживый, неискренний или лицемерный."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойной",
+                "target_lang_sense_clarification": "Неискренний, имеющий скрытые намерения (например, «двойная игра»)."
+              },
+              {
+                "target_lang_word": "двуличный",
+                "target_lang_sense_clarification": "Лицемерный, имеющий две стороны."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e32f99fc-b028-4e0c-8efb-1dd4a75afebb",
+          "sense_definition": "Stooping; bent over.",
+          "learner_level": "C2",
+          "frequency": "Low",
+          "semantic_group_id": "Physical State",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The old man was bent <w>double</w> from years of hard labor.",
+              "target_lang_translations": {
+                "ru": "Старик <w>согнулся вдвое</w> от многих лет тяжёлого труда."
+              }
+            },
+            {
+              "text": "He was <w>double</w> with laughter, holding his stomach.",
+              "target_lang_translations": {
+                "ru": "Он <w>согнулся пополам</w> от смеха, держась за живот."
+              }
+            }
+          ],
+          "common_phrases": [
+            "bent double",
+            "stooped double"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "often used in fixed expressions like 'bent double'"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Сутулый; согнувшийся."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "согнутый вдвое",
+                "target_lang_sense_clarification": "Используется во фразе «bent double» — согнувшийся пополам (от боли, смеха)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6cee4d93-8734-4813-8b52-683ee0354d74",
+          "sense_definition": "Of a family relationship, related on both the maternal and paternal sides of a family.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Specialized Adjective",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "My <w>double</w> cousin is related to me through both my mother's and father's families.",
+              "target_lang_translations": {
+                "ru": "Мой <w>двойной</w> кузен является моим родственником как по материнской, так и по отцовской линии."
+              }
+            },
+            {
+              "text": "It's rare to have a <w>double</w> cousin, but it happens when siblings from one family marry siblings from another.",
+              "target_lang_translations": {
+                "ru": "Иметь <w>двойного</w> кузена — редкость, но такое случается, когда родные братья и сёстры из одной семьи женятся на родных братьях и сёстрах из другой."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double cousin",
+            "double family relation"
+          ],
+          "target_lang_definitions": {
+            "ru": "О семейных отношениях: связанный родством как по материнской, так и по отцовской линии."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "двойной",
+                "target_lang_sense_clarification": "Описывает родственника, с которым есть родство по обеим линиям (например, «двойной кузен»)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "2f7d76f4-c582-4a88-94fb-6e103a297f8c",
+          "sense_definition": "Of flowers, having more than the normal number of petals.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Specialized Adjective",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The rose had beautiful <w>double</w> petals, making it look very full.",
+              "target_lang_translations": {
+                "ru": "У розы были красивые <w>махровые</w> лепестки, отчего она выглядела очень пышной."
+              }
+            },
+            {
+              "text": "Many cultivated flowers are bred to be <w>double</w> for their aesthetic appeal.",
+              "target_lang_translations": {
+                "ru": "Многие культурные цветы выводят <w>махровыми</w> из-за их эстетической привлекательности."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double flower",
+            "double petaled"
+          ],
+          "target_lang_definitions": {
+            "ru": "О цветах: имеющий больше лепестков, чем обычно."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "махровый",
+                "target_lang_sense_clarification": "О цветке с большим количеством лепестков (например, «махровая роза»)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "454f4234-5f90-4908-b0fa-976bee9df6f4",
+          "sense_definition": "Of an instrument, sounding an octave lower.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Specialized Adjective",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The <w>double</w> bass provides the deep, resonant sound in the orchestra.",
+              "target_lang_translations": {
+                "ru": "<w>Контрабас</w> обеспечивает глубокий, резонирующий звук в оркестре."
+              }
+            },
+            {
+              "text": "He plays the <w>double</w> bass in a jazz band.",
+              "target_lang_translations": {
+                "ru": "Он играет на <w>контрабасе</w> в джаз-бэнде."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double bass",
+            "double horn"
+          ],
+          "target_lang_definitions": {
+            "ru": "Об инструменте: звучащий на октаву ниже."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "контра-",
+                "target_lang_sense_clarification": "Описывает музыкальный инструмент, звучащий в басовом регистре, на октаву ниже основного (например, «контрабас»)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a3c0750a-c201-49fc-ab71-c57454058918",
+          "sense_definition": "Of time, twice as fast.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Specialized Adjective",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "The soldiers marched at <w>double</w> time to reach their destination quickly.",
+              "target_lang_translations": {
+                "ru": "Солдаты шли <w>ускоренным</w> шагом, чтобы быстрее добраться до места назначения."
+              }
+            },
+            {
+              "text": "The band played the song in <w>double</w> time, making it much faster.",
+              "target_lang_translations": {
+                "ru": "Группа сыграла песню в <w>ускоренном</w> темпе, сделав её намного быстрее."
+              }
+            }
+          ],
+          "common_phrases": [
+            "double time",
+            "at double speed"
+          ],
+          "target_lang_definitions": {
+            "ru": "О времени: вдвое быстрее."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "ускоренный",
+                "target_lang_sense_clarification": "В два раза быстрее обычного (например, «ускоренный темп»)."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "pos": "adverb",
+      "senses": [
+        {
+          "sense_id": "afd7a968-6894-4eed-8d27-9286fdf8fb5f",
+          "sense_definition": "Twice over; twofold; doubly.",
+          "learner_level": "B1",
+          "frequency": "High",
+          "semantic_group_id": "Twice/Twofold",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Please <w>double</w> check your work before submitting it.",
+              "target_lang_translations": {
+                "ru": "Пожалуйста, <w>дважды</w> проверьте свою работу перед отправкой."
+              }
+            },
+            {
+              "text": "He had to pay <w>double</w> for the express delivery.",
+              "target_lang_translations": {
+                "ru": "Ему пришлось заплатить <w>вдвое</w> больше за экспресс-доставку."
+              }
+            }
+          ],
+          "synonyms": [
+            "doubly",
+            "twice"
+          ],
+          "common_phrases": [
+            "double check",
+            "double up"
+          ],
+          "target_lang_definitions": {
+            "ru": "Дважды; вдвое; вдвойне."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "вдвое",
+                "target_lang_sense_clarification": "В два раза больше (относится к количеству, цене)."
+              },
+              {
+                "target_lang_word": "дважды",
+                "target_lang_sense_clarification": "Два раза (относится к действию, например, «проверить дважды»)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f227879b-dae4-459a-bde6-f0fc0cb12f17",
+          "sense_definition": "Two together; two at a time.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Twice/Twofold",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "After the long flight, I was so tired I started seeing <w>double</w>.",
+              "target_lang_translations": {
+                "ru": "После долгого перелёта я так устал, что у меня начало <w>двоиться</w> в глазах."
+              }
+            },
+            {
+              "text": "Due to the limited space, some of the children had to sleep <w>double</w>.",
+              "target_lang_translations": {
+                "ru": "Из-за ограниченного пространства некоторым детям пришлось спать <w>по двое</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "seeing double",
+            "sleep double"
+          ],
+          "target_lang_definitions": {
+            "ru": "Вдвоём; по двое за раз."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "по двое",
+                "target_lang_sense_clarification": "Вместе, по два человека (например, «спать по двое»)."
+              },
+              {
+                "target_lang_word": "двоиться",
+                "target_lang_sense_clarification": "Используется в выражении «seeing double» — двоиться в глазах."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "db57c8dd-7064-4059-b4f3-cd376a75e0f8",
+          "sense_definition": "Into two halves or sections.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Physical State",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "He was bent <w>double</w> with pain after falling.",
+              "target_lang_translations": {
+                "ru": "Он <w>согнулся пополам</w> от боли после падения."
+              }
+            },
+            {
+              "text": "The paper was folded <w>double</w> to fit into the small envelope.",
+              "target_lang_translations": {
+                "ru": "Бумагу сложили <w>вдвое</w>, чтобы она поместилась в маленький конверт."
+              }
+            }
+          ],
+          "common_phrases": [
+            "bent double",
+            "folded double"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "often used in fixed expressions like 'bent double'"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "На две половины или части."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "пополам",
+                "target_lang_sense_clarification": "Пополам (например, «согнуться пополам»)."
+              },
+              {
+                "target_lang_word": "вдвое",
+                "target_lang_sense_clarification": "В два слоя (например, «сложить вдвое»)."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "pos": "name",
+      "senses": [
+        {
+          "sense_id": "72ee2e3c-f3be-4d8c-858d-603aae6b7753",
+          "sense_definition": "A surname.",
+          "learner_level": "A1",
+          "frequency": "Low",
+          "semantic_group_id": "",
+          "name_type": "other",
+          "examples": [
+            {
+              "text": "The name <w>Double</w> is not very common.",
+              "target_lang_translations": {
+                "ru": "Фамилия <w>Дабл</w> не очень распространена."
+              }
+            },
+            {
+              "text": "Is your last name <w>Double</w>?",
+              "target_lang_translations": {
+                "ru": "Ваша фамилия <w>Дабл</w>?"
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "surname",
+              "comment": "a family name"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Фамилия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Дабл",
+                "target_lang_sense_clarification": "Транслитерация фамилии."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

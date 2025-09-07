@@ -11,7 +11,7 @@ data class LanguageCardResponse(
 
 @Serializable
 data class LanguageCardPosEntry(
-    val pos: String? = null,
+    val pos: String,
     val senses: List<LanguageCardResponseSense>
 )
 

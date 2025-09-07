@@ -1,0 +1,1396 @@
+{
+  "entries": [
+    {
+      "pos": "verb",
+      "senses": [
+        {
+          "sense_id": "609ca839-0a92-4920-96b7-5e95c4292de7",
+          "sense_definition": "Przekazywać coś komuś do ręki, ust lub w zasięg.",
+          "learner_level": "A1",
+          "frequency": "High",
+          "semantic_group_id": "Przekazywanie fizyczne",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Proszę, <w>podaj</w> mi sól.",
+              "target_lang_translations": {
+                "ru": "Пожалуйста, <w>передай</w> мне соль."
+              }
+            },
+            {
+              "text": "Zawsze <w>podaje</w> rękę na powitanie.",
+              "target_lang_translations": {
+                "ru": "Он всегда <w>подаёт</w> руку для приветствия."
+              }
+            }
+          ],
+          "synonyms": [
+            "dawać",
+            "wręczać",
+            "przekazywać"
+          ],
+          "common_phrases": [
+            "podawać rękę",
+            "podawać sobie coś"
+          ],
+          "target_lang_definitions": {
+            "ru": "Передавать что-либо кому-либо в руки или в пределы досягаемости."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "подавать",
+                "target_lang_sense_clarification": "Часто используется, когда предмет находится рядом и его нужно просто протянуть. Например, 'подать руку', 'подать соль'."
+              },
+              {
+                "target_lang_word": "передавать",
+                "target_lang_sense_clarification": "Более общее слово, может означать передачу через кого-то или на большее расстояние, но часто взаимозаменяемо с 'подавать'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "7c50a318-8013-48f4-9acd-8c8efff91049",
+          "sense_definition": "Przekazywać, ogłaszać lub informować o czymś (np. dane, wiadomości).",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Przekazywanie informacji",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Radio <w>podawało</w> najnowsze wiadomości.",
+              "target_lang_translations": {
+                "ru": "По радио <w>передавали</w> последние новости."
+              }
+            },
+            {
+              "text": "Proszę <w>podać</w> swoje imię i nazwisko.",
+              "target_lang_translations": {
+                "ru": "Пожалуйста, <w>назовите</w> ваше имя и фамилию."
+              }
+            }
+          ],
+          "synonyms": [
+            "przekazywać",
+            "informować",
+            "ogłaszać",
+            "obwieszczać"
+          ],
+          "common_phrases": [
+            "podawać do wiadomości",
+            "podawać numer",
+            "podawać dane"
+          ],
+          "target_lang_definitions": {
+            "ru": "Сообщать, объявлять или информировать о чём-либо (например, о данных, новостях)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "передавать",
+                "target_lang_sense_clarification": "Используется для новостей, сообщений по радио, телевидению."
+              },
+              {
+                "target_lang_word": "сообщать",
+                "target_lang_sense_clarification": "Общий глагол для информирования кого-либо о чём-либо."
+              },
+              {
+                "target_lang_word": "указывать",
+                "target_lang_sense_clarification": "Используется, когда нужно предоставить конкретные данные или информацию (имя, адрес, номер)."
+              },
+              {
+                "target_lang_word": "называть",
+                "target_lang_sense_clarification": "Сказать вслух какую-либо информацию, например, имя или номер телефона."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "42c6d10d-ed2b-4c35-8ebb-9dbe3c2f56c8",
+          "sense_definition": "Serwować jedzenie lub napoje, stawiać na stole.",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Serwowanie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Kelner <w>podawał</w> dania z uśmiechem.",
+              "target_lang_translations": {
+                "ru": "Официант с улыбкой <w>подавал</w> блюда."
+              }
+            },
+            {
+              "text": "Za chwilę <w>podajemy</w> do stołu.",
+              "target_lang_translations": {
+                "ru": "Сейчас будем <w>подавать</w> на стол."
+              }
+            }
+          ],
+          "synonyms": [
+            "serwować"
+          ],
+          "common_phrases": [
+            "podawać do stołu",
+            "podawać obiad"
+          ],
+          "target_lang_definitions": {
+            "ru": "Подавать еду или напитки, ставить на стол."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "подавать",
+                "target_lang_sense_clarification": "Основной и самый частый глагол для этого значения. Например, 'подавать обед', 'подавать на стол'."
+              },
+              {
+                "target_lang_word": "сервировать",
+                "target_lang_sense_clarification": "Более формальный или профессиональный термин, означающий накрывать на стол, расставлять приборы и блюда."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "215e351c-b15e-4d90-973b-c6e326d4e66d",
+          "sense_definition": "Dawać coś w dużej ilości lub liczbie, często wielu osobom.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Dostarczanie ilościowe",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Firma <w>podawała</w> darmowe próbki wszystkim klientom.",
+              "target_lang_translations": {
+                "ru": "Фирма <w>раздавала</w> бесплатные образцы всем клиентам."
+              }
+            },
+            {
+              "text": "<w>Podawała</w> swój numer telefonu wszystkim kolegom z pracy i teraz wciąż wydzwaniają.",
+              "target_lang_translations": {
+                "ru": "Она <w>раздавала</w> свой номер телефона всем коллегам по работе, и теперь они постоянно звонят."
+              }
+            }
+          ],
+          "synonyms": [
+            "rozdawać",
+            "dostarczać"
+          ],
+          "common_phrases": [
+            "podawać w dużych ilościach"
+          ],
+          "target_lang_definitions": {
+            "ru": "Давать что-либо в большом количестве, часто многим людям."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "раздавать",
+                "target_lang_sense_clarification": "Точно передаёт значение распространения, распределения чего-либо многим людям (например, образцы, листовки)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c944a3ab-13f1-4e53-9c86-e51bb2c4c101",
+          "sense_definition": "Dostarczać, aplikować jakąś substancję (np. lekarstwo, płyn) do organizmu lub systemu.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Aplikowanie substancji",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Pielęgniarka <w>podawała</w> pacjentowi leki.",
+              "target_lang_translations": {
+                "ru": "Медсестра <w>давала</w> пациенту лекарства."
+              }
+            },
+            {
+              "text": "System <w>podaje</w> wodę do chłodzenia silnika.",
+              "target_lang_translations": {
+                "ru": "Система <w>подаёт</w> воду для охлаждения двигателя."
+              }
+            }
+          ],
+          "synonyms": [
+            "aplikować",
+            "dostarczać"
+          ],
+          "common_phrases": [
+            "podawać lekarstwo",
+            "podawać kroplówkę"
+          ],
+          "target_lang_definitions": {
+            "ru": "Вводить или доставлять какое-либо вещество (напр., лекарство, жидкость) в организм или систему."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "вводить",
+                "target_lang_sense_clarification": "Используется для инъекций, капельниц (лекарств)."
+              },
+              {
+                "target_lang_word": "давать",
+                "target_lang_sense_clarification": "Более общее слово, когда речь идет о приеме лекарств, например, таблеток."
+              },
+              {
+                "target_lang_word": "подавать",
+                "target_lang_sense_clarification": "Используется в техническом контексте для доставки жидкостей или газов по трубам, каналам."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "795bb20b-94c6-4246-bddb-1ada51367e66",
+          "sense_definition": "Przekazywać piłkę lub krążek innemu zawodnikowi w grze zespołowej.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Sport (podanie)",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Napastnik <w>podawał</w> piłkę do kolegi z drużyny.",
+              "target_lang_translations": {
+                "ru": "Нападающий <w>пасовал</w> мяч товарищу по команде."
+              }
+            },
+            {
+              "text": "Zawodnicy <w>podawali</w> sobie krążek na lodzie.",
+              "target_lang_translations": {
+                "ru": "Игроки <w>передавали</w> друг другу шайбу на льду."
+              }
+            }
+          ],
+          "synonyms": [
+            "przekazywać",
+            "zagrywać"
+          ],
+          "common_phrases": [
+            "podawać piłkę",
+            "podawać do przodu"
+          ],
+          "target_lang_definitions": {
+            "ru": "Передавать мяч или шайбу другому игроку в командной игре."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "пасовать",
+                "target_lang_sense_clarification": "Специализированный спортивный термин, наиболее точный в этом контексте."
+              },
+              {
+                "target_lang_word": "передавать",
+                "target_lang_sense_clarification": "Общий глагол, который также может использоваться в спортивном контексте."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "1b3e9662-c389-4f4d-853a-46827e52ff66",
+          "sense_definition": "Rozpoczynać grę w tenisie, siatkówce itp. poprzez uderzenie piłki.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Sport (serwis)",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Tenisista mocno <w>podawał</w> w pierwszym secie.",
+              "target_lang_translations": {
+                "ru": "Теннисист мощно <w>подавал</w> в первом сете."
+              }
+            },
+            {
+              "text": "Kto dzisiaj <w>podaje</w>?",
+              "target_lang_translations": {
+                "ru": "Кто сегодня <w>подаёт</w>?"
+              }
+            }
+          ],
+          "synonyms": [
+            "serwować"
+          ],
+          "common_phrases": [
+            "podawać serwis"
+          ],
+          "target_lang_definitions": {
+            "ru": "Начинать игру (в теннисе, волейболе и т.п.), вводя мяч в игру ударом."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "подавать",
+                "target_lang_sense_clarification": "Основной спортивный термин для этого действия (совершать подачу)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "0ceec996-7950-4b9e-8c7a-428e48219806",
+          "sense_definition": "Przedstawiać, proponować lub zgłaszać coś (np. pomysł, temat, kandydaturę).",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Proponowanie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Na zebraniu <w>podano</w> kilka nowych propozycji.",
+              "target_lang_translations": {
+                "ru": "На собрании <w>предложили</w> несколько новых идей."
+              }
+            },
+            {
+              "text": "Zarząd <w>podaje</w> do głosowania nową uchwałę.",
+              "target_lang_translations": {
+                "ru": "Правление <w>выносит</w> на голосование новое постановление."
+              }
+            }
+          ],
+          "synonyms": [
+            "proponować",
+            "przedstawiać",
+            "zgłaszać",
+            "wysuwać"
+          ],
+          "common_phrases": [
+            "podawać pomysł",
+            "podawać kandydaturę",
+            "podawać temat"
+          ],
+          "target_lang_definitions": {
+            "ru": "Представлять, предлагать или выдвигать что-либо (напр., идею, тему, кандидатуру)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "предлагать",
+                "target_lang_sense_clarification": "Наиболее общее слово для 'proponować', используется для идей, планов."
+              },
+              {
+                "target_lang_word": "выдвигать",
+                "target_lang_sense_clarification": "Используется для кандидатур, теорий, требований."
+              },
+              {
+                "target_lang_word": "подавать",
+                "target_lang_sense_clarification": "Используется в официальном контексте, например, 'подавать заявление', 'подавать жалобу'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "90776eff-68f6-42db-91d3-84a5fa855ce5",
+          "sense_definition": "Kierować, prowadzić coś (np. rurę, kabel) w określonym kierunku.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Kierowanie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Technicy <w>podawali</w> nowe kable do budynku.",
+              "target_lang_translations": {
+                "ru": "Техники <w>прокладывали</w> новые кабели в здание."
+              }
+            },
+            {
+              "text": "Rurociąg <w>podaje</w> wodę do miasta.",
+              "target_lang_translations": {
+                "ru": "Трубопровод <w>подаёт</w> воду в город."
+              }
+            }
+          ],
+          "synonyms": [
+            "kierować",
+            "prowadzić"
+          ],
+          "common_phrases": [
+            "podawać rurę",
+            "podawać kabel"
+          ],
+          "target_lang_definitions": {
+            "ru": "Направлять, вести что-либо (напр., трубу, кабель) в определённом направлении."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "прокладывать",
+                "target_lang_sense_clarification": "Основной глагол для прокладки кабелей, труб, дорог."
+              },
+              {
+                "target_lang_word": "вести",
+                "target_lang_sense_clarification": "Означает направлять что-то по определённому маршруту."
+              },
+              {
+                "target_lang_word": "подавать",
+                "target_lang_sense_clarification": "Означает обеспечивать поступление чего-либо (воды, газа) по уже проложенным коммуникациям."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "2b53866e-0f64-4f3d-8e94-c7c3e98d6781",
+          "sense_definition": "Nadarzać się, pojawiać się (o okazji, możliwości). Często w formie bezosobowej „podaje się”.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Pojawianie się",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Rzadko <w>podaje</w> się taka okazja.",
+              "target_lang_translations": {
+                "ru": "Редко <w>представляется</w> такой случай."
+              }
+            },
+            {
+              "text": "Gdy <w>podaje</w> się szansa, trzeba ją wykorzystać.",
+              "target_lang_translations": {
+                "ru": "Когда <w>появляется</w> шанс, нужно его использовать."
+              }
+            }
+          ],
+          "synonyms": [
+            "nadarzać się",
+            "pojawiać się"
+          ],
+          "common_phrases": [
+            "podaje się okazja"
+          ],
+          "target_lang_definitions": {
+            "ru": "Представляться, появляться (о случае, возможности)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "представляться",
+                "target_lang_sense_clarification": "Литературный и нейтральный вариант, часто в выражении 'представился случай'."
+              },
+              {
+                "target_lang_word": "подворачиваться",
+                "target_lang_sense_clarification": "Разговорный, но очень распространённый вариант, 'подвернулась возможность'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "ebab1f8a-668b-4eb8-80a4-5b5573bccdf8",
+          "sense_definition": "Mówić tekst, aby ktoś go zapisał.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Dyktowanie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Nauczyciel <w>podawał</w> uczniom zadanie.",
+              "target_lang_translations": {
+                "ru": "Учитель <w>диктовал</w> ученикам задание."
+              }
+            },
+            {
+              "text": "Sekretarka <w>podawała</w> treść listu.",
+              "target_lang_translations": {
+                "ru": "Секретарь <w>диктовала</w> текст письма."
+              }
+            }
+          ],
+          "synonyms": [
+            "dyktować"
+          ],
+          "common_phrases": [
+            "podawać tekst",
+            "podawać do protokołu"
+          ],
+          "target_lang_definitions": {
+            "ru": "Говорить текст, чтобы кто-то его записал."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "диктовать",
+                "target_lang_sense_clarification": "Единственный точный перевод в этом значении."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "65630feb-bdc2-42f6-b4e8-ae185be4d73e",
+          "sense_definition": "Powodować, wywoływać coś (np. objawy, skutki); być źródłem czegoś.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Przyczyna/Źródło",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Choroba <w>podawała</w> dziwne objawy.",
+              "target_lang_translations": {
+                "ru": "Болезнь <w>вызывала</w> странные симптомы."
+              }
+            },
+            {
+              "text": "Ta sytuacja <w>podawała</w> wiele pytań.",
+              "target_lang_translations": {
+                "ru": "Эта ситуация <w>вызывала</w> много вопросов."
+              }
+            }
+          ],
+          "synonyms": [
+            "powodować",
+            "wywoływać",
+            "rodzić",
+            "sprawiać",
+            "czynić"
+          ],
+          "common_phrases": [
+            "podawać objawy",
+            "podawać powód"
+          ],
+          "target_lang_definitions": {
+            "ru": "Быть причиной, вызывать что-либо (напр., симптомы, вопросы)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "вызывать",
+                "target_lang_sense_clarification": "Основной глагол для обозначения причины и следствия (вызывать сомнения, вызывать симптомы)."
+              },
+              {
+                "target_lang_word": "служить причиной",
+                "target_lang_sense_clarification": "Более формальный синоним, 'быть причиной чего-либо'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "b3c01290-3190-407d-989e-20e65a421121",
+          "sense_definition": "Narażać kogoś/coś na działanie czegoś; poddawać kogoś/coś czemuś.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Narażanie/Poddawanie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Nie <w>podawaj</w> się na ryzyko.",
+              "target_lang_translations": {
+                "ru": "Не <w>подвергай</w> себя риску."
+              }
+            },
+            {
+              "text": "Jego słowa <w>podawały</w> w wątpliwość całe śledztwo.",
+              "target_lang_translations": {
+                "ru": "Его слова <w>ставили</w> под сомнение всё следствие."
+              }
+            }
+          ],
+          "synonyms": [
+            "narażać",
+            "wystawiać",
+            "poddawać"
+          ],
+          "common_phrases": [
+            "podawać w wątpliwość",
+            "podawać w niebezpieczeństwo"
+          ],
+          "target_lang_definitions": {
+            "ru": "Подвергать кого-либо/что-либо действию чего-либо; ставить под сомнение."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "подвергать",
+                "target_lang_sense_clarification": "Точный эквивалент для 'narażać na' или 'poddawać czemuś' (подвергать риску, критике)."
+              },
+              {
+                "target_lang_word": "ставить под сомнение",
+                "target_lang_sense_clarification": "Устойчивое выражение, означающее 'сомневаться в чём-либо'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "2060cb27-c5fc-4f83-81ef-25e750fe3327",
+          "sense_definition": "Nadawać, narzucać coś (np. imię, ton, prawo).",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Nadawanie/Narzucanie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Rodzice <w>podawali</w> dzieciom imiona po dziadkach.",
+              "target_lang_translations": {
+                "ru": "Родители <w>называли</w> детей в честь дедушек и бабушек."
+              }
+            },
+            {
+              "text": "Sędzia <w>podawał</w> wyrok.",
+              "target_lang_translations": {
+                "ru": "Судья <w>оглашал</w> приговор."
+              }
+            }
+          ],
+          "synonyms": [
+            "nadawać",
+            "narzucać"
+          ],
+          "common_phrases": [
+            "podawać imię",
+            "podawać ton"
+          ],
+          "target_lang_definitions": {
+            "ru": "Давать, присваивать что-либо (напр., имя); задавать (напр., тон)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "давать",
+                "target_lang_sense_clarification": "Используется при выборе имени для кого-либо."
+              },
+              {
+                "target_lang_word": "задавать",
+                "target_lang_sense_clarification": "Используется в выражении 'задавать тон'."
+              },
+              {
+                "target_lang_word": "выносить",
+                "target_lang_sense_clarification": "Используется для официальных решений, приговоров ('выносить приговор')."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6d79f8d2-41cb-4df0-b6d9-3a0dc9d21d93",
+          "sense_definition": "Doprowadzać coś do określonego stanu.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Doprowadzanie do stanu",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Trzeba <w>podać</w> sprawę do porządku.",
+              "target_lang_translations": {
+                "ru": "Нужно <w>привести</w> это дело в порядок."
+              }
+            },
+            {
+              "text": "Woda <w>podawała</w> się do wrzenia.",
+              "target_lang_translations": {
+                "ru": "Вода <w>закипала</w>."
+              }
+            }
+          ],
+          "synonyms": [
+            "doprowadzać"
+          ],
+          "common_phrases": [
+            "podawać do porządku"
+          ],
+          "target_lang_definitions": {
+            "ru": "Приводить что-либо в определённое состояние."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "доводить",
+                "target_lang_sense_clarification": "Используется для обозначения доведения до какого-либо состояния, часто до крайности ('доводить до кипения', 'доводить до слёз')."
+              },
+              {
+                "target_lang_word": "приводить",
+                "target_lang_sense_clarification": "Используется в выражении 'приводить в порядок'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "8a86364c-96bd-4df5-99fe-9264fbdb418b",
+          "sense_definition": "Ukazywać, ujawniać coś.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Ukazywanie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Obraz <w>podawał</w> ukryte znaczenie.",
+              "target_lang_translations": {
+                "ru": "Картина <w>раскрывала</w> скрытый смысл."
+              }
+            },
+            {
+              "text": "W końcu <w>podał</w> swoje prawdziwe intencje.",
+              "target_lang_translations": {
+                "ru": "В конце концов он <w>раскрыл</w> свои истинные намерения."
+              }
+            }
+          ],
+          "synonyms": [
+            "ukazywać",
+            "ujawniać"
+          ],
+          "common_phrases": [
+            "podawać się na widok"
+          ],
+          "target_lang_definitions": {
+            "ru": "Показывать, раскрывать, обнаруживать что-либо скрытое."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "раскрывать",
+                "target_lang_sense_clarification": "Используется, когда речь идет о чем-то скрытом (намерения, тайны, смысл)."
+              },
+              {
+                "target_lang_word": "обнаруживать",
+                "target_lang_sense_clarification": "Делать явным, видимым то, что было скрыто."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "eb3a90d9-e1ea-4cbb-bcc5-9d23f37b8c8a",
+          "sense_definition": "Powierzać coś komuś.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Powierzanie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Podawał</w> swoje sekrety tylko najbliższym przyjaciołom.",
+              "target_lang_translations": {
+                "ru": "Он <w>доверял</w> свои секреты только самым близким друзьям."
+              }
+            },
+            {
+              "text": "<w>Podał</w> dziecko pod opiekę babci.",
+              "target_lang_translations": {
+                "ru": "Он <w>доверил</w> ребенка заботе бабушки."
+              }
+            }
+          ],
+          "synonyms": [
+            "powierzać",
+            "zawierzać"
+          ],
+          "common_phrases": [
+            "podawać w opiekę"
+          ],
+          "target_lang_definitions": {
+            "ru": "Доверять, поручать что-либо кому-либо."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "доверять",
+                "target_lang_sense_clarification": "Используется для секретов, личной информации, а также для детей, имущества."
+              },
+              {
+                "target_lang_word": "вверять",
+                "target_lang_sense_clarification": "Более официально, означает передавать под чью-либо ответственность или заботу."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "647dac44-4162-4676-a3d3-62a24035dfa0",
+          "sense_definition": "Pochodzić z czegoś, mieć swoje źródło.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Pochodzenie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Ta tradycja <w>podaje</w> się z dawnych czasów.",
+              "target_lang_translations": {
+                "ru": "Эта традиция <w>берёт начало</w> с давних времён."
+              }
+            },
+            {
+              "text": "Jego wiedza <w>podaje</w> się z wielu źródeł.",
+              "target_lang_translations": {
+                "ru": "Его знания <w>происходят</w> из многих источников."
+              }
+            }
+          ],
+          "synonyms": [
+            "pochodzić",
+            "wywodzić się"
+          ],
+          "common_phrases": [
+            "podawać się z czegoś"
+          ],
+          "target_lang_definitions": {
+            "ru": "Происходить от чего-либо, брать начало, иметь своим источником."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "происходить",
+                "target_lang_sense_clarification": "Основной глагол для указания источника, происхождения (традиция происходит из...)."
+              },
+              {
+                "target_lang_word": "брать начало",
+                "target_lang_sense_clarification": "Поэтическое или книжное выражение, означающее 'начинаться с'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "538c3998-e9ec-4464-b805-e4c120f99787",
+          "sense_definition": "Wyciągać, wyjmować coś z wnętrza lub na powierzchnię.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Wyciąganie",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Górnicy <w>podawali</w> węgiel na powierzchnię.",
+              "target_lang_translations": {
+                "ru": "Шахтёры <w>поднимали</w> уголь на поверхность."
+              }
+            },
+            {
+              "text": "Z trudem <w>podawał</w> rękę z wody.",
+              "target_lang_translations": {
+                "ru": "Он с трудом <w>протягивал</w> руку из воды."
+              }
+            }
+          ],
+          "synonyms": [
+            "wyciągać",
+            "wyjmować"
+          ],
+          "common_phrases": [
+            "podawać z ziemi"
+          ],
+          "target_lang_definitions": {
+            "ru": "Извлекать, вынимать что-либо изнутри или на поверхность."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "поднимать",
+                "target_lang_sense_clarification": "Используется для перемещения чего-либо снизу вверх, на поверхность."
+              },
+              {
+                "target_lang_word": "извлекать",
+                "target_lang_sense_clarification": "Используется для полезных ископаемых."
+              },
+              {
+                "target_lang_word": "протягивать",
+                "target_lang_sense_clarification": "Протягивать руку, чтобы дотянуться до чего-либо или кого-либо."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "564df86c-7d0a-4861-aff0-40790988d477",
+          "sense_definition": "Oferować, proponować; poddawać się, ulegać (znaczenie archaiczne).",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Archaiczne",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "(Archaiczne) Król <w>podawał</w> rękę na znak pokoju.",
+              "target_lang_translations": {
+                "ru": "(Устар.) Король <w>протягивал</w> руку в знак мира."
+              }
+            },
+            {
+              "text": "(Archaiczne) <w>Podawał</w> się woli boskiej.",
+              "target_lang_translations": {
+                "ru": "(Устар.) Он <w>покорялся</w> воле божьей."
+              }
+            }
+          ],
+          "synonyms": [
+            "oferować",
+            "proponować",
+            "poddawać się",
+            "ulegać"
+          ],
+          "traits": [
+            {
+              "trait_type": "archaic",
+              "comment": "znaczenie przestarzałe"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "(Устар.) Предлагать, протягивать; сдаваться, покоряться."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "протягивать",
+                "target_lang_sense_clarification": "(Устар.) Для жеста, предложения (протягивать руку)."
+              },
+              {
+                "target_lang_word": "покоряться",
+                "target_lang_sense_clarification": "(Устар.) Для подчинения воле, судьбе."
+              },
+              {
+                "target_lang_word": "сдаваться",
+                "target_lang_sense_clarification": "(Устар.) Прекращать сопротивление, признавать себя побеждённым."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "pos": "verb",
+      "senses": [
+        {
+          "sense_id": "c3569798-b4aa-4d07-bc49-eb9d4d8378a9",
+          "sense_definition": "Przedstawiać się jako ktoś, często w celu oszustwa; zgłaszać swoją obecność.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Prezentowanie się",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Ten człowiek <w>podawał</w> się za dziennikarza.",
+              "target_lang_translations": {
+                "ru": "Этот человек <w>выдавал</w> себя за журналиста."
+              }
+            },
+            {
+              "text": "Musisz <w>podać</w> się do egzaminu.",
+              "target_lang_translations": {
+                "ru": "Ты должен <w>записаться</w> на экзамен."
+              }
+            }
+          ],
+          "synonyms": [
+            "przedstawiać się",
+            "zgłaszać się",
+            "udawać"
+          ],
+          "common_phrases": [
+            "podawać się za kogoś",
+            "podawać się do czegoś"
+          ],
+          "target_lang_definitions": {
+            "ru": "Выдавать себя за кого-либо, часто с целью обмана; заявлять о себе для какой-либо цели."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "выдавать себя за",
+                "target_lang_sense_clarification": "Используется, когда кто-то притворяется кем-то другим."
+              },
+              {
+                "target_lang_word": "записываться",
+                "target_lang_sense_clarification": "Регистрироваться для участия в чём-либо (напр., на экзамен)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "8dc94747-c68e-473b-845c-0acda6e83594",
+          "sense_definition": "Poddawać się czemuś, narażać się na coś.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "Poddawanie się",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Nie <w>podawaj</w> się na niepotrzebne ryzyko.",
+              "target_lang_translations": {
+                "ru": "Не <w>подвергай</w> себя ненужному риску."
+              }
+            },
+            {
+              "text": "Wojska <w>podawały</w> się w niewolę.",
+              "target_lang_translations": {
+                "ru": "Войска <w>сдавались</w> в плен."
+              }
+            }
+          ],
+          "synonyms": [
+            "poddawać się",
+            "narażać się",
+            "wystawiać się"
+          ],
+          "common_phrases": [
+            "podawać się w niewolę",
+            "podawać się na pastwę"
+          ],
+          "target_lang_definitions": {
+            "ru": "Сдаваться, подвергать себя чему-либо."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "сдаваться",
+                "target_lang_sense_clarification": "Используется в значении капитуляции (в плен, на милость победителя)."
+              },
+              {
+                "target_lang_word": "подвергать себя",
+                "target_lang_sense_clarification": "Используется, когда речь идет о риске, опасности."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "53432407-41c7-41f5-bcaf-1c03eee27e60",
+          "sense_definition": "Pochylać się, wychylać się do przodu.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Pochylanie się",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Kierowca <w>podawał</w> się do przodu, żeby lepiej widzieć.",
+              "target_lang_translations": {
+                "ru": "Водитель <w>подавался</w> вперёд, чтобы лучше видеть."
+              }
+            },
+            {
+              "text": "Roślina <w>podawała</w> się ku słońcu.",
+              "target_lang_translations": {
+                "ru": "Растение <w>тянулось</w> к солнцу."
+              }
+            }
+          ],
+          "synonyms": [
+            "pochylać się",
+            "wychylać się"
+          ],
+          "common_phrases": [
+            "podawać się do przodu"
+          ],
+          "target_lang_definitions": {
+            "ru": "Наклоняться, двигать телом вперёд или в сторону."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "подаваться",
+                "target_lang_sense_clarification": "Точный эквивалент, особенно с наречиями 'вперёд', 'вбок'."
+              },
+              {
+                "target_lang_word": "наклоняться",
+                "target_lang_sense_clarification": "Более общее слово для 'lean'."
+              },
+              {
+                "target_lang_word": "тянуться",
+                "target_lang_sense_clarification": "Двигаться по направлению к чему-либо, например, к свету."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "33f73c1c-d125-4c4f-bb12-34cb3b7f4524",
+          "sense_definition": "Rezygnować z funkcji, składać dymisję.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Rezygnacja",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Minister <w>podał</w> się do dymisji po skandalu.",
+              "target_lang_translations": {
+                "ru": "Министр <w>подал</w> в отставку после скандала."
+              }
+            },
+            {
+              "text": "Zdecydował się <w>podać</w> się do rezygnacji.",
+              "target_lang_translations": {
+                "ru": "Он решил <w>уйти</w> в отставку."
+              }
+            }
+          ],
+          "synonyms": [
+            "rezygnować",
+            "składać dymisję"
+          ],
+          "common_phrases": [
+            "podawać się do dymisji"
+          ],
+          "target_lang_definitions": {
+            "ru": "Уходить в отставку, подавать прошение об отставке."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "подавать в отставку",
+                "target_lang_sense_clarification": "Устойчивое выражение, означающее официальный уход с поста."
+              },
+              {
+                "target_lang_word": "уходить в отставку",
+                "target_lang_sense_clarification": "Более общее выражение, означающее 'уволиться', 'сложить полномочия'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "570d7089-1683-4855-97a2-0e72407cf960",
+          "sense_definition": "Kierować się w określonym kierunku.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Kierowanie się",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Podawali</w> się w stronę lasu.",
+              "target_lang_translations": {
+                "ru": "Они <w>направлялись</w> в сторону леса."
+              }
+            },
+            {
+              "text": "Zawsze <w>podaje</w> się za głosem serca.",
+              "target_lang_translations": {
+                "ru": "Он всегда <w>следует</w> зову сердца."
+              }
+            }
+          ],
+          "synonyms": [
+            "kierować się",
+            "zmierzać"
+          ],
+          "common_phrases": [
+            "podawać się w drogę"
+          ],
+          "target_lang_definitions": {
+            "ru": "Направляться, двигаться в определённую сторону."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "направляться",
+                "target_lang_sense_clarification": "Нейтральный глагол, означающий движение в определённом направлении."
+              },
+              {
+                "target_lang_word": "податься",
+                "target_lang_sense_clarification": "(Совершенный вид) Часто означает решительное перемещение, смену места ('податься в город')."
+              },
+              {
+                "target_lang_word": "следовать",
+                "target_lang_sense_clarification": "Используется в переносном смысле, 'следовать зову сердца', 'следовать совету'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "27fd5f93-149a-4f18-8966-24127f8b543f",
+          "sense_definition": "Ukazywać się, rozpościerać się przed kimś (o widoku, możliwościach).",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Ukazywanie się",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Przed nami <w>podawał</w> się piękny krajobraz.",
+              "target_lang_translations": {
+                "ru": "Перед нами <w>открывался</w> прекрасный пейзаж."
+              }
+            },
+            {
+              "text": "Nowe możliwości <w>podawały</w> się przed nim.",
+              "target_lang_translations": {
+                "ru": "Перед ним <w>открывались</w> новые возможности."
+              }
+            }
+          ],
+          "synonyms": [
+            "ukazywać się",
+            "rozpościerać się"
+          ],
+          "common_phrases": [
+            "podawać się przed oczami"
+          ],
+          "target_lang_definitions": {
+            "ru": "Открываться, простираться перед кем-либо (о виде, пейзаже, возможностях)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "открываться",
+                "target_lang_sense_clarification": "Используется для описания пейзажей, видов, а также возможностей, которые появляются перед человеком."
+              },
+              {
+                "target_lang_word": "простираться",
+                "target_lang_sense_clarification": "Означает 'раскидываться на большом пространстве' (о полях, лесах)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "510f0fab-7c44-4a96-a26e-470c9f5d184c",
+          "sense_definition": "Oddawać się czemuś lub komuś, poświęcać się.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Oddawanie się",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Podał</w> się całkowicie swojej pasji.",
+              "target_lang_translations": {
+                "ru": "Он полностью <w>отдался</w> своей страсти."
+              }
+            },
+            {
+              "text": "(Archaiczne) Rycerz <w>podawał</w> się w ofierze za swój kraj.",
+              "target_lang_translations": {
+                "ru": "(Устар.) Рыцарь <w>приносил</w> себя в жертву за свою страну."
+              }
+            }
+          ],
+          "synonyms": [
+            "oddawać się",
+            "poświęcać się"
+          ],
+          "common_phrases": [
+            "podawać się w ofierze"
+          ],
+          "target_lang_definitions": {
+            "ru": "Посвящать себя чему-либо, отдаваться чему-либо."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "отдаваться",
+                "target_lang_sense_clarification": "Имеет схожее значение с 'посвящать себя', часто с сильным эмоциональным оттенком."
+              },
+              {
+                "target_lang_word": "посвящать себя",
+                "target_lang_sense_clarification": "Означает полностью сосредоточиться на какой-либо деятельности, идее или человеке."
+              },
+              {
+                "target_lang_word": "приносить себя в жертву",
+                "target_lang_sense_clarification": "Устойчивое выражение, означающее 'жертвовать собой'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "912dc06a-f1c5-48a9-9829-e882fec59def",
+          "sense_definition": "Podejmować się czegoś, brać na siebie.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Podejmowanie się",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Podał</w> się do trudnego zadania.",
+              "target_lang_translations": {
+                "ru": "Он <w>взялся</w> за трудную задачу."
+              }
+            },
+            {
+              "text": "Nie każdy <w>podaje</w> się do takiej odpowiedzialności.",
+              "target_lang_translations": {
+                "ru": "Не каждый <w>возьмётся</w> за такую ответственность."
+              }
+            }
+          ],
+          "synonyms": [
+            "podejmować się",
+            "brać na siebie"
+          ],
+          "common_phrases": [
+            "podawać się do zadania"
+          ],
+          "target_lang_definitions": {
+            "ru": "Браться за что-либо, принимать на себя (задачу, ответственность)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "браться за",
+                "target_lang_sense_clarification": "Означает начинать выполнять сложную задачу или работу."
+              },
+              {
+                "target_lang_word": "принимать на себя",
+                "target_lang_sense_clarification": "Означает принимать на себя обязательства, ответственность."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "2e3b94ed-4409-4604-8abc-ca4a0c422c84",
+          "sense_definition": "Być oczywistym, narzucać się (o fakcie, wniosku).",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Oczywistość",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Wniosek <w>podawał</w> się sam przez się.",
+              "target_lang_translations": {
+                "ru": "Вывод <w>напрашивался</w> сам собой."
+              }
+            },
+            {
+              "text": "Jego wina <w>podawała</w> się na pierwszy rzut oka.",
+              "target_lang_translations": {
+                "ru": "Его вина <w>была очевидна</w> с первого взгляда."
+              }
+            }
+          ],
+          "synonyms": [
+            "narzucać się",
+            "być oczywistym"
+          ],
+          "common_phrases": [
+            "podawać się samo przez się"
+          ],
+          "target_lang_definitions": {
+            "ru": "Быть очевидным, напрашиваться (о выводе, факте)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "напрашиваться",
+                "target_lang_sense_clarification": "Идеально подходит для выводов или решений, которые кажутся единственно верными ('вывод напрашивается')."
+              },
+              {
+                "target_lang_word": "быть очевидным",
+                "target_lang_sense_clarification": "Прямой способ сказать, что что-то является очевидным."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "277bbb7e-96ad-450e-b9db-b29aaf563a29",
+          "sense_definition": "Być podobnym do kogoś lub czegoś (używane regionalnie, np. w Częstochowie i na Podhalu).",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Podobieństwo",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Wszystkie twoje córki <w>podają</w> się do Ciebie.",
+              "target_lang_translations": {
+                "ru": "Все твои дочери <w>похожи</w> на тебя."
+              }
+            },
+            {
+              "text": "Ten pies <w>podaje</w> się do swojego ojca.",
+              "target_lang_translations": {
+                "ru": "Эта собака <w>похожа</w> на своего отца."
+              }
+            }
+          ],
+          "synonyms": [
+            "być podobnym",
+            "przypominać"
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Częstochowa i Podhale"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "(Регионализм) Быть похожим на кого-либо или что-либо."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "быть похожим на",
+                "target_lang_sense_clarification": "Самый распространённый способ выразить сходство."
+              },
+              {
+                "target_lang_word": "походить на",
+                "target_lang_sense_clarification": "Более книжный вариант, синоним 'быть похожим на'."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

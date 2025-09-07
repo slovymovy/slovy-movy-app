@@ -1,0 +1,947 @@
+{
+  "entries": [
+    {
+      "pos": "noun",
+      "senses": [
+        {
+          "sense_id": "a4bbbaad-ffdd-461e-91c2-b7b00c4bf5ca",
+          "sense_definition": "Уменьшительно-ласкательное от слова «голова»; маленькая голова.",
+          "learner_level": "A1",
+          "frequency": "High",
+          "semantic_group_id": "",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Моя маленькая дочка погладила меня по <w>головке</w>.",
+              "target_lang_translations": {
+                "en": "My little daughter stroked my <w>head</w>."
+              }
+            },
+            {
+              "text": "У котенка такая милая <w>головка</w>.",
+              "target_lang_translations": {
+                "en": "The kitten has such a cute little <w>head</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "погладить по головке",
+            "маленькая головка"
+          ],
+          "target_lang_definitions": {
+            "en": "A small head; a diminutive or affectionate form of the word 'head'."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "little head",
+                "target_lang_sense_clarification": "Used as a diminutive or affectionate term for a person's or animal's head."
+              },
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "A general term for the head, often implying smallness or affection."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "5adb0e3f-c174-4ce5-8f5c-d887adff4402",
+          "sense_definition": "Утолщённая или выступающая вперёд (обычно округлая) часть или оконечность чего-либо (например, винта, булавки, молотка).",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Часть предмета",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Булавка с цветной <w>головкой</w>.",
+              "target_lang_translations": {
+                "en": "A pin with a colored <w>head</w>."
+              }
+            },
+            {
+              "text": "У меня в руках была только <w>головка</w> ключика.",
+              "target_lang_translations": {
+                "en": "I only had the <w>head</w> of the small key in my hands."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка винта",
+            "головка булавки",
+            "головка молотка"
+          ],
+          "target_lang_definitions": {
+            "en": "The thickened or protruding (usually rounded) part or end of something (e.g., a screw, pin, hammer)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "The top or end part of a tool or object, like a pin, nail, or screw."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "02f3d96f-e318-478e-879f-6002a6902594",
+          "sense_definition": "Утолщённая шаровидная корневая часть стебля, луковица репчатого лука, чеснока.",
+          "learner_level": "A2",
+          "frequency": "Middle",
+          "semantic_group_id": "Растения и плоды",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Для супа нужна одна <w>головка</w> лука.",
+              "target_lang_translations": {
+                "en": "You need one <w>bulb</w> of onion for the soup."
+              }
+            },
+            {
+              "text": "Разотрите лимон, корень сельдерея и <w>головку</w> чеснока.",
+              "target_lang_translations": {
+                "en": "Mash a lemon, a celery root, and a <w>head</w> of garlic."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка лука",
+            "головка чеснока"
+          ],
+          "target_lang_definitions": {
+            "en": "The thickened, spherical root part of a stem, such as a bulb of onion or garlic."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "bulb",
+                "target_lang_sense_clarification": "Used for a whole onion."
+              },
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "Used for a whole garlic."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "11573d4a-d9c8-4a54-8bc1-0611b72035a6",
+          "sense_definition": "Большой кусок пищевого продукта шарообразной или конусовидной формы (обычно о сахаре или сыре).",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "На столе лежала большая <w>головка</w> сыра.",
+              "target_lang_translations": {
+                "en": "There was a large <w>wheel</w> of cheese on the table."
+              }
+            },
+            {
+              "text": "Раньше сахар продавали целыми <w>головками</w>.",
+              "target_lang_translations": {
+                "en": "In the past, sugar was sold in whole <w>loaves</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка сыра",
+            "головка сахара"
+          ],
+          "target_lang_definitions": {
+            "en": "A large piece of a food product in a spherical or conical shape (usually of sugar or cheese)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "wheel",
+                "target_lang_sense_clarification": "Specifically for a large, round piece of cheese."
+              },
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "For a block of cheese or a traditional cone of sugar."
+              },
+              {
+                "target_lang_word": "loaf",
+                "target_lang_sense_clarification": "For a block of sugar (a sugarloaf)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "5bf6e10f-e3ad-41a3-b107-bfc74f651654",
+          "sense_definition": "Элемент детали или узла в конструкции технических устройств, а также в радиоэлектронных устройствах записи и воспроизведения информации.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Часть предмета",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Шлифовальная <w>головка</w> станка нуждается в замене.",
+              "target_lang_translations": {
+                "en": "The grinding <w>head</w> of the machine needs to be replaced."
+              }
+            },
+            {
+              "text": "Магнитная <w>головка</w> кассетного плеера требует чистки.",
+              "target_lang_translations": {
+                "en": "The magnetic <w>head</w> of the cassette player needs cleaning."
+              }
+            }
+          ],
+          "common_phrases": [
+            "магнитная головка",
+            "лазерная головка",
+            "шлифовальная головка"
+          ],
+          "target_lang_definitions": {
+            "en": "A component in a technical device, or in electronic devices for recording and reproducing information."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "The part of a machine that reads, writes, or erases information (e.g., on a tape or disk), or performs a specific mechanical action (e.g., grinding)."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e021c746-ed18-4d57-99ef-21d53560835f",
+          "sense_definition": "Шаровидное или продолговатое соцветие с укороченной осью, на верхушке которой сидят цветки (например, у клевера).",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Растения и плоды",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Вот склонил крупную красивую <w>головку</w> водосбор обыкновенный.",
+              "target_lang_translations": {
+                "en": "Here the common columbine has bent its large, beautiful <w>flower head</w>."
+              }
+            },
+            {
+              "text": "Пчелы собирают нектар с <w>головок</w> клевера.",
+              "target_lang_translations": {
+                "en": "Bees collect nectar from the clover <w>heads</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка клевера",
+            "головка ворсянки"
+          ],
+          "target_lang_definitions": {
+            "en": "A spherical or oblong inflorescence with a shortened axis, on top of which flowers are seated (e.g., in clover)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "A compact cluster of flowers, like on a clover."
+              },
+              {
+                "target_lang_word": "flower head",
+                "target_lang_sense_clarification": "A more descriptive term for a dense, rounded cluster of flowers."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "7fb17f04-3fda-43c2-8271-e4186aceea86",
+          "sense_definition": "Шарообразный плод некоторых растений (например, мака).",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Растения и плоды",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "На поле созрели <w>головки</w> мака.",
+              "target_lang_translations": {
+                "en": "Poppy <w>heads</w> have ripened in the field."
+              }
+            },
+            {
+              "text": "Из <w>головок</w> мака можно получить масло.",
+              "target_lang_translations": {
+                "en": "Oil can be extracted from poppy <w>pods</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка мака"
+          ],
+          "target_lang_definitions": {
+            "en": "The spherical fruit of some plants (e.g., the poppy)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "The seed-bearing capsule of a poppy."
+              },
+              {
+                "target_lang_word": "pod",
+                "target_lang_sense_clarification": "A common term for a poppy seed capsule."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "d8a2869f-0a3d-4b3f-b3a7-ff754dd00ed2",
+          "sense_definition": "Небольшой закруглённый конец мышцы или кости, соприкасающийся с другой мышцей или костью.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Анатомия",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Головка</w> плечевой кости соединена с суставной ямкой.",
+              "target_lang_translations": {
+                "en": "The <w>head</w> of the humerus is connected to the articular fossa."
+              }
+            },
+            {
+              "text": "Врач объяснил строение сустава, показав <w>головку</w> бедренной кости.",
+              "target_lang_translations": {
+                "en": "The doctor explained the structure of the joint, showing the <w>head</w> of the femur."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка кости",
+            "головка мышцы",
+            "головка плечевой кости"
+          ],
+          "target_lang_definitions": {
+            "en": "A small, rounded end of a muscle or bone that connects with another muscle or bone."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "Anatomical term for the rounded, articulating end of a bone."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f9bd812a-ba90-4b1e-88b6-2010a351a3a6",
+          "sense_definition": "Конусообразное или грибовидное утолщение крайней части клитора и полового члена.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Анатомия",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "В анатомии изучают строение <w>головки</w> полового члена.",
+              "target_lang_translations": {
+                "en": "In anatomy, they study the structure of the <w>glans</w> of the penis."
+              }
+            },
+            {
+              "text": "Термин «<w>головка</w>» используется для обозначения определённой части клитора.",
+              "target_lang_translations": {
+                "en": "The term '<w>head</w>' is used to refer to a specific part of the clitoris."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка полового члена",
+            "головка клитора"
+          ],
+          "target_lang_definitions": {
+            "en": "The conical or mushroom-shaped thickened end of the clitoris and penis."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "glans",
+                "target_lang_sense_clarification": "The specific anatomical term for the tip of the penis or clitoris."
+              },
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "A common, less formal term for the tip of the penis."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c66d8eac-79b7-4b7e-b4a4-fc949647a6c7",
+          "sense_definition": "Деревянная колодка со колками для натягивания струн в струнных музыкальных инструментах (скрипке, виолончели и т.п.).",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Часть предмета",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Головка</w> скрипки украшена резьбой.",
+              "target_lang_translations": {
+                "en": "The <w>scroll</w> of the violin is decorated with carving."
+              }
+            },
+            {
+              "text": "Настройка виолончели начинается с регулировки колков в <w>головке</w>.",
+              "target_lang_translations": {
+                "en": "Tuning a cello begins with adjusting the pegs in the <w>pegbox</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка скрипки",
+            "головка виолончели"
+          ],
+          "target_lang_definitions": {
+            "en": "The wooden part with pegs for tightening the strings on a stringed musical instrument (violin, cello, etc.)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "scroll",
+                "target_lang_sense_clarification": "The carved end of an instrument in the violin family."
+              },
+              {
+                "target_lang_word": "pegbox",
+                "target_lang_sense_clarification": "The part that houses the tuning pegs."
+              },
+              {
+                "target_lang_word": "headstock",
+                "target_lang_sense_clarification": "General term, especially for guitars and similar instruments."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "499fbb06-64c8-4262-b0eb-1a660ba56a54",
+          "sense_definition": "Навершие рукояти холодного оружия (ножа, сабли и т.п.).",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Часть предмета",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Головка</w> сабли часто служила противовесом клинку.",
+              "target_lang_translations": {
+                "en": "The <w>pommel</w> of the saber often served as a counterweight to the blade."
+              }
+            },
+            {
+              "text": "На <w>головке</w> старинного кинжала был выгравирован герб.",
+              "target_lang_translations": {
+                "en": "A coat of arms was engraved on the <w>pommel</w> of the ancient dagger."
+              }
+            }
+          ],
+          "synonyms": [
+            "навершие"
+          ],
+          "common_phrases": [
+            "головка сабли",
+            "головка ножа"
+          ],
+          "target_lang_definitions": {
+            "en": "The pommel of the hilt of a bladed weapon (knife, saber, etc.)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "pommel",
+                "target_lang_sense_clarification": "The weighted knob on the end of a sword or dagger hilt."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a4355840-39fa-49ee-96d4-c7afaf2d6478",
+          "sense_definition": "Рабочая часть булавы, часто называемая яблоком.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Часть предмета",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Удар <w>головкой</w> булавы был смертельным.",
+              "target_lang_translations": {
+                "en": "A blow with the <w>head</w> of the mace was fatal."
+              }
+            },
+            {
+              "text": "Наконечник булавы, или <w>головка</w>, мог быть украшен шипами.",
+              "target_lang_translations": {
+                "en": "The tip of the mace, or the <w>head</w>, could be decorated with spikes."
+              }
+            }
+          ],
+          "synonyms": [
+            "яблоко"
+          ],
+          "common_phrases": [
+            "головка булавы"
+          ],
+          "target_lang_definitions": {
+            "en": "The striking part of a mace, sometimes called an 'apple'."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "The weighted, striking part of a mace."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e9494890-8216-46f3-b599-e1528bef7a8c",
+          "sense_definition": "Пришивная часть обуви, покрывающая пальцы и верхнюю часть стопы; передок.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Часть предмета",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Сапожник пришил новые <w>головки</w> к старым голенищам.",
+              "target_lang_translations": {
+                "en": "The shoemaker sewed new <w>vamps</w> onto the old bootlegs."
+              }
+            },
+            {
+              "text": "Кожаные туфли XII века имели богато орнаментированную <w>головку</w>.",
+              "target_lang_translations": {
+                "en": "12th-century leather shoes had a richly ornamented <w>vamp</w>."
+              }
+            }
+          ],
+          "synonyms": [
+            "передок"
+          ],
+          "common_phrases": [
+            "головка обуви"
+          ],
+          "target_lang_definitions": {
+            "en": "The sewn part of a shoe that covers the toes and the upper part of the foot; the front part."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "vamp",
+                "target_lang_sense_clarification": "The upper front part of a shoe or boot."
+              },
+              {
+                "target_lang_word": "toe cap",
+                "target_lang_sense_clarification": "A piece of material covering the toe of a shoe."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a9aba0dc-0501-4a21-a9d5-02c601987e9d",
+          "sense_definition": "Передняя изогнутая часть полоза саней.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Часть предмета",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Головка</w> саней загнута вверх, чтобы не цепляться за снег.",
+              "target_lang_translations": {
+                "en": "The <w>head</w> of the sleigh runner is bent upwards so as not to catch on the snow."
+              }
+            },
+            {
+              "text": "Старинные сани имели резные <w>головки</w>.",
+              "target_lang_translations": {
+                "en": "Old sleighs had carved runner <w>heads</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка саней"
+          ],
+          "target_lang_definitions": {
+            "en": "The front, curved part of a sleigh runner."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "The upward-curving front part of a sleigh runner."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "4f4bd20d-7033-4f00-a294-7c27a0485437",
+          "sense_definition": "Брусок с деревянными зубьями, насаживаемый на рукоятку грабель.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Часть предмета",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Головка</w> грабель отломилась, и их пришлось чинить.",
+              "target_lang_translations": {
+                "en": "The <w>head</w> of the rake broke off, and it had to be repaired."
+              }
+            },
+            {
+              "text": "Для сбора сена нужна широкая <w>головка</w> грабель.",
+              "target_lang_translations": {
+                "en": "A wide rake <w>head</w> is needed for gathering hay."
+              }
+            }
+          ],
+          "synonyms": [
+            "брусок"
+          ],
+          "common_phrases": [
+            "головка грабель"
+          ],
+          "target_lang_definitions": {
+            "en": "A bar with wooden teeth mounted on the handle of a rake."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "The part of a rake to which the tines are attached."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "5b7d1c12-6419-446c-b75d-8a64780fd79c",
+          "sense_definition": "Деталь или узел головного убора, состоящие из клиньев, донышка и стенок.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Часть предмета",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Головка</w> кепки была сшита из нескольких клиньев.",
+              "target_lang_translations": {
+                "en": "The <w>crown</w> of the cap was sewn from several panels."
+              }
+            },
+            {
+              "text": "При пошиве шляпы важно правильно выкроить <w>головку</w>.",
+              "target_lang_translations": {
+                "en": "When sewing a hat, it is important to cut the <w>crown</w> correctly."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка кепки",
+            "головка шляпы"
+          ],
+          "target_lang_definitions": {
+            "en": "A part or assembly of headwear, consisting of panels, a top, and sides."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "crown",
+                "target_lang_sense_clarification": "The part of a hat that covers the top of the head."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "5bb2fd88-d2a7-49a1-b9a1-25eb15fdddae",
+          "sense_definition": "Группа руководящих лиц; центральный руководящий орган.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Головка</w> профсоюзной организации приняла решение.",
+              "target_lang_translations": {
+                "en": "The <w>leadership</w> of the trade union organization made a decision."
+              }
+            },
+            {
+              "text": "Вся <w>головка</w> администрации отсутствовала на совещании.",
+              "target_lang_translations": {
+                "en": "The entire <w>head</w> of the administration was absent from the meeting."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка организации",
+            "головка администрации"
+          ],
+          "target_lang_definitions": {
+            "en": "A group of leaders; a central governing body."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "leadership",
+                "target_lang_sense_clarification": "Figurative term for the governing body of an organization."
+              },
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "Figurative term for the leaders of an organization."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "0c88e57d-d3ef-4e7f-ba9b-4af102bebd20",
+          "sense_definition": "Название высшего сорта яиц.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "В магазине продаются яйца сорта «<w>головка</w>».",
+              "target_lang_translations": {
+                "en": "The store sells eggs of the '<w>golovka</w>' grade."
+              }
+            },
+            {
+              "text": "Яйца «<w>головка</w>» отличаются крупным размером и свежестью.",
+              "target_lang_translations": {
+                "en": "'<w>Golovka</w>' eggs are distinguished by their large size and freshness."
+              }
+            }
+          ],
+          "common_phrases": [
+            "яйца головка"
+          ],
+          "target_lang_definitions": {
+            "en": "The name for the highest grade of eggs."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "golovka",
+                "target_lang_sense_clarification": "A specific, high-grade classification for eggs in Russia. Does not have a direct English equivalent, so the original term is sometimes used."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "278db86c-d683-4f4f-bf59-943011833e08",
+          "sense_definition": "Овал, обязательная часть ноты (кроме целой).",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Полиграфия и таблицы",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Каждая нота имеет <w>головку</w> и штиль.",
+              "target_lang_translations": {
+                "en": "Each note has a <w>notehead</w> and a stem."
+              }
+            },
+            {
+              "text": "Размер <w>головки</w> ноты указывает на её длительность.",
+              "target_lang_translations": {
+                "en": "The appearance of the note's <w>head</w> indicates its duration."
+              }
+            }
+          ],
+          "synonyms": [
+            "овал"
+          ],
+          "common_phrases": [
+            "головка ноты"
+          ],
+          "target_lang_definitions": {
+            "en": "The oval, an essential part of a musical note (except for a whole note)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "notehead",
+                "target_lang_sense_clarification": "The specific musical term for the round part of a note."
+              },
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "A more general term for the round part of a musical note."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "97c0d310-a226-43b9-9e92-b9527ecaeb7b",
+          "sense_definition": "Верхняя часть таблицы с заголовками, заголовочная часть таблицы.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Полиграфия и таблицы",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Головка</w> таблицы должна быть чётко оформлена.",
+              "target_lang_translations": {
+                "en": "The table <w>header</w> must be clearly formatted."
+              }
+            },
+            {
+              "text": "В <w>головке</w> таблицы указываются названия столбцов.",
+              "target_lang_translations": {
+                "en": "The column names are indicated in the table <w>head</w>."
+              }
+            }
+          ],
+          "antonyms": [
+            "хвост"
+          ],
+          "common_phrases": [
+            "головка таблицы"
+          ],
+          "target_lang_definitions": {
+            "en": "The upper part of a table with headings; the header part of a table."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "header",
+                "target_lang_sense_clarification": "The top row of a table that contains the titles for each column."
+              },
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "A synonym for table header."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e9bf0eea-425a-423c-84a6-e8e713d2f486",
+          "sense_definition": "Пробел, образующий верхнее поле страницы (в печатной форме).",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Полиграфия и таблицы",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Размер <w>головки</w> страницы влияет на её внешний вид.",
+              "target_lang_translations": {
+                "en": "The size of the page's <w>head margin</w> affects its appearance."
+              }
+            },
+            {
+              "text": "Вёрстка книги требует соблюдения определённых размеров <w>головки</w>.",
+              "target_lang_translations": {
+                "en": "Book layout requires adherence to specific <w>head margin</w> sizes."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка страницы"
+          ],
+          "target_lang_definitions": {
+            "en": "The space that forms the top margin of a page (in printed form)."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head margin",
+                "target_lang_sense_clarification": "The blank space at the top of a printed page."
+              },
+              {
+                "target_lang_word": "header",
+                "target_lang_sense_clarification": "The area at the top of a page, often containing a title or page number."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "b63c4a6f-d2dc-45eb-89d4-4839b34bf2f6",
+          "sense_definition": "Верхний обрез книжного блока или готовой книги.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Полиграфия и таблицы",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "<w>Головка</w> книги может быть окрашена или позолочена.",
+              "target_lang_translations": {
+                "en": "The <w>head</w> of the book can be colored or gilded."
+              }
+            },
+            {
+              "text": "При переплёте книги особое внимание уделяется обработке <w>головки</w>.",
+              "target_lang_translations": {
+                "en": "When binding a book, special attention is paid to finishing the <w>top edge</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "головка книги"
+          ],
+          "target_lang_definitions": {
+            "en": "The top edge of a book block or a finished book."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "head",
+                "target_lang_sense_clarification": "The bookbinding term for the top edge of a book's pages."
+              },
+              {
+                "target_lang_word": "top edge",
+                "target_lang_sense_clarification": "A more general term for the top edge of a book."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "490311f0-fba1-4262-87cd-bd4d5ce6575f",
+          "sense_definition": "Головной убор замужних женщин в России XIX века, платок, завязываемый на лбу или темени узелком.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "На старинных картинах часто изображены крестьянки в <w>головках</w>.",
+              "target_lang_translations": {
+                "en": "Old paintings often depict peasant women in <w>golovkas</w>."
+              }
+            },
+            {
+              "text": "Эта <w>головка</w> была частью традиционного русского костюма.",
+              "target_lang_translations": {
+                "en": "This <w>headdress</w> was part of the traditional Russian costume."
+              }
+            }
+          ],
+          "synonyms": [
+            "платок"
+          ],
+          "common_phrases": [
+            "русская головка"
+          ],
+          "traits": [
+            {
+              "trait_type": "dated",
+              "comment": "Устаревшее значение, относится к историческому периоду."
+            },
+            {
+              "trait_type": "regional",
+              "comment": "Относится к традиционному костюму в России."
+            }
+          ],
+          "target_lang_definitions": {
+            "en": "A headdress for married women in 19th-century Russia, a kerchief tied in a knot on the forehead or crown."
+          },
+          "translations": {
+            "en": [
+              {
+                "target_lang_word": "golovka",
+                "target_lang_sense_clarification": "A specific type of historical Russian headdress for married women. Often left untranslated."
+              },
+              {
+                "target_lang_word": "headdress",
+                "target_lang_sense_clarification": "A general term for this type of head covering."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
