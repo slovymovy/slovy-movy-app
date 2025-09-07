@@ -1,0 +1,94 @@
+{
+    "word": "programmatically",
+    "lang_code": "en",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "935aaf4d-1db4-40d0-8254-d7c0708a9716",
+                "word": "programmatically",
+                "pos": "adv",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "d3674bcb-9937-4678-bce7-612fee308dc9",
+                        "entry_id": "935aaf4d-1db4-40d0-8254-d7c0708a9716",
+                        "glosses": [
+                            "In a programmatic manner."
+                        ],
+                        "tags": [
+                            "not-comparable"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "d8236acc-bd83-4ed6-ae86-f6d1444d4198",
+                        "entry_id": "935aaf4d-1db4-40d0-8254-d7c0708a9716",
+                        "glosses": [
+                            "In the manner of a political program; ideologically."
+                        ],
+                        "tags": [
+                            "not-comparable"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "04e5cfd7-8879-47d3-9343-e8c5b9fa6068",
+                                "sense_id": "d8236acc-bd83-4ed6-ae86-f6d1444d4198",
+                                "text": "While clearly opposed to the political thrust of much 'Heritage' cinema (Sammy and Rosie, in particular, in programmatically anti-Tory: for example, the property developer who ousts the 'straggly kids' is one of Thatcher's MPs and her vision of a 'new Britain' is blatantly lampooned), Kureishi's films do not, however, endorse traditional kinds of Left oppositional politics as the best means by which to challenge the hegemony of the New Right."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "312166e4-b9c6-449f-8179-2fe76ca32e0d",
+                        "entry_id": "935aaf4d-1db4-40d0-8254-d7c0708a9716",
+                        "glosses": [
+                            "Through program code, rather than through a user interface."
+                        ],
+                        "tags": [
+                            "not-comparable"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "a88c9350-6528-4401-849c-e8fe3b2bd02d",
+                                "sense_id": "312166e4-b9c6-449f-8179-2fe76ca32e0d",
+                                "text": "To force a window to repaint itself programmatically, you call the inherited Invalidate() method[…]"
+                            },
+                            {
+                                "example_id": "e7971a21-350a-42a2-9951-d0b07c9749a7",
+                                "sense_id": "312166e4-b9c6-449f-8179-2fe76ca32e0d",
+                                "text": "Mark-up coding was programmatically added to identify certain data types from others, for example, headwords and citations."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "bcf7f852-0f7a-4161-8473-a005fec673e1",
+                "word": "programmatically",
+                "pos": "adv",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "75cc8f29-5c24-4665-abcd-ed8b10f24b5c",
+                        "entry_id": "bcf7f852-0f7a-4161-8473-a005fec673e1",
+                        "glosses": [
+                            "programowo"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ]
+    }
+}

@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val driver = DriverFactory(this).createDriver("app.db")
-            val db = DatabaseProvider.createDatabase(driver)
+            val db = DatabaseProvider.createAppDatabase(driver)
             val repo = SettingsRepository(db)
             App(repo)
         }

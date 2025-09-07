@@ -8,7 +8,7 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 
 fun main() = application {
     val driver = DriverFactory(null).createDriver("jdbc:sqlite:")
-    val db = DatabaseProvider.createDatabase(driver)
+    val db = DatabaseProvider.createAppDatabase(driver)
     val repo = SettingsRepository(db)
 
     Window(

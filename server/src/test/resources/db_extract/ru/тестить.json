@@ -1,0 +1,315 @@
+{
+    "word": "тестить",
+    "lang_code": "ru",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [],
+        "ru-extract.jsonl": [
+            {
+                "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                "word": "тестить",
+                "pos": "verb",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "6a0f7654-4800-4fce-8d63-9ff057d3e216",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "first-person",
+                            "singular",
+                            "present"
+                        ],
+                        "form": "те́щу"
+                    },
+                    {
+                        "form_id": "5c4906d4-ad65-42be-bc60-676a953b026b",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "first-person",
+                            "singular",
+                            "past"
+                        ],
+                        "form": "те́стил"
+                    },
+                    {
+                        "form_id": "2bf356b1-3121-4f4d-a904-dcb85e7413f8",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "first-person",
+                            "singular",
+                            "past"
+                        ],
+                        "form": "те́стила"
+                    },
+                    {
+                        "form_id": "c922461a-d551-4e9a-a523-799b5a83af16",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "second-person",
+                            "singular",
+                            "present"
+                        ],
+                        "form": "те́стишь"
+                    },
+                    {
+                        "form_id": "af6119ac-c9f2-4bba-9d8c-98d9c0496dd8",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "second-person",
+                            "singular",
+                            "past"
+                        ],
+                        "form": "те́стил"
+                    },
+                    {
+                        "form_id": "0925da58-dda1-4687-9ae2-c7823eb4ceb9",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "second-person",
+                            "singular",
+                            "past"
+                        ],
+                        "form": "те́стила"
+                    },
+                    {
+                        "form_id": "5f79296b-10e9-4e10-95ad-abdc54a65b46",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "second-person",
+                            "singular",
+                            "imperative"
+                        ],
+                        "form": "те́сти"
+                    },
+                    {
+                        "form_id": "f229f3b8-b1b3-496c-91d3-54e65e3c6446",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "third-person",
+                            "singular",
+                            "present"
+                        ],
+                        "form": "те́стит"
+                    },
+                    {
+                        "form_id": "83e0956b-b7f8-452a-8129-e16452e7460d",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "third-person",
+                            "singular",
+                            "past"
+                        ],
+                        "form": "те́стил"
+                    },
+                    {
+                        "form_id": "a0fc5be0-8647-428c-a951-9a6048e92b63",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "third-person",
+                            "singular",
+                            "past"
+                        ],
+                        "form": "те́стила"
+                    },
+                    {
+                        "form_id": "21e921e9-f9e0-4d7c-b700-baf053b2e3b8",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "third-person",
+                            "singular",
+                            "past"
+                        ],
+                        "form": "те́стило"
+                    },
+                    {
+                        "form_id": "ae1f7f7a-245a-485a-8763-5b83fa7d9ca8",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "first-person",
+                            "plural",
+                            "present"
+                        ],
+                        "form": "те́стим"
+                    },
+                    {
+                        "form_id": "b71f38ad-e557-4f60-966f-f2bd9aced7df",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "first-person",
+                            "plural",
+                            "past"
+                        ],
+                        "form": "те́стили"
+                    },
+                    {
+                        "form_id": "743cabfe-09b3-4510-ba55-c835daf489c3",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "second-person",
+                            "plural",
+                            "present"
+                        ],
+                        "form": "те́стите"
+                    },
+                    {
+                        "form_id": "a86a9916-15f4-452b-8743-98cc7cbdc50d",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "second-person",
+                            "plural",
+                            "past"
+                        ],
+                        "form": "те́стили"
+                    },
+                    {
+                        "form_id": "84477120-092b-48a4-8a7f-dcc78aefbe8b",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "second-person",
+                            "plural",
+                            "imperative"
+                        ],
+                        "form": "те́стите"
+                    },
+                    {
+                        "form_id": "2a934717-0a47-4df9-a9ca-dc4aed6f363b",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "third-person",
+                            "plural",
+                            "present"
+                        ],
+                        "form": "те́стят"
+                    },
+                    {
+                        "form_id": "578c8374-0562-4169-b096-0558a68e202c",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "third-person",
+                            "plural",
+                            "past"
+                        ],
+                        "form": "те́стили"
+                    },
+                    {
+                        "form_id": "ad3e647d-b642-4f34-b0bb-3015e711b420",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "Пр. действ. наст."
+                        ],
+                        "form": "те́стящий"
+                    },
+                    {
+                        "form_id": "82737a78-7d22-49dc-a694-c683fe46d7dc",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "Пр. действ. прош."
+                        ],
+                        "form": "те́стивший"
+                    },
+                    {
+                        "form_id": "8940b217-66bb-4227-95bf-bdf4011ff6cd",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "Деепр. наст."
+                        ],
+                        "form": "те́стя"
+                    },
+                    {
+                        "form_id": "2b78fcbb-650d-471c-850d-832b37aa7855",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "Деепр. прош."
+                        ],
+                        "form": "те́стив"
+                    },
+                    {
+                        "form_id": "5fe6f695-0ed2-4810-ae14-e1a615e27890",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "Деепр. прош."
+                        ],
+                        "form": "те́стивши"
+                    },
+                    {
+                        "form_id": "1bba599b-49d8-4326-997d-068945e3d9c1",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "Пр. страд. наст."
+                        ],
+                        "form": "те́стимый"
+                    },
+                    {
+                        "form_id": "887df017-7542-4882-9a7d-fa3297a517e6",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "Пр. страд. прош."
+                        ],
+                        "form": "те́щенный"
+                    },
+                    {
+                        "form_id": "15584c8c-002e-4daf-8c6e-e9b33413c674",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "tags": [
+                            "future"
+                        ],
+                        "form": "буду/будешь… те́стить"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "5c37fe17-76eb-41b8-972b-6e05cd1a586d",
+                        "entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "glosses": [
+                            "тестировать"
+                        ],
+                        "tags": [
+                            "slang"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "9a90f7fb-5d72-4e96-8ffa-f173e174faad",
+                        "source_entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "source_sense_ids": [
+                            "5c37fe17-76eb-41b8-972b-6e05cd1a586d"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "тестировать"
+                    },
+                    {
+                        "linkage_id": "fdeabb99-1f7c-4c3c-9f4e-78684334a9d7",
+                        "source_entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "source_sense_ids": [
+                            "5c37fe17-76eb-41b8-972b-6e05cd1a586d"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "пробовать"
+                    },
+                    {
+                        "linkage_id": "967bef85-0a4b-4933-ab7b-dc29c75ea9be",
+                        "source_entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "source_sense_ids": [
+                            "5c37fe17-76eb-41b8-972b-6e05cd1a586d"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "проверять"
+                    },
+                    {
+                        "linkage_id": "6592d25b-942f-437b-9d08-5ea480f7fd24",
+                        "source_entry_id": "637d142a-23d2-44ce-b5f6-180f5a995c5f",
+                        "source_sense_ids": [
+                            "5c37fe17-76eb-41b8-972b-6e05cd1a586d"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "испытывать"
+                    }
+                ]
+            }
+        ],
+        "nl-extract.jsonl": [],
+        "pl-extract.jsonl": []
+    }
+}

@@ -1,0 +1,63 @@
+{
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "5c37fe17-76eb-41b8-972b-6e05cd1a586d",
+                    "sense_definition": "Проверять что-либо (например, программу, устройство, продукт) на работоспособность, качество или соответствие требованиям.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Разработчики сейчас <w>тестят</w> новую версию приложения.",
+                            "target_lang_translations": {
+                                "en": "The developers are currently <w>testing</w> the new version of the app."
+                            }
+                        },
+                        {
+                            "text": "Перед покупкой всегда старайтесь <w>тестить</w> товар, чтобы убедиться в его качестве.",
+                            "target_lang_translations": {
+                                "en": "Before buying, always try <w>to test</w> the product to make sure of its quality."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "тестировать",
+                        "пробовать",
+                        "проверять",
+                        "испытывать"
+                    ],
+                    "common_phrases": [
+                        "тестить программу",
+                        "тестить продукт",
+                        "тестить систему"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "разговорное"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To check something (e.g., a program, device, or product) for functionality, quality, or compliance with requirements. This is a colloquial term derived from the English word 'test'."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "to test",
+                                "target_lang_sense_clarification": "The most direct and common translation. Used for software, products, etc. It corresponds to the Russian colloquialism 'тестить'."
+                            },
+                            {
+                                "target_lang_word": "to try out",
+                                "target_lang_sense_clarification": "A more informal equivalent, often used when personally checking a product before buying. Implies a less formal or systematic process than 'to test'."
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

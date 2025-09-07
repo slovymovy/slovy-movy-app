@@ -1,0 +1,2489 @@
+{
+  "word": "double",
+  "lang_code": "en",
+  "source_file_to_entries": {
+    "raw-wiktextract-data.jsonl": [
+      {
+        "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+        "word": "double",
+        "pos": "adj",
+        "lang_code": "en",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "0586b521-654f-4d53-9ccb-47d80b22af9a",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "Made up of two matching or complementary elements."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": [
+              {
+                "example_id": "67f7cff9-f559-4017-adc9-ffc39cf06e4b",
+                "sense_id": "0586b521-654f-4d53-9ccb-47d80b22af9a",
+                "text": "The closet has double doors."
+              },
+              {
+                "example_id": "838bbb5b-42e7-4366-84bb-a42107740086",
+                "sense_id": "0586b521-654f-4d53-9ccb-47d80b22af9a",
+                "text": "“[…] it is not fair of you to bring against mankind double weapons ! Such is not the usage of civilized warfare. Dangerous enough you are as woman alone, without bringing to your aid those gifts of mind suited to problems which men have been accustomed to arrogate to themselves.”"
+              },
+              {
+                "example_id": "9de5879b-f230-4ffb-be97-b686a8f2e5fc",
+                "sense_id": "0586b521-654f-4d53-9ccb-47d80b22af9a",
+                "text": "The [Washington] Post's proprietor through those turbulent [Watergate] days, Katharine Graham, held a double place in Washington’s hierarchy: at once regal Georgetown hostess and scrappy newshound, ready to hold the establishment to account."
+              }
+            ]
+          },
+          {
+            "sense_id": "34c60656-63f7-4140-8e9c-b6214bb0144b",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "Of twice the quantity."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": [
+              {
+                "example_id": "6fa0fc17-6a06-47b1-b5d7-e66439a93349",
+                "sense_id": "34c60656-63f7-4140-8e9c-b6214bb0144b",
+                "text": "Give me a double serving of mashed potatoes."
+              }
+            ]
+          },
+          {
+            "sense_id": "6cee4d93-8734-4813-8b52-683ee0354d74",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "Of a family relationship, related on both the maternal and paternal sides of a family."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": [
+              {
+                "example_id": "282d24fc-8579-41d9-a695-9850f0dc9970",
+                "sense_id": "6cee4d93-8734-4813-8b52-683ee0354d74",
+                "text": "He's my double cousin as my mother's sister married my father's brother."
+              }
+            ]
+          },
+          {
+            "sense_id": "b10bab7d-ad0d-45c1-b02b-52b647f1b8a3",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "Designed for two (people, cars, etc.)."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": [
+              {
+                "example_id": "e6f84848-bc75-4e60-9669-4db4d32e6992",
+                "sense_id": "b10bab7d-ad0d-45c1-b02b-52b647f1b8a3",
+                "text": "a double room"
+              },
+              {
+                "example_id": "7d7e10e6-0fa1-4e19-af71-7f9623cf9a23",
+                "sense_id": "b10bab7d-ad0d-45c1-b02b-52b647f1b8a3",
+                "text": "a double garage"
+              }
+            ]
+          },
+          {
+            "sense_id": "b9092da5-2b7c-447f-b5a0-0502c248388c",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "Folded in two; composed of two layers."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "e32f99fc-b028-4e0c-8efb-1dd4a75afebb",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "Stooping; bent over."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "948dc9db-8aa1-4a58-b3ef-2922b7d41d10",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "Having two aspects; ambiguous."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": [
+              {
+                "example_id": "da47b56a-3cd4-4b28-9d7a-737283de79dd",
+                "sense_id": "948dc9db-8aa1-4a58-b3ef-2922b7d41d10",
+                "text": "a double meaning"
+              }
+            ]
+          },
+          {
+            "sense_id": "bd9e5af2-40de-4f69-89e4-1bb2c41d2651",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "False, deceitful, or hypocritical."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": [
+              {
+                "example_id": "48686a72-cb16-4abc-9324-edd8ce88bfb6",
+                "sense_id": "bd9e5af2-40de-4f69-89e4-1bb2c41d2651",
+                "text": "a double life"
+              },
+              {
+                "example_id": "609002c9-e051-4613-bf31-9f7c19269b26",
+                "sense_id": "bd9e5af2-40de-4f69-89e4-1bb2c41d2651",
+                "text": "A fals double tunge is more fiers and fell\nThen Cerberus the cur couching in the kenel of hel;\nWherof hereafter, I thinke for to write,"
+              }
+            ]
+          },
+          {
+            "sense_id": "2f7d76f4-c582-4a88-94fb-6e103a297f8c",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "Of flowers, having more than the normal number of petals."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "454f4234-5f90-4908-b0fa-976bee9df6f4",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "Of an instrument, sounding an octave lower."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": [
+              {
+                "example_id": "cf78fb96-01b7-4608-a1a5-b7c1ed3d66f0",
+                "sense_id": "454f4234-5f90-4908-b0fa-976bee9df6f4",
+                "text": "a double bass"
+              }
+            ]
+          },
+          {
+            "sense_id": "a3c0750a-c201-49fc-ab71-c57454058918",
+            "entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "glosses": [
+              "Of time, twice as fast."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": []
+          }
+        ],
+        "translations": [
+          {
+            "translation_id": "5b8ea780-4298-4562-ac05-37ed9484c291",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "made up of two matching or complementary elements",
+            "target_lang_word": "dubbel",
+            "target_lang_code": "nl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "dubbel",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "c7f7468f-13a2-4937-b749-d5f144ef7ab2",
+                    "entry_id": "7b31debf-d36f-48d5-930c-0cc5e43b29d9",
+                    "glosses": [
+                      "tweemaal zoveel"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "7a73a397-b565-4560-9d67-6d5458953f5b",
+                        "sense_id": "c7f7468f-13a2-4937-b749-d5f144ef7ab2",
+                        "text": "Hij kreeg een dubbele uitkering."
+                      },
+                      {
+                        "example_id": "6d26a4cc-b7f9-4faf-8e47-c1159bf51da8",
+                        "sense_id": "c7f7468f-13a2-4937-b749-d5f144ef7ab2",
+                        "text": "Om te voorkomen dat ik blaren zou krijgen had ik een dubbele laag sokken aangedaan (Darn Tough en Injinji teensokken)."
+                      },
+                      {
+                        "example_id": "16bb9dee-3971-4d13-a3f5-75c9df72c5f9",
+                        "sense_id": "c7f7468f-13a2-4937-b749-d5f144ef7ab2",
+                        "text": "De Zweedse bossen konden kant-en-klare stammen van twintig meter leveren, maar voor het werk met de palen in de rivier hadden ze de dubbele lengte nodig."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "target_word": "dubbel",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "f11bd8b0-55af-4a77-99e2-e1549bf36d35",
+                    "entry_id": "e89287cc-73b2-4d63-bfd6-7b325ed23e55",
+                    "glosses": [
+                      "persoon die in bepaalde scènes een acteur vervangt"
+                    ],
+                    "tags": [
+                      "masculine"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "8cb12b15-eba6-4359-a8ba-54c88c3643f9",
+                    "entry_id": "e89287cc-73b2-4d63-bfd6-7b325ed23e55",
+                    "glosses": [
+                      "dubbelspel bij de tennissport"
+                    ],
+                    "tags": [
+                      "neuter"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "06ce00ae-db44-4e7e-97b7-e3d2f94afa60",
+                    "entry_id": "e89287cc-73b2-4d63-bfd6-7b325ed23e55",
+                    "glosses": [
+                      "/ soort bier"
+                    ],
+                    "tags": [
+                      "masculine",
+                      "neuter"
+                    ],
+                    "examples": []
+                  }
+                ]
+              },
+              {
+                "target_word": "dubbel",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "d88ef328-96d9-41bc-82bc-5578434c2fb2",
+                    "entry_id": "0d616d3b-84ab-4df4-a2bf-e2adac208ff8",
+                    "glosses": [
+                      "eerste persoon enkelvoud tegenwoordige tijd van dubbelen"
+                    ],
+                    "tags": [
+                      "form-of"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "fd365bfc-361c-40a0-852c-210142f71d3e",
+                        "sense_id": "d88ef328-96d9-41bc-82bc-5578434c2fb2",
+                        "text": "Ik dubbel."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "f5650a51-9c08-43da-9043-c2487568b27a",
+                    "entry_id": "0d616d3b-84ab-4df4-a2bf-e2adac208ff8",
+                    "glosses": [
+                      "gebiedende wijs van dubbelen"
+                    ],
+                    "tags": [
+                      "form-of"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "ac6c0406-3ba7-4959-b765-0a8a0a0ad70a",
+                        "sense_id": "f5650a51-9c08-43da-9043-c2487568b27a",
+                        "text": "Dubbel!"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "9dd1f915-4db4-470c-842d-307818a8b282",
+                    "entry_id": "0d616d3b-84ab-4df4-a2bf-e2adac208ff8",
+                    "glosses": [
+                      "tweede persoon enkelvoud tegenwoordige tijd van dubbelen"
+                    ],
+                    "tags": [
+                      "form-of",
+                      "inversion"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "5dc0b685-4de4-4f3d-8869-6dc3ac6ef20f",
+                        "sense_id": "9dd1f915-4db4-470c-842d-307818a8b282",
+                        "text": "Dubbel je?"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "97b76115-ad31-4b3b-af0f-42b9591bc0ee",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "made up of two matching or complementary elements",
+            "target_lang_word": "podwójny",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "podwójny",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "360199a0-5bbe-4d0f-9bf9-dc7cadf5f7ac",
+                    "entry_id": "7f346af6-675e-42fc-ac89-ac5035071ca7",
+                    "glosses": [
+                      "składający się z dwóch jednakowych lub podobnych części"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "02edb162-9c66-462c-b978-c07cf0d4f15c",
+                        "sense_id": "360199a0-5bbe-4d0f-9bf9-dc7cadf5f7ac",
+                        "text": "Kraków był otoczony podwójnym murem."
+                      }
+                    ],
+                    "sense_index_json": "\"1.1\""
+                  },
+                  {
+                    "sense_id": "731bd33d-0bcb-425f-8a4b-c63ecc1d3d31",
+                    "entry_id": "7f346af6-675e-42fc-ac89-ac5035071ca7",
+                    "glosses": [
+                      "dwa razy większy, z dwa razy większą liczbą czegoś"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "cd5bac8c-5140-4272-9ff0-e8c7485d1d4a",
+                        "sense_id": "731bd33d-0bcb-425f-8a4b-c63ecc1d3d31",
+                        "text": "Tamta butelka soku ma podwójną objętość, a jest niewiele droższa od tej."
+                      },
+                      {
+                        "example_id": "6371f8eb-d005-4099-aa23-2c9c0eeb2915",
+                        "sense_id": "731bd33d-0bcb-425f-8a4b-c63ecc1d3d31",
+                        "text": "Na dodatek pozwolili mi poprowadzić swój nowy samochód i miałem z tego wyjazdu podwójną radość."
+                      }
+                    ],
+                    "sense_index_json": "\"1.2\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "ba1c30c5-ca0d-47bd-9a6d-f846d2bfc235",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "made up of two matching or complementary elements",
+            "target_lang_word": "двойно́й",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "88b76a10-cc3c-40c5-a901-91f98d5afe06",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "twice the quantity",
+            "target_lang_word": "podwójny",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "podwójny",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "360199a0-5bbe-4d0f-9bf9-dc7cadf5f7ac",
+                    "entry_id": "7f346af6-675e-42fc-ac89-ac5035071ca7",
+                    "glosses": [
+                      "składający się z dwóch jednakowych lub podobnych części"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "02edb162-9c66-462c-b978-c07cf0d4f15c",
+                        "sense_id": "360199a0-5bbe-4d0f-9bf9-dc7cadf5f7ac",
+                        "text": "Kraków był otoczony podwójnym murem."
+                      }
+                    ],
+                    "sense_index_json": "\"1.1\""
+                  },
+                  {
+                    "sense_id": "731bd33d-0bcb-425f-8a4b-c63ecc1d3d31",
+                    "entry_id": "7f346af6-675e-42fc-ac89-ac5035071ca7",
+                    "glosses": [
+                      "dwa razy większy, z dwa razy większą liczbą czegoś"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "cd5bac8c-5140-4272-9ff0-e8c7485d1d4a",
+                        "sense_id": "731bd33d-0bcb-425f-8a4b-c63ecc1d3d31",
+                        "text": "Tamta butelka soku ma podwójną objętość, a jest niewiele droższa od tej."
+                      },
+                      {
+                        "example_id": "6371f8eb-d005-4099-aa23-2c9c0eeb2915",
+                        "sense_id": "731bd33d-0bcb-425f-8a4b-c63ecc1d3d31",
+                        "text": "Na dodatek pozwolili mi poprowadzić swój nowy samochód i miałem z tego wyjazdu podwójną radość."
+                      }
+                    ],
+                    "sense_index_json": "\"1.2\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "19d320df-a03c-4769-b0d0-ff13d106e9d5",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "twice the quantity",
+            "target_lang_word": "podwojony",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "b2cc736a-6d19-4054-acd2-2e9935a2bd75",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "twice the quantity",
+            "target_lang_word": "двойно́й",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "4bd68ec6-12c6-449f-b301-496868d2e5d4",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "designed for two",
+            "target_lang_word": "tweepersoons-",
+            "target_lang_code": "nl",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "515c6616-7b8e-4883-96b3-0ea2b77b35b6",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "designed for two",
+            "target_lang_word": "dwuosobowy",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "dwuosobowy",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "52d27420-a35d-4697-8c13-e47419910885",
+                    "entry_id": "c41d82c2-300c-4264-b517-91da5acc71e1",
+                    "glosses": [
+                      "przeznaczony dla dwóch osób, mający dwa miejsca"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "916452db-a893-4155-b364-7062bae1570b",
+                        "sense_id": "52d27420-a35d-4697-8c13-e47419910885",
+                        "text": "\"PENSJONAT\" posiada dwa apartamenty dwupoziomowe dla trzech osób i trzy pokoje dwuosobowe"
+                      }
+                    ],
+                    "sense_index_json": "\"1.1\""
+                  },
+                  {
+                    "sense_id": "cc917a93-171d-4f63-bd17-3b5e721ca09a",
+                    "entry_id": "c41d82c2-300c-4264-b517-91da5acc71e1",
+                    "glosses": [
+                      "składający się z dwóch osób"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.2\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "01c86ceb-615e-4877-a046-52124e9a3de7",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "designed for two",
+            "target_lang_word": "dwumiejscowy",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "dwumiejscowy",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "658e2f3a-62e3-4fe9-81b0-3cb945882732",
+                    "entry_id": "54bf426c-aafb-4bdf-9eb0-eb0c97540853",
+                    "glosses": [
+                      "mający dwa miejsca, przeznaczony dla dwóch osób"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "f780543d-f7aa-444c-9081-b3125ec054ed",
+                        "sense_id": "658e2f3a-62e3-4fe9-81b0-3cb945882732",
+                        "text": "Półtora Słupka także okazał się jednym z najbardziej udanych samolotów wielozadaniowych tej wojny. W wersji dwumiejscowej był samolotem rozpoznawczym, w jednomiejscowej myśliwcem bombardującym"
+                      }
+                    ],
+                    "sense_index_json": "\"1.1\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "589aba55-e929-42e3-ab08-e824deb3a3fd",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "designed for two",
+            "target_lang_word": "двойно́й",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "8b902782-6c57-4cf0-9b75-c7985d46b912",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "having two aspects; ambiguous",
+            "target_lang_word": "dwojaki",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "dwojaki",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "d9ad8cdf-076e-4b45-8cbc-0366c0be02dd",
+                    "entry_id": "3f0fab88-914c-4044-9131-e7a2a4e8c6d4",
+                    "glosses": [
+                      "taki, który ma dwa typy, dwie postaci, odmiany, formy"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "2aaa704a-a508-482e-9094-e97ebfc43acf",
+                        "sense_id": "d9ad8cdf-076e-4b45-8cbc-0366c0be02dd",
+                        "text": "W małżeństwie tym widziałam dwojaką korzyść."
+                      }
+                    ],
+                    "sense_index_json": "\"1.1\""
+                  }
+                ]
+              },
+              {
+                "target_word": "dwojaki",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "1dbf9133-9814-41e4-ac06-b8c758e3728a",
+                    "entry_id": "298ffe59-5dcb-4673-906a-4c2c6b6c3fbf",
+                    "glosses": [
+                      "naczynie o dwóch osobnych komorach połączonych uchem"
+                    ],
+                    "tags": [
+                      "daw."
+                    ],
+                    "examples": [],
+                    "sense_index_json": "\"2.1\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "d748038b-a8d1-4b69-ae95-41e6f4df1a61",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_description": "in music, of an instrument, sounding an octave lower",
+            "target_lang_word": "contra",
+            "target_lang_code": "nl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "contra",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "9d2b0634-649d-4c85-b12e-3e0a0ab393d0",
+                    "entry_id": "05ec1267-1952-4635-a2ed-43a7e897f15f",
+                    "glosses": [
+                      "contrarevolutionair"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "09941575-220a-4f4e-9d87-d04255f2dfb0",
+                        "sense_id": "9d2b0634-649d-4c85-b12e-3e0a0ab393d0",
+                        "text": "in de jaren 1980 is het zelfstandig naamwoord contra ‘opstandeling in Nicaragua’ opgekomen"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "6df89283-824f-40a2-b14e-5c3aa425c2a6",
+                    "entry_id": "05ec1267-1952-4635-a2ed-43a7e897f15f",
+                    "glosses": [
+                      "argumenten tegen de geponeerde stelling"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "e2fced2a-d893-4561-b7dc-4b39facd1e6a",
+                        "sense_id": "6df89283-824f-40a2-b14e-5c3aa425c2a6",
+                        "text": "In de discussie kwamen alle pro's en contra's ter sprake."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "target_word": "contra",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "84f66f68-6a48-4a4d-bf87-e801d58f5101",
+                    "entry_id": "8487b715-c360-4819-b695-65c00222c30d",
+                    "glosses": [
+                      "tegen"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "5cfc7666-759a-4675-adb5-f2c48840147f",
+                        "sense_id": "84f66f68-6a48-4a4d-bf87-e801d58f5101",
+                        "text": "Hij is weer eens contraproductief bezig."
+                      },
+                      {
+                        "example_id": "a38d444f-6acb-4bc3-bd4f-1cba8f1ae19b",
+                        "sense_id": "84f66f68-6a48-4a4d-bf87-e801d58f5101",
+                        "text": "Afbreken contra opbouwen. Kwaad tegen goed."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "word_linkages": [
+          {
+            "linkage_id": "67063f5b-d488-469d-ba4d-c0b4a8bc51bf",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_ids": [],
+            "source_sense_description": "made up of two matching or complementary elements",
+            "linkage_type": "synonyms",
+            "word": "binary"
+          },
+          {
+            "linkage_id": "e11f8af8-7901-4a17-a59a-228ad50dd36b",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "twin"
+          },
+          {
+            "linkage_id": "05051f7c-667f-4ab6-8b15-21db66984cc7",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "dual"
+          },
+          {
+            "linkage_id": "495c4f3e-2529-49fa-a96b-d46678ed711f",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_ids": [],
+            "source_sense_description": "twice the quantity",
+            "linkage_type": "synonyms",
+            "word": "duplicate"
+          },
+          {
+            "linkage_id": "431c2d72-66b5-4ba2-947a-1d1afafcf626",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "twofold"
+          },
+          {
+            "linkage_id": "b4a37ef8-3850-4021-8547-6e3734a51fb8",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_ids": [],
+            "source_sense_description": "having two aspects",
+            "linkage_type": "synonyms",
+            "word": "twofold"
+          },
+          {
+            "linkage_id": "3037d845-422f-4691-8177-4baee9ceaabc",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_ids": [],
+            "source_sense_description": "antonym(s) of “made up of two matching or complementary elements”",
+            "linkage_type": "antonyms",
+            "word": "half"
+          },
+          {
+            "linkage_id": "0b045439-c6fb-449f-8f88-8b5f531d5428",
+            "source_entry_id": "cba4cf2f-1755-4281-9a82-1de73e96c443",
+            "source_sense_ids": [],
+            "source_sense_description": "antonym(s) of “of twice the quantity”",
+            "linkage_type": "antonyms",
+            "word": "half"
+          }
+        ]
+      },
+      {
+        "entry_id": "214da570-7e26-457c-a642-fd6d41a3914e",
+        "word": "double",
+        "pos": "adv",
+        "lang_code": "en",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "afd7a968-6894-4eed-8d27-9286fdf8fb5f",
+            "entry_id": "214da570-7e26-457c-a642-fd6d41a3914e",
+            "glosses": [
+              "Twice over; twofold; doubly."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": [
+              {
+                "example_id": "cf1d3ea6-9ab1-4168-a605-051c3654110a",
+                "sense_id": "afd7a968-6894-4eed-8d27-9286fdf8fb5f",
+                "text": "February 7 1736, Jonathan Swift, letter to Alexander Pope\nI was double their age."
+              }
+            ]
+          },
+          {
+            "sense_id": "f227879b-dae4-459a-bde6-f0fc0cb12f17",
+            "entry_id": "214da570-7e26-457c-a642-fd6d41a3914e",
+            "glosses": [
+              "Two together; two at a time."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": [
+              {
+                "example_id": "5aec12b6-b16b-4be2-8251-3e079f4121a0",
+                "sense_id": "f227879b-dae4-459a-bde6-f0fc0cb12f17",
+                "text": "When I met the twins, I thought I was seeing double."
+              },
+              {
+                "example_id": "eaea18dc-ebb4-494a-9823-7f5ce39f6f13",
+                "sense_id": "f227879b-dae4-459a-bde6-f0fc0cb12f17",
+                "text": "There are only a few beds, so some of the children will have to sleep double for the night."
+              }
+            ]
+          },
+          {
+            "sense_id": "db57c8dd-7064-4059-b4f3-cd376a75e0f8",
+            "entry_id": "214da570-7e26-457c-a642-fd6d41a3914e",
+            "glosses": [
+              "Into two halves or sections."
+            ],
+            "tags": [
+              "not-comparable"
+            ],
+            "examples": [
+              {
+                "example_id": "c1c50625-8695-4d0e-8a74-b18be681ede3",
+                "sense_id": "db57c8dd-7064-4059-b4f3-cd376a75e0f8",
+                "text": "The old man was bent double under his heavy burden."
+              }
+            ]
+          }
+        ],
+        "translations": [],
+        "word_linkages": [
+          {
+            "linkage_id": "637b327b-70d5-40ba-89ec-7124ef08baae",
+            "source_entry_id": "214da570-7e26-457c-a642-fd6d41a3914e",
+            "source_sense_ids": [],
+            "source_sense_description": "twice over",
+            "linkage_type": "synonyms",
+            "word": "doubly"
+          },
+          {
+            "linkage_id": "69d38648-a80c-44d4-af86-d1788a7a07d1",
+            "source_entry_id": "214da570-7e26-457c-a642-fd6d41a3914e",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "twice"
+          }
+        ]
+      },
+      {
+        "entry_id": "2adc9773-4b8f-427c-b2e8-30725eda746a",
+        "word": "Double",
+        "pos": "name",
+        "lang_code": "en",
+        "forms": [
+          {
+            "form_id": "09e91dd8-7868-42db-8819-79316f7e7c24",
+            "entry_id": "2adc9773-4b8f-427c-b2e8-30725eda746a",
+            "tags": [
+              "plural"
+            ],
+            "form": "Doubles"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "72ee2e3c-f3be-4d8c-858d-603aae6b7753",
+            "entry_id": "2adc9773-4b8f-427c-b2e8-30725eda746a",
+            "glosses": [
+              "A surname."
+            ],
+            "tags": [],
+            "examples": []
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+        "word": "double",
+        "pos": "noun",
+        "lang_code": "en",
+        "forms": [
+          {
+            "form_id": "c75c1e7f-0a64-4fbb-9e41-50573efe7a9c",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "tags": [
+              "plural"
+            ],
+            "form": "doubles"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "22903ff2-d4ff-4377-b5ff-a612626215de",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "Twice the number, amount, size, etc."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "fcdda643-8ff3-4446-b960-a8094362f3cd",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A person who resembles and stands in for another person, often for safety purposes"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "a1e2b901-340a-4c1e-8a57-a8588f5303be",
+                "sense_id": "fcdda643-8ff3-4446-b960-a8094362f3cd",
+                "text": "Saddam Hussein was rumored to have many doubles."
+              }
+            ]
+          },
+          {
+            "sense_id": "6cbcc17b-f69a-4365-ba4d-604299e7c9f9",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A drink with two portions of alcohol."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "597bd732-d87e-4dc0-b448-5497b4b0ac58",
+                "sense_id": "6cbcc17b-f69a-4365-ba4d-604299e7c9f9",
+                "text": "On second thought, make that a double."
+              }
+            ]
+          },
+          {
+            "sense_id": "c625bcec-6409-41d9-84b8-92f83005f0a4",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A ghostly apparition of a living person; a doppelgänger."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "0c562613-8d9d-49d5-8abd-a7dc69e5bd7e",
+                "sense_id": "c625bcec-6409-41d9-84b8-92f83005f0a4",
+                "text": "According to the description our captain had given me of Peter Sandaker once when he had dropped behind on the march, he was particularly good at telling tales and stories about goblin-birds, doubles, and fairies, and had a special fancy for entering into the most minute details, whenever he commenced telling about one or the other of the eighteen bears he had killed in his time."
+              }
+            ]
+          },
+          {
+            "sense_id": "6b7fed99-d567-44a4-9f4a-b119390e6118",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A sharp turn, especially a return on one's own tracks."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "09e42da0-7c6d-4e6e-ae30-f8d51681a335",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A redundant item for which an identical item already exists."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "c6e20b41-9777-4d09-a729-c021e9c26691",
+                "sense_id": "09e42da0-7c6d-4e6e-ae30-f8d51681a335",
+                "text": "I have more than 200 stamps in my collection but they're not all unique: some are doubles."
+              },
+              {
+                "example_id": "f26fe3af-1386-4834-adac-8958e59c0c32",
+                "sense_id": "09e42da0-7c6d-4e6e-ae30-f8d51681a335",
+                "text": "Before printing the photos, Liam deleted the doubles."
+              }
+            ]
+          },
+          {
+            "sense_id": "609dc5e5-df5d-4277-b279-4ae48f1a9f71",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A two-base hit."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "50743b91-2654-4edf-9157-edcea0d85726",
+                "sense_id": "609dc5e5-df5d-4277-b279-4ae48f1a9f71",
+                "text": "The catcher hit a double to lead off the ninth."
+              }
+            ]
+          },
+          {
+            "sense_id": "a7cf07f1-0c8b-444f-83c8-44555f7ab576",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A call that increases certain scoring points if the last preceding bid becomes the contract."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "b976064c-3142-4017-a2b6-475523afe386",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A strike in which the object ball is struck so as to make it rebound against the cushion to an opposite pocket."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "06c77208-3c8b-4457-97f4-e91e058030f8",
+                "sense_id": "b976064c-3142-4017-a2b6-475523afe386",
+                "text": "Brecel fired in doubles, a succession of stunning long pots and seemingly cleared balls at will as he rattled through the first four frames in under an hour."
+              }
+            ]
+          },
+          {
+            "sense_id": "9a6b7b04-55fa-49a7-bd42-b6cc3370520b",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A bet on two horses in different races in which any winnings from the first race are placed on the horse in the later race."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "a9c4f016-29e5-479f-87c7-7ad3366d3d64",
+                "sense_id": "9a6b7b04-55fa-49a7-bd42-b6cc3370520b",
+                "text": "Not only did I collect on the double; I had the win and the place money as well."
+              }
+            ]
+          },
+          {
+            "sense_id": "799bd736-a00e-4b98-8b9e-a096bd97b428",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "The narrow outermost ring on a dartboard."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "55c6f42e-a8e3-493f-a5c3-72af4868e8c4",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A hit on this ring."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "0a6281ce-f89b-4375-8e04-607a67d9c53f",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A tile that has the same value (i.e., the same number of pips) on both sides."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "a760c723-84de-4440-9374-5538ea5c7ffa",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A double-precision floating-point number."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "fa13c7b9-0325-487a-a762-c72ac6b0252a",
+                "sense_id": "a760c723-84de-4440-9374-5538ea5c7ffa",
+                "text": "The sine function returns a double."
+              }
+            ]
+          },
+          {
+            "sense_id": "2e25a336-01f4-4788-961c-6b35f7759077",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "Two competitions, usually one league and one cup, won by the same team in a single season."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "98eecf22-56bf-432f-8a5c-560acb1d9976",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A boat for two scullers."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "46c22311-8066-4343-8293-0a29d7958638",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "The feat of scoring twice in one game."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "e57ccaeb-dbc6-43da-8583-017131452bf1",
+                "sense_id": "46c22311-8066-4343-8293-0a29d7958638",
+                "text": "DJ Campbell grabbed a second-half double as Blackpool made Sunderland pay for a host of missed chances to secure a fifth away league win of the season."
+              }
+            ]
+          },
+          {
+            "sense_id": "617634bd-45f3-42ce-af4f-89590b7d3173",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "The feat of winning two events in a single meet or competition."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "8760957e-048a-4af7-9c32-4bdc2f963916",
+                "sense_id": "617634bd-45f3-42ce-af4f-89590b7d3173",
+                "text": "In 1996, Michael Johnson achieved a double by winning both the 200 and 400 meter dashes."
+              }
+            ]
+          },
+          {
+            "sense_id": "bb8b222a-d7d9-42bf-be0b-86caea899db2",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "The achievement of 1000 runs and 100 wickets taken in a single season."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "6781f91b-3a52-42bc-8b95-167abd1e8269",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A former French coin worth one-sixth of a sou."
+            ],
+            "tags": [
+              "historical"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "f7010879-c105-4c4e-87c9-da1aebf6fc13",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A copper coin worth one-eighth of a penny."
+            ],
+            "tags": [
+              "Guernsey",
+              "historical"
+            ],
+            "examples": [
+              {
+                "example_id": "3e2f08f2-3b67-4510-865e-4040032f26c6",
+                "sense_id": "f7010879-c105-4c4e-87c9-da1aebf6fc13",
+                "text": "As for doubles, they are not worth anything now; and I have still got an egg-cupful my mother used to keep handy to give the baker change from a farthing."
+              }
+            ]
+          },
+          {
+            "sense_id": "12f33b6b-6f1b-4981-ac22-226e4b6570b4",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "Playing the same part on two instruments, alternately."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "19a0820f-efd5-47e3-a1ed-4c8233f9e0f1",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A double feast."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "4a247181-64dc-427e-bc56-1ec2fb949572",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "Synonym of double-quick (“fast marching pace”)"
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "67e9cda6-28fd-4024-bbcf-7c5e727a4d3a",
+            "entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "glosses": [
+              "A secondary instrument with which a musician is skilled."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "f3663dd5-b445-49a3-a054-e165cc49ec55",
+                "sense_id": "67e9cda6-28fd-4024-bbcf-7c5e727a4d3a",
+                "text": "The saxophone is a valuable and rewarding double, and opens up many gigs that aren’t available to players of just the “orchestral” woodwinds."
+              }
+            ]
+          }
+        ],
+        "translations": [
+          {
+            "translation_id": "b34bfde0-e380-4435-91d6-dee42e388e2b",
+            "source_entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "source_sense_description": "twice the number or size etc",
+            "target_lang_word": "dwukrotność",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "ac329777-5d5c-4376-9e51-9150a3596865",
+            "source_entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "source_sense_description": "a person resembling or standing for another",
+            "target_lang_word": "dubbelganger",
+            "target_lang_code": "nl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "dubbelganger",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "ee23a87f-927a-4899-9f53-f62a5ea8a590",
+                    "entry_id": "e2a7eb29-073e-4647-a4e0-a0a90dbc42cd",
+                    "glosses": [
+                      "iemand die sprekend op een ander lijkt"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "7d411c72-bb58-4730-b5a8-b3b118efebbf",
+                        "sense_id": "ee23a87f-927a-4899-9f53-f62a5ea8a590",
+                        "text": "Niemand heeft opgemerkt dat het niet de echte president was, maar een dubbelganger."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "2438024e-cda2-4b7c-88e4-0f08c12a26bb",
+            "source_entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "source_sense_description": "a person resembling or standing for another",
+            "target_lang_word": "dubbelgangster",
+            "target_lang_code": "nl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "dubbelgangster",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "3fce7202-8175-4038-8b21-0d205d9b1613",
+                    "entry_id": "7d966fc6-a317-4232-a9f6-8d8da34b220d",
+                    "glosses": [
+                      "vrouwelijke dubbelganger"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "845492b6-a60f-4ced-92b1-bb9b702d5e68",
+            "source_entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "source_sense_description": "a person resembling or standing for another",
+            "target_lang_word": "sobowtór",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "sobowtór",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "a3b168ae-c2b2-4a89-b15e-1dc33f2c731a",
+                    "entry_id": "3ea514ef-25ff-45e8-8915-a7635ab358c8",
+                    "glosses": [
+                      "osoba wyglądająca bardzo podobnie do innej"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "5a511582-9ac3-41b9-92bb-30d32ccb7bd1",
+                        "sense_id": "a3b168ae-c2b2-4a89-b15e-1dc33f2c731a",
+                        "text": "Otóż ja mam sobowtóra i to jego widziałeś, nie mnie!"
+                      }
+                    ],
+                    "sense_index_json": "\"1.1\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "10917984-77df-4fc7-90b3-349ca095e4e1",
+            "source_entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "source_sense_description": "a person resembling or standing for another",
+            "target_lang_word": "двойни́к",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "fbe968c9-4e82-460e-96c5-b97202743f29",
+            "source_entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "source_sense_description": "a drink with double amount of alcohol",
+            "target_lang_word": "двойно́й",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "3739b6a4-edec-42be-8bc0-a73dbfadc613",
+            "source_entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "source_sense_description": "redundant item for which an identical item already exists",
+            "target_lang_word": "dublet",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "dublet",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "a3c25ab1-ad96-45d2-b12f-a2335ed74470",
+                    "entry_id": "4bdce02f-569c-400e-a0d8-4bcc7c6717da",
+                    "glosses": [
+                      "drugi albo kolejny identyczny egzemplarz czegoś [od 1827]"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.1\""
+                  },
+                  {
+                    "sense_id": "5cbaeb3b-aed0-4aa9-8000-7953cb1a5870",
+                    "entry_id": "4bdce02f-569c-400e-a0d8-4bcc7c6717da",
+                    "glosses": [
+                      "jedno z dwóch lub kilku słów w języku, które ostatecznie współdzieli z nimi etymologię, lecz dotarło do tego języka inną drogą"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "9842c198-bd50-4790-abc8-e310eacd92cc",
+                        "sense_id": "5cbaeb3b-aed0-4aa9-8000-7953cb1a5870",
+                        "text": "Słowa mięsiarz i masarz to dublety, oba pochodzą z prasłowiańskiego *męsarь, lecz masarz to pożyczka z języka czeskiego."
+                      }
+                    ],
+                    "sense_index_json": "\"1.2\""
+                  },
+                  {
+                    "sense_id": "b8e0861f-da70-4eef-96d1-b1d88f83a528",
+                    "entry_id": "4bdce02f-569c-400e-a0d8-4bcc7c6717da",
+                    "glosses": [
+                      "zwycięstwo w dwóch w klasyfikacjach w zawodach sportowych w tym samym czasie"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.3\""
+                  },
+                  {
+                    "sense_id": "8e7c59b9-73c5-46e8-945a-c1fbd4d7b289",
+                    "entry_id": "4bdce02f-569c-400e-a0d8-4bcc7c6717da",
+                    "glosses": [
+                      "rodzaj obcisłego kaftanu noszonego przez mężczyzn w Europie od XV do XVII wieku"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.4\""
+                  },
+                  {
+                    "sense_id": "eca66989-f9f3-45f1-a87e-17ee4ef802ff",
+                    "entry_id": "4bdce02f-569c-400e-a0d8-4bcc7c6717da",
+                    "glosses": [
+                      "podrobiony kamień składający się z prawdziwego kamienia szlachetnego lub kryształu oraz kamienia o mniejszej wartości lub szkła [od 1572]"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.5\""
+                  },
+                  {
+                    "sense_id": "f131a21f-f144-4e42-baa0-2d714d4beef1",
+                    "entry_id": "4bdce02f-569c-400e-a0d8-4bcc7c6717da",
+                    "glosses": [
+                      "dwa strzały z dubeltówki, które trafiają dwie sztuki zwierzyny"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.6\""
+                  },
+                  {
+                    "sense_id": "77f3813b-fd0e-44c0-a4ce-7f4943535e4b",
+                    "entry_id": "4bdce02f-569c-400e-a0d8-4bcc7c6717da",
+                    "glosses": [
+                      "gatunek jedwabnej tkaniny [1562]"
+                    ],
+                    "tags": [
+                      "Middle-Polish"
+                    ],
+                    "examples": [],
+                    "sense_index_json": "\"1.7\""
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "word_linkages": [
+          {
+            "linkage_id": "8fd4060a-a492-4521-9240-44237635da05",
+            "source_entry_id": "0abe4ccf-0a18-4299-8ace-d072d2659110",
+            "source_sense_ids": [
+              "4a247181-64dc-427e-bc56-1ec2fb949572"
+            ],
+            "linkage_type": "synonyms",
+            "word": "double-quick"
+          }
+        ]
+      },
+      {
+        "entry_id": "2fcf1d77-4aba-4f7b-a8b8-e60947f38fae",
+        "word": "Double",
+        "pos": "noun",
+        "lang_code": "en",
+        "forms": [
+          {
+            "form_id": "f424da25-1682-497b-8ca7-452b628335ab",
+            "entry_id": "2fcf1d77-4aba-4f7b-a8b8-e60947f38fae",
+            "tags": [
+              "canonical"
+            ],
+            "form": "the Double"
+          },
+          {
+            "form_id": "529c160c-8f1d-4ca8-a5cb-4cf82b5be50f",
+            "entry_id": "2fcf1d77-4aba-4f7b-a8b8-e60947f38fae",
+            "tags": [
+              "plural"
+            ],
+            "form": "Doubles"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "0d330b90-d201-4fac-90b9-8097b3b1eb1e",
+            "entry_id": "2fcf1d77-4aba-4f7b-a8b8-e60947f38fae",
+            "glosses": [
+              "Collectively, both the Indianapolis 500, a day race, and the Coca-Cola 600, an evening race, both of which are run on Memorial Day weekend Sunday. Used concerning racers who (wish[/ed/ing] to) participat[e/ed/ing] in both events, typically using a private jet to travel between Indianapolis, Indiana, after the 500 and Charlotte, North Carolina, to get to the 600."
+            ],
+            "tags": [
+              "US"
+            ],
+            "examples": []
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+        "word": "double",
+        "pos": "verb",
+        "lang_code": "en",
+        "forms": [
+          {
+            "form_id": "6ab18ccf-38e3-47a6-aa61-d9508fcca3a1",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "tags": [
+              "present",
+              "singular",
+              "third-person"
+            ],
+            "form": "doubles"
+          },
+          {
+            "form_id": "b03061ff-4528-4c8a-b911-dc63c1f26ae4",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "tags": [
+              "participle",
+              "present"
+            ],
+            "form": "doubling"
+          },
+          {
+            "form_id": "d7d4edf8-84ff-417f-be84-89101684ec62",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "tags": [
+              "participle",
+              "past"
+            ],
+            "form": "doubled"
+          },
+          {
+            "form_id": "277b6d27-b604-4bfe-94be-d972d2aa8db2",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "tags": [
+              "past"
+            ],
+            "form": "doubled"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "a2721334-d1ec-4943-97f5-20a9ecf43f24",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To multiply by two."
+            ],
+            "tags": [
+              "transitive"
+            ],
+            "examples": [
+              {
+                "example_id": "59fc916b-d294-4a5c-9b61-0c4efd3836b1",
+                "sense_id": "a2721334-d1ec-4943-97f5-20a9ecf43f24",
+                "text": "The company doubled their earnings per share over last quarter."
+              }
+            ]
+          },
+          {
+            "sense_id": "62cabbb1-15fc-4a90-b29d-16a9cbec1388",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To increase by 100%, to become twice as large in size."
+            ],
+            "tags": [
+              "intransitive"
+            ],
+            "examples": [
+              {
+                "example_id": "b4242146-06e2-437d-9b3a-1686cc490c3b",
+                "sense_id": "62cabbb1-15fc-4a90-b29d-16a9cbec1388",
+                "text": "Our earnings have doubled in the last year."
+              }
+            ]
+          },
+          {
+            "sense_id": "a95cc84a-2c6d-4b3a-80f4-7bcfcdb123dc",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To be the double of; to exceed by twofold; to contain or be worth twice as much as."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "87d27123-364d-4283-8c5f-8809b12b14f5",
+                "sense_id": "a95cc84a-2c6d-4b3a-80f4-7bcfcdb123dc",
+                "text": "Thus re-inforc’d, againſt the adverſe Fleet / Still doubling ours, brave Rupert leads the way."
+              }
+            ]
+          },
+          {
+            "sense_id": "f4023453-2b53-4343-b5d1-c9c4460a66d6",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To fold over so as to make two folds."
+            ],
+            "tags": [
+              "transitive"
+            ],
+            "examples": [
+              {
+                "example_id": "8174c8ab-5728-4fa1-8f91-03df9f2f2816",
+                "sense_id": "f4023453-2b53-4343-b5d1-c9c4460a66d6",
+                "text": "To make a pleat, double the material at the waist."
+              }
+            ]
+          },
+          {
+            "sense_id": "355d90f3-fb0f-4486-a266-41268abce6ba",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To clench (a fist)."
+            ],
+            "tags": [
+              "sometimes",
+              "transitive"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "fa0bae61-ac2b-4770-be7c-53ac951f68ca",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To get a two-base hit."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "71582212-bcf8-4762-a3e6-cf2d5d279fd6",
+                "sense_id": "fa0bae61-ac2b-4770-be7c-53ac951f68ca",
+                "text": "The batter doubled into the corner."
+              }
+            ]
+          },
+          {
+            "sense_id": "2c354184-4dd5-4b37-a326-22d1da2d7f4f",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To join or couple."
+            ],
+            "tags": [
+              "often",
+              "transitive"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "88d51002-65b8-44ba-9de3-0bedd4784789",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To repeat exactly; copy."
+            ],
+            "tags": [
+              "transitive"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "3151f203-d2ba-4940-a0f5-a6d7a3edd32b",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To serve a second role or have a second purpose."
+            ],
+            "tags": [
+              "intransitive"
+            ],
+            "examples": [
+              {
+                "example_id": "d5f323c5-740b-4b6a-8148-6cdf6effd14f",
+                "sense_id": "3151f203-d2ba-4940-a0f5-a6d7a3edd32b",
+                "text": "A spork is a kind of fork that doubles as a spoon."
+              }
+            ]
+          },
+          {
+            "sense_id": "9121fdf7-c694-4872-9653-eb36d4b67533",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To act as substitute for (another theatrical performer in a certain role, etc)."
+            ],
+            "tags": [
+              "ambitransitive",
+              "sometimes"
+            ],
+            "examples": [
+              {
+                "example_id": "7cd38782-d1e4-4739-8d33-23c4808e8b48",
+                "sense_id": "9121fdf7-c694-4872-9653-eb36d4b67533",
+                "text": "Laforêt, who (as the French express it), doubles Lainez, that is, performs the same characters in his absence."
+              },
+              {
+                "example_id": "9dfad5a0-67b9-45d3-ab2e-22c2f20fd0c6",
+                "sense_id": "9121fdf7-c694-4872-9653-eb36d4b67533",
+                "text": "[…] and when she attempted to double the part of her mother, she equally failed in playing the great or agreeable lady."
+              }
+            ]
+          },
+          {
+            "sense_id": "afe44536-4373-4797-b114-da11165786ae",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To play (both one part and another, in the same play, etc)."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "951f610b-c89d-49ea-bd5a-7e362396ea07",
+                "sense_id": "afe44536-4373-4797-b114-da11165786ae",
+                "text": "When, therefore, Briggs, the sedate, middle-aged individual, who in the Markham household doubles the roles of butler and valet, makes his appearance, his master affects to be in a great hurry, looks at his watch, and says : […]"
+              },
+              {
+                "example_id": "e537c27b-d399-425c-9c5c-fd64f7f156a6",
+                "sense_id": "afe44536-4373-4797-b114-da11165786ae",
+                "text": "Miss Theby doubles in the part of Rose and the native girl in the Philippines. This is a problem plot in which a young man leaves the girl of his choice because she has had an affair in her earlier years. He goes to the Philippines, […]"
+              },
+              {
+                "example_id": "e0f16ff6-c073-48b0-b5e2-30ca2adf763d",
+                "sense_id": "afe44536-4373-4797-b114-da11165786ae",
+                "text": "In On the Beat he doubles the parts of a constable and a gang-leader. Norman was all over the place."
+              },
+              {
+                "example_id": "b77044df-8b14-4a6d-acbb-386177b0612a",
+                "sense_id": "afe44536-4373-4797-b114-da11165786ae",
+                "text": "In his case the matter is simplified by the fact that the head of his Deception Staff doubles the roles of author and producer. The Commander therefore tells him what sort of deception he needs, examines the plans produced for him […]"
+              }
+            ]
+          },
+          {
+            "sense_id": "560269f0-e148-4d30-8d4b-2d0658febc40",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To turn sharply, following a winding course."
+            ],
+            "tags": [
+              "intransitive"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "fb0c459f-776c-4680-ad5f-f3ede10122e5",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To sail around (a headland or other point)."
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "650fec8c-c533-431a-8b0c-0ea9effa2285",
+                "sense_id": "fb0c459f-776c-4680-ad5f-f3ede10122e5",
+                "text": "Sailing along the coast, he doubled the promontory of Carthage."
+              },
+              {
+                "example_id": "6f671e38-051e-4459-aca4-e0302e534ca4",
+                "sense_id": "fb0c459f-776c-4680-ad5f-f3ede10122e5",
+                "text": "[…] though the Iſland itſelf was not very large […] I found a great Ledge of Rocks lie out about two Leagues into the Sea[…]ſo that I was oblig’d to go a great Way out to Sea to double the Point."
+              }
+            ]
+          },
+          {
+            "sense_id": "0f893dc5-f5e2-45bc-bb6c-8fb407807ddf",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To duplicate (a part) either in unison or at the octave above or below it."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "281b5bfd-a620-4dd5-b545-7256af72a44d",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To be capable of performing (upon an additional instrument)."
+            ],
+            "tags": [
+              "intransitive",
+              "usually"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "08feae4a-8315-4e0f-ae46-5dae4f9d1bc6",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To make a call that will double certain scoring points if the preceding bid becomes the contract."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "97a98d41-1cc0-4984-b4dd-0bac7241aa14",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To double down."
+            ],
+            "tags": [
+              "intransitive"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "057ba146-222a-45ea-b960-537e9638dc62",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To cause (a ball) to rebound from a cushion before entering the pocket."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "6ab89d4b-1938-4138-a46a-cdc8bb8dcc09",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To go or march at twice the normal speed."
+            ],
+            "tags": [
+              "intransitive"
+            ],
+            "examples": [
+              {
+                "example_id": "dafa1f95-dae9-42cc-914f-5a1f5004c4e0",
+                "sense_id": "6ab89d4b-1938-4138-a46a-cdc8bb8dcc09",
+                "text": "\"You double down to the harbour, my lad,\" said the Captain to Strickland, \"and sign on. You've got your papers.\"\nStrickland set off at once, and that was the last Captain Nichols saw of him."
+              }
+            ]
+          },
+          {
+            "sense_id": "c787507e-c657-4491-a175-4c770b7a4b93",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To multiply the strength or effect of by two."
+            ],
+            "tags": [
+              "transitive"
+            ],
+            "examples": [
+              {
+                "example_id": "1e4c4233-0876-4859-b8f1-17efe2499d88",
+                "sense_id": "c787507e-c657-4491-a175-4c770b7a4b93",
+                "text": "Sorry, this store does not double coupons."
+              }
+            ]
+          },
+          {
+            "sense_id": "a4ebfdb0-8700-4d99-ab26-1590929f1245",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To unite, as ranks or files, so as to form one from each two."
+            ],
+            "tags": [],
+            "examples": []
+          },
+          {
+            "sense_id": "6f7ff6ca-f04f-494e-a4b8-eab94e44dcd5",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To transmit simultaneously on the same channel as another station, either unintentionally or deliberately, causing interference."
+            ],
+            "tags": [
+              "informal"
+            ],
+            "examples": [
+              {
+                "example_id": "461261c3-e368-4536-8c60-99282a8e2595",
+                "sense_id": "6f7ff6ca-f04f-494e-a4b8-eab94e44dcd5",
+                "text": "Could you please repeat your last transmission? Another station was doubling with you."
+              }
+            ]
+          },
+          {
+            "sense_id": "54a36eab-cff2-40e6-9012-59b367807e54",
+            "entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "glosses": [
+              "To operate as a double agent."
+            ],
+            "tags": [
+              "intransitive"
+            ],
+            "examples": [
+              {
+                "example_id": "db137dc4-aa19-405b-99fd-adf0ff6b0efb",
+                "sense_id": "54a36eab-cff2-40e6-9012-59b367807e54",
+                "text": "Was this simply the cover name of an Allied spy-code named the Brass Monkey? […] The possibility that the Brass Monkey himself was \"doubling\" (with headquarters' approval, of course) is too logical […]"
+              }
+            ]
+          }
+        ],
+        "translations": [
+          {
+            "translation_id": "0d841f2e-9155-41d3-9871-65772a0833b2",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "(transitive) to multiply by two",
+            "target_lang_word": "podwajać",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "podwajać",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "0f179efc-9ad4-4c0f-9e35-98cc9c015eb4",
+                    "entry_id": "f0b48005-9c8c-43d0-8fff-07f5cb0ab2dc",
+                    "glosses": [
+                      "zwiększać dwukrotnie"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.1\""
+                  }
+                ]
+              },
+              {
+                "target_word": "podwajać",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "c3b2cf78-debf-4cb4-99e0-cea54424c069",
+                    "entry_id": "68a9b26c-3649-43ba-b2de-444ba4dafa0b",
+                    "glosses": [
+                      "zwiększać się dwukrotnie"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"2.1\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "efd8d93f-1ce0-42f4-bafb-dc5f4c219b99",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "(transitive) to multiply by two",
+            "target_lang_word": "podwoić",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "podwoić",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "a29880fe-7b2c-4cca-9f2e-425272ed2be7",
+                    "entry_id": "c8a46811-6cf0-4b50-9eb7-fda9122792d5",
+                    "glosses": [
+                      "zwiększyć dwukrotnie lub znacznie"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.1\""
+                  }
+                ]
+              },
+              {
+                "target_word": "podwoić",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "70c52161-7e69-43c8-a00b-7428b32b4161",
+                    "entry_id": "cd533e23-6df6-4a4d-98fa-43f6ba15113f",
+                    "glosses": [
+                      "zwiększyć się dwukrotnie"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"2.1\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "4e5969ed-8c35-4b1f-b2ed-91407abceff8",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "(transitive) to multiply by two",
+            "target_lang_word": "dublować",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "dublować",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "b4c19beb-a482-4dd2-a808-2c89dc1e021f",
+                    "entry_id": "b550a85b-ee31-4e69-8f8d-dbc616ae6d06",
+                    "glosses": [
+                      "podwajać (zwiększać dwa razy)"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.1\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "54f71e5f-d59e-4ff0-b6eb-65f6fa9ebfb9",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "(transitive) to multiply by two",
+            "target_lang_word": "zdublować",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "ed3ab971-3dc0-41e3-8be0-6d51e258a1a8",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "(transitive) to multiply by two",
+            "target_lang_word": "удва́ивать",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "удва́ивать",
+                "target_lang_code": "ru",
+                "target_senses": [
+                  {
+                    "sense_id": "f4a2a722-03fb-4250-8475-210521c706ff",
+                    "entry_id": "2501efa8-8728-4434-876e-77c7dc8fc0f6",
+                    "glosses": [
+                      "увеличивать в два раза; умножать на два"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "b6b2ea34-165d-4c56-a464-782ef5d14f51",
+                        "sense_id": "f4a2a722-03fb-4250-8475-210521c706ff",
+                        "text": "Все они обладают могучей выразительностью и обыкновенно удваивают действенную силу глагола сказуемого."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "9e6decef-3d46-41e6-af80-c15b64ecf8e3",
+                    "entry_id": "2501efa8-8728-4434-876e-77c7dc8fc0f6",
+                    "glosses": [
+                      "о звуке, слоге и т. п. — повторять дважды"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "6dd05644-5aae-4f79-a9ce-a723332cf763",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "(transitive) to multiply by two",
+            "target_lang_word": "удво́ить",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "удво́ить",
+                "target_lang_code": "ru",
+                "target_senses": [
+                  {
+                    "sense_id": "f44b5b67-5232-4503-8360-734c299263bb",
+                    "entry_id": "d844f455-e85c-4fb0-9c94-82b9c4097429",
+                    "glosses": [
+                      "увеличить в два раза; умножить на два"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "1e9cd341-b714-46cf-9a8c-66ac29f44df9",
+                    "entry_id": "d844f455-e85c-4fb0-9c94-82b9c4097429",
+                    "glosses": [
+                      "о звуке, слоге и т. п. — повторить дважды"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "b7cad8a0-ffce-4d1e-b16b-c436c8a38367",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "(intransitive) to increase by 100%",
+            "target_lang_word": "podwajać się",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "610e688e-7130-4f3e-b25c-3b96de087840",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "(intransitive) to increase by 100%",
+            "target_lang_word": "podwoić się",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "6e2649eb-68d9-4c1e-8426-f2ebff8f1c5b",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "(intransitive) to increase by 100%",
+            "target_lang_word": "удва́иваться",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "удва́иваться",
+                "target_lang_code": "ru",
+                "target_senses": [
+                  {
+                    "sense_id": "163b52c4-ee39-4fb0-a1b5-eb4b7343cf21",
+                    "entry_id": "fd13e487-5c69-4a43-b9a2-f26c9b2b8291",
+                    "glosses": [
+                      "увеличиваться, повышаться вдвое"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "cde20ed1-d491-4e56-9585-6f609c2b4fdf",
+                    "entry_id": "fd13e487-5c69-4a43-b9a2-f26c9b2b8291",
+                    "glosses": [
+                      "значительно увеличиваться, усиливаться"
+                    ],
+                    "tags": [
+                      "figuratively"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "c1910497-8c60-4126-bab6-b990aa816858",
+                    "entry_id": "fd13e487-5c69-4a43-b9a2-f26c9b2b8291",
+                    "glosses": [
+                      "страд. к удваивать"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "5126481b-5921-44c5-ad5a-00d201f00eea",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "(intransitive) to increase by 100%",
+            "target_lang_word": "удво́иться",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "удво́иться",
+                "target_lang_code": "ru",
+                "target_senses": [
+                  {
+                    "sense_id": "a653b488-d6aa-44e5-8a7f-e0d614ad2833",
+                    "entry_id": "f0d82075-70d2-450e-9b49-a5e319038f06",
+                    "glosses": [
+                      "увеличиться, повыситься вдвое"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "65a66c93-304f-4e0a-9e1b-edbb8e8c28eb",
+                    "entry_id": "f0d82075-70d2-450e-9b49-a5e319038f06",
+                    "glosses": [
+                      "значительно увеличиться, усилиться"
+                    ],
+                    "tags": [
+                      "figuratively"
+                    ],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "4c0b75ab-6897-4b23-8c3f-6832d0e21a33",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "to act as substitute",
+            "target_lang_word": "zastępować",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "zastępować",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "93f57d3d-daa9-407f-8aa1-f01ecd247dd4",
+                    "entry_id": "e9ff4b9b-6ed8-4e56-a356-3e7e5a344725",
+                    "glosses": [
+                      "pełnić cudzą rolę zamiast tej osoby lub rzeczy"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.1\""
+                  },
+                  {
+                    "sense_id": "fddb84e0-d004-4177-9849-4ec29421d626",
+                    "entry_id": "e9ff4b9b-6ed8-4e56-a356-3e7e5a344725",
+                    "glosses": [
+                      "zamieniać coś na coś"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.2\""
+                  },
+                  {
+                    "sense_id": "c76e26f8-b134-4c28-9f16-3d61a9850e4c",
+                    "entry_id": "e9ff4b9b-6ed8-4e56-a356-3e7e5a344725",
+                    "glosses": [
+                      "stawać przed kimś i zatrzymywać go"
+                    ],
+                    "tags": [
+                      "obsolete"
+                    ],
+                    "examples": [],
+                    "sense_index_json": "\"1.3\""
+                  }
+                ]
+              },
+              {
+                "target_word": "zastępować",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "0f4aa108-8a9c-4d7d-88e7-7dc1a75c43ce",
+                    "entry_id": "51f65262-00c5-471f-b6d5-410cf0a5d984",
+                    "glosses": [
+                      "pełnić nawzajem swoje funkcje"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"2.1\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "21365947-b85d-48fa-9c29-ac84ab402888",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "to act as substitute",
+            "target_lang_word": "zastąpić",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "zastąpić",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "3a250709-c2ce-4f9d-84c6-3d3fd0f68747",
+                    "entry_id": "e7f2919a-80b1-4988-9148-f65696aa6950",
+                    "glosses": [
+                      "aspekt dokonany od: zastępować"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.1\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "0cd567de-9d0e-439d-a0c0-3898446cd14b",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "to act as substitute",
+            "target_lang_word": "dublować",
+            "target_lang_code": "pl",
+            "note": "for an actor",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "dublować",
+                "target_lang_code": "pl",
+                "target_senses": [
+                  {
+                    "sense_id": "b4c19beb-a482-4dd2-a808-2c89dc1e021f",
+                    "entry_id": "b550a85b-ee31-4e69-8f8d-dbc616ae6d06",
+                    "glosses": [
+                      "podwajać (zwiększać dwa razy)"
+                    ],
+                    "tags": [],
+                    "examples": [],
+                    "sense_index_json": "\"1.1\""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "e0a9b7c3-cddd-40f9-9ab2-a6b2e3f8cd1a",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_description": "to act as substitute",
+            "target_lang_word": "zdublować",
+            "target_lang_code": "pl",
+            "target_sense_ids": [],
+            "cross_references": []
+          }
+        ],
+        "word_linkages": [
+          {
+            "linkage_id": "f6c924b7-5951-44a6-b092-6a5452e06fb3",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_ids": [],
+            "source_sense_description": "to multiply by two",
+            "linkage_type": "synonyms",
+            "word": "redouble"
+          },
+          {
+            "linkage_id": "559037de-5fb4-4a4e-9283-4415f3366005",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_ids": [],
+            "source_sense_description": "to repeat exactly; copy",
+            "linkage_type": "synonyms",
+            "word": "facsimilize"
+          },
+          {
+            "linkage_id": "f5c61259-50b6-497d-a1b6-727ad0a50b01",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "duplicate"
+          },
+          {
+            "linkage_id": "ab3509d4-691c-4aeb-bcfa-7d4d9166e229",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "double"
+          },
+          {
+            "linkage_id": "a3909f66-a58e-4ce3-8526-5c727807c88b",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_ids": [],
+            "source_sense_description": "antonym(s) of",
+            "linkage_type": "antonyms",
+            "word": "halve"
+          },
+          {
+            "linkage_id": "13d8b096-3cf0-4772-be8d-69a4c26445f7",
+            "source_entry_id": "d3df88f0-27a7-486a-b4d2-323cfefe5346",
+            "source_sense_ids": [],
+            "linkage_type": "antonyms",
+            "word": "bisect"
+          }
+        ]
+      }
+    ],
+    "ru-extract.jsonl": [],
+    "nl-extract.jsonl": [
+      {
+        "entry_id": "185c0da6-3552-42b5-8211-79bd815ded26",
+        "word": "double",
+        "pos": "adj",
+        "lang_code": "en",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "63adacb7-f80e-4e1e-aa76-173d2d30098e",
+            "entry_id": "185c0da6-3552-42b5-8211-79bd815ded26",
+            "glosses": [
+              "dubbel"
+            ],
+            "tags": [],
+            "examples": []
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      }
+    ],
+    "pl-extract.jsonl": [
+      {
+        "entry_id": "b734bd51-b4ca-4aa4-8ab7-476ffebaebf8",
+        "word": "double",
+        "pos": "adj",
+        "lang_code": "en",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "7c67e31e-e4c7-47bd-b5eb-e414201a5392",
+            "entry_id": "b734bd51-b4ca-4aa4-8ab7-476ffebaebf8",
+            "glosses": [
+              "podwójny"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "f8a2f050-ee28-4ffd-ba57-26b9c67cd062",
+                "sense_id": "7c67e31e-e4c7-47bd-b5eb-e414201a5392",
+                "text": "The closet has double doors.",
+                "translation": "Szafa ma podwójne drzwi."
+              },
+              {
+                "example_id": "4d156c75-fce5-4e28-b520-9eaa353232de",
+                "sense_id": "7c67e31e-e4c7-47bd-b5eb-e414201a5392",
+                "text": "Give me a double serving of mashed potatoes.",
+                "translation": "Nałóż mi podwójną porcję purée."
+              }
+            ],
+            "sense_index_json": "\"2.1\""
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "c6c4cbc7-f4ba-4a1b-84a1-7f418f17e102",
+        "word": "double",
+        "pos": "adv",
+        "lang_code": "en",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "5a22b882-faf2-4d5a-b542-f848a0258740",
+            "entry_id": "c6c4cbc7-f4ba-4a1b-84a1-7f418f17e102",
+            "glosses": [
+              "podwójnie"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"3.1\""
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "8ea92bd1-3127-4190-8c28-8779d3ae3609",
+        "word": "double",
+        "pos": "noun",
+        "lang_code": "en",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "7cc6e79d-f1da-4083-8b77-d03ae1044cf2",
+            "entry_id": "8ea92bd1-3127-4190-8c28-8779d3ae3609",
+            "glosses": [
+              "sobowtór"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.1\""
+          },
+          {
+            "sense_id": "071756e0-901a-401a-8239-9771198efcc7",
+            "entry_id": "8ea92bd1-3127-4190-8c28-8779d3ae3609",
+            "glosses": [
+              "dubler"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "331e9d5b-a96f-476b-ac28-29c0bae4e0c8",
+                "sense_id": "071756e0-901a-401a-8239-9771198efcc7",
+                "text": "Putin is rumored to have many doubles.",
+                "translation": "O Putinie mówią, że ma wielu dublerów."
+              }
+            ],
+            "sense_index_json": "\"1.2\""
+          },
+          {
+            "sense_id": "ba1f3ad7-a79c-4434-acf5-4f9d2e2e4c94",
+            "entry_id": "8ea92bd1-3127-4190-8c28-8779d3ae3609",
+            "glosses": [
+              "debel"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.3\""
+          },
+          {
+            "sense_id": "c3bbb939-87bb-419e-8898-c3038915ecec",
+            "entry_id": "8ea92bd1-3127-4190-8c28-8779d3ae3609",
+            "glosses": [
+              "w brydżu: kontra"
+            ],
+            "tags": [
+              "karc."
+            ],
+            "examples": [],
+            "sense_index_json": "\"1.4\""
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "9967ffcc-b628-4fd1-99cc-fb52a9573564",
+        "word": "double",
+        "pos": "verb",
+        "lang_code": "en",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "6043aa6c-4875-4bc6-8330-61a250c3fcd6",
+            "entry_id": "9967ffcc-b628-4fd1-99cc-fb52a9573564",
+            "glosses": [
+              "podwoić (się)"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"4.1\""
+          },
+          {
+            "sense_id": "276bc852-4461-4d73-9388-68fe928e1dc3",
+            "entry_id": "9967ffcc-b628-4fd1-99cc-fb52a9573564",
+            "glosses": [
+              "w brydżu: kontrować"
+            ],
+            "tags": [
+              "karc."
+            ],
+            "examples": [],
+            "sense_index_json": "\"4.2\""
+          },
+          {
+            "sense_id": "969542af-f20f-48d5-8dbc-95977809ec62",
+            "entry_id": "9967ffcc-b628-4fd1-99cc-fb52a9573564",
+            "glosses": [
+              "pełnić również inną funkcję"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"4.3\""
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      }
+    ]
+  }
+}

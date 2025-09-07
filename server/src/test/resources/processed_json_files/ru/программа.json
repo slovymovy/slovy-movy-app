@@ -1,0 +1,438 @@
+{
+    "entries": [
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                    "sense_definition": "Расписание передач радио или телевидения, а также перечень номеров, исполняемых на концерте, вечере, представлении.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "Расписание/Представление",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "<w>Программа</w> телепередач на завтра.",
+                            "target_lang_translations": {
+                                "en": "Tomorrow's TV <w>schedule</w>."
+                            }
+                        },
+                        {
+                            "text": "В <w>программе</w> пианист стоит вторым.",
+                            "target_lang_translations": {
+                                "en": "The pianist is second on the <w>program</w>."
+                            }
+                        },
+                        {
+                            "text": "Театральная <w>программа</w> была очень интересной.",
+                            "target_lang_translations": {
+                                "en": "The theater <w>program</w> was very interesting."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "программа телепередач",
+                        "концертная программа",
+                        "развлекательная программа"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "A schedule of radio or television broadcasts, or a list of performances at an event like a concert or show."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "program",
+                                "target_lang_sense_clarification": "A list of events or performances at a show, or a TV/radio broadcast (US spelling)."
+                            },
+                            {
+                                "target_lang_word": "programme",
+                                "target_lang_sense_clarification": "A list of events or performances at a show, or a TV/radio broadcast (UK spelling)."
+                            },
+                            {
+                                "target_lang_word": "schedule",
+                                "target_lang_sense_clarification": "Used for a TV or radio guide listing broadcast times."
+                            },
+                            {
+                                "target_lang_word": "lineup",
+                                "target_lang_sense_clarification": "The list of performers or acts at a concert or festival."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                    "sense_definition": "Канал радио- или телевещания.",
+                    "learner_level": "A2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Телевидение/Радио",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Переключить телевизор на первую <w>программу</w>.",
+                            "target_lang_translations": {
+                                "en": "Switch the TV to the first <w>channel</w>."
+                            }
+                        },
+                        {
+                            "text": "На этой <w>программе</w> всегда показывают интересные новости.",
+                            "target_lang_translations": {
+                                "en": "They always show interesting news on this <w>channel</w>."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "канал"
+                    ],
+                    "common_phrases": [
+                        "первая программа",
+                        "музыкальная программа"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "A radio or television broadcast channel."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "channel",
+                                "target_lang_sense_clarification": "The most direct translation for a TV or radio frequency band."
+                            },
+                            {
+                                "target_lang_word": "station",
+                                "target_lang_sense_clarification": "Often used for radio broadcasting companies or frequencies."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                    "sense_definition": "Заранее разработанный план действий, мероприятий или работ.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "План действий",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Читатель видит, что для нас именно те произведения и важны, в которых жизнь сказалась сама собою, а не по заранее придуманной автором <w>программе</w>.",
+                            "target_lang_translations": {
+                                "en": "The reader sees that for us, the most important works are those in which life reveals itself on its own, and not according to a pre-conceived <w>program</w> devised by the author."
+                            }
+                        },
+                        {
+                            "text": "Лизинговая <w>программа</w> рассчитана на 24 месяца, авансовый платёж составляет четверть от стоимости автомобиля.",
+                            "target_lang_translations": {
+                                "en": "The leasing <w>program</w> is for 24 months, and the down payment is a quarter of the car's value."
+                            }
+                        },
+                        {
+                            "text": "Мы разработали новую <w>программу</w> развития города.",
+                            "target_lang_translations": {
+                                "en": "We have developed a new city development <w>program</w>."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "план",
+                        "проект",
+                        "концепция"
+                    ],
+                    "common_phrases": [
+                        "выполнить программу",
+                        "разработать программу",
+                        "долгосрочная программа"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "A pre-arranged plan of actions, activities, or work."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "program",
+                                "target_lang_sense_clarification": "A structured plan of action or a set of related measures (US spelling)."
+                            },
+                            {
+                                "target_lang_word": "programme",
+                                "target_lang_sense_clarification": "A structured plan of action or a set of related measures (UK spelling)."
+                            },
+                            {
+                                "target_lang_word": "plan",
+                                "target_lang_sense_clarification": "A more general term for a set of intended actions."
+                            },
+                            {
+                                "target_lang_word": "scheme",
+                                "target_lang_sense_clarification": "A plan or system for doing or organizing something, often on a large scale."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                    "sense_definition": "Последовательность инструкций, написанных на языке программирования, предназначенная для выполнения компьютером или другим вычислительным устройством.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "Информационные технологии",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Он учится составлять компьютерные <w>программы</w>.",
+                            "target_lang_translations": {
+                                "en": "He is learning to write computer <w>programs</w>."
+                            }
+                        },
+                        {
+                            "text": "Эти обучающие <w>программы</w> очень полезны для изучения языков.",
+                            "target_lang_translations": {
+                                "en": "These educational <w>programs</w> are very useful for learning languages."
+                            }
+                        },
+                        {
+                            "text": "Эта <w>программа</w> позволяет редактировать фотографии.",
+                            "target_lang_translations": {
+                                "en": "This <w>program</w> allows you to edit photos."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "приложение",
+                        "прога"
+                    ],
+                    "common_phrases": [
+                        "компьютерная программа",
+                        "установить программу",
+                        "написать программу"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "A sequence of instructions written in a programming language for a computer to execute."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "program",
+                                "target_lang_sense_clarification": "The standard term for a set of instructions for a computer. 'Programme' is a rare alternative spelling in this context."
+                            },
+                            {
+                                "target_lang_word": "application",
+                                "target_lang_sense_clarification": "A program designed for end-users to perform a specific task."
+                            },
+                            {
+                                "target_lang_word": "software",
+                                "target_lang_sense_clarification": "A general term for computer programs."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                    "sense_definition": "Краткое изложение содержания и методологических установок учебного курса или предмета.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Образование",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "<w>Программа</w> (курса) по истории.",
+                            "target_lang_translations": {
+                                "en": "The history course <w>syllabus</w>."
+                            }
+                        },
+                        {
+                            "text": "Мы изучаем новую <w>программу</w> по математике в этом году.",
+                            "target_lang_translations": {
+                                "en": "We are studying a new mathematics <w>syllabus</w> this year."
+                            }
+                        },
+                        {
+                            "text": "Ознакомьтесь с <w>программой</w> семинара.",
+                            "target_lang_translations": {
+                                "en": "Please familiarize yourself with the seminar <w>program</w>."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "учебная программа",
+                        "программа курса"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "A document outlining the topics, schedule, and requirements for an academic course."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "syllabus",
+                                "target_lang_sense_clarification": "The most accurate term for an outline of subjects in a course of study."
+                            },
+                            {
+                                "target_lang_word": "program",
+                                "target_lang_sense_clarification": "Can refer to the plan for a specific event like a seminar or workshop."
+                            },
+                            {
+                                "target_lang_word": "course outline",
+                                "target_lang_sense_clarification": "A direct and clear synonym for syllabus."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                    "sense_definition": "Буклет или листок с информацией о предстоящем мероприятии (например, спектакле, концерте), содержащий перечень номеров, участников или краткое описание.",
+                    "learner_level": "B1",
+                    "frequency": "Low",
+                    "semantic_group_id": "Печатное издание",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Перед звонком надо успеть взять <w>программу</w> и бинокль.",
+                            "target_lang_translations": {
+                                "en": "Before the bell, you need to grab a <w>program</w> and binoculars."
+                            }
+                        },
+                        {
+                            "text": "<w>Программы</w> театров на март.",
+                            "target_lang_translations": {
+                                "en": "Theater <w>programs</w> for March."
+                            }
+                        },
+                        {
+                            "text": "В <w>программе</w> концерта указаны все исполнители.",
+                            "target_lang_translations": {
+                                "en": "All the performers are listed in the concert <w>program</w>."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "буклет"
+                    ],
+                    "common_phrases": [
+                        "программа спектакля",
+                        "купить программу"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "A booklet or leaflet distributed at an event, such as a play or concert, listing the schedule of acts and performers."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "program",
+                                "target_lang_sense_clarification": "A booklet for an event (US spelling)."
+                            },
+                            {
+                                "target_lang_word": "programme",
+                                "target_lang_sense_clarification": "A booklet for an event (UK spelling)."
+                            },
+                            {
+                                "target_lang_word": "playbill",
+                                "target_lang_sense_clarification": "A booklet or pamphlet specifically for a theatrical play."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                    "sense_definition": "Документ, излагающий цели и задачи деятельности организации, партии или отдельного государственного, общественного деятеля.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Политический/Социальный план",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "У этой партии нет чёткой и внятной <w>программы</w>.",
+                            "target_lang_translations": {
+                                "en": "This party does not have a clear and coherent <w>platform</w>."
+                            }
+                        },
+                        {
+                            "text": "Политическая <w>программа</w> нового президента.",
+                            "target_lang_translations": {
+                                "en": "The new president's political <w>program</w>."
+                            }
+                        },
+                        {
+                            "text": "Они представили свою экономическую <w>программу</w>.",
+                            "target_lang_translations": {
+                                "en": "They presented their economic <w>program</w>."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "политическая программа",
+                        "предвыборная программа",
+                        "партийная программа"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "A document stating the aims and principles of a political party, organization, or public figure."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "program",
+                                "target_lang_sense_clarification": "A set of principal goals supported by a political party or candidate (US spelling)."
+                            },
+                            {
+                                "target_lang_word": "programme",
+                                "target_lang_sense_clarification": "A set of principal goals supported by a political party or candidate (UK spelling)."
+                            },
+                            {
+                                "target_lang_word": "platform",
+                                "target_lang_sense_clarification": "The declared principles and policies of a political party or candidate."
+                            },
+                            {
+                                "target_lang_word": "manifesto",
+                                "target_lang_sense_clarification": "A public declaration of policy and aims, especially one issued before an election."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                    "sense_definition": "Совокупность дисциплин, преподаваемых в учебном заведении, или план обучения.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Образование",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Расширение (учебных) <w>программ</w> в школах.",
+                            "target_lang_translations": {
+                                "en": "Expansion of school <w>curricula</w>."
+                            }
+                        },
+                        {
+                            "text": "Эта университетская <w>программа</w> очень требовательна.",
+                            "target_lang_translations": {
+                                "en": "This university <w>program</w> is very demanding."
+                            }
+                        },
+                        {
+                            "text": "Новая <w>программа</w> обучения включает много практических занятий.",
+                            "target_lang_translations": {
+                                "en": "The new training <w>program</w> includes a lot of practical classes."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "образовательная программа",
+                        "школьная программа"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "The set of courses and content offered by an educational institution; a course of study."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "curriculum",
+                                "target_lang_sense_clarification": "The entire set of courses and content offered at a school or university."
+                            },
+                            {
+                                "target_lang_word": "program",
+                                "target_lang_sense_clarification": "A specific course of study, e.g., a degree program (US spelling)."
+                            },
+                            {
+                                "target_lang_word": "programme",
+                                "target_lang_sense_clarification": "A specific course of study, e.g., a degree programme (UK spelling)."
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

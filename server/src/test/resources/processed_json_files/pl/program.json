@@ -1,0 +1,473 @@
+{
+    "entries": [
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "a8b7b734-6c37-4c1e-8815-8f382fbc29aa",
+                    "sense_definition": "Plan działań, zestaw zaplanowanych czynności lub celów do osiągnięcia.",
+                    "learner_level": "A1",
+                    "frequency": "High",
+                    "semantic_group_id": "Planowanie i cele",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Jaki jest <w>program</w> na dzisiaj?",
+                            "target_lang_translations": {
+                                "ru": "Какая <w>программа</w> на сегодня?"
+                            }
+                        },
+                        {
+                            "text": "Partia ogłosiła swój nowy <w>program</w> polityczny.",
+                            "target_lang_translations": {
+                                "ru": "Партия объявила свою новую политическую <w>программу</w>."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "plan"
+                    ],
+                    "common_phrases": [
+                        "program dnia",
+                        "program polityczny",
+                        "program nauczania"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "План действий, набор запланированных мероприятий или целей для достижения."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Используется для описания плана действий, расписания мероприятий или политических намерений."
+                            },
+                            {
+                                "target_lang_word": "план",
+                                "target_lang_sense_clarification": "Более общее слово для обозначения намеченных действий или намерений."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "44904835-24a4-454c-aae2-4de785d617c2",
+                    "sense_definition": "Zestaw instrukcji lub komend zrozumiałych dla komputera, służących do wykonywania określonych zadań.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "Informatyka",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Muszę zainstalować nowy <w>program</w> na komputerze.",
+                            "target_lang_translations": {
+                                "ru": "Мне нужно установить новую <w>программу</w> на компьютер."
+                            }
+                        },
+                        {
+                            "text": "Ten <w>program</w> antywirusowy chroni mój laptop.",
+                            "target_lang_translations": {
+                                "ru": "Эта антивирусная <w>программа</w> защищает мой ноутбук."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "algorytm"
+                    ],
+                    "common_phrases": [
+                        "program komputerowy",
+                        "program antywirusowy",
+                        "napisać program"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Набор инструкций или команд, понятных компьютеру, для выполнения определенных задач."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Основной термин для любого компьютерного программного обеспечения."
+                            },
+                            {
+                                "target_lang_word": "приложение",
+                                "target_lang_sense_clarification": "Часто используется для обозначения программ на смартфонах и компьютерах (apps)."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "446a20e3-28c0-4ca1-9148-b6b28553d329",
+                    "sense_definition": "Odrębna audycja nadawana przez telewizję lub radio.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "Media i transmisje",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Oglądałem wczoraj bardzo ciekawy <w>program</w> o zwierzętach.",
+                            "target_lang_translations": {
+                                "ru": "Вчера я смотрел очень интересную <w>передачу</w> о животных."
+                            }
+                        },
+                        {
+                            "text": "Ten <w>program</w> telewizyjny zaczyna się o ósmej wieczorem.",
+                            "target_lang_translations": {
+                                "ru": "Эта телевизионная <w>программа</w> начинается в восемь вечера."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "audycja"
+                    ],
+                    "common_phrases": [
+                        "program telewizyjny",
+                        "program radiowy",
+                        "oglądać program"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Отдельная передача, транслируемая по телевидению или радио."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "передача",
+                                "target_lang_sense_clarification": "Наиболее точное и часто используемое слово для отдельной теле- или радиопередачи."
+                            },
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Более общее название, может относиться как к отдельной передаче, так и к циклу передач."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "76477862-ca8c-4a7a-8875-d24e346347ba",
+                    "sense_definition": "Zakres wiedzy objętej nauczaniem szkolnym lub akademickim; wykaz przedmiotów objętych takim nauczaniem.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Planowanie i cele",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Nowy <w>program</w> nauczania wprowadza więcej zajęć praktycznych.",
+                            "target_lang_translations": {
+                                "ru": "Новая учебная <w>программа</w> вводит больше практических занятий."
+                            }
+                        },
+                        {
+                            "text": "Musimy zrealizować cały <w>program</w> przed końcem semestru.",
+                            "target_lang_translations": {
+                                "ru": "Мы должны выполнить всю <w>программу</w> до конца семестра."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "program nauczania",
+                        "program studiów",
+                        "realizować program"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Объем знаний, охватываемый школьным или академическим обучением; перечень предметов, входящих в курс обучения."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Официальный термин для учебного плана, содержания курса или предмета."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "4f50984d-16ea-4cfc-9114-a61cb769c27e",
+                    "sense_definition": "Zestawienie audycji telewizyjnych lub radiowych na pewien okres, zwykle w czasopiśmie.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Media i transmisje",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Sprawdź w <w>programie</w> telewizyjnym, co jest wieczorem.",
+                            "target_lang_translations": {
+                                "ru": "Посмотри в телевизионной <w>программе</w>, что идёт вечером."
+                            }
+                        },
+                        {
+                            "text": "Kupiłem gazetę, żeby zobaczyć <w>program</w> na cały tydzień.",
+                            "target_lang_translations": {
+                                "ru": "Я купил газету, чтобы посмотреть <w>программу</w> на всю неделю."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "program TV",
+                        "sprawdzić w programie",
+                        "program na dziś"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Расписание теле- или радиопередач на определенный период, обычно публикуемое в газете или журнале."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Расписание передач на ТВ или радио, напечатанное в газете или доступное онлайн."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "bb07f737-bbd5-430d-a20a-2250776295be",
+                    "sense_definition": "Cykl audycji telewizyjnych lub radiowych, często powiązanych tematycznie.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Media i transmisje",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Ten <w>program</w> dokumentalny o kosmosie jest bardzo popularny.",
+                            "target_lang_translations": {
+                                "ru": "Эта документальная <w>программа</w> о космосе очень популярна."
+                            }
+                        },
+                        {
+                            "text": "Stacja planuje nowy <w>program</w> rozrywkowy na jesień.",
+                            "target_lang_translations": {
+                                "ru": "Канал планирует новую развлекательную <w>программу</w> на осень."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "program dokumentalny",
+                        "program informacyjny",
+                        "seria programów"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Цикл теле- или радиопередач, часто связанных общей темой или форматом."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Серия передач, объединенных общей темой (например, документальная программа)."
+                            },
+                            {
+                                "target_lang_word": "цикл передач",
+                                "target_lang_sense_clarification": "Более точное описание для серии тематических выпусков."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "85610f31-d456-47be-a2ee-ee5a6598d177",
+                    "sense_definition": "Broszurka z informacjami o sztuce teatralnej, operowej lub innym wydarzeniu, rozprowadzana pośród widzów.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Wydarzenia i występy",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "W <w>programie</w> teatralnym znalazłem listę aktorów.",
+                            "target_lang_translations": {
+                                "ru": "В театральной <w>программке</w> я нашёл список актёров."
+                            }
+                        },
+                        {
+                            "text": "Przedstawienie było tak dobre, że zachowałem <w>program</w> na pamiątkę.",
+                            "target_lang_translations": {
+                                "ru": "Спектакль был таким хорошим, что я сохранил <w>программку</w> на память."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "broszura",
+                        "repertuar"
+                    ],
+                    "common_phrases": [
+                        "program teatralny",
+                        "kupić program",
+                        "przeczytać program"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Брошюра с информацией о театральном спектакле, опере или другом событии, распространяемая среди зрителей."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программка",
+                                "target_lang_sense_clarification": "Наиболее употребительное слово для театральной брошюры со списком актеров и информацией о спектакле."
+                            },
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Более формальный, но менее распространенный вариант для театральной брошюры."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "6e1d65ee-abc2-49b8-9362-88334f7341ad",
+                    "sense_definition": "Kolejność punktów przedstawienia, występu, koncertu lub innej imprezy.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Wydarzenia i występy",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "W <w>programie</w> koncertu znalazły się utwory Chopina.",
+                            "target_lang_translations": {
+                                "ru": "В <w>программе</w> концерта были произведения Шопена."
+                            }
+                        },
+                        {
+                            "text": "Artyści przygotowali bogaty <w>program</w> artystyczny na galę.",
+                            "target_lang_translations": {
+                                "ru": "Артисты подготовили богатую артистическую <w>программу</w> для гала-вечера."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "repertuar"
+                    ],
+                    "common_phrases": [
+                        "program artystyczny",
+                        "program wieczoru",
+                        "zmienić program"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Последовательность номеров или частей представления, концерта или другого мероприятия."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Перечень номеров или частей концерта, спектакля, циркового представления."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "751f41c5-62a4-4487-bf9b-5325d068b75b",
+                    "sense_definition": "Zestaw działań wykonywanych przez program komputerowy.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "Informatyka",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Ten <w>program</w> wykonuje skomplikowane obliczenia w kilka sekund.",
+                            "target_lang_translations": {
+                                "ru": "Эта <w>программа</w> выполняет сложные вычисления за несколько секунд."
+                            }
+                        },
+                        {
+                            "text": "Zauważyłem, że <w>program</w> działa wolniej niż zwykle.",
+                            "target_lang_translations": {
+                                "ru": "Я заметил, что <w>программа</w> работает медленнее, чем обычно."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "wykonać program",
+                        "działanie programu"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Процесс выполнения или работа компьютерной программы."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Относится к работающему компьютерному приложению или его функционированию."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "a7beeb5b-edc3-4d00-8e1c-bf2aec3746d6",
+                    "sense_definition": "Kanał telewizyjny.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "Media i transmisje",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Na którym <w>programie</w> jest mecz?",
+                            "target_lang_translations": {
+                                "ru": "По какой <w>программе</w> идёт матч?"
+                            }
+                        },
+                        {
+                            "text": "Przełącz na inny <w>program</w>, ten jest nudny.",
+                            "target_lang_translations": {
+                                "ru": "Переключи на другую <w>программу</w>, эта скучная."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "kanał"
+                    ],
+                    "common_phrases": [
+                        "na którym programie?",
+                        "przełączyć program"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "Potocznie"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Телевизионный канал."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Разговорное название телевизионного канала."
+                            },
+                            {
+                                "target_lang_word": "канал",
+                                "target_lang_sense_clarification": "Стандартное, стилистически нейтральное название телевизионного канала."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "f8e8eb23-a20f-47ad-ba74-4d0da0e7e844",
+                    "sense_definition": "Element pozamuzyczny (np. tekst literacki, obraz), do którego odwołuje się kompozytor utworu muzycznego, nadając mu tytuł i wpływając na interpretację dzieła przez słuchacza.",
+                    "learner_level": "C1",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "W muzyce romantycznej często spotyka się <w>program</w> literacki.",
+                            "target_lang_translations": {
+                                "ru": "В музыке эпохи романтизма часто встречается литературная <w>программа</w>."
+                            }
+                        },
+                        {
+                            "text": "Ta symfonia ma bardzo rozbudowany <w>program</w>, który pomaga zrozumieć intencje kompozytora.",
+                            "target_lang_translations": {
+                                "ru": "У этой симфонии очень развёрнутая <w>программа</w>, которая помогает понять замысел композитора."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "muzyka programowa",
+                        "program symfonii"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Вне-музыкальный элемент (например, литературный текст, картина), к которому отсылает композитор в инструментальном произведении, влияя на его интерпретацию."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программа",
+                                "target_lang_sense_clarification": "Специальный музыковедческий термин, обозначающий сюжетную основу инструментального произведения."
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

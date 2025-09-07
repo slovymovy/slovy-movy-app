@@ -1,0 +1,151 @@
+
+import com.slovy.slovymovyapp.data.dictionary.DictionaryPos;
+import com.slovy.slovymovyapp.data.dictionary.LearnerLevel;
+import com.slovy.slovymovyapp.data.dictionary.NameType;
+import com.slovy.slovymovyapp.data.dictionary.SenseFrequency;
+import com.slovy.slovymovyapp.data.dictionary.TraitType;
+import kotlin.uuid.Uuid;
+
+-- Dictionary database schema
+CREATE TABLE lemma (
+  id BLOB AS Uuid NOT NULL PRIMARY KEY, -- UUID
+  pos INTEGER AS DictionaryPos NOT NULL,
+  lemma TEXT NOT NULL,
+  lemma_normalized TEXT NOT NULL
+);
+
+-- Word forms belonging to a POS entry
+CREATE TABLE form (
+  lemma_id BLOB AS Uuid NOT NULL REFERENCES lemma(id) ON DELETE CASCADE,
+  form_id BLOB AS Uuid NOT NULL,
+  form TEXT NOT NULL,
+  form_normalized TEXT NOT NULL,
+  PRIMARY KEY (form_id)
+);
+
+-- Tags associated with a word form (normalized list of strings)
+CREATE TABLE form_tag (
+  form_id BLOB AS Uuid NOT NULL REFERENCES form(form_id) ON DELETE CASCADE,
+  tag TEXT NOT NULL,
+  PRIMARY KEY(form_id, tag)
+);
+
+-- Senses associated with a POS entry
+CREATE TABLE sense (
+  sense_id BLOB AS Uuid NOT NULL PRIMARY KEY,
+  lemma_id BLOB AS Uuid NOT NULL REFERENCES lemma(id) ON DELETE CASCADE,
+  sense_definition TEXT NOT NULL,
+  learner_level INTEGER AS LearnerLevel NOT NULL,
+  frequency INTEGER AS SenseFrequency NOT NULL,
+  semantic_group_id TEXT NOT NULL,
+  name_type INTEGER AS NameType
+);
+
+-- Examples for a sense; example_id comes from source JSON and is scoped per sense
+CREATE TABLE sense_example (
+  sense_id BLOB AS Uuid NOT NULL REFERENCES sense(sense_id) ON DELETE CASCADE,
+  example_id INTEGER NOT NULL,
+  text TEXT NOT NULL,
+  PRIMARY KEY(sense_id, example_id)
+);
+
+-- Synonyms for a sense
+CREATE TABLE sense_synonym (
+  sense_id BLOB AS Uuid NOT NULL REFERENCES sense(sense_id) ON DELETE CASCADE,
+  synonym TEXT NOT NULL,
+  PRIMARY KEY(sense_id, synonym)
+);
+
+-- Antonyms for a sense
+CREATE TABLE sense_antonym (
+  sense_id BLOB AS Uuid NOT NULL REFERENCES sense(sense_id) ON DELETE CASCADE,
+  antonym TEXT NOT NULL,
+  PRIMARY KEY(sense_id, antonym)
+);
+
+-- Common phrases for a sense
+CREATE TABLE sense_common_phrase (
+  sense_id BLOB AS Uuid NOT NULL REFERENCES sense(sense_id) ON DELETE CASCADE,
+  phrase TEXT NOT NULL,
+  PRIMARY KEY(sense_id, phrase)
+);
+
+-- Traits for a sense; trait_type constrained to known enum values
+CREATE TABLE sense_trait (
+  sense_id BLOB AS Uuid NOT NULL REFERENCES sense(sense_id) ON DELETE CASCADE,
+  trait_type INTEGER AS TraitType NOT NULL,
+  comment TEXT NOT NULL,
+  PRIMARY KEY(sense_id, trait_type, comment)
+);
+
+
+-- Indexes to speed up searches by lemma
+CREATE INDEX IF NOT EXISTS idx_lemma_lemma_lower ON lemma(lower(lemma));
+CREATE INDEX IF NOT EXISTS idx_lemma_lemma_normalized ON lemma(lemma_normalized);
+
+-- Indexes to speed up searches by form
+CREATE INDEX IF NOT EXISTS idx_form_form ON form(form);
+CREATE INDEX IF NOT EXISTS idx_form_form_normalized ON form(form_normalized);
+
+-- Queries
+insertPosEntry:
+INSERT INTO lemma(id, lemma, lemma_normalized, pos)
+VALUES (?, ?, ?, ?);
+
+insertForm:
+INSERT INTO form(form_id, lemma_id, form, form_normalized)
+VALUES (?, ?, ?, ?);
+
+insertFormTag:
+INSERT OR IGNORE INTO form_tag(form_id, tag)
+VALUES (?, ?);
+
+insertSense:
+INSERT OR REPLACE INTO sense(
+  sense_id, lemma_id, sense_definition, learner_level, frequency, semantic_group_id, name_type
+) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+insertSenseExample:
+INSERT OR REPLACE INTO sense_example(sense_id, example_id, text)
+VALUES (?, ?, ?);
+
+insertSenseSynonym:
+INSERT OR IGNORE INTO sense_synonym(sense_id, synonym)
+VALUES (?, ?);
+
+insertSenseAntonym:
+INSERT OR IGNORE INTO sense_antonym(sense_id, antonym)
+VALUES (?, ?);
+
+insertSenseCommonPhrase:
+INSERT OR IGNORE INTO sense_common_phrase(sense_id, phrase)
+VALUES (?, ?);
+
+insertSenseTrait:
+INSERT OR IGNORE INTO sense_trait(sense_id, trait_type, comment)
+VALUES (?, ?, ?);
+
+-- Search queries
+-- Case-insensitive search using lower(); relies on idx_form_form_lower
+selectFormsByWord:
+SELECT f.lemma_id, f.lemma_id, f.form
+FROM form f
+WHERE lower(f.form) = lower(?);
+
+-- Diacritic-insensitive search using precomputed normalized column
+selectFormsByNormalized:
+SELECT f.lemma_id, f.lemma_id, f.form
+FROM form f
+WHERE f.form_normalized = ?;
+
+-- Search queries for lemmas
+selectLemmasByWord:
+SELECT l.id, l.lemma
+FROM lemma l
+WHERE lower(l.lemma) = lower(?);
+
+-- Diacritic-insensitive search using precomputed normalized column
+selectLemmasByNormalized:
+SELECT l.id, l.lemma
+FROM lemma l
+WHERE l.lemma_normalized = ?;

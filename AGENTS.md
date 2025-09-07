@@ -46,10 +46,20 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **Server main**: com.slovy.slovymovyapp.ApplicationKt
 
 ## Database (SqlDelight)
-- **Schema**: `shared/src/commonMain/sqldelight/com/slovy/slovymovyapp/db/`
-- **Migrations**: `shared/src/commonMain/sqldelight/com/slovy/slovymovyapp/db/migrations/`
-- **Repository pattern**: `NotesRepository` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/notes/`
-- **Platform drivers**: DriverFactory implementations for Android/iOS/JVM
+- App DB schema: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/`
+  - Migrations: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/migrations/`
+- Dictionary DB schema: `shared/src/commonMain/sqldelight/dictionarydb/com/slovy/slovymovyapp/dictionary/`
+- Translation DB schema: `shared/src/commonMain/sqldelight/translationdb/com/slovy/slovymovyapp/translation/`
+- Repository pattern: `SettingsRepository` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/settings/`
+- Platform drivers: DriverFactory implementations for Android/iOS/JVM
+
+## Testing Guidelines
+- Do not leave println statements in tests.
+  - Prefer descriptive assertion messages (assertTrue, assertEquals, fail with context) to convey failures.
+  - If you need temporary debugging during local development, use a debugger or temporary logs and remove them before committing.
+- Fail fast in tests: do not aggregate errors.
+  - Validate items inside loops using immediate assertions; abort the test on the first failure.
+  - Avoid collecting errors into lists and failing at the end.
 
 ## Key Notes
 - Module accessors: :composeApp, :shared, :server

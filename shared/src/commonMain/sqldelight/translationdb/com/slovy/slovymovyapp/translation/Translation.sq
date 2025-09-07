@@ -1,0 +1,57 @@
+import kotlin.uuid.Uuid;
+
+-- Translation database schema for target-language data linked to dictionary senses/examples
+
+-- Per-sense target language definitions
+CREATE TABLE sense_target_definition (
+  sense_id BLOB AS Uuid NOT NULL,
+  definition TEXT NOT NULL,
+  PRIMARY KEY(sense_id)
+);
+
+-- Per-sense translations: ordered list of target words per target language
+CREATE TABLE sense_translation (
+  sense_id BLOB AS Uuid NOT NULL,
+  idx INTEGER NOT NULL, -- position within the list to preserve order
+  target_lang_word TEXT NOT NULL,
+  target_lang_sense_clarification TEXT,
+  PRIMARY KEY(sense_id, idx)
+);
+
+-- Per-example target translations (scoped by sense_id and example_id)
+CREATE TABLE example_translation (
+  sense_id BLOB AS Uuid NOT NULL,
+  example_id INTEGER NOT NULL,
+  translation TEXT NOT NULL,
+  PRIMARY KEY(sense_id, example_id)
+);
+
+-- Inserts/Upserts
+insertSenseTargetDefinition:
+INSERT OR REPLACE INTO sense_target_definition(sense_id, definition)
+VALUES (?, ?);
+
+insertSenseTranslation:
+INSERT OR REPLACE INTO sense_translation(sense_id, idx, target_lang_word, target_lang_sense_clarification)
+VALUES (?, ?, ?, ?);
+
+insertExampleTranslation:
+INSERT OR REPLACE INTO example_translation(sense_id, example_id, translation)
+VALUES (?, ?, ?);
+
+-- Selectors
+selectDefinitionsBySense:
+SELECT definition
+FROM sense_target_definition
+WHERE sense_id = ?;
+
+selectSenseTranslationsBySense:
+SELECT idx, target_lang_word, target_lang_sense_clarification
+FROM sense_translation
+WHERE sense_id = ?
+ORDER BY idx;
+
+selectExampleTranslations:
+SELECT translation
+FROM example_translation
+WHERE sense_id = ? AND example_id = ?;

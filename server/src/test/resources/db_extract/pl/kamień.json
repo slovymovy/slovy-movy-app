@@ -1,0 +1,3559 @@
+{
+  "word": "kamień",
+  "lang_code": "pl",
+  "source_file_to_entries": {
+    "raw-wiktextract-data.jsonl": [
+      {
+        "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+        "word": "Kamień",
+        "pos": "name",
+        "lang_code": "pl",
+        "forms": [
+          {
+            "form_id": "9aae4b77-63e2-4ac7-834d-547af96aa1e8",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "tags": [
+              "nominative",
+              "singular"
+            ],
+            "form": "Kamień"
+          },
+          {
+            "form_id": "802bb37a-7d84-47b6-b202-290f6793f5bc",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "tags": [
+              "genitive",
+              "singular"
+            ],
+            "form": "Kamienia"
+          },
+          {
+            "form_id": "158aec35-a41d-4631-83bd-d48186191a6f",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "tags": [
+              "dative",
+              "singular"
+            ],
+            "form": "Kamieniowi"
+          },
+          {
+            "form_id": "12413974-02cf-4ee7-9292-1bb5798e12b7",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "tags": [
+              "accusative",
+              "singular"
+            ],
+            "form": "Kamień"
+          },
+          {
+            "form_id": "6eb66a23-b6bd-4c97-b464-3ac5c3aef3c7",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "tags": [
+              "instrumental",
+              "singular"
+            ],
+            "form": "Kamieniem"
+          },
+          {
+            "form_id": "95bc57f0-474d-4143-ac0b-f723b3e229a3",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "tags": [
+              "locative",
+              "singular"
+            ],
+            "form": "Kamieniu"
+          },
+          {
+            "form_id": "06b55d0c-82d4-4149-a3df-547a1a82ca21",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "tags": [
+              "singular",
+              "vocative"
+            ],
+            "form": "Kamieniu"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "c1ea29b6-5d1c-4cd7-8f4e-cdf8c1e44a15",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Mirsk, Lwówek Śląski County, Lower Silesian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "cd41faf4-5acd-4f17-b4a6-1c9d3b9543b6",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Międzybórz, Oleśnica County, Lower Silesian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "dcc899a2-694e-456b-8025-01e479c255ae",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Długołęka, Wrocław County, Lower Silesian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "6fbf3d97-81fc-44c5-ae51-dc99c2daaec5",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Jabłonowo Pomorskie, Brodnica County, Kuyavian-Pomeranian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "09e12154-b8b2-44bc-8452-b52dc6bf3f10",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Kamień, Chełm County, Lublin Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "7b4018a8-38e1-47c7-93e4-678db82257c7",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Wola Mysłowska, Łuków County, Lublin Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "e5db3295-9caa-4ad7-97d7-12bedcef0a02",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Łaziska, Opole Lubelskie County, Lublin Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "893ef20a-2020-46cf-8893-9b8f8cd3b9d5",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Stary Brus, Włodawa County, Lublin Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "c371f436-d3dc-4edc-8111-8ce24df9ac89",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Krosno Odrzańskie, Krosno Odrzańskie County, Lubusz Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "f1c868a0-8a0e-4c2d-b390-fdcd95355d9d",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Kleszczów, Bełchatów County, Łódź Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "f133b560-43ea-4ea5-ac6f-5397c6741244",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Dmosin, Brzeziny County, Łódź Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "24eeffe6-6d6a-4fc4-b05d-d78fed766aa5",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Sławno, Opoczno County, Łódź Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "7a8c3e57-18b9-4729-b906-8f64f4c6b1f7",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Głowno, Zgierz County, Łódź Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "f43c3ff3-53a8-4151-87e1-5dc5dcff065d",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Czernichów, Kraków County, Lesser Poland Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "15deae39-4ce0-4e05-b243-3aaea3a7a12d",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Białobrzegi, Białobrzegi County, Masovian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "0aeb6ae9-7482-4421-8da8-d83516d83c2e",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Dzierzgowo, Mława County, Masovian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "e7b96028-5aed-43dd-9c05-60d1c62e19d5",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Kamień, Rzeszów County, Subcarpathian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "74e65969-5f05-47d5-aaf0-8bd947462c0b",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Sztabin, Augustów County, Podlaskie Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "a4b64779-7ea8-4b9b-864b-4fe4dd9c3719",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Czyże, Hajnówka County, Podlaskie Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "562a96a4-1613-47ce-8961-174c5592f0a9",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Debrzno, Człuchów County, Pomeranian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "069d215e-e4bc-42af-bdb6-253e5f2836f8",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Szemud, Wejherowo County, Pomeranian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "98fc1d9b-adad-42dc-88ed-6daaffe7f4a0",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Korsze, Kętrzyn County, Warmian-Masurian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "8d13020a-e24c-40eb-bc06-63ced3305623",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Ruciane-Nida, Pisz County, Warmian-Masurian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "e4e740cf-e20a-484f-9de5-756922d32205",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Węgorzewo, Węgorzewo County, Warmian-Masurian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "589d0737-112c-43dc-8242-9fd276da8701",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Żerków, Jarocin County, Greater Poland Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "404e17ec-1ac2-46a6-808c-87cd462e721f",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Ceków-Kolonia, Kalisz County, Greater Poland Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "05d0d8e5-e06b-45fc-aee0-d6372dd81e63",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Koło, Koło County, Greater Poland Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "54af5f61-0e20-447e-a852-db171fce2873",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Międzychód, Międzychód County, Greater Poland Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "02074cae-a784-4f7a-b6c7-a748c16660f2",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Słupca, Słupca County, Greater Poland Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "67eb0b53-5d30-47b2-8eeb-424391e1a347",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Pyzdry, Września County, Greater Poland Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "24c842f7-bbd6-4f47-a611-4da9ef7686af",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a village in the Gmina of Złotów, Złotów County, Greater Poland Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "4109c47f-2f1a-4f1e-b768-48e4416124c7",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a district of Częstochowa, Silesian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "d52d423c-aa24-495d-a68e-e6bf5a54dbdb",
+            "entry_id": "858b0f58-dad2-4278-8ceb-1d6c97a54e07",
+            "glosses": [
+              "Kamień (a district of Piekary Śląskie, Silesian Voivodeship, Poland)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+        "word": "Kamień",
+        "pos": "name",
+        "lang_code": "pl",
+        "forms": [
+          {
+            "form_id": "08a0f288-5087-4872-8bd3-f090c8003504",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "nominative",
+              "singular"
+            ],
+            "form": "Kamień"
+          },
+          {
+            "form_id": "378233fb-7c3e-47c9-b2d6-10977d73fac0",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "nominative",
+              "plural"
+            ],
+            "form": "Kamieniowie"
+          },
+          {
+            "form_id": "46d0d1b3-887d-4710-96c7-ff9fa9da84cc",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "genitive",
+              "singular"
+            ],
+            "form": "Kamienia"
+          },
+          {
+            "form_id": "f2c96689-7272-46c1-af60-69df03809b34",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "genitive",
+              "plural"
+            ],
+            "form": "Kamieniów"
+          },
+          {
+            "form_id": "c0061f19-42c6-44dc-8031-7a688d235b15",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "dative",
+              "singular"
+            ],
+            "form": "Kamieniowi"
+          },
+          {
+            "form_id": "45a82970-d1b9-45bf-aa50-1047c9ec8418",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "dative",
+              "plural"
+            ],
+            "form": "Kamieniom"
+          },
+          {
+            "form_id": "44d7e04a-3219-43d3-b3b4-262728cf6204",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "accusative",
+              "singular"
+            ],
+            "form": "Kamienia"
+          },
+          {
+            "form_id": "46686a0d-59ad-47a7-af52-50ad169a2667",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "accusative",
+              "plural"
+            ],
+            "form": "Kamieniów"
+          },
+          {
+            "form_id": "33b1af02-20bd-4cc7-8a25-6da1e46b1598",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "instrumental",
+              "singular"
+            ],
+            "form": "Kamieniem"
+          },
+          {
+            "form_id": "dd50bfc5-511e-4261-8d1f-5e0d66bdeae4",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "instrumental",
+              "plural"
+            ],
+            "form": "Kamieniami"
+          },
+          {
+            "form_id": "a3393ea1-9692-4442-9829-e416284c2c22",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "locative",
+              "singular"
+            ],
+            "form": "Kamieniu"
+          },
+          {
+            "form_id": "ae437781-9ae6-4fe2-a63d-0e30aa92890f",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "locative",
+              "plural"
+            ],
+            "form": "Kamieniach"
+          },
+          {
+            "form_id": "5b49c6ae-1a0a-415d-ba2e-492f3a8f3ea9",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "singular",
+              "vocative"
+            ],
+            "form": "Kamieniu"
+          },
+          {
+            "form_id": "ac4f9d9d-4fdb-4604-acf3-8308d04805ac",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "tags": [
+              "plural",
+              "vocative"
+            ],
+            "form": "Kamieniowie"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "09125e36-c466-4532-b126-cad0f005e64d",
+            "entry_id": "fb2edd8f-e010-4d34-b06d-06ee110f0a2e",
+            "glosses": [
+              "a male surname"
+            ],
+            "tags": [
+              "masculine",
+              "person"
+            ],
+            "examples": []
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "e0cd9bae-3153-4f88-8d8e-d3afb15048d0",
+        "word": "Kamień",
+        "pos": "name",
+        "lang_code": "pl",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "dee60c67-5b6a-40d4-83b6-b79ba7091514",
+            "entry_id": "e0cd9bae-3153-4f88-8d8e-d3afb15048d0",
+            "glosses": [
+              "a female surname"
+            ],
+            "tags": [
+              "feminine",
+              "indeclinable"
+            ],
+            "examples": []
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "6171edd4-d016-4834-860e-473e016f34ea",
+        "word": "Kamień",
+        "pos": "name",
+        "lang_code": "pl",
+        "forms": [
+          {
+            "form_id": "6ff41391-a25a-4660-b6f0-1a3a842ecc59",
+            "entry_id": "6171edd4-d016-4834-860e-473e016f34ea",
+            "tags": [
+              "nominative",
+              "singular"
+            ],
+            "form": "Kamień"
+          },
+          {
+            "form_id": "8b7f5674-8d13-4dcb-bf67-af955c9d9a18",
+            "entry_id": "6171edd4-d016-4834-860e-473e016f34ea",
+            "tags": [
+              "genitive",
+              "singular"
+            ],
+            "form": "Kamienia"
+          },
+          {
+            "form_id": "878ed52a-0957-47ae-b242-9b6d7faafcb1",
+            "entry_id": "6171edd4-d016-4834-860e-473e016f34ea",
+            "tags": [
+              "dative",
+              "singular"
+            ],
+            "form": "Kamieniowi"
+          },
+          {
+            "form_id": "2c669d36-d6fc-4129-8ca1-a85540931695",
+            "entry_id": "6171edd4-d016-4834-860e-473e016f34ea",
+            "tags": [
+              "accusative",
+              "singular"
+            ],
+            "form": "Kamień"
+          },
+          {
+            "form_id": "e74ad9b7-1aeb-4dcb-9939-dd44420070c7",
+            "entry_id": "6171edd4-d016-4834-860e-473e016f34ea",
+            "tags": [
+              "instrumental",
+              "singular"
+            ],
+            "form": "Kamieniem"
+          },
+          {
+            "form_id": "f6afea85-ef46-436d-9dca-4a23de2a8de3",
+            "entry_id": "6171edd4-d016-4834-860e-473e016f34ea",
+            "tags": [
+              "locative",
+              "singular"
+            ],
+            "form": "Kamieniu"
+          },
+          {
+            "form_id": "c3dc58ea-ddf7-4cba-9905-a594ebc7e3f1",
+            "entry_id": "6171edd4-d016-4834-860e-473e016f34ea",
+            "tags": [
+              "singular",
+              "vocative"
+            ],
+            "form": "Kamieniu"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "935a0a25-50ad-4d44-93a7-ee2b894b9915",
+            "entry_id": "6171edd4-d016-4834-860e-473e016f34ea",
+            "glosses": [
+              "Kamen (a mountain in Putorana Plateau, Russia)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+        "word": "kamień",
+        "pos": "noun",
+        "lang_code": "pl",
+        "forms": [
+          {
+            "form_id": "9aec1d2a-d63a-41ea-a667-1fce261c3632",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "diminutive"
+            ],
+            "form": "kamyk"
+          },
+          {
+            "form_id": "34a2e72c-eb9e-467b-b2cb-33226733a24f",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "augmentative"
+            ],
+            "form": "kamor"
+          },
+          {
+            "form_id": "b4260d5d-00d9-47d1-aa20-95ecfae8fa39",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "nominative",
+              "singular"
+            ],
+            "form": "kamień"
+          },
+          {
+            "form_id": "a7711efd-9bda-4786-83b1-049836c38f4f",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "nominative",
+              "plural"
+            ],
+            "form": "kamienie"
+          },
+          {
+            "form_id": "557d90d3-d636-4d36-a21e-f0734d81a0ec",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "genitive",
+              "singular"
+            ],
+            "form": "kamienia"
+          },
+          {
+            "form_id": "12ee1828-162b-482a-9552-77c7bd33102a",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "genitive",
+              "plural"
+            ],
+            "form": "kamieni"
+          },
+          {
+            "form_id": "09863594-d354-4162-a54f-37bbeb45171b",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "dative",
+              "singular"
+            ],
+            "form": "kamieniowi"
+          },
+          {
+            "form_id": "efb77a3e-4484-4fac-b86c-ab5f6d8f24d1",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "dative",
+              "plural"
+            ],
+            "form": "kamieniom"
+          },
+          {
+            "form_id": "a2c239c3-f9c0-4d24-922a-20a44370c6f4",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "accusative",
+              "singular"
+            ],
+            "form": "kamień"
+          },
+          {
+            "form_id": "74e1fc8e-3e70-4868-a79b-4b8d0440d4b4",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "accusative",
+              "plural"
+            ],
+            "form": "kamienie"
+          },
+          {
+            "form_id": "ea92781c-d8b5-4453-b18b-43083c028d89",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "instrumental",
+              "singular"
+            ],
+            "form": "kamieniem"
+          },
+          {
+            "form_id": "9a96f49a-9c80-439b-af50-1f929886fd7a",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "instrumental",
+              "plural"
+            ],
+            "form": "kamieniami"
+          },
+          {
+            "form_id": "15cea2ad-17c7-4b9d-bdf3-ff898fc60862",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "locative",
+              "singular"
+            ],
+            "form": "kamieniu"
+          },
+          {
+            "form_id": "1e797818-38cb-423a-9a4c-d93f7b53eee5",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "locative",
+              "plural"
+            ],
+            "form": "kamieniach"
+          },
+          {
+            "form_id": "529e1fb5-e816-4b88-9ae0-a599a137e085",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "singular",
+              "vocative"
+            ],
+            "form": "kamieniu"
+          },
+          {
+            "form_id": "617fca2e-c822-48bf-98d6-5c6607846c13",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "tags": [
+              "plural",
+              "vocative"
+            ],
+            "form": "kamienie"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "bb468410-c08f-4325-9857-f92ca8b79b24",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "stone (piece of rock that has been separated)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": [
+              {
+                "example_id": "8b940a63-c9ec-45e3-b438-3a93379c082e",
+                "sense_id": "bb468410-c08f-4325-9857-f92ca8b79b24",
+                "text": "kamień brukowy",
+                "english": "flagstone, paving stone"
+              },
+              {
+                "example_id": "ca8527d2-6264-44f3-b45c-ca885976721c",
+                "sense_id": "bb468410-c08f-4325-9857-f92ca8b79b24",
+                "text": "kamień nagrobny",
+                "english": "tombstone, gravestone"
+              }
+            ]
+          },
+          {
+            "sense_id": "0a9b6c4e-df1e-4c65-b002-a02afe70bc43",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "stone (gemstone, jewel)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "bcca5d51-b2c4-4647-b7fe-a9184ec9ebb9",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "stone; plaque (hard sediment remaining on something)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "1f443cd0-5745-45d8-a78b-a7968a5bc41e",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "stone (hard, stone-like deposit in someone or something's body)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": [
+              {
+                "example_id": "00690799-627b-4282-a0d1-ffd25ccb4ccb",
+                "sense_id": "1f443cd0-5745-45d8-a78b-a7968a5bc41e",
+                "text": "kamień żółciowy",
+                "english": "gallstone"
+              }
+            ]
+          },
+          {
+            "sense_id": "3e868071-0f4c-41d8-86ab-711a54afdb91",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "stone (small stone-like item used in some games and sports)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "df5a9d4f-7e7b-49b1-80e4-54cbf01498cc",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "rock (closed hand in the game of rock paper scissors)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "c748362d-4845-4d9e-b93d-0f1ac82ca7e7",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "pack of matches containing 250 boxes"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine",
+              "obsolete"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "16bf6bce-abe0-4d68-a54b-828a3d277f4b",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "stone (unit of mass equal to 32 pounds)"
+            ],
+            "tags": [
+              "historical",
+              "inanimate",
+              "masculine",
+              "obsolete"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "108c7c09-fc64-48c9-9a6f-7c71ed20874c",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "stone (hard seed of some fruits)"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine",
+              "obsolete"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "eb2cac72-855b-4efc-a655-cbe5c23c4f25",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "border post"
+            ],
+            "tags": [
+              "inanimate",
+              "masculine",
+              "obsolete"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "7ee36966-56c6-48c3-8b4a-47ca4b43e687",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "knob used to vote when judging a guilty person"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "8fe7d4fc-888f-4ec0-ab14-2705cdbc6d47",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "plummet (measuring device)"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "7f5ca88b-bd10-4dfa-b79b-1e0c5df7fbca",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "antimony, semimetal"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "35a03a01-02b3-4bde-aa39-f306028a5824",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "The meaning of this term is uncertain. Possibilities include"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "854b5251-03a9-455c-8a5e-852e4edad089",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "The meaning of this term is uncertain. Possibilities include:",
+              "calamine (basic zinc silicate)"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": [
+              {
+                "example_id": "86ce00c6-8aed-4d91-a9e0-4286fef8eaaa",
+                "sense_id": "854b5251-03a9-455c-8a5e-852e4edad089",
+                "text": "Wezmi foku miecżykowego/ [...] kamienia calaminaris dragme [!]/ [...] apotym ty rzecży ktore maią bytz ſtarte na proch/ ſetrzi ye ſubtilnie"
+              }
+            ]
+          },
+          {
+            "sense_id": "a857527b-3127-4994-ba75-1e5ce6a3b7e4",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "copper ore"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "fdac3b17-4080-44fb-8f96-4390a3f93778",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "murra"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "68e263e0-e69d-4894-b408-1431db99c91e",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "magnet"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "a0ca6ed7-9dde-44ca-893f-689a3208756e",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "magnesia; magnesium oxide; manganese ore"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "9d6a3c1f-df33-4c82-a44c-5e78136f8402",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "The meaning of this term is uncertain. Possibilities include"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "0182268e-2aca-45fc-bbe1-fcdb4a52e6dc",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "The meaning of this term is uncertain. Possibilities include:",
+              "mica (hydrated magnesium silicate)"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": [
+              {
+                "example_id": "8e7bc167-427d-4a22-9796-ed0f0e5143be",
+                "sense_id": "0182268e-2aca-45fc-bbe1-fcdb4a52e6dc",
+                "text": "lapis specularis, Przezroczyſty kámień by śckło"
+              }
+            ]
+          },
+          {
+            "sense_id": "acfe12e8-d13b-40a4-854d-ca431699b993",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "fossil"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "c4e6cfce-85ac-4fbb-93a3-883bff78aae3",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "amber"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "35b71258-3d98-4c5a-9e6b-d226683655ae",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "coral"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "15c7a6a5-88f7-4e44-8af1-c3d463bc556c",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "solid"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "d2bbd031-dbba-400a-8a1a-48bf3e2e9818",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "weight"
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": []
+          },
+          {
+            "sense_id": "3c7c0466-bdfd-4081-a528-f322514e8bcc",
+            "entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "glosses": [
+              "stone; Further details are uncertain."
+            ],
+            "tags": [
+              "Middle",
+              "Polish",
+              "inanimate",
+              "masculine"
+            ],
+            "examples": [
+              {
+                "example_id": "be5698fa-51e8-446b-9f13-0ec1d33df861",
+                "sense_id": "3c7c0466-bdfd-4081-a528-f322514e8bcc",
+                "text": "Ile śię greckiego textu dotycze Tento/ nieściąga się na kamień alę abo nawęgieł abo nagłowę/ ilé zaś żydowskiego sktorego ſą mniéiſze słowa wźięté/ iako śię tego i zgrammatiki łatwie domyſliem nieściąga śię na głowę/ i nie tak pewnie na co inſzégo iako na kamień abo na to co ieſt powiedziáno otemto kamięniu"
+              },
+              {
+                "example_id": "9b9a234f-6561-47f2-9142-14c4e3a64996",
+                "sense_id": "3c7c0466-bdfd-4081-a528-f322514e8bcc",
+                "text": "ná pierwſzey ſtronie wierſz 5. ſtoi ná kámieniu/ ma być ná rámieniu."
+              }
+            ]
+          }
+        ],
+        "translations": [],
+        "word_linkages": [
+          {
+            "linkage_id": "d2c82f42-6379-4ce8-bf1c-d2b500f805be",
+            "source_entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "source_sense_ids": [
+              "0a9b6c4e-df1e-4c65-b002-a02afe70bc43"
+            ],
+            "linkage_type": "synonyms",
+            "word": "klejnot"
+          },
+          {
+            "linkage_id": "a8ac15e4-b721-45ef-8e07-827b68426866",
+            "source_entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "source_sense_ids": [
+              "108c7c09-fc64-48c9-9a6f-7c71ed20874c"
+            ],
+            "linkage_type": "synonyms",
+            "word": "pestka"
+          },
+          {
+            "linkage_id": "c257e18a-9af0-4cd9-bac2-aecf9cd7b258",
+            "source_entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "source_sense_ids": [
+              "8fe7d4fc-888f-4ec0-ab14-2705cdbc6d47"
+            ],
+            "linkage_type": "synonyms",
+            "word": "ołowianka"
+          },
+          {
+            "linkage_id": "6d45b4c9-5ee6-4147-9bf5-e62db12634cc",
+            "source_entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "source_sense_ids": [
+              "68e263e0-e69d-4894-b408-1431db99c91e"
+            ],
+            "linkage_type": "synonyms",
+            "word": "magnes"
+          },
+          {
+            "linkage_id": "b8e396d5-df30-4c9b-9fab-64c789d7283e",
+            "source_entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "source_sense_ids": [
+              "acfe12e8-d13b-40a4-854d-ca431699b993"
+            ],
+            "linkage_type": "synonyms",
+            "word": "skamielina"
+          },
+          {
+            "linkage_id": "df7e31f2-2c37-4f8e-bcfe-6ec5f7a5eb4a",
+            "source_entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "source_sense_ids": [
+              "c4e6cfce-85ac-4fbb-93a3-883bff78aae3"
+            ],
+            "linkage_type": "synonyms",
+            "word": "bursztyn"
+          },
+          {
+            "linkage_id": "b6ff4ac0-613d-45ea-b932-c320ba6ad78f",
+            "source_entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "source_sense_ids": [
+              "35b71258-3d98-4c5a-9e6b-d226683655ae"
+            ],
+            "linkage_type": "synonyms",
+            "word": "koral"
+          },
+          {
+            "linkage_id": "f4024686-fc8e-4e69-a1b3-ebe1937a5f1d",
+            "source_entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "source_sense_ids": [
+              "15c7a6a5-88f7-4e44-8af1-c3d463bc556c"
+            ],
+            "linkage_type": "synonyms",
+            "word": "ciało stałe"
+          },
+          {
+            "linkage_id": "66e5712e-40a8-47ca-9e7f-5a0f5150a327",
+            "source_entry_id": "ce0fcec3-d644-4c8b-8b52-88fc67be694b",
+            "source_sense_ids": [
+              "d2bbd031-dbba-400a-8a1a-48bf3e2e9818"
+            ],
+            "linkage_type": "synonyms",
+            "word": "odważnik"
+          }
+        ]
+      }
+    ],
+    "ru-extract.jsonl": [
+      {
+        "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+        "word": "kamień",
+        "pos": "noun",
+        "lang_code": "pl",
+        "forms": [
+          {
+            "form_id": "902872b3-fa42-4713-8527-588c4c0589c6",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "nominative",
+              "singular"
+            ],
+            "form": "kamień"
+          },
+          {
+            "form_id": "a2a6dcce-dd69-4fef-bfd5-5d53212362a7",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "nominative",
+              "plural"
+            ],
+            "form": "kamienie"
+          },
+          {
+            "form_id": "cf0b3735-dca4-414b-8f7d-44086625f72d",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "genitive",
+              "singular"
+            ],
+            "form": "kamienia"
+          },
+          {
+            "form_id": "9b260a5c-9751-40a1-9179-14f8ccc37404",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "genitive",
+              "plural"
+            ],
+            "form": "kamieni"
+          },
+          {
+            "form_id": "e0ebde72-9927-4b81-ac1c-0cb1126c1a96",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "dative",
+              "singular"
+            ],
+            "form": "kamieniowi"
+          },
+          {
+            "form_id": "ef12aa5c-d32e-41ce-a91e-d590d683ac20",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "dative",
+              "plural"
+            ],
+            "form": "kamieniom"
+          },
+          {
+            "form_id": "047bbf1b-bbc5-4f50-8e97-e839d3274741",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "accusative",
+              "singular"
+            ],
+            "form": "kamień"
+          },
+          {
+            "form_id": "938c488c-df81-4ceb-964b-5a6276e674b9",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "accusative",
+              "plural"
+            ],
+            "form": "kamienie"
+          },
+          {
+            "form_id": "c8b09cdf-b058-4200-8d73-743550209841",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "instrumental",
+              "singular"
+            ],
+            "form": "kamieniem"
+          },
+          {
+            "form_id": "14648a7e-ad1b-42be-8b4a-22f016068856",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "instrumental",
+              "plural"
+            ],
+            "form": "kamieniami"
+          },
+          {
+            "form_id": "e94f46ef-fc06-4ef3-9bac-9e1f6ed8650d",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "locative",
+              "singular"
+            ],
+            "form": "kamieniu"
+          },
+          {
+            "form_id": "e4bd1bcb-ff90-4341-a187-b42fde672be6",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "locative",
+              "plural"
+            ],
+            "form": "kamieniach"
+          },
+          {
+            "form_id": "e7da1e1a-9e5b-483b-83cf-b51f1a290e20",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "vocative",
+              "singular"
+            ],
+            "form": "kamieniu"
+          },
+          {
+            "form_id": "033876ca-790d-415e-a594-11a36ec9065e",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "tags": [
+              "vocative",
+              "plural"
+            ],
+            "form": "kamienie"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "4520373d-6f05-4eec-b4dd-724407e4867f",
+            "entry_id": "d2590946-43ee-481a-bac4-d46c2b642763",
+            "glosses": [
+              "камень"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "22d54acf-b07e-4afa-8d08-676f6efe0f7f",
+                "sense_id": "4520373d-6f05-4eec-b4dd-724407e4867f",
+                "text": "A Jezus odpowiadając rzekł mu: Widzisz te wielkie budowania? Nie będzie zostawiony kamień na kamieniu, który by nie był rozwalony.",
+                "translation": "Иисус сказал ему в ответ: видишь сии великие здания? всё это будет разрушено, так что не останется здеськамня на камне."
+              }
+            ]
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      }
+    ],
+    "nl-extract.jsonl": [],
+    "pl-extract.jsonl": [
+      {
+        "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+        "word": "kamień",
+        "pos": "noun",
+        "lang_code": "pl",
+        "forms": [
+          {
+            "form_id": "c864b687-d1f7-4237-8312-466d08b00f44",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "nominative",
+              "plural"
+            ],
+            "form": "kamienie"
+          },
+          {
+            "form_id": "1e23df81-a151-48c2-b532-70d2e3e66b1a",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "genitive",
+              "singular"
+            ],
+            "form": "kamienia"
+          },
+          {
+            "form_id": "c3f9a6b7-9782-42e2-b816-6b5250f61ef7",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "genitive",
+              "plural"
+            ],
+            "form": "kamieni"
+          },
+          {
+            "form_id": "61e5fa22-814a-469e-9d37-b4c3b3ecd995",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "dative",
+              "singular"
+            ],
+            "form": "kamieniowi"
+          },
+          {
+            "form_id": "7bc9ccaa-f1d7-47a4-9d36-b619184059a5",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "dative",
+              "plural"
+            ],
+            "form": "kamieniom"
+          },
+          {
+            "form_id": "6fb28e89-9c4d-434a-85e9-c13f48f5b17c",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "accusative",
+              "plural"
+            ],
+            "form": "kamienie"
+          },
+          {
+            "form_id": "961d827b-8c0a-49ff-ae5e-dcb3a605ceb6",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "instrumental",
+              "singular"
+            ],
+            "form": "kamieniem"
+          },
+          {
+            "form_id": "95a54342-8ad5-475e-9edb-8cf9c6b53e2a",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "instrumental",
+              "plural"
+            ],
+            "form": "kamieniami"
+          },
+          {
+            "form_id": "a87b9e53-f298-4308-9ca8-87cb9f3a6aa6",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "locative",
+              "singular"
+            ],
+            "form": "kamieniu"
+          },
+          {
+            "form_id": "2d742785-aabb-403a-9382-ad353a7637d9",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "locative",
+              "plural"
+            ],
+            "form": "kamieniach"
+          },
+          {
+            "form_id": "8873edc4-405c-4548-8573-eb5b89c772b8",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "vocative",
+              "singular"
+            ],
+            "form": "kamieniu"
+          },
+          {
+            "form_id": "c7c740fa-1d60-4d0c-9db9-b2c87ff05d4e",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "tags": [
+              "vocative",
+              "plural"
+            ],
+            "form": "kamienie"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "3480c958-664f-4bbf-b0c1-b396d68202e7",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "glosses": [
+              "obiekt pochodzenia mineralnego o konsystencji stałej, twardy, wyraźnie odgraniczający się od otoczenia"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "6154b3f7-f74b-4048-9c05-07009d608f4e",
+                "sense_id": "3480c958-664f-4bbf-b0c1-b396d68202e7",
+                "text": "Rzucił kamieniem w okno i rozbił je."
+              }
+            ],
+            "sense_index_json": "\"1.1\""
+          },
+          {
+            "sense_id": "333519f3-9da1-4bb1-aa9b-f1fda27a3d31",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "glosses": [
+              "minerał służący po uprzedniej obróbce do ozdabiania przedmiotów m.in. w jubilerstwie"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.2\""
+          },
+          {
+            "sense_id": "0c099fe6-1a4e-4bb2-a5fc-7197942d32d5",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "glosses": [
+              "twardy osad powstający w naczyniach, kotłach itp."
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.3\""
+          },
+          {
+            "sense_id": "0c41513a-fbfe-4219-88c6-8a876497e9df",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "glosses": [
+              "złóg powstający w organach wewnętrznych, takich jak nerki, woreczek żółciowy, moczowody"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.4\""
+          },
+          {
+            "sense_id": "fe09979a-67ce-40e5-a1b8-4336b2533c99",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "glosses": [
+              "pionek w niektórych grach planszowych"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.5\""
+          },
+          {
+            "sense_id": "94d8fefa-c764-42be-a3b2-f082d838dea5",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "glosses": [
+              "granitowy walec do gry w curling"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.6\""
+          },
+          {
+            "sense_id": "e0a655c5-0ddb-4d05-813d-2197fdc8d0a4",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "glosses": [
+              "jednostka masy"
+            ],
+            "tags": [],
+            "examples": [],
+            "sense_index_json": "\"1.7\""
+          },
+          {
+            "sense_id": "3dea33cd-7db3-4653-bc38-7eb54521f1ac",
+            "entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "glosses": [
+              "przestępcze chleb"
+            ],
+            "tags": [
+              "środ."
+            ],
+            "examples": [],
+            "sense_index_json": "\"1.8\""
+          }
+        ],
+        "translations": [
+          {
+            "translation_id": "dc12cf1c-f3b9-4512-92ae-5ddad448885d",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "3480c958-664f-4bbf-b0c1-b396d68202e7",
+            "target_lang_word": "stone",
+            "target_lang_code": "en",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "stone",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "b992d427-f358-477b-a4aa-4cebba25bec1",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A hard earthen substance that can form rocks."
+                    ],
+                    "tags": [
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "7b92ae3f-dff0-4e53-8e2a-0a303525ed9e",
+                        "sense_id": "b992d427-f358-477b-a4aa-4cebba25bec1",
+                        "text": "Toad, that vnder cold ſtone, / Dayes and Nights ha’s thirty one: / Sweltred Venom ſleeping got, / Boyle thou firſt i’th’ charmed pot."
+                      },
+                      {
+                        "example_id": "268ac46c-3161-40c3-b320-20fe488fcf87",
+                        "sense_id": "b992d427-f358-477b-a4aa-4cebba25bec1",
+                        "text": "The first day of the weeke, commeth Mary Magdalene earely when it was yet darke, vnto the Sepulchre, and seeth the stone taken away from the Sepulchre."
+                      },
+                      {
+                        "example_id": "55b1c524-0e19-401c-8ff3-7b0ac00e91e6",
+                        "sense_id": "b992d427-f358-477b-a4aa-4cebba25bec1",
+                        "text": "It is about 2,500 yards in circuit, is built of red stone, and, according to Von Orlich, is now \" a bastioned quinquangle ; the ancient walls with semicircular bastions face the two streams ; the land side is quite regular, and consists of two bastions, and a half-bastion with three ravelins,\" and stands higher than any ground in face of it."
+                      },
+                      {
+                        "example_id": "9b7d2174-f6e1-4588-abcb-93aacf0b4dc1",
+                        "sense_id": "b992d427-f358-477b-a4aa-4cebba25bec1",
+                        "text": "The solitary, lumbering trolls of Scandinavian mythology would sometimes be turned to stone by exposure to sunlight. Barack Obama is hoping that several measures announced on June 4th will have a similarly paralysing effect on their modern incarnation, the patent troll."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "5ab81aad-c3b0-4820-ada8-c3108594e37f",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A piece of such material: a rock or a pebble."
+                    ],
+                    "tags": [
+                      "countable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "a08dcf2a-b566-4469-8b57-f7a7b74a54ae",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A gemstone, a jewel, especially a diamond."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "b02f10b2-ad2d-46e9-a79a-eb7546a0d38b",
+                        "sense_id": "a08dcf2a-b566-4469-8b57-f7a7b74a54ae",
+                        "text": "[…]Ineſtimable Stones, vnvalewed Iewels[…]"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "1701ef72-1ed0-49fd-958f-cf857c869955",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A unit of weight equal to 14 pounds (≈6.3503 kilograms), formerly used for various commodities (wool, cheese, etc.), but now principally used for personal weight. Abbreviated as st."
+                    ],
+                    "tags": [
+                      "British",
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "eb280bff-b18f-45a3-9683-621a3081361d",
+                        "sense_id": "1701ef72-1ed0-49fd-958f-cf857c869955",
+                        "text": "British people measure their weight in stones and pounds. I weigh eight stone five."
+                      },
+                      {
+                        "example_id": "43fb8150-115d-4051-b097-c9255e827496",
+                        "sense_id": "1701ef72-1ed0-49fd-958f-cf857c869955",
+                        "text": "Seven pounds make a clove, 2 cloves a stone, 2 stone a tod, 6+¹⁄₂ tods a wey, 2 weys a sack, 12 sacks a last. […] It is to be observed here that a sack is 13 tods, and a tod 28 pounds, so that the sack is 364 pounds."
+                      },
+                      {
+                        "example_id": "4e8dd2f5-388b-4fe9-ae3d-9f3df46b535f",
+                        "sense_id": "1701ef72-1ed0-49fd-958f-cf857c869955",
+                        "text": "Generally, however, the stone or petra, almost always of 14 lbs., is used, the tod of 28 lbs., and the sack of thirteen stones."
+                      },
+                      {
+                        "example_id": "0c6a29b8-7090-45f8-8ea9-f646317bf08f",
+                        "sense_id": "1701ef72-1ed0-49fd-958f-cf857c869955",
+                        "text": "Weighed myself at the gym and have hit 10st 8lb, a sure sign of things getting out of control—so I can’t even console myself with a chocolate biscuit."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "8f47e329-30bb-482f-a411-be5cfe85716a",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "The central part of some fruits, particularly drupes; consisting of the seed and a hard endocarp layer."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "66976bd9-3ef8-425f-ac90-d8027abbe5f8",
+                        "sense_id": "8f47e329-30bb-482f-a411-be5cfe85716a",
+                        "text": "Near-synonym: pip"
+                      },
+                      {
+                        "example_id": "79a4e8f7-5b03-4abb-9b34-c8d2d51e8dce",
+                        "sense_id": "8f47e329-30bb-482f-a411-be5cfe85716a",
+                        "text": "a peach stone"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "f1771b3a-33ff-4ba5-92bf-e116db2edc56",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A hard, stone-like deposit."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "b29b6f54-25b1-4fbf-89a9-7eea9ec2d51c",
+                        "sense_id": "f1771b3a-33ff-4ba5-92bf-e116db2edc56",
+                        "text": "The pain of passing a larger stone is often compared to child birth."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "367dbf7d-01fe-4b40-bad2-0ac13d41304e",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A playing piece made of any hard material, used in various board games such as backgammon and go."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "0a69df51-ddc0-49c2-9c62-4eebedddd517",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A dull light grey or beige, like that of some stones."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "201853e9-7930-4883-bda1-769a43380ad4",
+                        "sense_id": "0a69df51-ddc0-49c2-9c62-4eebedddd517",
+                        "text": "stone:"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "9470da71-3dab-4e50-a8ab-afd7e6e555a8",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A 42-pound, precisely shaped piece of granite with a handle attached, which is bowled down the ice."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "14bf4d2a-35bb-45bf-b49f-119e08c0d1da",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A monument to the dead; a gravestone or tombstone."
+                    ],
+                    "tags": [
+                      "countable",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "74d055ec-7820-4dab-a3e1-b0330ab3b7b0",
+                        "sense_id": "14bf4d2a-35bb-45bf-b49f-119e08c0d1da",
+                        "text": "Amid that scene, if ſome relenting eye\n Glance on the ſtone where our cold reliques lie."
+                      },
+                      {
+                        "example_id": "6b78218f-e2f8-44cf-8018-273684224407",
+                        "sense_id": "14bf4d2a-35bb-45bf-b49f-119e08c0d1da",
+                        "text": "It seems to me that when I die / These words will be written on my stone[…]"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "53e83426-dedc-433b-97aa-a4469bc24e7a",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A mirror, or its glass."
+                    ],
+                    "tags": [
+                      "countable",
+                      "obsolete",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "efbe9934-38ba-4a23-870a-621bfa93be82",
+                        "sense_id": "53e83426-dedc-433b-97aa-a4469bc24e7a",
+                        "text": "She's dead as earth: Lend me a Looking-glaſſe; / If that her breath will miſt or ſtaine the ſtone, / Why then ſhe liues."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "9030c8c6-27e7-484f-921b-8513e7b1ef57",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A testicle."
+                    ],
+                    "tags": [
+                      "countable",
+                      "obsolete",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "9fe004ec-283d-4391-9cbc-ce96269110b5",
+                        "sense_id": "9030c8c6-27e7-484f-921b-8513e7b1ef57",
+                        "text": "[…]and yet I warrant it had vpon it brow, a bumpe as big as a young Cockrels ſtone?"
+                      },
+                      {
+                        "example_id": "2a7a9093-23b9-48dd-8be6-90f7742b3d6c",
+                        "sense_id": "9030c8c6-27e7-484f-921b-8513e7b1ef57",
+                        "text": "Hee that is wounded in the ſtones, or hath his priuie member cut off, ſhall not enter into the Congregation of the Lord."
+                      },
+                      {
+                        "example_id": "2358904d-4149-422e-ac9a-a2cbfa655196",
+                        "sense_id": "9030c8c6-27e7-484f-921b-8513e7b1ef57",
+                        "text": "To make Capons […] ſome for this Purpoſe make it their Buſineſs after Harveſt-time to go to Markets for buying up Chickens, and between Michaelmas and All-hollantide caponize the Cocks, when they have got large enough to have Stones of ſuch a Bigneſs that they may be pulled out; for if they are too little, it can't be done."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "7848020d-7855-4be8-9f9a-025033ab5aeb",
+                    "entry_id": "46259446-bda3-4d77-b7e5-59b30abbb64a",
+                    "glosses": [
+                      "A stand or table with a smooth, flat top of stone, commonly marble, on which to arrange the pages of a book, newspaper, etc. before printing."
+                    ],
+                    "tags": [
+                      "countable",
+                      "historical",
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "a8435e39-71c5-45b3-b26b-573afc038029",
+                        "sense_id": "7848020d-7855-4be8-9f9a-025033ab5aeb",
+                        "text": "The Chief called the makeup editor to the stone, pointed to the story which had caught his eye, and suggested a fairly simple remake."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "target_word": "stone",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "9cff588b-e894-44f2-a843-607db45fe342",
+                    "entry_id": "115bfe1f-e48d-4614-aa5b-b8999def390c",
+                    "glosses": [
+                      "To pelt with stones; especially, to kill by pelting with stones."
+                    ],
+                    "tags": [
+                      "transitive"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "5640d859-2367-4703-a5f5-79341d48e110",
+                        "sense_id": "9cff588b-e894-44f2-a843-607db45fe342",
+                        "text": "She got stoned to death after they found her."
+                      },
+                      {
+                        "example_id": "8db7a52e-30fd-48e7-a574-7399f603c626",
+                        "sense_id": "9cff588b-e894-44f2-a843-607db45fe342",
+                        "text": "stoned to death"
+                      },
+                      {
+                        "example_id": "e35c8a18-a655-4f5d-8dcf-ed9b7d264bb6",
+                        "sense_id": "9cff588b-e894-44f2-a843-607db45fe342",
+                        "text": "55 But hee being full of the holy Ghost, looked vp stedfastly into heauen, and saw the glory of God, and Iesus standing on the right hand of God,\n56 And said, Behold, I see the heauens opened, and the Sonne of man standing on the right hand of God.\n57 Then they cried out with a loud voice, and stopped their eares, and ran vpon him with one accord,\n58 And cast him out of the citie, and stoned him: and the witnesses layd downe their clothes at a yong mans feete, whose name was Saul.\n59 And they stoned Steuen, calling vpon God, and saying, Lord Iesus receiue my spirit.\n60 And he kneeled downe, and cried with a loud voice, Lord lay not this sinne to their charge. And when he had said this, he fell asleepe."
+                      },
+                      {
+                        "example_id": "f058d40e-77bd-4aa6-89cf-5685623ccbe2",
+                        "sense_id": "9cff588b-e894-44f2-a843-607db45fe342",
+                        "text": "An up slow train on the Howrah-Burdwan line, north of Calcutta, arrived 15 min. late at Belur recently. The delay resulted in several waiting passengers stoning the driver and the guard."
+                      },
+                      {
+                        "example_id": "06faa758-b5ba-4812-b325-12a40e1cd5ed",
+                        "sense_id": "9cff588b-e894-44f2-a843-607db45fe342",
+                        "text": "Our house was being stoned by a group of adolescent boys. We called the police seven times and they wouldn't come."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "ec143881-8346-462f-b57d-93def348624f",
+                    "entry_id": "115bfe1f-e48d-4614-aa5b-b8999def390c",
+                    "glosses": [
+                      "To wall or wall up with stones."
+                    ],
+                    "tags": [
+                      "transitive"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "2d90b2fb-26d1-4bf9-80f1-ecad736bb665",
+                        "sense_id": "ec143881-8346-462f-b57d-93def348624f",
+                        "text": "[…] and since it was a rule of the French troops not to be a burden on the people along their route it could be that the advance guard dug and stoned the well for the troop's own special use."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "67c53002-281f-437f-8721-8c1b418d942d",
+                    "entry_id": "115bfe1f-e48d-4614-aa5b-b8999def390c",
+                    "glosses": [
+                      "To remove a stone from (fruit etc.)."
+                    ],
+                    "tags": [
+                      "transitive"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "bda48428-e6ff-4c80-834b-d8f31fb98fbc",
+                    "entry_id": "115bfe1f-e48d-4614-aa5b-b8999def390c",
+                    "glosses": [
+                      "To form a stone during growth, with reference to fruit etc."
+                    ],
+                    "tags": [
+                      "intransitive"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "cb979102-a6dc-449a-bdbb-ef8a645afcbc",
+                    "entry_id": "115bfe1f-e48d-4614-aa5b-b8999def390c",
+                    "glosses": [
+                      "Especially of cannabis or narcotics: To intoxicate. (Usually in passive)"
+                    ],
+                    "tags": [
+                      "slang",
+                      "transitive"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "653d1745-df24-4cbf-8b87-cb7b4e37920f",
+                    "entry_id": "115bfe1f-e48d-4614-aa5b-b8999def390c",
+                    "glosses": [
+                      "To do nothing, to stare blankly into space and not pay attention when relaxing or when bored."
+                    ],
+                    "tags": [
+                      "Singapore",
+                      "intransitive",
+                      "slang"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "04275f51-1fe5-487a-9635-ff98057e194f",
+                        "sense_id": "653d1745-df24-4cbf-8b87-cb7b4e37920f",
+                        "text": "I was stoning the whole of today."
+                      },
+                      {
+                        "example_id": "9b1db490-25cd-4f85-adcf-8a705676af9c",
+                        "sense_id": "653d1745-df24-4cbf-8b87-cb7b4e37920f",
+                        "text": "Resume writing class lesson 2, stoning."
+                      },
+                      {
+                        "example_id": "a5b90095-4e7d-4c89-83d7-593b0fef0886",
+                        "sense_id": "653d1745-df24-4cbf-8b87-cb7b4e37920f",
+                        "text": "The Marina Barrage is a reservoir, but everyone goes there because the spacious greenery at the top is the perfect place for stoning, which is Singlish for hanging out and chilling."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "d5b55e3f-0a67-4728-908c-a97e613102a8",
+                    "entry_id": "115bfe1f-e48d-4614-aa5b-b8999def390c",
+                    "glosses": [
+                      "To lap with an abrasive stone to remove surface irregularities."
+                    ],
+                    "tags": [
+                      "transitive"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "1eb05401-df69-4119-92fa-4f428da0600c",
+                        "sense_id": "d5b55e3f-0a67-4728-908c-a97e613102a8",
+                        "text": "Before they did the setup on the machining center, they stoned the table to knock down any nicked burrs."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "target_word": "stone",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "a79754c2-742d-45b9-8cfa-82620340b540",
+                    "entry_id": "94ece192-4d29-424e-8afa-7a8889d012fa",
+                    "glosses": [
+                      "Constructed of stone."
+                    ],
+                    "tags": [
+                      "not-comparable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "91f8d193-0c6c-4781-a2ec-0008a4a96f56",
+                        "sense_id": "a79754c2-742d-45b9-8cfa-82620340b540",
+                        "text": "stone walls"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "8bf7df29-8baf-456e-a0b9-315fb036555f",
+                    "entry_id": "94ece192-4d29-424e-8afa-7a8889d012fa",
+                    "glosses": [
+                      "Having the appearance of stone."
+                    ],
+                    "tags": [
+                      "not-comparable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "53f8293a-dc05-45bd-bcb2-05cffc9b7cfd",
+                        "sense_id": "8bf7df29-8baf-456e-a0b9-315fb036555f",
+                        "text": "stone pot"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "630a504e-40b2-4a31-b6fd-6d08bc8db91e",
+                    "entry_id": "94ece192-4d29-424e-8afa-7a8889d012fa",
+                    "glosses": [
+                      "Of a dull light grey or beige, like that of some stones."
+                    ],
+                    "tags": [
+                      "not-comparable"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "875a54e6-98aa-464f-8d54-a30dc1f99891",
+                    "entry_id": "94ece192-4d29-424e-8afa-7a8889d012fa",
+                    "glosses": [
+                      "Used as an intensifier."
+                    ],
+                    "tags": [
+                      "not-comparable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "e4ccfd27-6219-4168-9bb3-b2a73e8ee1b1",
+                        "sense_id": "875a54e6-98aa-464f-8d54-a30dc1f99891",
+                        "text": "She is one stone fox."
+                      },
+                      {
+                        "example_id": "7b984e8a-56c2-4456-b3fc-6a71105d658f",
+                        "sense_id": "875a54e6-98aa-464f-8d54-a30dc1f99891",
+                        "text": "Yeah, he's a stone fuck–up. But he's stand–up, too, don't forget that."
+                      },
+                      {
+                        "example_id": "5b7395ba-bd53-4c04-884a-0e8115f76283",
+                        "sense_id": "875a54e6-98aa-464f-8d54-a30dc1f99891",
+                        "text": "Of course the Torah rejects (*some*) sexual acts between members of the same sex. And of course it doesn't condemn gays and lesbians. Someone who doesn't realize that is a stone bigot to begin with."
+                      },
+                      {
+                        "example_id": "68f46edb-af8f-4919-9730-6e9c9ad9e5c2",
+                        "sense_id": "875a54e6-98aa-464f-8d54-a30dc1f99891",
+                        "text": "“And I got the best metal man in the business going for me, too.” “This job's going to be a stone motherfucker,” Flacco said"
+                      },
+                      {
+                        "example_id": "0242d0f5-1ca2-4165-ac90-86c1276d7177",
+                        "sense_id": "875a54e6-98aa-464f-8d54-a30dc1f99891",
+                        "text": "He might be a stone killer who simply doesn't care if his victim's alive or dead at the time of disfigurement."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "1b6ed352-abbe-4a89-a5e1-bc907144cb9d",
+                    "entry_id": "94ece192-4d29-424e-8afa-7a8889d012fa",
+                    "glosses": [
+                      "Willing to give sexual pleasure but not to receive it."
+                    ],
+                    "tags": [
+                      "not-comparable",
+                      "slang"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "3cf89ce7-edcc-460a-b066-30b61c0e4ea3",
+                        "sense_id": "1b6ed352-abbe-4a89-a5e1-bc907144cb9d",
+                        "text": "stone butch"
+                      },
+                      {
+                        "example_id": "0502ea4e-24ed-4b27-91d2-36f75ff8ddfb",
+                        "sense_id": "1b6ed352-abbe-4a89-a5e1-bc907144cb9d",
+                        "text": "stone femme"
+                      },
+                      {
+                        "example_id": "ccee4ddc-4156-42ac-84b8-87f1bf6ca4fa",
+                        "sense_id": "1b6ed352-abbe-4a89-a5e1-bc907144cb9d",
+                        "text": "Lately I've read these stories by women who are so angry with stone lovers, even mocking their passion when they finally give way to trust, to being touched."
+                      },
+                      {
+                        "example_id": "836254e4-7aca-4727-84ca-78ed1b273873",
+                        "sense_id": "1b6ed352-abbe-4a89-a5e1-bc907144cb9d",
+                        "text": "My physical preference tends more to very masculine-bodied non-transitioning stone TG butches."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "target_word": "stone",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "9a23050a-5893-44c4-ade0-383aee9a721b",
+                    "entry_id": "8d7cfa55-301b-46c8-b95c-c4138fe2bf23",
+                    "glosses": [
+                      "As a stone (used with following adjective)."
+                    ],
+                    "tags": [
+                      "not-comparable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "e90d92fd-2aa5-4c23-8fb6-5fa9fae696ba",
+                        "sense_id": "9a23050a-5893-44c4-ade0-383aee9a721b",
+                        "text": "My father is stone deaf. This soup is stone cold."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "69a5e3d3-8f74-4a50-b24b-3e140ac2c512",
+                    "entry_id": "8d7cfa55-301b-46c8-b95c-c4138fe2bf23",
+                    "glosses": [
+                      "Absolutely, completely (used with following adjectives)."
+                    ],
+                    "tags": [
+                      "not-comparable",
+                      "slang"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "a491197b-f0ae-4ea1-8aa9-f81f1741d44e",
+                        "sense_id": "69a5e3d3-8f74-4a50-b24b-3e140ac2c512",
+                        "text": "I went stone crazy after she left."
+                      },
+                      {
+                        "example_id": "b41d7f14-8ea6-4bd3-9cfa-6cbfa1de2dee",
+                        "sense_id": "69a5e3d3-8f74-4a50-b24b-3e140ac2c512",
+                        "text": "I said the medication made my vision temporarily blurry, it did not make me stone blind."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "1f90b34e-3a20-4ca0-87ad-884e7f46a017",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "3480c958-664f-4bbf-b0c1-b396d68202e7",
+            "target_lang_word": "steen",
+            "target_lang_code": "nl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "steen",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "b1da253c-5ce3-4028-a3bf-3b5703d5e1e5",
+                    "entry_id": "b9fb4cfc-6f91-4cef-bdd3-ef09f77930ac",
+                    "glosses": [
+                      "/ harde stof, vaak op kiezel gebaseerd maar ook andere mineralen omvattend"
+                    ],
+                    "tags": [
+                      "masculine",
+                      "neuter"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "7249edb5-dbc5-4bb2-9809-7d0c91dd6483",
+                        "sense_id": "b1da253c-5ce3-4028-a3bf-3b5703d5e1e5",
+                        "text": "Huizen worden vaak van steen gemaakt, omdat het zo goed bestand is tegen weersinvloeden."
+                      },
+                      {
+                        "example_id": "4afa0ae8-253d-40cd-9b38-aae501108f09",
+                        "sense_id": "b1da253c-5ce3-4028-a3bf-3b5703d5e1e5",
+                        "text": "Zittend op een steen aten we wat de pot schafte."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "f9ce9c16-8eef-4b87-b849-c44d7f2f63b9",
+                    "entry_id": "b9fb4cfc-6f91-4cef-bdd3-ef09f77930ac",
+                    "glosses": [
+                      "een fragment van deze stof"
+                    ],
+                    "tags": [
+                      "masculine"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "052c438a-3c87-4785-9533-7dc1146395b5",
+                        "sense_id": "f9ce9c16-8eef-4b87-b849-c44d7f2f63b9",
+                        "text": "Er ligt een kleine steen op het garagepad."
+                      },
+                      {
+                        "example_id": "4d48a2bd-3212-409b-9b8f-37acaedc744b",
+                        "sense_id": "f9ce9c16-8eef-4b87-b849-c44d7f2f63b9",
+                        "text": "Vanachter mijn struik gooide ik wat kleine steentjes naar hem toe."
+                      },
+                      {
+                        "example_id": "147a0084-1f2a-42cf-812f-e512b06cf3db",
+                        "sense_id": "f9ce9c16-8eef-4b87-b849-c44d7f2f63b9",
+                        "text": "Na uren lopen en een hele tijd zoeken vond ik een vlakke plek voor mijn tent en gooide ik eerst een aantal stenen de struiken in om eventuele slangen te verjagen."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "d42769cb-0839-4beb-b3d6-22298a517175",
+                    "entry_id": "b9fb4cfc-6f91-4cef-bdd3-ef09f77930ac",
+                    "glosses": [
+                      "als linkerdeel van een samengesteld bijvoeglijk naamwoord om de betekenis van het rechterdeel te versterken\\nDe eerste betekenis \\\"harde stof\\\" is bij sommige van deze woorden ook mogelijk."
+                    ],
+                    "tags": [
+                      "informal",
+                      "intensifier",
+                      "prefix"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "5e15c458-b7dc-45d6-955f-3b08012a08a1",
+                    "entry_id": "b9fb4cfc-6f91-4cef-bdd3-ef09f77930ac",
+                    "glosses": [
+                      "vogelziekte veroorzaakt door het organisme Trichomonas gallinae"
+                    ],
+                    "tags": [
+                      "neuter"
+                    ],
+                    "examples": []
+                  }
+                ]
+              },
+              {
+                "target_word": "steen",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "e6199ce1-1688-4740-945f-658e34ca2cb6",
+                    "entry_id": "7c88516a-9fb4-48cb-9c3e-3e06e9e83d65",
+                    "glosses": [
+                      "eerste persoon enkelvoud tegenwoordige tijd van stenen"
+                    ],
+                    "tags": [
+                      "form-of"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "e670e650-99b1-46b4-b3ba-22cb42a785b7",
+                        "sense_id": "e6199ce1-1688-4740-945f-658e34ca2cb6",
+                        "text": "Ik steen."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "854e691f-e297-4d78-877d-977efb4015c1",
+                    "entry_id": "7c88516a-9fb4-48cb-9c3e-3e06e9e83d65",
+                    "glosses": [
+                      "gebiedende wijs van stenen"
+                    ],
+                    "tags": [
+                      "form-of"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "236e16f2-4d7d-4d58-ae88-f55774a097f8",
+                        "sense_id": "854e691f-e297-4d78-877d-977efb4015c1",
+                        "text": "Steen!"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "d48801fc-7d86-4dc2-bf83-b100ed182220",
+                    "entry_id": "7c88516a-9fb4-48cb-9c3e-3e06e9e83d65",
+                    "glosses": [
+                      "tweede persoon enkelvoud tegenwoordige tijd van stenen"
+                    ],
+                    "tags": [
+                      "form-of",
+                      "inversion"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "0c22f222-2527-4b64-bb8d-98eb1a2b1c84",
+                        "sense_id": "d48801fc-7d86-4dc2-bf83-b100ed182220",
+                        "text": "Steen je?"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "0e8c666d-8fad-4df3-9654-d9d676ce37c8",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "3480c958-664f-4bbf-b0c1-b396d68202e7",
+            "target_lang_word": "камень",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "камень",
+                "target_lang_code": "ru",
+                "target_senses": [
+                  {
+                    "sense_id": "547654ef-c237-445f-94d0-1d28618078b5",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "природный твёрдый минерал, скальная масса, горная порода"
+                    ],
+                    "tags": [
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "8eac5953-d9cb-4560-b4f0-99040536b4a1",
+                        "sense_id": "547654ef-c237-445f-94d0-1d28618078b5",
+                        "text": "Итогами пребывания военнопленных в СССР стали возрождённые ими города, фабрики и заводы, в военное время разрушенные ими же, дороги и каналы, миллионы тонн добытой руды, угля, камня, миллионы кубометров леса и многое другое."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "кусок такой породы, минерала"
+                    ],
+                    "tags": [
+                      "countable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "57499ddf-8b0c-46c8-9e61-9807506e5eaf",
+                        "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                        "text": "Точильный камень."
+                      },
+                      {
+                        "example_id": "76d081b7-2755-4a72-b20f-8b6591f88942",
+                        "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                        "text": "Стрелять камнями из рогатки."
+                      },
+                      {
+                        "example_id": "dbd77d08-446b-4273-9880-6cda5a6b91fc",
+                        "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                        "text": ".. у берегов есть подводные камни, целые горы камней .."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "камень [1] как конструкционный либо облицовочный материал"
+                    ],
+                    "tags": [
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "94a263fb-ef86-43e8-9ec0-7e21edd59651",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Дом из камня."
+                      },
+                      {
+                        "example_id": "e11a8b78-7013-4765-a398-12c5393fb386",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Облицевать гостиную камнем."
+                      },
+                      {
+                        "example_id": "df2b924a-a683-4928-885a-0cb063b9ed44",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Вот какой-то джип перевалил бордюрный камень, истерически бодро прокатил метров двадцать по тротуару, упёрся в тумбу, разочарованно попятился и начал внедряться обратно в поток."
+                      },
+                      {
+                        "example_id": "d010739c-7c0c-4dc2-8b9d-299d7ffcc2e9",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Важне́йшим строи́тельным материа́лом при строи́тельстве го́рки явля́ется ка́мень."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "26b78b92-73cc-4d01-b7d0-589d5e071b5f",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "то же, что драгоценный камень"
+                    ],
+                    "tags": [
+                      "colloquial",
+                      "special"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "dae8a5d9-3903-4fc5-b22a-87fc2dd4ed58",
+                        "sense_id": "26b78b92-73cc-4d01-b7d0-589d5e071b5f",
+                        "text": "Перстень с камнем."
+                      },
+                      {
+                        "example_id": "996ae726-a35d-4038-81c6-85ae8c22e0dd",
+                        "sense_id": "26b78b92-73cc-4d01-b7d0-589d5e071b5f",
+                        "text": "Бете он проиграл, держа с нею пари по поводу каких-то пустяков, пуд конфет, а Касе — брошку, в которой последовательно чередовались камни — коралл, аметист, сапфир и яшма .."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "653b1bf1-2ebe-44a1-a24f-778c6b91e210",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "солевое отложение во внутренних органах человека или животного"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "05096d37-458d-4dc0-b93a-3a7374ea1a6b",
+                        "sense_id": "653b1bf1-2ebe-44a1-a24f-778c6b91e210",
+                        "text": "У него камень в почках."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "dc6b2c0b-7291-4fc8-aadd-199907091769",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "игровая фишка в домино и некоторых других настольных играх"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "a01ac43b-f3d7-4661-abd4-fe854fc5ae6e",
+                        "sense_id": "dc6b2c0b-7291-4fc8-aadd-199907091769",
+                        "text": "Обычный комплект состоит из 28 камней с количеством очков от 0 до 6."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "c985f98f-8abc-409c-8130-2d3ba34df5cd",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "игровой снаряд в кёрлинге"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "f9aec6c5-c3d6-456d-a6e7-def649a87001",
+                        "sense_id": "c985f98f-8abc-409c-8130-2d3ba34df5cd",
+                        "text": "Камень представляет собой цилиндр из полированного гранита весом 20 кг, снабжённый ручкой."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "987c0127-4c6b-4053-b62b-66927d7b0293",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "центральный процессор"
+                    ],
+                    "tags": [
+                      "slang"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "c227e66b-65ac-4881-810a-369dffa71923",
+                        "sense_id": "987c0127-4c6b-4053-b62b-66927d7b0293",
+                        "text": "На твоей машине какой камень? AMD."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "80e6194b-18a5-431b-b638-08ed33c15f5d",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "то же, что гашиш"
+                    ],
+                    "tags": [
+                      "slang"
+                    ],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "92e2d66c-d24d-435c-9cb8-8c2192af0c50",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "0c099fe6-1a4e-4bb2-a5fc-7197942d32d5",
+            "target_lang_word": "limescale",
+            "target_lang_code": "en",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "limescale",
+                "target_lang_code": "en",
+                "target_senses": [
+                  {
+                    "sense_id": "608dc2da-61d0-4330-80e6-33564ccf4736",
+                    "entry_id": "422abc7f-dab6-49b8-9a46-58b62ed459bc",
+                    "glosses": [
+                      "A white, chalky deposit of calcium carbonate found in kettles, washing machines etc., especially in a hard water area."
+                    ],
+                    "tags": [
+                      "uncountable"
+                    ],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "17176799-b5fc-4390-952b-8fc14bd593cf",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "0c099fe6-1a4e-4bb2-a5fc-7197942d32d5",
+            "target_lang_word": "ketelsteen",
+            "target_lang_code": "nl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "ketelsteen",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "867ad6ec-1780-4991-aaf4-e855d080f79e",
+                    "entry_id": "29975f71-29af-4997-9c23-0b46e29547f1",
+                    "glosses": [
+                      "afzetting vooral in ketels als gevolg van het koken van te hard water"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "6f9fa131-e9b2-489a-864a-68706d94f1e8",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "0c099fe6-1a4e-4bb2-a5fc-7197942d32d5",
+            "target_lang_word": "накипь",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "накипь",
+                "target_lang_code": "ru",
+                "target_senses": [
+                  {
+                    "sense_id": "492327fb-2dea-4ad2-b547-0e697e78a64b",
+                    "entry_id": "61d653eb-f3fa-463a-ac84-4b435c775a28",
+                    "glosses": [
+                      "пена, образовавшаяся на поверхности жидкости в процессе кипения"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "d3238f6d-96a3-449a-92b2-4a72b28ad40a",
+                        "sense_id": "492327fb-2dea-4ad2-b547-0e697e78a64b",
+                        "text": "Если это та самая шумовка, которой женщины снимают накипь с супа, то я попрошу у жены…"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "b20553fc-9bd1-4945-83a4-70b375bfd545",
+                    "entry_id": "61d653eb-f3fa-463a-ac84-4b435c775a28",
+                    "glosses": [
+                      "твёрдые отложения, образующиеся на поверхностях теплообменных аппаратов в результате производимого в них нагревания, кипячения, испарения воды с растворёнными в ней солями"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "dc5a3411-0a70-4bfd-a592-02b7a8985480",
+                        "sense_id": "b20553fc-9bd1-4945-83a4-70b375bfd545",
+                        "text": "Около мастерской на улице валялись покрытые белой накипью самоварные стояки, опрокинутые вверх дном котлы из красной меди, ржавые кастрюли с проломанными днищами, эмалированные миски, цинковые корыта."
+                      },
+                      {
+                        "example_id": "632621e5-7306-4f24-b8af-6a458b8058cc",
+                        "sense_id": "b20553fc-9bd1-4945-83a4-70b375bfd545",
+                        "text": "Образование накипи ― самая большая проблема производителей электрических чайников."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "e43b3a88-301b-4b98-a363-c5fa73533832",
+                    "entry_id": "61d653eb-f3fa-463a-ac84-4b435c775a28",
+                    "glosses": [
+                      "налёт, наносной слой на чём-либо"
+                    ],
+                    "tags": [
+                      "colloquial",
+                      "figuratively"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "1c3f927b-7872-40a1-9057-5d4b398262cb",
+                        "sense_id": "e43b3a88-301b-4b98-a363-c5fa73533832",
+                        "text": "Раздувается и дышит порывисто млечная накипь облаков ― небо сбежало, будто молоко."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "a6f23d64-19c1-42de-8bc8-4d2b30dc4f17",
+                    "entry_id": "61d653eb-f3fa-463a-ac84-4b435c775a28",
+                    "glosses": [
+                      "то, что накипело; тяжёлое чувство, неприятный осадок"
+                    ],
+                    "tags": [
+                      "colloquial",
+                      "figuratively"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "10993cfd-38ab-4a15-acc4-600a0e435a49",
+                        "sense_id": "a6f23d64-19c1-42de-8bc8-4d2b30dc4f17",
+                        "text": "Созвучно теме в «письмах к правительству» Булгакова, которая прорывалась сквозь накипь личной боли."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "d02390f4-80a7-46cd-b98a-645ef450723a",
+                    "entry_id": "61d653eb-f3fa-463a-ac84-4b435c775a28",
+                    "glosses": [
+                      "подонки общества; люди, являющиеся, с чьей-либо точки зрения, вредным элементом в обществе"
+                    ],
+                    "tags": [
+                      "colloquial",
+                      "figuratively"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "c73b7453-925a-4553-abab-940a1fa943a4",
+                        "sense_id": "d02390f4-80a7-46cd-b98a-645ef450723a",
+                        "text": "Мародеры, спекулянты и прочая накипь — дело милиции и истребительных батальонов."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "b699dfed-032d-4d77-862f-9a072e6fa899",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "333519f3-9da1-4bb1-aa9b-f1fda27a3d31",
+            "target_lang_word": "камень",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "камень",
+                "target_lang_code": "ru",
+                "target_senses": [
+                  {
+                    "sense_id": "547654ef-c237-445f-94d0-1d28618078b5",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "природный твёрдый минерал, скальная масса, горная порода"
+                    ],
+                    "tags": [
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "8eac5953-d9cb-4560-b4f0-99040536b4a1",
+                        "sense_id": "547654ef-c237-445f-94d0-1d28618078b5",
+                        "text": "Итогами пребывания военнопленных в СССР стали возрождённые ими города, фабрики и заводы, в военное время разрушенные ими же, дороги и каналы, миллионы тонн добытой руды, угля, камня, миллионы кубометров леса и многое другое."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "кусок такой породы, минерала"
+                    ],
+                    "tags": [
+                      "countable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "57499ddf-8b0c-46c8-9e61-9807506e5eaf",
+                        "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                        "text": "Точильный камень."
+                      },
+                      {
+                        "example_id": "76d081b7-2755-4a72-b20f-8b6591f88942",
+                        "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                        "text": "Стрелять камнями из рогатки."
+                      },
+                      {
+                        "example_id": "dbd77d08-446b-4273-9880-6cda5a6b91fc",
+                        "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                        "text": ".. у берегов есть подводные камни, целые горы камней .."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "камень [1] как конструкционный либо облицовочный материал"
+                    ],
+                    "tags": [
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "94a263fb-ef86-43e8-9ec0-7e21edd59651",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Дом из камня."
+                      },
+                      {
+                        "example_id": "e11a8b78-7013-4765-a398-12c5393fb386",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Облицевать гостиную камнем."
+                      },
+                      {
+                        "example_id": "df2b924a-a683-4928-885a-0cb063b9ed44",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Вот какой-то джип перевалил бордюрный камень, истерически бодро прокатил метров двадцать по тротуару, упёрся в тумбу, разочарованно попятился и начал внедряться обратно в поток."
+                      },
+                      {
+                        "example_id": "d010739c-7c0c-4dc2-8b9d-299d7ffcc2e9",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Важне́йшим строи́тельным материа́лом при строи́тельстве го́рки явля́ется ка́мень."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "26b78b92-73cc-4d01-b7d0-589d5e071b5f",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "то же, что драгоценный камень"
+                    ],
+                    "tags": [
+                      "colloquial",
+                      "special"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "dae8a5d9-3903-4fc5-b22a-87fc2dd4ed58",
+                        "sense_id": "26b78b92-73cc-4d01-b7d0-589d5e071b5f",
+                        "text": "Перстень с камнем."
+                      },
+                      {
+                        "example_id": "996ae726-a35d-4038-81c6-85ae8c22e0dd",
+                        "sense_id": "26b78b92-73cc-4d01-b7d0-589d5e071b5f",
+                        "text": "Бете он проиграл, держа с нею пари по поводу каких-то пустяков, пуд конфет, а Касе — брошку, в которой последовательно чередовались камни — коралл, аметист, сапфир и яшма .."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "653b1bf1-2ebe-44a1-a24f-778c6b91e210",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "солевое отложение во внутренних органах человека или животного"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "05096d37-458d-4dc0-b93a-3a7374ea1a6b",
+                        "sense_id": "653b1bf1-2ebe-44a1-a24f-778c6b91e210",
+                        "text": "У него камень в почках."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "dc6b2c0b-7291-4fc8-aadd-199907091769",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "игровая фишка в домино и некоторых других настольных играх"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "a01ac43b-f3d7-4661-abd4-fe854fc5ae6e",
+                        "sense_id": "dc6b2c0b-7291-4fc8-aadd-199907091769",
+                        "text": "Обычный комплект состоит из 28 камней с количеством очков от 0 до 6."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "c985f98f-8abc-409c-8130-2d3ba34df5cd",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "игровой снаряд в кёрлинге"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "f9aec6c5-c3d6-456d-a6e7-def649a87001",
+                        "sense_id": "c985f98f-8abc-409c-8130-2d3ba34df5cd",
+                        "text": "Камень представляет собой цилиндр из полированного гранита весом 20 кг, снабжённый ручкой."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "987c0127-4c6b-4053-b62b-66927d7b0293",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "центральный процессор"
+                    ],
+                    "tags": [
+                      "slang"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "c227e66b-65ac-4881-810a-369dffa71923",
+                        "sense_id": "987c0127-4c6b-4053-b62b-66927d7b0293",
+                        "text": "На твоей машине какой камень? AMD."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "80e6194b-18a5-431b-b638-08ed33c15f5d",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "то же, что гашиш"
+                    ],
+                    "tags": [
+                      "slang"
+                    ],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "458c52e3-5bed-49f8-8696-62fb35ab63d1",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "0c41513a-fbfe-4219-88c6-8a876497e9df",
+            "target_lang_word": "nier-",
+            "target_lang_code": "nl",
+            "target_sense_ids": [],
+            "cross_references": []
+          },
+          {
+            "translation_id": "fe223342-25a2-440b-87de-f5d4bb4c25e2",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "0c41513a-fbfe-4219-88c6-8a876497e9df",
+            "target_lang_word": "gal",
+            "target_lang_code": "nl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "gal",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "6debc022-ea86-4660-9345-dbbe47708fa5",
+                    "entry_id": "0089b12a-313a-4003-b3e3-d19e90572f34",
+                    "glosses": [
+                      "eenheid van versnelling in het c.g.s-stelsel (centimeter-gram-seconde-stelsel), weergegeven met symbool Gal"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  }
+                ]
+              },
+              {
+                "target_word": "gal",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "cdd4a6a1-6402-4860-9e76-2e6d655ec0d9",
+                    "entry_id": "26824a91-99b7-4056-acdf-957f2f523c69",
+                    "glosses": [
+                      "uit de lever afkomstig vocht dat een rol speelt in de spijsvertering, met name van vet"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "0e65d2a5-3d9d-455a-a052-5a46d9d973c2",
+                        "sense_id": "cdd4a6a1-6402-4860-9e76-2e6d655ec0d9",
+                        "text": "Gal helpt bij de vertering van vetten."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "target_word": "gal",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "29be9404-80b7-4fd5-b64d-de1247aae5fa",
+                    "entry_id": "8ff88849-f610-4011-bf33-5c8621a02231",
+                    "glosses": [
+                      "door luchtinsluiting gevormd holletje in (giet-) materiaal"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "4a5a5dda-a2e7-40c0-83f4-b08e50efb93f",
+                        "sense_id": "29be9404-80b7-4fd5-b64d-de1247aae5fa",
+                        "text": "De grote gaten moeten we dichtplamuren, de kleine galletjes mogen wel blijven zitten."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "f088b9d3-2529-44b4-ba1b-f4a14ca2f672",
+                    "entry_id": "8ff88849-f610-4011-bf33-5c8621a02231",
+                    "glosses": [
+                      "uitwas aan blad van boom of struik, ontstaan door een parasiet of symbiont, meestal een insect (een galwesp, galmug, gewone vijgenwesp, vlieg, bladluis of galmijt) die haar eieren in de plant legt"
+                    ],
+                    "tags": [
+                      "Cecidologie"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "8f30793b-2808-4088-b7cc-fab43e283351",
+                    "entry_id": "8ff88849-f610-4011-bf33-5c8621a02231",
+                    "glosses": [
+                      "gezwel bij dieren (paardenbeen)"
+                    ],
+                    "tags": [],
+                    "examples": []
+                  }
+                ]
+              },
+              {
+                "target_word": "gal",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "1c8f1759-0a5f-4481-ac92-597f7e3c5ca9",
+                    "entry_id": "8f188b24-44a6-4ad5-8dec-26c993a5fd13",
+                    "glosses": [
+                      "eerste persoon enkelvoud tegenwoordige tijd van gallen"
+                    ],
+                    "tags": [
+                      "form-of"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "072c8706-1aac-447a-bbf5-f9e8845b581b",
+                        "sense_id": "1c8f1759-0a5f-4481-ac92-597f7e3c5ca9",
+                        "text": "Ik gal."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "32513263-0eaa-4284-a549-cd89e1752b9d",
+                    "entry_id": "8f188b24-44a6-4ad5-8dec-26c993a5fd13",
+                    "glosses": [
+                      "gebiedende wijs van gallen"
+                    ],
+                    "tags": [
+                      "form-of"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "1158fa53-c84a-4cd9-97b6-0b4ad0f4adf1",
+                        "sense_id": "32513263-0eaa-4284-a549-cd89e1752b9d",
+                        "text": "Gal!"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "29bb147f-40b4-4277-8763-952e210b8c47",
+                    "entry_id": "8f188b24-44a6-4ad5-8dec-26c993a5fd13",
+                    "glosses": [
+                      "tweede persoon enkelvoud tegenwoordige tijd van gallen"
+                    ],
+                    "tags": [
+                      "form-of",
+                      "inversion"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "d06d0835-6d0e-45d4-9f29-0acca9eb8835",
+                        "sense_id": "29bb147f-40b4-4277-8763-952e210b8c47",
+                        "text": "Gal je?"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "170c3822-236d-4e77-ba47-b24e14752e9d",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "0c41513a-fbfe-4219-88c6-8a876497e9df",
+            "target_lang_word": "steen",
+            "target_lang_code": "nl",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "steen",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "b1da253c-5ce3-4028-a3bf-3b5703d5e1e5",
+                    "entry_id": "b9fb4cfc-6f91-4cef-bdd3-ef09f77930ac",
+                    "glosses": [
+                      "/ harde stof, vaak op kiezel gebaseerd maar ook andere mineralen omvattend"
+                    ],
+                    "tags": [
+                      "masculine",
+                      "neuter"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "7249edb5-dbc5-4bb2-9809-7d0c91dd6483",
+                        "sense_id": "b1da253c-5ce3-4028-a3bf-3b5703d5e1e5",
+                        "text": "Huizen worden vaak van steen gemaakt, omdat het zo goed bestand is tegen weersinvloeden."
+                      },
+                      {
+                        "example_id": "4afa0ae8-253d-40cd-9b38-aae501108f09",
+                        "sense_id": "b1da253c-5ce3-4028-a3bf-3b5703d5e1e5",
+                        "text": "Zittend op een steen aten we wat de pot schafte."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "f9ce9c16-8eef-4b87-b849-c44d7f2f63b9",
+                    "entry_id": "b9fb4cfc-6f91-4cef-bdd3-ef09f77930ac",
+                    "glosses": [
+                      "een fragment van deze stof"
+                    ],
+                    "tags": [
+                      "masculine"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "052c438a-3c87-4785-9533-7dc1146395b5",
+                        "sense_id": "f9ce9c16-8eef-4b87-b849-c44d7f2f63b9",
+                        "text": "Er ligt een kleine steen op het garagepad."
+                      },
+                      {
+                        "example_id": "4d48a2bd-3212-409b-9b8f-37acaedc744b",
+                        "sense_id": "f9ce9c16-8eef-4b87-b849-c44d7f2f63b9",
+                        "text": "Vanachter mijn struik gooide ik wat kleine steentjes naar hem toe."
+                      },
+                      {
+                        "example_id": "147a0084-1f2a-42cf-812f-e512b06cf3db",
+                        "sense_id": "f9ce9c16-8eef-4b87-b849-c44d7f2f63b9",
+                        "text": "Na uren lopen en een hele tijd zoeken vond ik een vlakke plek voor mijn tent en gooide ik eerst een aantal stenen de struiken in om eventuele slangen te verjagen."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "d42769cb-0839-4beb-b3d6-22298a517175",
+                    "entry_id": "b9fb4cfc-6f91-4cef-bdd3-ef09f77930ac",
+                    "glosses": [
+                      "als linkerdeel van een samengesteld bijvoeglijk naamwoord om de betekenis van het rechterdeel te versterken\\nDe eerste betekenis \\\"harde stof\\\" is bij sommige van deze woorden ook mogelijk."
+                    ],
+                    "tags": [
+                      "informal",
+                      "intensifier",
+                      "prefix"
+                    ],
+                    "examples": []
+                  },
+                  {
+                    "sense_id": "5e15c458-b7dc-45d6-955f-3b08012a08a1",
+                    "entry_id": "b9fb4cfc-6f91-4cef-bdd3-ef09f77930ac",
+                    "glosses": [
+                      "vogelziekte veroorzaakt door het organisme Trichomonas gallinae"
+                    ],
+                    "tags": [
+                      "neuter"
+                    ],
+                    "examples": []
+                  }
+                ]
+              },
+              {
+                "target_word": "steen",
+                "target_lang_code": "nl",
+                "target_senses": [
+                  {
+                    "sense_id": "e6199ce1-1688-4740-945f-658e34ca2cb6",
+                    "entry_id": "7c88516a-9fb4-48cb-9c3e-3e06e9e83d65",
+                    "glosses": [
+                      "eerste persoon enkelvoud tegenwoordige tijd van stenen"
+                    ],
+                    "tags": [
+                      "form-of"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "e670e650-99b1-46b4-b3ba-22cb42a785b7",
+                        "sense_id": "e6199ce1-1688-4740-945f-658e34ca2cb6",
+                        "text": "Ik steen."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "854e691f-e297-4d78-877d-977efb4015c1",
+                    "entry_id": "7c88516a-9fb4-48cb-9c3e-3e06e9e83d65",
+                    "glosses": [
+                      "gebiedende wijs van stenen"
+                    ],
+                    "tags": [
+                      "form-of"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "236e16f2-4d7d-4d58-ae88-f55774a097f8",
+                        "sense_id": "854e691f-e297-4d78-877d-977efb4015c1",
+                        "text": "Steen!"
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "d48801fc-7d86-4dc2-bf83-b100ed182220",
+                    "entry_id": "7c88516a-9fb4-48cb-9c3e-3e06e9e83d65",
+                    "glosses": [
+                      "tweede persoon enkelvoud tegenwoordige tijd van stenen"
+                    ],
+                    "tags": [
+                      "form-of",
+                      "inversion"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "0c22f222-2527-4b64-bb8d-98eb1a2b1c84",
+                        "sense_id": "d48801fc-7d86-4dc2-bf83-b100ed182220",
+                        "text": "Steen je?"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "translation_id": "5974e609-b359-4e63-88c9-9f7ec81033a3",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_id": "0c41513a-fbfe-4219-88c6-8a876497e9df",
+            "target_lang_word": "камень",
+            "target_lang_code": "ru",
+            "target_sense_ids": [],
+            "cross_references": [
+              {
+                "target_word": "камень",
+                "target_lang_code": "ru",
+                "target_senses": [
+                  {
+                    "sense_id": "547654ef-c237-445f-94d0-1d28618078b5",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "природный твёрдый минерал, скальная масса, горная порода"
+                    ],
+                    "tags": [
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "8eac5953-d9cb-4560-b4f0-99040536b4a1",
+                        "sense_id": "547654ef-c237-445f-94d0-1d28618078b5",
+                        "text": "Итогами пребывания военнопленных в СССР стали возрождённые ими города, фабрики и заводы, в военное время разрушенные ими же, дороги и каналы, миллионы тонн добытой руды, угля, камня, миллионы кубометров леса и многое другое."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "кусок такой породы, минерала"
+                    ],
+                    "tags": [
+                      "countable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "57499ddf-8b0c-46c8-9e61-9807506e5eaf",
+                        "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                        "text": "Точильный камень."
+                      },
+                      {
+                        "example_id": "76d081b7-2755-4a72-b20f-8b6591f88942",
+                        "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                        "text": "Стрелять камнями из рогатки."
+                      },
+                      {
+                        "example_id": "dbd77d08-446b-4273-9880-6cda5a6b91fc",
+                        "sense_id": "cfa9f3d2-7086-4a47-96c2-dc54e4b6e10b",
+                        "text": ".. у берегов есть подводные камни, целые горы камней .."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "камень [1] как конструкционный либо облицовочный материал"
+                    ],
+                    "tags": [
+                      "uncountable"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "94a263fb-ef86-43e8-9ec0-7e21edd59651",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Дом из камня."
+                      },
+                      {
+                        "example_id": "e11a8b78-7013-4765-a398-12c5393fb386",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Облицевать гостиную камнем."
+                      },
+                      {
+                        "example_id": "df2b924a-a683-4928-885a-0cb063b9ed44",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Вот какой-то джип перевалил бордюрный камень, истерически бодро прокатил метров двадцать по тротуару, упёрся в тумбу, разочарованно попятился и начал внедряться обратно в поток."
+                      },
+                      {
+                        "example_id": "d010739c-7c0c-4dc2-8b9d-299d7ffcc2e9",
+                        "sense_id": "b6773747-b54a-44cf-a1fa-8f6e21a95c19",
+                        "text": "Важне́йшим строи́тельным материа́лом при строи́тельстве го́рки явля́ется ка́мень."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "26b78b92-73cc-4d01-b7d0-589d5e071b5f",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "то же, что драгоценный камень"
+                    ],
+                    "tags": [
+                      "colloquial",
+                      "special"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "dae8a5d9-3903-4fc5-b22a-87fc2dd4ed58",
+                        "sense_id": "26b78b92-73cc-4d01-b7d0-589d5e071b5f",
+                        "text": "Перстень с камнем."
+                      },
+                      {
+                        "example_id": "996ae726-a35d-4038-81c6-85ae8c22e0dd",
+                        "sense_id": "26b78b92-73cc-4d01-b7d0-589d5e071b5f",
+                        "text": "Бете он проиграл, держа с нею пари по поводу каких-то пустяков, пуд конфет, а Касе — брошку, в которой последовательно чередовались камни — коралл, аметист, сапфир и яшма .."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "653b1bf1-2ebe-44a1-a24f-778c6b91e210",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "солевое отложение во внутренних органах человека или животного"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "05096d37-458d-4dc0-b93a-3a7374ea1a6b",
+                        "sense_id": "653b1bf1-2ebe-44a1-a24f-778c6b91e210",
+                        "text": "У него камень в почках."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "dc6b2c0b-7291-4fc8-aadd-199907091769",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "игровая фишка в домино и некоторых других настольных играх"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "a01ac43b-f3d7-4661-abd4-fe854fc5ae6e",
+                        "sense_id": "dc6b2c0b-7291-4fc8-aadd-199907091769",
+                        "text": "Обычный комплект состоит из 28 камней с количеством очков от 0 до 6."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "c985f98f-8abc-409c-8130-2d3ba34df5cd",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "игровой снаряд в кёрлинге"
+                    ],
+                    "tags": [],
+                    "examples": [
+                      {
+                        "example_id": "f9aec6c5-c3d6-456d-a6e7-def649a87001",
+                        "sense_id": "c985f98f-8abc-409c-8130-2d3ba34df5cd",
+                        "text": "Камень представляет собой цилиндр из полированного гранита весом 20 кг, снабжённый ручкой."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "987c0127-4c6b-4053-b62b-66927d7b0293",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "центральный процессор"
+                    ],
+                    "tags": [
+                      "slang"
+                    ],
+                    "examples": [
+                      {
+                        "example_id": "c227e66b-65ac-4881-810a-369dffa71923",
+                        "sense_id": "987c0127-4c6b-4053-b62b-66927d7b0293",
+                        "text": "На твоей машине какой камень? AMD."
+                      }
+                    ]
+                  },
+                  {
+                    "sense_id": "80e6194b-18a5-431b-b638-08ed33c15f5d",
+                    "entry_id": "f9a507ba-156a-4630-939a-55abf7007493",
+                    "glosses": [
+                      "то же, что гашиш"
+                    ],
+                    "tags": [
+                      "slang"
+                    ],
+                    "examples": []
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "word_linkages": [
+          {
+            "linkage_id": "d21c0caa-1daf-423e-ba61-785a5a09a709",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_ids": [
+              "3480c958-664f-4bbf-b0c1-b396d68202e7"
+            ],
+            "linkage_type": "synonyms",
+            "word": "skała"
+          },
+          {
+            "linkage_id": "56214eb7-229b-4340-bd17-21c1e123008e",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_ids": [
+              "3480c958-664f-4bbf-b0c1-b396d68202e7"
+            ],
+            "linkage_type": "synonyms",
+            "word": "głaz"
+          },
+          {
+            "linkage_id": "20d1fbad-c5c4-423c-9f01-86eb39c5c16b",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_ids": [
+              "3480c958-664f-4bbf-b0c1-b396d68202e7"
+            ],
+            "linkage_type": "synonyms",
+            "word": "reg. śl. kizlok, kiziol"
+          },
+          {
+            "linkage_id": "83aa23ad-e038-4600-8c83-956fc0023889",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_ids": [
+              "0c099fe6-1a4e-4bb2-a5fc-7197942d32d5"
+            ],
+            "linkage_type": "synonyms",
+            "word": "nagar"
+          },
+          {
+            "linkage_id": "746718a8-e510-4a91-a435-551d56742860",
+            "source_entry_id": "b414063c-b425-4068-9738-df6215c240f3",
+            "source_sense_ids": [
+              "0c099fe6-1a4e-4bb2-a5fc-7197942d32d5"
+            ],
+            "linkage_type": "synonyms",
+            "word": "kamień kotłowy"
+          }
+        ]
+      }
+    ]
+  }
+}

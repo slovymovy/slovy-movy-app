@@ -1,0 +1,2152 @@
+{
+  "entries": [
+    {
+      "pos": "name",
+      "senses": [
+        {
+          "sense_id": "e67ffcc3-a126-470c-ad5b-7e48f6a0eb73",
+          "sense_definition": "A town in south-west Greater London, England (properly Richmond upon Thames).",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "They decided to spend the day exploring <w>Richmond</w> Park in London.",
+              "target_lang_translations": {
+                "ru": "Они решили провести день, исследуя <w>Ричмонд</w>-парк в Лондоне."
+              }
+            },
+            {
+              "text": "The train from Waterloo goes directly to <w>Richmond</w> station.",
+              "target_lang_translations": {
+                "ru": "Поезд с вокзала Ватерлоо идет прямо до станции <w>Ричмонд</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "England"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город на юго-западе Большого Лондона, Англия (официально Ричмонд-апон-Темс)."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Англии, на Темзе"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "2556596a-2eae-4d77-bbb2-dada74364b55",
+          "sense_definition": "The capital city of Virginia, USA.",
+          "learner_level": "A2",
+          "frequency": "High",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The capital of Virginia is <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Столица Вирджинии — <w>Ричмонд</w>."
+              }
+            },
+            {
+              "text": "Many historical sites can be found in <w>Richmond</w>, Virginia.",
+              "target_lang_translations": {
+                "ru": "В <w>Ричмонде</w>, штат Вирджиния, можно найти много исторических достопримечательностей."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Столица штата Вирджиния, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "столица штата Вирджиния, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "037b1dfa-e9d7-42aa-b54c-d75ae80f3306",
+          "sense_definition": "A city on Lulu Island, in Greater Vancouver, British Columbia, Canada.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "My cousin lives in <w>Richmond</w>, British Columbia.",
+              "target_lang_translations": {
+                "ru": "Мой двоюродный брат живет в <w>Ричмонде</w>, Британская Колумбия."
+              }
+            },
+            {
+              "text": "The airport is very close to <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Аэропорт находится очень близко к <w>Ричмонду</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Canada"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город на острове Лулу, в Большом Ванкувере, Британская Колумбия, Канада."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Канаде, Британская Колумбия"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "379e4383-6a2b-4b94-9630-195bdd071c45",
+          "sense_definition": "A residential neighbourhood of Calgary, Alberta, Canada.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "They bought a house in the <w>Richmond</w> neighbourhood of Calgary.",
+              "target_lang_translations": {
+                "ru": "Они купили дом в районе <w>Ричмонд</w> в Калгари."
+              }
+            },
+            {
+              "text": "The school is located in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Школа расположена в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Canada"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Жилой район в Калгари, Альберта, Канада."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "район в Калгари, Канада"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "cdde08f2-440b-4fcf-aa6e-be3699a80358",
+          "sense_definition": "A former urban neighbourhood in Halifax, Nova Scotia, Canada.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The historical records mention the old <w>Richmond</w> neighbourhood in Halifax.",
+              "target_lang_translations": {
+                "ru": "В исторических записях упоминается старый район <w>Ричмонд</w> в Галифаксе."
+              }
+            },
+            {
+              "text": "This area was once part of <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Эта территория когда-то была частью <w>Ричмонда</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Canada"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Бывший городской район в Галифаксе, Новая Шотландия, Канада."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "бывший район в Галифаксе, Канада"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "18f6e73e-7a58-4e4a-89fa-a76fb5171ab0",
+          "sense_definition": "A village and former municipality of Ottawa, Ontario, Canada.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The village of <w>Richmond</w> is a short drive from Ottawa.",
+              "target_lang_translations": {
+                "ru": "Деревня <w>Ричмонд</w> находится в нескольких минутах езды от Оттавы."
+              }
+            },
+            {
+              "text": "Many people commute from <w>Richmond</w> to work in the city.",
+              "target_lang_translations": {
+                "ru": "Многие люди ездят на работу в город из <w>Ричмонда</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Canada"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Деревня и бывший муниципалитет в Оттаве, Онтарио, Канада."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "деревня в Онтарио, Канада"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a65d109a-e72a-42c4-beb6-435cacd3fa11",
+          "sense_definition": "A rural community of Prince County, Prince Edward Island, Canada.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The quiet community of <w>Richmond</w> is known for its farms.",
+              "target_lang_translations": {
+                "ru": "Тихая община <w>Ричмонд</w> известна своими фермами."
+              }
+            },
+            {
+              "text": "They spent their summer vacation in <w>Richmond</w>, enjoying the countryside.",
+              "target_lang_translations": {
+                "ru": "Они провели летние каникулы в <w>Ричмонде</w>, наслаждаясь сельской местностью."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Canada"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Сельская община в округе Принс, Остров Принца Эдуарда, Канада."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "сельская община в Канаде"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "99a48f7a-682c-495d-8f76-b6f7dab080e9",
+          "sense_definition": "A town in the region of Estrie, Quebec, Canada.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The small town of <w>Richmond</w> is located in Quebec.",
+              "target_lang_translations": {
+                "ru": "Маленький городок <w>Ричмонд</w> расположен в Квебеке."
+              }
+            },
+            {
+              "text": "We drove through <w>Richmond</w> on our way to the mountains.",
+              "target_lang_translations": {
+                "ru": "Мы проехали через <w>Ричмонд</w> по пути в горы."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Canada"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в регионе Эстри, Квебек, Канада."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Квебеке, Канада"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a540bc90-b8ff-49b7-8dd9-8972cffd675d",
+          "sense_definition": "A market town and civil parish in North Yorkshire, England.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The historic market town of <w>Richmond</w> in Yorkshire is beautiful.",
+              "target_lang_translations": {
+                "ru": "Исторический рыночный город <w>Ричмонд</w> в Йоркшире прекрасен."
+              }
+            },
+            {
+              "text": "They visited <w>Richmond</w> Castle during their trip to England.",
+              "target_lang_translations": {
+                "ru": "Они посетили замок <w>Ричмонд</w> во время своей поездки в Англию."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "England"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Рыночный город и гражданский приход в Северном Йоркшире, Англия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Англии, Северный Йоркшир"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "5b4c428a-717a-4251-b94d-9379dbbc22d4",
+          "sense_definition": "A suburb and ward in Sheffield, South Yorkshire, England.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "She grew up in the <w>Richmond</w> suburb of Sheffield.",
+              "target_lang_translations": {
+                "ru": "Она выросла в пригороде Шеффилда под названием <w>Ричмонд</w>."
+              }
+            },
+            {
+              "text": "The local park in <w>Richmond</w> is very popular.",
+              "target_lang_translations": {
+                "ru": "Местный парк в <w>Ричмонде</w> очень популярен."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "England"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Пригород и район в Шеффилде, Южный Йоркшир, Англия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "пригород Шеффилда, Англия"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e55813ab-365c-4290-9a8d-848905e17797",
+          "sense_definition": "A town in the north of the South Island, New Zealand, headquarters of Tasman district.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "They are planning a trip to <w>Richmond</w>, New Zealand.",
+              "target_lang_translations": {
+                "ru": "Они планируют поездку в <w>Ричмонд</w>, Новая Зеландия."
+              }
+            },
+            {
+              "text": "The main office for the district is located in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Главный офис округа расположен в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "New Zealand"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город на севере Южного острова, Новая Зеландия, административный центр округа Тасман."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Новой Зеландии"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c2b869a4-9bb8-4cdb-93b3-d154f53c320d",
+          "sense_definition": "A minor suburb of Christchurch, New Zealand.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The house is in <w>Richmond</w>, a quiet suburb of Christchurch.",
+              "target_lang_translations": {
+                "ru": "Дом находится в <w>Ричмонде</w>, тихом пригороде Крайстчерча."
+              }
+            },
+            {
+              "text": "They often go for walks in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Они часто гуляют в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "New Zealand"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Небольшой пригород Крайстчерча, Новая Зеландия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "пригород Крайстчерча, Новая Зеландия"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "8f82d20b-35ab-438a-9aec-019a8d761251",
+          "sense_definition": "A sizable port city in Contra Costa County, California, USA.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The port of <w>Richmond</w>, California, is very busy.",
+              "target_lang_translations": {
+                "ru": "Порт <w>Ричмонда</w>, Калифорния, очень оживленный."
+              }
+            },
+            {
+              "text": "Many ships arrive daily in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Множество кораблей ежедневно прибывает в <w>Ричмонд</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Крупный портовый город в округе Контра-Коста, Калифорния, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Калифорнии, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "b8655376-5336-4698-a8ea-e2b68b851851",
+          "sense_definition": "A neighborhood of San Francisco, California, USA; in full, the Richmond District.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The Golden Gate Park is next to the <w>Richmond</w> District in San Francisco.",
+              "target_lang_translations": {
+                "ru": "Парк Золотые Ворота находится рядом с районом <w>Ричмонд</w> в Сан-Франциско."
+              }
+            },
+            {
+              "text": "They live in <w>Richmond</w>, close to the beach.",
+              "target_lang_translations": {
+                "ru": "Они живут в <w>Ричмонде</w>, недалеко от пляжа."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Район Сан-Франциско, Калифорния, США; полностью — район Ричмонд."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "район в Сан-Франциско, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "8c9fb0d2-3047-4823-b419-37915dd3524a",
+          "sense_definition": "A city, the county seat of Wayne County, Indiana, USA.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "<w>Richmond</w>, Indiana, is a historic city.",
+              "target_lang_translations": {
+                "ru": "<w>Ричмонд</w>, Индиана, — это исторический город."
+              }
+            },
+            {
+              "text": "The county government is based in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Правительство округа базируется в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город, административный центр округа Уэйн, Индиана, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Индиане, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f48bdc67-48c5-444e-a325-8eee5ef0c4ee",
+          "sense_definition": "A home rule city, the county seat of Madison County, Kentucky, USA.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Eastern Kentucky University is located in <w>Richmond</w>, Kentucky.",
+              "target_lang_translations": {
+                "ru": "Университет Восточного Кентукки расположен в <w>Ричмонде</w>, штат Кентукки."
+              }
+            },
+            {
+              "text": "The city of <w>Richmond</w> serves as the county seat.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> является административным центром округа."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город с самоуправлением, административный центр округа Мэдисон, Кентукки, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Кентукки, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6a1a17a6-f773-4b90-a0fd-b9bc85496078",
+          "sense_definition": "A city in Macomb County and St. Clair County, Michigan, USA.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "They are planning to move to <w>Richmond</w>, Michigan.",
+              "target_lang_translations": {
+                "ru": "Они планируют переехать в <w>Ричмонд</w>, штат Мичиган."
+              }
+            },
+            {
+              "text": "The city of <w>Richmond</w> spans two counties.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> расположен на территории двух округов."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в округах Макомб и Сент-Клэр, Мичиган, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Мичигане, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "ee9d0b2f-5673-405f-891d-5948a0b23f3a",
+          "sense_definition": "A city, the county seat of Ray County, Missouri, USA.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The courthouse is in <w>Richmond</w>, Missouri.",
+              "target_lang_translations": {
+                "ru": "Здание суда находится в <w>Ричмонде</w>, штат Миссури."
+              }
+            },
+            {
+              "text": "Many local events are held in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Многие местные мероприятия проводятся в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город, административный центр округа Рэй, Миссури, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Миссури, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "1287a09f-b8f8-4416-a97a-8ad3f2e358cd",
+          "sense_definition": "A former borough of New York City; since 1975, the borough of Staten Island, USA.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "Before 1975, Staten Island was known as the borough of <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "До 1975 года Статен-Айленд был известен как боро <w>Ричмонд</w>."
+              }
+            },
+            {
+              "text": "The history books refer to the borough of <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "В исторических книгах упоминается боро <w>Ричмонд</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            },
+            {
+              "trait_type": "form",
+              "comment": "Refers to a former name of Staten Island"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Бывший боро Нью-Йорка; с 1975 года — боро Статен-Айленд, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "бывшее название Статен-Айленда, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "60bf46a2-9fe8-4f09-9418-d4c4f90bdd77",
+          "sense_definition": "A neighborhood of Portland, Oregon, USA.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "They live in the <w>Richmond</w> neighborhood of Portland.",
+              "target_lang_translations": {
+                "ru": "Они живут в районе <w>Ричмонд</w> в Портленде."
+              }
+            },
+            {
+              "text": "The local coffee shop in <w>Richmond</w> is very popular.",
+              "target_lang_translations": {
+                "ru": "Местная кофейня в <w>Ричмонде</w> очень популярна."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Район Портленда, Орегон, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "район в Портленде, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "11e15ec7-4a0b-455a-ba6f-e5733252f210",
+          "sense_definition": "A city, the county seat of Fort Bend County, Texas, USA.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "<w>Richmond</w>, Texas, is part of the Houston metropolitan area.",
+              "target_lang_translations": {
+                "ru": "<w>Ричмонд</w>, Техас, является частью агломерации Хьюстона."
+              }
+            },
+            {
+              "text": "The county offices are located in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Офисы округа расположены в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город, административный центр округа Форт-Бенд, Техас, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Техасе, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "d6878598-aab9-46d8-8267-30a862739696",
+          "sense_definition": "A surname derived from the English place name.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Names",
+          "name_type": "person_name",
+          "examples": [
+            {
+              "text": "Be cheerful, <w>Richmond</w>; for the wronged souls Of butcher'd princes fight in thy behalf: King Henry's issue, <w>Richmond</w>, comforts thee.",
+              "target_lang_translations": {
+                "ru": "Будь бодр, <w>Ричмонд</w>, ибо души убиенных принцев сражаются на твоей стороне: потомок короля Генриха, <w>Ричмонд</w>, утешает тебя."
+              }
+            },
+            {
+              "text": "Mr. <w>Richmond</w> is the new history teacher at our school.",
+              "target_lang_translations": {
+                "ru": "Мистер <w>Ричмонд</w> — новый учитель истории в нашей школе."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "surname",
+              "comment": "Used as a family name"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Фамилия, произошедшая от английского топонима."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "фамилия"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "48bb3f1d-0831-450e-8560-5673aae530c1",
+          "sense_definition": "A town in the City of Hawkesbury, New South Wales, Australia.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "They visited the town of <w>Richmond</w> in New South Wales.",
+              "target_lang_translations": {
+                "ru": "Они посетили город <w>Ричмонд</w> в Новом Южном Уэльсе."
+              }
+            },
+            {
+              "text": "The university campus is located near <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Университетский кампус расположен недалеко от <w>Ричмонда</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Australia"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в составе города Хоксбери, Новый Южный Уэльс, Австралия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Австралии, Новый Южный Уэльс"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "8b8c285a-d208-40c1-811b-a83326fc2e7d",
+          "sense_definition": "A town and locality in the Shire of Richmond, Queensland, Australia.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The Shire of <w>Richmond</w> is known for its vast landscapes.",
+              "target_lang_translations": {
+                "ru": "Графство <w>Ричмонд</w> известно своими обширными ландшафтами."
+              }
+            },
+            {
+              "text": "They drove through <w>Richmond</w> on their outback adventure.",
+              "target_lang_translations": {
+                "ru": "Они проехали через <w>Ричмонд</w> во время своего путешествия по австралийской глубинке."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Australia"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город и местность в графстве Ричмонд, Квинсленд, Австралия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Австралии, Квинсленд"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "2ae345d2-a910-4e4b-a9d9-be4230e967fb",
+          "sense_definition": "An urban inner suburb of Adelaide, South Australia.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The family lives in <w>Richmond</w>, a suburb of Adelaide.",
+              "target_lang_translations": {
+                "ru": "Семья живет в <w>Ричмонде</w>, пригороде Аделаиды."
+              }
+            },
+            {
+              "text": "There are many shops and cafes in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "В <w>Ричмонде</w> много магазинов и кафе."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Australia"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Городской внутренний пригород Аделаиды, Южная Австралия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "пригород Аделаиды, Австралия"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "05609189-e30b-4dc2-93e0-64f32d094afc",
+          "sense_definition": "A town in Tasmania, Australia.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "<w>Richmond</w>, Tasmania, is famous for its historic bridge.",
+              "target_lang_translations": {
+                "ru": "<w>Ричмонд</w> в Тасмании знаменит своим историческим мостом."
+              }
+            },
+            {
+              "text": "Many tourists visit <w>Richmond</w> for its colonial architecture.",
+              "target_lang_translations": {
+                "ru": "Многие туристы посещают <w>Ричмонд</w> из-за его колониальной архитектуры."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Australia"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в Тасмании, Австралия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Австралии, Тасмания"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6c698a2a-7ff5-4754-871e-6eff052ae339",
+          "sense_definition": "An inner suburb of Melbourne, Victoria, Australia.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "<w>Richmond</w> is a vibrant inner suburb of Melbourne.",
+              "target_lang_translations": {
+                "ru": "<w>Ричмонд</w> — это оживленный внутренний пригород Мельбурна."
+              }
+            },
+            {
+              "text": "They went to a concert in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Они пошли на концерт в <w>Ричмонд</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Australia"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Внутренний пригород Мельбурна, Виктория, Австралия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "пригород Мельбурна, Австралия"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "ed051925-9ecf-4396-8dc9-0237a3e7543d",
+          "sense_definition": "A townland in County Tipperary, Ireland.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The small townland of <w>Richmond</w> is in rural Ireland.",
+              "target_lang_translations": {
+                "ru": "Небольшой таунленд <w>Ричмонд</w> находится в сельской местности Ирландии."
+              }
+            },
+            {
+              "text": "They have family living in <w>Richmond</w>, County Tipperary.",
+              "target_lang_translations": {
+                "ru": "У них есть родственники, живущие в <w>Ричмонде</w>, графство Типперэри."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Ireland"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Таунленд в графстве Типперэри, Ирландия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "таунленд в Ирландии"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "b7c7dac0-16cc-4094-bd23-b277a4fd83c2",
+          "sense_definition": "A market town in Saint Mary parish, Jamaica.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The market in <w>Richmond</w>, Jamaica, is very lively.",
+              "target_lang_translations": {
+                "ru": "Рынок в <w>Ричмонде</w>, Ямайка, очень оживленный."
+              }
+            },
+            {
+              "text": "They stopped in <w>Richmond</w> on their way to the coast.",
+              "target_lang_translations": {
+                "ru": "Они остановились в <w>Ричмонде</w> по пути на побережье."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Jamaica"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Рыночный город в приходе Сент-Мэри, Ямайка."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город на Ямайке"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "923482ac-2965-4aee-bd3b-dd8993d74de1",
+          "sense_definition": "A small settlement in North Otago district, Otago, New Zealand.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The settlement of <w>Richmond</w> is nestled in the Otago region.",
+              "target_lang_translations": {
+                "ru": "Поселение <w>Ричмонд</w> расположено в регионе Отаго."
+              }
+            },
+            {
+              "text": "It's a very small place, hardly anyone lives in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Это очень маленькое место, в <w>Ричмонде</w> почти никто не живет."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "New Zealand"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Небольшое поселение в округе Северный Отаго, Отаго, Новая Зеландия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "поселение в Новой Зеландии"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "ad29f811-561a-477b-a644-3117888d5424",
+          "sense_definition": "A town in the Karoo region, Northern Cape, South Africa.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The town of <w>Richmond</w> is located in the arid Karoo region.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> расположен в засушливом регионе Кару."
+              }
+            },
+            {
+              "text": "They drove through <w>Richmond</w> on their road trip across South Africa.",
+              "target_lang_translations": {
+                "ru": "Они проехали через <w>Ричмонд</w> во время своего автопутешествия по Южной Африке."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "South Africa"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в регионе Кару, Северо-Капская провинция, Южная Африка."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в ЮАР, Северо-Капская провинция"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "2f3c6704-78d7-4dfe-8bdc-126355b0cf1b",
+          "sense_definition": "A town in KwaZulu-Natal, South Africa.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The town of <w>Richmond</w> in KwaZulu-Natal has a rich history.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> в Квазулу-Натале имеет богатую историю."
+              }
+            },
+            {
+              "text": "They visited friends who live in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Они навестили друзей, которые живут в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "South Africa"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в Квазулу-Натале, Южная Африка."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в ЮАР, Квазулу-Натал"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c22ae431-b863-4a08-bed4-7c28987af16b",
+          "sense_definition": "An unincorporated community in Dallas County, Alabama, also known as Warrenton, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The small community of <w>Richmond</w> is in Alabama.",
+              "target_lang_translations": {
+                "ru": "Небольшая община <w>Ричмонд</w> находится в Алабаме."
+              }
+            },
+            {
+              "text": "It's a quiet place, sometimes called Warrenton, but officially <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Это тихое место, иногда называемое Уоррентон, но официально — <w>Ричмонд</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Неинкорпорированная община в округе Даллас, Алабама, также известная как Уоррентон, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "община в Алабаме, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "cf839856-96ab-41f3-88c4-45239c110ee4",
+          "sense_definition": "An unincorporated community in Little River County, Arkansas, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The community of <w>Richmond</w> is located in Arkansas.",
+              "target_lang_translations": {
+                "ru": "Община <w>Ричмонд</w> расположена в Арканзасе."
+              }
+            },
+            {
+              "text": "There isn't much in <w>Richmond</w>, just a few houses.",
+              "target_lang_translations": {
+                "ru": "В <w>Ричмонде</w> мало что есть, всего несколько домов."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Неинкорпорированная община в округе Литл-Ривер, Арканзас, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "община в Арканзасе, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "02830fa0-5aea-4b56-9d23-8ddcffd4d0a3",
+          "sense_definition": "A village in McHenry County, Illinois, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The village of <w>Richmond</w> is a charming place in Illinois.",
+              "target_lang_translations": {
+                "ru": "Деревня <w>Ричмонд</w> — это очаровательное место в Иллинойсе."
+              }
+            },
+            {
+              "text": "They have a small farm near <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "У них есть небольшая ферма недалеко от <w>Ричмонда</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Деревня в округе Мак-Генри, Иллинойс, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "деревня в Иллинойсе, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "920bd1ba-33d6-4520-8960-6d4e49fb32a1",
+          "sense_definition": "A tiny city in Franklin County, Kansas, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "<w>Richmond</w>, Kansas, is a very small city.",
+              "target_lang_translations": {
+                "ru": "<w>Ричмонд</w>, Канзас, — очень маленький город."
+              }
+            },
+            {
+              "text": "Not many people live in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "В <w>Ричмонде</w> живет не так много людей."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Крошечный город в округе Франклин, Канзас, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Канзасе, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "b973362d-d155-4770-b96f-a3ef97da1058",
+          "sense_definition": "A village in Madison Parish, Louisiana, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The village of <w>Richmond</w> is located in rural Louisiana.",
+              "target_lang_translations": {
+                "ru": "Деревня <w>Ричмонд</w> расположена в сельской местности Луизианы."
+              }
+            },
+            {
+              "text": "They drove through <w>Richmond</w> on their way to the river.",
+              "target_lang_translations": {
+                "ru": "Они проехали через <w>Ричмонд</w> по пути к реке."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Деревня в приходе Мэдисон, Луизиана, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "деревня в Луизиане, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a639cea2-7858-4221-a63b-95af4abab9f8",
+          "sense_definition": "A town and census-designated place in Sagadahoc County, Maine, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The town of <w>Richmond</w> in Maine is known for its scenic beauty.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> в штате Мэн известен своей живописной красотой."
+              }
+            },
+            {
+              "text": "They spent their summer at a lake house near <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Они провели лето в домике у озера недалеко от <w>Ричмонда</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город и статистически обособленная местность в округе Сагадахок, Мэн, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в штате Мэн, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "9c2abf45-0ee8-48a2-9059-51a56a630b8d",
+          "sense_definition": "A town in Berkshire County, Massachusetts, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "She grew up in <w>Richmond</w>, Massachusetts.",
+              "target_lang_translations": {
+                "ru": "Она выросла в <w>Ричмонде</w>, штат Массачусетс."
+              }
+            },
+            {
+              "text": "The town of <w>Richmond</w> is quite small.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> довольно маленький."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в округе Беркшир, Массачусетс, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Массачусетсе, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "9aea18d5-e967-4498-b8cf-7aeed7d4ae7a",
+          "sense_definition": "A small city in Stearns County, Minnesota, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The city of <w>Richmond</w> in Minnesota is known for its lakes.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> в Миннесоте известен своими озерами."
+              }
+            },
+            {
+              "text": "They went fishing in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Они ездили на рыбалку в <w>Ричмонд</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Небольшой город в округе Стернс, Миннесота, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Миннесоте, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e294c3bd-8a2c-4f29-9e0c-b0f029b7014c",
+          "sense_definition": "A town in Cheshire County, New Hampshire, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The town of <w>Richmond</w> is nestled in the New Hampshire mountains.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> расположен в горах Нью-Гэмпшира."
+              }
+            },
+            {
+              "text": "They enjoy hiking near <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Им нравится ходить в походы недалеко от <w>Ричмонда</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в округе Чешир, Нью-Гэмпшир, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Нью-Гэмпшире, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e247b27d-abf8-4ad5-90e1-57f6c0fa2882",
+          "sense_definition": "A town in Ontario County, New York, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The town of <w>Richmond</w> in New York is quite rural.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> в штате Нью-Йорк довольно сельский."
+              }
+            },
+            {
+              "text": "They have a summer house in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "У них есть летний домик в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в округе Онтарио, Нью-Йорк, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в штате Нью-Йорк, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "78547867-e3cd-46e9-a3ab-7a9e63e3cb47",
+          "sense_definition": "A village in Jefferson County, Ohio, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The village of <w>Richmond</w> is a quiet place in Ohio.",
+              "target_lang_translations": {
+                "ru": "Деревня <w>Ричмонд</w> — это тихое место в Огайо."
+              }
+            },
+            {
+              "text": "They visited their grandparents in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Они навестили своих бабушку и дедушку в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Деревня в округе Джефферсон, Огайо, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "деревня в Огайо, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "a0f2b0f6-9075-4071-a55f-3e38b880e398",
+          "sense_definition": "An unincorporated community in Wheeler County, Oregon, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The small community of <w>Richmond</w> is in eastern Oregon.",
+              "target_lang_translations": {
+                "ru": "Небольшая община <w>Ричмонд</w> находится в восточном Орегоне."
+              }
+            },
+            {
+              "text": "There are only a few residents in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "В <w>Ричмонде</w> всего несколько жителей."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Неинкорпорированная община в округе Уилер, Орегон, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "община в Орегоне, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c5ab9d62-f570-465d-804d-e8e8e5e54632",
+          "sense_definition": "A town in Washington County, Rhode Island, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The town of <w>Richmond</w> in Rhode Island is known for its natural beauty.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> в Род-Айленде известен своей природной красотой."
+              }
+            },
+            {
+              "text": "They went hiking in the forests around <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Они ходили в поход по лесам вокруг <w>Ричмонда</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в округе Вашингтон, Род-Айленд, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Род-Айленде, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "d48ca8cd-5243-42bb-8bdd-3e80bebf7ba6",
+          "sense_definition": "A small city in Cache County, Utah, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The city of <w>Richmond</w> in Utah is surrounded by mountains.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> в штате Юта окружен горами."
+              }
+            },
+            {
+              "text": "They visited family in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Они навестили семью в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Небольшой город в округе Кэш, Юта, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Юте, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "0d9e27e6-c9b4-4391-9516-307ad9d0cf9d",
+          "sense_definition": "A town in Chittenden County, Vermont, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The town of <w>Richmond</w> in Vermont is known for its covered bridge.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> в Вермонте известен своим крытым мостом."
+              }
+            },
+            {
+              "text": "They went skiing near <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Они катались на лыжах недалеко от <w>Ричмонда</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в округе Читтенден, Вермонт, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Вермонте, США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "c1f875e8-df0c-407f-b9cf-601f8839d6dd",
+          "sense_definition": "A town in Shawano County, Wisconsin, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The town of <w>Richmond</w> is located in central Wisconsin.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> расположен в центральной части Висконсина."
+              }
+            },
+            {
+              "text": "They have a cabin in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "У них есть домик в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в округе Шавано, Висконсин, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Висконсине, округ Шавано"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "62852eda-4428-4a18-9a1a-21166d2e5457",
+          "sense_definition": "A town in St. Croix County, Wisconsin, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The town of <w>Richmond</w> is near the St. Croix River.",
+              "target_lang_translations": {
+                "ru": "Город <w>Ричмонд</w> находится недалеко от реки Сент-Круа."
+              }
+            },
+            {
+              "text": "They went canoeing in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Они катались на каноэ в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город в округе Сент-Круа, Висконсин, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Висконсине, округ Сент-Круа"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "cafdb536-9e85-446a-82eb-a1010572eea4",
+          "sense_definition": "A town and unincorporated community in Walworth County, Wisconsin, USA.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The community of <w>Richmond</w> is in southeastern Wisconsin.",
+              "target_lang_translations": {
+                "ru": "Община <w>Ричмонд</w> находится на юго-востоке Висконсина."
+              }
+            },
+            {
+              "text": "They have a small business in <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "У них есть небольшой бизнес в <w>Ричмонде</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Город и неинкорпорированная община в округе Уолуорт, Висконсин, США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "город в Висконсине, округ Уолуорт"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "e40df8e9-5eac-46e7-9197-9c1687ea756c",
+          "sense_definition": "A male given name transferred from the surname.",
+          "learner_level": "B1",
+          "frequency": "Low",
+          "semantic_group_id": "Names",
+          "name_type": "person_name",
+          "examples": [
+            {
+              "text": "<w>Richmond</w> was named after his grandfather.",
+              "target_lang_translations": {
+                "ru": "<w>Ричмонда</w> назвали в честь его деда."
+              }
+            },
+            {
+              "text": "My friend <w>Richmond</w> is a very talented artist.",
+              "target_lang_translations": {
+                "ru": "Мой друг <w>Ричмонд</w> — очень талантливый художник."
+              }
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Мужское имя, образованное от фамилии."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "мужское имя"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "4c1c3040-b5cf-49b4-b6cd-20de1eda4aeb",
+          "sense_definition": "An electoral division in New South Wales, Australia.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The candidate is running in the electoral division of <w>Richmond</w>.",
+              "target_lang_translations": {
+                "ru": "Кандидат баллотируется в избирательном округе <w>Ричмонд</w>."
+              }
+            },
+            {
+              "text": "The results from <w>Richmond</w> will be announced soon.",
+              "target_lang_translations": {
+                "ru": "Результаты из <w>Ричмонда</w> будут объявлены в ближайшее время."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Australia"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Избирательный округ в Новом Южном Уэльсе, Австралия."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "избирательный округ в Австралии"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f4f6613a-8e48-498b-9ce7-6f90361887db",
+          "sense_definition": "A civil parish of Prince County, Prince Edward Island, Canada.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "The civil parish of <w>Richmond</w> is a historical administrative area.",
+              "target_lang_translations": {
+                "ru": "Гражданский приход <w>Ричмонд</w> является исторической административной единицей."
+              }
+            },
+            {
+              "text": "Land records show the property is located in <w>Richmond</w> parish.",
+              "target_lang_translations": {
+                "ru": "Земельные записи показывают, что собственность находится в приходе <w>Ричмонд</w>."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "Canada"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Гражданский приход в округе Принс, Остров Принца Эдуарда, Канада."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "гражданский приход в Канаде"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "75b2c303-ee74-4f65-a401-a0b09e23dd61",
+          "sense_definition": "A number of townships named Richmond in the USA.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "Places named Richmond",
+          "name_type": "place_name",
+          "examples": [
+            {
+              "text": "There are several <w>Richmond</w> Townships across the United States.",
+              "target_lang_translations": {
+                "ru": "В Соединенных Штатах есть несколько тауншипов под названием <w>Ричмонд</w>."
+              }
+            },
+            {
+              "text": "The map shows a <w>Richmond</w> Township in Ohio and another in Michigan.",
+              "target_lang_translations": {
+                "ru": "На карте показан тауншип <w>Ричмонд</w> в Огайо и еще один в Мичигане."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "regional",
+              "comment": "USA"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Ряд тауншипов под названием Ричмонд в США."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "название нескольких тауншипов в США"
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f536e77f-3ad8-4d37-8dd7-3b7bf982ca36",
+          "sense_definition": "An English dukedom.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Titles",
+          "name_type": "other",
+          "examples": [
+            {
+              "text": "The Duke of <w>Richmond</w> holds an ancient English dukedom.",
+              "target_lang_translations": {
+                "ru": "Герцог <w>Ричмонд</w> носит древний английский герцогский титул."
+              }
+            },
+            {
+              "text": "The <w>Richmond</w> dukedom has a long and storied history.",
+              "target_lang_translations": {
+                "ru": "Герцогство <w>Ричмонд</w> имеет долгую и легендарную историю."
+              }
+            }
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "Refers to a historical noble title"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Английский герцогский титул."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Ричмонд",
+                "target_lang_sense_clarification": "герцогский титул"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

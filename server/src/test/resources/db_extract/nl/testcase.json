@@ -1,0 +1,140 @@
+{
+    "word": "testcase",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "b536011f-2572-4845-94b0-041660e42d28",
+                "word": "testcase",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "b640a366-68f1-4a83-b736-3c85041d5a1c",
+                        "entry_id": "b536011f-2572-4845-94b0-041660e42d28",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "testcases"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "5bfa4446-3ce2-40c9-9abd-9c45e325646b",
+                        "entry_id": "b536011f-2572-4845-94b0-041660e42d28",
+                        "glosses": [
+                            "een geval dat men gebruikt om iets te beproeven"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "3759bd19-38f7-442d-838a-17efd3fb65f8",
+                                "sense_id": "5bfa4446-3ce2-40c9-9abd-9c45e325646b",
+                                "text": ",,Zo leuk om die jongens dan weer te zien\", zegt zij. Hij: ,,De Vierdaagse is elke keer weer een testcase. Fysiek en mentaal.\" Zij: ,,De Vierdaagse houd je fit. Je blijft zo het hele jaar in beweging.\""
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "89a1cfa6-30c4-4924-b5ca-1392ccd2d2ea",
+                        "entry_id": "b536011f-2572-4845-94b0-041660e42d28",
+                        "glosses": [
+                            "een zaak die men voorlegt aan de rechter om jurisprudentie te kunnen schrijven"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "5d929bbb-708f-4bc0-87f1-aa72484f7617",
+                                "sense_id": "89a1cfa6-30c4-4924-b5ca-1392ccd2d2ea",
+                                "text": "Gezondheidseconoom Lieven Annemans (Universiteit Gent) vindt wel dat de verzekering ‘een interessant debat opent over de vraag of huishoudhulp al dan niet terugbetaald moet worden door de verplichte ziekteverzekering’. ‘Ik volg Think-Pink wanneer ze zeggen dat dit geen “eerlijke” verzekering is. Maar mocht blijken dat zo’n hulp de levenskwaliteit van vrouwen die kanker hebben wel degelijk verbetert, dan moet overwogen worden dat op te nemen in de verplichte ziekteverzekering. Dan heeft iedereen die het wenst er recht op. Daarom is dit best wel een interessante testcase.’"
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "9b87f6fc-b5c4-43b5-ab13-ca9844e86554",
+                        "source_entry_id": "b536011f-2572-4845-94b0-041660e42d28",
+                        "source_sense_id": "5bfa4446-3ce2-40c9-9abd-9c45e325646b",
+                        "source_sense_description": "een zaak die men voorlegt aan de rechter en de uitspraak van de rechter is dan beslissend hoe men een rechtsregel dient toe te passen",
+                        "target_lang_word": "test case",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "test case",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "d4a00517-0635-4db2-a0e1-1bc9c749ccbe",
+                                        "entry_id": "7bfa3dd8-a925-4a21-9aec-1e1330f7dcb4",
+                                        "glosses": [
+                                            "A legal action intended to set a precedent."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "47efa3b6-a7cf-44e0-8139-0f580d95c3cc",
+                                                "sense_id": "d4a00517-0635-4db2-a0e1-1bc9c749ccbe",
+                                                "text": "Although these decisions imply acceptance of gay and lesbian parenting, most of the second-parent adoption cases have been brought following \"test-case\" criteria that maximize the likelihood of judicial acceptance. The couples usually have had long-term monogamous relationships; they are economically stable; there is often direct economic benefit to the child of granting the adoption […] Also, in these cases there is no heterosexual parent or family member challenging custody, so the child will be raised in a lesbian or gay home regardless of the judge's decision."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "0df02b12-2024-46b5-8a99-49978d00b203",
+                                        "entry_id": "7bfa3dd8-a925-4a21-9aec-1e1330f7dcb4",
+                                        "glosses": [
+                                            "Any of a set of conditions and variables used to test an application."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": [
+                    {
+                        "linkage_id": "ffe2372d-2bd4-45be-8269-1b3c0e37a916",
+                        "source_entry_id": "b536011f-2572-4845-94b0-041660e42d28",
+                        "source_sense_ids": [
+                            "89a1cfa6-30c4-4924-b5ca-1392ccd2d2ea"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "testgeval"
+                    },
+                    {
+                        "linkage_id": "f2f9b538-f7ac-4174-8b09-cc0cad22a1a4",
+                        "source_entry_id": "b536011f-2572-4845-94b0-041660e42d28",
+                        "source_sense_ids": [
+                            "89a1cfa6-30c4-4924-b5ca-1392ccd2d2ea"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "proefgeval"
+                    },
+                    {
+                        "linkage_id": "2d59d7f5-51f2-4852-9d36-a9cdd6d05ceb",
+                        "source_entry_id": "b536011f-2572-4845-94b0-041660e42d28",
+                        "source_sense_ids": [
+                            "89a1cfa6-30c4-4924-b5ca-1392ccd2d2ea"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "proefzaak"
+                    },
+                    {
+                        "linkage_id": "4cad135f-ca6d-4759-8843-45bc464003bc",
+                        "source_entry_id": "b536011f-2572-4845-94b0-041660e42d28",
+                        "source_sense_ids": [
+                            "89a1cfa6-30c4-4924-b5ca-1392ccd2d2ea"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "proefproces"
+                    }
+                ]
+            }
+        ],
+        "pl-extract.jsonl": []
+    }
+}

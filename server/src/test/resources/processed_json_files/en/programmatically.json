@@ -1,0 +1,200 @@
+{
+    "entries": [
+        {
+            "pos": "adverb",
+            "senses": [
+                {
+                    "sense_id": "d3674bcb-9937-4678-bce7-612fee308dc9",
+                    "sense_definition": "In a planned or systematic way, often following a set of instructions or a program.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Planned/Systematic",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The robot moved <w>programmatically</w> along the assembly line to assemble the car parts.",
+                            "target_lang_translations": {
+                                "ru": "Робот <w>программно</w> двигался по сборочной линии, собирая детали автомобиля."
+                            }
+                        },
+                        {
+                            "text": "The company decided to expand <w>programmatically</w> into new markets, following a detailed business plan.",
+                            "target_lang_translations": {
+                                "ru": "Компания решила <w>планомерно</w> выходить на новые рынки, следуя детальному бизнес-плану."
+                            }
+                        },
+                        {
+                            "text": "The lights in the building are <w>programmatically</w> controlled to save energy during off-peak hours.",
+                            "target_lang_translations": {
+                                "ru": "Освещение в здании управляется <w>программно</w> для экономии энергии в непиковые часы."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "systematically",
+                        "methodically",
+                        "by design"
+                    ],
+                    "antonyms": [
+                        "randomly",
+                        "haphazardly",
+                        "spontaneously"
+                    ],
+                    "common_phrases": [
+                        "programmatically controlled",
+                        "programmatically managed",
+                        "programmatically executed"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Планомерно, систематически, в соответствии с заранее определенной программой или планом."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "планомерно",
+                                "target_lang_sense_clarification": "Подчеркивает наличие плана и последовательность действий."
+                            },
+                            {
+                                "target_lang_word": "программно",
+                                "target_lang_sense_clarification": "Относится к следованию определенной программе или плану действий, часто автоматизированному."
+                            },
+                            {
+                                "target_lang_word": "систематически",
+                                "target_lang_sense_clarification": "Указывает на методичность и упорядоченность процесса."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "312166e4-b9c6-449f-8179-2fe76ca32e0d",
+                    "sense_definition": "Using computer code or a software program, rather than manual input or a user interface.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "Computing/Technical",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "To force a window to repaint itself <w>programmatically</w>, you call the inherited Invalidate() method.",
+                            "target_lang_translations": {
+                                "ru": "Чтобы заставить окно перерисоваться <w>программно</w>, вы вызываете унаследованный метод Invalidate()."
+                            }
+                        },
+                        {
+                            "text": "Mark-up coding was <w>programmatically</w> added to identify certain data types from others, for example, headwords and citations.",
+                            "target_lang_translations": {
+                                "ru": "Разметка была добавлена <w>программно</w> для различения одних типов данных от других, например, заглавных слов и цитат."
+                            }
+                        },
+                        {
+                            "text": "Developers can <w>programmatically</w> access the database to retrieve information without user interaction.",
+                            "target_lang_translations": {
+                                "ru": "Разработчики могут <w>программно</w> получать доступ к базе данных для извлечения информации без взаимодействия с пользователем."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "via code",
+                        "by script",
+                        "through software"
+                    ],
+                    "antonyms": [
+                        "manually",
+                        "interactively",
+                        "by hand"
+                    ],
+                    "common_phrases": [
+                        "programmatically access",
+                        "programmatically generate",
+                        "programmatically create",
+                        "programmatically update"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "Used in the context of computing or software development."
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "С помощью компьютерного кода или программного обеспечения, без ручного вмешательства или использования пользовательского интерфейса."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программно",
+                                "target_lang_sense_clarification": "Основной термин в IT, означающий выполнение действия с помощью кода."
+                            },
+                            {
+                                "target_lang_word": "программным путем",
+                                "target_lang_sense_clarification": "Более формальный вариант, подчеркивающий использование программного метода."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "d8236acc-bd83-4ed6-ae86-f6d1444d4198",
+                    "sense_definition": "In a way that reflects a specific political or ideological agenda.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "Political/Ideological",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The party's new policy was <w>programmatically</w> aligned with its core values of social justice.",
+                            "target_lang_translations": {
+                                "ru": "Новая политика партии была <w>программно</w> согласована с ее основными ценностями социальной справедливости."
+                            }
+                        },
+                        {
+                            "text": "The speech was <w>programmatically</w> anti-establishment, criticizing the current government's policies.",
+                            "target_lang_translations": {
+                                "ru": "Речь была <w>программно</w> антиистеблишментской и критиковала политику текущего правительства."
+                            }
+                        },
+                        {
+                            "text": "The group was <w>programmatically</w> opposed to any changes in the constitution that would reduce civil liberties.",
+                            "target_lang_translations": {
+                                "ru": "Группа была <w>программно</w> против любых изменений в конституции, которые бы урезали гражданские свободы."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "ideologically",
+                        "politically",
+                        "doctrinally"
+                    ],
+                    "antonyms": [
+                        "apolitically",
+                        "non-ideologically",
+                        "impartially"
+                    ],
+                    "common_phrases": [
+                        "programmatically opposed",
+                        "programmatically aligned",
+                        "programmatically driven"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "Used in political or academic contexts."
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "В соответствии с определенной политической или идеологической программой, платформой или доктриной."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "программно",
+                                "target_lang_sense_clarification": "Указывает на соответствие политической программе или платформе партии."
+                            },
+                            {
+                                "target_lang_word": "идеологически",
+                                "target_lang_sense_clarification": "Подчеркивает соответствие определенной идеологии или системе взглядов."
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

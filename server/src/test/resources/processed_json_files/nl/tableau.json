@@ -1,0 +1,777 @@
+{
+  "entries": [
+    {
+      "pos": "noun",
+      "senses": [
+        {
+          "sense_id": "881467ff-5108-4539-b7e3-75b73a82e466",
+          "sense_definition": "Een voorstelling of weergave van een situatie, vaak visueel, die een geheel vormt.",
+          "learner_level": "B1",
+          "frequency": "High",
+          "semantic_group_id": "VisueleVoorstelling",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Het <w>tableau</w> van de zonsondergang over de bergen was adembenemend.",
+              "target_lang_translations": {
+                "ru": "<w>Картина</w> заката над горами была захватывающей.",
+                "en": "The <w>scene</w> of the sunset over the mountains was breathtaking."
+              }
+            },
+            {
+              "text": "Het hele <w>tableau</w> van de situatie werd duidelijk toen alle feiten op tafel kwamen.",
+              "target_lang_translations": {
+                "ru": "Вся <w>картина</w> ситуации прояснилась, когда все факты были выложены на стол.",
+                "en": "The whole <w>picture</w> of the situation became clear when all the facts came to light."
+              }
+            }
+          ],
+          "synonyms": [
+            "tafereel",
+            "schouwspel",
+            "plaatje",
+            "scene"
+          ],
+          "common_phrases": [
+            "een indrukwekkend tableau",
+            "het hele tableau"
+          ],
+          "target_lang_definitions": {
+            "ru": "Изображение или представление ситуации, часто визуальное, образующее единое целое.",
+            "en": "A representation or overall picture of a situation, often visual, that forms a complete whole."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "картина",
+                "target_lang_sense_clarification": "Используется для описания впечатляющей или полной визуальной сцены, как реальной, так и воображаемой."
+              },
+              {
+                "target_lang_word": "сцена",
+                "target_lang_sense_clarification": "Описывает конкретный момент или ситуацию, часто с драматическим или живописным оттенком."
+              },
+              {
+                "target_lang_word": "зрелище",
+                "target_lang_sense_clarification": "Подчёркивает впечатляющий, захватывающий характер наблюдаемой сцены."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "scene",
+                "target_lang_sense_clarification": "Used for a visual or situational setting, like a view or a moment in a story."
+              },
+              {
+                "target_lang_word": "picture",
+                "target_lang_sense_clarification": "Refers to the overall situation or state of affairs, often used figuratively (e.g., 'the big picture')."
+              },
+              {
+                "target_lang_word": "tableau",
+                "target_lang_sense_clarification": "A direct loanword, often used for a picturesque or dramatic grouping or scene."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "0281a9f7-7f92-44c0-a97f-a46cd8307b7c",
+          "sense_definition": "Een vlak voorwerp, zoals een dienblad of een bord, waarop dingen worden uitgestald of gepresenteerd.",
+          "learner_level": "B1",
+          "frequency": "Middle",
+          "semantic_group_id": "Voorwerp",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "De ober bracht een <w>tableau</w> met drankjes naar onze tafel.",
+              "target_lang_translations": {
+                "ru": "Официант принёс к нашему столу <w>поднос</w> с напитками.",
+                "en": "The waiter brought a <w>tray</w> of drinks to our table."
+              }
+            },
+            {
+              "text": "Op het <w>tableau</w> lagen verschillende soorten kaas en brood.",
+              "target_lang_translations": {
+                "ru": "На <w>блюде</w> лежали разные сорта сыра и хлеб.",
+                "en": "On the <w>platter</w> were different types of cheese and bread."
+              }
+            }
+          ],
+          "synonyms": [
+            "plateau"
+          ],
+          "common_phrases": [
+            "een tableau met hapjes",
+            "een tableau vol fruit"
+          ],
+          "target_lang_definitions": {
+            "ru": "Плоский предмет, такой как поднос или доска, на котором выставляют или подают что-либо.",
+            "en": "A flat object, like a serving tray or board, on which items are displayed or presented."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "поднос",
+                "target_lang_sense_clarification": "Плоский предмет с бортиками для переноски или подачи посуды, еды."
+              },
+              {
+                "target_lang_word": "блюдо",
+                "target_lang_sense_clarification": "Большая тарелка или плоская посуда для подачи еды, особенно закусок или нарезок."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "tray",
+                "target_lang_sense_clarification": "The most common term for a flat receptacle with a raised rim, used for carrying or displaying things."
+              },
+              {
+                "target_lang_word": "platter",
+                "target_lang_sense_clarification": "A large flat dish or plate, typically used for serving food."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "89d457a8-ef5a-4f74-8550-75b158e27207",
+          "sense_definition": "Een overzichtelijke presentatie of opsomming van feiten, gegevens of een situatie.",
+          "learner_level": "B2",
+          "frequency": "High",
+          "semantic_group_id": "Overzicht",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "De onderzoeker presenteerde een gedetailleerd <w>tableau</w> van de economische ontwikkelingen.",
+              "target_lang_translations": {
+                "ru": "Исследователь представил подробную <w>картину</w> экономического развития.",
+                "en": "The researcher presented a detailed <w>overview</w> of the economic developments."
+              }
+            },
+            {
+              "text": "Het <w>tableau</w> van daders en slachtoffers was complex.",
+              "target_lang_translations": {
+                "ru": "<w>Картина</w> с преступниками и жертвами была сложной.",
+                "en": "The <w>breakdown</w> of perpetrators and victims was complex."
+              }
+            }
+          ],
+          "synonyms": [
+            "overzicht",
+            "tabel"
+          ],
+          "common_phrases": [
+            "een compleet tableau",
+            "het tableau van de feiten"
+          ],
+          "target_lang_definitions": {
+            "ru": "Наглядное представление или перечисление фактов, данных или описание ситуации.",
+            "en": "A clear, structured presentation or summary of facts, data, or a situation."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "картина",
+                "target_lang_sense_clarification": "Используется в переносном смысле для обозначения общей, целостной ситуации или обзора."
+              },
+              {
+                "target_lang_word": "сводка",
+                "target_lang_sense_clarification": "Краткое изложение данных или фактов, собранных вместе."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "overview",
+                "target_lang_sense_clarification": "A general review or summary of a subject or situation."
+              },
+              {
+                "target_lang_word": "breakdown",
+                "target_lang_sense_clarification": "A detailed analysis or itemized list of something."
+              },
+              {
+                "target_lang_word": "table",
+                "target_lang_sense_clarification": "A set of facts or figures systematically displayed, especially in columns."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "09e28ceb-76a0-41ba-8f61-f04b8c131ba1",
+          "sense_definition": "Een geschilderd of afgebeeld tafereel, vaak met een specifieke betekenis of compositie.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "VisueleVoorstelling",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Het museum toonde een prachtig <w>tableau</w> uit de 17e eeuw.",
+              "target_lang_translations": {
+                "ru": "В музее было выставлено прекрасное <w>полотно</w> XVII века.",
+                "en": "The museum displayed a beautiful <w>painting</w> from the 17th century."
+              }
+            },
+            {
+              "text": "Het <w>tableau</w> van de kruisiging was zeer indrukwekkend.",
+              "target_lang_translations": {
+                "ru": "<w>Картина</w> распятия была очень впечатляющей.",
+                "en": "The <w>tableau</w> of the crucifixion was very impressive."
+              }
+            }
+          ],
+          "synonyms": [
+            "schilderij",
+            "tafereel"
+          ],
+          "common_phrases": [
+            "een historisch tableau",
+            "een religieus tableau"
+          ],
+          "target_lang_definitions": {
+            "ru": "Написанная или изображённая сцена, часто с особым значением или композицией.",
+            "en": "A painted or depicted scene, especially a work of art with a specific composition."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "полотно",
+                "target_lang_sense_clarification": "Обычно о большом, значительном живописном произведении."
+              },
+              {
+                "target_lang_word": "картина",
+                "target_lang_sense_clarification": "Общее название для любого живописного произведения."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "painting",
+                "target_lang_sense_clarification": "A painted picture as a work of art."
+              },
+              {
+                "target_lang_word": "tableau",
+                "target_lang_sense_clarification": "A loanword used in art contexts for a picture, painting, or other scene on a flat surface."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "9c95c275-b0c2-497f-a820-21f599521144",
+          "sense_definition": "Een levende voorstelling waarbij mensen een scène uitbeelden door stil te staan, vaak uit de geschiedenis of een verhaal.",
+          "learner_level": "B2",
+          "frequency": "Middle",
+          "semantic_group_id": "VisueleVoorstelling",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Tijdens het festival werd een <w>tableau</w> vivant van een beroemd schilderij opgevoerd.",
+              "target_lang_translations": {
+                "ru": "Во время фестиваля была представлена <w>живая картина</w> по мотивам известного полотна.",
+                "en": "During the festival, a <w>tableau vivant</w> of a famous painting was performed."
+              }
+            },
+            {
+              "text": "De kinderen vormden een prachtig <w>tableau</w> van de kerststal.",
+              "target_lang_translations": {
+                "ru": "Дети составили прекрасную <w>живую картину</w> рождественского вертепа.",
+                "en": "The children formed a beautiful <w>tableau</w> of the nativity scene."
+              }
+            }
+          ],
+          "synonyms": [
+            "tafereel",
+            "scene"
+          ],
+          "common_phrases": [
+            "een levend tableau",
+            "een tableau vivant"
+          ],
+          "target_lang_definitions": {
+            "ru": "Представление, в котором люди, застыв в неподвижности, изображают какую-либо сцену, часто из истории или литературного произведения.",
+            "en": "A silent and motionless group of people arranged to represent a scene from a story or history."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "живая картина",
+                "target_lang_sense_clarification": "Группа людей, изображающая сцену в неподвижных позах; прямой перевод 'tableau vivant'."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "tableau vivant",
+                "target_lang_sense_clarification": "The precise term, a French loan phrase meaning 'living picture'."
+              },
+              {
+                "target_lang_word": "living picture",
+                "target_lang_sense_clarification": "The direct English translation of 'tableau vivant'."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "d9754b06-c136-4808-b3ef-af83e8e8e0e9",
+          "sense_definition": "Een afzonderlijk deel van een theatervoorstelling, vaak een statische scène of een moment van stilstand.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "VisueleVoorstelling",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Het derde <w>tableau</w> van het toneelstuk was bijzonder ontroerend.",
+              "target_lang_translations": {
+                "ru": "Третья <w>картина</w> спектакля была особенно трогательной.",
+                "en": "The third <w>tableau</w> of the play was particularly moving."
+              }
+            },
+            {
+              "text": "Na het laatste <w>tableau</w> viel het doek en klapte het publiek.",
+              "target_lang_translations": {
+                "ru": "После последней <w>сцены</w> занавес опустился, и публика зааплодировала.",
+                "en": "After the final <w>scene</w>, the curtain fell and the audience applauded."
+              }
+            }
+          ],
+          "synonyms": [
+            "scene",
+            "tafereel"
+          ],
+          "common_phrases": [
+            "het laatste tableau",
+            "een dramatisch tableau"
+          ],
+          "target_lang_definitions": {
+            "ru": "Отдельная часть театрального представления, часто статичная сцена или момент затишья.",
+            "en": "A distinct part of a theatrical performance, often a static or striking scene."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "картина",
+                "target_lang_sense_clarification": "В театре — часть акта, действия, не требующая смены декораций."
+              },
+              {
+                "target_lang_word": "сцена",
+                "target_lang_sense_clarification": "Общее название для части действия в пьесе."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "tableau",
+                "target_lang_sense_clarification": "A specific theatrical term for a static scene on stage, like a frozen picture."
+              },
+              {
+                "target_lang_word": "scene",
+                "target_lang_sense_clarification": "A sequence of continuous action in a play, movie, or opera."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "f370b200-b37e-4e9d-ad77-59b90dab7e13",
+          "sense_definition": "Een gedenkplaat of bord waarop namen, feiten of een overzicht zijn vastgelegd, vaak ter ere van iets of iemand.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Overzicht",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Ter nagedachtenis aan de gevallen soldaten werd een <w>tableau</w> onthuld.",
+              "target_lang_translations": {
+                "ru": "В память о павших солдатах была открыта <w>мемориальная доска</w>.",
+                "en": "In memory of the fallen soldiers, a <w>plaque</w> was unveiled."
+              }
+            },
+            {
+              "text": "Het <w>tableau</w> in de kerk vermeldde de namen van alle pastoors sinds 1800.",
+              "target_lang_translations": {
+                "ru": "На <w>памятной доске</w> в церкви были перечислены имена всех пасторов с 1800 года.",
+                "en": "The <w>panel</w> in the church listed the names of all the pastors since 1800."
+              }
+            }
+          ],
+          "synonyms": [
+            "plaquette",
+            "paneel"
+          ],
+          "common_phrases": [
+            "een tableau onthullen"
+          ],
+          "target_lang_definitions": {
+            "ru": "Мемориальная доска или плита, на которой увековечены имена, факты или список, часто в честь кого-либо или чего-либо.",
+            "en": "A commemorative plate or board on which names, facts, or an overview are recorded."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "мемориальная доска",
+                "target_lang_sense_clarification": "Плита с надписью, установленная в память о ком-либо или о каком-либо событии."
+              },
+              {
+                "target_lang_word": "памятная доска",
+                "target_lang_sense_clarification": "Синоним 'мемориальной доски', используется в том же значении."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "plaque",
+                "target_lang_sense_clarification": "An ornamental tablet fixed to a surface in commemoration of a person or event."
+              },
+              {
+                "target_lang_word": "panel",
+                "target_lang_sense_clarification": "A flat board on which names or information are written or displayed."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "151f37b1-556c-464b-a682-298bcc7b7b31",
+          "sense_definition": "De officiële lijst van advocaten die bij een bepaalde rechtbank zijn ingeschreven en bevoegd zijn om het beroep uit te oefenen.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Lijst",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Hij werd van het <w>tableau</w> geschrapt na een klacht over onprofessioneel gedrag.",
+              "target_lang_translations": {
+                "ru": "Его исключили из <w>реестра адвокатов</w> после жалобы на непрофессиональное поведение.",
+                "en": "He was struck off the <w>roll</w> following a complaint of unprofessional conduct."
+              }
+            },
+            {
+              "text": "Alle nieuwe advocaten moeten zich inschrijven op het <w>tableau</w> voordat ze kunnen beginnen.",
+              "target_lang_translations": {
+                "ru": "Все новые адвокаты должны быть внесены в <w>реестр</w>, прежде чем они смогут начать практику.",
+                "en": "All new lawyers must register on the <w>roll</w> before they can begin."
+              }
+            }
+          ],
+          "synonyms": [
+            "toog",
+            "rol"
+          ],
+          "common_phrases": [
+            "van het tableau geschrapt worden",
+            "op het tableau staan"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "juridische terminologie"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Официальный список адвокатов, зарегистрированных при определённом суде и имеющих право заниматься практикой.",
+            "en": "The official register of lawyers admitted to practice law in a particular jurisdiction."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "реестр адвокатов",
+                "target_lang_sense_clarification": "Официальный список лиц, имеющих право заниматься адвокатской деятельностью."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "roll",
+                "target_lang_sense_clarification": "The official list or register of lawyers admitted to practice."
+              },
+              {
+                "target_lang_word": "bar",
+                "target_lang_sense_clarification": "The collective body of lawyers in a jurisdiction (e.g., 'admitted to the bar')."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "ba4c3f2e-c23e-447c-b828-fd457f0230cc",
+          "sense_definition": "De lijst van artiesten die deel uitmaken van een gezelschap, theater of productie.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Lijst",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Het <w>tableau</w> van het balletgezelschap bestaat uit dansers van over de hele wereld.",
+              "target_lang_translations": {
+                "ru": "<w>Состав</w> балетной труппы включает танцоров со всего мира.",
+                "en": "The ballet company's <w>roster</w> consists of dancers from all over the world."
+              }
+            },
+            {
+              "text": "Nieuwe talenten worden toegevoegd aan het <w>tableau</w> van het theater.",
+              "target_lang_translations": {
+                "ru": "Новые таланты добавляются в <w>труппу</w> театра.",
+                "en": "New talents are added to the theater's <w>company</w>."
+              }
+            }
+          ],
+          "common_phrases": [
+            "het tableau van het gezelschap"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "theater/artistieke terminologie"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Список артистов, входящих в состав труппы, театра или постановки.",
+            "en": "The list of artists who are part of a company, theater, or production."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "труппа",
+                "target_lang_sense_clarification": "Коллектив артистов театра или цирка."
+              },
+              {
+                "target_lang_word": "состав",
+                "target_lang_sense_clarification": "Список участников коллектива, команды, постановки."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "roster",
+                "target_lang_sense_clarification": "A list of the members of a team, company, or other organization."
+              },
+              {
+                "target_lang_word": "company",
+                "target_lang_sense_clarification": "The group of performers as a whole."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "bcb01081-171b-408a-9cf4-be9eb88b72dc",
+          "sense_definition": "Een overzicht van behaalde successen, overwinningen of prestaties.",
+          "learner_level": "C1",
+          "frequency": "Low",
+          "semantic_group_id": "Lijst",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "De piloot had een indrukwekkend <w>tableau</w> van overwinningen op zijn naam staan.",
+              "target_lang_translations": {
+                "ru": "У пилота был впечатляющий <w>послужной список</w> побед.",
+                "en": "The pilot had an impressive <w>record</w> of victories to his name."
+              }
+            },
+            {
+              "text": "Haar <w>tableau</w> van academische prestaties was ongeëvenaard.",
+              "target_lang_translations": {
+                "ru": "Её <w>список достижений</w> в учёбе был непревзойдённым.",
+                "en": "Her <w>list of achievements</w> in academia was unparalleled."
+              }
+            }
+          ],
+          "synonyms": [
+            "erelijst",
+            "palmares"
+          ],
+          "common_phrases": [
+            "een indrukwekkend tableau van overwinningen"
+          ],
+          "target_lang_definitions": {
+            "ru": "Список достигнутых успехов, побед или достижений.",
+            "en": "A list or record of successes, victories, or achievements."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "послужной список",
+                "target_lang_sense_clarification": "Перечень успехов, достижений в какой-либо деятельности; 'track record'."
+              },
+              {
+                "target_lang_word": "список достижений",
+                "target_lang_sense_clarification": "Буквальный перевод; перечень успехов и достижений."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "record",
+                "target_lang_sense_clarification": "A person's or organization's past achievements or performance."
+              },
+              {
+                "target_lang_word": "list of achievements",
+                "target_lang_sense_clarification": "A direct and clear description of a record of accomplishments."
+              },
+              {
+                "target_lang_word": "roll of honor",
+                "target_lang_sense_clarification": "A formal list of people whose achievements are honored."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "6b1061fa-f505-40f8-9ee0-76682b1d92e0",
+          "sense_definition": "De uitstalling van geschoten wild na een jachtpartij.",
+          "learner_level": "C1",
+          "frequency": "VeryLow",
+          "semantic_group_id": "VisueleVoorstelling",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Na de jacht werd het <w>tableau</w> gemaakt, een traditie onder jagers.",
+              "target_lang_translations": {
+                "ru": "После охоты была сделана <w>выкладка добычи</w> — традиция среди охотников.",
+                "en": "After the hunt, the <w>tableau</w> was laid out, a tradition among hunters."
+              }
+            },
+            {
+              "text": "Het <w>tableau</w> van de dag bestond uit drie herten en een aantal fazanten.",
+              "target_lang_translations": {
+                "ru": "<w>Выкладка добычи</w> за день состояла из трёх оленей и нескольких фазанов.",
+                "en": "The day's <w>bag</w> consisted of three deer and a number of pheasants."
+              }
+            }
+          ],
+          "common_phrases": [
+            "tableau maken"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "jachtterminologie"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Выкладка добытой на охоте дичи.",
+            "en": "A ceremonial display of the game killed during a hunt."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "выкладка добычи",
+                "target_lang_sense_clarification": "Процесс или результат раскладывания убитой дичи для демонстрации после охоты."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "tableau",
+                "target_lang_sense_clarification": "The specific, formal term used in hunting for the ceremonial display of game after a hunt."
+              },
+              {
+                "target_lang_word": "bag",
+                "target_lang_sense_clarification": "An informal term for the quantity of game killed on a particular occasion."
+              }
+            ]
+          }
+        },
+        {
+          "sense_id": "aaee2356-df09-48a3-b67f-4218290ac119",
+          "sense_definition": "In de taalkunde: een schematische weergave, vaak in de Optimaliteitstheorie, die de voorkeur van bepaalde taalkundige vormen boven andere illustreert.",
+          "learner_level": "C2",
+          "frequency": "VeryLow",
+          "semantic_group_id": "Taalkunde",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "Het <w>tableau</w> in de Optimaliteitstheorie helpt bij het analyseren van fonologische processen.",
+              "target_lang_translations": {
+                "ru": "<w>Таблица</w> в теории оптимальности помогает анализировать фонологические процессы.",
+                "en": "The <w>tableau</w> in Optimality Theory helps in analyzing phonological processes."
+              }
+            },
+            {
+              "text": "De studenten moesten een <w>tableau</w> opstellen om de grammaticale regels te illustreren.",
+              "target_lang_translations": {
+                "ru": "Студенты должны были составить <w>таблицу</w>, чтобы проиллюстрировать грамматические правила.",
+                "en": "The students had to create a <w>tableau</w> to illustrate the grammatical rules."
+              }
+            }
+          ],
+          "synonyms": [
+            "tabel"
+          ],
+          "common_phrases": [
+            "een OT-tableau"
+          ],
+          "traits": [
+            {
+              "trait_type": "form",
+              "comment": "taalkundige terminologie"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "В лингвистике: схематическое представление, часто в теории оптимальности, которое иллюстрирует предпочтение одних языковых форм другим.",
+            "en": "In linguistics, a grid-like diagram used in Optimality Theory to evaluate candidate outputs against a set of constraints."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "таблица",
+                "target_lang_sense_clarification": "В лингвистике, особенно в теории оптимальности, используется для схематического анализа и сравнения вариантов."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "tableau",
+                "target_lang_sense_clarification": "The specific technical term used in Optimality Theory (OT) for the evaluation grid."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "pos": "interjection",
+      "senses": [
+        {
+          "sense_id": "a6de79b3-6d7b-4f07-8c06-65a0437b97b0",
+          "sense_definition": "Een uitroep om de verrassende, opvallende of dramatische aard van een plotselinge situatie te benadrukken, alsof het een schilderij is.",
+          "learner_level": "B2",
+          "frequency": "Low",
+          "semantic_group_id": "",
+          "name_type": "no",
+          "examples": [
+            {
+              "text": "De bal ging recht door het raam. <w>Tableau</w>!",
+              "target_lang_translations": {
+                "ru": "Мяч пролетел прямо в окно. <w>Картина</w>!",
+                "en": "The ball went right through the window. <w>What a scene</w>!"
+              }
+            },
+            {
+              "text": "Ze kwamen onverwacht binnen en zagen de hele familie in pyjama. Wat een <w>tableau</w>!",
+              "target_lang_translations": {
+                "ru": "Они неожиданно вошли и увидели всю семью в пижамах. Ну и <w>картина</w>!",
+                "en": "They walked in unexpectedly and saw the whole family in pajamas. What a <w>tableau</w>!"
+              }
+            }
+          ],
+          "common_phrases": [
+            "En tableau!",
+            "Wat een tableau!"
+          ],
+          "traits": [
+            {
+              "trait_type": "colloquial",
+              "comment": "informeel gebruik"
+            }
+          ],
+          "target_lang_definitions": {
+            "ru": "Восклицание, подчёркивающее внезапный, поразительный или драматичный характер ситуации, как будто это сцена из пьесы или картина.",
+            "en": "An exclamation used to highlight a sudden, dramatic, or picturesque scene."
+          },
+          "translations": {
+            "ru": [
+              {
+                "target_lang_word": "Картина!",
+                "target_lang_sense_clarification": "Восклицание, используемое для описания неожиданной, комичной или нелепой сцены."
+              },
+              {
+                "target_lang_word": "Немая сцена!",
+                "target_lang_sense_clarification": "Из пьесы Гоголя 'Ревизор', используется для описания момента всеобщего ошеломления и молчания."
+              }
+            ],
+            "en": [
+              {
+                "target_lang_word": "What a scene!",
+                "target_lang_sense_clarification": "A common exclamation to express surprise or drama at a situation."
+              },
+              {
+                "target_lang_word": "Tableau!",
+                "target_lang_sense_clarification": "Can be used directly as a loanword, often in a theatrical or humorous way, to point out a dramatic scene."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

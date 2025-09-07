@@ -1,0 +1,2930 @@
+{
+    "word": "program",
+    "lang_code": "pl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                "word": "program",
+                "pos": "noun",
+                "lang_code": "pl",
+                "forms": [
+                    {
+                        "form_id": "605675d6-07aa-4145-b68c-2cd7c388ad23",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "diminutive"
+                        ],
+                        "form": "programik"
+                    },
+                    {
+                        "form_id": "c17266ae-6748-448b-a26e-84f40eda7444",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "adjective"
+                        ],
+                        "form": "programowy"
+                    },
+                    {
+                        "form_id": "94bb4d00-bcd1-485d-8e94-6f98049f2e16",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "nominative",
+                            "singular"
+                        ],
+                        "form": "program"
+                    },
+                    {
+                        "form_id": "63015631-c2d2-4fe3-ab61-b186fbda49d7",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "programy"
+                    },
+                    {
+                        "form_id": "1ce19355-c310-4091-87f4-84a0fc9939cc",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "programu"
+                    },
+                    {
+                        "form_id": "6dc8a9fe-86cf-41ff-83c4-f1373fabe81b",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "programów"
+                    },
+                    {
+                        "form_id": "f75e55b0-2e99-4fed-9b96-10063148b4a0",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "programowi"
+                    },
+                    {
+                        "form_id": "26c85f84-6649-4a93-9217-6a2b19d331b4",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "dative",
+                            "plural"
+                        ],
+                        "form": "programom"
+                    },
+                    {
+                        "form_id": "ab7cd565-e1bc-4fae-acbe-d711fd781424",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "accusative",
+                            "singular"
+                        ],
+                        "form": "program"
+                    },
+                    {
+                        "form_id": "e7fd5c5f-c391-4ae6-bea9-e6e9526fbeba",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "accusative",
+                            "plural"
+                        ],
+                        "form": "programy"
+                    },
+                    {
+                        "form_id": "aee1066a-211b-4a8f-ab64-3636af8f88cf",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "programem"
+                    },
+                    {
+                        "form_id": "3943707b-23cc-4b1f-b384-2d54b6001806",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "instrumental",
+                            "plural"
+                        ],
+                        "form": "programami"
+                    },
+                    {
+                        "form_id": "93c8ab67-5759-46d5-8b94-01b3b6726467",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "locative",
+                            "singular"
+                        ],
+                        "form": "programie"
+                    },
+                    {
+                        "form_id": "67e2d202-5291-4366-a0c8-c723200b26a7",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "locative",
+                            "plural"
+                        ],
+                        "form": "programach"
+                    },
+                    {
+                        "form_id": "9f408b1d-4f2d-473b-8ff2-a17e3562ab86",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "singular",
+                            "vocative"
+                        ],
+                        "form": "programie"
+                    },
+                    {
+                        "form_id": "f8091ccb-b571-4bd9-a62c-c8cd5c866fb3",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "tags": [
+                            "plural",
+                            "vocative"
+                        ],
+                        "form": "programy"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "4ea9ca5c-acf1-4074-8cfb-ee71ab617bf8",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (a set of structured activities; a plan of action)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "699e811b-0ec8-48d6-b81b-ff701eb21a70",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (list of goals of an organization)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "6f0da4e7-6973-4c5b-8d95-a1fda2dfe93f",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (a leaflet listing information about a play, game or other activity)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "248b747f-767e-4776-8cdb-63f139dcb4b6",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (a performance of a show or other broadcast on radio or television)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "466b2f40-f6a9-47b4-a621-62e0398d5de3",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (list of information relating to broadcasts)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "bb07f737-bbd5-430d-a20a-2250776295be",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (set of broadcasts)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "3787766d-3c53-4606-842b-71f515011f20",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (range of information a teacher teaches)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "cb9d53c1-e4a1-4cd8-ada8-d98fdf56ed4c",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (a computer program)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "751f41c5-62a4-4487-bf9b-5325d068b75b",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (set of actions determined by a computer program)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "f8e8eb23-a20f-47ad-ba74-4d0da0e7e844",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (extra-musical element, e.g. a literary text, a painting to which the composer of a musical piece refers, signaling it in its title, playing a fundamental role in the listener's interpretation of the piece)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "6e1d65ee-abc2-49b8-9362-88334f7341ad",
+                        "entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "glosses": [
+                            "program (series of elements of a play, performance, etc., following each other in a specific order)"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "aaa7bdf6-0fb8-4259-a79e-21190b95b18e",
+                        "source_entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "source_sense_ids": [
+                            "6f0da4e7-6973-4c5b-8d95-a1fda2dfe93f"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "repertuar"
+                    },
+                    {
+                        "linkage_id": "cb2d283f-8352-4328-8769-b8b914c700e8",
+                        "source_entry_id": "97ce12b8-c9e9-4960-a5b3-2343444919bb",
+                        "source_sense_ids": [
+                            "6f0da4e7-6973-4c5b-8d95-a1fda2dfe93f"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "broszura"
+                    }
+                ]
+            }
+        ],
+        "ru-extract.jsonl": [
+            {
+                "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                "word": "program",
+                "pos": "noun",
+                "lang_code": "pl",
+                "forms": [
+                    {
+                        "form_id": "471627fe-2647-4af7-9f47-656b0784a62f",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "nominative",
+                            "singular"
+                        ],
+                        "form": "program"
+                    },
+                    {
+                        "form_id": "498fbbd6-7700-4b4e-9b2e-ec382f5b29bf",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "programy"
+                    },
+                    {
+                        "form_id": "e72a2b89-ec27-4594-a18d-1661401941d2",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "programu"
+                    },
+                    {
+                        "form_id": "40a0650b-0a48-4186-a196-5d6a82f5bd4f",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "programów"
+                    },
+                    {
+                        "form_id": "b340a08f-3140-443d-9a40-4874829c09ef",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "programowi"
+                    },
+                    {
+                        "form_id": "2809fe51-4642-4753-97fa-8dd91a5bc80e",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "dative",
+                            "plural"
+                        ],
+                        "form": "programom"
+                    },
+                    {
+                        "form_id": "898208c6-7a4a-4016-833a-dde83a5459d9",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "accusative",
+                            "singular"
+                        ],
+                        "form": "program"
+                    },
+                    {
+                        "form_id": "5a8819cc-efb1-4025-b6fb-9936d9373e5f",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "accusative",
+                            "plural"
+                        ],
+                        "form": "programy"
+                    },
+                    {
+                        "form_id": "0d557d38-196a-4478-90f2-e157585bf8d0",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "programem"
+                    },
+                    {
+                        "form_id": "e54c5a9b-3fd6-43d6-a9ee-336d09f73c50",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "instrumental",
+                            "plural"
+                        ],
+                        "form": "programami"
+                    },
+                    {
+                        "form_id": "fc666c65-7494-448b-b83d-0ab5288e3d27",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "locative",
+                            "singular"
+                        ],
+                        "form": "programie"
+                    },
+                    {
+                        "form_id": "5f206d62-4163-4819-b4a5-c02554b1121e",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "locative",
+                            "plural"
+                        ],
+                        "form": "programach"
+                    },
+                    {
+                        "form_id": "f16b378a-d2d9-4896-9208-e2869b521ce9",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "vocative",
+                            "singular"
+                        ],
+                        "form": "programie"
+                    },
+                    {
+                        "form_id": "36a7b685-9e30-48b5-bc01-73f3f146cdb7",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "tags": [
+                            "vocative",
+                            "plural"
+                        ],
+                        "form": "programy"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "3ac187e3-f3a6-4511-90f1-8a4f37fda01e",
+                        "entry_id": "4a53340c-1e5c-49e1-a903-7e62250f274f",
+                        "glosses": [
+                            "программа, афиша"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "60c51c0e-994f-4c97-9119-52883a1883be",
+                                "sense_id": "3ac187e3-f3a6-4511-90f1-8a4f37fda01e",
+                                "text": "Artykuł opisuje system fonetyczny zaimplementowany w programie dodającym wymowę na Wikisłowniku."
+                            },
+                            {
+                                "example_id": "13bf300b-28e1-42e0-ab75-23fc8e69fd80",
+                                "sense_id": "3ac187e3-f3a6-4511-90f1-8a4f37fda01e",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "454841e9-cbd0-47ff-838e-09928649623a",
+                "word": "program",
+                "pos": "noun",
+                "lang_code": "pl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "8c3e8727-70f8-441a-8f6a-6eb1c3bd9e5d",
+                        "entry_id": "454841e9-cbd0-47ff-838e-09928649623a",
+                        "glosses": [
+                            "programma"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "2595bae0-cd03-4cf1-ac96-7e289130a24f",
+                        "source_entry_id": "454841e9-cbd0-47ff-838e-09928649623a",
+                        "source_sense_ids": [
+                            "8c3e8727-70f8-441a-8f6a-6eb1c3bd9e5d"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "program komputerowy"
+                    }
+                ]
+            }
+        ],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                "word": "program",
+                "pos": "noun",
+                "lang_code": "pl",
+                "forms": [
+                    {
+                        "form_id": "a472b7cb-83ea-4e70-aa81-bdeda9d13c43",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "programu"
+                    },
+                    {
+                        "form_id": "cdbf15bb-64ed-4dfc-a4ad-942993f2e3b4",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "programowi"
+                    },
+                    {
+                        "form_id": "88e08d54-84b9-44e9-a0b2-36cc30bab64c",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "programem"
+                    },
+                    {
+                        "form_id": "c3764c5d-d11e-4f63-a2d0-d6dfdfab5f06",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "locative",
+                            "singular"
+                        ],
+                        "form": "programie"
+                    },
+                    {
+                        "form_id": "ef452932-5918-4f6c-857c-5d3bdde4dc2d",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "vocative",
+                            "singular"
+                        ],
+                        "form": "programie"
+                    },
+                    {
+                        "form_id": "c27d3421-fa48-412f-b3c2-883e8b472d76",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "programy"
+                    },
+                    {
+                        "form_id": "dab9bd89-cf31-44a5-8150-57a0f025ca0c",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "programów"
+                    },
+                    {
+                        "form_id": "c23cc7b4-e8bc-43ba-bbde-a71263710906",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "dative",
+                            "plural"
+                        ],
+                        "form": "programom"
+                    },
+                    {
+                        "form_id": "d52d270c-46bd-4620-9d34-765226981657",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "accusative",
+                            "plural"
+                        ],
+                        "form": "programy"
+                    },
+                    {
+                        "form_id": "5704403f-bc7d-4a47-bf57-c12a2ec37770",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "instrumental",
+                            "plural"
+                        ],
+                        "form": "programami"
+                    },
+                    {
+                        "form_id": "b4a8de5c-a8f2-4bdf-86e3-86d9e91b48f5",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "locative",
+                            "plural"
+                        ],
+                        "form": "programach"
+                    },
+                    {
+                        "form_id": "663cdbd3-4f5d-4a50-bea9-b7825fed46ef",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "tags": [
+                            "vocative",
+                            "plural"
+                        ],
+                        "form": "programy"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "a8b7b734-6c37-4c1e-8815-8f382fbc29aa",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "glosses": [
+                            "plan działań"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "3a154cfe-3d37-4421-ba73-d7a0f5557e65",
+                                "sense_id": "a8b7b734-6c37-4c1e-8815-8f382fbc29aa",
+                                "text": "Pani Bożenko, jaki jest program zajęć na dzisiaj?"
+                            }
+                        ],
+                        "sense_index_json": "\"1.1\""
+                    },
+                    {
+                        "sense_id": "446a20e3-28c0-4ca1-9148-b6b28553d329",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "glosses": [
+                            "odrębna audycja nadawana przez telewizję lub radio"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "487ae7cd-4394-4784-b3d2-2d70ba3b75a2",
+                                "sense_id": "446a20e3-28c0-4ca1-9148-b6b28553d329",
+                                "text": "Bardzo mi się podobał ten program o słoniach."
+                            }
+                        ],
+                        "sense_index_json": "\"1.2\""
+                    },
+                    {
+                        "sense_id": "a7beeb5b-edc3-4d00-8e1c-bf2aec3746d6",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "glosses": [
+                            "stacja telewizyjna"
+                        ],
+                        "tags": [
+                            "colloquial"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "1111a0bb-4cee-4991-936f-5c9b7daac242",
+                                "sense_id": "a7beeb5b-edc3-4d00-8e1c-bf2aec3746d6",
+                                "text": "Na którym programie jest mecz?"
+                            }
+                        ],
+                        "sense_index_json": "\"1.3\""
+                    },
+                    {
+                        "sense_id": "4f50984d-16ea-4cfc-9114-a61cb769c27e",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "glosses": [
+                            "zestawienie programów (1.2) na pewien okres, zwykle w czasopiśmie"
+                        ],
+                        "tags": [
+                            "colloquial"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "ba93578f-8e0f-4227-92c7-fa4761411fb2",
+                                "sense_id": "4f50984d-16ea-4cfc-9114-a61cb769c27e",
+                                "text": "Zobacz w programie, o której zaczyna się transmisja."
+                            }
+                        ],
+                        "sense_index_json": "\"1.4\""
+                    },
+                    {
+                        "sense_id": "85610f31-d456-47be-a2ee-ee5a6598d177",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "glosses": [
+                            "broszurka z informacjami o sztuce teatralnej lub operowej, rozprowadzana pośród widzów"
+                        ],
+                        "tags": [
+                            "colloquial"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "74261b36-455d-445b-a0a1-28457cdf222c",
+                                "sense_id": "85610f31-d456-47be-a2ee-ee5a6598d177",
+                                "text": "W programie napisano, że tę sztukę wystawiono pierwszy raz w 1824 (= tysiąc osiemset dwudziestym czwartym) roku."
+                            }
+                        ],
+                        "sense_index_json": "\"1.5\""
+                    },
+                    {
+                        "sense_id": "44904835-24a4-454c-aae2-4de785d617c2",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "glosses": [
+                            "zestaw komend zrozumiałych dla komputera służących wykonywaniu jakichś zadań"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "848dbc19-efd2-4fd7-a577-7fa8afd7790b",
+                                "sense_id": "44904835-24a4-454c-aae2-4de785d617c2",
+                                "text": "Jedyne programy na dysku Bogdana to gry."
+                            }
+                        ],
+                        "sense_index_json": "\"1.6\""
+                    },
+                    {
+                        "sense_id": "76477862-ca8c-4a7a-8875-d24e346347ba",
+                        "entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "glosses": [
+                            "zakres wiedzy objętej nauczaniem szkolnym lub akademickim; wykaz przedmiotów objętych takim nauczaniem"
+                        ],
+                        "tags": [
+                            "also"
+                        ],
+                        "examples": [],
+                        "sense_index_json": "\"1.7\""
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "22683f12-a2e9-4373-a818-19b82d955a23",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "a8b7b734-6c37-4c1e-8815-8f382fbc29aa",
+                        "target_lang_word": "program",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "program",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A set of structured activities; a plan of action."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a3616653-1f1b-42c9-8586-ad4233487858",
+                                                "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                                "text": "get with the program"
+                                            },
+                                            {
+                                                "example_id": "ab02fc62-5cc2-4d63-ad5f-7d29e74aecae",
+                                                "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                                "text": "Our program for today’s exercise class includes swimming and jogging."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a104ee5d-c21a-4803-9fd1-5d550068a9d1",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A leaflet listing information about a play, game or other activity."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "03f4b537-b9fd-4985-9259-58dc673f0e28",
+                                                "sense_id": "a104ee5d-c21a-4803-9fd1-5d550068a9d1",
+                                                "text": "The program consisted of ads for restaurants and the credits of everyone connected with the play."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "fc0a76e8-2aff-4bde-bead-216b95dfb414",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A set of principal goals which are supported by a political party or individual candidate."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "e2d02330-c780-4bc1-b310-794763d40245",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A performance of a show or other broadcast on radio or television."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6b1f529d-6185-43c1-9810-12126ebfeac7",
+                                                "sense_id": "e2d02330-c780-4bc1-b310-794763d40245",
+                                                "text": "Tonight’s program was hosted by Johnny Carson."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "df676583-a500-45d0-895a-85fa127cdf29",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A computer program."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "fe2215a8-903e-495d-a283-4c3c044c8970",
+                                                "sense_id": "df676583-a500-45d0-895a-85fa127cdf29",
+                                                "text": "The program runs on both Linux and Microsoft Windows."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "9198ec53-5b46-406c-b0ec-1990fee842ba",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A particular mindset or method of doing things."
+                                        ],
+                                        "tags": [
+                                            "especially"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "1b26546b-8615-4795-a9d5-1f7d2a8aeaab",
+                                                "sense_id": "9198ec53-5b46-406c-b0ec-1990fee842ba",
+                                                "text": "Ellis: Come on, John, why don’t you get with the program and tell him where the detonators are?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "200cc959-2f34-4efa-b614-354d7fdb3ad2",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A custom tracklist."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "af38ea27-20a6-4702-ae75-466550cb7e47",
+                                                "sense_id": "200cc959-2f34-4efa-b614-354d7fdb3ad2",
+                                                "text": "program playback",
+                                                "english": "playing tracks in a custom order"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "program",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6f682e77-c536-48cb-bc52-3a6b348531d6",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To enter a program or other instructions into (a computer or other electronic device) to instruct it to do a particular task."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "7321b29a-2a2b-4bbb-83da-c3c021a92a9a",
+                                                "sense_id": "6f682e77-c536-48cb-bc52-3a6b348531d6",
+                                                "text": "He programmed the DVR to record his favorite show."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "e415f411-68fb-4bdf-9819-f2aaaf17902d",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To develop (software) by writing program code."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "d68f957b-9057-4c65-97d3-8d8be086fd98",
+                                                "sense_id": "e415f411-68fb-4bdf-9819-f2aaaf17902d",
+                                                "text": "I programmed a small game as a demonstration."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "66e0f765-fa8d-41c6-8ff7-81221e62e55d",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To put together the schedule of an event."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "d02b2ec5-b1c1-4a0d-87c1-d70f2f42c702",
+                                                "sense_id": "66e0f765-fa8d-41c6-8ff7-81221e62e55d",
+                                                "text": "Mary will program Tuesday’s festivities."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "23458449-5fc1-4d9e-b81c-8aafe25e76df",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To schedule the programming; to determine what will be broadcast."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "32d90260-d03a-4e00-a3be-cc223efce865",
+                                                "sense_id": "23458449-5fc1-4d9e-b81c-8aafe25e76df",
+                                                "text": "We program for special audience groups, too, as shown by our Mexican language program each Sunday morning."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To cause to automatically behave in a particular way."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "bd3ed3ca-8f00-4c4c-939e-16d1e9d81b06",
+                                                "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                                "text": "The lab rat was programmed to press the lever when the bell rang."
+                                            },
+                                            {
+                                                "example_id": "34fb04bf-6492-4cf9-bd79-ea89209ba254",
+                                                "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                                "text": "My point was not to commend but to expose her, and her way of thinking. In another place a teenage character worries that her stomach is too big. I, the author don't think her stomach is too big—the character does, because she's been programmed that way."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "75aacdb0-b6d5-4efc-80b8-35d6b5d1a6ed",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "a8b7b734-6c37-4c1e-8815-8f382fbc29aa",
+                        "target_lang_word": "programma",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "programma",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "bd056be0-4f09-4b50-b2d0-7bd28251d2fa",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "applicatie voor de computer"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1dc3425a-afc4-46ec-a653-3e77ef35e467",
+                                                "sense_id": "bd056be0-4f09-4b50-b2d0-7bd28251d2fa",
+                                                "text": "Hij schreef een nieuw programma in C++."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "49fee13c-d372-415a-a62c-789c0e90be18",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "aantal activiteiten voor een bepaalde tijd"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "89067acc-c9fb-4b8a-b26f-9097a0acdba5",
+                                                "sense_id": "49fee13c-d372-415a-a62c-789c0e90be18",
+                                                "text": "We hebben een heel programma om de kinderen bezig te houden."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "31741799-3f81-419f-bab4-ec826fa8d572",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "uitzending op radio of televisie"
+                                        ],
+                                        "tags": [
+                                            "media"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "7ee00ee4-339f-49fd-b202-528040fc4f83",
+                                                "sense_id": "31741799-3f81-419f-bab4-ec826fa8d572",
+                                                "text": "Het journaal is een veelbekeken programma."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "04f47f76-ae33-408b-b5e0-5e737fd0a5db",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "los blaadje met informatie over de uitvoering of het concert dat men bijwoont"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "cb4cbaf2-effe-4071-abdf-d49c7c6b0d22",
+                                                "sense_id": "04f47f76-ae33-408b-b5e0-5e737fd0a5db",
+                                                "text": "Wilt u een programma, meneer?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "6c0e5ae0-ba35-4396-aea8-78ea45e41481",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "onderling afgesproken doelstellingen en plannen"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6d16330a-6d2d-4379-8f2b-b55405c08c69",
+                                                "sense_id": "6c0e5ae0-ba35-4396-aea8-78ea45e41481",
+                                                "text": "Dit past niet binnen het programma van onze partij."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "6f417736-1926-4bbe-876f-610535200b70",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "a8b7b734-6c37-4c1e-8815-8f382fbc29aa",
+                        "target_lang_word": "программа",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "программа",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "план действия, деятельности, работы"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "debc7634-177b-408c-aed7-cb02015be640",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Читатель видит, что для нас именно те произведения и важны, в которых жизнь сказалась сама собою, а не по заранее придуманной автором программе."
+                                            },
+                                            {
+                                                "example_id": "31e19caf-c064-4ab1-9277-9ae739f80b90",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Очевидно, Арина Петровна намеревалась буквально выполнить свою программу: содержать постылого в такой мере, чтоб он только не умер с голоду."
+                                            },
+                                            {
+                                                "example_id": "9fd29211-9066-47af-965b-c753c7c6b411",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Лизинговая программа рассчитана на 24 месяца, авансовый платёж составляет четверть от стоимости автомобиля."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "изложение целей и задач организации, партии или отдельного государственного, общественного деятеля"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a4923bd9-d427-425a-8d52-6715055054c8",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "У этой партии нет чёткой и внятной программы."
+                                            },
+                                            {
+                                                "example_id": "d1d13e6a-8c53-4f1d-bdb2-25cf040e84dd",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "Политическая программа нового президента."
+                                            },
+                                            {
+                                                "example_id": "8cd2b78b-469a-46f2-ba80-0fbc0ca0e2f5",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "Большевистская аграрная программа звала крестьян на революцию против царя и помещиков."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "краткое изложение содержания и методологических установок курса, предмета, преподаваемого в учебном заведении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6c5de37a-c6df-4680-b122-748d12b9b9f0",
+                                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                                "text": "Программа (курса) по истории."
+                                            },
+                                            {
+                                                "example_id": "329737ad-d3e8-4887-b2a5-8e98b5f7d360",
+                                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                                "text": "Программа по машиностроению."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "совокупность дисциплин, преподаваемых в учебном заведении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "0f4e190e-679e-4916-88ba-dd98b99e9cc2",
+                                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                                "text": "Расширение (учебных) программ в школах."
+                                            },
+                                            {
+                                                "example_id": "013a4222-bb90-4015-b917-5cdf1113ecd0",
+                                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                                "text": "Воспитание в детстве было получить негде, а образование Училище живописи не давало, программа общеобразовательных предметов была слаба, да и смотрели на образование, как на пустяки, — были уверены, что художнику нужна только кисть, а образование — вещь второстепенная."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "расписание передач радио или телевидения, перечень отдельных номеров, исполняемых на вечере, концерте, цирковом представлении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ebf45c2b-c474-4914-8c02-1394b7aa3fae",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "Программа телепередач на завтра."
+                                            },
+                                            {
+                                                "example_id": "1e51736d-b430-4737-ba0f-126cbb339b9a",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "В программе пианист стоит вторым."
+                                            },
+                                            {
+                                                "example_id": "f4a2a80e-b641-47a5-ad77-fced1191f8c3",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "Бедняге вятичу или костромичу, взятому от сохи, никогда не приходилось видеть раньше кинематографа, и он решил посмотреть. Купил билет, сел. Просмотрел всю программу — пришёл в такой восторг, что остался снова её смотреть…"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "буклет, в котором отражена программа [5] (в театре — краткое описание спектакля, указатель с перечнем исполняемых пьес и действующих лиц в них)"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "278b2179-3019-4a04-86f6-6f25c4f29a78",
+                                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                                "text": "Перед звонком надо успеть взять программу и бинокль."
+                                            },
+                                            {
+                                                "example_id": "06ccc5d9-3974-47ee-955f-faecdf7b8d75",
+                                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                                "text": "Программы театров на март."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "канал радио- и телевещания"
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "3ff49478-d99b-4585-af57-031f80f9767b",
+                                                "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                                "text": "Переключить телевизор на первую программу."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "последовательность формализованных инструкций, предназначенная для исполнения устройством управления вычислительной машины, компьютера ."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1493bf3c-a40e-4896-8001-89489338556f",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Составлять программу."
+                                            },
+                                            {
+                                                "example_id": "ce4885f1-178f-4408-97d0-402a0ee5355a",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Отлаживать программу"
+                                            },
+                                            {
+                                                "example_id": "50bbcfcd-9e0f-4c74-bebc-342d83b2a5dc",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Компьютерная программа. Обучающие (компьютерные) программы. Прикладные программы. Офисные программы"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "f0cb205d-960d-4bc9-af10-e834df336d25",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "a7beeb5b-edc3-4d00-8e1c-bf2aec3746d6",
+                        "target_lang_word": "channel",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "channel",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "0f44c4d8-9653-4f69-b0cd-6794c616cc8a",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "The hollow bed of running waters; (also) the bed of the sea or other body of water."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "d0c1a175-637c-42db-bf3d-352f3dcaa63d",
+                                                "sense_id": "0f44c4d8-9653-4f69-b0cd-6794c616cc8a",
+                                                "text": "The water coming out of the waterwheel created a standing wave in the channel."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "b328524b-b8fb-4713-b8ed-11d290063678",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "The natural or man-made deeper course through a reef, bar, bay, or any shallow body of water."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "7c45fe5d-5a6f-41fe-aa4b-dabe1303f945",
+                                                "sense_id": "b328524b-b8fb-4713-b8ed-11d290063678",
+                                                "text": "European adventurers found themselves within a watery world, a tapestry of streams, channels, wetlands, lakes and lush riparian meadows enriched by floodwaters from the Mississippi River."
+                                            },
+                                            {
+                                                "example_id": "dee340aa-6c4c-4fe4-b651-4e2cb426cd0a",
+                                                "sense_id": "b328524b-b8fb-4713-b8ed-11d290063678",
+                                                "text": "A channel was dredged to allow ocean-going vessels to reach the city."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "9927b311-dd14-4f45-be06-99da1847f2cc",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "The navigable part of a river."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "c7ccda03-2139-4da7-82c7-f939bf829ca7",
+                                                "sense_id": "9927b311-dd14-4f45-be06-99da1847f2cc",
+                                                "text": "We were careful to keep our boat in the channel."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "ebd8ff3f-8d0f-4f46-9ee2-bb8f9fd91434",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A narrow body of water between two land masses."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "43575d5f-aad7-47c5-862c-864210982f7c",
+                                                "sense_id": "ebd8ff3f-8d0f-4f46-9ee2-bb8f9fd91434",
+                                                "text": "The English Channel lies between France and England."
+                                            },
+                                            {
+                                                "example_id": "8054f558-ed08-4e01-b916-6b75ab3bd78a",
+                                                "sense_id": "ebd8ff3f-8d0f-4f46-9ee2-bb8f9fd91434",
+                                                "text": "Our citizens and our businesses on both sides of the channel need more security and predictability for the future"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a777ae51-3eab-455b-b151-1759c75231a6",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "Something through which another thing passes; a means of conveying or transmitting."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6cdb3542-2a7d-49ed-af52-e49233898474",
+                                                "sense_id": "a777ae51-3eab-455b-b151-1759c75231a6",
+                                                "text": "The news was conveyed to us by different channels."
+                                            },
+                                            {
+                                                "example_id": "0c784815-d448-4839-bb88-78d6a510179d",
+                                                "sense_id": "a777ae51-3eab-455b-b151-1759c75231a6",
+                                                "text": "But I write to tell you what you will hear through all the various channels by which news travels,..."
+                                            },
+                                            {
+                                                "example_id": "cb9232ba-f431-4c05-8d7f-9063c4484459",
+                                                "sense_id": "a777ae51-3eab-455b-b151-1759c75231a6",
+                                                "text": "The veins are converging channels."
+                                            },
+                                            {
+                                                "example_id": "3495ecb6-5080-420d-b2fe-27110460ec95",
+                                                "sense_id": "a777ae51-3eab-455b-b151-1759c75231a6",
+                                                "text": "At best, he is but a channel to convey to the National Assembly such matter as may import that body to know."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "0f08903d-170e-43ef-93f0-b2cfdc643882",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "An ion channel: pore-forming proteins located in a cell membrane that allow specific ions to pass through."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "2052c91f-0da8-4bd3-8062-d9e3a027408b",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A gutter; a groove, as in a fluted column."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "cb6e31e7-7d5f-41a7-a6b2-54b2dd3725e5",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A structural member with a cross section shaped like a squared-off letter C."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "7c495be2-fd35-46a6-9aef-8ef53df5c842",
+                                                "sense_id": "cb6e31e7-7d5f-41a7-a6b2-54b2dd3725e5",
+                                                "text": "The channel is not very efficient as a beam or column when used alone, but built-up members may be constructed of channels assembled together with other structural shapes and connected by rivets or welds."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3a94a24a-ccaf-4734-bee6-aee45784e5f4",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A connection between initiating and terminating nodes of a circuit."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6a95d738-244a-4715-ad86-5761aa287112",
+                                                "sense_id": "3a94a24a-ccaf-4734-bee6-aee45784e5f4",
+                                                "text": "The guard-rail provided the channel between the downed wire and the tree."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c256bcdb-b5f5-4286-a94d-6f49085f0794",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "The narrow conducting portion of a MOSFET transistor."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "1ed03caa-0545-4206-86f3-4b66579b8798",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "The part that connects a data source to a data sink."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "569fbbaf-c096-43e3-a72e-aa8226423c5f",
+                                                "sense_id": "1ed03caa-0545-4206-86f3-4b66579b8798",
+                                                "text": "A channel stretches between them."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "5ac906aa-e323-4d2d-bdb3-61cef18f4316",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A path for conveying electrical or electromagnetic signals, usually distinguished from other parallel paths."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "043c83e6-3775-4cb2-998d-f3222cb885fd",
+                                                "sense_id": "5ac906aa-e323-4d2d-bdb3-61cef18f4316",
+                                                "text": "We are using one of the 24 channels."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "857f994e-ea71-43b4-9d04-e3984789ce06",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A single path provided by a transmission medium via physical separation, such as by multipair cable."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "b4881d92-5da1-4c40-a7e5-0793c894a9ec",
+                                                "sense_id": "857f994e-ea71-43b4-9d04-e3984789ce06",
+                                                "text": "The channel is created by bonding the signals from these four pairs."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c463646f-c3a8-454b-b237-6efa7bef5c13",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A single path provided by a transmission medium via spectral or protocol separation, such as by frequency or time-division multiplexing."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "59b1da62-d09d-4a6c-842c-d0812022a7c9",
+                                                "sense_id": "c463646f-c3a8-454b-b237-6efa7bef5c13",
+                                                "text": "Their call is being carried on channel 6 of the T-1 line."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "47f0dff6-b1e8-4d00-8227-9f9e22a1d817",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A specific radio frequency or band of frequencies, usually in conjunction with a predetermined letter, number, or codeword, and allocated by international agreement."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a92588ec-c243-4c94-9074-1f44c9ed1fe8",
+                                                "sense_id": "47f0dff6-b1e8-4d00-8227-9f9e22a1d817",
+                                                "text": "KNDD is the channel at 107.7 MHz in Seattle."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "12e26cd5-830d-4f39-9927-7794e0b44868",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A specific radio frequency or band of frequencies used for transmitting television."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "2bf3fd54-1dfe-4e5c-b1fc-4756d259cad5",
+                                                "sense_id": "12e26cd5-830d-4f39-9927-7794e0b44868",
+                                                "text": "NBC is on channel 11 in San Jose."
+                                            },
+                                            {
+                                                "example_id": "c1bf2133-bd3d-431b-b363-9100752f2445",
+                                                "sense_id": "12e26cd5-830d-4f39-9927-7794e0b44868",
+                                                "text": "2008, Lou Schuler, \"Foreward\", in Nate Green, Built for Show, page xi\nTV back then was five channels (three networks, PBS, and an independent station that ran I Love Lucy reruns), […]"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3b043b7a-b85e-42ff-8f60-35273d913e80",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "The portion of a storage medium, such as a track or a band, that is accessible to a given reading or writing station or head."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "945a54ce-5105-4676-8894-a32e0baa7211",
+                                                "sense_id": "3b043b7a-b85e-42ff-8f60-35273d913e80",
+                                                "text": "This chip in this disk drive is the channel device."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "864e483f-02f7-4a23-b5fb-2ecd9c469edf",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "The part of a turbine pump where the pressure is built up."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "fc284452-f1ee-4f40-8905-6886e14da0d3",
+                                                "sense_id": "864e483f-02f7-4a23-b5fb-2ecd9c469edf",
+                                                "text": "The liquid is pressurized in the lateral channel."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a1444f92-9c2c-405e-ac40-58b2233bac45",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A distribution channel."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "144c5e60-0ebb-481d-b08d-db1d6a8cb5e4",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A particular area for conversations on an IRC or similar network, analogous to a chat room and often dedicated to a specific topic."
+                                        ],
+                                        "tags": [
+                                            "Internet"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "2050be20-5d14-4b15-9531-5635819b79b4",
+                                                "sense_id": "144c5e60-0ebb-481d-b08d-db1d6a8cb5e4",
+                                                "text": "The excerpt in Figure 1 below shows a list of some channel names as they appear to an IRC user. The left hand column displays the channel name, the middle column displays how many people are currently on the channel, and the right hand column indicates the theme of the channel or the current topic of conversation: […]"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "e0de0bbd-27d7-48f1-9342-cddf9cb6403a",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A means of delivering up-to-date Internet content via a push mechanism."
+                                        ],
+                                        "tags": [
+                                            "Internet",
+                                            "historical"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "4d2942b9-61c4-4a59-a674-b33f7dc8992f",
+                                                "sense_id": "e0de0bbd-27d7-48f1-9342-cddf9cb6403a",
+                                                "text": "Netcaster is the \"receiver\" for channels that are built into Netscape 4.01 and later releases."
+                                            },
+                                            {
+                                                "example_id": "2fed2204-0789-4fa0-aa40-f1602715ca6f",
+                                                "sense_id": "e0de0bbd-27d7-48f1-9342-cddf9cb6403a",
+                                                "text": "To access channels in Windows 98, you don't have to go any farther than your desktop."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "ca54ea24-ded8-4ea2-912d-edb832761d04",
+                                        "entry_id": "8ff1de37-f20d-40a6-9ed0-8bc22cf816ca",
+                                        "glosses": [
+                                            "A psychic or medium who temporarily takes on the personality of somebody else."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "channel",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "0d239193-3fed-472e-9c70-02bc2d860a67",
+                                        "entry_id": "1bf270c6-6330-4568-9800-cd35a6555c3a",
+                                        "glosses": [
+                                            "To make or cut a channel or groove in."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "d74e9929-cf10-45ad-832d-d3ce0c073b17",
+                                        "entry_id": "1bf270c6-6330-4568-9800-cd35a6555c3a",
+                                        "glosses": [
+                                            "To direct or guide along a desired course."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "8f915227-ecc7-4a86-a226-622b722c6362",
+                                                "sense_id": "d74e9929-cf10-45ad-832d-d3ce0c073b17",
+                                                "text": "We will channel the traffic to the left with these cones."
+                                            },
+                                            {
+                                                "example_id": "02b724a1-a1e3-4af8-9b9d-cdf34d24ecf3",
+                                                "sense_id": "d74e9929-cf10-45ad-832d-d3ce0c073b17",
+                                                "text": "The resources channelled to those institutions which showed themselves most adept at formfilling, self-promotion and presentation were inadequate to sustain the quality they claimed."
+                                            },
+                                            {
+                                                "example_id": "8b2e9d06-764e-4ba1-83e8-37f19aeb0d65",
+                                                "sense_id": "d74e9929-cf10-45ad-832d-d3ce0c073b17",
+                                                "text": "But the real excitement is to be found in Erith and Thamesmead, where the Blairites in exile are channelling their hopes on Georgia Gould, 22, daughter of Mr Tony's famed pollmeister Philip."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f24742cc-e630-4982-b4e0-936ffef9995d",
+                                        "entry_id": "1bf270c6-6330-4568-9800-cd35a6555c3a",
+                                        "glosses": [
+                                            "To serve as a medium for."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "b66e4714-58bd-4f9d-9bf3-aebc579ea488",
+                                                "sense_id": "f24742cc-e630-4982-b4e0-936ffef9995d",
+                                                "text": "She was channeling the spirit of her late husband, Seth."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "475668d5-18b5-4a6d-afac-fb3cb37b5e22",
+                                        "entry_id": "1bf270c6-6330-4568-9800-cd35a6555c3a",
+                                        "glosses": [
+                                            "To follow as a model, especially in a performance."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "f747c5fb-d568-40a5-9880-e681b88fb6ee",
+                                                "sense_id": "475668d5-18b5-4a6d-afac-fb3cb37b5e22",
+                                                "text": "He was trying to channel President Reagan, but the audience wasn't buying it."
+                                            },
+                                            {
+                                                "example_id": "beddcfaf-9273-4faa-ae88-c632489601ee",
+                                                "sense_id": "475668d5-18b5-4a6d-afac-fb3cb37b5e22",
+                                                "text": "When it is my turn to sing karaoke, I am going to channel Ray Charles."
+                                            },
+                                            {
+                                                "example_id": "7739b47e-1dd6-4b80-b85f-ece6f4baff8c",
+                                                "sense_id": "475668d5-18b5-4a6d-afac-fb3cb37b5e22",
+                                                "text": "So I handed out lyrics by Allan Sherman, the shticky 1960s parody writer who my father revered and channeled to the end."
+                                            },
+                                            {
+                                                "example_id": "1a595035-fb3c-43c7-a471-b22e6e02aaf4",
+                                                "sense_id": "475668d5-18b5-4a6d-afac-fb3cb37b5e22",
+                                                "text": "He is channeling the most narcotic form of oratory in modern America for whites as well as blacks: a preacherly style of speaking rooted in black American tradition."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "channel",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6402b4e5-1dfb-4e4f-8df4-14ff6b8527c9",
+                                        "entry_id": "6703854a-3ce5-4727-93bd-5920af64723d",
+                                        "glosses": [
+                                            "The wale of a sailing ship which projects beyond the gunwale and to which the shrouds attach via the chains. One of the flat ledges of heavy plank bolted edgewise to the outside of a vessel, to increase the spread of the shrouds and carry them clear of the bulwarks."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "8afaad59-9ee6-463c-98d0-4867bd85095d",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "44904835-24a4-454c-aae2-4de785d617c2",
+                        "target_lang_word": "program",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "program",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A set of structured activities; a plan of action."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a3616653-1f1b-42c9-8586-ad4233487858",
+                                                "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                                "text": "get with the program"
+                                            },
+                                            {
+                                                "example_id": "ab02fc62-5cc2-4d63-ad5f-7d29e74aecae",
+                                                "sense_id": "245e9af7-199d-4c74-96ac-be349dea27f0",
+                                                "text": "Our program for today’s exercise class includes swimming and jogging."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a104ee5d-c21a-4803-9fd1-5d550068a9d1",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A leaflet listing information about a play, game or other activity."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "03f4b537-b9fd-4985-9259-58dc673f0e28",
+                                                "sense_id": "a104ee5d-c21a-4803-9fd1-5d550068a9d1",
+                                                "text": "The program consisted of ads for restaurants and the credits of everyone connected with the play."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "fc0a76e8-2aff-4bde-bead-216b95dfb414",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A set of principal goals which are supported by a political party or individual candidate."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "e2d02330-c780-4bc1-b310-794763d40245",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A performance of a show or other broadcast on radio or television."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6b1f529d-6185-43c1-9810-12126ebfeac7",
+                                                "sense_id": "e2d02330-c780-4bc1-b310-794763d40245",
+                                                "text": "Tonight’s program was hosted by Johnny Carson."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "df676583-a500-45d0-895a-85fa127cdf29",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A computer program."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "fe2215a8-903e-495d-a283-4c3c044c8970",
+                                                "sense_id": "df676583-a500-45d0-895a-85fa127cdf29",
+                                                "text": "The program runs on both Linux and Microsoft Windows."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "9198ec53-5b46-406c-b0ec-1990fee842ba",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A particular mindset or method of doing things."
+                                        ],
+                                        "tags": [
+                                            "especially"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "1b26546b-8615-4795-a9d5-1f7d2a8aeaab",
+                                                "sense_id": "9198ec53-5b46-406c-b0ec-1990fee842ba",
+                                                "text": "Ellis: Come on, John, why don’t you get with the program and tell him where the detonators are?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "200cc959-2f34-4efa-b614-354d7fdb3ad2",
+                                        "entry_id": "c306e8c0-3350-4698-8c32-1dcfb3be30a2",
+                                        "glosses": [
+                                            "A custom tracklist."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "af38ea27-20a6-4702-ae75-466550cb7e47",
+                                                "sense_id": "200cc959-2f34-4efa-b614-354d7fdb3ad2",
+                                                "text": "program playback",
+                                                "english": "playing tracks in a custom order"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "program",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6f682e77-c536-48cb-bc52-3a6b348531d6",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To enter a program or other instructions into (a computer or other electronic device) to instruct it to do a particular task."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "7321b29a-2a2b-4bbb-83da-c3c021a92a9a",
+                                                "sense_id": "6f682e77-c536-48cb-bc52-3a6b348531d6",
+                                                "text": "He programmed the DVR to record his favorite show."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "e415f411-68fb-4bdf-9819-f2aaaf17902d",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To develop (software) by writing program code."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "d68f957b-9057-4c65-97d3-8d8be086fd98",
+                                                "sense_id": "e415f411-68fb-4bdf-9819-f2aaaf17902d",
+                                                "text": "I programmed a small game as a demonstration."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "66e0f765-fa8d-41c6-8ff7-81221e62e55d",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To put together the schedule of an event."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "d02b2ec5-b1c1-4a0d-87c1-d70f2f42c702",
+                                                "sense_id": "66e0f765-fa8d-41c6-8ff7-81221e62e55d",
+                                                "text": "Mary will program Tuesday’s festivities."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "23458449-5fc1-4d9e-b81c-8aafe25e76df",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To schedule the programming; to determine what will be broadcast."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "32d90260-d03a-4e00-a3be-cc223efce865",
+                                                "sense_id": "23458449-5fc1-4d9e-b81c-8aafe25e76df",
+                                                "text": "We program for special audience groups, too, as shown by our Mexican language program each Sunday morning."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                        "entry_id": "43ec40ab-3d91-4ba5-947d-1e668bc35f55",
+                                        "glosses": [
+                                            "To cause to automatically behave in a particular way."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "bd3ed3ca-8f00-4c4c-939e-16d1e9d81b06",
+                                                "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                                "text": "The lab rat was programmed to press the lever when the bell rang."
+                                            },
+                                            {
+                                                "example_id": "34fb04bf-6492-4cf9-bd79-ea89209ba254",
+                                                "sense_id": "3690e1bd-5993-4fed-968d-4ffa7ab93f1a",
+                                                "text": "My point was not to commend but to expose her, and her way of thinking. In another place a teenage character worries that her stomach is too big. I, the author don't think her stomach is too big—the character does, because she's been programmed that way."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "80cce22b-7cbf-42af-8eda-330727154c39",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "44904835-24a4-454c-aae2-4de785d617c2",
+                        "target_lang_word": "programma",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "programma",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "bd056be0-4f09-4b50-b2d0-7bd28251d2fa",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "applicatie voor de computer"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1dc3425a-afc4-46ec-a653-3e77ef35e467",
+                                                "sense_id": "bd056be0-4f09-4b50-b2d0-7bd28251d2fa",
+                                                "text": "Hij schreef een nieuw programma in C++."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "49fee13c-d372-415a-a62c-789c0e90be18",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "aantal activiteiten voor een bepaalde tijd"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "89067acc-c9fb-4b8a-b26f-9097a0acdba5",
+                                                "sense_id": "49fee13c-d372-415a-a62c-789c0e90be18",
+                                                "text": "We hebben een heel programma om de kinderen bezig te houden."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "31741799-3f81-419f-bab4-ec826fa8d572",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "uitzending op radio of televisie"
+                                        ],
+                                        "tags": [
+                                            "media"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "7ee00ee4-339f-49fd-b202-528040fc4f83",
+                                                "sense_id": "31741799-3f81-419f-bab4-ec826fa8d572",
+                                                "text": "Het journaal is een veelbekeken programma."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "04f47f76-ae33-408b-b5e0-5e737fd0a5db",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "los blaadje met informatie over de uitvoering of het concert dat men bijwoont"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "cb4cbaf2-effe-4071-abdf-d49c7c6b0d22",
+                                                "sense_id": "04f47f76-ae33-408b-b5e0-5e737fd0a5db",
+                                                "text": "Wilt u een programma, meneer?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "6c0e5ae0-ba35-4396-aea8-78ea45e41481",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "onderling afgesproken doelstellingen en plannen"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6d16330a-6d2d-4379-8f2b-b55405c08c69",
+                                                "sense_id": "6c0e5ae0-ba35-4396-aea8-78ea45e41481",
+                                                "text": "Dit past niet binnen het programma van onze partij."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "ea549828-98f6-410b-94bd-c85f1686cedf",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "44904835-24a4-454c-aae2-4de785d617c2",
+                        "target_lang_word": "программа",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "программа",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "план действия, деятельности, работы"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "debc7634-177b-408c-aed7-cb02015be640",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Читатель видит, что для нас именно те произведения и важны, в которых жизнь сказалась сама собою, а не по заранее придуманной автором программе."
+                                            },
+                                            {
+                                                "example_id": "31e19caf-c064-4ab1-9277-9ae739f80b90",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Очевидно, Арина Петровна намеревалась буквально выполнить свою программу: содержать постылого в такой мере, чтоб он только не умер с голоду."
+                                            },
+                                            {
+                                                "example_id": "9fd29211-9066-47af-965b-c753c7c6b411",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Лизинговая программа рассчитана на 24 месяца, авансовый платёж составляет четверть от стоимости автомобиля."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "изложение целей и задач организации, партии или отдельного государственного, общественного деятеля"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a4923bd9-d427-425a-8d52-6715055054c8",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "У этой партии нет чёткой и внятной программы."
+                                            },
+                                            {
+                                                "example_id": "d1d13e6a-8c53-4f1d-bdb2-25cf040e84dd",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "Политическая программа нового президента."
+                                            },
+                                            {
+                                                "example_id": "8cd2b78b-469a-46f2-ba80-0fbc0ca0e2f5",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "Большевистская аграрная программа звала крестьян на революцию против царя и помещиков."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "краткое изложение содержания и методологических установок курса, предмета, преподаваемого в учебном заведении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6c5de37a-c6df-4680-b122-748d12b9b9f0",
+                                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                                "text": "Программа (курса) по истории."
+                                            },
+                                            {
+                                                "example_id": "329737ad-d3e8-4887-b2a5-8e98b5f7d360",
+                                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                                "text": "Программа по машиностроению."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "совокупность дисциплин, преподаваемых в учебном заведении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "0f4e190e-679e-4916-88ba-dd98b99e9cc2",
+                                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                                "text": "Расширение (учебных) программ в школах."
+                                            },
+                                            {
+                                                "example_id": "013a4222-bb90-4015-b917-5cdf1113ecd0",
+                                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                                "text": "Воспитание в детстве было получить негде, а образование Училище живописи не давало, программа общеобразовательных предметов была слаба, да и смотрели на образование, как на пустяки, — были уверены, что художнику нужна только кисть, а образование — вещь второстепенная."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "расписание передач радио или телевидения, перечень отдельных номеров, исполняемых на вечере, концерте, цирковом представлении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ebf45c2b-c474-4914-8c02-1394b7aa3fae",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "Программа телепередач на завтра."
+                                            },
+                                            {
+                                                "example_id": "1e51736d-b430-4737-ba0f-126cbb339b9a",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "В программе пианист стоит вторым."
+                                            },
+                                            {
+                                                "example_id": "f4a2a80e-b641-47a5-ad77-fced1191f8c3",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "Бедняге вятичу или костромичу, взятому от сохи, никогда не приходилось видеть раньше кинематографа, и он решил посмотреть. Купил билет, сел. Просмотрел всю программу — пришёл в такой восторг, что остался снова её смотреть…"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "буклет, в котором отражена программа [5] (в театре — краткое описание спектакля, указатель с перечнем исполняемых пьес и действующих лиц в них)"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "278b2179-3019-4a04-86f6-6f25c4f29a78",
+                                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                                "text": "Перед звонком надо успеть взять программу и бинокль."
+                                            },
+                                            {
+                                                "example_id": "06ccc5d9-3974-47ee-955f-faecdf7b8d75",
+                                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                                "text": "Программы театров на март."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "канал радио- и телевещания"
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "3ff49478-d99b-4585-af57-031f80f9767b",
+                                                "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                                "text": "Переключить телевизор на первую программу."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "последовательность формализованных инструкций, предназначенная для исполнения устройством управления вычислительной машины, компьютера ."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1493bf3c-a40e-4896-8001-89489338556f",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Составлять программу."
+                                            },
+                                            {
+                                                "example_id": "ce4885f1-178f-4408-97d0-402a0ee5355a",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Отлаживать программу"
+                                            },
+                                            {
+                                                "example_id": "50bbcfcd-9e0f-4c74-bebc-342d83b2a5dc",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Компьютерная программа. Обучающие (компьютерные) программы. Прикладные программы. Офисные программы"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "a7aa8dfc-6905-4a9a-97f5-eba93cc2fc1c",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "446a20e3-28c0-4ca1-9148-b6b28553d329",
+                        "target_lang_word": "programma",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "programma",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "bd056be0-4f09-4b50-b2d0-7bd28251d2fa",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "applicatie voor de computer"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1dc3425a-afc4-46ec-a653-3e77ef35e467",
+                                                "sense_id": "bd056be0-4f09-4b50-b2d0-7bd28251d2fa",
+                                                "text": "Hij schreef een nieuw programma in C++."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "49fee13c-d372-415a-a62c-789c0e90be18",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "aantal activiteiten voor een bepaalde tijd"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "89067acc-c9fb-4b8a-b26f-9097a0acdba5",
+                                                "sense_id": "49fee13c-d372-415a-a62c-789c0e90be18",
+                                                "text": "We hebben een heel programma om de kinderen bezig te houden."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "31741799-3f81-419f-bab4-ec826fa8d572",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "uitzending op radio of televisie"
+                                        ],
+                                        "tags": [
+                                            "media"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "7ee00ee4-339f-49fd-b202-528040fc4f83",
+                                                "sense_id": "31741799-3f81-419f-bab4-ec826fa8d572",
+                                                "text": "Het journaal is een veelbekeken programma."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "04f47f76-ae33-408b-b5e0-5e737fd0a5db",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "los blaadje met informatie over de uitvoering of het concert dat men bijwoont"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "cb4cbaf2-effe-4071-abdf-d49c7c6b0d22",
+                                                "sense_id": "04f47f76-ae33-408b-b5e0-5e737fd0a5db",
+                                                "text": "Wilt u een programma, meneer?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "6c0e5ae0-ba35-4396-aea8-78ea45e41481",
+                                        "entry_id": "99f74bbb-585f-4ff3-80ce-e78c1967637e",
+                                        "glosses": [
+                                            "onderling afgesproken doelstellingen en plannen"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6d16330a-6d2d-4379-8f2b-b55405c08c69",
+                                                "sense_id": "6c0e5ae0-ba35-4396-aea8-78ea45e41481",
+                                                "text": "Dit past niet binnen het programma van onze partij."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "466f7de0-6d72-4562-b573-c183c643b0eb",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "446a20e3-28c0-4ca1-9148-b6b28553d329",
+                        "target_lang_word": "программа",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "программа",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "план действия, деятельности, работы"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "debc7634-177b-408c-aed7-cb02015be640",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Читатель видит, что для нас именно те произведения и важны, в которых жизнь сказалась сама собою, а не по заранее придуманной автором программе."
+                                            },
+                                            {
+                                                "example_id": "31e19caf-c064-4ab1-9277-9ae739f80b90",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Очевидно, Арина Петровна намеревалась буквально выполнить свою программу: содержать постылого в такой мере, чтоб он только не умер с голоду."
+                                            },
+                                            {
+                                                "example_id": "9fd29211-9066-47af-965b-c753c7c6b411",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Лизинговая программа рассчитана на 24 месяца, авансовый платёж составляет четверть от стоимости автомобиля."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "изложение целей и задач организации, партии или отдельного государственного, общественного деятеля"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a4923bd9-d427-425a-8d52-6715055054c8",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "У этой партии нет чёткой и внятной программы."
+                                            },
+                                            {
+                                                "example_id": "d1d13e6a-8c53-4f1d-bdb2-25cf040e84dd",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "Политическая программа нового президента."
+                                            },
+                                            {
+                                                "example_id": "8cd2b78b-469a-46f2-ba80-0fbc0ca0e2f5",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "Большевистская аграрная программа звала крестьян на революцию против царя и помещиков."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "краткое изложение содержания и методологических установок курса, предмета, преподаваемого в учебном заведении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6c5de37a-c6df-4680-b122-748d12b9b9f0",
+                                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                                "text": "Программа (курса) по истории."
+                                            },
+                                            {
+                                                "example_id": "329737ad-d3e8-4887-b2a5-8e98b5f7d360",
+                                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                                "text": "Программа по машиностроению."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "совокупность дисциплин, преподаваемых в учебном заведении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "0f4e190e-679e-4916-88ba-dd98b99e9cc2",
+                                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                                "text": "Расширение (учебных) программ в школах."
+                                            },
+                                            {
+                                                "example_id": "013a4222-bb90-4015-b917-5cdf1113ecd0",
+                                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                                "text": "Воспитание в детстве было получить негде, а образование Училище живописи не давало, программа общеобразовательных предметов была слаба, да и смотрели на образование, как на пустяки, — были уверены, что художнику нужна только кисть, а образование — вещь второстепенная."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "расписание передач радио или телевидения, перечень отдельных номеров, исполняемых на вечере, концерте, цирковом представлении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ebf45c2b-c474-4914-8c02-1394b7aa3fae",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "Программа телепередач на завтра."
+                                            },
+                                            {
+                                                "example_id": "1e51736d-b430-4737-ba0f-126cbb339b9a",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "В программе пианист стоит вторым."
+                                            },
+                                            {
+                                                "example_id": "f4a2a80e-b641-47a5-ad77-fced1191f8c3",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "Бедняге вятичу или костромичу, взятому от сохи, никогда не приходилось видеть раньше кинематографа, и он решил посмотреть. Купил билет, сел. Просмотрел всю программу — пришёл в такой восторг, что остался снова её смотреть…"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "буклет, в котором отражена программа [5] (в театре — краткое описание спектакля, указатель с перечнем исполняемых пьес и действующих лиц в них)"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "278b2179-3019-4a04-86f6-6f25c4f29a78",
+                                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                                "text": "Перед звонком надо успеть взять программу и бинокль."
+                                            },
+                                            {
+                                                "example_id": "06ccc5d9-3974-47ee-955f-faecdf7b8d75",
+                                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                                "text": "Программы театров на март."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "канал радио- и телевещания"
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "3ff49478-d99b-4585-af57-031f80f9767b",
+                                                "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                                "text": "Переключить телевизор на первую программу."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "последовательность формализованных инструкций, предназначенная для исполнения устройством управления вычислительной машины, компьютера ."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1493bf3c-a40e-4896-8001-89489338556f",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Составлять программу."
+                                            },
+                                            {
+                                                "example_id": "ce4885f1-178f-4408-97d0-402a0ee5355a",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Отлаживать программу"
+                                            },
+                                            {
+                                                "example_id": "50bbcfcd-9e0f-4c74-bebc-342d83b2a5dc",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Компьютерная программа. Обучающие (компьютерные) программы. Прикладные программы. Офисные программы"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "90ceaa23-efad-43b6-9ed3-b4ac3a359ac2",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "4f50984d-16ea-4cfc-9114-a61cb769c27e",
+                        "target_lang_word": "программа",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "программа",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "план действия, деятельности, работы"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "debc7634-177b-408c-aed7-cb02015be640",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Читатель видит, что для нас именно те произведения и важны, в которых жизнь сказалась сама собою, а не по заранее придуманной автором программе."
+                                            },
+                                            {
+                                                "example_id": "31e19caf-c064-4ab1-9277-9ae739f80b90",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Очевидно, Арина Петровна намеревалась буквально выполнить свою программу: содержать постылого в такой мере, чтоб он только не умер с голоду."
+                                            },
+                                            {
+                                                "example_id": "9fd29211-9066-47af-965b-c753c7c6b411",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Лизинговая программа рассчитана на 24 месяца, авансовый платёж составляет четверть от стоимости автомобиля."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "изложение целей и задач организации, партии или отдельного государственного, общественного деятеля"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a4923bd9-d427-425a-8d52-6715055054c8",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "У этой партии нет чёткой и внятной программы."
+                                            },
+                                            {
+                                                "example_id": "d1d13e6a-8c53-4f1d-bdb2-25cf040e84dd",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "Политическая программа нового президента."
+                                            },
+                                            {
+                                                "example_id": "8cd2b78b-469a-46f2-ba80-0fbc0ca0e2f5",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "Большевистская аграрная программа звала крестьян на революцию против царя и помещиков."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "краткое изложение содержания и методологических установок курса, предмета, преподаваемого в учебном заведении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6c5de37a-c6df-4680-b122-748d12b9b9f0",
+                                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                                "text": "Программа (курса) по истории."
+                                            },
+                                            {
+                                                "example_id": "329737ad-d3e8-4887-b2a5-8e98b5f7d360",
+                                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                                "text": "Программа по машиностроению."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "совокупность дисциплин, преподаваемых в учебном заведении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "0f4e190e-679e-4916-88ba-dd98b99e9cc2",
+                                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                                "text": "Расширение (учебных) программ в школах."
+                                            },
+                                            {
+                                                "example_id": "013a4222-bb90-4015-b917-5cdf1113ecd0",
+                                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                                "text": "Воспитание в детстве было получить негде, а образование Училище живописи не давало, программа общеобразовательных предметов была слаба, да и смотрели на образование, как на пустяки, — были уверены, что художнику нужна только кисть, а образование — вещь второстепенная."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "расписание передач радио или телевидения, перечень отдельных номеров, исполняемых на вечере, концерте, цирковом представлении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ebf45c2b-c474-4914-8c02-1394b7aa3fae",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "Программа телепередач на завтра."
+                                            },
+                                            {
+                                                "example_id": "1e51736d-b430-4737-ba0f-126cbb339b9a",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "В программе пианист стоит вторым."
+                                            },
+                                            {
+                                                "example_id": "f4a2a80e-b641-47a5-ad77-fced1191f8c3",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "Бедняге вятичу или костромичу, взятому от сохи, никогда не приходилось видеть раньше кинематографа, и он решил посмотреть. Купил билет, сел. Просмотрел всю программу — пришёл в такой восторг, что остался снова её смотреть…"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "буклет, в котором отражена программа [5] (в театре — краткое описание спектакля, указатель с перечнем исполняемых пьес и действующих лиц в них)"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "278b2179-3019-4a04-86f6-6f25c4f29a78",
+                                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                                "text": "Перед звонком надо успеть взять программу и бинокль."
+                                            },
+                                            {
+                                                "example_id": "06ccc5d9-3974-47ee-955f-faecdf7b8d75",
+                                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                                "text": "Программы театров на март."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "канал радио- и телевещания"
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "3ff49478-d99b-4585-af57-031f80f9767b",
+                                                "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                                "text": "Переключить телевизор на первую программу."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "последовательность формализованных инструкций, предназначенная для исполнения устройством управления вычислительной машины, компьютера ."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1493bf3c-a40e-4896-8001-89489338556f",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Составлять программу."
+                                            },
+                                            {
+                                                "example_id": "ce4885f1-178f-4408-97d0-402a0ee5355a",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Отлаживать программу"
+                                            },
+                                            {
+                                                "example_id": "50bbcfcd-9e0f-4c74-bebc-342d83b2a5dc",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Компьютерная программа. Обучающие (компьютерные) программы. Прикладные программы. Офисные программы"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "ac27ab66-890b-466e-9de6-da4e79546ad2",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_id": "85610f31-d456-47be-a2ee-ee5a6598d177",
+                        "target_lang_word": "программа",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "программа",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "план действия, деятельности, работы"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "debc7634-177b-408c-aed7-cb02015be640",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Читатель видит, что для нас именно те произведения и важны, в которых жизнь сказалась сама собою, а не по заранее придуманной автором программе."
+                                            },
+                                            {
+                                                "example_id": "31e19caf-c064-4ab1-9277-9ae739f80b90",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Очевидно, Арина Петровна намеревалась буквально выполнить свою программу: содержать постылого в такой мере, чтоб он только не умер с голоду."
+                                            },
+                                            {
+                                                "example_id": "9fd29211-9066-47af-965b-c753c7c6b411",
+                                                "sense_id": "f3cadd01-e867-4a02-bd0c-3a5f97d9e8ce",
+                                                "text": "Лизинговая программа рассчитана на 24 месяца, авансовый платёж составляет четверть от стоимости автомобиля."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "изложение целей и задач организации, партии или отдельного государственного, общественного деятеля"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a4923bd9-d427-425a-8d52-6715055054c8",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "У этой партии нет чёткой и внятной программы."
+                                            },
+                                            {
+                                                "example_id": "d1d13e6a-8c53-4f1d-bdb2-25cf040e84dd",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "Политическая программа нового президента."
+                                            },
+                                            {
+                                                "example_id": "8cd2b78b-469a-46f2-ba80-0fbc0ca0e2f5",
+                                                "sense_id": "a5e0365f-15bf-4f7b-8c53-4a9a2c07f679",
+                                                "text": "Большевистская аграрная программа звала крестьян на революцию против царя и помещиков."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "краткое изложение содержания и методологических установок курса, предмета, преподаваемого в учебном заведении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6c5de37a-c6df-4680-b122-748d12b9b9f0",
+                                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                                "text": "Программа (курса) по истории."
+                                            },
+                                            {
+                                                "example_id": "329737ad-d3e8-4887-b2a5-8e98b5f7d360",
+                                                "sense_id": "c92ac918-c61f-4058-a9f9-366012d68cd3",
+                                                "text": "Программа по машиностроению."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "совокупность дисциплин, преподаваемых в учебном заведении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "0f4e190e-679e-4916-88ba-dd98b99e9cc2",
+                                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                                "text": "Расширение (учебных) программ в школах."
+                                            },
+                                            {
+                                                "example_id": "013a4222-bb90-4015-b917-5cdf1113ecd0",
+                                                "sense_id": "f061264e-643d-455c-a0c4-97369b78860e",
+                                                "text": "Воспитание в детстве было получить негде, а образование Училище живописи не давало, программа общеобразовательных предметов была слаба, да и смотрели на образование, как на пустяки, — были уверены, что художнику нужна только кисть, а образование — вещь второстепенная."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "расписание передач радио или телевидения, перечень отдельных номеров, исполняемых на вечере, концерте, цирковом представлении"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ebf45c2b-c474-4914-8c02-1394b7aa3fae",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "Программа телепередач на завтра."
+                                            },
+                                            {
+                                                "example_id": "1e51736d-b430-4737-ba0f-126cbb339b9a",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "В программе пианист стоит вторым."
+                                            },
+                                            {
+                                                "example_id": "f4a2a80e-b641-47a5-ad77-fced1191f8c3",
+                                                "sense_id": "a51a3765-9b26-412d-bca0-c03443ffc445",
+                                                "text": "Бедняге вятичу или костромичу, взятому от сохи, никогда не приходилось видеть раньше кинематографа, и он решил посмотреть. Купил билет, сел. Просмотрел всю программу — пришёл в такой восторг, что остался снова её смотреть…"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "буклет, в котором отражена программа [5] (в театре — краткое описание спектакля, указатель с перечнем исполняемых пьес и действующих лиц в них)"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "278b2179-3019-4a04-86f6-6f25c4f29a78",
+                                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                                "text": "Перед звонком надо успеть взять программу и бинокль."
+                                            },
+                                            {
+                                                "example_id": "06ccc5d9-3974-47ee-955f-faecdf7b8d75",
+                                                "sense_id": "461f3f6d-55ce-4da1-9e1d-324cc97ba60c",
+                                                "text": "Программы театров на март."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "канал радио- и телевещания"
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "3ff49478-d99b-4585-af57-031f80f9767b",
+                                                "sense_id": "af3957f5-d648-4f30-8ad4-de9c2e71cb5f",
+                                                "text": "Переключить телевизор на первую программу."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                        "entry_id": "fd4c48d6-1f08-4735-b76e-a8868dabdfc1",
+                                        "glosses": [
+                                            "последовательность формализованных инструкций, предназначенная для исполнения устройством управления вычислительной машины, компьютера ."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1493bf3c-a40e-4896-8001-89489338556f",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Составлять программу."
+                                            },
+                                            {
+                                                "example_id": "ce4885f1-178f-4408-97d0-402a0ee5355a",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Отлаживать программу"
+                                            },
+                                            {
+                                                "example_id": "50bbcfcd-9e0f-4c74-bebc-342d83b2a5dc",
+                                                "sense_id": "3c0d4bd1-c06c-4a47-ba73-ecbf1c653d6f",
+                                                "text": "Компьютерная программа. Обучающие (компьютерные) программы. Прикладные программы. Офисные программы"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": [
+                    {
+                        "linkage_id": "aed562d1-fc71-4cde-aa7c-621131fb98ae",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_ids": [
+                            "a8b7b734-6c37-4c1e-8815-8f382fbc29aa"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "plan"
+                    },
+                    {
+                        "linkage_id": "20941ee7-ef33-47e0-80df-2ba50c5093e6",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_ids": [
+                            "a8b7b734-6c37-4c1e-8815-8f382fbc29aa"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "algorytm"
+                    },
+                    {
+                        "linkage_id": "71131acf-e0e8-4335-a19e-25d05c8c01ea",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_ids": [
+                            "446a20e3-28c0-4ca1-9148-b6b28553d329"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "audycja"
+                    },
+                    {
+                        "linkage_id": "477eb835-d422-4012-ab65-fba18eaca7c3",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_ids": [
+                            "a7beeb5b-edc3-4d00-8e1c-bf2aec3746d6"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "kanał"
+                    },
+                    {
+                        "linkage_id": "d8dcab9c-1d14-4781-b85f-9cb4dde630d4",
+                        "source_entry_id": "3b2b182a-4aee-409c-a4b2-4e594a49414a",
+                        "source_sense_ids": [
+                            "44904835-24a4-454c-aae2-4de785d617c2"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "algorytm"
+                    }
+                ]
+            }
+        ]
+    }
+}

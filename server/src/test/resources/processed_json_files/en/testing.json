@@ -1,0 +1,199 @@
+{
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "f8731e0a-3d06-4a0f-af1c-98de00309b76",
+                    "sense_definition": "The present participle or gerund form of the verb 'to test', meaning to perform an examination or evaluation.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "action_of_testing",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The scientist is <w>testing</w> the new hypothesis in the lab.",
+                            "target_lang_translations": {
+                                "ru": "Учёный <w>проверяет</w> новую гипотезу в лаборатории."
+                            }
+                        },
+                        {
+                            "text": "<w>Testing</w> the water before swimming is a good idea.",
+                            "target_lang_translations": {
+                                "ru": "<w>Проверять</w> воду перед плаванием — хорошая идея."
+                            }
+                        },
+                        {
+                            "text": "They spent all morning <w>testing</w> out the new equipment.",
+                            "target_lang_translations": {
+                                "ru": "Они всё утро <w>проверяли</w> новое оборудование."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "examining",
+                        "evaluating",
+                        "checking",
+                        "trying out"
+                    ],
+                    "common_phrases": [
+                        "testing out",
+                        "testing for",
+                        "testing positive/negative"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "present participle and gerund form of 'test'"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Причастие настоящего времени или герундий от глагола 'to test', означающее выполнение проверки или оценки."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "тестирование",
+                                "target_lang_sense_clarification": "Процесс проверки или испытания чего-либо. Используется как отглагольное существительное (герундий)."
+                            },
+                            {
+                                "target_lang_word": "проверка",
+                                "target_lang_sense_clarification": "Более общее слово для обозначения процесса контроля или испытания, часто используется как герундий."
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "16f3dcde-882f-464a-8f53-0843847294b2",
+                    "sense_definition": "The process of checking something to see if it works correctly or meets certain standards.",
+                    "learner_level": "B2",
+                    "frequency": "High",
+                    "semantic_group_id": "evaluation_process",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The software is currently undergoing rigorous <w>testing</w> before its release.",
+                            "target_lang_translations": {
+                                "ru": "В настоящее время программное обеспечение проходит тщательное <w>тестирование</w> перед выпуском."
+                            }
+                        },
+                        {
+                            "text": "Quality <w>testing</w> is essential to ensure product reliability.",
+                            "target_lang_translations": {
+                                "ru": "<w>Тестирование</w> качества необходимо для обеспечения надёжности продукта."
+                            }
+                        },
+                        {
+                            "text": "The new car went through extensive road <w>testing</w> to ensure its safety.",
+                            "target_lang_translations": {
+                                "ru": "Новый автомобиль прошёл длительные дорожные <w>испытания</w> для обеспечения его безопасности."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "examination",
+                        "evaluation",
+                        "trial",
+                        "assessment"
+                    ],
+                    "common_phrases": [
+                        "product testing",
+                        "software testing",
+                        "road testing",
+                        "quality testing"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Процесс проверки чего-либо с целью убедиться, что оно работает правильно или соответствует определённым стандартам."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "тестирование",
+                                "target_lang_sense_clarification": "Процесс испытания или проверки чего-либо, особенно в техническом или научном контексте (например, программного обеспечения, оборудования)."
+                            },
+                            {
+                                "target_lang_word": "испытание",
+                                "target_lang_sense_clarification": "Проверка свойств, качеств кого-либо или чего-либо, часто в сложных или экстремальных условиях (например, дорожные испытания)."
+                            },
+                            {
+                                "target_lang_word": "проверка",
+                                "target_lang_sense_clarification": "Более общее слово, означающее контроль или обследование с целью выяснения правильности, состояния чего-либо."
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "adjective",
+            "senses": [
+                {
+                    "sense_id": "5e1a3249-2d90-42a3-ab1d-c18a2c92f4d0",
+                    "sense_definition": "Causing difficulty or requiring a lot of effort and ability.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "difficulty",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The exam was very <w>testing</w>, but I think I did well.",
+                            "target_lang_translations": {
+                                "ru": "Экзамен был очень <w>сложным</w>, но, думаю, я справился хорошо."
+                            }
+                        },
+                        {
+                            "text": "She faced a <w>testing</w> challenge when she started her new job.",
+                            "target_lang_translations": {
+                                "ru": "Она столкнулась с <w>трудной</w> задачей, когда начала работать на новой работе."
+                            }
+                        },
+                        {
+                            "text": "It was a <w>testing</w> time for everyone involved in the project.",
+                            "target_lang_translations": {
+                                "ru": "Это было <w>напряжённое</w> время для всех, кто участвовал в проекте."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "challenging",
+                        "difficult",
+                        "demanding"
+                    ],
+                    "antonyms": [
+                        "easy",
+                        "simple"
+                    ],
+                    "common_phrases": [
+                        "a testing time",
+                        "a testing period",
+                        "a testing challenge"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Трудный, требующий больших усилий, напряжения или способностей."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "сложный",
+                                "target_lang_sense_clarification": "Наиболее общий и частый перевод, означает 'трудный для выполнения, понимания или решения'."
+                            },
+                            {
+                                "target_lang_word": "трудный",
+                                "target_lang_sense_clarification": "Синоним 'сложный', подчёркивает необходимость приложить усилия и преодолеть препятствия."
+                            },
+                            {
+                                "target_lang_word": "напряжённый",
+                                "target_lang_sense_clarification": "Описывает период времени или ситуацию, требующую больших физических или умственных усилий и вызывающую стресс (например, 'a testing time')."
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,513 @@
+{
+  "word": "tableau",
+  "lang_code": "nl",
+  "source_file_to_entries": {
+    "raw-wiktextract-data.jsonl": [],
+    "ru-extract.jsonl": [],
+    "nl-extract.jsonl": [
+      {
+        "entry_id": "9b77cea2-cd59-4090-b2ae-4cbc22d74e38",
+        "word": "tableau",
+        "pos": "intj",
+        "lang_code": "nl",
+        "forms": [],
+        "senses": [
+          {
+            "sense_id": "a6de79b3-6d7b-4f07-8c06-65a0437b97b0",
+            "entry_id": "9b77cea2-cd59-4090-b2ae-4cbc22d74e38",
+            "glosses": [
+              "uitroep om het markante van een situatie die zich opeens voordoet te benadrukken: alsof het een bijzonder schilderij is of alsof je er een schilderij van zou moeten maken"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "b81e7f3b-b249-4abc-b438-5306fbb9ee91",
+                "sense_id": "a6de79b3-6d7b-4f07-8c06-65a0437b97b0",
+                "text": "Een goede mop: het meer dan levensgroote foetensmoel van Mussert is hier op alle reclamezuilen aangeplakt met het onderschrift: ‘Zonder dezen man heeft Nederland geen toekomst meer.’ Een dag later was overal de z van ‘zonder’ met wit overplakt! Tableau. Maar helaas hebben deze ressentimentsgieren geen gevoel voor humor..."
+              }
+            ]
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      },
+      {
+        "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+        "word": "tableau",
+        "pos": "noun",
+        "lang_code": "nl",
+        "forms": [
+          {
+            "form_id": "f5301ea9-3b09-45b0-8e2b-560bcf2fe3b1",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "tags": [
+              "plural"
+            ],
+            "form": "tableaus"
+          },
+          {
+            "form_id": "689d3958-8efa-4a17-a56a-6cc40fb6abcf",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "tags": [
+              "diminutive",
+              "singular"
+            ],
+            "form": "tableautje"
+          },
+          {
+            "form_id": "c827efee-2e9d-47c2-8f10-78b1c0bc1ed2",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "tags": [
+              "diminutive",
+              "plural"
+            ],
+            "form": "tableautjes"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "881467ff-5108-4539-b7e3-75b73a82e466",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "weergave die een aantal zaken in hun onderling verband laat zien"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "5db5cba4-feec-4fb8-9a5f-36cc1373e5d2",
+                "sense_id": "881467ff-5108-4539-b7e3-75b73a82e466",
+                "text": "In mijn achteruitkijkspiegel zie ik het langzaam krimpende tableau: de schokschouderende vrouw in het mos, geen jas, haar handen in elkaar gevouwen, naast de jeep het gestolde meisje, wind in de ogen."
+              },
+              {
+                "example_id": "7c97ffc0-9ba5-4919-b302-cba972331d30",
+                "sense_id": "881467ff-5108-4539-b7e3-75b73a82e466",
+                "text": "De relaties tussen de nieuwe adviseurs en de overheid hebben vooral betrekking op het bestuur en de bureaucratie. De politiek komt in het tableau nauwelijks voor."
+              }
+            ]
+          },
+          {
+            "sense_id": "09e28ceb-76a0-41ba-8f61-f04b8c131ba1",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "weergave die een aantal zaken in hun onderling verband laat zien",
+              "geschilderd tafereel"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "af3c12bd-c333-4c3e-8a59-c0cf66b21ec8",
+                "sense_id": "09e28ceb-76a0-41ba-8f61-f04b8c131ba1",
+                "text": "In mijn achteruitkijkspiegel zie ik het langzaam krimpende tableau: de schokschouderende vrouw in het mos, geen jas, haar handen in elkaar gevouwen, naast de jeep het gestolde meisje, wind in de ogen."
+              },
+              {
+                "example_id": "a4db769a-922c-4591-8602-9ee717b8e823",
+                "sense_id": "09e28ceb-76a0-41ba-8f61-f04b8c131ba1",
+                "text": "De relaties tussen de nieuwe adviseurs en de overheid hebben vooral betrekking op het bestuur en de bureaucratie. De politiek komt in het tableau nauwelijks voor."
+              },
+              {
+                "example_id": "f3637e5d-9ed1-440e-82dc-5078adecfc75",
+                "sense_id": "09e28ceb-76a0-41ba-8f61-f04b8c131ba1",
+                "text": "De Nederlandse journaliste José Buschman kwam voor kort een schilderijtje van de Duitse schilder E. Weckerling op het spoor, waarop een oriëntaals landschap is afgebeeld. Op de keerzijde staat een fascinerende ‘dédicace’ die aanvangt met: ‘Aan mijn lieve frienden (sic) Louis en Mevrouw Elisabeth Couperus...’ Het tableau met opdracht bleek een cadeau van P.M. Ruys, consul van de Nederlanden in Algiers toen de Haagse schrijver en zijn vrouw in Afrika verbleven."
+              },
+              {
+                "example_id": "d41d158f-a422-4a3f-92a4-a23c3c745fbd",
+                "sense_id": "09e28ceb-76a0-41ba-8f61-f04b8c131ba1",
+                "text": "Toch lijkt Caravaggio's tableau, hoe treffend ook, kunstmatig geënsceneerd naast Rembrandts behandeling van hetzelfde onderwerp (…)."
+              }
+            ]
+          },
+          {
+            "sense_id": "9c95c275-b0c2-497f-a820-21f599521144",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "weergave die een aantal zaken in hun onderling verband laat zien",
+              "tafereel uit de geschiedenis of uit een verhaal, uitgebeeld door verklede, zwijgende mensen"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "3eac06db-b146-45b5-b186-04f1beffa11a",
+                "sense_id": "9c95c275-b0c2-497f-a820-21f599521144",
+                "text": "In mijn achteruitkijkspiegel zie ik het langzaam krimpende tableau: de schokschouderende vrouw in het mos, geen jas, haar handen in elkaar gevouwen, naast de jeep het gestolde meisje, wind in de ogen."
+              },
+              {
+                "example_id": "a966edd9-c445-40ba-a169-6cc11281d33d",
+                "sense_id": "9c95c275-b0c2-497f-a820-21f599521144",
+                "text": "De relaties tussen de nieuwe adviseurs en de overheid hebben vooral betrekking op het bestuur en de bureaucratie. De politiek komt in het tableau nauwelijks voor."
+              },
+              {
+                "example_id": "79e78606-36b9-4fe0-bc3d-40c5fb4182d2",
+                "sense_id": "9c95c275-b0c2-497f-a820-21f599521144",
+                "text": "Abdul Karim speelde ook de hoofdrol van Eliëzer in het tableau Rebekka dat diezelfde maand in Osborne werd opgevoerd."
+              }
+            ]
+          },
+          {
+            "sense_id": "d9754b06-c136-4808-b3ef-af83e8e8e0e9",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "weergave die een aantal zaken in hun onderling verband laat zien",
+              "stukje van een theatervoorstelling met doorlopende gebeurtenissen op één plaats"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "fc12e3e3-2307-490b-b64f-df0759ace3b8",
+                "sense_id": "d9754b06-c136-4808-b3ef-af83e8e8e0e9",
+                "text": "In mijn achteruitkijkspiegel zie ik het langzaam krimpende tableau: de schokschouderende vrouw in het mos, geen jas, haar handen in elkaar gevouwen, naast de jeep het gestolde meisje, wind in de ogen."
+              },
+              {
+                "example_id": "358fd8e6-d6e8-4da9-a1cb-8c4dbfa198c3",
+                "sense_id": "d9754b06-c136-4808-b3ef-af83e8e8e0e9",
+                "text": "De relaties tussen de nieuwe adviseurs en de overheid hebben vooral betrekking op het bestuur en de bureaucratie. De politiek komt in het tableau nauwelijks voor."
+              },
+              {
+                "example_id": "eaa5b5d2-958d-4527-896d-76719a3cda0d",
+                "sense_id": "d9754b06-c136-4808-b3ef-af83e8e8e0e9",
+                "text": "Kijk, als ik twee van deze huizen op onze bühne laat uitbeelden, zal men het desnoods nog slikken. Als ik er vier van in het tableau zou opnemen, is het alweer formalisme."
+              },
+              {
+                "example_id": "897617ff-a530-4f69-ab1d-728962352816",
+                "sense_id": "d9754b06-c136-4808-b3ef-af83e8e8e0e9",
+                "text": "Tableau 2 geeft een voorafschaduwing van het optreden van de Leproos in het derde tableau."
+              }
+            ]
+          },
+          {
+            "sense_id": "6b1061fa-f505-40f8-9ee0-76682b1d92e0",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "weergave die een aantal zaken in hun onderling verband laat zien",
+              "uitstalling van de dieren die bij een jachtpartij geschoten zijn"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "8e2ae346-fa13-4457-8254-367c901c24cc",
+                "sense_id": "6b1061fa-f505-40f8-9ee0-76682b1d92e0",
+                "text": "In mijn achteruitkijkspiegel zie ik het langzaam krimpende tableau: de schokschouderende vrouw in het mos, geen jas, haar handen in elkaar gevouwen, naast de jeep het gestolde meisje, wind in de ogen."
+              },
+              {
+                "example_id": "53f0fd87-e854-46ec-9c50-dc0c8e4d0812",
+                "sense_id": "6b1061fa-f505-40f8-9ee0-76682b1d92e0",
+                "text": "De relaties tussen de nieuwe adviseurs en de overheid hebben vooral betrekking op het bestuur en de bureaucratie. De politiek komt in het tableau nauwelijks voor."
+              },
+              {
+                "example_id": "90d91855-b7c9-417b-9208-096b2e6e9052",
+                "sense_id": "6b1061fa-f505-40f8-9ee0-76682b1d92e0",
+                "text": "Aan het eind van de dag maak je tableau, dan worden de geschoten dieren uitgestald en gaat er een fles Jägermeister open."
+              }
+            ]
+          },
+          {
+            "sense_id": "0281a9f7-7f92-44c0-a97f-a46cd8307b7c",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "weergave die een aantal zaken in hun onderling verband laat zien",
+              "vlak voorwerp met een uitstalling van een aantal dingen die bij elkaar horen"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "ecc0c31c-4634-4d5c-bc73-4db43e3ea325",
+                "sense_id": "0281a9f7-7f92-44c0-a97f-a46cd8307b7c",
+                "text": "In mijn achteruitkijkspiegel zie ik het langzaam krimpende tableau: de schokschouderende vrouw in het mos, geen jas, haar handen in elkaar gevouwen, naast de jeep het gestolde meisje, wind in de ogen."
+              },
+              {
+                "example_id": "831d2524-8c53-471f-a488-3227a63e9bc1",
+                "sense_id": "0281a9f7-7f92-44c0-a97f-a46cd8307b7c",
+                "text": "De relaties tussen de nieuwe adviseurs en de overheid hebben vooral betrekking op het bestuur en de bureaucratie. De politiek komt in het tableau nauwelijks voor."
+              },
+              {
+                "example_id": "0b686b06-cdfc-4aa0-9d07-a7e9486acdfa",
+                "sense_id": "0281a9f7-7f92-44c0-a97f-a46cd8307b7c",
+                "text": "Wanneer ze de kinderen naar bed heeft gebracht, komt Juliette terug met een tableau van noten, kaas, druiven en een ongesneden brood."
+              },
+              {
+                "example_id": "0021accb-6f32-4c65-90a0-0e03dd1bb67b",
+                "sense_id": "0281a9f7-7f92-44c0-a97f-a46cd8307b7c",
+                "text": "Vlak voor het einde van de dolle avond boden de obers ons een dessert van de zaak aan, een tableau van drie verdiepingen vol vruchten dat stond te branden als een lier, terwijl ik nu juist heel veel zin had in fruit. Die achterlijke obers hadden de boel flink overdreven zodat je, voordat je je aan al die kilo's fruit tegoed kon doen, er eerst de brandweer bij moest roepen."
+              }
+            ]
+          },
+          {
+            "sense_id": "89d457a8-ef5a-4f74-8550-75b158e27207",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "opsomming die een overzicht geeft"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "1f777804-9c1a-4135-94ed-afa1410aabb7",
+                "sense_id": "89d457a8-ef5a-4f74-8550-75b158e27207",
+                "text": "Mijn stelling is dat de Koude Oorlog, het allesoverheersende conflict tussen de Verenigde Staten en de Sovjet-Unie, alle Nederlanders voor existentiële dilemma's plaatste, waaraan vrijwel niemand ontsnapte zonder foute - moreel verwerpelijke, bedenkelijke dan wel twijfelachtige - keuzes te maken. Ter illustratie heb ik dit tableau opgesteld van zeven grote maatschappelijke kwesties die zorgden voor hoog oplopende sociale spanningen en diepe politieke verdeeldheid."
+              },
+              {
+                "example_id": "acca61da-40e3-44e6-b35e-235efa6b49cc",
+                "sense_id": "89d457a8-ef5a-4f74-8550-75b158e27207",
+                "text": "Hij geeft ook het voorbeeld van de kindsoldaten: daders en slachtoffers tegelijk. Het tableau van daders, omstanders, slachtoffers en hulpverleners is dus ingewikkeld."
+              }
+            ]
+          },
+          {
+            "sense_id": "f370b200-b37e-4e9d-ad77-59b90dab7e13",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "opsomming die een overzicht geeft",
+              "op een geschikte plaats bevestigd vlak van duurzaam materiaal waarop een gedenkwaardig overzicht is vastgelegd"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "9148f2ee-0b84-4c52-b45b-5c9f2f6b1917",
+                "sense_id": "f370b200-b37e-4e9d-ad77-59b90dab7e13",
+                "text": "Mijn stelling is dat de Koude Oorlog, het allesoverheersende conflict tussen de Verenigde Staten en de Sovjet-Unie, alle Nederlanders voor existentiële dilemma's plaatste, waaraan vrijwel niemand ontsnapte zonder foute - moreel verwerpelijke, bedenkelijke dan wel twijfelachtige - keuzes te maken. Ter illustratie heb ik dit tableau opgesteld van zeven grote maatschappelijke kwesties die zorgden voor hoog oplopende sociale spanningen en diepe politieke verdeeldheid."
+              },
+              {
+                "example_id": "bb607f41-b6eb-41bc-9e07-58aa225975ed",
+                "sense_id": "f370b200-b37e-4e9d-ad77-59b90dab7e13",
+                "text": "Hij geeft ook het voorbeeld van de kindsoldaten: daders en slachtoffers tegelijk. Het tableau van daders, omstanders, slachtoffers en hulpverleners is dus ingewikkeld."
+              },
+              {
+                "example_id": "317251ef-7aa2-4eb4-a6a2-db46eeaf773c",
+                "sense_id": "f370b200-b37e-4e9d-ad77-59b90dab7e13",
+                "text": "Na afloop van het muzikale gedeelte werd ter herinnering aan alle organisten van het Müllerorgel een tableau onthuld met daarop de namen van hen die door de eeuwen heen het jubilerende orgel bespeeld hebben."
+              }
+            ]
+          },
+          {
+            "sense_id": "151f37b1-556c-464b-a682-298bcc7b7b31",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "opsomming die een overzicht geeft",
+              "lijst van advocaten die bij een bepaalde rechtbank ingeschreven staan"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "22e3a69a-48c1-4311-8c1d-c331686c9b19",
+                "sense_id": "151f37b1-556c-464b-a682-298bcc7b7b31",
+                "text": "Hij geeft ook het voorbeeld van de kindsoldaten: daders en slachtoffers tegelijk. Het tableau van daders, omstanders, slachtoffers en hulpverleners is dus ingewikkeld."
+              },
+              {
+                "example_id": "2b8490b3-c412-4669-a257-110a9ebebd78",
+                "sense_id": "151f37b1-556c-464b-a682-298bcc7b7b31",
+                "text": "Mijn stelling is dat de Koude Oorlog, het allesoverheersende conflict tussen de Verenigde Staten en de Sovjet-Unie, alle Nederlanders voor existentiële dilemma's plaatste, waaraan vrijwel niemand ontsnapte zonder foute - moreel verwerpelijke, bedenkelijke dan wel twijfelachtige - keuzes te maken. Ter illustratie heb ik dit tableau opgesteld van zeven grote maatschappelijke kwesties die zorgden voor hoog oplopende sociale spanningen en diepe politieke verdeeldheid."
+              },
+              {
+                "example_id": "1f2bb8eb-7891-413e-97ba-040d81b897c9",
+                "sense_id": "151f37b1-556c-464b-a682-298bcc7b7b31",
+                "text": "Tien advocaten werden onherroepelijk geschrapt van het tableau. Zij mogen het beroep van advocaat niet meer uitoefenen."
+              }
+            ]
+          },
+          {
+            "sense_id": "ba4c3f2e-c23e-447c-b828-fd457f0230cc",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "opsomming die een overzicht geeft",
+              "lijst van artiesten die deel uitmaken van een bepaald gezelschap"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "00311338-d02d-4621-8ddd-c2d1bee6686a",
+                "sense_id": "ba4c3f2e-c23e-447c-b828-fd457f0230cc",
+                "text": "Mijn stelling is dat de Koude Oorlog, het allesoverheersende conflict tussen de Verenigde Staten en de Sovjet-Unie, alle Nederlanders voor existentiële dilemma's plaatste, waaraan vrijwel niemand ontsnapte zonder foute - moreel verwerpelijke, bedenkelijke dan wel twijfelachtige - keuzes te maken. Ter illustratie heb ik dit tableau opgesteld van zeven grote maatschappelijke kwesties die zorgden voor hoog oplopende sociale spanningen en diepe politieke verdeeldheid."
+              },
+              {
+                "example_id": "3363502b-726f-460e-abfe-01660e604874",
+                "sense_id": "ba4c3f2e-c23e-447c-b828-fd457f0230cc",
+                "text": "Hij geeft ook het voorbeeld van de kindsoldaten: daders en slachtoffers tegelijk. Het tableau van daders, omstanders, slachtoffers en hulpverleners is dus ingewikkeld."
+              },
+              {
+                "example_id": "145242e1-b762-4fd5-bfe1-ea02bbcee188",
+                "sense_id": "ba4c3f2e-c23e-447c-b828-fd457f0230cc",
+                "text": "Om die reden worden dansers aangenomen uit landen waar de Russische ballettraining nog keihard gedoceerd wordt: opvallend veel dansers van het huidige tableau komen uit de voormalige Sovjet-Unie en uit voormalige satellietstaten of landen die een traditionele Sovjet-ballettraining kennen: China, Korea en Japan. De opkomst van dansers uit deze Aziatische landen is tegenwoordig ook op internationale balletconcours evident."
+              }
+            ]
+          },
+          {
+            "sense_id": "bcb01081-171b-408a-9cf4-be9eb88b72dc",
+            "entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "glosses": [
+              "opsomming die een overzicht geeft",
+              "lijst van behaalde successen of overwinningen"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "ffcdf735-efb0-404e-891e-07596ee03784",
+                "sense_id": "bcb01081-171b-408a-9cf4-be9eb88b72dc",
+                "text": "Mijn stelling is dat de Koude Oorlog, het allesoverheersende conflict tussen de Verenigde Staten en de Sovjet-Unie, alle Nederlanders voor existentiële dilemma's plaatste, waaraan vrijwel niemand ontsnapte zonder foute - moreel verwerpelijke, bedenkelijke dan wel twijfelachtige - keuzes te maken. Ter illustratie heb ik dit tableau opgesteld van zeven grote maatschappelijke kwesties die zorgden voor hoog oplopende sociale spanningen en diepe politieke verdeeldheid."
+              },
+              {
+                "example_id": "16a075a3-e9db-418a-a912-1a2d5e6c41e0",
+                "sense_id": "bcb01081-171b-408a-9cf4-be9eb88b72dc",
+                "text": "Hij geeft ook het voorbeeld van de kindsoldaten: daders en slachtoffers tegelijk. Het tableau van daders, omstanders, slachtoffers en hulpverleners is dus ingewikkeld."
+              },
+              {
+                "example_id": "0e118dd7-53eb-4a6f-93d6-ddcb4e2a2921",
+                "sense_id": "bcb01081-171b-408a-9cf4-be9eb88b72dc",
+                "text": "De piloot van de jager is duidelijk een virtuoos, met op zijn tableau ettelijke tientallen slachtoffers, die jaren heeft kunnen oefenen op Engelsen, Fransen, Polen en daarvoor misschien op de Sovjetrussische Polikarpovs van het Republikeinse leger toen hij diende in Spanje, in het Condorlegioen, voor Franco."
+              }
+            ]
+          }
+        ],
+        "translations": [],
+        "word_linkages": [
+          {
+            "linkage_id": "68efb345-a813-446f-bb68-21364cfbda7b",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [
+              "881467ff-5108-4539-b7e3-75b73a82e466"
+            ],
+            "linkage_type": "synonyms",
+            "word": "tafereel"
+          },
+          {
+            "linkage_id": "242edaab-51fc-471e-8145-3646e7f95572",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [
+              "881467ff-5108-4539-b7e3-75b73a82e466"
+            ],
+            "linkage_type": "synonyms",
+            "word": "plaatje"
+          },
+          {
+            "linkage_id": "0635ab3a-3a74-43f9-be3a-3c522b45c57a",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [
+              "881467ff-5108-4539-b7e3-75b73a82e466"
+            ],
+            "linkage_type": "synonyms",
+            "word": "schouwspel"
+          },
+          {
+            "linkage_id": "22b6a062-3593-40c2-8e68-e4261f9d036d",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "schilderij"
+          },
+          {
+            "linkage_id": "042e39d7-cc9a-4823-90bb-ef66c06c023f",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "toog"
+          },
+          {
+            "linkage_id": "82eca1b6-3a4b-4e85-be1b-3245adc0fb56",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "scene"
+          },
+          {
+            "linkage_id": "2a126f02-fc8a-490a-855b-dccebd40cde7",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "plateau"
+          },
+          {
+            "linkage_id": "6748b0f8-0723-4835-ba20-47d910be6bb7",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [
+              "09e28ceb-76a0-41ba-8f61-f04b8c131ba1"
+            ],
+            "linkage_type": "synonyms",
+            "word": "overzicht"
+          },
+          {
+            "linkage_id": "b97ea928-ea14-4501-af88-fb4f17fc3193",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [
+              "09e28ceb-76a0-41ba-8f61-f04b8c131ba1"
+            ],
+            "linkage_type": "synonyms",
+            "word": "tabel"
+          },
+          {
+            "linkage_id": "1816875c-8674-4dd6-b2e7-597c7f43c7cb",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "paneel"
+          },
+          {
+            "linkage_id": "3dbf9673-6544-4988-8e67-ddd8bbacd465",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "plaquette"
+          },
+          {
+            "linkage_id": "2adfa037-9947-4265-b2dc-232452d904b8",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "rol"
+          },
+          {
+            "linkage_id": "f184449e-b191-419f-8134-2448f2bfd0d2",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "erelijst"
+          },
+          {
+            "linkage_id": "418da475-7dc4-4137-a224-afbe88c55de2",
+            "source_entry_id": "0425515a-ead2-4750-87e9-997d96c3ae82",
+            "source_sense_ids": [],
+            "linkage_type": "synonyms",
+            "word": "palmares"
+          }
+        ]
+      },
+      {
+        "entry_id": "7819d69d-ebcc-4ee8-97f0-452e46eb47f6",
+        "word": "tableau",
+        "pos": "noun",
+        "lang_code": "nl",
+        "forms": [
+          {
+            "form_id": "4ce56938-a0c1-46ad-b09d-80212297a0d8",
+            "entry_id": "7819d69d-ebcc-4ee8-97f0-452e46eb47f6",
+            "tags": [
+              "plural"
+            ],
+            "form": "tableaus"
+          }
+        ],
+        "senses": [
+          {
+            "sense_id": "aaee2356-df09-48a3-b67f-4218290ac119",
+            "entry_id": "7819d69d-ebcc-4ee8-97f0-452e46eb47f6",
+            "glosses": [
+              "tabel met beperkende regels in een specifieke volgorde, die laat zien hoe volgens de theorie een taalgebruiker tot de beste keus uit een aantal mogelijke vormen komt"
+            ],
+            "tags": [],
+            "examples": [
+              {
+                "example_id": "d5ef36fe-c44a-4cf8-8022-b7ea16492ef0",
+                "sense_id": "aaee2356-df09-48a3-b67f-4218290ac119",
+                "text": "In de OT worden de keuzes tussen de kandidaat-vormen uitgedrukt in schema's, gewoonlijk ‘tableaus’ genoemd, waarin een sterretje een schending van een beperking aanduidt. Het vingertje wijst naar de ‘winnende’ kandidaat."
+              },
+              {
+                "example_id": "a8e942e8-9745-4d1c-9f1f-97429ccb28c7",
+                "sense_id": "aaee2356-df09-48a3-b67f-4218290ac119",
+                "text": "Het enige wat in de tableau bepaald wordt is de positie van de hoofdklemtoon."
+              }
+            ]
+          }
+        ],
+        "translations": [],
+        "word_linkages": []
+      }
+    ],
+    "pl-extract.jsonl": []
+  }
+}

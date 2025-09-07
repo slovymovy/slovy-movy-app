@@ -20,6 +20,7 @@ kotlin {
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
     iosX64()
@@ -48,14 +49,31 @@ kotlin {
     }
 }
 
-val databaseName = "AppDatabase"
+val appDatabaseName = "AppDatabase"
+val dictionaryDatabaseName = "DictionaryDatabase"
+val translationDatabaseName = "TranslationDatabase"
 sqldelight {
     databases {
-        create(databaseName) {
+        create(appDatabaseName) {
             packageName.set("com.slovy.slovymovyapp.db")
             deriveSchemaFromMigrations.set(false)
             verifyMigrations.set(false)
             verifyDefinitions.set(false)
+            srcDirs.setFrom("src/commonMain/sqldelight/appdb")
+        }
+        create(dictionaryDatabaseName) {
+            packageName.set("com.slovy.slovymovyapp.dictionary")
+            deriveSchemaFromMigrations.set(false)
+            verifyMigrations.set(false)
+            verifyDefinitions.set(false)
+            srcDirs.setFrom("src/commonMain/sqldelight/dictionarydb")
+        }
+        create(translationDatabaseName) {
+            packageName.set("com.slovy.slovymovyapp.translation")
+            deriveSchemaFromMigrations.set(false)
+            verifyMigrations.set(false)
+            verifyDefinitions.set(false)
+            srcDirs.setFrom("src/commonMain/sqldelight/translationdb")
         }
     }
 }
@@ -74,7 +92,13 @@ android {
 
 // Disable SqlDelight verification tasks on Windows due to https://github.com/sqldelight/sqldelight/issues/5312
 if (OperatingSystem.current().isWindows) {
-    tasks.matching { it.name.startsWith("verify") && it.name.contains(databaseName) }.configureEach {
+    tasks.matching { task ->
+        task.name.startsWith("verify") && listOf(
+            appDatabaseName,
+            dictionaryDatabaseName,
+            translationDatabaseName
+        ).any { task.name.contains(it) }
+    }.configureEach {
         enabled = false
     }
 }

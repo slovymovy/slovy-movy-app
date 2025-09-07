@@ -1,0 +1,256 @@
+{
+    "word": "testing",
+    "lang_code": "en",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "7414adca-b2ad-45f1-8776-06230db71680",
+                "word": "testing",
+                "pos": "adj",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "6534942f-e22e-42e1-8786-896ef6ae3378",
+                        "entry_id": "7414adca-b2ad-45f1-8776-06230db71680",
+                        "tags": [
+                            "comparative"
+                        ],
+                        "form": "more testing"
+                    },
+                    {
+                        "form_id": "e2dc2cde-8c08-4e86-b4f8-d0f612bce8c9",
+                        "entry_id": "7414adca-b2ad-45f1-8776-06230db71680",
+                        "tags": [
+                            "superlative"
+                        ],
+                        "form": "most testing"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "5e1a3249-2d90-42a3-ab1d-c18a2c92f4d0",
+                        "entry_id": "7414adca-b2ad-45f1-8776-06230db71680",
+                        "glosses": [
+                            "Difficult; tough."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "8306637e-98f1-4c9f-b040-96041debc6a5",
+                                "sense_id": "5e1a3249-2d90-42a3-ab1d-c18a2c92f4d0",
+                                "text": "England have now gone four games without a win at Wembley, their longest sequence without a victory in 30 years, and still have much work to do to reach Euro 2012 as they prepare for a testing trip to face Bulgaria in Sofia in September."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "94b7cb77-680e-438d-9fd5-cf31c0591195",
+                "word": "testing",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "7a7be7e0-5503-4011-bb21-3f5036826131",
+                        "entry_id": "94b7cb77-680e-438d-9fd5-cf31c0591195",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "testings"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "16f3dcde-882f-464a-8f53-0843847294b2",
+                        "entry_id": "94b7cb77-680e-438d-9fd5-cf31c0591195",
+                        "glosses": [
+                            "The act of conducting a test; trialing, proving."
+                        ],
+                        "tags": [
+                            "countable",
+                            "uncountable"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "c15a2224-80a5-4f59-ad0a-2ceca827cdf6",
+                                "sense_id": "16f3dcde-882f-464a-8f53-0843847294b2",
+                                "text": "The wilderness testings of Jesus prepare him for ministry in which such temptations and shortcuts will recur."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "23c56187-408f-453e-b658-031c716a3cc2",
+                        "source_entry_id": "94b7cb77-680e-438d-9fd5-cf31c0591195",
+                        "source_sense_id": "16f3dcde-882f-464a-8f53-0843847294b2",
+                        "source_sense_description": "the act of conducting a test",
+                        "target_lang_word": "testowanie",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "testowanie",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "bad9e5d0-ee7e-4269-a677-4f3dfd195bb2",
+                                        "entry_id": "0cc67ac1-07da-4514-9d17-bcb4a687fdc0",
+                                        "glosses": [
+                                            "rzecz. odczas. od testować"
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1.1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "d2757e0d-762b-410a-b67e-108fc31a747a",
+                        "source_entry_id": "94b7cb77-680e-438d-9fd5-cf31c0591195",
+                        "source_sense_id": "16f3dcde-882f-464a-8f53-0843847294b2",
+                        "source_sense_description": "the act of conducting a test",
+                        "target_lang_word": "тести́рование",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "тести́рование",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "61c5d915-7f30-46bc-a20d-7839d3ab82db",
+                                        "entry_id": "de2931e2-6dec-49b4-abec-d7b600ae6bce",
+                                        "glosses": [
+                                            "действие по значению гл. тестировать; проведение теста, испытание чего-либо"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "9ad8ef8a-6407-4eed-8cc3-5f379383ea98",
+                                                "sense_id": "61c5d915-7f30-46bc-a20d-7839d3ab82db",
+                                                "text": "Мы проводили тестирование на шести образцах."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "4458618e-1306-43b4-b68e-b40d4bb0bc56",
+                                        "entry_id": "de2931e2-6dec-49b4-abec-d7b600ae6bce",
+                                        "glosses": [
+                                            "проверка знаний учащегося при помощи тестов"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "3443647d-d6bb-4827-b015-225f48580ef3",
+                                                "sense_id": "4458618e-1306-43b4-b68e-b40d4bb0bc56",
+                                                "text": "Завтра снова тестирование в школе."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "9ae5da0a-cefa-4d04-8fdf-7f82d30df1c0",
+                "word": "testing",
+                "pos": "verb",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "f8731e0a-3d06-4a0f-af1c-98de00309b76",
+                        "entry_id": "9ae5da0a-cefa-4d04-8fdf-7f82d30df1c0",
+                        "glosses": [
+                            "present participle and gerund of test"
+                        ],
+                        "tags": [
+                            "form-of",
+                            "gerund",
+                            "participle",
+                            "present"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "2f4646d0-19a3-41df-9b94-beb764657ea4",
+                "word": "testing",
+                "pos": "adj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "b8307e8b-1f9a-4f2e-a9dd-832f4562ad2a",
+                        "entry_id": "2f4646d0-19a3-41df-9b94-beb764657ea4",
+                        "glosses": [
+                            "trudny, stanowiący wyzwanie"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "3ddeaff3-8ad9-4a9f-8811-5ce5af3237ec",
+                "word": "testing",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "18b8091b-7993-4e8f-8374-b4434d74e1b6",
+                        "entry_id": "3ddeaff3-8ad9-4a9f-8811-5ce5af3237ec",
+                        "glosses": [
+                            "przetestowanie, test"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"2.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "0cf1dc79-de93-4e3c-906c-c00fe42b3e43",
+                "word": "testing",
+                "pos": "verb",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "a6de3c51-2fd8-4ed5-87d7-50dbf3a1c37d",
+                        "entry_id": "0cf1dc79-de93-4e3c-906c-c00fe42b3e43",
+                        "glosses": [
+                            "imiesłów czasu teraźniejszego (present participle) czasownika to test"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"3.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ]
+    }
+}

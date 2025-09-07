@@ -15,7 +15,7 @@ class SettingsRepositoryJvmTest {
     @Test
     fun insert_and_query_and_delete_setting() {
         val driver = DriverFactory(null).createDriver(IN_MEMORY)
-        val db: AppDatabase = DatabaseProvider.createDatabase(driver)
+        val db: AppDatabase = DatabaseProvider.createAppDatabase(driver)
         val repo = SettingsRepository(db)
 
         val setting = Setting(

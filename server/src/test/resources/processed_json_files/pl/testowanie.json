@@ -1,0 +1,62 @@
+{
+    "entries": [
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "98d7c7ba-dd70-49f6-a75a-354a54ab4764",
+                    "sense_definition": "Czynność lub proces sprawdzania, badania lub weryfikacji czegoś (np. produktu, systemu, hipotezy) w celu oceny jego jakości, wydajności, funkcjonalności lub zgodności z określonymi wymaganiami.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Przed wprowadzeniem nowego leku na rynek, konieczne jest jego długotrwałe <w>testowanie</w> kliniczne.",
+                            "target_lang_translations": {
+                                "ru": "Перед выпуском нового лекарства на рынок необходимо его длительное клиническое <w>тестирование</w>."
+                            }
+                        },
+                        {
+                            "text": "Automatyczne <w>testowanie</w> oprogramowania znacznie przyspiesza proces wykrywania błędów.",
+                            "target_lang_translations": {
+                                "ru": "Автоматическое <w>тестирование</w> программного обеспечения значительно ускоряет процесс обнаружения ошибок."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "sprawdzanie",
+                        "badanie",
+                        "weryfikacja",
+                        "próba"
+                    ],
+                    "common_phrases": [
+                        "testowanie oprogramowania",
+                        "testowanie produktów",
+                        "testowanie hipotez",
+                        "przejść testowanie"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Действие или процесс проверки, испытания или верификации чего-либо (например, продукта, системы, гипотезы) с целью оценки качества, производительности, функциональности или соответствия определённым требованиям."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "тестирование",
+                                "target_lang_sense_clarification": "Основной и наиболее точный перевод. Используется в широком контексте для обозначения проверки продуктов, программного обеспечения, гипотез и т.д."
+                            },
+                            {
+                                "target_lang_word": "испытание",
+                                "target_lang_sense_clarification": "Часто используется для обозначения более строгих, официальных или физических проверок, например, техники, материалов или лекарств (клинические испытания)."
+                            },
+                            {
+                                "target_lang_word": "проверка",
+                                "target_lang_sense_clarification": "Более общее слово, означающее 'контроль' или 'проверку соответствия'. Может использоваться как синоним в некоторых контекстах."
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

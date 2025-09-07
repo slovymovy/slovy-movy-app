@@ -19,7 +19,7 @@ class SettingsRepositoryAndroidInstrumentedTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
         val driver = DriverFactory(context).createDriver("test.db")
-        val db: AppDatabase = DatabaseProvider.createDatabase(driver)
+        val db: AppDatabase = DatabaseProvider.createAppDatabase(driver)
         val repo = SettingsRepository(db)
         val setting = Setting(Setting.Name.TEST_PROPERTY, Json.parseToJsonElement("{\"version\": \"1.0\"}"))
         repo.insert(setting)
