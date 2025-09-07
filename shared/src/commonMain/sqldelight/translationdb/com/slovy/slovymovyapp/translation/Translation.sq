@@ -1,15 +1,17 @@
+import kotlin.uuid.Uuid;
+
 -- Translation database schema for target-language data linked to dictionary senses/examples
 
 -- Per-sense target language definitions
 CREATE TABLE sense_target_definition (
-  sense_id TEXT NOT NULL,
+  sense_id BLOB AS Uuid NOT NULL,
   definition TEXT NOT NULL,
   PRIMARY KEY(sense_id)
 );
 
 -- Per-sense translations: ordered list of target words per target language
 CREATE TABLE sense_translation (
-  sense_id TEXT NOT NULL,
+  sense_id BLOB AS Uuid NOT NULL,
   idx INTEGER NOT NULL, -- position within the list to preserve order
   target_lang_word TEXT NOT NULL,
   target_lang_sense_clarification TEXT,
@@ -18,7 +20,7 @@ CREATE TABLE sense_translation (
 
 -- Per-example target translations (scoped by sense_id and example_id)
 CREATE TABLE example_translation (
-  sense_id TEXT NOT NULL,
+  sense_id BLOB AS Uuid NOT NULL,
   example_id INTEGER NOT NULL,
   translation TEXT NOT NULL,
   PRIMARY KEY(sense_id, example_id)

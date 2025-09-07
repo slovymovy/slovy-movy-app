@@ -13,7 +13,7 @@ class SettingsRepositoryIosTest {
     @Test
     fun repository_works_on_ios_with_native_db() {
         val driver = DriverFactory(null).createDriver(":memory:")
-        val db: AppDatabase = DatabaseProvider.createDatabase(driver)
+        val db: AppDatabase = DatabaseProvider.createAppDatabase(driver)
         val repo = SettingsRepository(db)
         val setting = Setting(Setting.Name.TEST_PROPERTY, Json.parseToJsonElement("{\"version\": \"1.0\"}"))
         repo.insert(setting)

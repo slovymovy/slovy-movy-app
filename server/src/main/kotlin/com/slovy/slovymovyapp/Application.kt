@@ -21,7 +21,7 @@ fun main() {
 fun Application.module() {
 
     val driver = DriverFactory(null).createDriver(IN_MEMORY)
-    val db: AppDatabase = DatabaseProvider.createDatabase(driver)
+    val db: AppDatabase = DatabaseProvider.createAppDatabase(driver)
     val repo = SettingsRepository(db)
 
     routing {

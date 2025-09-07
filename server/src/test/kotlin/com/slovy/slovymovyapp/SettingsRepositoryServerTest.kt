@@ -15,7 +15,7 @@ class SettingsRepositoryServerTest {
     fun repository_works_on_server_with_in_memory_db() {
 
         val driver = DriverFactory(null).createDriver(IN_MEMORY)
-        val db: AppDatabase = DatabaseProvider.createDatabase(driver)
+        val db: AppDatabase = DatabaseProvider.createAppDatabase(driver)
         val repo = SettingsRepository(db)
         val setting = Setting(Setting.Name.TEST_PROPERTY, Json.parseToJsonElement("{\"port\": 8080}"))
         repo.insert(setting)
