@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [ 24, 29 ] # was handing on for some reason 29
+        api-level: [ 24, 29 ]
     steps:
       - name: checkout repository
         uses: actions/checkout@v5
@@ -69,7 +69,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedCheck
+          script: ./gradlew connectedCheck && killall -INT crashpad_handler || true # see https://github.com/ReactiveCircus/android-emulator-runner/issues/385
 
   tests-macos:
     timeout-minutes: 30
