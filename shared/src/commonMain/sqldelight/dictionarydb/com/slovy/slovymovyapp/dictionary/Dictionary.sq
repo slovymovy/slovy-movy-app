@@ -80,12 +80,12 @@ CREATE TABLE sense_trait (
 
 
 -- Indexes to speed up searches by lemma
-CREATE INDEX IF NOT EXISTS idx_lemma_lemma_lower ON lemma(lower(lemma));
-CREATE INDEX IF NOT EXISTS idx_lemma_lemma_normalized ON lemma(lemma_normalized);
+CREATE INDEX IF NOT EXISTS idx_lemma_lemma ON lemma(lemma COLLATE NOCASE);
+CREATE INDEX IF NOT EXISTS idx_lemma_lemma_normalized ON lemma(lemma_normalized COLLATE NOCASE);
 
 -- Indexes to speed up searches by form
-CREATE INDEX IF NOT EXISTS idx_form_form ON form(form);
-CREATE INDEX IF NOT EXISTS idx_form_form_normalized ON form(form_normalized);
+CREATE INDEX IF NOT EXISTS idx_form_form ON form(form COLLATE NOCASE);
+CREATE INDEX IF NOT EXISTS idx_form_form_normalized ON form(form_normalized COLLATE NOCASE);
 
 -- Queries
 insertPosEntry:
@@ -125,27 +125,32 @@ insertSenseTrait:
 INSERT OR IGNORE INTO sense_trait(sense_id, trait_type, comment)
 VALUES (?, ?, ?);
 
--- Search queries
--- Case-insensitive search using lower(); relies on idx_form_form_lower
-selectFormsByWord:
+selectFormsByForm:
 SELECT f.lemma_id, f.lemma_id, f.form
 FROM form f
-WHERE lower(f.form) = lower(?);
+WHERE f.form = ? COLLATE NOCASE;
 
--- Diacritic-insensitive search using precomputed normalized column
 selectFormsByNormalized:
 SELECT f.lemma_id, f.lemma_id, f.form
 FROM form f
-WHERE f.form_normalized = ?;
+WHERE f.form_normalized = ? COLLATE NOCASE;
 
--- Search queries for lemmas
+selectFormsByLemmaId:
+SELECT f.lemma_id, f.lemma_id, f.form
+FROM form f
+WHERE f.lemma_id = ?;
+
 selectLemmasByWord:
 SELECT l.id, l.lemma
 FROM lemma l
-WHERE lower(l.lemma) = lower(?);
+WHERE l.lemma = ? COLLATE NOCASE;
 
--- Diacritic-insensitive search using precomputed normalized column
+selectLemmasById:
+SELECT l.id, l.lemma
+FROM lemma l
+WHERE l.id = ?;
+
 selectLemmasByNormalized:
 SELECT l.id, l.lemma
 FROM lemma l
-WHERE l.lemma_normalized = ?;
+WHERE l.lemma_normalized = ? COLLATE NOCASE;

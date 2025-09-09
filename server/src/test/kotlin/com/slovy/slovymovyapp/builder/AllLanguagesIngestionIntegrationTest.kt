@@ -55,9 +55,10 @@ class AllLanguagesIngestionIntegrationTest {
                     e.senses.any { s -> processedSenseIds.contains(uuidParse(s.senseId.toString())) }
                 }
                 // Validate presence of at least first form (if any) from entries used by processed
-                val anyForm = entriesUsedByProcessed.firstOrNull { it.forms.isNotEmpty() }?.forms?.firstOrNull()?.form
-                if (anyForm != null) {
-                    val forms = dq.selectFormsByWord(anyForm.lowercase()).executeAsList()
+                val entry = entriesUsedByProcessed.firstOrNull { it.forms.isNotEmpty() }
+                val anyForm = entry?.forms?.firstOrNull()?.form
+                if (entry != null && anyForm != null) {
+                    val forms = dq.selectFormsByNormalized(unaccent(anyForm)).executeAsList()
                     assertTrue(forms.isNotEmpty(), "Form '$anyForm' should exist for '$word' in $lang")
                 }
 
