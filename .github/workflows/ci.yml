@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         api-level: [ 24, 29 ] # was handing on for some reason 29
     steps:
