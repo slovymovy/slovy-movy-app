@@ -18,3 +18,4 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 /.claude/settings.local.json
 /iosApp/Configuration/Config.local.xcconfig 
+.db-files

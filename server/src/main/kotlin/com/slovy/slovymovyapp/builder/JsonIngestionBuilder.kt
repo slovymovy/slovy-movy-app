@@ -237,8 +237,13 @@ fun uuidParse(string: String): Uuid = try {
     Uuid.parse(string)
 } catch (_: IllegalArgumentException) {
     // Pad incomplete UUID with zeros to reach required length
-    val paddedId = string.padEnd(36, '0')
-    Uuid.parse(paddedId)
+    val paddedId = string.replace(Regex("[^abcdef0-9]"), "")
+        .padEnd(32, '0').substring(0, 32)
+    try {
+        Uuid.parse(paddedId)
+    } catch (e: IllegalArgumentException) {
+        throw IllegalArgumentException("Invalid UUID: $string", e)
+    }
 }
 
 
