@@ -41,7 +41,7 @@ class AllLanguagesIngestionIntegrationTest {
                 val raw = json.decodeFromString(ExtractedWordData.serializer(), rawFile.readText())
                 val processed = json.decodeFromString(LanguageCardResponse.serializer(), pFile.readText())
                 val word = raw.word
-                val lemmas = dq.selectLemmasByNormalized(word.lowercase()).executeAsList()
+                val lemmas = dq.selectLemmasByWord(word.lowercase()).executeAsList()
                 assertTrue(lemmas.isNotEmpty(), "Lemma should exist for '$word' in $lang from ${pFile.name}")
 
                 // Determine native entries and forms to check
@@ -57,7 +57,7 @@ class AllLanguagesIngestionIntegrationTest {
                 // Validate presence of at least first form (if any) from entries used by processed
                 val anyForm = entriesUsedByProcessed.firstOrNull { it.forms.isNotEmpty() }?.forms?.firstOrNull()?.form
                 if (anyForm != null) {
-                    val forms = dq.selectFormsByNormalized(anyForm.lowercase()).executeAsList()
+                    val forms = dq.selectFormsByWord(anyForm.lowercase()).executeAsList()
                     assertTrue(forms.isNotEmpty(), "Form '$anyForm' should exist for '$word' in $lang")
                 }
 
