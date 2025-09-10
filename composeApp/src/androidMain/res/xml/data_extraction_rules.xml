@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <!-- Cloud backup (Android 12+). Only include the application database; downloaded DB files
+         in the databases/ dir are excluded by omission. -->
+    <cloud-backup>
+        <include domain="database" path="app.db" />
+    </cloud-backup>
+
+    <!-- Device-to-device transfer (Android 12+). Mirror the same include policy. -->
+    <device-transfer>
+        <include domain="database" path="app.db" />
+    </device-transfer>
+</data-extraction-rules>

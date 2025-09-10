@@ -4,6 +4,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.db.DriverFactory
+import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 
 fun main() = application {
@@ -15,6 +16,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "Open words"
     ) {
-        App(repo)
+        val platform = PlatformDbSupport(null)
+        App(repo, platform)
     }
 }

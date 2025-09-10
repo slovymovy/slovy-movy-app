@@ -1,8 +1,11 @@
 package com.slovy.slovymovyapp
 
 import androidx.compose.runtime.*
+import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.ui.DownloadDataScreen
 import com.slovy.slovymovyapp.ui.LanguageSelectionScreen
 import com.slovy.slovymovyapp.ui.SearchScreen
 import com.slovy.slovymovyapp.ui.WordDetailScreen
@@ -11,6 +14,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private enum class Route {
+    DOWNLOAD,
     LANGUAGE,
     SEARCH,
     DETAIL
@@ -18,23 +22,30 @@ private enum class Route {
 
 @Composable
 @Preview
-fun App(settingsRepository: SettingsRepository? = null) {
-    var route by remember { mutableStateOf(Route.SEARCH) }
+fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: PlatformDbSupport? = null) {
+    var route by remember { mutableStateOf(Route.DOWNLOAD) }
     var selectedLanguage by remember { mutableStateOf<String?>(null) }
     var selectedWord by remember { mutableStateOf<String?>(null) }
 
-    // Load persisted language once
+    val platform = remember(platformDbSupport) { platformDbSupport ?: PlatformDbSupport(null) }
+    val dataManager = remember(platform, settingsRepository) { DataDbManager(platform, settingsRepository) }
+
+    // Load persisted language and data version once
     LaunchedEffect(Unit) {
         val saved = settingsRepository?.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
-        if (saved.isNullOrBlank()) {
-            route = Route.LANGUAGE
-        } else {
-            selectedLanguage = saved
-            route = Route.SEARCH
-        }
+        val hasVersion = dataManager.hasRequiredVersion()
+        selectedLanguage = saved
+        route = if (!hasVersion) Route.DOWNLOAD else if (saved.isNullOrBlank()) Route.LANGUAGE else Route.SEARCH
     }
 
     when (route) {
+        Route.DOWNLOAD -> DownloadDataScreen(
+            manager = dataManager,
+            onSuccess = { route = if (selectedLanguage.isNullOrBlank()) Route.LANGUAGE else Route.SEARCH },
+            onCancel = { /* stay on screen or close app */ },
+            onError = { /* stay and allow retry */ }
+        )
+
         Route.LANGUAGE -> LanguageSelectionScreen(
             onLanguageChosen = { lang ->
                 // Persist selection
@@ -48,6 +59,7 @@ fun App(settingsRepository: SettingsRepository? = null) {
                 route = Route.SEARCH
             }
         )
+
         Route.SEARCH -> SearchScreen(
             language = selectedLanguage,
             onWordSelected = { word ->
@@ -55,6 +67,7 @@ fun App(settingsRepository: SettingsRepository? = null) {
                 route = Route.DETAIL
             }
         )
+
         Route.DETAIL -> WordDetailScreen(
             language = selectedLanguage,
             word = selectedWord ?: "",
