@@ -10,6 +10,7 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -107,29 +108,33 @@ class DataDbManager(
     ) = withContext(Dispatchers.Default) {
         val client = HttpClient()
         try {
-            val response: HttpResponse = client.get(url)
-            val total = response.headers["Content-Length"]?.toLongOrNull()
-            val out = platform.openOutput(destPath)
-            try {
-                val channel = response.bodyAsChannel()
-                val buffer = ByteArray(8 * 1024)
-                var downloaded = 0L
-                while (true) {
-                    if (cancelToken.isCancelled) {
-                        out.flush()
-                        out.close()
-                        platform.deleteFile(destPath)
-                        throw CancellationException("Download cancelled")
+            client.prepareGet(url).execute { response ->
+                val total = response.headers["Content-Length"]?.toLongOrNull()
+                val out = platform.openOutput(destPath)
+                try {
+                    val channel = response.bodyAsChannel()
+                    val buffer = ByteArray(1024 * 1024) // Smaller buffer for better memory efficiency
+                    var downloaded = 0L
+
+                    while (!channel.isClosedForRead) {
+                        if (cancelToken.isCancelled) {
+                            out.flush()
+                            out.close()
+                            platform.deleteFile(destPath)
+                            throw CancellationException("Download cancelled")
+                        }
+
+                        val read = channel.readAvailable(buffer, 0, buffer.size)
+                        if (read <= 0) break
+
+                        out.write(buffer, 0, read)
+                        out.flush() // Flush more frequently to avoid buffering
+                        downloaded += read
+                        onProgress(DownloadProgress(downloaded, total))
                     }
-                    val read = channel.readAvailable(buffer, 0, buffer.size)
-                    if (read <= 0) break
-                    out.write(buffer, 0, read)
-                    downloaded += read
-                    onProgress(DownloadProgress(downloaded, total))
+                } finally {
+                    out.close()
                 }
-                out.flush()
-            } finally {
-                out.close()
             }
         } finally {
             client.close()
