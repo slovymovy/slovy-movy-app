@@ -4,9 +4,11 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.translation.TranslationDatabase
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
+import kotlinx.io.files.Path
 import platform.Foundation.*
 
 actual class PlatformDbSupport actual constructor(androidContext: Any?) {
@@ -26,10 +28,10 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
 
     actual fun fileExists(path: String): Boolean = NSFileManager.defaultManager.fileExistsAtPath(path)
 
-    @OptIn(ExperimentalForeignApi::class)
+    @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     actual fun openOutput(destPath: String): PlatformFileOutput {
         val fileManager = NSFileManager.defaultManager
-        val parent = (destPath as NSString).stringByDeletingLastPathComponent
+        val parent = Path(destPath).parent?.toString() ?: error("Invalid path: $destPath")
         if (!fileManager.fileExistsAtPath(parent)) {
             fileManager.createDirectoryAtPath(parent, true, null, null)
         }
