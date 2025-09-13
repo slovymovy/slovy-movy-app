@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
@@ -115,6 +116,10 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.sqldelight.androidDriver)
+}
+
+sqldelight {
+    linkSqlite = true
 }
 
 compose.desktop {
