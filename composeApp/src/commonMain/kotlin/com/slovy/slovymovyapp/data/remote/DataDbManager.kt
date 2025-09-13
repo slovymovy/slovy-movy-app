@@ -106,7 +106,7 @@ class DataDbManager(
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken,
     ) = withContext(Dispatchers.Default) {
-        val client = HttpClient()
+        val client = platform.createHttpClient()
         try {
             client.prepareGet(url).execute { response ->
                 val total = response.headers["Content-Length"]?.toLongOrNull()
@@ -172,6 +172,7 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun markNoBackup(path: String)
     fun createReadOnlyDictionaryDriver(dbFile: DbFile): SqlDriver
     fun createReadOnlyTranslationDriver(dbFile: DbFile): SqlDriver
+    fun createHttpClient(): HttpClient
 }
 
 interface PlatformFileOutput {

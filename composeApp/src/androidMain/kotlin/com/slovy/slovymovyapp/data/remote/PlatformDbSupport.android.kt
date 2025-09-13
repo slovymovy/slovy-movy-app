@@ -5,6 +5,8 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.translation.TranslationDatabase
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
 import java.io.File
 import java.io.FileOutputStream
 
@@ -65,5 +67,9 @@ actual class PlatformDbSupport actual constructor(private val androidContext: An
             context = ctx,
             name = name
         )
+    }
+
+    actual fun createHttpClient(): HttpClient {
+        return HttpClient(OkHttp)
     }
 }

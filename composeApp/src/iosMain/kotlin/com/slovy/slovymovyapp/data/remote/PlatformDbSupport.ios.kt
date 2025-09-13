@@ -4,6 +4,8 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.translation.TranslationDatabase
+import io.ktor.client.*
+import io.ktor.client.engine.darwin.*
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
@@ -75,6 +77,10 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
 
     actual fun createReadOnlyTranslationDriver(dbFile: DbFile): SqlDriver {
         return NativeSqliteDriver(TranslationDatabase.Schema, dbFile.path)
+    }
+
+    actual fun createHttpClient(): HttpClient {
+        return HttpClient(Darwin)
     }
 
     @OptIn(ExperimentalForeignApi::class)

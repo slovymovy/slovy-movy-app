@@ -2,6 +2,8 @@ package com.slovy.slovymovyapp.data.remote
 
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
 import java.io.File
 import java.io.FileOutputStream
 
@@ -53,5 +55,9 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     actual fun createReadOnlyTranslationDriver(dbFile: DbFile): SqlDriver {
         val url = "jdbc:sqlite:${dbFile.path}?mode=ro"
         return JdbcSqliteDriver(url)
+    }
+
+    actual fun createHttpClient(): HttpClient {
+        return HttpClient(CIO)
     }
 }
