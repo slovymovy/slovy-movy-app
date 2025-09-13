@@ -53,6 +53,7 @@ val appDatabaseName = "AppDatabase"
 val dictionaryDatabaseName = "DictionaryDatabase"
 val translationDatabaseName = "TranslationDatabase"
 sqldelight {
+    linkSqlite = true
     databases {
         create(appDatabaseName) {
             packageName.set("com.slovy.slovymovyapp.db")
