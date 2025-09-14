@@ -69,7 +69,10 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedCheck; killall -INT crashpad_handler || true # see https://github.com/ReactiveCircus/android-emulator-runner/issues/385
+          script: |
+            ./gradlew connectedCheck; status=$?
+            killall -INT crashpad_handler || true # see https://github.com/ReactiveCircus/android-emulator-runner/issues/385
+            exit $status
 
       - name: Upload test results and reports (Linux)
         if: always()
