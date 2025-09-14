@@ -69,7 +69,24 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedCheck && killall -INT crashpad_handler || true # see https://github.com/ReactiveCircus/android-emulator-runner/issues/385
+          script: |
+            ./gradlew connectedCheck; status=$?
+            killall -INT crashpad_handler || true # see https://github.com/ReactiveCircus/android-emulator-runner/issues/385
+            exit $status
+
+      - name: Upload test results and reports (Linux)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-linux-api-${{ matrix.api-level }}
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            **/build/reports/problems/**
+            **/build/reports/tests/**
+            **/build/test-results/**
+            **/build/reports/androidTests/**
+            **/build/outputs/androidTest-results/**
 
   tests-macos:
     timeout-minutes: 30
@@ -105,3 +122,15 @@ jobs:
           SDK_NAME: iphonesimulator
         run: |
           ./gradlew iosX64Test
+
+      - name: Upload test results and reports (macOS)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-macos
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            **/build/reports/problems/**
+            **/build/reports/tests/**
+            **/build/test-results/**

@@ -8,9 +8,17 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
+
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
+
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
@@ -37,6 +45,8 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.sqldelight.androidDriver)
+            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -48,8 +58,14 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlinx.serializationJson)
+            implementation(libs.kotlinx.coroutinesCore)
             implementation(libs.sqldelight.runtime)
+            implementation(libs.ktor.client.core)
             implementation(projects.shared)
+        }
+        iosMain.dependencies {
+            implementation(libs.sqldelight.nativeDriver)
+            implementation(libs.ktor.client.darwin)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -57,6 +73,8 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.sqldelight.sqliteDriver)
+            implementation(libs.ktor.client.cio)
         }
     }
 }
@@ -98,6 +116,10 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.sqldelight.androidDriver)
+}
+
+sqldelight {
+    linkSqlite = true
 }
 
 compose.desktop {
