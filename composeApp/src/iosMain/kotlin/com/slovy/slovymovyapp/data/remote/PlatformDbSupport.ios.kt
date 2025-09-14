@@ -72,11 +72,29 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     actual fun createReadOnlyDictionaryDriver(dbFile: DbFile): SqlDriver {
-        return NativeSqliteDriver(DictionaryDatabase.Schema, dbFile.path)
+        // SQLiter/NativeSqliteDriver expects a filename without path; provide basePath separately.
+        val name = NSURL.fileURLWithPath(dbFile.path).lastPathComponent ?: dbFile.path
+        return NativeSqliteDriver(
+            schema = DictionaryDatabase.Schema,
+            name = name,
+            onConfiguration = { cfg ->
+                val ext = cfg.extendedConfig.copy(basePath = baseDir)
+                cfg.copy(extendedConfig = ext)
+            }
+        )
     }
 
     actual fun createReadOnlyTranslationDriver(dbFile: DbFile): SqlDriver {
-        return NativeSqliteDriver(TranslationDatabase.Schema, dbFile.path)
+        // SQLiter/NativeSqliteDriver expects a filename without path; provide basePath separately.
+        val name = NSURL.fileURLWithPath(dbFile.path).lastPathComponent ?: dbFile.path
+        return NativeSqliteDriver(
+            schema = TranslationDatabase.Schema,
+            name = name,
+            onConfiguration = { cfg ->
+                val ext = cfg.extendedConfig.copy(basePath = baseDir)
+                cfg.copy(extendedConfig = ext)
+            }
+        )
     }
 
     actual fun createHttpClient(): HttpClient {
