@@ -7,4 +7,15 @@
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
     </dict>
+     <key>NSAppTransportSecurity</key>
+        <dict>
+            <key>NSExceptionDomains</key>
+            <dict>
+                <key>storage.googleapis.com</key>
+                <dict>
+                    <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                    <true/>
+                </dict>
+            </dict>
+        </dict>
 </plist>

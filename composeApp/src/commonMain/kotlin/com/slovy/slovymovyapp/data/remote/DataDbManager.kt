@@ -29,7 +29,9 @@ class DataDbManager(
 ) {
     companion object {
         const val VERSION = "v0"
-        const val BASE_URL = "https://storage.googleapis.com/slovymovy/v0/"
+        // TODO: we use HTTP for now to workaround some issues with IOS emulator
+        // https://github.com/slovymovy/slovy-movy-app/issues/34
+        const val BASE_URL = "http://storage.googleapis.com/slovymovy/v0/"
         fun dictionaryFileName(lang: String): String = "dictionary_${lang.lowercase()}.db"
         fun translationFileName(src: String, tgt: String): String =
             "translation_${src.lowercase()}_${tgt.lowercase()}.db"
