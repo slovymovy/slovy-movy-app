@@ -3,7 +3,6 @@ package com.slovy.slovymovyapp.data.remote
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
-import com.slovy.slovymovyapp.translation.TranslationDatabase
 import io.ktor.client.*
 import io.ktor.client.engine.darwin.*
 import kotlinx.cinterop.BetaInteropApi
@@ -71,10 +70,10 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         url.setResourceValue(true, forKey = NSURLIsExcludedFromBackupKey, error = null)
     }
 
-    actual fun createReadOnlyDictionaryDriver(dbFile: DbFile): SqlDriver {
+    actual fun createDataReadonlyDriver(dbFile: DbFile): SqlDriver {
         // SQLiter/NativeSqliteDriver expects a filename without path; provide basePath separately.
         val name = NSURL.fileURLWithPath(dbFile.path).lastPathComponent ?: dbFile.path
-        return NativeSqliteDriver(
+        val result = NativeSqliteDriver(
             schema = DictionaryDatabase.Schema,
             name = name,
             onConfiguration = { cfg ->
@@ -82,19 +81,8 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
                 cfg.copy(extendedConfig = ext)
             }
         )
-    }
-
-    actual fun createReadOnlyTranslationDriver(dbFile: DbFile): SqlDriver {
-        // SQLiter/NativeSqliteDriver expects a filename without path; provide basePath separately.
-        val name = NSURL.fileURLWithPath(dbFile.path).lastPathComponent ?: dbFile.path
-        return NativeSqliteDriver(
-            schema = TranslationDatabase.Schema,
-            name = name,
-            onConfiguration = { cfg ->
-                val ext = cfg.extendedConfig.copy(basePath = baseDir)
-                cfg.copy(extendedConfig = ext)
-            }
-        )
+        enforceQueryOnly(result)
+        return result
     }
 
     actual fun createHttpClient(): HttpClient {

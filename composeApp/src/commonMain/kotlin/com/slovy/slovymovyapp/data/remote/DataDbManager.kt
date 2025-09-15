@@ -58,15 +58,13 @@ class DataDbManager(
 
     fun openDictionaryReadOnly(lang: String): DictionaryDatabase {
         val file = DbFile(platform.getDatabasePath(dictionaryFileName(lang)))
-        val driver = platform.createReadOnlyDictionaryDriver(file)
-        enforceQueryOnly(driver)
+        val driver = platform.createDataReadonlyDriver(file)
         return DatabaseProvider.createDictionaryDatabase(driver)
     }
 
     fun openTranslationReadOnly(src: String, tgt: String): TranslationDatabase {
         val file = DbFile(platform.getDatabasePath(translationFileName(src, tgt)))
-        val driver = platform.createReadOnlyTranslationDriver(file)
-        enforceQueryOnly(driver)
+        val driver = platform.createDataReadonlyDriver(file)
         return DatabaseProvider.createTranslationDatabase(driver)
     }
 
@@ -172,8 +170,7 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun openOutput(destPath: String): PlatformFileOutput
     fun deleteFile(path: String)
     fun markNoBackup(path: String)
-    fun createReadOnlyDictionaryDriver(dbFile: DbFile): SqlDriver
-    fun createReadOnlyTranslationDriver(dbFile: DbFile): SqlDriver
+    fun createDataReadonlyDriver(dbFile: DbFile): SqlDriver
     fun createHttpClient(): HttpClient
 }
 
@@ -184,7 +181,7 @@ interface PlatformFileOutput {
 }
 
 // Query-only enforcement is identical across platforms
-private fun enforceQueryOnly(driver: SqlDriver) {
+fun enforceQueryOnly(driver: SqlDriver) {
     try {
         driver.execute(null, "PRAGMA query_only = ON", 0)
     } catch (_: Throwable) {

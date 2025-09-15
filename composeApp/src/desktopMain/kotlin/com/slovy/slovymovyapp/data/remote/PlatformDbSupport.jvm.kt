@@ -47,12 +47,7 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         // No-op on desktop JVM
     }
 
-    actual fun createReadOnlyDictionaryDriver(dbFile: DbFile): SqlDriver {
-        val url = "jdbc:sqlite:${dbFile.path}?mode=ro"
-        return JdbcSqliteDriver(url)
-    }
-
-    actual fun createReadOnlyTranslationDriver(dbFile: DbFile): SqlDriver {
+    actual fun createDataReadonlyDriver(dbFile: DbFile): SqlDriver {
         val url = "jdbc:sqlite:${dbFile.path}?mode=ro"
         return JdbcSqliteDriver(url)
     }

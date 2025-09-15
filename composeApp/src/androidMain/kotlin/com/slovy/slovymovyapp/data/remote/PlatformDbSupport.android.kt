@@ -4,7 +4,6 @@ import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
-import com.slovy.slovymovyapp.translation.TranslationDatabase
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import java.io.File
@@ -51,22 +50,15 @@ actual class PlatformDbSupport actual constructor(private val androidContext: An
         // No runtime action needed here.
     }
 
-    actual fun createReadOnlyDictionaryDriver(dbFile: DbFile): SqlDriver {
+    actual fun createDataReadonlyDriver(dbFile: DbFile): SqlDriver {
         val name = File(dbFile.path).name
-        return AndroidSqliteDriver(
+        val result = AndroidSqliteDriver(
             schema = DictionaryDatabase.Schema,
             context = ctx,
             name = name
         )
-    }
-
-    actual fun createReadOnlyTranslationDriver(dbFile: DbFile): SqlDriver {
-        val name = File(dbFile.path).name
-        return AndroidSqliteDriver(
-            schema = TranslationDatabase.Schema,
-            context = ctx,
-            name = name
-        )
+        enforceQueryOnly(result)
+        return result
     }
 
     actual fun createHttpClient(): HttpClient {
