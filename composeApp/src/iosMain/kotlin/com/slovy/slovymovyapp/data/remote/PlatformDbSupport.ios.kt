@@ -106,6 +106,19 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     @OptIn(ExperimentalForeignApi::class)
+    actual fun getAvailableBytesForPath(path: String): Long? {
+        return try {
+            val fm = NSFileManager.defaultManager
+            val dir = Path(path).parent?.toString() ?: path
+            val attrs = fm.attributesOfFileSystemForPath(dir, error = null)
+            val free = attrs?.get(NSFileSystemFreeSize) as? NSNumber
+            free?.longLongValue
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
     private fun ensureDir(path: String) {
         val fileManager = NSFileManager.defaultManager
         if (!fileManager.fileExistsAtPath(path)) {

@@ -29,6 +29,7 @@ class DataDbManager(
 ) {
     companion object {
         const val VERSION = "v0"
+
         // TODO: we use HTTP for now to workaround some issues with IOS emulator
         // https://github.com/slovymovy/slovy-movy-app/issues/34
         const val BASE_URL = "http://storage.googleapis.com/slovymovy/v0/"
@@ -115,6 +116,14 @@ class DataDbManager(
             }
             client.prepareGet(url).execute { response ->
                 val total = response.headers["Content-Length"]?.toLongOrNull()
+                // Check available disk space if total size is known
+                if (total != null) {
+                    val available = platform.getAvailableBytesForPath(destPath)
+                    val headroom = 1024L * 1024L // 1 MiB safety margin
+                    if (available != null && available < total + headroom) {
+                        throw IllegalStateException("Not enough free space to download file: required=${total + headroom}, available=$available")
+                    }
+                }
                 val out = platform.openOutput(tempPath)
                 try {
                     val channel = response.bodyAsChannel()
@@ -192,6 +201,9 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun markNoBackup(path: String)
     fun createDataReadonlyDriver(dbFile: DbFile): SqlDriver
     fun createHttpClient(): HttpClient
+
+    // Returns available bytes for the filesystem containing the provided path. Null if unknown.
+    fun getAvailableBytesForPath(path: String): Long?
 }
 
 interface PlatformFileOutput {

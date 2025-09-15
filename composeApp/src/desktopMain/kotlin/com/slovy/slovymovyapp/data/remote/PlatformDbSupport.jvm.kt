@@ -63,4 +63,13 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     actual fun createHttpClient(): HttpClient {
         return HttpClient(CIO)
     }
+
+    actual fun getAvailableBytesForPath(path: String): Long? {
+        return try {
+            val dir = File(path).parentFile ?: File(path)
+            dir.usableSpace
+        } catch (_: Throwable) {
+            null
+        }
+    }
 }
