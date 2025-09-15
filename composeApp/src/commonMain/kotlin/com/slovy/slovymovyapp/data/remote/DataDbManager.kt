@@ -107,10 +107,15 @@ class DataDbManager(
         cancelToken: CancelToken,
     ) = withContext(Dispatchers.Default) {
         val client = platform.createHttpClient()
+        val tempPath = "$destPath.part"
         try {
+            // Ensure no stale temp file exists
+            if (platform.fileExists(tempPath)) {
+                platform.deleteFile(tempPath)
+            }
             client.prepareGet(url).execute { response ->
                 val total = response.headers["Content-Length"]?.toLongOrNull()
-                val out = platform.openOutput(destPath)
+                val out = platform.openOutput(tempPath)
                 try {
                     val channel = response.bodyAsChannel()
                     val buffer = ByteArray(1024 * 1024) // Smaller buffer for better memory efficiency
@@ -120,7 +125,7 @@ class DataDbManager(
                         if (cancelToken.isCancelled) {
                             out.flush()
                             out.close()
-                            platform.deleteFile(destPath)
+                            platform.deleteFile(tempPath)
                             throw CancellationException("Download cancelled")
                         }
 
@@ -136,6 +141,20 @@ class DataDbManager(
                     out.close()
                 }
             }
+            // After successful download, move temp to destination
+            if (!platform.moveFile(tempPath, destPath)) {
+                // Best effort cleanup
+                platform.deleteFile(tempPath)
+                throw IllegalStateException("Failed to move downloaded file to destination")
+            }
+        } catch (e: CancellationException) {
+            // Ensure temp file is removed on cancel
+            platform.deleteFile(tempPath)
+            throw e
+        } catch (t: Throwable) {
+            // Ensure temp file is removed on error
+            platform.deleteFile(tempPath)
+            throw t
         } finally {
             client.close()
         }
@@ -169,6 +188,7 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun fileExists(path: String): Boolean
     fun openOutput(destPath: String): PlatformFileOutput
     fun deleteFile(path: String)
+    fun moveFile(from: String, to: String): Boolean
     fun markNoBackup(path: String)
     fun createDataReadonlyDriver(dbFile: DbFile): SqlDriver
     fun createHttpClient(): HttpClient

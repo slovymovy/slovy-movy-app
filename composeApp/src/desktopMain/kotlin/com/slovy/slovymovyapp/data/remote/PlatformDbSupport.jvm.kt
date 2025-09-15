@@ -43,6 +43,14 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         File(path).delete()
     }
 
+    actual fun moveFile(from: String, to: String): Boolean {
+        val src = File(from)
+        val dst = File(to)
+        dst.parentFile?.mkdirs()
+        if (dst.exists()) dst.delete()
+        return src.renameTo(dst)
+    }
+
     actual fun markNoBackup(path: String) {
         // No-op on desktop JVM
     }

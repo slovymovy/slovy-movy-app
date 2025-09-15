@@ -44,6 +44,14 @@ actual class PlatformDbSupport actual constructor(private val androidContext: An
         File(path).delete()
     }
 
+    actual fun moveFile(from: String, to: String): Boolean {
+        val src = File(from)
+        val dst = File(to)
+        dst.parentFile?.mkdirs()
+        if (dst.exists()) dst.delete()
+        return src.renameTo(dst)
+    }
+
     actual fun markNoBackup(path: String) {
         // Auto Backup rules (fullBackupContent) in the app manifest include only app.db from the
         // databases domain. All downloaded DB files are excluded from backup automatically.

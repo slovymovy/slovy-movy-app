@@ -64,6 +64,22 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     @OptIn(ExperimentalForeignApi::class)
+    actual fun moveFile(from: String, to: String): Boolean {
+        val fm = NSFileManager.defaultManager
+        // Ensure destination directory exists
+        val toUrl = NSURL.fileURLWithPath(to)
+        val parent = toUrl.URLByDeletingLastPathComponent?.path
+        if (parent != null && !fm.fileExistsAtPath(parent)) {
+            fm.createDirectoryAtPath(parent, true, null, null)
+        }
+        // Remove destination if present
+        if (fm.fileExistsAtPath(to)) {
+            fm.removeItemAtPath(to, error = null)
+        }
+        return fm.moveItemAtPath(from, toPath = to, error = null)
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
     actual fun markNoBackup(path: String) {
         // Exclude from iCloud and iTunes backups
         val url = NSURL.fileURLWithPath(path)
