@@ -1,26 +1,24 @@
-package com.slovy.slovymovyapp
+package com.slovy.slovymovyapp.db
 
-import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver.Companion.IN_MEMORY
-import com.slovy.slovymovyapp.data.db.DatabaseProvider
-import com.slovy.slovymovyapp.data.db.DriverFactory
+import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
-import com.slovy.slovymovyapp.db.AppDatabase
+import com.slovy.slovymovyapp.test.BaseTest
+import com.slovy.slovymovyapp.test.platformDbSupport
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SettingsRepositoryJvmTest {
+open class SettingsRepositoryTest : BaseTest() {
 
     @Test
     fun insert_and_query_and_delete_setting() {
-        val driver = DriverFactory(null).createDriver(IN_MEMORY)
-        val db: AppDatabase = DatabaseProvider.createAppDatabase(driver)
+        val db: AppDatabase = DataDbManager(platformDbSupport()).openAppDatabase()
         val repo = SettingsRepository(db)
 
         val setting = Setting(
             id = Setting.Name.TEST_PROPERTY,
-            value = Json.parseToJsonElement("{\"mode\": \"dark\"}")
+            value = Json.Default.parseToJsonElement("{\"mode\": \"dark\"}")
         )
 
         // Insert

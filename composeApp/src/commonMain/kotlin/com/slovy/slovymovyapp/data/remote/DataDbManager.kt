@@ -4,6 +4,7 @@ import app.cash.sqldelight.db.SqlDriver
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import io.ktor.client.*
@@ -13,6 +14,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.max
@@ -29,6 +31,7 @@ class DataDbManager(
 ) {
     companion object {
         const val VERSION = "v0"
+
         // TODO: we use HTTP for now to workaround some issues with IOS emulator
         // https://github.com/slovymovy/slovy-movy-app/issues/34
         const val BASE_URL = "http://storage.googleapis.com/slovymovy/v0/"
@@ -41,9 +44,14 @@ class DataDbManager(
         lang: String,
         onProgress: (DownloadProgress) -> Unit = {},
         cancelToken: CancelToken? = null
-    ): DbFile {
+    ): Path {
         val name = dictionaryFileName(lang)
         return ensureFile(name, onProgress, cancelToken)
+    }
+
+    fun deleteDictionary(lang: String) {
+        val name = dictionaryFileName(lang)
+        platform.deleteFile(platform.getDatabasePath(name))
     }
 
     suspend fun ensureTranslation(
@@ -51,20 +59,31 @@ class DataDbManager(
         tgt: String,
         onProgress: (DownloadProgress) -> Unit = {},
         cancelToken: CancelToken? = null
-    ): DbFile {
+    ): Path {
         val name = translationFileName(src, tgt)
         return ensureFile(name, onProgress, cancelToken)
     }
 
+    fun deleteTranslation(src: String, tgt: String) {
+        val name = translationFileName(src, tgt)
+        platform.deleteFile(platform.getDatabasePath(name))
+    }
+
+    fun openAppDatabase(): AppDatabase {
+        val file = platform.getDatabasePath("app.db")
+        val driver = platform.createAppDataDriver(file)
+        return DatabaseProvider.createAppDatabase(driver)
+    }
+
     fun openDictionaryReadOnly(lang: String): DictionaryDatabase {
-        val file = DbFile(platform.getDatabasePath(dictionaryFileName(lang)))
-        val driver = platform.createDataReadonlyDriver(file)
+        val file = platform.getDatabasePath(dictionaryFileName(lang))
+        val driver = platform.createDictionaryDataDriver(file, true)
         return DatabaseProvider.createDictionaryDatabase(driver)
     }
 
     fun openTranslationReadOnly(src: String, tgt: String): TranslationDatabase {
-        val file = DbFile(platform.getDatabasePath(translationFileName(src, tgt)))
-        val driver = platform.createDataReadonlyDriver(file)
+        val file = platform.getDatabasePath(translationFileName(src, tgt))
+        val driver = platform.createTranslationDataDriver(file, true)
         return DatabaseProvider.createTranslationDatabase(driver)
     }
 
@@ -86,9 +105,9 @@ class DataDbManager(
         name: String,
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken?,
-    ): DbFile = withContext(Dispatchers.Default) {
+    ): Path = withContext(Dispatchers.Default) {
         val path = platform.getDatabasePath(name)
-        val file = DbFile(path)
+        val file = Path(path)
         if (!platform.fileExists(path)) {
             val url = BASE_URL + name
             platform.ensureDatabasesDir()
@@ -102,15 +121,28 @@ class DataDbManager(
 
     private suspend fun downloadToFile(
         url: String,
-        destPath: String,
+        destPath: Path,
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken,
     ) = withContext(Dispatchers.Default) {
         val client = platform.createHttpClient()
+        val tempPath = Path("$destPath.part")
         try {
+            // Ensure no stale temp file exists
+            if (platform.fileExists(tempPath)) {
+                platform.deleteFile(tempPath)
+            }
             client.prepareGet(url).execute { response ->
                 val total = response.headers["Content-Length"]?.toLongOrNull()
-                val out = platform.openOutput(destPath)
+                // Check available disk space if total size is known
+                if (total != null) {
+                    val available = platform.getAvailableBytesForPath(destPath)
+                    val headroom = 1024L * 1024L // 1 MiB safety margin
+                    if (available != null && available < total + headroom) {
+                        throw IllegalStateException("Not enough free space to download file: required=${total + headroom}, available=$available")
+                    }
+                }
+                val out = platform.openOutput(tempPath)
                 try {
                     val channel = response.bodyAsChannel()
                     val buffer = ByteArray(1024 * 1024) // Smaller buffer for better memory efficiency
@@ -120,7 +152,7 @@ class DataDbManager(
                         if (cancelToken.isCancelled) {
                             out.flush()
                             out.close()
-                            platform.deleteFile(destPath)
+                            platform.deleteFile(tempPath)
                             throw CancellationException("Download cancelled")
                         }
 
@@ -136,14 +168,25 @@ class DataDbManager(
                     out.close()
                 }
             }
+            // After successful download, move temp to destination
+            if (!platform.moveFile(tempPath, destPath)) {
+                // Best effort cleanup
+                platform.deleteFile(tempPath)
+                throw IllegalStateException("Failed to move downloaded file to destination")
+            }
+        } catch (e: CancellationException) {
+            // Ensure temp file is removed on cancel
+            platform.deleteFile(tempPath)
+            throw e
+        } catch (t: Throwable) {
+            // Ensure temp file is removed on error
+            platform.deleteFile(tempPath)
+            throw t
         } finally {
             client.close()
         }
     }
 }
-
-// Simple path holder
-data class DbFile(val path: String)
 
 // Download cancellation token
 class CancelToken {
@@ -164,14 +207,20 @@ class DownloadProgress(val bytesDownloaded: Long, val totalBytes: Long?) {
  * Platform-specific support for file locations, and read-only driver creation.
  */
 expect class PlatformDbSupport(androidContext: Any? = null) {
-    fun getDatabasePath(name: String): String
+    fun getDatabasePath(name: String): Path
     fun ensureDatabasesDir()
-    fun fileExists(path: String): Boolean
-    fun openOutput(destPath: String): PlatformFileOutput
-    fun deleteFile(path: String)
-    fun markNoBackup(path: String)
-    fun createDataReadonlyDriver(dbFile: DbFile): SqlDriver
+    fun fileExists(path: Path): Boolean
+    fun openOutput(destPath: Path): PlatformFileOutput
+    fun deleteFile(path: Path)
+    fun moveFile(from: Path, to: Path): Boolean
+    fun markNoBackup(path: Path)
+    fun createAppDataDriver(path: Path): SqlDriver
+    fun createDictionaryDataDriver(path: Path, readOnly: Boolean): SqlDriver
+    fun createTranslationDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createHttpClient(): HttpClient
+
+    // Returns available bytes for the filesystem containing the provided path. Null if unknown.
+    fun getAvailableBytesForPath(path: Path): Long?
 }
 
 interface PlatformFileOutput {

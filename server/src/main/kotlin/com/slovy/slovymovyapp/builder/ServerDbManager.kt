@@ -1,7 +1,10 @@
 package com.slovy.slovymovyapp.builder
 
+import app.cash.sqldelight.db.QueryResult
+import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
+import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import java.io.File
@@ -10,7 +13,7 @@ import java.io.File
  * Simple DB manager that creates per-language dictionary DBs and per-translation-pair DBs.
  * Files are created under the provided outputDir.
  */
-class DbManager(private val outputDir: File) {
+class ServerDbManager(private val outputDir: File) {
     init {
         if (!outputDir.exists()) outputDir.mkdirs()
     }
@@ -22,23 +25,35 @@ class DbManager(private val outputDir: File) {
 
     fun openDictionary(langCode: String): DictionaryDatabase {
         val file = dictionaryDbFile(langCode)
-        val isNew = !file.exists()
-        val url = "jdbc:sqlite:${file.absolutePath}"
-        val driver = JdbcSqliteDriver(url)
-        if (isNew) {
-            DictionaryDatabase.Schema.create(driver)
-        }
+        val schema = DictionaryDatabase.Schema
+        val driver = driver(file, schema)
         return DatabaseProvider.createDictionaryDatabase(driver)
     }
 
     fun openTranslation(sourceLang: String, targetLang: String): TranslationDatabase {
         val file = translationDbFile(sourceLang, targetLang)
+        val schema = TranslationDatabase.Schema
+        val driver = driver(file, schema)
+        return DatabaseProvider.createTranslationDatabase(driver)
+    }
+
+    fun openApp(): AppDatabase {
+        val file = File(outputDir, "app.db")
+        val schema = AppDatabase.Schema
+        val driver = driver(file, schema)
+        return DatabaseProvider.createAppDatabase(driver)
+    }
+
+    private fun driver(
+        file: File,
+        schema: SqlSchema<QueryResult.Value<Unit>>
+    ): JdbcSqliteDriver {
         val isNew = !file.exists()
         val url = "jdbc:sqlite:${file.absolutePath}"
         val driver = JdbcSqliteDriver(url)
         if (isNew) {
-            TranslationDatabase.Schema.create(driver)
+            schema.create(driver)
         }
-        return DatabaseProvider.createTranslationDatabase(driver)
+        return driver
     }
 }

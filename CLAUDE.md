@@ -26,11 +26,19 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **Desktop distribution**: `gradlew :composeApp:packageDistributionForCurrentOS`
 
 ## Test Structure
-- **shared**: `shared/src/commonTest` (kotlin-test)
-  - Platform-specific: `shared/src/jvmTest`, `shared/src/iosTest`
-- **composeApp**: `composeApp/src/commonTest` (kotlin-test)
-  - Android instrumented: `composeApp/src/androidTest` (androidx.test)
+- **shared**: Core logic lives in `shared/src/commonMain`; use the composeApp tests to cover DB behaviour.
+- **composeApp**: Shared tests live in `composeApp/src/commonTest`. The expect/actual `BaseTest` + `TestContext` wiring lets the same tests run on every target:
+  - Android JVM (`gradlew :composeApp:androidUnitTest`) uses Robolectric to provide an Android context.
+  - Android instrumented (`gradlew :composeApp:connectedAndroidTest`) reuses the same `commonTest` sources; requires an emulator/device and network access for DB download tests.
+  - Desktop JVM (`gradlew :composeApp:desktopTest`) exercises the same tests against the JDBC driver.
+  - iOS simulator (`gradlew :composeApp:iosSimulatorArm64Test`) runs the tests on macOS; native targets are skipped elsewhere.
 - **server**: `server/src/test` (ktor-server-test-host, kotlin-test-junit)
+
+### Adding Tests
+- Default to `composeApp/src/commonTest` so logic executes on Android JVM, Android instrumented, Desktop, and iOS.
+- Extend `BaseTest` for KMP tests; it injects the platform context through `TestContext`.
+- If a test needs target-specific setup, update the relevant `TestContext.<platform>.kt` actual or add a new expect/actual helper alongside `BaseTest`.
+- Only add platform-specific test source sets when behaviour truly diverges (e.g., Android UI instrumentation); otherwise keep coverage centralized in `commonTest`.
 
 ## Configuration
 - **Versions**: All in `gradle/libs.versions.toml`
@@ -51,7 +59,8 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - Dictionary DB schema: `shared/src/commonMain/sqldelight/dictionarydb/com/slovy/slovymovyapp/dictionary/`
 - Translation DB schema: `shared/src/commonMain/sqldelight/translationdb/com/slovy/slovymovyapp/translation/`
 - Repository pattern: `SettingsRepository` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/settings/`
-- Platform drivers: DriverFactory implementations for Android/iOS/JVM
+- Database bootstrap: `DatabaseProvider` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/db/`
+- Platform DB support: expect/actual `PlatformDbSupport` + helpers in `composeApp/src/*/kotlin/com/slovy/slovymovyapp/data/remote/`
 
 ## Testing Guidelines
 - Do not leave println statements in tests.
@@ -64,4 +73,3 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 ## Key Notes
 - Module accessors: :composeApp, :shared, :server
 - iOS warnings on non-macOS are expected and harmless
-- Compose Hot Reload plugin available for development

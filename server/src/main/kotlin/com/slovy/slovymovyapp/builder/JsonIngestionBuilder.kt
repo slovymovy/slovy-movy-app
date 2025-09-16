@@ -26,7 +26,7 @@ val LANG_TO_SOURCE_FILE: Map<String, String> = mapOf(
     "pl" to "pl-extract.jsonl",
 )
 
-class JsonIngestionBuilder(private val dbManager: DbManager) {
+class JsonIngestionBuilder(private val serverDbManager: ServerDbManager) {
 
     @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
@@ -42,7 +42,7 @@ class JsonIngestionBuilder(private val dbManager: DbManager) {
         val langCode = raw.langCode
         val lemmaWord = raw.word
 
-        val dictDb = dbManager.openDictionary(langCode)
+        val dictDb = serverDbManager.openDictionary(langCode)
         val dictQ = dictDb.dictionaryQueries
         dictDb.transaction {
 
@@ -162,7 +162,7 @@ class JsonIngestionBuilder(private val dbManager: DbManager) {
             // Build translation DBs per target language encountered
             val targetLangs = collectTargetLanguages(processed)
             targetLangs.forEach { trg ->
-                val trDb = dbManager.openTranslation(raw.langCode, trg)
+                val trDb = serverDbManager.openTranslation(raw.langCode, trg)
                 val trQ = trDb.translationQueries
                 trDb.transaction {
                     processed.entries.forEach { posEntry ->

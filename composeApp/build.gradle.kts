@@ -1,6 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -11,21 +12,20 @@ plugins {
     alias(libs.plugins.sqldelight)
 }
 
+@OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
-
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
+        instrumentedTestVariant {
+            sourceSetTree.set(KotlinSourceSetTree.test)
+        }
     }
-
     listOf(
         iosX64(),
         iosArm64(),
@@ -41,7 +41,6 @@ kotlin {
 
     sourceSets {
         val desktopMain by getting
-
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -75,6 +74,10 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.sqldelight.sqliteDriver)
             implementation(libs.ktor.client.cio)
+        }
+        androidUnitTest.dependencies {
+            implementation(libs.androidx.test.core)
+            implementation(libs.robolectric)
         }
     }
 }
