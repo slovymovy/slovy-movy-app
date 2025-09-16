@@ -27,8 +27,8 @@ fun main(args: Array<String>) {
     require(processedRoot.exists() && processedRoot.isDirectory) { "processed path not found or not a directory: ${params.processed}" }
     if (!outRoot.exists()) outRoot.mkdirs()
 
-    val dbManager = DbManager(outRoot)
-    val builder = JsonIngestionBuilder(dbManager)
+    val serverDbManager = ServerDbManager(outRoot)
+    val builder = JsonIngestionBuilder(serverDbManager)
 
     // languages are subdirectories inside processed_root
     val languages = processedRoot.listFiles()?.filter { it.isDirectory }?.map { it.name }?.sorted().orEmpty()

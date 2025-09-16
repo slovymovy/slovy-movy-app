@@ -24,8 +24,8 @@ class AllLanguagesIngestionIntegrationTest {
     @Test
     fun ingest_all_languages_and_files() {
         val outDir = Files.createTempDirectory("ingestion_all_langs_test").toFile()
-        val dbManager = DbManager(outDir)
-        val builder = JsonIngestionBuilder(dbManager)
+        val serverDbManager = ServerDbManager(outDir)
+        val builder = JsonIngestionBuilder(serverDbManager)
 
         langs.forEach { lang ->
             val processedFiles = listResourceJsonFiles("processed_json_files/$lang")
@@ -36,7 +36,7 @@ class AllLanguagesIngestionIntegrationTest {
                 builder.ingest(pFile, rawFile)
 
                 // Validate dictionary DB: lemma existence and forms from raw
-                val dictDb = dbManager.openDictionary(lang)
+                val dictDb = serverDbManager.openDictionary(lang)
                 val dq = dictDb.dictionaryQueries
                 val raw = json.decodeFromString(ExtractedWordData.serializer(), rawFile.readText())
                 val processed = json.decodeFromString(LanguageCardResponse.serializer(), pFile.readText())
@@ -68,7 +68,7 @@ class AllLanguagesIngestionIntegrationTest {
                     entry.senses.forEach { sense ->
                         val senseId = uuidParse(sense.senseId)
                         targetLangs.forEach { trg ->
-                            val trDb = dbManager.openTranslation(lang, trg)
+                            val trDb = serverDbManager.openTranslation(lang, trg)
                             val tq = trDb.translationQueries
                             val defExpected = sense.targetLangDefinitions[trg]
                             if (defExpected != null) {

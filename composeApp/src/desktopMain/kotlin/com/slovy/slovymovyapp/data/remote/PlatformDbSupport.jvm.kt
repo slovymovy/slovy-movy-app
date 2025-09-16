@@ -1,9 +1,15 @@
 package com.slovy.slovymovyapp.data.remote
 
+import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import com.slovy.slovymovyapp.db.AppDatabase
+import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
+import com.slovy.slovymovyapp.translation.TranslationDatabase
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import kotlinx.io.files.Path
 import java.io.File
 import java.io.FileOutputStream
 
@@ -13,17 +19,17 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         File(home, ".slovymovyapp/databases").apply { mkdirs() }
     }
 
-    actual fun getDatabasePath(name: String): String = File(baseDir, name).absolutePath
+    actual fun getDatabasePath(name: String): Path = Path(File(baseDir, name).absolutePath)
 
     actual fun ensureDatabasesDir() {
         baseDir.mkdirs()
     }
 
-    actual fun fileExists(path: String): Boolean = File(path).exists()
+    actual fun fileExists(path: Path): Boolean = File(path.toString()).exists()
 
-    actual fun openOutput(destPath: String): PlatformFileOutput {
-        File(destPath).parentFile?.mkdirs()
-        val fos = FileOutputStream(File(destPath))
+    actual fun openOutput(destPath: Path): PlatformFileOutput {
+        File(destPath.toString()).parentFile?.mkdirs()
+        val fos = FileOutputStream(File(destPath.toString()))
         return object : PlatformFileOutput {
             override fun write(buffer: ByteArray, offset: Int, length: Int) {
                 fos.write(buffer, offset, length)
@@ -39,34 +45,61 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         }
     }
 
-    actual fun deleteFile(path: String) {
-        File(path).delete()
+    actual fun deleteFile(path: Path) {
+        File(path.toString()).delete()
     }
 
-    actual fun moveFile(from: String, to: String): Boolean {
-        val src = File(from)
-        val dst = File(to)
+    actual fun moveFile(from: Path, to: Path): Boolean {
+        val src = File(from.toString())
+        val dst = File(to.toString())
         dst.parentFile?.mkdirs()
         if (dst.exists()) dst.delete()
         return src.renameTo(dst)
     }
 
-    actual fun markNoBackup(path: String) {
+    actual fun markNoBackup(path: Path) {
         // No-op on desktop JVM
     }
 
-    actual fun createDataReadonlyDriver(dbFile: DbFile): SqlDriver {
-        val url = "jdbc:sqlite:${dbFile.path}?mode=ro"
-        return JdbcSqliteDriver(url)
+    actual fun createAppDataDriver(path: Path): SqlDriver {
+        return jdbcSqliteDriver(path, false, AppDatabase.Schema)
+    }
+
+    actual fun createDictionaryDataDriver(path: Path, readOnly: Boolean): SqlDriver {
+        return jdbcSqliteDriver(path, readOnly, DictionaryDatabase.Schema)
+    }
+
+    actual fun createTranslationDataDriver(path: Path, readOnly: Boolean): SqlDriver {
+        return jdbcSqliteDriver(path, readOnly, TranslationDatabase.Schema)
+    }
+
+    private fun jdbcSqliteDriver(
+        path: Path,
+        readOnly: Boolean,
+        schema: SqlSchema<QueryResult.Value<Unit>>
+    ): JdbcSqliteDriver {
+        val url = jdbcConnectionString(path, readOnly)
+        val isNew = !fileExists(path)
+        val driver = JdbcSqliteDriver(url)
+        if (isNew) {
+            schema.create(driver)
+        }
+        return driver
+    }
+
+    private fun jdbcConnectionString(path: Path, readOnly: Boolean): String {
+        val url = "jdbc:sqlite:file:${path}" + if (readOnly) "?mode=ro" else ""
+        return url
     }
 
     actual fun createHttpClient(): HttpClient {
         return HttpClient(CIO)
     }
 
-    actual fun getAvailableBytesForPath(path: String): Long? {
+    @Suppress("UsableSpace")
+    actual fun getAvailableBytesForPath(path: Path): Long? {
         return try {
-            val dir = File(path).parentFile ?: File(path)
+            val dir = File(path.toString()).parentFile ?: File(path.toString())
             dir.usableSpace
         } catch (_: Throwable) {
             null

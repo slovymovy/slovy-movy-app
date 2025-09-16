@@ -1,8 +1,12 @@
 package com.slovy.slovymovyapp.data.remote
 
+import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
+import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
+import com.slovy.slovymovyapp.translation.TranslationDatabase
 import io.ktor.client.*
 import io.ktor.client.engine.darwin.*
 import kotlinx.cinterop.BetaInteropApi
@@ -21,23 +25,23 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         full
     }
 
-    actual fun getDatabasePath(name: String): String = "$baseDir/$name"
+    actual fun getDatabasePath(name: String): Path = Path("$baseDir/$name")
 
     actual fun ensureDatabasesDir() {
         ensureDir(baseDir)
     }
 
-    actual fun fileExists(path: String): Boolean = NSFileManager.defaultManager.fileExistsAtPath(path)
+    actual fun fileExists(path: Path): Boolean = NSFileManager.defaultManager.fileExistsAtPath(path.toString())
 
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-    actual fun openOutput(destPath: String): PlatformFileOutput {
+    actual fun openOutput(destPath: Path): PlatformFileOutput {
         val fileManager = NSFileManager.defaultManager
-        val parent = Path(destPath).parent?.toString() ?: error("Invalid path: $destPath")
+        val parent = destPath.parent?.toString() ?: error("Invalid path: $destPath")
         if (!fileManager.fileExistsAtPath(parent)) {
             fileManager.createDirectoryAtPath(parent, true, null, null)
         }
-        fileManager.createFileAtPath(destPath, contents = null, attributes = null)
-        val handle = NSFileHandle.fileHandleForWritingAtPath(destPath)
+        fileManager.createFileAtPath(destPath.toString(), contents = null, attributes = null)
+        val handle = NSFileHandle.fileHandleForWritingAtPath(destPath.toString())
             ?: error("Unable to open file for writing")
         handle.seekToEndOfFile()
         return object : PlatformFileOutput {
@@ -59,45 +63,63 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    actual fun deleteFile(path: String) {
-        NSFileManager.defaultManager.removeItemAtPath(path, error = null)
+    actual fun deleteFile(path: Path) {
+        NSFileManager.defaultManager.removeItemAtPath(path.toString(), error = null)
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    actual fun moveFile(from: String, to: String): Boolean {
+    actual fun moveFile(from: Path, to: Path): Boolean {
         val fm = NSFileManager.defaultManager
         // Ensure destination directory exists
-        val toUrl = NSURL.fileURLWithPath(to)
+        val toUrl = NSURL.fileURLWithPath(to.toString())
         val parent = toUrl.URLByDeletingLastPathComponent?.path
         if (parent != null && !fm.fileExistsAtPath(parent)) {
             fm.createDirectoryAtPath(parent, true, null, null)
         }
         // Remove destination if present
-        if (fm.fileExistsAtPath(to)) {
-            fm.removeItemAtPath(to, error = null)
+        if (fm.fileExistsAtPath(to.toString())) {
+            fm.removeItemAtPath(to.toString(), error = null)
         }
-        return fm.moveItemAtPath(from, toPath = to, error = null)
+        return fm.moveItemAtPath(from.toString(), toPath = to.toString(), error = null)
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    actual fun markNoBackup(path: String) {
+    actual fun markNoBackup(path: Path) {
         // Exclude from iCloud and iTunes backups
-        val url = NSURL.fileURLWithPath(path)
+        val url = NSURL.fileURLWithPath(path.toString())
         url.setResourceValue(true, forKey = NSURLIsExcludedFromBackupKey, error = null)
     }
 
-    actual fun createDataReadonlyDriver(dbFile: DbFile): SqlDriver {
+    actual fun createDictionaryDataDriver(path: Path, readOnly: Boolean): SqlDriver {
+        return nativeSqliteDriver(DictionaryDatabase.Schema, path, readOnly)
+    }
+
+    actual fun createTranslationDataDriver(path: Path, readOnly: Boolean): SqlDriver {
+        return nativeSqliteDriver(TranslationDatabase.Schema, path, readOnly)
+    }
+
+    actual fun createAppDataDriver(path: Path): SqlDriver {
+        return nativeSqliteDriver(AppDatabase.Schema, path, false)
+    }
+
+    private fun nativeSqliteDriver(
+        schema: SqlSchema<QueryResult.Value<Unit>>,
+        path: Path,
+        readOnly: Boolean
+    ): NativeSqliteDriver {
         // SQLiter/NativeSqliteDriver expects a filename without path; provide basePath separately.
-        val name = NSURL.fileURLWithPath(dbFile.path).lastPathComponent ?: dbFile.path
+        val name = NSURL.fileURLWithPath(path.toString()).lastPathComponent ?: path.toString()
         val result = NativeSqliteDriver(
-            schema = DictionaryDatabase.Schema,
+            schema = schema,
             name = name,
             onConfiguration = { cfg ->
                 val ext = cfg.extendedConfig.copy(basePath = baseDir)
                 cfg.copy(extendedConfig = ext)
             }
         )
-        enforceQueryOnly(result)
+        if (readOnly) {
+            enforceQueryOnly(result)
+        }
         return result
     }
 
@@ -106,10 +128,10 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    actual fun getAvailableBytesForPath(path: String): Long? {
+    actual fun getAvailableBytesForPath(path: Path): Long? {
         return try {
             val fm = NSFileManager.defaultManager
-            val dir = Path(path).parent?.toString() ?: path
+            val dir = Path(path.toString()).parent?.toString() ?: path.toString()
             val attrs = fm.attributesOfFileSystemForPath(dir, error = null)
             val free = attrs?.get(NSFileSystemFreeSize) as? NSNumber
             free?.longLongValue
