@@ -18,6 +18,7 @@ fun DownloadScreen(
     onCancel: () -> Unit,
     onError: (Throwable) -> Unit,
     download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
+    description: String = "Downloading data"
 ) {
     var state by remember { mutableStateOf<State>(State.Idle) }
     val cancel = remember { CancelToken() }
@@ -54,7 +55,7 @@ fun DownloadScreen(
                     CircularProgressIndicator()
                     Spacer(Modifier.height(16.dp))
                     val pct = if (s.percent >= 0) "${s.percent}%" else "…"
-                    Text("Downloading data $pct", style = MaterialTheme.typography.bodyMedium)
+                    Text("$description $pct", style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(16.dp))
                     OutlinedButton(onClick = { cancel.cancel() }) { Text("Cancel") }
                 }

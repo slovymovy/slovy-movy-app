@@ -67,6 +67,7 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
         }
 
         Route.DOWNLOAD_DICTIONARY -> DownloadScreen(
+            description = "Downloading dictionary",
             download = { onProgress, cancel ->
                 dataManager.ensureDictionary(dictionaryLanguage!!, onProgress, cancel)
             },
@@ -90,6 +91,7 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
         )
 
         Route.DOWNLOAD_TRANSLATION -> DownloadScreen(
+            description = "Downloading translation",
             download = { onProgress, cancel ->
                 dataManager.ensureTranslation(dictionaryLanguage!!, nativeLanguage!!, onProgress, cancel)
             },
