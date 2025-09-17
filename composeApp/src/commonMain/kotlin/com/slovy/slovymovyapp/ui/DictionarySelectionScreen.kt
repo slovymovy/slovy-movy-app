@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-private val languages = listOf(
+private val dictionaries = listOf(
     "English" to "en",
     "Русский" to "ru",
     "Nederlands" to "nl",
@@ -20,8 +20,8 @@ private val languages = listOf(
 
 @Preview
 @Composable
-fun LanguageSelectionScreen(
-    onLanguageChosen: (String) -> Unit = { _ -> }
+fun DictionarySelectionScreen(
+    onDictionaryChosen: (String) -> Unit = { _ -> }
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(
@@ -30,17 +30,17 @@ fun LanguageSelectionScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Choose your native language",
+                text = "Choose dictionary",
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            languages.forEach { (label, code) ->
+            dictionaries.forEach { (label, code) ->
                 Text(
                     text = label,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onLanguageChosen(code) }
+                        .clickable { onDictionaryChosen(code) }
                         .padding(vertical = 12.dp)
                 )
             }

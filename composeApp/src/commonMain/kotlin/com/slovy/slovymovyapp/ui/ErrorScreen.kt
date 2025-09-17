@@ -1,9 +1,7 @@
 package com.slovy.slovymovyapp.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -15,22 +13,23 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Preview
 @Composable
-fun HomeScreen(welcomeText: String = "Hi") {
+fun ErrorScreen(
+    message: String = "An unexpected error occurred.",
+    onOkay: () -> Unit = {}
+) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier.fillMaxSize().padding(24.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Home",
-                style = MaterialTheme.typography.headlineMedium
+                text = message,
+                style = MaterialTheme.typography.bodyLarge
             )
-            Text(
-                text = welcomeText,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(top = 12.dp)
-            )
+            Button(onClick = onOkay) {
+                Text("Okay")
+            }
         }
     }
 }

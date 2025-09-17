@@ -10,6 +10,7 @@ import com.slovy.slovymovyapp.translation.TranslationDatabase
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -75,6 +76,14 @@ class DataDbManager(
         return DatabaseProvider.createAppDatabase(driver)
     }
 
+    fun hasDictionary(lang: String): Boolean {
+        return platform.fileExists(platform.getDatabasePath(dictionaryFileName(lang)))
+    }
+
+    fun hasTranslation(src: String, tgt: String): Boolean {
+        return platform.fileExists(platform.getDatabasePath(translationFileName(src, tgt)))
+    }
+
     fun openDictionaryReadOnly(lang: String): DictionaryDatabase {
         val file = platform.getDatabasePath(dictionaryFileName(lang))
         val driver = platform.createDictionaryDataDriver(file, true)
@@ -133,6 +142,18 @@ class DataDbManager(
                 platform.deleteFile(tempPath)
             }
             client.prepareGet(url).execute { response ->
+                // Fail early on non-success HTTP responses
+                if (!response.status.isSuccess()) {
+                    val snippet = try {
+                        response.bodyAsText().take(512)
+                    } catch (_: Throwable) {
+                        null
+                    }
+                    val baseMsg =
+                        "HTTP ${response.status.value} ${response.status.description} while downloading $url"
+                    throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
+                }
+
                 val total = response.headers["Content-Length"]?.toLongOrNull()
                 // Check available disk space if total size is known
                 if (total != null) {
@@ -197,7 +218,7 @@ class CancelToken {
 }
 
 // Progress model
-class DownloadProgress(val bytesDownloaded: Long, val totalBytes: Long?) {
+class DownloadProgress(bytesDownloaded: Long, val totalBytes: Long?) {
     val percent: Int = if (totalBytes != null && totalBytes > 0) {
         ((bytesDownloaded * 100L) / max(totalBytes, 1)).toInt()
     } else -1

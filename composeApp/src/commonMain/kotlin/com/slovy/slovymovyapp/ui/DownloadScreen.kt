@@ -7,15 +7,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.CancelToken
-import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.data.remote.DownloadProgress
+import kotlinx.io.files.Path
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
+@Preview
 @Composable
-fun DownloadDataScreen(
-    manager: DataDbManager,
-    // For demo and tests we download the smallest files: dictionary_en and translation_nl_en
+fun DownloadScreen(
     onSuccess: () -> Unit,
     onCancel: () -> Unit,
     onError: (Throwable) -> Unit,
+    download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
 ) {
     var state by remember { mutableStateOf<State>(State.Idle) }
     val cancel = remember { CancelToken() }
@@ -23,18 +25,10 @@ fun DownloadDataScreen(
     LaunchedEffect(Unit) {
         state = State.Running(0, null)
         try {
-            // Download dictionary_en
-            manager.ensureDictionary(
-                lang = "en",
-                onProgress = { p -> state = State.Running(p.percent.coerceAtLeast(0), p.totalBytes) },
-                cancelToken = cancel
-            )
-            // Download translation_nl_en
-            manager.ensureTranslation(
-                src = "nl", tgt = "en",
-                onProgress = { p -> state = State.Running(p.percent.coerceAtLeast(0), p.totalBytes) },
-                cancelToken = cancel
-            )
+            val onProgress: (DownloadProgress) -> Unit =
+                { p -> state = State.Running(p.percent.coerceAtLeast(0), p.totalBytes) }
+
+            download(onProgress, cancel)
             state = State.Done
             onSuccess()
         } catch (t: Throwable) {
@@ -59,14 +53,14 @@ fun DownloadDataScreen(
                 is State.Running -> {
                     CircularProgressIndicator()
                     Spacer(Modifier.height(16.dp))
-                    val pct = if (s.percent >= 0) "${'$'}{s.percent}%" else "…"
-                    Text("Downloading data ${'$'}pct", style = MaterialTheme.typography.bodyMedium)
+                    val pct = if (s.percent >= 0) "${s.percent}%" else "…"
+                    Text("Downloading data $pct", style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(16.dp))
                     OutlinedButton(onClick = { cancel.cancel() }) { Text("Cancel") }
                 }
 
                 is State.Failed -> {
-                    Text("Download failed: ${'$'}{s.error.message}")
+                    Text("Download failed: ${s.error.message}")
                     Spacer(Modifier.height(16.dp))
                     Button(onClick = { state = State.Idle }) { Text("Retry") }
                 }

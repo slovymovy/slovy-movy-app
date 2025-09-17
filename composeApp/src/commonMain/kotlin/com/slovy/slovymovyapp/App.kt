@@ -5,46 +5,110 @@ import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
-import com.slovy.slovymovyapp.ui.DownloadDataScreen
-import com.slovy.slovymovyapp.ui.LanguageSelectionScreen
-import com.slovy.slovymovyapp.ui.SearchScreen
-import com.slovy.slovymovyapp.ui.WordDetailScreen
+import com.slovy.slovymovyapp.ui.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private enum class Route {
-    DOWNLOAD,
+    DOWNLOAD_DICTIONARY,
+    DOWNLOAD_TRANSLATION,
     LANGUAGE,
+
+    DICTIONARY,
     SEARCH,
-    DETAIL
+    DETAIL,
+    ERROR
 }
 
 @Composable
 @Preview
 fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: PlatformDbSupport? = null) {
-    var route by remember { mutableStateOf(Route.DOWNLOAD) }
-    var selectedLanguage by remember { mutableStateOf<String?>(null) }
+    var route by remember { mutableStateOf<Route?>(null) }
+    var nativeLanguage by remember { mutableStateOf<String?>(null) }
+    var dictionaryLanguage by remember { mutableStateOf<String?>(null) }
     var selectedWord by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var returnRoute by remember { mutableStateOf<Route?>(null) }
 
     val platform = remember(platformDbSupport) { platformDbSupport ?: PlatformDbSupport(null) }
     val dataManager = remember(platform, settingsRepository) { DataDbManager(platform, settingsRepository) }
 
     // Load persisted language and data version once
+    fun selectInitialRoute(): Route {
+        val native = settingsRepository?.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
+        if (native != null) {
+            nativeLanguage = native
+
+            val dictionary = settingsRepository.getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
+            if (dictionary != null) {
+                dictionaryLanguage = dictionary
+                if (!dataManager.hasDictionary(dictionary)) {
+                    return Route.DOWNLOAD_DICTIONARY
+                } else if (!dataManager.hasTranslation(dictionary, native)) {
+                    return Route.DOWNLOAD_TRANSLATION
+                } else {
+                    return Route.SEARCH
+                }
+            }
+            return Route.DICTIONARY
+        } else {
+            return Route.LANGUAGE
+        }
+    }
+
     LaunchedEffect(Unit) {
-        val saved = settingsRepository?.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
-        val hasVersion = dataManager.hasRequiredVersion()
-        selectedLanguage = saved
-        route = if (!hasVersion) Route.DOWNLOAD else if (saved.isNullOrBlank()) Route.LANGUAGE else Route.SEARCH
+        route = selectInitialRoute()
     }
 
     when (route) {
-        Route.DOWNLOAD -> DownloadDataScreen(
-            manager = dataManager,
-            onSuccess = { route = if (selectedLanguage.isNullOrBlank()) Route.LANGUAGE else Route.SEARCH },
-            onCancel = { /* stay on screen or close app */ },
-            onError = { /* stay and allow retry */ }
+        null -> {
+            // Waiting for initial route calculation; show nothing to avoid NPE during first composition
+        }
+
+        Route.DOWNLOAD_DICTIONARY -> DownloadScreen(
+            download = { onProgress, cancel ->
+                dataManager.ensureDictionary(dictionaryLanguage!!, onProgress, cancel)
+            },
+            onSuccess = {
+                route = if (dataManager.hasTranslation(
+                        dictionaryLanguage!!,
+                        nativeLanguage!!
+                    )
+                ) Route.SEARCH else Route.DOWNLOAD_TRANSLATION
+            },
+            onCancel = {
+                errorMessage = "Download cancelled"
+                returnRoute = selectInitialRoute()
+                route = Route.ERROR
+            },
+            onError = { t ->
+                errorMessage = t.message ?: "Unknown error"
+                returnRoute = selectInitialRoute()
+                route = Route.ERROR
+            }
         )
+
+        Route.DOWNLOAD_TRANSLATION -> DownloadScreen(
+            download = { onProgress, cancel ->
+                dataManager.ensureTranslation(dictionaryLanguage!!, nativeLanguage!!, onProgress, cancel)
+            },
+            onSuccess = { route = Route.SEARCH },
+            onCancel = {
+                errorMessage = "Download cancelled"
+                returnRoute = selectInitialRoute()
+                route = Route.ERROR
+            },
+            onError = { t ->
+                settingsRepository?.deleteById(Setting.Name.LANGUAGE)
+                settingsRepository?.deleteById(Setting.Name.DICTIONARY)
+
+                errorMessage = t.message ?: "Unknown error"
+                returnRoute = selectInitialRoute()
+                route = Route.ERROR
+            }
+        )
+
 
         Route.LANGUAGE -> LanguageSelectionScreen(
             onLanguageChosen = { lang ->
@@ -55,13 +119,27 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                         value = Json.parseToJsonElement("\"$lang\"")
                     )
                 )
-                selectedLanguage = lang
-                route = Route.SEARCH
+                nativeLanguage = lang
+                route = Route.DICTIONARY
+            }
+        )
+
+        Route.DICTIONARY -> DictionarySelectionScreen(
+            onDictionaryChosen = { lang ->
+                // Persist selection
+                settingsRepository!!.insert(
+                    Setting(
+                        id = Setting.Name.DICTIONARY,
+                        value = Json.parseToJsonElement("\"$lang\"")
+                    )
+                )
+                dictionaryLanguage = lang
+                route = Route.DOWNLOAD_DICTIONARY
             }
         )
 
         Route.SEARCH -> SearchScreen(
-            language = selectedLanguage,
+            language = nativeLanguage,
             onWordSelected = { word ->
                 selectedWord = word
                 route = Route.DETAIL
@@ -69,9 +147,14 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
         )
 
         Route.DETAIL -> WordDetailScreen(
-            language = selectedLanguage,
+            language = nativeLanguage,
             word = selectedWord ?: "",
             onBack = { route = Route.SEARCH }
+        )
+
+        Route.ERROR -> ErrorScreen(
+            message = errorMessage ?: "Unknown error",
+            onOkay = { route = returnRoute ?: Route.LANGUAGE }
         )
     }
 }
