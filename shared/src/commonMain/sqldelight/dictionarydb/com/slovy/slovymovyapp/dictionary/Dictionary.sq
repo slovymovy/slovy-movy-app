@@ -154,3 +154,51 @@ selectLemmasByNormalized:
 SELECT l.id, l.lemma
 FROM lemma l
 WHERE l.lemma_normalized = ? COLLATE NOCASE;
+
+-- LIKE-based search queries with limit 20
+selectLemmasLike:
+SELECT l.id, l.lemma
+FROM lemma l
+WHERE l.lemma LIKE ? COLLATE NOCASE
+LIMIT ?;
+
+selectLemmasNormalizedLike:
+SELECT l.id, l.lemma
+FROM lemma l
+WHERE l.lemma_normalized LIKE ? COLLATE NOCASE
+LIMIT ?;
+
+
+
+-- Form -> Lemma JOIN queries to avoid client-side lookups
+selectLemmasByFormEquals:
+SELECT l.id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form = ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;
+
+selectLemmasByFormNormalizedEquals:
+SELECT l.id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form_normalized = ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;
+
+selectLemmasFromFormsLike:
+SELECT l.id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form LIKE ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;
+
+selectLemmasFromFormsNormalizedLike:
+SELECT l.id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form_normalized LIKE ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;

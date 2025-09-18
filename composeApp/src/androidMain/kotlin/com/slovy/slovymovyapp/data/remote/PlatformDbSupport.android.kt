@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.data.remote
 
 import android.content.Context
+import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
@@ -76,11 +77,27 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         schema: SqlSchema<QueryResult.Value<Unit>>,
         readOnly: Boolean
     ): AndroidSqliteDriver {
-        val name = File(path.toString()).name
+        val file = File(path.toString())
+        val name = file.name
+
         val result = AndroidSqliteDriver(
             schema = schema,
             context = ctx,
-            name = name
+            name = name,
+            callback = if (!readOnly) AndroidSqliteDriver.Callback(schema) else object :
+                AndroidSqliteDriver.Callback(schema) {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    // Do nothing
+                }
+
+                override fun onUpgrade(
+                    db: SupportSQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int
+                ) {
+                    // Do nothing
+                }
+            }
         )
         if (readOnly) {
             enforceQueryOnly(result)

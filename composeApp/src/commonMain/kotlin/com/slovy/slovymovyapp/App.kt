@@ -142,6 +142,8 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
 
         Route.SEARCH -> SearchScreen(
             language = nativeLanguage,
+            dictionaryLanguage = dictionaryLanguage,
+            dataManager = dataManager,
             onWordSelected = { word ->
                 selectedWord = word
                 route = Route.DETAIL
