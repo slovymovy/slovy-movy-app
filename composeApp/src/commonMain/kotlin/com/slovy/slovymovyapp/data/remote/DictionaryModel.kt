@@ -1,7 +1,5 @@
 package com.slovy.slovymovyapp.data.remote
 
-import kotlinx.serialization.Serializable
-
 data class LanguageCard(
     val entries: List<LanguageCardPosEntry>
 )
@@ -12,17 +10,32 @@ data class LanguageCardPosEntry(
     val senses: List<LanguageCardResponseSense>
 )
 
-@Serializable
 data class LanguageCardForm(
     val tags: List<String> = emptyList(),
     val form: String
 )
 
+enum class LearnerLevel {
+    A1,
+    A2,
+    B1,
+    B2,
+    C1,
+    C2;
+}
+
+enum class SenseFrequency {
+    HIGH,
+    MIDDLE,
+    LOW,
+    VERY_LOW;
+}
+
 data class LanguageCardResponseSense(
     val senseId: String,
     val senseDefinition: String,
-    val learnerLevel: String,
-    val frequency: String,
+    val learnerLevel: LearnerLevel,
+    val frequency: SenseFrequency,
     val semanticGroupId: String,
     val nameType: String? = null,
     val examples: List<LanguageCardExample> = emptyList(),

@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp
 
 import androidx.compose.runtime.*
 import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.data.remote.LanguageCard
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
@@ -27,7 +28,8 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
     var route by remember { mutableStateOf<Route?>(null) }
     var nativeLanguage by remember { mutableStateOf<String?>(null) }
     var dictionaryLanguage by remember { mutableStateOf<String?>(null) }
-    var selectedWord by remember { mutableStateOf<String?>(null) }
+    var selectedCard by remember { mutableStateOf<LanguageCard?>(null) }
+    var selectedLemma by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var returnRoute by remember { mutableStateOf<Route?>(null) }
 
@@ -144,15 +146,16 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
             language = nativeLanguage,
             dictionaryLanguage = dictionaryLanguage,
             dataManager = dataManager,
-            onWordSelected = { word ->
-                selectedWord = word
+            onWordSelected = { card, lemma ->
+                selectedCard = card
+                selectedLemma = lemma
                 route = Route.DETAIL
             }
         )
 
         Route.DETAIL -> WordDetailScreen(
-            language = nativeLanguage,
-            word = selectedWord ?: "",
+            card = selectedCard!!,
+            lemma = selectedLemma,
             onBack = { route = Route.SEARCH }
         )
 

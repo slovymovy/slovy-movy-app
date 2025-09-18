@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.data.remote.LanguageCard
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private val fallbackDictionary = listOf("world", "idea", "bass")
@@ -23,7 +26,7 @@ fun SearchScreen(
     language: String? = null,
     dictionaryLanguage: String? = null,
     dataManager: DataDbManager? = null,
-    onWordSelected: (String) -> Unit = { _ -> }
+    onWordSelected: (LanguageCard, String) -> Unit = { _, _ -> }
 ) {
     var query by remember { mutableStateOf("") }
 
@@ -53,7 +56,13 @@ fun SearchScreen(
                 )
             }
         ) { innerPadding ->
-            Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(innerPadding)
+                    .padding(16.dp)
+            ) {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
@@ -72,7 +81,12 @@ fun SearchScreen(
                             text = item.display,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onWordSelected(item.lemma) }
+                                .clickable {
+                                    val card = repository?.getLanguageCard(item.language, item.lemmaId)
+                                    if (card != null) {
+                                        onWordSelected(card, item.lemma)
+                                    }
+                                }
                                 .padding(vertical = 12.dp)
                         )
                     }

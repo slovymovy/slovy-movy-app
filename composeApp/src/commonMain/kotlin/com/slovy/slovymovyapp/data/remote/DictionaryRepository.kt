@@ -187,8 +187,8 @@ class DictionaryRepository(
             LanguageCardResponseSense(
                 senseId = s.sense_id.toString(),
                 senseDefinition = s.sense_definition,
-                learnerLevel = s.learner_level.name,
-                frequency = s.frequency.name,
+                learnerLevel = LearnerLevel.valueOf(s.learner_level.name),
+                frequency = SenseFrequency.valueOf(s.frequency.name),
                 semanticGroupId = s.semantic_group_id,
                 nameType = s.name_type?.name,
                 examples = examples,
