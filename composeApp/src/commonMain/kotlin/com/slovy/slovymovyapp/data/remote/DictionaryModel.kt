@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.data.remote
 
 data class LanguageCard(
+    val lemma: String,
     val entries: List<LanguageCardPosEntry>
 )
 

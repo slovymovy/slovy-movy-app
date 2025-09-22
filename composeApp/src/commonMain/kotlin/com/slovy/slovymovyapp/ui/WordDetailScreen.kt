@@ -26,7 +26,6 @@ private fun KeyValue(label: String, value: String) {
 @Composable
 fun WordDetailScreen(
     card: LanguageCard = sampleCard(),
-    lemma: String = "Lemma",
     onBack: () -> Unit = {}
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
@@ -39,7 +38,7 @@ fun WordDetailScreen(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = lemma,
+                text = card.lemma,
                 style = MaterialTheme.typography.headlineSmall
             )
 
@@ -126,6 +125,7 @@ fun WordDetailScreen(
 
 private fun sampleCard(): LanguageCard {
     return LanguageCard(
+        lemma = "testing",
         entries = listOf(
             // Verb entry
             LanguageCardPosEntry(

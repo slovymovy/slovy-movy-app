@@ -206,6 +206,6 @@ class DictionaryRepository(
             forms = forms,
             senses = senses
         )
-        return LanguageCard(entries = listOf(entry))
+        return LanguageCard(entries = listOf(entry), lemma = lemmaRow.lemma)
     }
 }
