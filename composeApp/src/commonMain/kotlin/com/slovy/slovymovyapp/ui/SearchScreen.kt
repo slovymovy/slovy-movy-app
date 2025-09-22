@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.remote.LanguageCard
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private val fallbackDictionary = listOf("world", "idea", "bass")
@@ -26,7 +25,7 @@ fun SearchScreen(
     language: String? = null,
     dictionaryLanguage: String? = null,
     dataManager: DataDbManager? = null,
-    onWordSelected: (LanguageCard, String) -> Unit = { _, _ -> }
+    onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> }
 ) {
     var query by remember { mutableStateOf("") }
 
@@ -82,10 +81,7 @@ fun SearchScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    val card = repository?.getLanguageCard(item.language, item.lemmaId)
-                                    if (card != null) {
-                                        onWordSelected(card, item.lemma)
-                                    }
+                                    onWordSelected(item)
                                 }
                                 .padding(vertical = 12.dp)
                         )

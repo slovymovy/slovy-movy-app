@@ -26,7 +26,7 @@ private fun KeyValue(label: String, value: String) {
 @Composable
 fun WordDetailScreen(
     card: LanguageCard = sampleCard(),
-    lemma: String? = null,
+    lemma: String = "Lemma",
     onBack: () -> Unit = {}
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
@@ -39,12 +39,9 @@ fun WordDetailScreen(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = "Word details",
+                text = lemma,
                 style = MaterialTheme.typography.headlineSmall
             )
-            if (lemma != null) {
-                Text(text = lemma, style = MaterialTheme.typography.titleLarge)
-            }
 
             card.entries.forEachIndexed { idx, entry ->
                 if (idx > 0) HorizontalDivider()
