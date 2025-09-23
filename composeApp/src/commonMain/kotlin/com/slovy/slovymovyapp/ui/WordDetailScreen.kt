@@ -1,14 +1,25 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.animation.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -19,10 +30,12 @@ import kotlin.text.Typography.bullet
 
 @Composable
 private fun SectionLabel(text: String) {
-    Text(
+    HighlightedText(
         text = text,
-        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        style = MaterialTheme.typography.labelLarge.copy(
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     )
 }
 
@@ -34,9 +47,8 @@ private fun KeyValue(label: String, value: String) {
 }
 
 @Composable
-private fun EntryForms(forms: List<LanguageCardForm>) {
+private fun FormsList(forms: List<LanguageCardForm>) {
     if (forms.isEmpty()) return
-    SectionLabel("Forms")
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         forms.forEach { form ->
             val tags = if (form.tags.isNotEmpty()) {
@@ -44,11 +56,78 @@ private fun EntryForms(forms: List<LanguageCardForm>) {
             } else {
                 ""
             }
-            Text(
+            HighlightedText(
                 text = "$bullet ${form.form}$tags",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
+        }
+    }
+}
+
+@Composable
+private fun ExpandableSection(
+    title: String,
+    modifier: Modifier = Modifier,
+    stateKey: String,
+    startExpanded: Boolean = true,
+    supportingText: String? = null,
+    headlineStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    var expanded by rememberSaveable(stateKey) { mutableStateOf(startExpanded) }
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .clickable { expanded = !expanded },
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    HighlightedText(text = title, style = headlineStyle)
+                    supportingText?.takeIf { !expanded }?.let {
+                        HighlightedText(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
+                }
+                Icon(
+                    imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
+                    contentDescription = if (expanded) {
+                        "Collapse $title"
+                    } else {
+                        "Expand $title"
+                    },
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                content()
+            }
         }
     }
 }
@@ -64,10 +143,10 @@ fun WordDetailScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(
+                    HighlightedText(
                         text = card.lemma,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.displaySmall
+                        style = MaterialTheme.typography.displaySmall,
+                        textAlign = TextAlign.Center
                     )
                 },
                 navigationIcon = {
@@ -101,8 +180,8 @@ fun WordDetailScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                card.entries.forEach { entry ->
-                    EntryCard(entry = entry)
+                card.entries.forEachIndexed { index, entry ->
+                    EntryCard(entry = entry, entryIndex = index)
                 }
             }
         }
@@ -110,58 +189,126 @@ fun WordDetailScreen(
 }
 
 @Composable
-private fun EntryCard(entry: LanguageCardPosEntry) {
+private fun EntryCard(entry: LanguageCardPosEntry, entryIndex: Int) {
+    var expanded by rememberSaveable("entry_${entryIndex}_${entry.pos}") { mutableStateOf(true) }
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-        ) {
-            Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                shape = RoundedCornerShape(12.dp)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                    .clickable { expanded = !expanded }
+                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = entry.pos.uppercase(),
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = entry.pos.uppercase(),
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                val summaryParts = buildList {
+                    add("${entry.senses.size} sense${pluralEnding(entry.senses)}")
+                    if (entry.forms.isNotEmpty()) {
+                        add("${entry.forms.size} form${pluralEnding(entry.forms)}")
+                    }
+                }.joinToString(" $bullet ")
+
+                Column(modifier = Modifier.weight(1f)) {
+                    AnimatedVisibility(
+                        visible = !expanded,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            HighlightedText(
+                                text = summaryParts,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            )
+                            Text(
+                                text = "Tap to expand",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                Icon(
+                    imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
+                    contentDescription = if (expanded) {
+                        "Collapse ${entry.pos} entry"
+                    } else {
+                        "Expand ${entry.pos} entry"
+                    },
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            if (entry.forms.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                EntryForms(entry.forms)
-            }
-
-            val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
-            if (groupEntries.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(if (entry.forms.isNotEmpty()) 24.dp else 16.dp))
-                groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
-                    if (groupEntries.size > 1 && groupIndex > 0) {
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 0.dp)
+                        .padding(bottom = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    if (entry.forms.isNotEmpty()) {
+                        val formsSummary = entry.forms
+                            .flatMap { it.tags }
+                            .toSet()
+                            .sortedBy { it }
+                            .joinToString(separator = ", ")
+                        ExpandableSection(
+                            title = "Forms (${entry.forms.size})",
+                            supportingText = formsSummary.ifEmpty { null },
+                            stateKey = "entry_${entryIndex}_forms",
+                            startExpanded = false
+                        ) {
+                            SectionLabel("Forms")
+                            FormsList(entry.forms)
+                        }
                     }
 
-                    if (groupEntries.size > 1 && groupId.isNotBlank()) {
-                        SectionLabel("Group: $groupId")
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
-
-                    senseList.forEachIndexed { senseIndex, sense ->
-                        SenseCard(sense = sense)
-                        if (senseIndex < senseList.lastIndex) {
-                            Spacer(modifier = Modifier.height(12.dp))
+                    val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
+                    groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
+                        if (groupEntries.size > 1 && groupIndex > 0) {
                             HorizontalDivider(
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            if (groupEntries.size > 1 && groupId.isNotBlank()) {
+                                SectionLabel("Group: $groupId")
+                            }
+
+                            senseList.forEachIndexed { senseIndex, sense ->
+                                SenseCard(sense = sense)
+                                if (senseIndex < senseList.lastIndex) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -170,73 +317,178 @@ private fun EntryCard(entry: LanguageCardPosEntry) {
     }
 }
 
+private fun pluralEnding(someList: List<*>): String = if (someList.size == 1) "" else "s"
+
 @Composable
 private fun SenseCard(sense: LanguageCardResponseSense) {
+    var expanded by rememberSaveable("expanded_${sense.senseId}") {
+        mutableStateOf(sense.frequency == SenseFrequency.HIGH || sense.frequency == SenseFrequency.MIDDLE)
+    }
+
     OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            HighlightedText(
-                text = sense.senseDefinition,
-                style = MaterialTheme.typography.titleLarge
-            )
-
-            LevelAndFrequencyRow(level = sense.learnerLevel, frequency = sense.frequency)
-
-            if (sense.synonyms.isNotEmpty()) {
-                KeyValue("Synonyms", bulletList(sense.synonyms))
-            }
-            if (sense.antonyms.isNotEmpty()) {
-                KeyValue("Antonyms", bulletList(sense.antonyms))
-            }
-            if (sense.commonPhrases.isNotEmpty()) {
-                KeyValue("Phrases", bulletList(sense.commonPhrases))
-            }
-
-            val targetLanguages = sense.targetLangDefinitions.keys + sense.translations.keys
-
-            targetLanguages.forEach { lang ->
-                SectionLabel(codeToLanguage.getOrElse(lang) { lang })
-                sense.targetLangDefinitions[lang]?.let { definition ->
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable { expanded = !expanded }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     HighlightedText(
-                        text = definition,
-                        style = MaterialTheme.typography.bodyMedium
+                        text = sense.senseDefinition,
+                        style = MaterialTheme.typography.titleLarge
                     )
+
+                    LevelAndFrequencyRow(level = sense.learnerLevel, frequency = sense.frequency)
+
+                    val frequencyLabel = sense.frequency.name.lowercase().replaceFirstChar { it.titlecase() }
+                    val levelLabel = sense.learnerLevel.name
+                    val summaryParts = buildList {
+                        add("$frequencyLabel frequency")
+                        add("Level $levelLabel")
+                        if (sense.synonyms.isNotEmpty()) {
+                            add("${sense.synonyms.size} synonym${pluralEnding(sense.synonyms)}")
+                        }
+                        val translationsCount = sense.translations.values.sumOf { it.size }
+                        if (translationsCount > 0) {
+                            add("$translationsCount translation${pluralEnding(sense.translations.values.flatten())}")
+                        }
+                        if (sense.examples.isNotEmpty()) {
+                            add("${sense.examples.size} example${pluralEnding(sense.examples)}")
+                        }
+                    }.joinToString(" $bullet ")
+
+                    AnimatedVisibility(
+                        visible = !expanded,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        HighlightedText(
+                            text = summaryParts,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
                 }
-                sense.translations[lang]?.takeIf { it.isNotEmpty() }?.let { translations ->
-                    SectionLabel("Translations")
-                    TranslationList(translations = translations)
-                }
+
+                Icon(
+                    imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
+                    contentDescription = if (expanded) {
+                        "Collapse sense"
+                    } else {
+                        "Expand sense"
+                    },
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
-            if (sense.examples.isNotEmpty()) {
-                SectionLabel("Examples")
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    sense.examples.forEach { ex ->
-                        BulletHighlightedText(
-                            text = ex.text,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        if (ex.targetLangTranslations.isNotEmpty()) {
-                            ex.targetLangTranslations.forEach { (_, translation) ->
-                                PrefixedHighlightedText(
-                                    prefix = "– ",
-                                    text = translation,
-                                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
-                                    modifier = Modifier.padding(start = 24.dp)
-                                )
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 0.dp)
+                        .padding(bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (sense.examples.isNotEmpty()) {
+                        val examplePreview = sense.examples.first().text
+                            .replace("\n", " ")
+                        ExpandableSection(
+                            title = "Examples (${sense.examples.size})",
+                            supportingText = examplePreview.ifBlank { null },
+                            stateKey = "${sense.senseId}_examples",
+                            startExpanded = true,
+                            headlineStyle = MaterialTheme.typography.titleSmall
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                sense.examples.forEach { ex ->
+                                    BulletHighlightedText(
+                                        text = ex.text,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    if (ex.targetLangTranslations.isNotEmpty()) {
+                                        ex.targetLangTranslations.forEach { (_, translation) ->
+                                            PrefixedHighlightedText(
+                                                prefix = "– ",
+                                                text = translation,
+                                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                                                modifier = Modifier.padding(start = 24.dp)
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
+                    if (sense.synonyms.isNotEmpty()) {
+                        KeyValue("Synonyms", bulletList(sense.synonyms))
+                    }
+                    if (sense.antonyms.isNotEmpty()) {
+                        KeyValue("Antonyms", bulletList(sense.antonyms))
+                    }
+                    if (sense.commonPhrases.isNotEmpty()) {
+                        KeyValue("Phrases", bulletList(sense.commonPhrases))
+                    }
+
+                    val languageOrder = buildList {
+                        sense.targetLangDefinitions.keys.forEach { add(it) }
+                        sense.translations.keys.forEach { if (!contains(it)) add(it) }
+                    }
+
+                    languageOrder.forEach { lang ->
+                        LanguageSection(languageCode = lang, sense = sense, startExpanded = expanded)
+                    }
+
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun LanguageSection(languageCode: String, sense: LanguageCardResponseSense, startExpanded: Boolean) {
+    val languageLabel = codeToLanguage.getOrElse(languageCode) { languageCode }
+    val definition = sense.targetLangDefinitions[languageCode]
+    val translations = sense.translations[languageCode].orEmpty()
+    val translationCount = translations.size
+    val supportingParts = buildList {
+        if (definition != null) add("Definition")
+        if (translationCount > 0) {
+            add("$translationCount translation${pluralEnding(translations)}")
+        }
+    }.joinToString(" $bullet ")
+
+    ExpandableSection(
+        title = languageLabel,
+        supportingText = supportingParts.ifEmpty { null },
+        stateKey = "${sense.senseId}_${languageCode}_translations",
+        startExpanded = startExpanded,
+        headlineStyle = MaterialTheme.typography.titleSmall
+    ) {
+        definition?.let {
+            HighlightedText(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        if (translationCount > 0) {
+            SectionLabel("Translations")
+            TranslationList(translations = translations)
         }
     }
 }
@@ -313,7 +565,12 @@ private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency)
 
 // Helpers to render <w>word</w> with special highlight style across all displayed text
 @Composable
-private fun HighlightedText(text: String, style: TextStyle) {
+private fun HighlightedText(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign? = null
+) {
     val highlight = SpanStyle(
         color = MaterialTheme.colorScheme.secondary,
         fontWeight = FontWeight.Light
@@ -321,7 +578,7 @@ private fun HighlightedText(text: String, style: TextStyle) {
     val annotated = buildAnnotatedString {
         appendTextWithW(this, text, highlight)
     }
-    Text(text = annotated, style = style)
+    Text(text = annotated, style = style, modifier = modifier, textAlign = textAlign)
 }
 
 @Composable
@@ -354,6 +611,48 @@ private fun PrefixedHighlightedText(
     }
     Text(text = annotated, style = style, modifier = modifier)
 }
+
+private val ExpandMoreVector: ImageVector = ImageVector.Builder(
+    name = "ExpandableChevronDown",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f
+).apply {
+    path(
+        fill = SolidColor(Color.Black),
+        pathFillType = PathFillType.NonZero
+    ) {
+        moveTo(12f, 16f)
+        lineTo(5.5f, 9.5f)
+        lineTo(6.91f, 8.09f)
+        lineTo(12f, 13.17f)
+        lineTo(17.09f, 8.09f)
+        lineTo(18.5f, 9.5f)
+        close()
+    }
+}.build()
+
+private val ExpandLessVector: ImageVector = ImageVector.Builder(
+    name = "ExpandableChevronUp",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f
+).apply {
+    path(
+        fill = SolidColor(Color.Black),
+        pathFillType = PathFillType.NonZero
+    ) {
+        moveTo(5.5f, 14.5f)
+        lineTo(6.91f, 15.91f)
+        lineTo(12f, 10.83f)
+        lineTo(17.09f, 15.91f)
+        lineTo(18.5f, 14.5f)
+        lineTo(12f, 8.0f)
+        close()
+    }
+}.build()
 
 private fun appendTextWithW(builder: AnnotatedString.Builder, input: String, highlight: SpanStyle) {
     var i = 0
