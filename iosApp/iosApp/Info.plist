@@ -6,8 +6,8 @@
         <string>Open words</string>
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
-    </dict>
-     <key>NSAppTransportSecurity</key>
+
+        <key>NSAppTransportSecurity</key>
         <dict>
             <key>NSExceptionDomains</key>
             <dict>
@@ -18,4 +18,5 @@
                 </dict>
             </dict>
         </dict>
+    </dict>
 </plist>
