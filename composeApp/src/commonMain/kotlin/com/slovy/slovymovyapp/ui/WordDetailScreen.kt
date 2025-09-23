@@ -11,152 +11,264 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.*
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.text.Typography.bullet
 
 @Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+@Composable
 private fun KeyValue(label: String, value: String) {
     if (value.isBlank()) return
-    Text(text = label, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold))
+    SectionLabel(label)
     HighlightedText(text = value, style = MaterialTheme.typography.bodyMedium)
 }
 
+@Composable
+private fun EntryForms(forms: List<LanguageCardForm>) {
+    if (forms.isEmpty()) return
+    SectionLabel("Forms")
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        forms.forEach { form ->
+            val tags = if (form.tags.isNotEmpty()) {
+                form.tags.joinToString(separator = ", ", prefix = " (", postfix = ")")
+            } else {
+                ""
+            }
+            Text(
+                text = "$bullet ${form.form}$tags",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun WordDetailScreen(
     card: LanguageCard = sampleCard(),
     onBack: () -> Unit = {}
 ) {
-    Surface(color = MaterialTheme.colorScheme.background) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = card.lemma,
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.displaySmall
+                    )
+                },
+                navigationIcon = {
+                    TextButton(onClick = onBack) {
+                        Text(
+                            text = "Back",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 64.dp, start = 16.dp, end = 16.dp, bottom = 64.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            Text(
-                text = card.lemma,
-                style = MaterialTheme.typography.headlineSmall
+            if (card.entries.isEmpty()) {
+                Text(
+                    text = "No entries available.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                card.entries.forEach { entry ->
+                    EntryCard(entry = entry)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EntryCard(entry: LanguageCardPosEntry) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = entry.pos.uppercase(),
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+
+            if (entry.forms.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                EntryForms(entry.forms)
+            }
+
+            val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
+            if (groupEntries.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(if (entry.forms.isNotEmpty()) 24.dp else 16.dp))
+                groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
+                    if (groupEntries.size > 1 && groupIndex > 0) {
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    if (groupEntries.size > 1 && groupId.isNotBlank()) {
+                        SectionLabel("Group: $groupId")
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    senseList.forEachIndexed { senseIndex, sense ->
+                        SenseCard(sense = sense)
+                        if (senseIndex < senseList.lastIndex) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SenseCard(sense: LanguageCardResponseSense) {
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            HighlightedText(
+                text = sense.senseDefinition,
+                style = MaterialTheme.typography.titleLarge
             )
 
-            card.entries.forEachIndexed { idx, entry ->
-                if (idx > 0) HorizontalDivider()
+            LevelAndFrequencyRow(level = sense.learnerLevel, frequency = sense.frequency)
 
-                Text(
-                    text = entry.pos,
-                    style = MaterialTheme.typography.titleMedium
-                )
+            if (sense.synonyms.isNotEmpty()) {
+                KeyValue("Synonyms", bulletList(sense.synonyms))
+            }
+            if (sense.antonyms.isNotEmpty()) {
+                KeyValue("Antonyms", bulletList(sense.antonyms))
+            }
+            if (sense.commonPhrases.isNotEmpty()) {
+                KeyValue("Phrases", bulletList(sense.commonPhrases))
+            }
 
-                if (entry.forms.isNotEmpty()) {
-                    val formsJoined = entry.forms.joinToString(separator = "\n ") { "\t\t$bullet${it.form}${it.tags}" }
-                    Text(
-                        text = "Forms",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+            val targetLanguages = sense.targetLangDefinitions.keys + sense.translations.keys
+
+            targetLanguages.forEach { lang ->
+                SectionLabel(codeToLanguage.getOrElse(lang) { lang })
+                sense.targetLangDefinitions[lang]?.let { definition ->
+                    HighlightedText(
+                        text = definition,
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                    Text(text = formsJoined, style = MaterialTheme.typography.bodySmall)
                 }
+                sense.translations[lang]?.takeIf { it.isNotEmpty() }?.let { translations ->
+                    SectionLabel("Translations")
+                    TranslationList(translations = translations)
+                }
+            }
 
-                val sensesByGroup = entry.senses.groupBy { it.semanticGroupId }
-                sensesByGroup.forEach { (groupId, senseList) ->
-                    if (sensesByGroup.size > 1) {
-                        Text(
-                            text = "Group: $groupId",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+            if (sense.examples.isNotEmpty()) {
+                SectionLabel("Examples")
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    sense.examples.forEach { ex ->
+                        BulletHighlightedText(
+                            text = ex.text,
+                            style = MaterialTheme.typography.bodyMedium
                         )
-                    }
-                    senseList.forEach { sense ->
-                        HorizontalDivider()
-                        HighlightedText(text = sense.senseDefinition, style = MaterialTheme.typography.bodyLarge)
-
-                        // Level + Frequency badges
-                        LevelAndFrequencyRow(level = sense.learnerLevel, frequency = sense.frequency)
-
-                        if (sense.synonyms.isNotEmpty()) {
-                            KeyValue("Synonyms", bulletList(sense.synonyms))
-                        }
-                        if (sense.antonyms.isNotEmpty()) {
-                            KeyValue("Antonyms", bulletList(sense.antonyms))
-                        }
-                        if (sense.commonPhrases.isNotEmpty()) {
-                            KeyValue("Phrases", bulletList(sense.commonPhrases))
-                        }
-
-                        val targetLanguages = sense.targetLangDefinitions.keys + sense.translations.keys
-
-                        targetLanguages.forEach { lang ->
-                            Text(
-                                text = codeToLanguage.getOrElse(lang, { lang }),
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
-                            )
-                            if (sense.targetLangDefinitions.contains(lang)) {
-                                HighlightedText(
-                                    text = sense.targetLangDefinitions[lang]!!,
-                                    style = MaterialTheme.typography.bodyMedium
+                        if (ex.targetLangTranslations.isNotEmpty()) {
+                            ex.targetLangTranslations.forEach { (_, translation) ->
+                                PrefixedHighlightedText(
+                                    prefix = "– ",
+                                    text = translation,
+                                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                                    modifier = Modifier.padding(start = 24.dp)
                                 )
-                            }
-                            if (sense.translations.contains(lang)) {
-                                Text(
-                                    text = "Translations",
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
-                                )
-                                sense.translations[lang]?.let { list ->
-                                    val joined = list.joinToString(separator = "\n") {
-                                        buildAnnotatedString {
-                                            withStyle(SpanStyle(fontWeight = FontWeight.Light)) {
-                                                append("\t\t$bullet")
-                                                append(it.targetLangWord)
-                                            }
-                                            if (it.targetLangSenseClarification != null) {
-                                                withStyle(SpanStyle(fontWeight = FontWeight.ExtraLight)) {
-                                                    append("\t(${it.targetLangSenseClarification})")
-                                                }
-                                            }
-                                        }
-                                    }
-                                    Text(text = joined, style = MaterialTheme.typography.bodySmall)
-                                }
-                            }
-                        }
-
-                        if (sense.examples.isNotEmpty()) {
-                            Text(
-                                text = "Examples",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
-                            )
-                            sense.examples.forEach { ex ->
-                                BulletHighlightedText(text = ex.text, style = MaterialTheme.typography.bodyMedium)
-                                if (ex.targetLangTranslations.isNotEmpty()) {
-                                    ex.targetLangTranslations.forEach { (tgt, tr) ->
-                                        PrefixedHighlightedText(
-                                            prefix = "\t ",
-                                            text = tr,
-                                            style = MaterialTheme.typography.bodySmall
-                                        )
-                                    }
-                                }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
 
-            Button(onClick = onBack) {
-                Text("Back")
+@Composable
+private fun TranslationList(translations: List<LanguageCardTranslation>) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        translations.forEach { translation ->
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                BulletHighlightedText(
+                    text = translation.targetLangWord,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                translation.targetLangSenseClarification?.takeIf { it.isNotBlank() }?.let { clarification ->
+                    Text(
+                        text = clarification,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 24.dp)
+                    )
+                }
             }
         }
     }
 }
 
 private fun bulletList(strings: List<String>): String =
-    strings.joinToString(separator = "\n", transform = { "\t$bullet\t$it" })
+    strings.joinToString(separator = "\n") { "$bullet $it" }
 
 @Composable
 private fun Badge(text: String, container: Color, content: Color) {
-    Surface(color = container, contentColor = content, shape = RoundedCornerShape(8.dp)) {
+    Surface(color = container, contentColor = content, shape = RoundedCornerShape(12.dp)) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
@@ -167,26 +279,29 @@ private fun Badge(text: String, container: Color, content: Color) {
 
 @Composable
 private fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
-    LearnerLevel.A1, LearnerLevel.A2 ->
-        MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
-
-    LearnerLevel.B1 -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
-    LearnerLevel.B2 -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
-    LearnerLevel.C1 -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
-    LearnerLevel.C2 -> MaterialTheme.colorScheme.error to MaterialTheme.colorScheme.onError
+    LearnerLevel.A1 -> Color(0xFFE0F7D4) to Color(0xFF215732)
+    LearnerLevel.A2 -> Color(0xFFBFEBD7) to Color(0xFF0F4C3C)
+    LearnerLevel.B1 -> Color(0xFFCCE3FF) to Color(0xFF0F3D7A)
+    LearnerLevel.B2 -> Color(0xFFB7D2FF) to Color(0xFF0F3566)
+    LearnerLevel.C1 -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
+    LearnerLevel.C2 -> Color(0xFFFBD0D9) to Color(0xFF7A1232)
 }
 
 @Composable
 private fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> = when (f) {
-    SenseFrequency.HIGH -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
-    SenseFrequency.MIDDLE -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
-    SenseFrequency.LOW -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
-    SenseFrequency.VERY_LOW -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
+    SenseFrequency.HIGH -> Color(0xFFDFF6DD) to Color(0xFF1C5E20)
+    SenseFrequency.MIDDLE -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
+    SenseFrequency.LOW -> Color(0xFFFFE0B2) to Color(0xFF8C4513)
+    SenseFrequency.VERY_LOW -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
 }
 
 @Composable
 private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         val (lc, lcc) = colorsForLevel(level)
         val (fc, fcc) = colorsForFrequency(frequency)
         Badge(text = "Level: ${level.name}", container = lc, content = lcc)
@@ -223,7 +338,12 @@ private fun BulletHighlightedText(text: String, style: TextStyle) {
 }
 
 @Composable
-private fun PrefixedHighlightedText(prefix: String, text: String, style: TextStyle) {
+private fun PrefixedHighlightedText(
+    prefix: String,
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier
+) {
     val highlight = SpanStyle(
         color = MaterialTheme.colorScheme.secondary,
         fontWeight = FontWeight.Light
@@ -232,7 +352,7 @@ private fun PrefixedHighlightedText(prefix: String, text: String, style: TextSty
         append(prefix)
         appendTextWithW(this, text, highlight)
     }
-    Text(text = annotated, style = style)
+    Text(text = annotated, style = style, modifier = modifier)
 }
 
 private fun appendTextWithW(builder: AnnotatedString.Builder, input: String, highlight: SpanStyle) {
