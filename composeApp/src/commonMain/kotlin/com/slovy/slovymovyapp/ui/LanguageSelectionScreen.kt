@@ -11,12 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-private val languages = listOf(
+val languagesToCode = listOf(
     "English" to "en",
     "Русский" to "ru",
     "Nederlands" to "nl",
     "Polski" to "pl"
 )
+
+val codeToLanguage = languagesToCode.associate { it.second to it.first }
 
 @Preview
 @Composable
@@ -34,7 +36,7 @@ fun LanguageSelectionScreen(
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            languages.forEach { (label, code) ->
+            languagesToCode.forEach { (label, code) ->
                 Text(
                     text = label,
                     style = MaterialTheme.typography.titleMedium,

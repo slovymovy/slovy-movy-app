@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.CancelToken
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
-import kotlinx.io.files.Path
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Preview

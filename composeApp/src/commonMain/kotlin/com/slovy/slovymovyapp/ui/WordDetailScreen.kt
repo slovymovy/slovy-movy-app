@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.*
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.text.Typography.bullet
 
 @Composable
 private fun KeyValue(label: String, value: String) {
@@ -33,7 +34,7 @@ fun WordDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 64.dp, start = 12.dp, end = 12.dp, bottom = 64.dp),
+                .padding(top = 64.dp, start = 16.dp, end = 16.dp, bottom = 64.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.Start
         ) {
@@ -51,8 +52,12 @@ fun WordDetailScreen(
                 )
 
                 if (entry.forms.isNotEmpty()) {
-                    val formsJoined = entry.forms.joinToString(separator = ", ") { it.form }
-                    KeyValue(label = "Forms", value = formsJoined)
+                    val formsJoined = entry.forms.joinToString(separator = "\n ") { "\t\t$bullet${it.form}${it.tags}" }
+                    Text(
+                        text = "Forms",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                    Text(text = formsJoined, style = MaterialTheme.typography.bodySmall)
                 }
 
                 val sensesByGroup = entry.senses.groupBy { it.semanticGroupId }
@@ -71,26 +76,49 @@ fun WordDetailScreen(
                         LevelAndFrequencyRow(level = sense.learnerLevel, frequency = sense.frequency)
 
                         if (sense.synonyms.isNotEmpty()) {
-                            KeyValue("Synonyms", sense.synonyms.joinToString())
+                            KeyValue("Synonyms", bulletList(sense.synonyms))
                         }
                         if (sense.antonyms.isNotEmpty()) {
-                            KeyValue("Antonyms", sense.antonyms.joinToString())
+                            KeyValue("Antonyms", bulletList(sense.antonyms))
                         }
                         if (sense.commonPhrases.isNotEmpty()) {
-                            KeyValue("Phrases", sense.commonPhrases.joinToString())
+                            KeyValue("Phrases", bulletList(sense.commonPhrases))
                         }
 
-                        if (sense.translations.isNotEmpty()) {
-                            sense.translations.forEach { (tgt, list) ->
-                                val joined = list.joinToString {
-                                    it.targetLangWord + (it.targetLangSenseClarification?.let { c -> " ($c)" } ?: "")
-                                }
-                                KeyValue("Translations [$tgt]", joined)
+                        val targetLanguages = sense.targetLangDefinitions.keys + sense.translations.keys
+
+                        targetLanguages.forEach { lang ->
+                            Text(
+                                text = codeToLanguage.getOrElse(lang, { lang }),
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                            )
+                            if (sense.targetLangDefinitions.contains(lang)) {
+                                HighlightedText(
+                                    text = sense.targetLangDefinitions[lang]!!,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
-                        }
-                        if (sense.targetLangDefinitions.isNotEmpty()) {
-                            sense.targetLangDefinitions.forEach { (tgt, def) ->
-                                KeyValue("Definition [$tgt]", def)
+                            if (sense.translations.contains(lang)) {
+                                Text(
+                                    text = "Translations",
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                                )
+                                sense.translations[lang]?.let { list ->
+                                    val joined = list.joinToString(separator = "\n") {
+                                        buildAnnotatedString {
+                                            withStyle(SpanStyle(fontWeight = FontWeight.Light)) {
+                                                append("\t\t$bullet")
+                                                append(it.targetLangWord)
+                                            }
+                                            if (it.targetLangSenseClarification != null) {
+                                                withStyle(SpanStyle(fontWeight = FontWeight.ExtraLight)) {
+                                                    append("\t(${it.targetLangSenseClarification})")
+                                                }
+                                            }
+                                        }
+                                    }
+                                    Text(text = joined, style = MaterialTheme.typography.bodySmall)
+                                }
                             }
                         }
 
@@ -104,7 +132,7 @@ fun WordDetailScreen(
                                 if (ex.targetLangTranslations.isNotEmpty()) {
                                     ex.targetLangTranslations.forEach { (tgt, tr) ->
                                         PrefixedHighlightedText(
-                                            prefix = "  [$tgt] ",
+                                            prefix = "\t ",
                                             text = tr,
                                             style = MaterialTheme.typography.bodySmall
                                         )
@@ -120,6 +148,112 @@ fun WordDetailScreen(
                 Text("Back")
             }
         }
+    }
+}
+
+private fun bulletList(strings: List<String>): String =
+    strings.joinToString(separator = "\n", transform = { "\t$bullet\t$it" })
+
+@Composable
+private fun Badge(text: String, container: Color, content: Color) {
+    Surface(color = container, contentColor = content, shape = RoundedCornerShape(8.dp)) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+    }
+}
+
+@Composable
+private fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
+    LearnerLevel.A1, LearnerLevel.A2 ->
+        MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
+
+    LearnerLevel.B1 -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
+    LearnerLevel.B2 -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+    LearnerLevel.C1 -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
+    LearnerLevel.C2 -> MaterialTheme.colorScheme.error to MaterialTheme.colorScheme.onError
+}
+
+@Composable
+private fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> = when (f) {
+    SenseFrequency.HIGH -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
+    SenseFrequency.MIDDLE -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
+    SenseFrequency.LOW -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
+    SenseFrequency.VERY_LOW -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
+}
+
+@Composable
+private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        val (lc, lcc) = colorsForLevel(level)
+        val (fc, fcc) = colorsForFrequency(frequency)
+        Badge(text = "Level: ${level.name}", container = lc, content = lcc)
+        val freqLabel = frequency.name.lowercase().replaceFirstChar { it.titlecase() }
+        Badge(text = "Frequency: $freqLabel", container = fc, content = fcc)
+    }
+}
+
+
+// Helpers to render <w>word</w> with special highlight style across all displayed text
+@Composable
+private fun HighlightedText(text: String, style: TextStyle) {
+    val highlight = SpanStyle(
+        color = MaterialTheme.colorScheme.secondary,
+        fontWeight = FontWeight.Light
+    )
+    val annotated = buildAnnotatedString {
+        appendTextWithW(this, text, highlight)
+    }
+    Text(text = annotated, style = style)
+}
+
+@Composable
+private fun BulletHighlightedText(text: String, style: TextStyle) {
+    val highlight = SpanStyle(
+        color = MaterialTheme.colorScheme.secondary,
+        fontWeight = FontWeight.Light
+    )
+    val annotated = buildAnnotatedString {
+        append(bullet)
+        appendTextWithW(this, text, highlight)
+    }
+    Text(text = annotated, style = style)
+}
+
+@Composable
+private fun PrefixedHighlightedText(prefix: String, text: String, style: TextStyle) {
+    val highlight = SpanStyle(
+        color = MaterialTheme.colorScheme.secondary,
+        fontWeight = FontWeight.Light
+    )
+    val annotated = buildAnnotatedString {
+        append(prefix)
+        appendTextWithW(this, text, highlight)
+    }
+    Text(text = annotated, style = style)
+}
+
+private fun appendTextWithW(builder: AnnotatedString.Builder, input: String, highlight: SpanStyle) {
+    var i = 0
+    while (i < input.length) {
+        val start = input.indexOf("<w>", i)
+        if (start == -1) {
+            builder.append(input.substring(i))
+            break
+        }
+        // Append text before <w>
+        if (start > i) builder.append(input.substring(i, start))
+        val end = input.indexOf("</w>", start + 3)
+        if (end == -1) {
+            // No closing tag – append the rest verbatim
+            builder.append(input.substring(start))
+            break
+        }
+        val word = input.substring(start + 3, end)
+        builder.withStyle(highlight) { builder.append(word) }
+        i = end + 4 // move after </w>
     }
 }
 
@@ -287,108 +421,4 @@ private fun sampleCard(): LanguageCard {
             )
         )
     )
-}
-
-
-@Composable
-private fun Badge(text: String, container: Color, content: Color) {
-    Surface(color = container, contentColor = content, shape = RoundedCornerShape(8.dp)) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        )
-    }
-}
-
-@Composable
-private fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
-    LearnerLevel.A1, LearnerLevel.A2 ->
-        MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
-
-    LearnerLevel.B1 -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
-    LearnerLevel.B2 -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
-    LearnerLevel.C1 -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
-    LearnerLevel.C2 -> MaterialTheme.colorScheme.error to MaterialTheme.colorScheme.onError
-}
-
-@Composable
-private fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> = when (f) {
-    SenseFrequency.HIGH -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
-    SenseFrequency.MIDDLE -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
-    SenseFrequency.LOW -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
-    SenseFrequency.VERY_LOW -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
-}
-
-@Composable
-private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        val (lc, lcc) = colorsForLevel(level)
-        val (fc, fcc) = colorsForFrequency(frequency)
-        Badge(text = "Level: ${level.name}", container = lc, content = lcc)
-        val freqLabel = frequency.name.lowercase().replaceFirstChar { it.titlecase() }
-        Badge(text = "Frequency: $freqLabel", container = fc, content = fcc)
-    }
-}
-
-
-// Helpers to render <w>word</w> with special highlight style across all displayed text
-@Composable
-private fun HighlightedText(text: String, style: TextStyle) {
-    val highlight = SpanStyle(
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.SemiBold
-    )
-    val annotated = buildAnnotatedString {
-        appendTextWithW(this, text, highlight)
-    }
-    Text(text = annotated, style = style)
-}
-
-@Composable
-private fun BulletHighlightedText(text: String, style: TextStyle) {
-    val highlight = SpanStyle(
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.SemiBold
-    )
-    val annotated = buildAnnotatedString {
-        append("• ")
-        appendTextWithW(this, text, highlight)
-    }
-    Text(text = annotated, style = style)
-}
-
-@Composable
-private fun PrefixedHighlightedText(prefix: String, text: String, style: TextStyle) {
-    val highlight = SpanStyle(
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.SemiBold
-    )
-    val annotated = buildAnnotatedString {
-        append(prefix)
-        appendTextWithW(this, text, highlight)
-    }
-    Text(text = annotated, style = style)
-}
-
-private fun appendTextWithW(builder: AnnotatedString.Builder, input: String, highlight: SpanStyle) {
-    var i = 0
-    while (i < input.length) {
-        val start = input.indexOf("<w>", i)
-        if (start == -1) {
-            builder.append(input.substring(i))
-            break
-        }
-        // Append text before <w>
-        if (start > i) builder.append(input.substring(i, start))
-        val end = input.indexOf("</w>", start + 3)
-        if (end == -1) {
-            // No closing tag – append the rest verbatim
-            builder.append(input.substring(start))
-            break
-        }
-        val word = input.substring(start + 3, end)
-        builder.withStyle(highlight) { builder.append(word) }
-        i = end + 4 // move after </w>
-    }
 }
