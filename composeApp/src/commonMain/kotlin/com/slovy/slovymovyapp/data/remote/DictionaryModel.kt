@@ -6,7 +6,7 @@ data class LanguageCard(
 )
 
 data class LanguageCardPosEntry(
-    val pos: String,
+    val pos: PartOfSpeech,
     val forms: MutableList<LanguageCardForm>,
     val senses: List<LanguageCardResponseSense>
 )
@@ -32,13 +32,41 @@ enum class SenseFrequency {
     VERY_LOW;
 }
 
+enum class PartOfSpeech {
+    ARTICLE,
+    NOUN,
+    NAME,
+    VERB,
+    ADJECTIVE,
+    ADVERB,
+    PRONOUN,
+    PREPOSITION,
+    CONJUNCTION,
+    INTERJECTION,
+    DETERMINER,
+    NUMERAL;
+}
+
+enum class NameType {
+    NO,
+    PERSON_NAME,
+    PLACE_NAME,
+    GEOGRAPHICAL_FEATURE,
+    ORGANIZATION_NAME,
+    FICTIONAL_NAME,
+    HISTORICAL_NAME,
+    EVENT_NAME,
+    WORK_OF_ART_NAME,
+    OTHER;
+}
+
 data class LanguageCardResponseSense(
     val senseId: String,
     val senseDefinition: String,
     val learnerLevel: LearnerLevel,
     val frequency: SenseFrequency,
     val semanticGroupId: String,
-    val nameType: String? = null,
+    val nameType: NameType? = null,
     val examples: List<LanguageCardExample> = emptyList(),
     val synonyms: List<String> = emptyList(),
     val antonyms: List<String> = emptyList(),

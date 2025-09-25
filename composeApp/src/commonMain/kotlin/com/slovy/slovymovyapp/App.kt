@@ -15,7 +15,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.uuid.Uuid
 
 @Serializable
 private sealed interface AppDestination {
@@ -37,7 +36,7 @@ private sealed interface AppDestination {
     @Serializable
     data class WordDetail(
         val dictionaryLanguage: String,
-        val lemmaId: String,
+        val lemma: String,
     ) : AppDestination
 
     @Serializable
@@ -195,7 +194,7 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                     navController.navigate(
                         AppDestination.WordDetail(
                             dictionaryLanguage = item.language,
-                            lemmaId = item.lemmaId.toString(),
+                            lemma = item.lemma,
                         )
                     )
                 }
@@ -203,13 +202,11 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
         }
         composable<AppDestination.WordDetail> { backStackEntry ->
             val args = backStackEntry.toRoute<AppDestination.WordDetail>()
-            val card = remember(args.dictionaryLanguage, args.lemmaId) {
-                args.lemmaId.let { uuid ->
-                    dictionaryRepository.getLanguageCard(args.dictionaryLanguage, Uuid.parse(uuid))
-                }
+            val card = remember(args.dictionaryLanguage, args.lemma) {
+                dictionaryRepository.getLanguageCard(args.dictionaryLanguage, args.lemma)
             }
             if (card == null) {
-                LaunchedEffect(args.dictionaryLanguage, args.lemmaId) {
+                LaunchedEffect(args.dictionaryLanguage, args.lemma) {
                     navController.navigate(AppDestination.Error("Word not found, seems like database is broken")) {
                         popUpTo<AppDestination.WordDetail> { inclusive = true }
                     }

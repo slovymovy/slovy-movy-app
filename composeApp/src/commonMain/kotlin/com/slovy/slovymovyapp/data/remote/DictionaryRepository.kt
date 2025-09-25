@@ -123,89 +123,101 @@ class DictionaryRepository(
         return out.take(maxItems)
     }
 
-    fun getLanguageCard(language: String, lemmaId: Uuid): LanguageCard? {
+    fun getLanguageCard(language: String, lemma: String): LanguageCard? {
         val db = dataDbManager.openDictionaryReadOnly(language)
         val q = db.dictionaryQueries
 
-        val lemmaRow = q.selectLemmaFullById(lemmaId).executeAsList().firstOrNull() ?: return null
-        val formsWithId = q.selectFormsWithIdByLemmaId(lemmaId).executeAsList()
-        val forms = formsWithId.map { formRow ->
-            val tags = q.selectFormTagsByFormId(formRow.form_id).executeAsList().map { it.tag }
-            LanguageCardForm(tags = tags, form = formRow.form)
-        }.toMutableList()
+        // Collect all lemma IDs for the given lemma text (case-insensitive), including normalized matches
+        val byWord = q.selectLemmasByWord(lemma).executeAsList()
+        val byNorm = q.selectLemmasByNormalized(lemma).executeAsList()
+        val lemmaIds = LinkedHashSet<Uuid>()
+        byWord.forEach { lemmaIds.add(it.id) }
+        byNorm.forEach { lemmaIds.add(it.id) }
+        if (lemmaIds.isEmpty()) return null
 
-        val sensesRows = q.selectSensesByLemmaId(lemmaId).executeAsList()
-        val senses = sensesRows.map { s ->
-            val synonyms = q.selectSenseSynonyms(s.sense_id).executeAsList().map { it.synonym }
-            val antonyms = q.selectSenseAntonyms(s.sense_id).executeAsList().map { it.antonym }
-            val phrases = q.selectSenseCommonPhrases(s.sense_id).executeAsList().map { it.phrase }
-            val traits = q.selectSenseTraits(s.sense_id).executeAsList().map { tr ->
-                LanguageCardTrait(
-                    traitType = TraitType.valueOf(tr.trait_type.name),
-                    comment = tr.comment
+        val entries = mutableListOf<LanguageCardPosEntry>()
+        for (lemmaId in lemmaIds) {
+            val lemmaRow = q.selectLemmaFullById(lemmaId).executeAsList().firstOrNull() ?: continue
+            val formsWithId = q.selectFormsWithIdByLemmaId(lemmaId).executeAsList()
+            val forms = formsWithId.map { formRow ->
+                val tags = q.selectFormTagsByFormId(formRow.form_id).executeAsList().map { it.tag }
+                LanguageCardForm(tags = tags, form = formRow.form)
+            }.toMutableList()
+
+            val sensesRows = q.selectSensesByLemmaId(lemmaId).executeAsList()
+            val senses = sensesRows.map { s ->
+                val synonyms = q.selectSenseSynonyms(s.sense_id).executeAsList().map { it.synonym }
+                val antonyms = q.selectSenseAntonyms(s.sense_id).executeAsList().map { it.antonym }
+                val phrases = q.selectSenseCommonPhrases(s.sense_id).executeAsList().map { it.phrase }
+                val traits = q.selectSenseTraits(s.sense_id).executeAsList().map { tr ->
+                    LanguageCardTrait(
+                        traitType = TraitType.valueOf(tr.trait_type.name),
+                        comment = tr.comment
+                    )
+                }
+
+                // Aggregate per-target language translations/definitions
+                val targetLangs = installedTranslationTargets(language)
+                val openTdbs: Map<String, TranslationDatabase> = targetLangs.associateWith { tgt ->
+                    val tdb = dataDbManager.openTranslationReadOnly(language, tgt)
+                    tdb
+                }
+
+                val tgtDefinitions = LinkedHashMap<String, String>()
+                val tgtTranslations = LinkedHashMap<String, List<LanguageCardTranslation>>()
+                for ((tgt, tdb) in openTdbs) {
+                    val tq = tdb.translationQueries
+                    val def: String? = tq.selectDefinitionsBySense(s.sense_id).executeAsList().firstOrNull()
+                    if (def != null) {
+                        tgtDefinitions[tgt] = def
+                    }
+                    val trs = tq.selectSenseTranslationsBySense(s.sense_id).executeAsList()
+                    if (trs.isNotEmpty()) {
+                        tgtTranslations[tgt] = trs.map {
+                            LanguageCardTranslation(
+                                targetLangWord = it.target_lang_word,
+                                targetLangSenseClarification = it.target_lang_sense_clarification
+                            )
+                        }
+                    }
+                }
+
+                val examples = q.selectSenseExamples(s.sense_id).executeAsList().map { ex ->
+                    val trMap = LinkedHashMap<String, String>()
+                    for ((tgt, tdb) in openTdbs) {
+                        val translation: String? =
+                            tdb.translationQueries.selectExampleTranslations(s.sense_id, ex.example_id).executeAsList()
+                                .firstOrNull()
+                        if (translation != null) trMap[tgt] = translation
+                    }
+                    LanguageCardExample(text = ex.text, targetLangTranslations = trMap)
+                }
+
+                LanguageCardResponseSense(
+                    senseId = s.sense_id.toString(),
+                    senseDefinition = s.sense_definition,
+                    learnerLevel = LearnerLevel.valueOf(s.learner_level.name),
+                    frequency = SenseFrequency.valueOf(s.frequency.name),
+                    semanticGroupId = s.semantic_group_id,
+                    nameType = s.name_type?.let { NameType.valueOf(it.name) },
+                    examples = examples,
+                    synonyms = synonyms,
+                    antonyms = antonyms,
+                    commonPhrases = phrases,
+                    traits = traits,
+                    targetLangDefinitions = tgtDefinitions,
+                    translations = tgtTranslations,
                 )
             }
 
-            // Aggregate per-target language translations/definitions
-            val targetLangs = installedTranslationTargets(language)
-            val openTdbs: Map<String, TranslationDatabase> = targetLangs.associateWith { tgt ->
-                val tdb =
-                    dataDbManager.openTranslationReadOnly(language, tgt)
-                tdb
-            }
-
-            val tgtDefinitions = LinkedHashMap<String, String>()
-            val tgtTranslations = LinkedHashMap<String, List<LanguageCardTranslation>>()
-            for ((tgt, tdb) in openTdbs) {
-                val tq = tdb.translationQueries
-                val def: String? = tq.selectDefinitionsBySense(s.sense_id).executeAsList().firstOrNull()
-                if (def != null) {
-                    tgtDefinitions[tgt] = def
-                }
-                val trs = tq.selectSenseTranslationsBySense(s.sense_id).executeAsList()
-                if (trs.isNotEmpty()) {
-                    tgtTranslations[tgt] = trs.map {
-                        LanguageCardTranslation(
-                            targetLangWord = it.target_lang_word,
-                            targetLangSenseClarification = it.target_lang_sense_clarification
-                        )
-                    }
-                }
-            }
-
-            val examples = q.selectSenseExamples(s.sense_id).executeAsList().map { ex ->
-                val trMap = LinkedHashMap<String, String>()
-                for ((tgt, tdb) in openTdbs) {
-                    val translation: String? =
-                        tdb.translationQueries.selectExampleTranslations(s.sense_id, ex.example_id).executeAsList()
-                            .firstOrNull()
-                    if (translation != null) trMap[tgt] = translation
-                }
-                LanguageCardExample(text = ex.text, targetLangTranslations = trMap)
-            }
-
-            LanguageCardResponseSense(
-                senseId = s.sense_id.toString(),
-                senseDefinition = s.sense_definition,
-                learnerLevel = LearnerLevel.valueOf(s.learner_level.name),
-                frequency = SenseFrequency.valueOf(s.frequency.name),
-                semanticGroupId = s.semantic_group_id,
-                nameType = s.name_type?.name,
-                examples = examples,
-                synonyms = synonyms,
-                antonyms = antonyms,
-                commonPhrases = phrases,
-                traits = traits,
-                targetLangDefinitions = tgtDefinitions,
-                translations = tgtTranslations,
+            val entry = LanguageCardPosEntry(
+                pos = PartOfSpeech.valueOf(lemmaRow.pos.name),
+                forms = forms,
+                senses = senses
             )
+            entries.add(entry)
         }
-
-        val entry = LanguageCardPosEntry(
-            pos = lemmaRow.pos.name,
-            forms = forms,
-            senses = senses
-        )
-        return LanguageCard(entries = listOf(entry), lemma = lemmaRow.lemma)
+        if (entries.isEmpty()) return null
+        return LanguageCard(entries = entries, lemma = lemma)
     }
 }

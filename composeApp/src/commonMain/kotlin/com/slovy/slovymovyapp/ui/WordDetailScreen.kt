@@ -211,7 +211,8 @@ private fun EntryCard(entry: LanguageCardPosEntry, entryIndex: Int) {
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = entry.pos.uppercase(),
+                        text = entry.pos.name.lowercase()
+                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
@@ -682,7 +683,7 @@ private fun sampleCard(): LanguageCard {
         entries = listOf(
             // Verb entry
             LanguageCardPosEntry(
-                pos = "verb",
+                pos = PartOfSpeech.VERB,
                 forms = mutableListOf(),
                 senses = listOf(
                     LanguageCardResponseSense(
@@ -691,7 +692,7 @@ private fun sampleCard(): LanguageCard {
                         learnerLevel = LearnerLevel.A2,
                         frequency = SenseFrequency.HIGH,
                         semanticGroupId = "action_of_testing",
-                        nameType = "no",
+                        nameType = null,
                         examples = listOf(
                             LanguageCardExample(
                                 text = "The scientist is <w>testing</w> the new hypothesis in the lab.",
@@ -734,7 +735,7 @@ private fun sampleCard(): LanguageCard {
             ),
             // Noun entry
             LanguageCardPosEntry(
-                pos = "noun",
+                pos = PartOfSpeech.NOUN,
                 forms = mutableListOf(),
                 senses = listOf(
                     LanguageCardResponseSense(
@@ -743,7 +744,7 @@ private fun sampleCard(): LanguageCard {
                         learnerLevel = LearnerLevel.B2,
                         frequency = SenseFrequency.HIGH,
                         semanticGroupId = "evaluation_process",
-                        nameType = "no",
+                        nameType = null,
                         examples = listOf(
                             LanguageCardExample(
                                 text = "The software is currently undergoing rigorous <w>testing</w> before its release.",
@@ -789,7 +790,7 @@ private fun sampleCard(): LanguageCard {
             ),
             // Adjective entry
             LanguageCardPosEntry(
-                pos = "adjective",
+                pos = PartOfSpeech.ADJECTIVE,
                 forms = mutableListOf(),
                 senses = listOf(
                     LanguageCardResponseSense(
@@ -798,7 +799,7 @@ private fun sampleCard(): LanguageCard {
                         learnerLevel = LearnerLevel.B1,
                         frequency = SenseFrequency.MIDDLE,
                         semanticGroupId = "difficulty",
-                        nameType = "no",
+                        nameType = NameType.NO,
                         examples = listOf(
                             LanguageCardExample(
                                 text = "The exam was very <w>testing</w>, but I think I did well.",
