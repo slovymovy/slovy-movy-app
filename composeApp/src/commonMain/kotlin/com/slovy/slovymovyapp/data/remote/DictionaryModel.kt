@@ -25,11 +25,11 @@ enum class LearnerLevel {
     C2;
 }
 
-enum class SenseFrequency {
-    HIGH,
-    MIDDLE,
-    LOW,
-    VERY_LOW;
+enum class SenseFrequency(val label: String) {
+    HIGH("High"),
+    MIDDLE("Middle"),
+    LOW("Low"),
+    VERY_LOW("Very low");
 }
 
 enum class PartOfSpeech {

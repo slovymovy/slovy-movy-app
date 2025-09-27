@@ -12,10 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -54,17 +50,16 @@ private fun LanguageCardPosEntry.toEntryUiState(index: Int): EntryUiState = Entr
     entryId = "${pos.name.lowercase()}_$index",
     expanded = true,
     formsExpanded = false,
-    senses = senses.map { it.toSenseUiState() }
+    senses = senses.map { it.toSenseUiState(senses.size < 2) }
 )
 
-private fun LanguageCardResponseSense.toSenseUiState(): SenseUiState {
-    val defaultExpanded = frequency == SenseFrequency.HIGH || frequency == SenseFrequency.MIDDLE
+private fun LanguageCardResponseSense.toSenseUiState(expanded: Boolean): SenseUiState {
     val languages = collectLanguageCodes()
-    val languageStates = languages.associateWith { defaultExpanded }
-    val examplesExpanded = if (examples.isEmpty()) false else true
+    val languageStates = languages.associateWith { expanded }
+    val examplesExpanded = examples.isNotEmpty()
     return SenseUiState(
         senseId = senseId,
-        expanded = defaultExpanded,
+        expanded = expanded,
         examplesExpanded = examplesExpanded,
         languageExpanded = languageStates
     )
@@ -139,11 +134,26 @@ private fun SectionLabel(text: String) {
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun KeyValue(label: String, value: String) {
-    if (value.isBlank()) return
+private fun EntryList(
+    label: String, values: List<String>, containerColor: Color, contentColor: Color
+) {
+    if (values.isEmpty()) return
     SectionLabel(label)
-    HighlightedText(text = value, style = MaterialTheme.typography.bodyMedium)
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        values.forEach {
+            Badge(
+                text = it,
+                containerColor = containerColor,
+                contentColor = contentColor
+            )
+        }
+    }
 }
 
 @Composable
@@ -506,11 +516,6 @@ private fun EntryCard(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             )
-                            Text(
-                                text = "Tap to expand",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
                         }
                     }
                 }
@@ -539,42 +544,40 @@ private fun EntryCard(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     if (entry.forms.isNotEmpty()) {
-                        val formsSummary = entry.forms
-                            .flatMap { it.tags }
-                            .toSet()
-                            .sortedBy { it }
-                            .joinToString(separator = ", ")
                         ExpandableSection(
-                            title = "Forms (${entry.forms.size})",
+                            title = "Grammar",
                             expanded = entryState.formsExpanded,
                             onToggle = onFormsToggle,
-                            supportingText = formsSummary.ifEmpty { null },
-                            headlineStyle = MaterialTheme.typography.titleMedium
+                            supportingText = null,
+                            headlineStyle = MaterialTheme.typography.titleSmall
                         ) {
-                            SectionLabel("Forms")
+                            SectionLabel("Grammar")
                             FormsList(entry.forms)
                         }
                     }
 
                     val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
                     groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
-                        if (groupEntries.size > 1 && groupIndex > 0) {
+                        val showGroup = groupEntries.size > 1 && groupIndex > 0 && senseList.size > 1
+                        if (showGroup) {
                             HorizontalDivider(
                                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                             )
                         }
 
                         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            if (groupEntries.size > 1 && groupId.isNotBlank()) {
+                            if (showGroup) {
                                 SectionLabel("Group: $groupId")
                             }
 
                             senseList.forEachIndexed { senseIndex, sense ->
                                 val senseState = entryState.senses.find { it.senseId == sense.senseId }
-                                    ?: sense.toSenseUiState()
+                                    ?: sense.toSenseUiState(false)
                                 SenseCard(
                                     sense = sense,
                                     state = senseState,
+                                    translationBasedHeader = sense.translationsHeader(),
+                                    translationHeaderSuffix = translationsHeaderSuffix(sense, entry.senses),
                                     onToggle = { onSenseToggle(sense.senseId) },
                                     onExamplesToggle = { onSenseExamplesToggle(sense.senseId) },
                                     onLanguageToggle = { languageCode ->
@@ -601,9 +604,11 @@ private fun pluralEnding(someList: List<*>): String = if (someList.size == 1) ""
 private fun SenseCard(
     sense: LanguageCardResponseSense,
     state: SenseUiState,
+    translationBasedHeader: String?,
+    translationHeaderSuffix: String?,
     onToggle: () -> Unit,
     onExamplesToggle: () -> Unit,
-    onLanguageToggle: (String) -> Unit
+    onLanguageToggle: (String) -> Unit,
 ) {
     val expanded = state.expanded
     OutlinedCard(
@@ -624,38 +629,25 @@ private fun SenseCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    HighlightedText(
-                        text = sense.senseDefinition,
-                        style = MaterialTheme.typography.titleLarge
-                    )
+                    if (translationBasedHeader == null) {
+                        HighlightedText(
+                            text = sense.senseDefinition,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    } else {
+                        HighlightedText(
+                            text = translationBasedHeader,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        if (translationHeaderSuffix != null) {
+                            HighlightedText(
+                                text = translationHeaderSuffix,
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                    }
 
                     LevelAndFrequencyRow(level = sense.learnerLevel, frequency = sense.frequency)
-
-                    val summaryParts = buildList {
-                        if (sense.synonyms.isNotEmpty()) {
-                            add("${sense.synonyms.size} synonym${pluralEnding(sense.synonyms)}")
-                        }
-                        val translationsCount = sense.translations.values.sumOf { it.size }
-                        if (translationsCount > 0) {
-                            add("$translationsCount translation${pluralEnding(sense.translations.values.flatten())}")
-                        }
-                        if (sense.examples.isNotEmpty()) {
-                            add("${sense.examples.size} example${pluralEnding(sense.examples)}")
-                        }
-                    }.joinToString(" $bullet ")
-
-                    AnimatedVisibility(
-                        visible = !expanded && summaryParts.isNotBlank(),
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        HighlightedText(
-                            text = summaryParts,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        )
-                    }
                 }
 
                 Icon(
@@ -681,6 +673,31 @@ private fun SenseCard(
                         .padding(bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    if (sense.targetLangDefinitions.isNotEmpty()) {
+                        OutlinedCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            if (translationBasedHeader != null) {
+                                Text(
+                                    text = sense.senseDefinition,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                            if (translationHeaderSuffix == null) {
+                                sense.targetLangDefinitions.forEach {
+                                    Text(
+                                        text = it.value,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     if (sense.examples.isNotEmpty()) {
                         val examplePreview = sense.examples.first().text
                             .replace("\n", " ")
@@ -695,14 +712,14 @@ private fun SenseCard(
                                 sense.examples.forEach { ex ->
                                     BulletHighlightedText(
                                         text = ex.text,
-                                        style = MaterialTheme.typography.bodyMedium
+                                        style = MaterialTheme.typography.bodyLarge
                                     )
                                     if (ex.targetLangTranslations.isNotEmpty()) {
                                         ex.targetLangTranslations.forEach { (_, translation) ->
                                             PrefixedHighlightedText(
                                                 prefix = "– ",
                                                 text = translation,
-                                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                                                style = MaterialTheme.typography.bodySmall,
                                                 modifier = Modifier.padding(start = 24.dp)
                                             )
                                         }
@@ -711,15 +728,25 @@ private fun SenseCard(
                             }
                         }
                     }
-                    if (sense.synonyms.isNotEmpty()) {
-                        KeyValue("Synonyms", bulletList(sense.synonyms))
-                    }
-                    if (sense.antonyms.isNotEmpty()) {
-                        KeyValue("Antonyms", bulletList(sense.antonyms))
-                    }
-                    if (sense.commonPhrases.isNotEmpty()) {
-                        KeyValue("Phrases", bulletList(sense.commonPhrases))
-                    }
+
+                    EntryList(
+                        "Common phrases",
+                        sense.commonPhrases,
+                        MaterialTheme.colorScheme.tertiaryContainer,
+                        MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                    EntryList(
+                        "Synonyms",
+                        sense.synonyms,
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    EntryList(
+                        "Antonyms",
+                        sense.antonyms,
+                        MaterialTheme.colorScheme.errorContainer,
+                        MaterialTheme.colorScheme.onErrorContainer
+                    )
 
                     val languageOrder = buildList {
                         sense.targetLangDefinitions.keys.forEach { add(it) }
@@ -727,18 +754,48 @@ private fun SenseCard(
                     }
 
                     languageOrder.forEach { lang ->
-                        val langExpanded = state.languageExpanded[lang] ?: expanded
-                        LanguageSection(
-                            languageCode = lang,
-                            sense = sense,
-                            expanded = langExpanded,
-                            onToggle = { onLanguageToggle(lang) }
-                        )
+                        if (sense.translations[lang]?.isNotEmpty() ?: false) {
+                            val langExpanded = state.languageExpanded[lang] ?: expanded
+                            LanguageSection(
+                                languageCode = lang,
+                                sense = sense,
+                                expanded = langExpanded,
+                                onToggle = { onLanguageToggle(lang) }
+                            )
+                        }
                     }
-
                 }
             }
         }
+    }
+}
+
+private fun translationsHeaderSuffix(
+    sense: LanguageCardResponseSense,
+    allSenses: List<LanguageCardResponseSense>
+): String? {
+    if (sense.translations.isEmpty()) {
+        return null
+    } else {
+        val eachCount = allSenses.map { it.translationsHeader() }.groupingBy { it }.eachCount()
+        val translationsHeader = sense.translationsHeader()
+        return if (eachCount[translationsHeader] == 1) {
+            null
+        } else {
+            sense.targetLangDefinitions.map { definition -> definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() } }
+                .joinToString(",")
+        }
+    }
+}
+
+private fun LanguageCardResponseSense.translationsHeader(): String? {
+    if (translations.isEmpty()) {
+        return null
+    }
+    val prefix = if (translations.keys.size > 1) "$bullet " else ""
+    return translations.entries.sortedBy { it.key }.joinToString(separator = "\n") {
+        prefix + it.value.map { translation -> translation.targetLangWord }.sortedBy { text -> text }
+            .joinToString(separator = ", ")
     }
 }
 
@@ -750,34 +807,16 @@ private fun LanguageSection(
     onToggle: () -> Unit
 ) {
     val languageLabel = codeToLanguage.getOrElse(languageCode) { languageCode }
-    val definition = sense.targetLangDefinitions[languageCode]
     val translations = sense.translations[languageCode].orEmpty()
-    val translationCount = translations.size
-    val supportingParts = buildList {
-        if (definition != null) add("Definition")
-        if (translationCount > 0) {
-            add("$translationCount translation${pluralEnding(translations)}")
-        }
-    }.joinToString(" $bullet ")
 
     ExpandableSection(
         title = languageLabel,
         expanded = expanded,
         onToggle = onToggle,
-        supportingText = supportingParts.ifEmpty { null },
+        supportingText = null,
         headlineStyle = MaterialTheme.typography.titleSmall
     ) {
-        definition?.let {
-            HighlightedText(
-                text = it,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        if (translationCount > 0) {
-            SectionLabel("Translations")
-            TranslationList(translations = translations)
-        }
+        TranslationList(translations = translations)
     }
 }
 
@@ -803,12 +842,9 @@ private fun TranslationList(translations: List<LanguageCardTranslation>) {
     }
 }
 
-private fun bulletList(strings: List<String>): String =
-    strings.joinToString(separator = "\n") { "$bullet $it" }
-
 @Composable
-private fun Badge(text: String, container: Color, content: Color) {
-    Surface(color = container, contentColor = content, shape = RoundedCornerShape(12.dp)) {
+private fun Badge(text: String, containerColor: Color, contentColor: Color) {
+    Surface(color = containerColor, contentColor = contentColor, shape = RoundedCornerShape(12.dp)) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
@@ -826,9 +862,8 @@ private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency)
     ) {
         val (lc, lcc) = colorsForLevel(level)
         val (fc, fcc) = colorsForFrequency(frequency)
-        Badge(text = level.name, container = lc, content = lcc)
-        val freqLabel = frequency.name.lowercase().replaceFirstChar { it.titlecase() }
-        Badge(text = freqLabel, container = fc, content = fcc)
+        Badge(text = level.name, containerColor = lc, contentColor = lcc)
+        Badge(text = frequency.label, containerColor = fc, contentColor = fcc)
     }
 }
 
@@ -881,48 +916,6 @@ private fun PrefixedHighlightedText(
     Text(text = annotated, style = style, modifier = modifier)
 }
 
-private val ExpandMoreVector: ImageVector = ImageVector.Builder(
-    name = "ExpandableChevronDown",
-    defaultWidth = 24.dp,
-    defaultHeight = 24.dp,
-    viewportWidth = 24f,
-    viewportHeight = 24f
-).apply {
-    path(
-        fill = SolidColor(Color.Black),
-        pathFillType = PathFillType.NonZero
-    ) {
-        moveTo(12f, 16f)
-        lineTo(5.5f, 9.5f)
-        lineTo(6.91f, 8.09f)
-        lineTo(12f, 13.17f)
-        lineTo(17.09f, 8.09f)
-        lineTo(18.5f, 9.5f)
-        close()
-    }
-}.build()
-
-private val ExpandLessVector: ImageVector = ImageVector.Builder(
-    name = "ExpandableChevronUp",
-    defaultWidth = 24.dp,
-    defaultHeight = 24.dp,
-    viewportWidth = 24f,
-    viewportHeight = 24f
-).apply {
-    path(
-        fill = SolidColor(Color.Black),
-        pathFillType = PathFillType.NonZero
-    ) {
-        moveTo(5.5f, 14.5f)
-        lineTo(6.91f, 15.91f)
-        lineTo(12f, 10.83f)
-        lineTo(17.09f, 15.91f)
-        lineTo(18.5f, 14.5f)
-        lineTo(12f, 8.0f)
-        close()
-    }
-}.build()
-
 private fun appendTextWithW(builder: AnnotatedString.Builder, input: String, highlight: SpanStyle) {
     var i = 0
     while (i < input.length) {
@@ -944,4 +937,3 @@ private fun appendTextWithW(builder: AnnotatedString.Builder, input: String, hig
         i = end + 4 // move after </w>
     }
 }
-

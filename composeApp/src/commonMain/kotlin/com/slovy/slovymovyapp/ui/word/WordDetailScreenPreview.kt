@@ -245,6 +245,29 @@ private fun WordDetailScreenPreviewNoTranslations() {
     WordDetailScreenContent(state = sampleNoTranslationCard().toContentUiState())
 }
 
+// Edge case preview functions
+@Preview
+@Composable
+private fun WordDetailScreenPreviewNoTranslationsAllExpanded() {
+    val base = sampleNoTranslationCard().toContentUiState()
+    val expanded = base.entries.map { entryState ->
+        entryState.copy(
+            expanded = true,
+            formsExpanded = true,
+            senses = entryState.senses.map { senseState ->
+                senseState.copy(
+                    expanded = true,
+                    examplesExpanded = true,
+                    languageExpanded = senseState.languageExpanded.mapValues { true }
+                )
+            }
+        )
+    }
+    WordDetailScreenContent(
+        state = base.copy(entries = expanded)
+    )
+}
+
 @Preview
 @Composable
 private fun WordDetailScreenPreviewNoTranslationsCollapsed() {
@@ -363,7 +386,7 @@ internal fun sampleAmazonCard(): LanguageCard {
             // Noun entry with multiple meanings
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                forms = mutableListOf(),
+                forms = mutableListOf(LanguageCardForm(listOf("plural"), "amazons")),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "000a2542-e328-4b25-ae77-27edac4d3796",
@@ -393,6 +416,38 @@ internal fun sampleAmazonCard(): LanguageCard {
                                 LanguageCardTranslation(
                                     targetLangWord = "амазонка",
                                     targetLangSenseClarification = "Относится к мифологическим воительницам."
+                                )
+                            )
+                        )
+                    ),
+                    LanguageCardResponseSense(
+                        senseId = "4f67890a-bcde-5678-9012-34567890abcd",
+                        senseDefinition = "A major river in South America, the largest river by water volume in the world.",
+                        learnerLevel = LearnerLevel.A2,
+                        frequency = SenseFrequency.HIGH,
+                        semanticGroupId = "River",
+                        nameType = NameType.GEOGRAPHICAL_FEATURE,
+                        examples = listOf(
+                            LanguageCardExample(
+                                text = "The <w>Amazon</w> River flows through several South American countries.",
+                                targetLangTranslations = mapOf("ru" to "Река <w>Амазонка</w> протекает через несколько южноамериканских стран.")
+                            )
+                        ),
+                        commonPhrases = listOf("Amazon River", "Amazon Basin", "Amazon Rainforest"),
+                        traits = listOf(
+                            LanguageCardTrait(
+                                TraitType.FORM,
+                                "Always capitalized when referring to the river."
+                            )
+                        ),
+                        targetLangDefinitions = mapOf(
+                            "ru" to "Крупнейшая река в Южной Америке, самая полноводная река в мире."
+                        ),
+                        translations = mapOf(
+                            "ru" to listOf(
+                                LanguageCardTranslation(
+                                    targetLangWord = "амазонка",
+                                    targetLangSenseClarification = "Название реки."
                                 )
                             )
                         )

@@ -2,6 +2,11 @@ package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.LearnerLevel
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
@@ -39,3 +44,45 @@ internal fun colorsForPos(pos: PartOfSpeech): Pair<Color, Color> = when (pos) {
     PartOfSpeech.ARTICLE -> Color(0xFFE8EAF6) to Color(0xFF283593)
     PartOfSpeech.NAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232)
 }
+
+internal val ExpandMoreVector: ImageVector = ImageVector.Builder(
+    name = "ExpandableChevronDown",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f
+).apply {
+    path(
+        fill = SolidColor(Color.Black),
+        pathFillType = PathFillType.NonZero
+    ) {
+        moveTo(12f, 16f)
+        lineTo(5.5f, 9.5f)
+        lineTo(6.91f, 8.09f)
+        lineTo(12f, 13.17f)
+        lineTo(17.09f, 8.09f)
+        lineTo(18.5f, 9.5f)
+        close()
+    }
+}.build()
+
+internal val ExpandLessVector: ImageVector = ImageVector.Builder(
+    name = "ExpandableChevronUp",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f
+).apply {
+    path(
+        fill = SolidColor(Color.Black),
+        pathFillType = PathFillType.NonZero
+    ) {
+        moveTo(5.5f, 14.5f)
+        lineTo(6.91f, 15.91f)
+        lineTo(12f, 10.83f)
+        lineTo(17.09f, 15.91f)
+        lineTo(18.5f, 14.5f)
+        lineTo(12f, 8.0f)
+        close()
+    }
+}.build()
