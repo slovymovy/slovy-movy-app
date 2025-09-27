@@ -53,6 +53,13 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **Android namespace**: com.slovy.slovymovyapp
 - **Server main**: com.slovy.slovymovyapp.ApplicationKt
 
+### Compose UI workflow
+- Split each screen into a thin stateful entry point and a stateless composable that renders a `UiState` data model; previews/tests should target the stateless layer.
+- Keep all mutable UI flags (loading, expanded sections, dialog visibility, etc.) inside the `UiState`; avoid `remember`/`rememberSaveable` inside rendering composables.
+- Provide explicit callbacks (`onToggle`, `onRetry`, …) so the orchestrator can mutate the `UiState` while previews pass no-op lambdas.
+- Add preview functions for every meaningful `UiState` variant (content, loading, error, empty) so designers/devs can inspect layouts without runtime wiring.
+- When deriving default UI state from domain models (e.g., `LanguageCard`), add helper mappers (`toUiState()`) rather than embedding logic inside composables.
+
 ## Database (SqlDelight)
 - App DB schema: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/`
   - Migrations: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/migrations/`

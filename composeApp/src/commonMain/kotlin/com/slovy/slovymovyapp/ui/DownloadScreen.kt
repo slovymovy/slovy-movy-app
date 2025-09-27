@@ -10,7 +10,6 @@ import com.slovy.slovymovyapp.data.remote.CancelToken
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-@Preview
 @Composable
 fun DownloadScreen(
     onSuccess: () -> Unit = {},
@@ -19,29 +18,46 @@ fun DownloadScreen(
     download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit = { _, _ -> },
     description: String = "Downloading data"
 ) {
-    var state by remember { mutableStateOf<State>(State.Idle) }
+    var state by remember { mutableStateOf<DownloadUiState>(DownloadUiState.Idle) }
     val cancel = remember { CancelToken() }
 
     LaunchedEffect(Unit) {
-        state = State.Running(0, null)
+        state = DownloadUiState.Running(0, null)
         try {
             val onProgress: (DownloadProgress) -> Unit =
-                { p -> state = State.Running(p.percent.coerceAtLeast(0), p.totalBytes) }
+                { p -> state = DownloadUiState.Running(p.percent.coerceAtLeast(0), p.totalBytes) }
 
             download(onProgress, cancel)
-            state = State.Done
+            state = DownloadUiState.Done
             onSuccess()
         } catch (t: Throwable) {
             if (cancel.isCancelled) {
-                state = State.Cancelled
+                state = DownloadUiState.Cancelled
                 onCancel()
             } else {
-                state = State.Failed(t)
+                state = DownloadUiState.Failed(t)
                 onError(t)
             }
         }
     }
 
+    DownloadScreenContent(
+        state = state,
+        description = description,
+        onCancelClick = { cancel.cancel() },
+        onRetryClick = { state = DownloadUiState.Idle },
+        onCloseClick = onCancel
+    )
+}
+
+@Composable
+fun DownloadScreenContent(
+    state: DownloadUiState,
+    description: String = "Downloading data",
+    onCancelClick: () -> Unit = {},
+    onRetryClick: () -> Unit = {},
+    onCloseClick: () -> Unit = {},
+) {
     Surface(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -49,29 +65,30 @@ fun DownloadScreen(
             verticalArrangement = Arrangement.Center
         ) {
             when (val s = state) {
-                is State.Idle -> Text("Preparing download…")
-                is State.Running -> {
+                is DownloadUiState.Idle -> Text("Preparing download…")
+                is DownloadUiState.Running -> {
                     CircularProgressIndicator()
                     Spacer(Modifier.height(16.dp))
                     val pct = if (s.percent >= 0) "${s.percent}%" else "…"
                     Text("$description $pct", style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(16.dp))
-                    OutlinedButton(onClick = { cancel.cancel() }) { Text("Cancel") }
+                    OutlinedButton(onClick = onCancelClick) { Text("Cancel") }
                 }
 
-                is State.Failed -> {
-                    Text("Download failed: ${s.error.message}")
+                is DownloadUiState.Failed -> {
+                    val message = s.error.message ?: "Unknown error"
+                    Text("Download failed: $message")
                     Spacer(Modifier.height(16.dp))
-                    Button(onClick = { state = State.Idle }) { Text("Retry") }
+                    Button(onClick = onRetryClick) { Text("Retry") }
                 }
 
-                is State.Cancelled -> {
+                is DownloadUiState.Cancelled -> {
                     Text("Download cancelled")
                     Spacer(Modifier.height(16.dp))
-                    Button(onClick = onCancel) { Text("Close") }
+                    Button(onClick = onCloseClick) { Text("Close") }
                 }
 
-                is State.Done -> {
+                is DownloadUiState.Done -> {
                     Text("Download completed")
                 }
             }
@@ -79,10 +96,40 @@ fun DownloadScreen(
     }
 }
 
-private sealed interface State {
-    data object Idle : State
-    data class Running(val percent: Int, val total: Long?) : State
-    data class Failed(val error: Throwable) : State
-    data object Cancelled : State
-    data object Done : State
+sealed interface DownloadUiState {
+    data object Idle : DownloadUiState
+    data class Running(val percent: Int, val total: Long?) : DownloadUiState
+    data class Failed(val error: Throwable) : DownloadUiState
+    data object Cancelled : DownloadUiState
+    data object Done : DownloadUiState
+}
+
+@Preview
+@Composable
+private fun DownloadScreenPreviewIdle() {
+    DownloadScreenContent(state = DownloadUiState.Idle)
+}
+
+@Preview
+@Composable
+private fun DownloadScreenPreviewRunning() {
+    DownloadScreenContent(state = DownloadUiState.Running(percent = 42, total = 1000L))
+}
+
+@Preview
+@Composable
+private fun DownloadScreenPreviewFailed() {
+    DownloadScreenContent(state = DownloadUiState.Failed(Throwable("Network error")))
+}
+
+@Preview
+@Composable
+private fun DownloadScreenPreviewCancelled() {
+    DownloadScreenContent(state = DownloadUiState.Cancelled)
+}
+
+@Preview
+@Composable
+private fun DownloadScreenPreviewDone() {
+    DownloadScreenContent(state = DownloadUiState.Done)
 }

@@ -6,6 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,10 +21,27 @@ val languagesToCode = listOf(
 
 val codeToLanguage = languagesToCode.associate { it.second to it.first }
 
-@Preview
 @Composable
 fun LanguageSelectionScreen(
     onLanguageChosen: (String) -> Unit = { _ -> }
+) {
+    val state = remember {
+        LanguageSelectionUiState(
+            title = "Choose your native language",
+            languages = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
+        )
+    }
+
+    LanguageSelectionScreenContent(
+        state = state,
+        onLanguageChosen = onLanguageChosen
+    )
+}
+
+@Composable
+fun LanguageSelectionScreenContent(
+    state: LanguageSelectionUiState,
+    onLanguageChosen: (String) -> Unit = {}
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(
@@ -32,20 +50,52 @@ fun LanguageSelectionScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Choose your native language",
+                text = state.title,
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            languagesToCode.forEach { (label, code) ->
+            state.languages.forEach { option ->
                 Text(
-                    text = label,
+                    text = option.label,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onLanguageChosen(code) }
+                        .clickable { onLanguageChosen(option.code) }
                         .padding(vertical = 12.dp)
                 )
             }
         }
     }
+}
+
+data class LanguageSelectionUiState(
+    val title: String,
+    val languages: List<LanguageOption>
+)
+
+data class LanguageOption(
+    val label: String,
+    val code: String
+)
+
+@Preview
+@Composable
+private fun LanguageSelectionScreenPreviewDefault() {
+    LanguageSelectionScreenContent(
+        state = LanguageSelectionUiState(
+            title = "Choose your native language",
+            languages = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
+        )
+    )
+}
+
+@Preview
+@Composable
+private fun LanguageSelectionScreenPreviewEmpty() {
+    LanguageSelectionScreenContent(
+        state = LanguageSelectionUiState(
+            title = "Choose your native language",
+            languages = emptyList()
+        )
+    )
 }

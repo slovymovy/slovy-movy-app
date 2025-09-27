@@ -1,0 +1,203 @@
+{
+    "entries": [
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "65a4e9ac-cd46-4763-a0a4-d2457cfa6071",
+                    "sense_definition": "A social gathering or party held to mark a special occasion or to have fun.",
+                    "learner_level": "A1",
+                    "frequency": "High",
+                    "semantic_group_id": "Social Event",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "We're having a little <w>celebration</w> tomorrow for Martin's scholarship.",
+                            "target_lang_translations": {
+                                "ru": "Завтра мы устраиваем небольшое <w>празднование</w> по случаю стипендии Мартина."
+                            }
+                        },
+                        {
+                            "text": "The birthday <w>celebration</w> was a lot of fun.",
+                            "target_lang_translations": {
+                                "ru": "<w>Празднование</w> дня рождения было очень весёлым."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "entertainment",
+                        "festivity",
+                        "function",
+                        "gathering",
+                        "celebration"
+                    ],
+                    "common_phrases": [
+                        "birthday celebration",
+                        "wedding celebration",
+                        "anniversary celebration",
+                        "graduation celebration"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Собрание людей или вечеринка, устраиваемые в честь особого случая или для развлечения."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "праздник",
+                                "target_lang_sense_clarification": "Обычно относится к самому событию, вечеринке или дню, который отмечается."
+                            },
+                            {
+                                "target_lang_word": "празднование",
+                                "target_lang_sense_clarification": "Описывает как само событие, так и процесс его отмечания."
+                            },
+                            {
+                                "target_lang_word": "торжество",
+                                "target_lang_sense_clarification": "Подразумевает более крупное, официальное или пышное мероприятие."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "3bd9a276-181a-4c5b-9316-399938a15a20",
+                    "sense_definition": "The act or process of showing appreciation, gratitude, or remembrance for something, often through a social event.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "Act of Celebrating",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "She jumped in the air in <w>celebration</w>.",
+                            "target_lang_translations": {
+                                "ru": "Она подпрыгнула в воздух в знак <w>торжества</w>."
+                            }
+                        },
+                        {
+                            "text": "The whole city was involved in the <w>celebration</w> of the team's victory.",
+                            "target_lang_translations": {
+                                "ru": "Весь город участвовал в <w>праздновании</w> победы команды."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "in celebration of",
+                        "a celebration of life"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Действие или процесс выражения признательности, благодарности или памяти о чем-либо, часто в форме общественного мероприятия."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "празднование",
+                                "target_lang_sense_clarification": "Обозначает сам процесс отмечания события, выражение радости."
+                            },
+                            {
+                                "target_lang_word": "торжество",
+                                "target_lang_sense_clarification": "Может означать как само празднование, так и чувство радости, триумфа по поводу победы или успеха."
+                            },
+                            {
+                                "target_lang_word": "чествование",
+                                "target_lang_sense_clarification": "Используется, когда речь идет о выражении почета и уважения конкретному человеку или группе людей."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "37b7809b-48d4-4d93-ad81-590241a8f188",
+                    "sense_definition": "The act of observing or marking a special day or event, such as a holiday or feast day, often with formal ceremonies or festivities.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Observance/Event",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The town prepared for the annual <w>celebration</w> of its founding day.",
+                            "target_lang_translations": {
+                                "ru": "Город готовился к ежегодному <w>празднованию</w> дня своего основания."
+                            }
+                        },
+                        {
+                            "text": "Family gatherings are a common part of holiday <w>celebrations</w>.",
+                            "target_lang_translations": {
+                                "ru": "Семейные встречи — обычная часть праздничных <w>торжеств</w>."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "feast",
+                        "festival"
+                    ],
+                    "common_phrases": [
+                        "holiday celebration",
+                        "feast day celebration",
+                        "annual celebration"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Соблюдение или отмечание особого дня или события, такого как государственный или религиозный праздник, часто с официальными церемониями или торжествами."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "празднование",
+                                "target_lang_sense_clarification": "Относится к процессу проведения праздника или мероприятия."
+                            },
+                            {
+                                "target_lang_word": "праздник",
+                                "target_lang_sense_clarification": "Обозначает сам праздничный день или событие (например, Новый год, День города)."
+                            },
+                            {
+                                "target_lang_word": "торжество",
+                                "target_lang_sense_clarification": "Описывает официальные или масштабные праздничные мероприятия."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "32dd5231-5b09-4607-9adc-9b39262906dc",
+                    "sense_definition": "The formal performance of a solemn religious ceremony or rite, such as a Christian sacrament.",
+                    "learner_level": "B1",
+                    "frequency": "Low",
+                    "semantic_group_id": "Religious Ceremony",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "We will attend the Christmas <w>celebration</w> in church.",
+                            "target_lang_translations": {
+                                "ru": "Мы пойдём на рождественскую <w>службу</w> в церковь."
+                            }
+                        },
+                        {
+                            "text": "The priest led the <w>celebration</w> of the Mass.",
+                            "target_lang_translations": {
+                                "ru": "Священник вёл <w>служение</w> мессы."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "Christmas celebration",
+                        "religious celebration"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Формальное исполнение торжественной религиозной церемонии или обряда, например, христианского таинства."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "празднование",
+                                "target_lang_sense_clarification": "Используется для обозначения отмечания религиозного праздника в целом (например, празднование Рождества)."
+                            },
+                            {
+                                "target_lang_word": "служба",
+                                "target_lang_sense_clarification": "Более точный термин для обозначения самой религиозной церемонии или обряда в церкви."
+                            },
+                            {
+                                "target_lang_word": "богослужение",
+                                "target_lang_sense_clarification": "Более формальный и точный термин для обозначения религиозной церемонии, особенно в православии."
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,4 +1,4 @@
-package com.slovy.slovymovyapp.ui
+package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
@@ -10,7 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,8 +25,113 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.codeToLanguage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.text.Typography.bullet
+
+sealed interface WordDetailUiState {
+    object Loading : WordDetailUiState
+    data class Empty(val lemma: String? = null, val message: String = "No entries available.") : WordDetailUiState
+    data class Error(val message: String, val showRetry: Boolean = true) : WordDetailUiState
+    data class Content(val card: LanguageCard, val entries: List<EntryUiState>) : WordDetailUiState
+}
+
+data class EntryUiState(
+    val entryId: String,
+    val expanded: Boolean = true,
+    val formsExpanded: Boolean = false,
+    val senses: List<SenseUiState> = emptyList()
+)
+
+data class SenseUiState(
+    val senseId: String,
+    val expanded: Boolean = true,
+    val examplesExpanded: Boolean = true,
+    val languageExpanded: Map<String, Boolean> = emptyMap()
+)
+
+internal fun LanguageCard.toContentUiState(): WordDetailUiState.Content = WordDetailUiState.Content(
+    card = this,
+    entries = entries.mapIndexed { index, entry -> entry.toEntryUiState(index) }
+)
+
+private fun LanguageCardPosEntry.toEntryUiState(index: Int): EntryUiState = EntryUiState(
+    entryId = "${pos.name.lowercase()}_$index",
+    expanded = true,
+    formsExpanded = false,
+    senses = senses.map { it.toSenseUiState() }
+)
+
+private fun LanguageCardResponseSense.toSenseUiState(): SenseUiState {
+    val defaultExpanded = frequency == SenseFrequency.HIGH || frequency == SenseFrequency.MIDDLE
+    val languages = collectLanguageCodes()
+    val languageStates = languages.associateWith { defaultExpanded }
+    val examplesExpanded = if (examples.isEmpty()) false else true
+    return SenseUiState(
+        senseId = senseId,
+        expanded = defaultExpanded,
+        examplesExpanded = examplesExpanded,
+        languageExpanded = languageStates
+    )
+}
+
+private fun LanguageCardResponseSense.collectLanguageCodes(): List<String> {
+    val ordered = linkedSetOf<String>()
+    ordered += targetLangDefinitions.keys
+    ordered += translations.keys
+    examples.forEach { ex -> ordered += ex.targetLangTranslations.keys }
+    return ordered.toList()
+}
+
+private fun WordDetailUiState.Content.toggleEntry(entryIndex: Int): WordDetailUiState.Content =
+    updateEntry(entryIndex) { entry -> entry.copy(expanded = !entry.expanded) }
+
+private fun WordDetailUiState.Content.toggleForms(entryIndex: Int): WordDetailUiState.Content =
+    updateEntry(entryIndex) { entry -> entry.copy(formsExpanded = !entry.formsExpanded) }
+
+private fun WordDetailUiState.Content.toggleSense(entryIndex: Int, senseId: String): WordDetailUiState.Content =
+    updateEntry(entryIndex) { entry -> entry.updateSense(senseId) { sense -> sense.copy(expanded = !sense.expanded) } }
+
+private fun WordDetailUiState.Content.toggleSenseExamples(entryIndex: Int, senseId: String): WordDetailUiState.Content =
+    updateEntry(entryIndex) { entry -> entry.updateSense(senseId) { sense -> sense.copy(examplesExpanded = !sense.examplesExpanded) } }
+
+private fun WordDetailUiState.Content.toggleSenseLanguage(
+    entryIndex: Int,
+    senseId: String,
+    languageCode: String
+): WordDetailUiState.Content =
+    updateEntry(entryIndex) { entry ->
+        entry.updateSense(senseId) { sense -> sense.toggleLanguage(languageCode) }
+    }
+
+private inline fun WordDetailUiState.Content.updateEntry(
+    entryIndex: Int,
+    transform: (EntryUiState) -> EntryUiState
+): WordDetailUiState.Content {
+    if (entryIndex !in entries.indices) return this
+    val updated = entries.mapIndexed { idx, entry ->
+        if (idx == entryIndex) transform(entry) else entry
+    }
+    return copy(entries = updated)
+}
+
+private inline fun EntryUiState.updateSense(
+    senseId: String,
+    transform: (SenseUiState) -> SenseUiState
+): EntryUiState {
+    val idx = senses.indexOfFirst { it.senseId == senseId }
+    if (idx == -1) return this
+    val updatedSenses = senses.mapIndexed { index, sense ->
+        if (index == idx) transform(sense) else sense
+    }
+    return copy(senses = updatedSenses)
+}
+
+private fun SenseUiState.toggleLanguage(languageCode: String): SenseUiState {
+    val current = languageExpanded[languageCode] ?: expanded
+    val updated = languageExpanded.toMutableMap().apply { put(languageCode, !current) }
+    return copy(languageExpanded = updated)
+}
 
 @Composable
 private fun SectionLabel(text: String) {
@@ -69,21 +174,19 @@ private fun FormsList(forms: List<LanguageCardForm>) {
 @Composable
 private fun ExpandableSection(
     title: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
     modifier: Modifier = Modifier,
-    stateKey: String,
-    startExpanded: Boolean = true,
     supportingText: String? = null,
     headlineStyle: TextStyle = MaterialTheme.typography.titleMedium,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    var expanded by rememberSaveable(stateKey) { mutableStateOf(startExpanded) }
-
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .clickable { expanded = !expanded },
+                .clickable(onClick = onToggle),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
         ) {
             Row(
@@ -133,21 +236,83 @@ private fun ExpandableSection(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
 fun WordDetailScreen(
-    card: LanguageCard = sampleCard(),
-    onBack: () -> Unit = {}
+    card: LanguageCard? = sampleCard(),
+    onBack: () -> Unit = {},
+    onRetry: () -> Unit = {}
 ) {
+    var internalState by remember(card) {
+        mutableStateOf(
+            card?.toContentUiState() ?: WordDetailUiState.Empty(card?.lemma)
+        )
+    }
+
+    fun updateContent(transform: (WordDetailUiState.Content) -> WordDetailUiState.Content) {
+        val current = internalState
+        if (current is WordDetailUiState.Content) {
+            internalState = transform(current)
+        }
+    }
+
+    WordDetailScreenContent(
+        state = internalState,
+        onBack = onBack,
+        onRetry = onRetry,
+        onEntryToggle = { index -> updateContent { it.toggleEntry(index) } },
+        onFormsToggle = { index -> updateContent { it.toggleForms(index) } },
+        onSenseToggle = { entryIndex, senseId -> updateContent { it.toggleSense(entryIndex, senseId) } },
+        onSenseExamplesToggle = { entryIndex, senseId ->
+            updateContent { it.toggleSenseExamples(entryIndex, senseId) }
+        },
+        onLanguageToggle = { entryIndex, senseId, languageCode ->
+            updateContent { it.toggleSenseLanguage(entryIndex, senseId, languageCode) }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WordDetailScreenContent(
+    state: WordDetailUiState,
+    onBack: () -> Unit = {},
+    onRetry: () -> Unit = {},
+    onEntryToggle: (Int) -> Unit = {},
+    onFormsToggle: (Int) -> Unit = {},
+    onSenseToggle: (Int, String) -> Unit = { _, _ -> },
+    onSenseExamplesToggle: (Int, String) -> Unit = { _, _ -> },
+    onLanguageToggle: (Int, String, String) -> Unit = { _, _, _ -> },
+) {
+    val fallbackTitle = "Word Details"
+    val titleText = when (state) {
+        is WordDetailUiState.Content -> state.card.lemma
+        is WordDetailUiState.Empty -> state.lemma ?: fallbackTitle
+        else -> fallbackTitle
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    HighlightedText(
-                        text = card.lemma,
-                        style = MaterialTheme.typography.displaySmall,
-                        textAlign = TextAlign.Center
-                    )
+                    when (state) {
+                        is WordDetailUiState.Content -> HighlightedText(
+                            text = state.card.lemma,
+                            style = MaterialTheme.typography.displaySmall,
+                            textAlign = TextAlign.Center
+                        )
+
+                        is WordDetailUiState.Empty -> HighlightedText(
+                            text = titleText,
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center
+                        )
+
+                        else -> Text(
+                            text = titleText,
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
@@ -164,24 +329,74 @@ fun WordDetailScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            if (card.entries.isEmpty()) {
-                Text(
-                    text = "No entries available.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+        when (state) {
+            is WordDetailUiState.Content -> {
+                val scrollState = rememberScrollState()
+                WordDetailContent(
+                    card = state.card,
+                    entryStates = state.entries,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp, vertical = 24.dp),
+                    onEntryToggle = onEntryToggle,
+                    onFormsToggle = onFormsToggle,
+                    onSenseToggle = onSenseToggle,
+                    onSenseExamplesToggle = onSenseExamplesToggle,
+                    onLanguageToggle = onLanguageToggle
                 )
-            } else {
-                card.entries.forEachIndexed { index, entry ->
-                    EntryCard(entry = entry, entryIndex = index)
+            }
+
+            is WordDetailUiState.Empty -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = state.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            is WordDetailUiState.Error -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = state.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                    if (state.showRetry) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = onRetry) {
+                            Text("Retry")
+                        }
+                    }
+                }
+            }
+
+            WordDetailUiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
         }
@@ -189,8 +404,57 @@ fun WordDetailScreen(
 }
 
 @Composable
-private fun EntryCard(entry: LanguageCardPosEntry, entryIndex: Int) {
-    var expanded by rememberSaveable("entry_${entryIndex}_${entry.pos}") { mutableStateOf(true) }
+private fun WordDetailContent(
+    card: LanguageCard,
+    entryStates: List<EntryUiState>,
+    modifier: Modifier = Modifier,
+    onEntryToggle: (Int) -> Unit,
+    onFormsToggle: (Int) -> Unit,
+    onSenseToggle: (Int, String) -> Unit,
+    onSenseExamplesToggle: (Int, String) -> Unit,
+    onLanguageToggle: (Int, String, String) -> Unit
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        if (card.entries.isEmpty()) {
+            Text(
+                text = "No entries available.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            card.entries.forEachIndexed { index, entry ->
+                val entryState = entryStates.getOrNull(index) ?: entry.toEntryUiState(index)
+                EntryCard(
+                    entry = entry,
+                    entryState = entryState,
+                    onEntryToggle = { onEntryToggle(index) },
+                    onFormsToggle = { onFormsToggle(index) },
+                    onSenseToggle = { senseId -> onSenseToggle(index, senseId) },
+                    onSenseExamplesToggle = { senseId -> onSenseExamplesToggle(index, senseId) },
+                    onLanguageToggle = { senseId, languageCode ->
+                        onLanguageToggle(index, senseId, languageCode)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EntryCard(
+    entry: LanguageCardPosEntry,
+    entryState: EntryUiState,
+    onEntryToggle: () -> Unit,
+    onFormsToggle: () -> Unit,
+    onSenseToggle: (String) -> Unit,
+    onSenseExamplesToggle: (String) -> Unit,
+    onLanguageToggle: (String, String) -> Unit
+) {
+    val expanded = entryState.expanded
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -201,7 +465,7 @@ private fun EntryCard(entry: LanguageCardPosEntry, entryIndex: Int) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                    .clickable { expanded = !expanded }
+                    .clickable(onClick = onEntryToggle)
                     .padding(horizontal = 20.dp, vertical = 18.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -238,7 +502,7 @@ private fun EntryCard(entry: LanguageCardPosEntry, entryIndex: Int) {
 
                 Column(modifier = Modifier.weight(1f)) {
                     AnimatedVisibility(
-                        visible = !expanded,
+                        visible = !expanded && summaryParts.isNotBlank(),
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
@@ -289,9 +553,10 @@ private fun EntryCard(entry: LanguageCardPosEntry, entryIndex: Int) {
                             .joinToString(separator = ", ")
                         ExpandableSection(
                             title = "Forms (${entry.forms.size})",
+                            expanded = entryState.formsExpanded,
+                            onToggle = onFormsToggle,
                             supportingText = formsSummary.ifEmpty { null },
-                            stateKey = "entry_${entryIndex}_forms",
-                            startExpanded = false
+                            headlineStyle = MaterialTheme.typography.titleMedium
                         ) {
                             SectionLabel("Forms")
                             FormsList(entry.forms)
@@ -312,7 +577,17 @@ private fun EntryCard(entry: LanguageCardPosEntry, entryIndex: Int) {
                             }
 
                             senseList.forEachIndexed { senseIndex, sense ->
-                                SenseCard(sense = sense)
+                                val senseState = entryState.senses.find { it.senseId == sense.senseId }
+                                    ?: sense.toSenseUiState()
+                                SenseCard(
+                                    sense = sense,
+                                    state = senseState,
+                                    onToggle = { onSenseToggle(sense.senseId) },
+                                    onExamplesToggle = { onSenseExamplesToggle(sense.senseId) },
+                                    onLanguageToggle = { languageCode ->
+                                        onLanguageToggle(sense.senseId, languageCode)
+                                    }
+                                )
                                 if (senseIndex < senseList.lastIndex) {
                                     HorizontalDivider(
                                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
@@ -330,11 +605,14 @@ private fun EntryCard(entry: LanguageCardPosEntry, entryIndex: Int) {
 private fun pluralEnding(someList: List<*>): String = if (someList.size == 1) "" else "s"
 
 @Composable
-private fun SenseCard(sense: LanguageCardResponseSense) {
-    var expanded by rememberSaveable("expanded_${sense.senseId}") {
-        mutableStateOf(sense.frequency == SenseFrequency.HIGH || sense.frequency == SenseFrequency.MIDDLE)
-    }
-
+private fun SenseCard(
+    sense: LanguageCardResponseSense,
+    state: SenseUiState,
+    onToggle: () -> Unit,
+    onExamplesToggle: () -> Unit,
+    onLanguageToggle: (String) -> Unit
+) {
+    val expanded = state.expanded
     OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -345,7 +623,7 @@ private fun SenseCard(sense: LanguageCardResponseSense) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .clickable { expanded = !expanded }
+                    .clickable(onClick = onToggle)
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -374,7 +652,7 @@ private fun SenseCard(sense: LanguageCardResponseSense) {
                     }.joinToString(" $bullet ")
 
                     AnimatedVisibility(
-                        visible = !expanded,
+                        visible = !expanded && summaryParts.isNotBlank(),
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
@@ -415,9 +693,9 @@ private fun SenseCard(sense: LanguageCardResponseSense) {
                             .replace("\n", " ")
                         ExpandableSection(
                             title = "Examples",
+                            expanded = state.examplesExpanded,
+                            onToggle = onExamplesToggle,
                             supportingText = examplePreview.ifBlank { null },
-                            stateKey = "${sense.senseId}_examples",
-                            startExpanded = true,
                             headlineStyle = MaterialTheme.typography.titleSmall
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -456,7 +734,13 @@ private fun SenseCard(sense: LanguageCardResponseSense) {
                     }
 
                     languageOrder.forEach { lang ->
-                        LanguageSection(languageCode = lang, sense = sense, startExpanded = expanded)
+                        val langExpanded = state.languageExpanded[lang] ?: expanded
+                        LanguageSection(
+                            languageCode = lang,
+                            sense = sense,
+                            expanded = langExpanded,
+                            onToggle = { onLanguageToggle(lang) }
+                        )
                     }
 
                 }
@@ -466,7 +750,12 @@ private fun SenseCard(sense: LanguageCardResponseSense) {
 }
 
 @Composable
-private fun LanguageSection(languageCode: String, sense: LanguageCardResponseSense, startExpanded: Boolean) {
+private fun LanguageSection(
+    languageCode: String,
+    sense: LanguageCardResponseSense,
+    expanded: Boolean,
+    onToggle: () -> Unit
+) {
     val languageLabel = codeToLanguage.getOrElse(languageCode) { languageCode }
     val definition = sense.targetLangDefinitions[languageCode]
     val translations = sense.translations[languageCode].orEmpty()
@@ -480,9 +769,9 @@ private fun LanguageSection(languageCode: String, sense: LanguageCardResponseSen
 
     ExpandableSection(
         title = languageLabel,
+        expanded = expanded,
+        onToggle = onToggle,
         supportingText = supportingParts.ifEmpty { null },
-        stateKey = "${sense.senseId}_${languageCode}_translations",
-        startExpanded = startExpanded,
         headlineStyle = MaterialTheme.typography.titleSmall
     ) {
         definition?.let {
@@ -698,168 +987,3 @@ private fun appendTextWithW(builder: AnnotatedString.Builder, input: String, hig
     }
 }
 
-private fun sampleCard(): LanguageCard {
-    return LanguageCard(
-        lemma = "testing",
-        entries = listOf(
-            // Verb entry
-            LanguageCardPosEntry(
-                pos = PartOfSpeech.VERB,
-                forms = mutableListOf(),
-                senses = listOf(
-                    LanguageCardResponseSense(
-                        senseId = "f8731e0a-3d06-4a0f-af1c-98de00309b76",
-                        senseDefinition = "The present participle or gerund form of the verb 'to test', meaning to perform an examination or evaluation.",
-                        learnerLevel = LearnerLevel.A2,
-                        frequency = SenseFrequency.HIGH,
-                        semanticGroupId = "action_of_testing",
-                        nameType = null,
-                        examples = listOf(
-                            LanguageCardExample(
-                                text = "The scientist is <w>testing</w> the new hypothesis in the lab.",
-                                targetLangTranslations = mapOf("ru" to "Учёный <w>проверяет</w> новую гипотезу в лаборатории.")
-                            ),
-                            LanguageCardExample(
-                                text = "<w>Testing</w> the water before swimming is a good idea.",
-                                targetLangTranslations = mapOf("ru" to "<w>Проверять</w> воду перед плаванием — хорошая идея.")
-                            ),
-                            LanguageCardExample(
-                                text = "They spent all morning <w>testing</w> out the new equipment.",
-                                targetLangTranslations = mapOf("ru" to "Они всё утро <w>проверяли</w> новое оборудование.")
-                            )
-                        ),
-                        synonyms = listOf("examining", "evaluating", "checking", "trying out"),
-                        commonPhrases = listOf("testing out", "testing for", "testing positive/negative"),
-                        traits = listOf(
-                            LanguageCardTrait(
-                                TraitType.FORM,
-                                "present participle and gerund form of 'test'"
-                            )
-                        ),
-                        targetLangDefinitions = mapOf(
-                            "ru" to "Причастие настоящего времени или герундий от глагола 'to test', означающее выполнение проверки или оценки."
-                        ),
-                        translations = mapOf(
-                            "ru" to listOf(
-                                LanguageCardTranslation(
-                                    targetLangWord = "тестирование",
-                                    targetLangSenseClarification = "Процесс проверки или испытания чего-либо. Используется как отглагольное существительное (герундий)."
-                                ),
-                                LanguageCardTranslation(
-                                    targetLangWord = "проверка",
-                                    targetLangSenseClarification = "Более общее слово для обозначения процесса контроля или испытания, часто используется как герундий."
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
-            // Noun entry
-            LanguageCardPosEntry(
-                pos = PartOfSpeech.NOUN,
-                forms = mutableListOf(),
-                senses = listOf(
-                    LanguageCardResponseSense(
-                        senseId = "16f3dcde-882f-464a-8f53-0843847294b2",
-                        senseDefinition = "The process of checking something to see if it works correctly or meets certain standards.",
-                        learnerLevel = LearnerLevel.B2,
-                        frequency = SenseFrequency.HIGH,
-                        semanticGroupId = "evaluation_process",
-                        nameType = null,
-                        examples = listOf(
-                            LanguageCardExample(
-                                text = "The software is currently undergoing rigorous <w>testing</w> before its release.",
-                                targetLangTranslations = mapOf("ru" to "В настоящее время программное обеспечение проходит тщательное <w>тестирование</w> перед выпуском.")
-                            ),
-                            LanguageCardExample(
-                                text = "Quality <w>testing</w> is essential to ensure product reliability.",
-                                targetLangTranslations = mapOf("ru" to "<w>Тестирование</w> качества необходимо для обеспечения надёжности продукта.")
-                            ),
-                            LanguageCardExample(
-                                text = "The new car went through extensive road <w>testing</w> to ensure its safety.",
-                                targetLangTranslations = mapOf("ru" to "Новый автомобиль прошёл длительные дорожные <w>испытания</w> для обеспечения его безопасности.")
-                            )
-                        ),
-                        synonyms = listOf("examination", "evaluation", "trial", "assessment"),
-                        commonPhrases = listOf(
-                            "product testing",
-                            "software testing",
-                            "road testing",
-                            "quality testing"
-                        ),
-                        targetLangDefinitions = mapOf(
-                            "ru" to "Процесс проверки чего-либо с целью убедиться, что оно работает правильно или соответствует определённым стандартам."
-                        ),
-                        translations = mapOf(
-                            "ru" to listOf(
-                                LanguageCardTranslation(
-                                    targetLangWord = "тестирование",
-                                    targetLangSenseClarification = "Процесс испытания или проверки чего-либо, особенно в техническом или научном контексте (например, программного обеспечения, оборудования)."
-                                ),
-                                LanguageCardTranslation(
-                                    targetLangWord = "испытание",
-                                    targetLangSenseClarification = "Проверка свойств, качеств кого-либо или чего-либо, часто в сложных или экстремальных условиях (например, дорожные испытания)."
-                                ),
-                                LanguageCardTranslation(
-                                    targetLangWord = "проверка",
-                                    targetLangSenseClarification = "Более общее слово, означающее контроль или обследование с целью выяснения правильности, состояния чего-либо."
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
-            // Adjective entry
-            LanguageCardPosEntry(
-                pos = PartOfSpeech.ADJECTIVE,
-                forms = mutableListOf(),
-                senses = listOf(
-                    LanguageCardResponseSense(
-                        senseId = "5e1a3249-2d90-42a3-ab1d-c18a2c92f4d0",
-                        senseDefinition = "Causing difficulty or requiring a lot of effort and ability.",
-                        learnerLevel = LearnerLevel.B1,
-                        frequency = SenseFrequency.MIDDLE,
-                        semanticGroupId = "difficulty",
-                        nameType = NameType.NO,
-                        examples = listOf(
-                            LanguageCardExample(
-                                text = "The exam was very <w>testing</w>, but I think I did well.",
-                                targetLangTranslations = mapOf("ru" to "Экзамен был очень <w>сложным</w>, но, думаю, я справился хорошо.")
-                            ),
-                            LanguageCardExample(
-                                text = "She faced a <w>testing</w> challenge when she started her new job.",
-                                targetLangTranslations = mapOf("ru" to "Она столкнулась с <w>трудной</w> задачей, когда начала работать на новой работе.")
-                            ),
-                            LanguageCardExample(
-                                text = "It was a <w>testing</w> time for everyone involved in the project.",
-                                targetLangTranslations = mapOf("ru" to "Это было <w>напряжённое</w> время для всех, кто участвовал в проекте.")
-                            )
-                        ),
-                        synonyms = listOf("challenging", "difficult", "demanding"),
-                        antonyms = listOf("easy", "simple"),
-                        commonPhrases = listOf("a testing time", "a testing period", "a testing challenge"),
-                        targetLangDefinitions = mapOf(
-                            "ru" to "Трудный, требующий больших усилий, напряжения или способностей."
-                        ),
-                        translations = mapOf(
-                            "ru" to listOf(
-                                LanguageCardTranslation(
-                                    targetLangWord = "сложный",
-                                    targetLangSenseClarification = "Наиболее общий и частый перевод, означает 'трудный для выполнения, понимания или решения'."
-                                ),
-                                LanguageCardTranslation(
-                                    targetLangWord = "трудный",
-                                    targetLangSenseClarification = "Синоним 'сложный', подчёркивает необходимость приложить усилия и преодолеть препятствия."
-                                ),
-                                LanguageCardTranslation(
-                                    targetLangWord = "напряжённый",
-                                    targetLangSenseClarification = "Описывает период времени или ситуацию, требующую больших физических или умственных усилий и вызывающую стресс (например, 'a testing time')."
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        )
-    )
-}
