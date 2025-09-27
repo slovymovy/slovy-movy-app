@@ -13,10 +13,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 @Composable
 fun DownloadScreen(
-    onSuccess: () -> Unit,
-    onCancel: () -> Unit,
-    onError: (Throwable) -> Unit,
-    download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
+    onSuccess: () -> Unit = {},
+    onCancel: () -> Unit = {},
+    onError: (Throwable) -> Unit = {},
+    download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit = { _, _ -> },
     description: String = "Downloading data"
 ) {
     var state by remember { mutableStateOf<State>(State.Idle) }

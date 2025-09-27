@@ -205,9 +205,10 @@ private fun EntryCard(entry: LanguageCardPosEntry, entryIndex: Int) {
                     .padding(horizontal = 20.dp, vertical = 18.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val (pc, pcc) = colorsForPos(entry.pos)
                 Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    color = pc,
+                    contentColor = pcc,
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
@@ -218,10 +219,18 @@ private fun EntryCard(entry: LanguageCardPosEntry, entryIndex: Int) {
                     )
                 }
 
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "(${entry.senses.size} meaning${pluralEnding(entry.senses)})",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+
                 Spacer(modifier = Modifier.width(16.dp))
 
                 val summaryParts = buildList {
-                    add("${entry.senses.size} sense${pluralEnding(entry.senses)}")
                     if (entry.forms.isNotEmpty()) {
                         add("${entry.forms.size} form${pluralEnding(entry.forms)}")
                     }
@@ -351,11 +360,7 @@ private fun SenseCard(sense: LanguageCardResponseSense) {
 
                     LevelAndFrequencyRow(level = sense.learnerLevel, frequency = sense.frequency)
 
-                    val frequencyLabel = sense.frequency.name.lowercase().replaceFirstChar { it.titlecase() }
-                    val levelLabel = sense.learnerLevel.name
                     val summaryParts = buildList {
-                        add("$frequencyLabel frequency")
-                        add("Level $levelLabel")
                         if (sense.synonyms.isNotEmpty()) {
                             add("${sense.synonyms.size} synonym${pluralEnding(sense.synonyms)}")
                         }
@@ -409,7 +414,7 @@ private fun SenseCard(sense: LanguageCardResponseSense) {
                         val examplePreview = sense.examples.first().text
                             .replace("\n", " ")
                         ExpandableSection(
-                            title = "Examples (${sense.examples.size})",
+                            title = "Examples",
                             supportingText = examplePreview.ifBlank { null },
                             stateKey = "${sense.senseId}_examples",
                             startExpanded = true,
@@ -549,6 +554,22 @@ private fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> = when (f)
 }
 
 @Composable
+private fun colorsForPos(pos: PartOfSpeech): Pair<Color, Color> = when (pos) {
+    PartOfSpeech.NOUN -> Color(0xFFE3F2FD) to Color(0xFF0D47A1) // light blue / dark blue
+    PartOfSpeech.VERB -> Color(0xFFE8F5E9) to Color(0xFF1B5E20) // light green / dark green
+    PartOfSpeech.ADJECTIVE -> Color(0xFFFFF3E0) to Color(0xFFEF6C00) // light orange / dark orange
+    PartOfSpeech.ADVERB -> Color(0xFFF3E5F5) to Color(0xFF6A1B9A) // light purple / dark purple
+    PartOfSpeech.PRONOUN -> Color(0xFFFFEBEE) to Color(0xFFC62828) // light red / dark red
+    PartOfSpeech.PREPOSITION -> Color(0xFFE0F7FA) to Color(0xFF006064) // light cyan / dark teal
+    PartOfSpeech.CONJUNCTION -> Color(0xFFEDE7F6) to Color(0xFF4527A0) // light indigo / dark indigo
+    PartOfSpeech.INTERJECTION -> Color(0xFFFFFDE7) to Color(0xFFF9A825) // light yellow / amber
+    PartOfSpeech.DETERMINER -> Color(0xFFF1F8E9) to Color(0xFF33691E) // light lime / dark lime
+    PartOfSpeech.NUMERAL -> Color(0xFFE0F2F1) to Color(0xFF004D40) // light teal / dark teal
+    PartOfSpeech.ARTICLE -> Color(0xFFE8EAF6) to Color(0xFF283593) // light blue grey / dark blue
+    PartOfSpeech.NAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232) // light pink / dark burgundy
+}
+
+@Composable
 private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -557,9 +578,9 @@ private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency)
     ) {
         val (lc, lcc) = colorsForLevel(level)
         val (fc, fcc) = colorsForFrequency(frequency)
-        Badge(text = "Level: ${level.name}", container = lc, content = lcc)
+        Badge(text = level.name, container = lc, content = lcc)
         val freqLabel = frequency.name.lowercase().replaceFirstChar { it.titlecase() }
-        Badge(text = "Frequency: $freqLabel", container = fc, content = fcc)
+        Badge(text = freqLabel, container = fc, content = fcc)
     }
 }
 
