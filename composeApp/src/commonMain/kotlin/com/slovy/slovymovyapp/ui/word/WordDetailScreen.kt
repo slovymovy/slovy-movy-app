@@ -55,7 +55,7 @@ private fun LanguageCardPosEntry.toEntryUiState(index: Int): EntryUiState = Entr
 
 private fun LanguageCardResponseSense.toSenseUiState(expanded: Boolean): SenseUiState {
     val languages = collectLanguageCodes()
-    val languageStates = languages.associateWith { expanded }
+    val languageStates = languages.associateWith { false }
     val examplesExpanded = examples.isNotEmpty()
     return SenseUiState(
         senseId = senseId,
