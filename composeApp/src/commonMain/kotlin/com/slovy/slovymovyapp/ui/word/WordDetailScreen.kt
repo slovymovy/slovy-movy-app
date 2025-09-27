@@ -7,11 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.codeToLanguage
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.text.Typography.bullet
 
 sealed interface WordDetailUiState {
@@ -238,21 +233,19 @@ private fun ExpandableSection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WordDetailScreen(
-    card: LanguageCard? = sampleCard(),
+    card: LanguageCard,
     onBack: () -> Unit = {},
     onRetry: () -> Unit = {}
 ) {
     var internalState by remember(card) {
         mutableStateOf(
-            card?.toContentUiState() ?: WordDetailUiState.Empty(card?.lemma)
+            card.toContentUiState()
         )
     }
 
     fun updateContent(transform: (WordDetailUiState.Content) -> WordDetailUiState.Content) {
         val current = internalState
-        if (current is WordDetailUiState.Content) {
-            internalState = transform(current)
-        }
+        internalState = transform(current)
     }
 
     WordDetailScreenContent(
@@ -825,40 +818,6 @@ private fun Badge(text: String, container: Color, content: Color) {
 }
 
 @Composable
-private fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
-    LearnerLevel.A1 -> Color(0xFFE0F7D4) to Color(0xFF215732)
-    LearnerLevel.A2 -> Color(0xFFBFEBD7) to Color(0xFF0F4C3C)
-    LearnerLevel.B1 -> Color(0xFFCCE3FF) to Color(0xFF0F3D7A)
-    LearnerLevel.B2 -> Color(0xFFB7D2FF) to Color(0xFF0F3566)
-    LearnerLevel.C1 -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
-    LearnerLevel.C2 -> Color(0xFFFBD0D9) to Color(0xFF7A1232)
-}
-
-@Composable
-private fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> = when (f) {
-    SenseFrequency.HIGH -> Color(0xFFDFF6DD) to Color(0xFF1C5E20)
-    SenseFrequency.MIDDLE -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
-    SenseFrequency.LOW -> Color(0xFFFFE0B2) to Color(0xFF8C4513)
-    SenseFrequency.VERY_LOW -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
-}
-
-@Composable
-private fun colorsForPos(pos: PartOfSpeech): Pair<Color, Color> = when (pos) {
-    PartOfSpeech.NOUN -> Color(0xFFE3F2FD) to Color(0xFF0D47A1) // light blue / dark blue
-    PartOfSpeech.VERB -> Color(0xFFE8F5E9) to Color(0xFF1B5E20) // light green / dark green
-    PartOfSpeech.ADJECTIVE -> Color(0xFFFFF3E0) to Color(0xFFEF6C00) // light orange / dark orange
-    PartOfSpeech.ADVERB -> Color(0xFFF3E5F5) to Color(0xFF6A1B9A) // light purple / dark purple
-    PartOfSpeech.PRONOUN -> Color(0xFFFFEBEE) to Color(0xFFC62828) // light red / dark red
-    PartOfSpeech.PREPOSITION -> Color(0xFFE0F7FA) to Color(0xFF006064) // light cyan / dark teal
-    PartOfSpeech.CONJUNCTION -> Color(0xFFEDE7F6) to Color(0xFF4527A0) // light indigo / dark indigo
-    PartOfSpeech.INTERJECTION -> Color(0xFFFFFDE7) to Color(0xFFF9A825) // light yellow / amber
-    PartOfSpeech.DETERMINER -> Color(0xFFF1F8E9) to Color(0xFF33691E) // light lime / dark lime
-    PartOfSpeech.NUMERAL -> Color(0xFFE0F2F1) to Color(0xFF004D40) // light teal / dark teal
-    PartOfSpeech.ARTICLE -> Color(0xFFE8EAF6) to Color(0xFF283593) // light blue grey / dark blue
-    PartOfSpeech.NAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232) // light pink / dark burgundy
-}
-
-@Composable
 private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -872,7 +831,6 @@ private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency)
         Badge(text = freqLabel, container = fc, content = fcc)
     }
 }
-
 
 // Helpers to render <w>word</w> with special highlight style across all displayed text
 @Composable

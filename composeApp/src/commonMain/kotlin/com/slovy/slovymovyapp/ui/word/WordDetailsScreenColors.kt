@@ -1,0 +1,41 @@
+package com.slovy.slovymovyapp.ui.word
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import com.slovy.slovymovyapp.data.remote.LearnerLevel
+import com.slovy.slovymovyapp.data.remote.PartOfSpeech
+import com.slovy.slovymovyapp.data.remote.SenseFrequency
+
+@Composable
+internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
+    LearnerLevel.A1 -> Color(0xFFE0F7D4) to Color(0xFF215732)
+    LearnerLevel.A2 -> Color(0xFFBFEBD7) to Color(0xFF0F4C3C)
+    LearnerLevel.B1 -> Color(0xFFCCE3FF) to Color(0xFF0F3D7A)
+    LearnerLevel.B2 -> Color(0xFFB7D2FF) to Color(0xFF0F3566)
+    LearnerLevel.C1 -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
+    LearnerLevel.C2 -> Color(0xFFFBD0D9) to Color(0xFF7A1232)
+}
+
+@Composable
+internal fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> = when (f) {
+    SenseFrequency.HIGH -> Color(0xFFDFF6DD) to Color(0xFF1C5E20)
+    SenseFrequency.MIDDLE -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
+    SenseFrequency.LOW -> Color(0xFFFFE0B2) to Color(0xFF8C4513)
+    SenseFrequency.VERY_LOW -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
+}
+
+@Composable
+internal fun colorsForPos(pos: PartOfSpeech): Pair<Color, Color> = when (pos) {
+    PartOfSpeech.NOUN -> Color(0xFFE3F2FD) to Color(0xFF0D47A1)
+    PartOfSpeech.VERB -> Color(0xFFE8F5E9) to Color(0xFF1B5E20)
+    PartOfSpeech.ADJECTIVE -> Color(0xFFFFF3E0) to Color(0xFFEF6C00)
+    PartOfSpeech.ADVERB -> Color(0xFFF3E5F5) to Color(0xFF6A1B9A)
+    PartOfSpeech.PRONOUN -> Color(0xFFFFEBEE) to Color(0xFFC62828)
+    PartOfSpeech.PREPOSITION -> Color(0xFFE0F7FA) to Color(0xFF006064)
+    PartOfSpeech.CONJUNCTION -> Color(0xFFEDE7F6) to Color(0xFF4527A0)
+    PartOfSpeech.INTERJECTION -> Color(0xFFFFFDE7) to Color(0xFFF9A825)
+    PartOfSpeech.DETERMINER -> Color(0xFFF1F8E9) to Color(0xFF33691E)
+    PartOfSpeech.NUMERAL -> Color(0xFFE0F2F1) to Color(0xFF004D40)
+    PartOfSpeech.ARTICLE -> Color(0xFFE8EAF6) to Color(0xFF283593)
+    PartOfSpeech.NAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232)
+}
