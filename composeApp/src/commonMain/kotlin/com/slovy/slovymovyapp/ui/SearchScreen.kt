@@ -192,7 +192,7 @@ private fun SearchResultCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = item.lemma,
+                    text = item.display,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )

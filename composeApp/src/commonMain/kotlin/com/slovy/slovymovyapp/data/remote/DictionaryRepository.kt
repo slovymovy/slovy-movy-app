@@ -33,25 +33,14 @@ class DictionaryRepository(
     }
 
     // Search within all installed dictionaries by default; if dictionaryLanguage provided, restrict to it.
-    fun search(query: String, dictionaryLanguage: String? = null, maxItems: Int = 20): List<SearchItem> {
+    fun search(query: String, dictionaryLanguage: String? = null, maxItems: Int = 200): List<SearchItem> {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
 
         val langs = if (dictionaryLanguage != null) listOf(dictionaryLanguage) else installedDictionaries()
         if (langs.isEmpty()) {
             // Fallback to simple in-memory filtering for preview/no DB
-            val fallback = listOf("world", "idea", "bass")
-            return fallback
-                .filter { it.contains(trimmed, ignoreCase = true) }
-                .map {
-                    SearchItem(
-                        language = dictionaryLanguage ?: "en",
-                        lemmaId = Uuid.random(),
-                        lemma = it,
-                        display = "\"$it\""
-                    )
-                }
-                .take(maxItems)
+            return listOf()
         }
 
         val out = mutableListOf<SearchItem>()
