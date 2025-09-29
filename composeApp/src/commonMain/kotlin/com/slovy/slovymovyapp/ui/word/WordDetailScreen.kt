@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,6 +18,7 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.codeToLanguage
 import kotlin.text.Typography.bullet
@@ -298,11 +301,17 @@ fun WordDetailScreenContent(
             CenterAlignedTopAppBar(
                 title = {
                     when (state) {
-                        is WordDetailUiState.Content -> HighlightedText(
-                            text = state.card.lemma,
-                            style = MaterialTheme.typography.displaySmall,
-                            textAlign = TextAlign.Center
-                        )
+                        is WordDetailUiState.Content ->
+                            BasicText(
+                                text = state.card.lemma,
+                                style = MaterialTheme.typography.headlineSmall,
+                                autoSize = TextAutoSize.StepBased(
+                                    minFontSize = 5.sp,
+                                    maxFontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                                    stepSize = 1.sp
+                                ),
+                                maxLines = 1
+                            )
 
                         is WordDetailUiState.Empty -> HighlightedText(
                             text = titleText,

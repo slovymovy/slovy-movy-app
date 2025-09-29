@@ -396,6 +396,12 @@ private fun WordDetailScreenPreviewAllTraitTypes() {
     WordDetailScreenContent(state = sampleAllTraitTypesCard().toContentUiState())
 }
 
+@Preview
+@Composable
+private fun WordDetailScreenPreviewVeryLongWord() {
+    WordDetailScreenContent(state = sampleVeryLongWordCard().toContentUiState())
+}
+
 // Sample word card creators for different types of words
 internal fun sampleAmazonCard(): LanguageCard {
     return LanguageCard(
@@ -1238,6 +1244,52 @@ internal fun sampleAllTraitTypesCard(): LanguageCard {
                                 LanguageCardTranslation(
                                     targetLangWord = "ты",
                                     targetLangSenseClarification = "Устаревшая форма обращения."
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+}
+
+internal fun sampleVeryLongWordCard(): LanguageCard {
+    return LanguageCard(
+        lemma = "pneumonoultramicroscopicsilicovolcanoconiosis",
+        entries = listOf(
+            LanguageCardPosEntry(
+                pos = PartOfSpeech.NOUN,
+                forms = mutableListOf(),
+                senses = listOf(
+                    LanguageCardResponseSense(
+                        senseId = "very-long-word-example",
+                        senseDefinition = "A lung disease caused by inhaling very fine silicate or quartz dust.",
+                        learnerLevel = LearnerLevel.C2,
+                        frequency = SenseFrequency.VERY_LOW,
+                        semanticGroupId = "Medical",
+                        nameType = NameType.NO,
+                        examples = listOf(
+                            LanguageCardExample(
+                                text = "<w>Pneumonoultramicroscopicsilicovolcanoconiosis</w> is one of the longest words in the English language.",
+                                targetLangTranslations = mapOf("ru" to "<w>Пневмоноультрамикроскопическийсиликовулканокониоз</w> - одно из самых длинных слов в английском языке.")
+                            )
+                        ),
+                        synonyms = listOf("silicosis", "black lung disease"),
+                        traits = listOf(
+                            LanguageCardTrait(
+                                TraitType.FORM,
+                                "Considered one of the longest words in major dictionaries"
+                            )
+                        ),
+                        targetLangDefinitions = mapOf(
+                            "ru" to "Заболевание легких, вызванное вдыханием мелкодисперсной пыли силикатов или кварца."
+                        ),
+                        translations = mapOf(
+                            "ru" to listOf(
+                                LanguageCardTranslation(
+                                    targetLangWord = "пневмокониоз",
+                                    targetLangSenseClarification = "Медицинский термин для болезни легких."
                                 )
                             )
                         )
