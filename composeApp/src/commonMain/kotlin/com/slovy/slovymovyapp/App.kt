@@ -201,7 +201,7 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
         }
         composable<AppDestination.Search> {
             SearchScreen(
-                language = nativeLanguage,
+                targetLanguage = nativeLanguage,
                 dictionaryLanguage = dictionaryLanguage,
                 dataManager = dataManager,
                 onWordSelected = { item ->

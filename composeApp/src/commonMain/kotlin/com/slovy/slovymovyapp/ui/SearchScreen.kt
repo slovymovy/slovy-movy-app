@@ -1,37 +1,26 @@
 package com.slovy.slovymovyapp.ui
 
-// Using a simple text button instead of material icons to keep commonMain lightweight
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import kotlin.uuid.Uuid
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    language: String? = null,
+    targetLanguage: String? = null,
     dictionaryLanguage: String? = null,
     dataManager: DataDbManager? = null,
     onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> }
@@ -50,13 +39,13 @@ fun SearchScreen(
         }
     }
 
-    val uiState = remember(query, results, showInfo, language) {
+    val uiState = remember(query, results, showInfo, dictionaryLanguage) {
         SearchUiState(
             title = "Search",
             query = query,
             results = results,
             isInfoDialogVisible = showInfo,
-            infoText = language ?: "Not selected",
+            infoText = dictionaryLanguage ?: "Not selected",
             showNoResults = query.isNotBlank() && results.isEmpty()
         )
     }
@@ -83,10 +72,19 @@ fun SearchScreenContent(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(state.title) },
+                    title = {
+                        Column {
+                            Text(state.title)
+                            Text(
+                                text = state.infoText,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
                     actions = {
-                        TextButton(onClick = onInfoClick) {
-                            Text("ℹ︎")
+                        IconButton(onClick = onInfoClick) {
+                            Text("ℹ︎", style = MaterialTheme.typography.titleLarge)
                         }
                     }
                 )
@@ -95,31 +93,54 @@ fun SearchScreenContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
                     .padding(innerPadding)
-                    .padding(16.dp)
             ) {
+                // Search field with padding
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = onQueryChange,
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Search a word") }
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp),
+                    label = { Text("Search a word") },
+                    placeholder = { Text("Type to search...") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    trailingIcon = {
+                        if (state.query.isNotEmpty()) {
+                            TextButton(onClick = { onQueryChange("") }) {
+                                Text("✕")
+                            }
+                        }
+                    }
                 )
 
-                if (state.showNoResults) {
-                    Text(
-                        text = "No results",
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-                } else {
-                    state.results.forEach { item ->
-                        Text(
-                            text = item.display,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onResultSelected(item) }
-                                .padding(vertical = 12.dp)
-                        )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Result area
+                when {
+                    state.query.isEmpty() -> {
+                        EmptySearchState()
+                    }
+
+                    state.showNoResults -> {
+                        NoResultsState(query = state.query)
+                    }
+
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
+                        ) {
+                            items(state.results) { item ->
+                                SearchResultCard(
+                                    item = item,
+                                    onClick = { onResultSelected(item) }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -133,8 +154,130 @@ fun SearchScreenContent(
                         Text("OK")
                     }
                 },
-                title = { Text("Selected language") },
-                text = { Text(state.infoText) }
+                title = { Text("Selected Language") },
+                text = {
+                    Column {
+                        Text("Currently searching in:")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = state.infoText,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchResultCard(
+    item: DictionaryRepository.SearchItem,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.lemma,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            SuggestionChip(
+                onClick = { },
+                label = {
+                    Text(
+                        text = item.language.uppercase(),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                },
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptySearchState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Text(
+                text = "🔍",
+                style = MaterialTheme.typography.displayLarge
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Search for words",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Start typing to find words in your selected language",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun NoResultsState(query: String) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Text(
+                text = "🤔",
+                style = MaterialTheme.typography.displayLarge
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "No results found",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "We couldn't find any words matching \"$query\"",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Try a different spelling or search term",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -154,11 +297,11 @@ data class SearchUiState(
 private fun SearchScreenPreviewEmptyQuery() {
     SearchScreenContent(
         state = SearchUiState(
-            title = "Search",
+            title = "Dictionary Search",
             query = "",
             results = emptyList(),
             isInfoDialogVisible = false,
-            infoText = "Not selected",
+            infoText = "English",
             showNoResults = false
         )
     )
@@ -169,20 +312,32 @@ private fun SearchScreenPreviewEmptyQuery() {
 private fun SearchScreenPreviewWithResults() {
     SearchScreenContent(
         state = SearchUiState(
-            title = "Search",
-            query = "wo",
+            title = "Dictionary Search",
+            query = "cel",
             results = listOf(
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
-                    lemma = "world",
-                    display = "\"world\""
+                    lemma = "celebration",
+                    display = "\"celebration\""
                 ),
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
-                    lemma = "word",
-                    display = "\"word\""
+                    lemma = "celebrity",
+                    display = "\"celebrity\""
+                ),
+                DictionaryRepository.SearchItem(
+                    language = "en",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
+                    lemma = "celestial",
+                    display = "\"celestial\""
+                ),
+                DictionaryRepository.SearchItem(
+                    language = "en",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"),
+                    lemma = "cell",
+                    display = "\"cell\""
                 )
             ),
             isInfoDialogVisible = false,
@@ -194,11 +349,45 @@ private fun SearchScreenPreviewWithResults() {
 
 @Preview
 @Composable
+private fun SearchScreenPreviewMultilingualResults() {
+    SearchScreenContent(
+        state = SearchUiState(
+            title = "Dictionary Search",
+            query = "program",
+            results = listOf(
+                DictionaryRepository.SearchItem(
+                    language = "en",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                    lemma = "program",
+                    display = "\"program\""
+                ),
+                DictionaryRepository.SearchItem(
+                    language = "en",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
+                    lemma = "programmatically",
+                    display = "\"programmatically\""
+                ),
+                DictionaryRepository.SearchItem(
+                    language = "ru",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
+                    lemma = "программа",
+                    display = "\"программа\""
+                )
+            ),
+            isInfoDialogVisible = false,
+            infoText = "Multiple languages",
+            showNoResults = false
+        )
+    )
+}
+
+@Preview
+@Composable
 private fun SearchScreenPreviewNoResults() {
     SearchScreenContent(
         state = SearchUiState(
-            title = "Search",
-            query = "xyz",
+            title = "Dictionary Search",
+            query = "xyzabc123",
             results = emptyList(),
             isInfoDialogVisible = false,
             infoText = "English",
@@ -212,11 +401,46 @@ private fun SearchScreenPreviewNoResults() {
 private fun SearchScreenPreviewInfoDialog() {
     SearchScreenContent(
         state = SearchUiState(
-            title = "Search",
+            title = "Dictionary Search",
             query = "world",
-            results = emptyList(),
+            results = listOf(
+                DictionaryRepository.SearchItem(
+                    language = "en",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                    lemma = "world",
+                    display = "\"world\""
+                )
+            ),
             isInfoDialogVisible = true,
             infoText = "English",
+            showNoResults = false
+        )
+    )
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewDutchLanguage() {
+    SearchScreenContent(
+        state = SearchUiState(
+            title = "Dictionary Search",
+            query = "bib",
+            results = listOf(
+                DictionaryRepository.SearchItem(
+                    language = "nl",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                    lemma = "bibliotheek",
+                    display = "\"bibliotheek\""
+                ),
+                DictionaryRepository.SearchItem(
+                    language = "nl",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
+                    lemma = "bijbel",
+                    display = "\"bijbel\""
+                )
+            ),
+            isInfoDialogVisible = false,
+            infoText = "Nederlands (Dutch)",
             showNoResults = false
         )
     )
