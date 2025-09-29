@@ -647,7 +647,11 @@ private fun SenseCard(
                         }
                     }
 
-                    LevelAndFrequencyRow(level = sense.learnerLevel, frequency = sense.frequency)
+                    LevelAndFrequencyRow(
+                        level = sense.learnerLevel,
+                        frequency = sense.frequency,
+                        nameType = sense.nameType
+                    )
                 }
 
                 Icon(
@@ -696,6 +700,10 @@ private fun SenseCard(
                                 }
                             }
                         }
+                    }
+
+                    if (sense.traits.isNotEmpty()) {
+                        TraitsList(traits = sense.traits)
                     }
 
                     if (sense.examples.isNotEmpty()) {
@@ -853,8 +861,55 @@ private fun Badge(text: String, containerColor: Color, contentColor: Color) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency) {
+private fun TraitsList(traits: List<LanguageCardTrait>) {
+    if (traits.isEmpty()) return
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        SectionLabel("Notes")
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            traits.forEach { trait ->
+                val (tc, tcc) = colorsForTraitType(trait.traitType)
+
+                OutlinedCard(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.outlinedCardColors(containerColor = tc.copy(alpha = 0.3f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = trait.traitType.displayName,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = tcc
+                            )
+                        )
+                        if (trait.comment.isNotBlank()) {
+                            Text(
+                                text = trait.comment,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency, nameType: NameType?) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -864,6 +919,10 @@ private fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency)
         val (fc, fcc) = colorsForFrequency(frequency)
         Badge(text = level.name, containerColor = lc, contentColor = lcc)
         Badge(text = frequency.label, containerColor = fc, contentColor = fcc)
+        if (nameType != null && nameType != NameType.NO) {
+            val (nc, ncc) = colorsForNameType(nameType)
+            Badge(text = nameType.displayName, containerColor = nc, contentColor = ncc)
+        }
     }
 }
 
