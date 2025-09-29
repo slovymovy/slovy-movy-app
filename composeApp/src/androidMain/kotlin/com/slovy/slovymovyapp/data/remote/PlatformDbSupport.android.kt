@@ -19,7 +19,16 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     private val ctx: Context = (androidContext as? Context)
         ?: error("Android Context is required for PlatformDbSupport on Android")
 
-    actual fun getDatabasePath(name: String): Path = Path(ctx.getDatabasePath(name).absolutePath)
+    actual fun getDatabasePath(name: String): Path {
+        if (name.isEmpty()) {
+            // Return the databases directory itself when name is empty
+            return Path(
+                ctx.getDatabasePath("placeholder.db").parentFile?.absolutePath
+                    ?: error("Cannot get databases directory")
+            )
+        }
+        return Path(ctx.getDatabasePath(name).absolutePath)
+    }
 
     actual fun ensureDatabasesDir() {
         ctx.getDatabasePath("placeholder.db").parentFile?.mkdirs()
@@ -121,5 +130,13 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         } catch (_: Throwable) {
             null
         }
+    }
+
+    actual fun listFiles(path: Path): List<Path> {
+        val dir = File(path.toString())
+        if (!dir.isDirectory) {
+            return dir.parentFile?.listFiles()?.map { Path(it.absolutePath) } ?: emptyList()
+        }
+        return dir.listFiles()?.map { Path(it.absolutePath) } ?: emptyList()
     }
 }

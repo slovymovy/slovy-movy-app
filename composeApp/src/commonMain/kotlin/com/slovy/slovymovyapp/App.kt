@@ -12,6 +12,7 @@ import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.ui.*
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
@@ -42,6 +43,9 @@ private sealed interface AppDestination {
 
     @Serializable
     data class Error(val message: String) : AppDestination
+
+    @Serializable
+    data object DataVersionMismatch : AppDestination
 }
 
 @Composable
@@ -57,7 +61,16 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
     val navController = rememberNavController()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
 
-    fun selectInitialDestination(): AppDestination {
+    suspend fun selectInitialDestination(): AppDestination {
+        // Check if data version is current
+        if (!dataManager.hasRequiredVersion()) {
+            val savedVersion = settingsRepository?.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
+            // If version exists but is outdated, show error before deleting
+            if (savedVersion != null) {
+                return AppDestination.DataVersionMismatch
+            }
+        }
+
         val native = settingsRepository?.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
         if (native != null) {
             nativeLanguage = native
@@ -219,14 +232,32 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                 )
             }
         }
+        composable<AppDestination.DataVersionMismatch> {
+            val coroutineScope = rememberCoroutineScope()
+            ErrorScreen(
+                message = "Data format has been updated. Your downloaded dictionaries will be deleted and need to be re-downloaded.",
+                onOkay = {
+                    coroutineScope.launch {
+                        dataManager.deleteAllDownloadedData()
+                        val target = selectInitialDestination()
+                        navController.navigate(target) {
+                            popUpTo<AppDestination.DataVersionMismatch> { inclusive = true }
+                        }
+                    }
+                }
+            )
+        }
         composable<AppDestination.Error> { backStackEntry ->
             val args = backStackEntry.toRoute<AppDestination.Error>()
+            val coroutineScope = rememberCoroutineScope()
             ErrorScreen(
                 message = args.message,
                 onOkay = {
-                    val target = selectInitialDestination()
-                    navController.navigate(target) {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    coroutineScope.launch {
+                        val target = selectInitialDestination()
+                        navController.navigate(target) {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                        }
                     }
                 }
             )

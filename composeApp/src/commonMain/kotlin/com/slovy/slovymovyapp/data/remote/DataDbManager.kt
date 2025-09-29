@@ -31,11 +31,11 @@ class DataDbManager(
     private val settingsRepository: SettingsRepository? = null,
 ) {
     companion object {
-        const val VERSION = "v0"
+        const val VERSION = "v1"
 
         // TODO: we use HTTP for now to workaround some issues with IOS emulator
         // https://github.com/slovymovy/slovy-movy-app/issues/34
-        const val BASE_URL = "http://storage.googleapis.com/slovymovy/v0/"
+        const val BASE_URL = "http://storage.googleapis.com/slovymovy/$VERSION/"
         fun dictionaryFileName(lang: String): String = "dictionary_${lang.lowercase()}.db"
         fun translationFileName(src: String, tgt: String): String =
             "translation_${src.lowercase()}_${tgt.lowercase()}.db"
@@ -68,6 +68,30 @@ class DataDbManager(
     fun deleteTranslation(src: String, tgt: String) {
         val name = translationFileName(src, tgt)
         platform.deleteFile(platform.getDatabasePath(name))
+    }
+
+    /**
+     * Deletes all downloaded dictionary and translation databases.
+     * Also clears the stored version setting.
+     * Used when data version changes.
+     */
+    fun deleteAllDownloadedData() {
+        val databasesDir = platform.getDatabasePath("")
+        val files = platform.listFiles(databasesDir)
+        files.forEach { file ->
+            val fileName = file.name
+            if (fileName.startsWith("dictionary_") || fileName.startsWith("translation_")) {
+                platform.deleteFile(file)
+            }
+        }
+        clearVersion()
+    }
+
+    /**
+     * Clears the stored data version from settings.
+     */
+    fun clearVersion() {
+        settingsRepository?.deleteById(Setting.Name.DATA_VERSION)
     }
 
     fun openAppDatabase(): AppDatabase {
@@ -239,6 +263,7 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun createDictionaryDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createTranslationDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createHttpClient(): HttpClient
+    fun listFiles(path: Path): List<Path>
 
     // Returns available bytes for the filesystem containing the provided path. Null if unknown.
     fun getAvailableBytesForPath(path: Path): Long?
