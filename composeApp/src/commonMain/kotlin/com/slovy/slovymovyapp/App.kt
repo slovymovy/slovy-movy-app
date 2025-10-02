@@ -63,6 +63,9 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
     val navController = rememberNavController()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
 
+    // Track the last viewed word for tab navigation
+    var lastWordDetail by remember { mutableStateOf<AppDestination.WordDetail?>(null) }
+
     suspend fun selectInitialDestination(): AppDestination {
         // Check if data version is current
         if (!dataManager.hasRequiredVersion()) {
@@ -242,17 +245,29 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
             SearchScreen(
                 viewModel = viewModel,
                 onWordSelected = { item ->
-                    navController.navigate(
-                        AppDestination.WordDetail(
-                            dictionaryLanguage = item.language,
-                            lemma = item.lemma,
-                        )
+                    val destination = AppDestination.WordDetail(
+                        dictionaryLanguage = item.language,
+                        lemma = item.lemma,
                     )
+                    lastWordDetail = destination
+                    navController.navigate(destination)
+                },
+                isWordDetailAvailable = lastWordDetail != null,
+                onNavigateToWordDetail = {
+                    lastWordDetail?.let { destination ->
+                        navController.navigate(destination)
+                    }
                 }
             )
         }
         composable<AppDestination.WordDetail> { backStackEntry ->
             val args = backStackEntry.toRoute<AppDestination.WordDetail>()
+
+            // Update lastWordDetail when navigating to this screen
+            LaunchedEffect(args) {
+                lastWordDetail = args
+            }
+
             val viewModel = viewModel(
                 viewModelStoreOwner = backStackEntry
             ) {
@@ -261,7 +276,10 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
 
             WordDetailScreen(
                 viewModel = viewModel,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onNavigateToSearch = {
+                    navController.popBackStack(AppDestination.Search, inclusive = false)
+                }
             )
         }
         composable<AppDestination.DataVersionMismatch> { backStackEntry ->

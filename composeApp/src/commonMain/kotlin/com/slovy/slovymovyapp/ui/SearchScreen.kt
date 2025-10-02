@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -57,7 +59,9 @@ class SearchViewModel(
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel,
-    onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> }
+    onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> },
+    isWordDetailAvailable: Boolean = false,
+    onNavigateToWordDetail: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
@@ -84,6 +88,8 @@ fun SearchScreen(
             focusManager.clearFocus()
             onWordSelected(item)
         },
+        isWordDetailAvailable = isWordDetailAvailable,
+        onNavigateToWordDetail = onNavigateToWordDetail
     )
 }
 
@@ -92,7 +98,9 @@ fun SearchScreen(
 fun SearchScreenContent(
     state: SearchUiState,
     onQueryChange: (String) -> Unit = {},
-    onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {}
+    onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
+    isWordDetailAvailable: Boolean = false,
+    onNavigateToWordDetail: () -> Unit = {}
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -103,6 +111,14 @@ fun SearchScreenContent(
                             Text(state.title)
                         }
                     }
+                )
+            },
+            bottomBar = {
+                AppNavigationBar(
+                    currentScreen = AppScreen.SEARCH,
+                    isWordDetailAvailable = isWordDetailAvailable,
+                    onNavigateToSearch = {},
+                    onNavigateToWordDetail = onNavigateToWordDetail
                 )
             }
         ) { innerPadding ->
@@ -208,72 +224,71 @@ private fun SearchResultCard(
 
 @Composable
 private fun EmptySearchState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(32.dp)
-        ) {
-            Text(
-                text = "🔍",
-                style = MaterialTheme.typography.displayLarge
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Search for words",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Start typing to find words in your selected language",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-        }
+        Spacer(modifier = Modifier.height(48.dp))
+        Text(
+            text = "🔍",
+            style = MaterialTheme.typography.displayLarge
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Search for words",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Start typing to find words in your selected language",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
     }
 }
 
 @Composable
 private fun NoResultsState(query: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(32.dp)
-        ) {
-            Text(
-                text = "🤔",
-                style = MaterialTheme.typography.displayLarge
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "No results found",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "We couldn't find any words matching \"$query\"",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Try a different spelling or search term",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-        }
+        Spacer(modifier = Modifier.height(48.dp))
+        Text(
+            text = "🤔",
+            style = MaterialTheme.typography.displayLarge
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "No results found",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "We couldn't find any words matching \"$query\"",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Try a different spelling or search term",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
     }
 }
 

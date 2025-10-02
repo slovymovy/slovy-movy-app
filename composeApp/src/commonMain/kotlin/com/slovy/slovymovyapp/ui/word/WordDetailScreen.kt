@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.AppNavigationBar
+import com.slovy.slovymovyapp.ui.AppScreen
 import com.slovy.slovymovyapp.ui.codeToLanguage
 import kotlin.text.Typography.bullet
 
@@ -304,7 +306,8 @@ private fun ExpandableSection(
 @Composable
 fun WordDetailScreen(
     viewModel: WordDetailViewModel,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onNavigateToSearch: () -> Unit = {}
 ) {
     // Restore scroll position after process death
     val savedScrollPosition = rememberSaveable { viewModel.scrollState.value }
@@ -319,6 +322,7 @@ fun WordDetailScreen(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
         onBack = onBack,
+        onNavigateToSearch = onNavigateToSearch,
         onEntryToggle = { index -> viewModel.toggleEntry(index) },
         onFormsToggle = { index -> viewModel.toggleForms(index) },
         onSenseToggle = { entryIndex, senseId -> viewModel.toggleSense(entryIndex, senseId) },
@@ -335,6 +339,7 @@ fun WordDetailScreenContent(
     state: WordDetailUiState,
     scrollState: ScrollState = ScrollState(0),
     onBack: () -> Unit = {},
+    onNavigateToSearch: () -> Unit = {},
     onEntryToggle: (Int) -> Unit = {},
     onFormsToggle: (Int) -> Unit = {},
     onSenseToggle: (Int, String) -> Unit = { _, _ -> },
@@ -345,7 +350,6 @@ fun WordDetailScreenContent(
     val titleText = when (state) {
         is WordDetailUiState.Content -> state.card.lemma
         is WordDetailUiState.Empty -> state.lemma ?: fallbackTitle
-        else -> fallbackTitle
     }
 
     Scaffold(
@@ -370,12 +374,6 @@ fun WordDetailScreenContent(
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center
                         )
-
-                        else -> Text(
-                            text = titleText,
-                            style = MaterialTheme.typography.headlineSmall,
-                            textAlign = TextAlign.Center
-                        )
                     }
                 },
                 navigationIcon = {
@@ -389,6 +387,14 @@ fun WordDetailScreenContent(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
+            )
+        },
+        bottomBar = {
+            AppNavigationBar(
+                currentScreen = AppScreen.WORD_DETAIL,
+                isWordDetailAvailable = true,
+                onNavigateToSearch = onNavigateToSearch,
+                onNavigateToWordDetail = {}
             )
         },
         containerColor = MaterialTheme.colorScheme.background
