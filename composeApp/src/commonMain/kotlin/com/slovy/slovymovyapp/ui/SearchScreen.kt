@@ -11,11 +11,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.uuid.Uuid
 
@@ -34,7 +36,7 @@ class SearchViewModel(
     var state by mutableStateOf(SearchUiState("Search", "", emptyList(), false))
         private set
 
-    fun updateQuery(newQuery: String) {
+    suspend fun updateQuery(newQuery: String) {
         val trimmed = newQuery.trim()
         val newResults = if (trimmed.isEmpty()) {
             emptyList()
@@ -44,8 +46,10 @@ class SearchViewModel(
         state = state.copy(
             query = trimmed,
             results = newResults,
-            showNoResults = newResults.isEmpty() && newResults.isNotEmpty()
+            showNoResults = newResults.isEmpty() && trimmed.isNotEmpty()
         )
+        // Reset scroll to top when query changes
+        state.scrollState.scrollToItem(0)
     }
 }
 
@@ -55,6 +59,8 @@ fun SearchScreen(
     viewModel: SearchViewModel,
     onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> }
 ) {
+    val focusManager = LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
 
@@ -64,10 +70,20 @@ fun SearchScreen(
         }
     }
 
+    // Clear focus when scrolling starts
+    LaunchedEffect(viewModel.state.scrollState.isScrollInProgress) {
+        if (viewModel.state.scrollState.isScrollInProgress) {
+            focusManager.clearFocus()
+        }
+    }
+
     SearchScreenContent(
         state = viewModel.state,
-        onQueryChange = { viewModel.updateQuery(it) },
-        onResultSelected = onWordSelected,
+        onQueryChange = { coroutineScope.launch { viewModel.updateQuery(it) } },
+        onResultSelected = { item ->
+            focusManager.clearFocus()
+            onWordSelected(item)
+        },
     )
 }
 
