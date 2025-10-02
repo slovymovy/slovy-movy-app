@@ -362,18 +362,6 @@ private fun WordDetailScreenPreviewLowFrequencyWord() {
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewError() {
-    WordDetailScreenContent(state = WordDetailUiState.Error(message = "Unable to load word"))
-}
-
-@Preview
-@Composable
-private fun WordDetailScreenPreviewLoading() {
-    WordDetailScreenContent(state = WordDetailUiState.Loading)
-}
-
-@Preview
-@Composable
 private fun WordDetailScreenPreviewEmpty() {
     WordDetailScreenContent(state = WordDetailUiState.Empty(lemma = "testing"))
 }

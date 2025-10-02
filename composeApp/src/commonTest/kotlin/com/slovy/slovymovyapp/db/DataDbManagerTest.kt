@@ -247,12 +247,12 @@ class DataDbManagerTest : BaseTest() {
 
         if (!platform.fileExists(dictPath)) {
             val out = platform.openOutput(dictPath)
-            out.write("test".toByteArray(), 0, 4)
+            out.write("test".encodeToByteArray(), 0, 4)
             out.close()
         }
         if (!platform.fileExists(transPath)) {
             val out = platform.openOutput(transPath)
-            out.write("test".toByteArray(), 0, 4)
+            out.write("test".encodeToByteArray(), 0, 4)
             out.close()
         }
 
@@ -317,7 +317,6 @@ class DataDbManagerTest : BaseTest() {
     @Test
     fun listFiles_on_databases_directory_works() {
         val platform = platformDbSupport()
-        val mgr = DataDbManager(platform, null)
 
         platform.ensureDatabasesDir()
 
@@ -325,11 +324,11 @@ class DataDbManagerTest : BaseTest() {
         val transPath = platform.getDatabasePath(DataDbManager.translationFileName("en", "ru"))
 
         val out1 = platform.openOutput(dictPath)
-        out1.write("test1".toByteArray(), 0, 5)
+        out1.write("test1".encodeToByteArray(), 0, 5)
         out1.close()
 
         val out2 = platform.openOutput(transPath)
-        out2.write("test2".toByteArray(), 0, 5)
+        out2.write("test2".encodeToByteArray(), 0, 5)
         out2.close()
 
         try {

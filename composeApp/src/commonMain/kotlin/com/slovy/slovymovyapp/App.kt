@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp
 
 import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -12,6 +13,7 @@ import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.ui.*
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
+import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -97,8 +99,15 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
     val resolvedStart = startDestination ?: return
 
     NavHost(navController = navController, startDestination = resolvedStart) {
-        composable<AppDestination.Language> {
+        composable<AppDestination.Language> { backStackEntry ->
+            val viewModel = viewModel(
+                viewModelStoreOwner = backStackEntry
+            ) {
+                LanguageSelectionViewModel()
+            }
+
             LanguageSelectionScreen(
+                viewModel = viewModel,
                 onLanguageChosen = { lang ->
                     settingsRepository?.insert(
                         Setting(
@@ -111,8 +120,15 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                 }
             )
         }
-        composable<AppDestination.Dictionary> {
+        composable<AppDestination.Dictionary> { backStackEntry ->
+            val viewModel = viewModel(
+                viewModelStoreOwner = backStackEntry
+            ) {
+                DictionarySelectionViewModel()
+            }
+
             DictionarySelectionScreen(
+                viewModel = viewModel,
                 onDictionaryChosen = { lang ->
                     settingsRepository?.insert(
                         Setting(
@@ -125,7 +141,7 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                 }
             )
         }
-        composable<AppDestination.DownloadDictionary> {
+        composable<AppDestination.DownloadDictionary> { backStackEntry ->
             val dictLang = dictionaryLanguage
             if (dictLang == null) {
                 LaunchedEffect(Unit) {
@@ -134,37 +150,45 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                     }
                 }
             } else {
-                DownloadScreen(
-                    description = "Downloading dictionary",
-                    download = { onProgress, cancel ->
-                        dataManager.ensureDictionary(dictLang, onProgress, cancel)
-                    },
-                    onSuccess = {
-                        val native = nativeLanguage
-                        if (native != null && dataManager.hasTranslation(dictLang, native)) {
-                            navController.navigate(AppDestination.Search) {
-                                popUpTo<AppDestination.Dictionary> { inclusive = false }
+                val viewModel = viewModel(
+                    viewModelStoreOwner = backStackEntry
+                ) {
+                    DownloadViewModel(
+                        download = { onProgress, cancel ->
+                            dataManager.ensureDictionary(dictLang, onProgress, cancel)
+                        },
+                        onSuccess = {
+                            val native = nativeLanguage
+                            if (native != null && dataManager.hasTranslation(dictLang, native)) {
+                                navController.navigate(AppDestination.Search) {
+                                    popUpTo<AppDestination.Dictionary> { inclusive = false }
+                                }
+                            } else {
+                                navController.navigate(AppDestination.DownloadTranslation) {
+                                    popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
+                                }
                             }
-                        } else {
-                            navController.navigate(AppDestination.DownloadTranslation) {
+                        },
+                        onCancel = {
+                            navController.navigate(AppDestination.Error("Download cancelled")) {
+                                popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
+                            }
+                        },
+                        onError = { t ->
+                            navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
                                 popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
                             }
                         }
-                    },
-                    onCancel = {
-                        navController.navigate(AppDestination.Error("Download cancelled")) {
-                            popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
-                        }
-                    },
-                    onError = { t ->
-                        navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
-                            popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
-                        }
-                    }
+                    )
+                }
+
+                DownloadScreen(
+                    viewModel = viewModel,
+                    description = "Downloading dictionary"
                 )
             }
         }
-        composable<AppDestination.DownloadTranslation> {
+        composable<AppDestination.DownloadTranslation> { backStackEntry ->
             val dictLang = dictionaryLanguage
             val native = nativeLanguage
             if (dictLang == null || native == null) {
@@ -174,36 +198,49 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                     }
                 }
             } else {
+                val viewModel = viewModel(
+                    viewModelStoreOwner = backStackEntry
+                ) {
+                    DownloadViewModel(
+                        download = { onProgress, cancel ->
+                            dataManager.ensureTranslation(dictLang, native, onProgress, cancel)
+                        },
+                        onSuccess = {
+                            navController.navigate(AppDestination.Search) {
+                                popUpTo<AppDestination.Dictionary> { inclusive = false }
+                            }
+                        },
+                        onCancel = {
+                            navController.navigate(AppDestination.Error("Download cancelled")) {
+                                popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
+                            }
+                        },
+                        onError = { t ->
+                            settingsRepository!!.deleteById(Setting.Name.LANGUAGE)
+                            settingsRepository.deleteById(Setting.Name.DICTIONARY)
+                            navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
+                                popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
                 DownloadScreen(
-                    description = "Downloading translation",
-                    download = { onProgress, cancel ->
-                        dataManager.ensureTranslation(dictLang, native, onProgress, cancel)
-                    },
-                    onSuccess = {
-                        navController.navigate(AppDestination.Search) {
-                            popUpTo<AppDestination.Dictionary> { inclusive = false }
-                        }
-                    },
-                    onCancel = {
-                        navController.navigate(AppDestination.Error("Download cancelled")) {
-                            popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
-                        }
-                    },
-                    onError = { t ->
-                        settingsRepository!!.deleteById(Setting.Name.LANGUAGE)
-                        settingsRepository.deleteById(Setting.Name.DICTIONARY)
-                        navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
-                            popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
-                        }
-                    }
+                    viewModel = viewModel,
+                    description = "Downloading translation"
                 )
             }
         }
-        composable<AppDestination.Search> {
+        composable<AppDestination.Search> { backStackEntry ->
+
+            val viewModel = viewModel(
+                viewModelStoreOwner = backStackEntry
+            ) {
+                SearchViewModel(DictionaryRepository(dataManager))
+            }
+
             SearchScreen(
-                targetLanguage = nativeLanguage,
-                dictionaryLanguage = dictionaryLanguage,
-                dataManager = dataManager,
+                viewModel = viewModel,
                 onWordSelected = { item ->
                     navController.navigate(
                         AppDestination.WordDetail(
@@ -216,26 +253,27 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
         }
         composable<AppDestination.WordDetail> { backStackEntry ->
             val args = backStackEntry.toRoute<AppDestination.WordDetail>()
-            val card = remember(args.dictionaryLanguage, args.lemma) {
-                dictionaryRepository.getLanguageCard(args.dictionaryLanguage, args.lemma)
+            val viewModel = viewModel(
+                viewModelStoreOwner = backStackEntry
+            ) {
+                WordDetailViewModel(dictionaryRepository, args.dictionaryLanguage, args.lemma)
             }
-            if (card == null) {
-                LaunchedEffect(args.dictionaryLanguage, args.lemma) {
-                    navController.navigate(AppDestination.Error("Word not found, seems like database is broken")) {
-                        popUpTo<AppDestination.WordDetail> { inclusive = true }
-                    }
-                }
-            } else {
-                WordDetailScreen(
-                    card = card,
-                    onBack = { navController.popBackStack() }
-                )
-            }
+
+            WordDetailScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
-        composable<AppDestination.DataVersionMismatch> {
+        composable<AppDestination.DataVersionMismatch> { backStackEntry ->
             val coroutineScope = rememberCoroutineScope()
+            val viewModel = viewModel(
+                viewModelStoreOwner = backStackEntry
+            ) {
+                ErrorViewModel("Data format has been updated. Your downloaded dictionaries will be deleted and need to be re-downloaded.")
+            }
+
             ErrorScreen(
-                message = "Data format has been updated. Your downloaded dictionaries will be deleted and need to be re-downloaded.",
+                viewModel = viewModel,
                 onOkay = {
                     coroutineScope.launch {
                         dataManager.deleteAllDownloadedData()
@@ -250,8 +288,14 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
         composable<AppDestination.Error> { backStackEntry ->
             val args = backStackEntry.toRoute<AppDestination.Error>()
             val coroutineScope = rememberCoroutineScope()
+            val viewModel = viewModel(
+                viewModelStoreOwner = backStackEntry
+            ) {
+                ErrorViewModel(args.message)
+            }
+
             ErrorScreen(
-                message = args.message,
+                viewModel = viewModel,
                 onOkay = {
                     coroutineScope.launch {
                         val target = selectInitialDestination()

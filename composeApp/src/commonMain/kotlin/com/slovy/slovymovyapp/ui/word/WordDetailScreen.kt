@@ -1,15 +1,16 @@
 package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,14 +20,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.codeToLanguage
 import kotlin.text.Typography.bullet
 
 sealed interface WordDetailUiState {
-    object Loading : WordDetailUiState
     data class Empty(val lemma: String? = null, val message: String = "No entries available.") : WordDetailUiState
-    data class Error(val message: String, val showRetry: Boolean = true) : WordDetailUiState
     data class Content(val card: LanguageCard, val entries: List<EntryUiState>) : WordDetailUiState
 }
 
@@ -124,6 +124,63 @@ private fun SenseUiState.toggleLanguage(languageCode: String): SenseUiState {
     val current = languageExpanded[languageCode] ?: expanded
     val updated = languageExpanded.toMutableMap().apply { put(languageCode, !current) }
     return copy(languageExpanded = updated)
+}
+
+class WordDetailViewModel(
+    repository: DictionaryRepository,
+    dictionaryLanguage: String = "",
+    lemma: String = ""
+) : ViewModel() {
+    var state by mutableStateOf<WordDetailUiState>(WordDetailUiState.Empty())
+        private set
+
+    val scrollState = ScrollState(0)
+
+    init {
+        val card = repository.getLanguageCard(dictionaryLanguage, lemma)
+        state = card?.toContentUiState() ?: WordDetailUiState.Empty(lemma = lemma, message = "Word not found")
+    }
+
+    fun setScrollPosition(position: Int) {
+        // This will be called when restoring from saved state
+        scrollState.dispatchRawDelta(-scrollState.value.toFloat())
+        scrollState.dispatchRawDelta(position.toFloat())
+    }
+
+    fun toggleEntry(index: Int) {
+        val current = state
+        if (current is WordDetailUiState.Content) {
+            state = current.toggleEntry(index)
+        }
+    }
+
+    fun toggleForms(index: Int) {
+        val current = state
+        if (current is WordDetailUiState.Content) {
+            state = current.toggleForms(index)
+        }
+    }
+
+    fun toggleSense(entryIndex: Int, senseId: String) {
+        val current = state
+        if (current is WordDetailUiState.Content) {
+            state = current.toggleSense(entryIndex, senseId)
+        }
+    }
+
+    fun toggleSenseExamples(entryIndex: Int, senseId: String) {
+        val current = state
+        if (current is WordDetailUiState.Content) {
+            state = current.toggleSenseExamples(entryIndex, senseId)
+        }
+    }
+
+    fun toggleLanguage(entryIndex: Int, senseId: String, languageCode: String) {
+        val current = state
+        if (current is WordDetailUiState.Content) {
+            state = current.toggleSenseLanguage(entryIndex, senseId, languageCode)
+        }
+    }
 }
 
 @Composable
@@ -246,33 +303,28 @@ private fun ExpandableSection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WordDetailScreen(
-    card: LanguageCard,
-    onBack: () -> Unit = {},
-    onRetry: () -> Unit = {}
+    viewModel: WordDetailViewModel,
+    onBack: () -> Unit = {}
 ) {
-    var internalState by remember(card) {
-        mutableStateOf(
-            card.toContentUiState()
-        )
-    }
+    // Restore scroll position after process death
+    val savedScrollPosition = rememberSaveable { viewModel.scrollState.value }
 
-    fun updateContent(transform: (WordDetailUiState.Content) -> WordDetailUiState.Content) {
-        val current = internalState
-        internalState = transform(current)
+    LaunchedEffect(savedScrollPosition) {
+        if (viewModel.scrollState.value == 0 && savedScrollPosition > 0) {
+            viewModel.setScrollPosition(savedScrollPosition)
+        }
     }
 
     WordDetailScreenContent(
-        state = internalState,
+        state = viewModel.state,
+        scrollState = viewModel.scrollState,
         onBack = onBack,
-        onRetry = onRetry,
-        onEntryToggle = { index -> updateContent { it.toggleEntry(index) } },
-        onFormsToggle = { index -> updateContent { it.toggleForms(index) } },
-        onSenseToggle = { entryIndex, senseId -> updateContent { it.toggleSense(entryIndex, senseId) } },
-        onSenseExamplesToggle = { entryIndex, senseId ->
-            updateContent { it.toggleSenseExamples(entryIndex, senseId) }
-        },
+        onEntryToggle = { index -> viewModel.toggleEntry(index) },
+        onFormsToggle = { index -> viewModel.toggleForms(index) },
+        onSenseToggle = { entryIndex, senseId -> viewModel.toggleSense(entryIndex, senseId) },
+        onSenseExamplesToggle = { entryIndex, senseId -> viewModel.toggleSenseExamples(entryIndex, senseId) },
         onLanguageToggle = { entryIndex, senseId, languageCode ->
-            updateContent { it.toggleSenseLanguage(entryIndex, senseId, languageCode) }
+            viewModel.toggleLanguage(entryIndex, senseId, languageCode)
         }
     )
 }
@@ -281,8 +333,8 @@ fun WordDetailScreen(
 @Composable
 fun WordDetailScreenContent(
     state: WordDetailUiState,
+    scrollState: ScrollState = ScrollState(0),
     onBack: () -> Unit = {},
-    onRetry: () -> Unit = {},
     onEntryToggle: (Int) -> Unit = {},
     onFormsToggle: (Int) -> Unit = {},
     onSenseToggle: (Int, String) -> Unit = { _, _ -> },
@@ -343,7 +395,6 @@ fun WordDetailScreenContent(
     ) { innerPadding ->
         when (state) {
             is WordDetailUiState.Content -> {
-                val scrollState = rememberScrollState()
                 WordDetailContent(
                     card = state.card,
                     entryStates = state.entries,
@@ -374,41 +425,6 @@ fun WordDetailScreenContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
-                }
-            }
-
-            is WordDetailUiState.Error -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = 24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = state.message,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error,
-                        textAlign = TextAlign.Center
-                    )
-                    if (state.showRetry) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = onRetry) {
-                            Text("Retry")
-                        }
-                    }
-                }
-            }
-
-            WordDetailUiState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
                 }
             }
         }

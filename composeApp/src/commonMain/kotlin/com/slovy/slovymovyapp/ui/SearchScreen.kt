@@ -3,59 +3,71 @@ package com.slovy.slovymovyapp.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.slovy.slovymovyapp.data.remote.DataDbManager
+import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.uuid.Uuid
 
+data class SearchUiState(
+    val title: String,
+    val query: String,
+    val results: List<DictionaryRepository.SearchItem>,
+    val showNoResults: Boolean,
+    val scrollState: LazyListState = LazyListState()
+)
+
+class SearchViewModel(
+    private val repository: DictionaryRepository
+) : ViewModel() {
+
+    var state by mutableStateOf(SearchUiState("Search", "", emptyList(), false))
+        private set
+
+    fun updateQuery(newQuery: String) {
+        val trimmed = newQuery.trim()
+        val newResults = if (trimmed.isEmpty()) {
+            emptyList()
+        } else {
+            repository.search(trimmed)
+        }
+        state = state.copy(
+            query = trimmed,
+            results = newResults,
+            showNoResults = newResults.isEmpty() && newResults.isNotEmpty()
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    targetLanguage: String? = null,
-    dictionaryLanguage: String? = null,
-    dataManager: DataDbManager? = null,
+    viewModel: SearchViewModel,
     onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> }
 ) {
-    var query by remember { mutableStateOf("") }
-    var showInfo by remember { mutableStateOf(false) }
+    // restore after process death
+    val savedQuery = rememberSaveable { viewModel.state.query }
 
-    // Repository instance
-    val repository = remember(dataManager) { dataManager?.let { DictionaryRepository(it) } }
-
-    val results = remember(query, dictionaryLanguage, repository) {
-        val trimmed = query.trim()
-        if (trimmed.isEmpty()) emptyList()
-        else {
-            repository?.search(trimmed, dictionaryLanguage) ?: emptyList()
+    LaunchedEffect(savedQuery) {
+        if (viewModel.state.query.isEmpty() && savedQuery.isNotEmpty()) {
+            viewModel.updateQuery(savedQuery)
         }
     }
 
-    val uiState = remember(query, results, showInfo, dictionaryLanguage) {
-        SearchUiState(
-            title = "Search",
-            query = query,
-            results = results,
-            isInfoDialogVisible = showInfo,
-            infoText = dictionaryLanguage ?: "Not selected",
-            showNoResults = query.isNotBlank() && results.isEmpty()
-        )
-    }
-
     SearchScreenContent(
-        state = uiState,
-        onQueryChange = { query = it },
+        state = viewModel.state,
+        onQueryChange = { viewModel.updateQuery(it) },
         onResultSelected = onWordSelected,
-        onInfoClick = { showInfo = true },
-        onInfoDismiss = { showInfo = false }
     )
 }
 
@@ -64,9 +76,7 @@ fun SearchScreen(
 fun SearchScreenContent(
     state: SearchUiState,
     onQueryChange: (String) -> Unit = {},
-    onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
-    onInfoClick: () -> Unit = {},
-    onInfoDismiss: () -> Unit = {},
+    onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {}
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -75,16 +85,6 @@ fun SearchScreenContent(
                     title = {
                         Column {
                             Text(state.title)
-                            Text(
-                                text = state.infoText,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = onInfoClick) {
-                            Text("ℹ︎", style = MaterialTheme.typography.titleLarge)
                         }
                     }
                 )
@@ -132,7 +132,8 @@ fun SearchScreenContent(
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                            state = state.scrollState
                         ) {
                             items(state.results) { item ->
                                 SearchResultCard(
@@ -144,29 +145,6 @@ fun SearchScreenContent(
                     }
                 }
             }
-        }
-
-        if (state.isInfoDialogVisible) {
-            AlertDialog(
-                onDismissRequest = onInfoDismiss,
-                confirmButton = {
-                    TextButton(onClick = onInfoDismiss) {
-                        Text("OK")
-                    }
-                },
-                title = { Text("Selected Language") },
-                text = {
-                    Column {
-                        Text("Currently searching in:")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = state.infoText,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            )
         }
     }
 }
@@ -283,15 +261,6 @@ private fun NoResultsState(query: String) {
     }
 }
 
-data class SearchUiState(
-    val title: String,
-    val query: String,
-    val results: List<DictionaryRepository.SearchItem>,
-    val isInfoDialogVisible: Boolean,
-    val infoText: String,
-    val showNoResults: Boolean
-)
-
 @Preview
 @Composable
 private fun SearchScreenPreviewEmptyQuery() {
@@ -300,10 +269,8 @@ private fun SearchScreenPreviewEmptyQuery() {
             title = "Dictionary Search",
             query = "",
             results = emptyList(),
-            isInfoDialogVisible = false,
-            infoText = "English",
-            showNoResults = false
-        )
+            showNoResults = false,
+        ),
     )
 }
 
@@ -340,10 +307,8 @@ private fun SearchScreenPreviewWithResults() {
                     display = "\"cell\""
                 )
             ),
-            isInfoDialogVisible = false,
-            infoText = "English",
-            showNoResults = false
-        )
+            showNoResults = false,
+        ),
     )
 }
 
@@ -374,10 +339,8 @@ private fun SearchScreenPreviewMultilingualResults() {
                     display = "\"программа\""
                 )
             ),
-            isInfoDialogVisible = false,
-            infoText = "Multiple languages",
-            showNoResults = false
-        )
+            showNoResults = false,
+        ),
     )
 }
 
@@ -389,10 +352,8 @@ private fun SearchScreenPreviewNoResults() {
             title = "Dictionary Search",
             query = "xyzabc123",
             results = emptyList(),
-            isInfoDialogVisible = false,
-            infoText = "English",
-            showNoResults = true
-        )
+            showNoResults = true,
+        ),
     )
 }
 
@@ -411,10 +372,8 @@ private fun SearchScreenPreviewInfoDialog() {
                     display = "\"world\""
                 )
             ),
-            isInfoDialogVisible = true,
-            infoText = "English",
-            showNoResults = false
-        )
+            showNoResults = false,
+        ),
     )
 }
 
@@ -439,9 +398,7 @@ private fun SearchScreenPreviewDutchLanguage() {
                     display = "\"bijbel\""
                 )
             ),
-            isInfoDialogVisible = false,
-            infoText = "Nederlands (Dutch)",
-            showNoResults = false
-        )
+            showNoResults = false,
+        ),
     )
 }

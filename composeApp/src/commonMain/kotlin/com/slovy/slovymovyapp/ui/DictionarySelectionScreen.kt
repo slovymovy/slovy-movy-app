@@ -6,39 +6,44 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-private val dictionaries = listOf(
+private val dictionariesKnown = listOf(
     "English" to "en",
     "Русский" to "ru",
     "Nederlands" to "nl",
     "Polski" to "pl"
 )
 
+data class DictionaryOption(
+    val label: String,
+    val code: String
+)
+
+class DictionarySelectionViewModel(
+    val title: String = "Choose dictionary",
+    val dictionaries: List<DictionaryOption> = dictionariesKnown.map { (label, code) -> DictionaryOption(label, code) }
+) : ViewModel() {
+}
+
 @Composable
 fun DictionarySelectionScreen(
+    viewModel: DictionarySelectionViewModel,
     onDictionaryChosen: (String) -> Unit = { _ -> }
 ) {
-    val state = remember {
-        DictionarySelectionUiState(
-            title = "Choose dictionary",
-            dictionaries = dictionaries.map { (label, code) -> DictionaryOption(label, code) }
-        )
-    }
-
     DictionarySelectionScreenContent(
-        state = state,
+        state = viewModel,
         onDictionaryChosen = onDictionaryChosen
     )
 }
 
 @Composable
 fun DictionarySelectionScreenContent(
-    state: DictionarySelectionUiState,
+    state: DictionarySelectionViewModel,
     onDictionaryChosen: (String) -> Unit = {}
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
@@ -66,23 +71,13 @@ fun DictionarySelectionScreenContent(
     }
 }
 
-data class DictionarySelectionUiState(
-    val title: String,
-    val dictionaries: List<DictionaryOption>
-)
-
-data class DictionaryOption(
-    val label: String,
-    val code: String
-)
-
 @Preview
 @Composable
 private fun DictionarySelectionScreenPreviewDefault() {
     DictionarySelectionScreenContent(
-        state = DictionarySelectionUiState(
+        state = DictionarySelectionViewModel(
             title = "Choose dictionary",
-            dictionaries = dictionaries.map { (label, code) -> DictionaryOption(label, code) }
+            dictionaries = dictionariesKnown.map { (label, code) -> DictionaryOption(label, code) }
         )
     )
 }
@@ -91,7 +86,7 @@ private fun DictionarySelectionScreenPreviewDefault() {
 @Composable
 private fun DictionarySelectionScreenPreviewEmpty() {
     DictionarySelectionScreenContent(
-        state = DictionarySelectionUiState(
+        state = DictionarySelectionViewModel(
             title = "Choose dictionary",
             dictionaries = emptyList()
         )
