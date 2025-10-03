@@ -62,9 +62,7 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
 
     val navController = rememberNavController()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
-
-    // Track the last viewed word for tab navigation
-    var lastWordDetail by remember { mutableStateOf<AppDestination.WordDetail?>(null) }
+    val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
 
     suspend fun selectInitialDestination(): AppDestination {
         // Check if data version is current
@@ -249,12 +247,11 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                         dictionaryLanguage = item.language,
                         lemma = item.lemma,
                     )
-                    lastWordDetail = destination
                     navController.navigate(destination)
                 },
-                isWordDetailAvailable = lastWordDetail != null,
+                isWordDetailAvailable = wordDetailViewModels.isNotEmpty(),
                 onNavigateToWordDetail = {
-                    lastWordDetail?.let { destination ->
+                    wordDetailViewModels.keys.lastOrNull()?.let { destination ->
                         navController.navigate(destination)
                     }
                 }
@@ -263,15 +260,21 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
         composable<AppDestination.WordDetail> { backStackEntry ->
             val args = backStackEntry.toRoute<AppDestination.WordDetail>()
 
-            // Update lastWordDetail when navigating to this screen
-            LaunchedEffect(args) {
-                lastWordDetail = args
-            }
-
+            // Try to retrieve cached ViewModel, otherwise create new one with proper lifecycle
             val viewModel = viewModel(
                 viewModelStoreOwner = backStackEntry
             ) {
-                WordDetailViewModel(dictionaryRepository, args.dictionaryLanguage, args.lemma)
+                wordDetailViewModels[args] ?: WordDetailViewModel(
+                    dictionaryRepository,
+                    args.dictionaryLanguage,
+                    args.lemma
+                )
+            }.also {
+                // Enforce max N cached ViewModels (remove oldest if at capacity)
+                if (wordDetailViewModels.size >= 10 && args !in wordDetailViewModels) {
+                    wordDetailViewModels.remove(wordDetailViewModels.keys.first())
+                }
+                wordDetailViewModels[args] = it
             }
 
             WordDetailScreen(
