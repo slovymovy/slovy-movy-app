@@ -7,11 +7,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import com.slovy.slovymovyapp.data.remote.LearnerLevel
-import com.slovy.slovymovyapp.data.remote.NameType
-import com.slovy.slovymovyapp.data.remote.PartOfSpeech
-import com.slovy.slovymovyapp.data.remote.SenseFrequency
-import com.slovy.slovymovyapp.data.remote.TraitType
+import com.slovy.slovymovyapp.data.remote.*
 
 @Composable
 internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
