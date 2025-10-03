@@ -1,0 +1,9 @@
+CREATE TABLE favorites (
+  sense_id TEXT NOT NULL,
+  target_lang TEXT NOT NULL,
+  lemma TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (sense_id, target_lang)
+);
+
+CREATE INDEX idx_favorites_lang_lemma ON favorites(target_lang, lemma);

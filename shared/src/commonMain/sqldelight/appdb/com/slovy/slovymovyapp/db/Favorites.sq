@@ -1,0 +1,44 @@
+-- Favorites table: stores favorite word senses
+CREATE TABLE favorites (
+  sense_id TEXT NOT NULL,
+  target_lang TEXT NOT NULL,
+  lemma TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (sense_id, target_lang)
+);
+
+-- Index for efficient grouping by language and lemma
+CREATE INDEX idx_favorites_lang_lemma ON favorites(target_lang, lemma);
+
+-- Favorites queries
+
+insertFavorite:
+INSERT OR REPLACE INTO favorites(sense_id, target_lang, lemma, created_at)
+VALUES (?, ?, ?, ?);
+
+deleteFavorite:
+DELETE FROM favorites WHERE sense_id = ? AND target_lang = ?;
+
+selectAll:
+SELECT sense_id, target_lang, lemma, created_at FROM favorites
+ORDER BY created_at DESC;
+
+selectByLangAndLemma:
+SELECT sense_id, target_lang, lemma, created_at FROM favorites
+WHERE target_lang = ? AND lemma = ?
+ORDER BY created_at DESC;
+
+selectGroupedByLangAndLemma:
+SELECT target_lang, lemma, COUNT(*) AS favorite_count FROM favorites
+GROUP BY target_lang, lemma
+ORDER BY lemma ASC;
+
+selectAllOrderedByLangAndLemma:
+SELECT sense_id, target_lang, lemma, created_at FROM favorites
+ORDER BY target_lang ASC, lemma ASC, created_at DESC;
+
+countBySenseIdAndLang:
+SELECT COUNT(*) FROM favorites WHERE sense_id = ? AND target_lang = ?;
+
+deleteAll:
+DELETE FROM favorites;
