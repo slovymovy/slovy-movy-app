@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,16 +48,24 @@ data class SenseUiState(
     val languageExpanded: Map<String, Boolean> = emptyMap()
 )
 
-internal fun LanguageCard.toContentUiState(): WordDetailUiState.Content = WordDetailUiState.Content(
-    card = this,
-    entries = entries.mapIndexed { index, entry -> entry.toEntryUiState(index) }
-)
+internal fun LanguageCard.toContentUiState(targetSenseId: String? = null): WordDetailUiState.Content =
+    WordDetailUiState.Content(
+        card = this,
+        entries = entries.mapIndexed { index, entry -> entry.toEntryUiState(index, targetSenseId) }
+    )
 
-private fun LanguageCardPosEntry.toEntryUiState(index: Int): EntryUiState = EntryUiState(
+private fun LanguageCardPosEntry.toEntryUiState(index: Int, targetSenseId: String? = null): EntryUiState = EntryUiState(
     entryId = "${pos.name.lowercase()}_$index",
     expanded = true,
     formsExpanded = false,
-    senses = senses.map { it.toSenseUiState(senses.size < 2) }
+    senses = senses.map {
+        val expanded = if (targetSenseId != null) {
+            it.senseId == targetSenseId
+        } else {
+            senses.size < 2
+        }
+        it.toSenseUiState(expanded)
+    }
 )
 
 private fun LanguageCardResponseSense.toSenseUiState(expanded: Boolean): SenseUiState {
@@ -131,22 +141,41 @@ private fun SenseUiState.toggleLanguage(languageCode: String): SenseUiState {
 class WordDetailViewModel(
     repository: DictionaryRepository,
     dictionaryLanguage: String = "",
-    lemma: String = ""
+    lemma: String = "",
+    targetSenseId: String? = null
 ) : ViewModel() {
     var state by mutableStateOf<WordDetailUiState>(WordDetailUiState.Empty())
         private set
 
     val scrollState = ScrollState(0)
+    val targetSenseId: String? = targetSenseId
+    var sensePositions by mutableStateOf<Map<String, Float>>(emptyMap())
+        private set
+
+    private var hasScrolledToTarget = false
 
     init {
         val card = repository.getLanguageCard(dictionaryLanguage, lemma)
-        state = card?.toContentUiState() ?: WordDetailUiState.Empty(lemma = lemma, message = "Word not found")
+        state =
+            card?.toContentUiState(targetSenseId) ?: WordDetailUiState.Empty(lemma = lemma, message = "Word not found")
     }
 
     fun setScrollPosition(position: Int) {
         // This will be called when restoring from saved state
         scrollState.dispatchRawDelta(-scrollState.value.toFloat())
         scrollState.dispatchRawDelta(position.toFloat())
+    }
+
+    fun updateSensePosition(senseId: String, yOffset: Float) {
+        sensePositions = sensePositions + (senseId to yOffset)
+    }
+
+    fun scrollToTargetSenseIfNeeded() {
+        if (hasScrolledToTarget) return
+        val target = targetSenseId ?: return
+        val position = sensePositions[target] ?: return
+        scrollState.dispatchRawDelta(position - scrollState.value.toFloat())
+        hasScrolledToTarget = true
     }
 
     fun toggleEntry(index: Int) {
@@ -318,6 +347,13 @@ fun WordDetailScreen(
         }
     }
 
+    // Scroll to target sense once positions are available (only once)
+    LaunchedEffect(viewModel.targetSenseId, viewModel.sensePositions) {
+        if (viewModel.targetSenseId != null && viewModel.sensePositions.containsKey(viewModel.targetSenseId)) {
+            viewModel.scrollToTargetSenseIfNeeded()
+        }
+    }
+
     WordDetailScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
@@ -329,7 +365,8 @@ fun WordDetailScreen(
         onSenseExamplesToggle = { entryIndex, senseId -> viewModel.toggleSenseExamples(entryIndex, senseId) },
         onLanguageToggle = { entryIndex, senseId, languageCode ->
             viewModel.toggleLanguage(entryIndex, senseId, languageCode)
-        }
+        },
+        onSensePositioned = { senseId, yOffset -> viewModel.updateSensePosition(senseId, yOffset) }
     )
 }
 
@@ -345,6 +382,7 @@ fun WordDetailScreenContent(
     onSenseToggle: (Int, String) -> Unit = { _, _ -> },
     onSenseExamplesToggle: (Int, String) -> Unit = { _, _ -> },
     onLanguageToggle: (Int, String, String) -> Unit = { _, _, _ -> },
+    onSensePositioned: (String, Float) -> Unit = { _, _ -> },
 ) {
     val fallbackTitle = "Word Details"
     val titleText = when (state) {
@@ -413,7 +451,8 @@ fun WordDetailScreenContent(
                     onFormsToggle = onFormsToggle,
                     onSenseToggle = onSenseToggle,
                     onSenseExamplesToggle = onSenseExamplesToggle,
-                    onLanguageToggle = onLanguageToggle
+                    onLanguageToggle = onLanguageToggle,
+                    onSensePositioned = onSensePositioned
                 )
             }
 
@@ -446,7 +485,8 @@ private fun WordDetailContent(
     onFormsToggle: (Int) -> Unit,
     onSenseToggle: (Int, String) -> Unit,
     onSenseExamplesToggle: (Int, String) -> Unit,
-    onLanguageToggle: (Int, String, String) -> Unit
+    onLanguageToggle: (Int, String, String) -> Unit,
+    onSensePositioned: (String, Float) -> Unit = { _, _ -> }
 ) {
     Column(
         modifier = modifier,
@@ -471,7 +511,8 @@ private fun WordDetailContent(
                     onSenseExamplesToggle = { senseId -> onSenseExamplesToggle(index, senseId) },
                     onLanguageToggle = { senseId, languageCode ->
                         onLanguageToggle(index, senseId, languageCode)
-                    }
+                    },
+                    onSensePositioned = onSensePositioned
                 )
             }
         }
@@ -486,7 +527,8 @@ private fun EntryCard(
     onFormsToggle: () -> Unit,
     onSenseToggle: (String) -> Unit,
     onSenseExamplesToggle: (String) -> Unit,
-    onLanguageToggle: (String, String) -> Unit
+    onLanguageToggle: (String, String) -> Unit,
+    onSensePositioned: (String, Float) -> Unit = { _, _ -> }
 ) {
     val expanded = entryState.expanded
     ElevatedCard(
@@ -613,7 +655,8 @@ private fun EntryCard(
                                     onExamplesToggle = { onSenseExamplesToggle(sense.senseId) },
                                     onLanguageToggle = { languageCode ->
                                         onLanguageToggle(sense.senseId, languageCode)
-                                    }
+                                    },
+                                    onPositioned = onSensePositioned
                                 )
                                 if (senseIndex < senseList.lastIndex) {
                                     HorizontalDivider(
@@ -640,10 +683,15 @@ private fun SenseCard(
     onToggle: () -> Unit,
     onExamplesToggle: () -> Unit,
     onLanguageToggle: (String) -> Unit,
+    onPositioned: (String, Float) -> Unit = { _, _ -> }
 ) {
     val expanded = state.expanded
     OutlinedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { coordinates ->
+                onPositioned(sense.senseId, coordinates.positionInParent().y)
+            },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {

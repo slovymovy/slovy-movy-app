@@ -41,6 +41,7 @@ private sealed interface AppDestination {
     data class WordDetail(
         val dictionaryLanguage: String,
         val lemma: String,
+        val targetSenseId: String? = null,
     ) : AppDestination
 
     @Serializable
@@ -267,7 +268,8 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                 wordDetailViewModels[args] ?: WordDetailViewModel(
                     dictionaryRepository,
                     args.dictionaryLanguage,
-                    args.lemma
+                    args.lemma,
+                    args.targetSenseId
                 )
             }.also {
                 // Enforce max N cached ViewModels (remove oldest if at capacity)

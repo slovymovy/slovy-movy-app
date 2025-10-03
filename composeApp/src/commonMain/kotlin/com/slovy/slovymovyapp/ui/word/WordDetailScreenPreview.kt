@@ -1287,3 +1287,35 @@ internal fun sampleVeryLongWordCard(): LanguageCard {
         )
     )
 }
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewTargetSenseAmazon() {
+    WordDetailScreenContent(
+        state = sampleAmazonCard().toContentUiState(targetSenseId = "4f67890a-bcde-5678-9012-34567890abcd")
+    )
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewTargetSenseAmazonParrot() {
+    WordDetailScreenContent(
+        state = sampleAmazonCard().toContentUiState(targetSenseId = "8c2403c5-1510-45cb-9112-304f78772f96")
+    )
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewTargetSenseMultilingual() {
+    WordDetailScreenContent(
+        state = sampleMultilingualCard().toContentUiState(targetSenseId = "d4e5f6a7-b8c9-0123-def0-456789012345")
+    )
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewTargetSenseRichmondVirginia() {
+    WordDetailScreenContent(
+        state = sampleRichmondCard().toContentUiState(targetSenseId = "2556596a-2eae-4d77-bbb2-dada74364b55")
+    )
+}
