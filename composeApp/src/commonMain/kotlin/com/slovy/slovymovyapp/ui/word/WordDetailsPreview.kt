@@ -4,16 +4,18 @@ import androidx.compose.runtime.Composable
 import com.slovy.slovymovyapp.data.remote.*
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+val isSenseFavoritePreview: (String) -> Boolean = { it.hashCode() % 2 == 0 }
+
 @Preview
 @Composable
 private fun WordDetailScreenPreviewContent() {
-    WordDetailScreenContent(state = sampleTestingCard().toContentUiState())
+    WordDetailScreenContent(state = sampleTestingCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewCollapsed() {
-    val base = sampleTestingCard().toContentUiState()
+    val base = sampleTestingCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val collapsedEntries = base.entries.map { entryState ->
         entryState.copy(
             expanded = false,
@@ -37,13 +39,13 @@ private fun WordDetailScreenPreviewCollapsed() {
 @Preview
 @Composable
 private fun WordDetailScreenPreviewAmazon() {
-    WordDetailScreenContent(state = sampleAmazonCard().toContentUiState())
+    WordDetailScreenContent(state = sampleAmazonCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewAmazonCollapsed() {
-    val base = sampleAmazonCard().toContentUiState()
+    val base = sampleAmazonCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val collapsedEntries = base.entries.map { entryState ->
         entryState.copy(
             expanded = false,
@@ -66,13 +68,13 @@ private fun WordDetailScreenPreviewAmazonCollapsed() {
 @Preview
 @Composable
 private fun WordDetailScreenPreviewCelebration() {
-    WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState())
+    WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewCelebrationCollapsed() {
-    val base = sampleCelebrationCard().toContentUiState()
+    val base = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val collapsedEntries = base.entries.map { entryState ->
         entryState.copy(
             expanded = false,
@@ -95,13 +97,13 @@ private fun WordDetailScreenPreviewCelebrationCollapsed() {
 @Preview
 @Composable
 private fun WordDetailScreenPreviewProgrammatically() {
-    WordDetailScreenContent(state = sampleProgrammaticallyCard().toContentUiState())
+    WordDetailScreenContent(state = sampleProgrammaticallyCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewProgrammaticallyCollapsed() {
-    val base = sampleProgrammaticallyCard().toContentUiState()
+    val base = sampleProgrammaticallyCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val collapsedEntries = base.entries.map { entryState ->
         entryState.copy(
             expanded = false,
@@ -124,13 +126,13 @@ private fun WordDetailScreenPreviewProgrammaticallyCollapsed() {
 @Preview
 @Composable
 private fun WordDetailScreenPreviewRichmond() {
-    WordDetailScreenContent(state = sampleRichmondCard().toContentUiState())
+    WordDetailScreenContent(state = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewRichmondCollapsed() {
-    val base = sampleRichmondCard().toContentUiState()
+    val base = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val collapsedEntries = base.entries.map { entryState ->
         entryState.copy(
             expanded = false,
@@ -153,13 +155,13 @@ private fun WordDetailScreenPreviewRichmondCollapsed() {
 @Preview
 @Composable
 private fun WordDetailScreenPreviewKwartier() {
-    WordDetailScreenContent(state = sampleKwartierCard().toContentUiState())
+    WordDetailScreenContent(state = sampleKwartierCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewKwartierCollapsed() {
-    val base = sampleKwartierCard().toContentUiState()
+    val base = sampleKwartierCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val collapsedEntries = base.entries.map { entryState ->
         entryState.copy(
             expanded = false,
@@ -182,13 +184,13 @@ private fun WordDetailScreenPreviewKwartierCollapsed() {
 @Preview
 @Composable
 private fun WordDetailScreenPreviewProgramma() {
-    WordDetailScreenContent(state = sampleProgrammaCard().toContentUiState())
+    WordDetailScreenContent(state = sampleProgrammaCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewProgrammaCollapsed() {
-    val base = sampleProgrammaCard().toContentUiState()
+    val base = sampleProgrammaCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val collapsedEntries = base.entries.map { entryState ->
         entryState.copy(
             expanded = false,
@@ -212,28 +214,28 @@ private fun WordDetailScreenPreviewProgrammaCollapsed() {
 @Composable
 private fun WordDetailScreenPreviewSimpleWord() {
     // Simple single-sense word like "celebration"
-    WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState())
+    WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewComplexWord() {
     // Complex multi-POS word like "amazon"
-    WordDetailScreenContent(state = sampleAmazonCard().toContentUiState())
+    WordDetailScreenContent(state = sampleAmazonCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewProperNoun() {
     // Proper noun with multiple geographical meanings like "Richmond"
-    WordDetailScreenContent(state = sampleRichmondCard().toContentUiState())
+    WordDetailScreenContent(state = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewAdverb() {
     // Technical adverb like "programmatically"
-    WordDetailScreenContent(state = sampleProgrammaticallyCard().toContentUiState())
+    WordDetailScreenContent(state = sampleProgrammaticallyCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 
@@ -242,14 +244,14 @@ private fun WordDetailScreenPreviewAdverb() {
 @Composable
 private fun WordDetailScreenPreviewNoTranslations() {
     // Word with no translations available
-    WordDetailScreenContent(state = sampleNoTranslationCard().toContentUiState())
+    WordDetailScreenContent(state = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 // Edge case preview functions
 @Preview
 @Composable
 private fun WordDetailScreenPreviewNoTranslationsAllExpanded() {
-    val base = sampleNoTranslationCard().toContentUiState()
+    val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val expanded = base.entries.map { entryState ->
         entryState.copy(
             expanded = true,
@@ -271,7 +273,7 @@ private fun WordDetailScreenPreviewNoTranslationsAllExpanded() {
 @Preview
 @Composable
 private fun WordDetailScreenPreviewNoTranslationsCollapsed() {
-    val base = sampleNoTranslationCard().toContentUiState()
+    val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val collapsedEntries = base.entries.map { entryState ->
         entryState.copy(
             expanded = false,
@@ -294,13 +296,13 @@ private fun WordDetailScreenPreviewNoTranslationsCollapsed() {
 @Composable
 private fun WordDetailScreenPreviewMultilingual() {
     // Dutch word with both Russian and English translations
-    WordDetailScreenContent(state = sampleMultilingualCard().toContentUiState())
+    WordDetailScreenContent(state = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewMultilingualCollapsed() {
-    val base = sampleMultilingualCard().toContentUiState()
+    val base = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val collapsedEntries = base.entries.map { entryState ->
         entryState.copy(
             expanded = false,
@@ -324,7 +326,7 @@ private fun WordDetailScreenPreviewMultilingualCollapsed() {
 @Composable
 private fun WordDetailScreenPreviewPartiallyExpanded() {
     // Show a complex word with some sections expanded and others collapsed
-    val base = sampleMultilingualCard().toContentUiState()
+    val base = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
     val mixedEntries = base.entries.mapIndexed { entryIndex, entryState ->
         entryState.copy(
             expanded = true,
@@ -349,14 +351,14 @@ private fun WordDetailScreenPreviewPartiallyExpanded() {
 @Composable
 private fun WordDetailScreenPreviewHighFrequencyWord() {
     // Show a high-frequency word (celebration)
-    WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState())
+    WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewLowFrequencyWord() {
     // Show a low-frequency/rare word (whippersnapper)
-    WordDetailScreenContent(state = sampleNoTranslationCard().toContentUiState())
+    WordDetailScreenContent(state = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 
@@ -369,25 +371,25 @@ private fun WordDetailScreenPreviewEmpty() {
 @Preview
 @Composable
 private fun WordDetailScreenPreviewWithTraits() {
-    WordDetailScreenContent(state = sampleWordWithTraits().toContentUiState())
+    WordDetailScreenContent(state = sampleWordWithTraits().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewWithNameTypes() {
-    WordDetailScreenContent(state = sampleRichmondCard().toContentUiState())
+    WordDetailScreenContent(state = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewAllTraitTypes() {
-    WordDetailScreenContent(state = sampleAllTraitTypesCard().toContentUiState())
+    WordDetailScreenContent(state = sampleAllTraitTypesCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 @Preview
 @Composable
 private fun WordDetailScreenPreviewVeryLongWord() {
-    WordDetailScreenContent(state = sampleVeryLongWordCard().toContentUiState())
+    WordDetailScreenContent(state = sampleVeryLongWordCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
 }
 
 // Sample word card creators for different types of words
@@ -1292,7 +1294,10 @@ internal fun sampleVeryLongWordCard(): LanguageCard {
 @Composable
 private fun WordDetailScreenPreviewTargetSenseAmazon() {
     WordDetailScreenContent(
-        state = sampleAmazonCard().toContentUiState(targetSenseId = "4f67890a-bcde-5678-9012-34567890abcd")
+        state = sampleAmazonCard().toContentUiState(
+            targetSenseId = "4f67890a-bcde-5678-9012-34567890abcd",
+            isSenseFavorite = isSenseFavoritePreview,
+        )
     )
 }
 
@@ -1300,7 +1305,10 @@ private fun WordDetailScreenPreviewTargetSenseAmazon() {
 @Composable
 private fun WordDetailScreenPreviewTargetSenseAmazonParrot() {
     WordDetailScreenContent(
-        state = sampleAmazonCard().toContentUiState(targetSenseId = "8c2403c5-1510-45cb-9112-304f78772f96")
+        state = sampleAmazonCard().toContentUiState(
+            targetSenseId = "8c2403c5-1510-45cb-9112-304f78772f96",
+            isSenseFavorite = isSenseFavoritePreview,
+        )
     )
 }
 
@@ -1308,7 +1316,10 @@ private fun WordDetailScreenPreviewTargetSenseAmazonParrot() {
 @Composable
 private fun WordDetailScreenPreviewTargetSenseMultilingual() {
     WordDetailScreenContent(
-        state = sampleMultilingualCard().toContentUiState(targetSenseId = "d4e5f6a7-b8c9-0123-def0-456789012345")
+        state = sampleMultilingualCard().toContentUiState(
+            targetSenseId = "d4e5f6a7-b8c9-0123-def0-456789012345",
+            isSenseFavorite = isSenseFavoritePreview,
+        )
     )
 }
 
@@ -1316,6 +1327,9 @@ private fun WordDetailScreenPreviewTargetSenseMultilingual() {
 @Composable
 private fun WordDetailScreenPreviewTargetSenseRichmondVirginia() {
     WordDetailScreenContent(
-        state = sampleRichmondCard().toContentUiState(targetSenseId = "2556596a-2eae-4d77-bbb2-dada74364b55")
+        state = sampleRichmondCard().toContentUiState(
+            targetSenseId = "2556596a-2eae-4d77-bbb2-dada74364b55",
+            isSenseFavorite = isSenseFavoritePreview,
+        )
     )
 }

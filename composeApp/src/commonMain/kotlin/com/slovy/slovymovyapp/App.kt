@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
@@ -38,6 +39,9 @@ private sealed interface AppDestination {
     data object Search : AppDestination
 
     @Serializable
+    data object Favorites : AppDestination
+
+    @Serializable
     data class WordDetail(
         val dictionaryLanguage: String,
         val lemma: String,
@@ -60,6 +64,9 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
     val platform = remember(platformDbSupport) { platformDbSupport ?: PlatformDbSupport(null) }
     val dataManager = remember(platform, settingsRepository) { DataDbManager(platform, settingsRepository) }
     val dictionaryRepository = remember(dataManager) { DictionaryRepository(dataManager) }
+    val favoritesRepository = remember(dataManager) {
+        FavoritesRepository(dataManager.openAppDatabase())
+    }
 
     val navController = rememberNavController()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
@@ -255,6 +262,45 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                     wordDetailViewModels.keys.lastOrNull()?.let { destination ->
                         navController.navigate(destination)
                     }
+                },
+                onNavigateToFavorites = {
+                    if (!navController.popBackStack(AppDestination.Favorites, inclusive = false))
+                        navController.navigate(AppDestination.Favorites)
+                }
+            )
+        }
+        composable<AppDestination.Favorites> { backStackEntry ->
+
+            val viewModel = viewModel(
+                viewModelStoreOwner = backStackEntry
+            ) {
+                FavoritesViewModel(favoritesRepository, dictionaryRepository)
+            }
+
+            // Reload favorites when navigating to this screen
+            LaunchedEffect(Unit) {
+                viewModel.loadFavorites()
+            }
+
+            FavoritesScreen(
+                viewModel = viewModel,
+                onNavigateToSearch = {
+                    if (!navController.popBackStack(AppDestination.Search, inclusive = false))
+                        navController.navigate(AppDestination.Search)
+                },
+                onNavigateToWordDetail = { targetLang, lemma, senseId ->
+                    val destination = AppDestination.WordDetail(
+                        dictionaryLanguage = targetLang,
+                        lemma = lemma,
+                        targetSenseId = senseId
+                    )
+                    navController.navigate(destination)
+                },
+                isWordDetailAvailable = wordDetailViewModels.isNotEmpty(),
+                onNavigateToLastWordDetail = {
+                    wordDetailViewModels.keys.lastOrNull()?.let { destination ->
+                        navController.navigate(destination)
+                    }
                 }
             )
         }
@@ -267,6 +313,7 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
             ) {
                 wordDetailViewModels[args] ?: WordDetailViewModel(
                     dictionaryRepository,
+                    favoritesRepository,
                     args.dictionaryLanguage,
                     args.lemma,
                     args.targetSenseId
@@ -279,11 +326,21 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                 wordDetailViewModels[args] = it
             }
 
+
+            // Reload favorites when navigating to this screen
+            LaunchedEffect(Unit) {
+                viewModel.loadFavorites()
+            }
+
             WordDetailScreen(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
                 onNavigateToSearch = {
                     navController.popBackStack(AppDestination.Search, inclusive = false)
+                },
+                onNavigateToFavorites = {
+                    if (!navController.popBackStack(AppDestination.Favorites, inclusive = false))
+                        navController.navigate(AppDestination.Favorites)
                 }
             )
         }

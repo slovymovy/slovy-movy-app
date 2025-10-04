@@ -61,8 +61,10 @@ sqldelight {
         create(appDatabaseName) {
             packageName.set("com.slovy.slovymovyapp.db")
             deriveSchemaFromMigrations.set(false)
-            verifyMigrations.set(false)
-            verifyDefinitions.set(false)
+            // https://github.com/sqldelight/sqldelight/issues/5312
+            verifyMigrations.set(!OperatingSystem.current().isWindows)
+            // https://github.com/sqldelight/sqldelight/issues/5312
+            verifyDefinitions.set(!OperatingSystem.current().isWindows)
             srcDirs.setFrom("src/commonMain/sqldelight/appdb")
         }
         create(dictionaryDatabaseName) {

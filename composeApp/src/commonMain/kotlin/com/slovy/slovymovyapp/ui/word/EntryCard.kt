@@ -49,7 +49,8 @@ internal fun EntryCard(
     onSenseToggle: (String) -> Unit,
     onSenseExamplesToggle: (String) -> Unit,
     onLanguageToggle: (String, String) -> Unit,
-    onSensePositioned: (String, Float) -> Unit = { _, _ -> }
+    onSensePositioned: (String, Float) -> Unit = { _, _ -> },
+    onSenseFavoriteToggle: (String) -> Unit = {}
 ) {
     val expanded = entryState.expanded
     ElevatedCard(
@@ -170,13 +171,14 @@ internal fun EntryCard(
                                 SenseCard(
                                     sense = sense,
                                     state = senseState,
-                                    otherSenses = entry.senses,
+                                    allSenses = entry.senses,
                                     onToggle = { onSenseToggle(sense.senseId) },
                                     onExamplesToggle = { onSenseExamplesToggle(sense.senseId) },
                                     onLanguageToggle = { languageCode ->
                                         onLanguageToggle(sense.senseId, languageCode)
                                     },
-                                    onPositioned = onSensePositioned
+                                    onPositioned = onSensePositioned,
+                                    onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) }
                                 )
                                 if (senseIndex < senseList.lastIndex) {
                                     HorizontalDivider(
@@ -192,4 +194,4 @@ internal fun EntryCard(
     }
 }
 
-private fun pluralEnding(someList: List<*>): String = if (someList.size == 1) "" else "s"
+fun pluralEnding(someList: List<*>): String = if (someList.size == 1) "" else "s"

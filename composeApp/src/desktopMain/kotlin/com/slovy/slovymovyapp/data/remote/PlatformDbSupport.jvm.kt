@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.data.remote
 
+import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
@@ -79,12 +80,47 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         schema: SqlSchema<QueryResult.Value<Unit>>
     ): JdbcSqliteDriver {
         val url = jdbcConnectionString(path, readOnly)
-        val isNew = !fileExists(path)
         val driver = JdbcSqliteDriver(url)
+        if (readOnly) {
+            return driver
+        }
+        val isNew = !fileExists(path)
+
         if (isNew) {
             schema.create(driver)
+            setVersion(driver, schema.version)
+        } else {
+            val currentVersion = driver.executeQuery(
+                identifier = null,
+                sql = "PRAGMA user_version",
+                mapper = { cursor ->
+                    QueryResult.Value(cursor.getLong(0) ?: 0)
+                },
+                parameters = 0
+            ).value
+
+            schema.migrate(
+                driver,
+                currentVersion,
+                schema.version,
+                *(1..schema.version).map {
+                    AfterVersion(it) { d ->
+                        setVersion(d, it)
+                    }
+                }.toTypedArray()
+            )
+
+            setVersion(driver, schema.version)
         }
         return driver
+    }
+
+    private fun setVersion(driver: SqlDriver, version: Long) {
+        driver.execute(
+            identifier = null,
+            sql = "PRAGMA user_version = $version",
+            parameters = 0
+        )
     }
 
     private fun jdbcConnectionString(path: Path, readOnly: Boolean): String {

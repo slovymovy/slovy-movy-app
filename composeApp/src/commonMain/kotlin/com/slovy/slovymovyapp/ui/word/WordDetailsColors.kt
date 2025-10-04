@@ -111,3 +111,27 @@ internal val ExpandLessVector: ImageVector = ImageVector.Builder(
         close()
     }
 }.build()
+
+internal val ArrowForwardVector: ImageVector = ImageVector.Builder(
+    name = "ArrowForward",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f
+).apply {
+    path(
+        fill = SolidColor(Color.Black),
+        pathFillType = PathFillType.NonZero
+    ) {
+        moveTo(12f, 4f)
+        lineTo(10.59f, 5.41f)
+        lineTo(16.17f, 11f)
+        lineTo(4f, 11f)
+        lineTo(4f, 13f)
+        lineTo(16.17f, 13f)
+        lineTo(10.59f, 18.59f)
+        lineTo(12f, 20f)
+        lineTo(20f, 12f)
+        close()
+    }
+}.build()
