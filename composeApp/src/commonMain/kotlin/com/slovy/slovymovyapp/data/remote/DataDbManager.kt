@@ -10,6 +10,7 @@ import com.slovy.slovymovyapp.translation.TranslationDatabase
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -30,11 +31,11 @@ class DataDbManager(
     private val settingsRepository: SettingsRepository? = null,
 ) {
     companion object {
-        const val VERSION = "v0"
+        const val VERSION = "v1"
 
         // TODO: we use HTTP for now to workaround some issues with IOS emulator
         // https://github.com/slovymovy/slovy-movy-app/issues/34
-        const val BASE_URL = "http://storage.googleapis.com/slovymovy/v0/"
+        const val BASE_URL = "http://storage.googleapis.com/slovymovy/$VERSION/"
         fun dictionaryFileName(lang: String): String = "dictionary_${lang.lowercase()}.db"
         fun translationFileName(src: String, tgt: String): String =
             "translation_${src.lowercase()}_${tgt.lowercase()}.db"
@@ -69,10 +70,42 @@ class DataDbManager(
         platform.deleteFile(platform.getDatabasePath(name))
     }
 
+    /**
+     * Deletes all downloaded dictionary and translation databases.
+     * Also clears the stored version setting.
+     * Used when data version changes.
+     */
+    fun deleteAllDownloadedData() {
+        val databasesDir = platform.getDatabasePath("")
+        val files = platform.listFiles(databasesDir)
+        files.forEach { file ->
+            val fileName = file.name
+            if (fileName.startsWith("dictionary_") || fileName.startsWith("translation_")) {
+                platform.deleteFile(file)
+            }
+        }
+        clearVersion()
+    }
+
+    /**
+     * Clears the stored data version from settings.
+     */
+    fun clearVersion() {
+        settingsRepository?.deleteById(Setting.Name.DATA_VERSION)
+    }
+
     fun openAppDatabase(): AppDatabase {
         val file = platform.getDatabasePath("app.db")
         val driver = platform.createAppDataDriver(file)
         return DatabaseProvider.createAppDatabase(driver)
+    }
+
+    fun hasDictionary(lang: String): Boolean {
+        return platform.fileExists(platform.getDatabasePath(dictionaryFileName(lang)))
+    }
+
+    fun hasTranslation(src: String, tgt: String): Boolean {
+        return platform.fileExists(platform.getDatabasePath(translationFileName(src, tgt)))
     }
 
     fun openDictionaryReadOnly(lang: String): DictionaryDatabase {
@@ -133,6 +166,18 @@ class DataDbManager(
                 platform.deleteFile(tempPath)
             }
             client.prepareGet(url).execute { response ->
+                // Fail early on non-success HTTP responses
+                if (!response.status.isSuccess()) {
+                    val snippet = try {
+                        response.bodyAsText().take(512)
+                    } catch (_: Throwable) {
+                        null
+                    }
+                    val baseMsg =
+                        "HTTP ${response.status.value} ${response.status.description} while downloading $url"
+                    throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
+                }
+
                 val total = response.headers["Content-Length"]?.toLongOrNull()
                 // Check available disk space if total size is known
                 if (total != null) {
@@ -197,7 +242,7 @@ class CancelToken {
 }
 
 // Progress model
-class DownloadProgress(val bytesDownloaded: Long, val totalBytes: Long?) {
+class DownloadProgress(bytesDownloaded: Long, val totalBytes: Long?) {
     val percent: Int = if (totalBytes != null && totalBytes > 0) {
         ((bytesDownloaded * 100L) / max(totalBytes, 1)).toInt()
     } else -1
@@ -218,6 +263,7 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun createDictionaryDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createTranslationDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createHttpClient(): HttpClient
+    fun listFiles(path: Path): List<Path>
 
     // Returns available bytes for the filesystem containing the provided path. Null if unknown.
     fun getAvailableBytesForPath(path: Path): Long?

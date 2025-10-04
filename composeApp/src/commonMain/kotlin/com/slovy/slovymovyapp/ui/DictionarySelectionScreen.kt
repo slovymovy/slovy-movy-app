@@ -12,40 +12,39 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-val languagesToCode = listOf(
+private val dictionariesKnown = listOf(
     "English" to "en",
     "Русский" to "ru",
     "Nederlands" to "nl",
     "Polski" to "pl"
 )
 
-val codeToLanguage = languagesToCode.associate { it.second to it.first }
-
-data class LanguageOption(
+data class DictionaryOption(
     val label: String,
     val code: String
 )
 
-class LanguageSelectionViewModel(
-    val title: String = "Choose your native language",
-    val languages: List<LanguageOption> = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
-) : ViewModel()
+class DictionarySelectionViewModel(
+    val title: String = "Choose dictionary",
+    val dictionaries: List<DictionaryOption> = dictionariesKnown.map { (label, code) -> DictionaryOption(label, code) }
+) : ViewModel() {
+}
 
 @Composable
-fun LanguageSelectionScreen(
-    viewModel: LanguageSelectionViewModel,
-    onLanguageChosen: (String) -> Unit = { _ -> }
+fun DictionarySelectionScreen(
+    viewModel: DictionarySelectionViewModel,
+    onDictionaryChosen: (String) -> Unit = { _ -> }
 ) {
-    LanguageSelectionScreenContent(
+    DictionarySelectionScreenContent(
         state = viewModel,
-        onLanguageChosen = onLanguageChosen
+        onDictionaryChosen = onDictionaryChosen
     )
 }
 
 @Composable
-fun LanguageSelectionScreenContent(
-    state: LanguageSelectionViewModel,
-    onLanguageChosen: (String) -> Unit = {}
+fun DictionarySelectionScreenContent(
+    state: DictionarySelectionViewModel,
+    onDictionaryChosen: (String) -> Unit = {}
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(
@@ -58,13 +57,13 @@ fun LanguageSelectionScreenContent(
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            state.languages.forEach { option ->
+            state.dictionaries.forEach { option ->
                 Text(
                     text = option.label,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onLanguageChosen(option.code) }
+                        .clickable { onDictionaryChosen(option.code) }
                         .padding(vertical = 12.dp)
                 )
             }
@@ -74,22 +73,22 @@ fun LanguageSelectionScreenContent(
 
 @Preview
 @Composable
-private fun LanguageSelectionScreenPreviewDefault() {
-    LanguageSelectionScreenContent(
-        state = LanguageSelectionViewModel(
-            title = "Choose your native language",
-            languages = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
+private fun DictionarySelectionScreenPreviewDefault() {
+    DictionarySelectionScreenContent(
+        state = DictionarySelectionViewModel(
+            title = "Choose dictionary",
+            dictionaries = dictionariesKnown.map { (label, code) -> DictionaryOption(label, code) }
         )
     )
 }
 
 @Preview
 @Composable
-private fun LanguageSelectionScreenPreviewEmpty() {
-    LanguageSelectionScreenContent(
-        state = LanguageSelectionViewModel(
-            title = "Choose your native language",
-            languages = emptyList()
+private fun DictionarySelectionScreenPreviewEmpty() {
+    DictionarySelectionScreenContent(
+        state = DictionarySelectionViewModel(
+            title = "Choose dictionary",
+            dictionaries = emptyList()
         )
     )
 }

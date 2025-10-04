@@ -109,8 +109,28 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     ): NativeSqliteDriver {
         // SQLiter/NativeSqliteDriver expects a filename without path; provide basePath separately.
         val name = NSURL.fileURLWithPath(path.toString()).lastPathComponent ?: path.toString()
+
+        // When opening in read-only mode, avoid running schema create/migrate.
+        // We wrap the schema with a no-op implementation (same version) so the driver doesn't try
+        // to perform any migrations or DDL. Queries are still allowed via enforceQueryOnly.
+        val effectiveSchema = if (readOnly) object : SqlSchema<QueryResult.Value<Unit>> {
+            override val version: Long = schema.version
+            override fun create(driver: SqlDriver): QueryResult.Value<Unit> {
+                return QueryResult.Unit
+            }
+
+            override fun migrate(
+                driver: SqlDriver,
+                oldVersion: Long,
+                newVersion: Long,
+                vararg callbacks: app.cash.sqldelight.db.AfterVersion
+            ): QueryResult.Value<Unit> {
+                return QueryResult.Unit
+            }
+        } else schema
+
         val result = NativeSqliteDriver(
-            schema = schema,
+            schema = effectiveSchema,
             name = name,
             onConfiguration = { cfg ->
                 val ext = cfg.extendedConfig.copy(basePath = baseDir)
@@ -146,5 +166,22 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         if (!fileManager.fileExistsAtPath(path)) {
             fileManager.createDirectoryAtPath(path, true, null, null)
         }
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    actual fun listFiles(path: Path): List<Path> {
+        val fm = NSFileManager.defaultManager
+        val pathStr = path.toString()
+        val dir = if (fm.fileExistsAtPath(pathStr)) {
+            val url = NSURL.fileURLWithPath(pathStr)
+            if (url.hasDirectoryPath) pathStr else (Path(pathStr).parent?.toString() ?: pathStr)
+        } else {
+            Path(pathStr).parent?.toString() ?: pathStr
+        }
+
+        val contents = fm.contentsOfDirectoryAtPath(dir, error = null) as? List<*>
+        return contents?.mapNotNull { filename ->
+            (filename as? String)?.let { Path("$dir/$it") }
+        } ?: emptyList()
     }
 }

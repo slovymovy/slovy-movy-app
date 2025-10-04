@@ -1,0 +1,1298 @@
+{
+    "word": "celebration",
+    "lang_code": "en",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                "word": "celebration",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "9ef7c2d2-dd32-4745-83f7-b86cd762ac85",
+                        "entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "celebrations"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "32dd5231-5b09-4607-9adc-9b39262906dc",
+                        "entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "glosses": [
+                            "The formal performance of a solemn rite, such as Christian sacrament."
+                        ],
+                        "tags": [
+                            "countable",
+                            "uncountable"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "c1dcd527-7e37-46cc-83b5-b14df34bcb74",
+                                "sense_id": "32dd5231-5b09-4607-9adc-9b39262906dc",
+                                "text": "We will attend the Christmas celebration in church."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "37b7809b-48d4-4d93-ad81-590241a8f188",
+                        "entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "glosses": [
+                            "The observance of a holiday or feast day, as by solemnities."
+                        ],
+                        "tags": [
+                            "countable",
+                            "uncountable"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "3bd9a276-181a-4c5b-9316-399938a15a20",
+                        "entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "glosses": [
+                            "The act, process of showing appreciation, gratitude and/or remembrance, notably as a social event."
+                        ],
+                        "tags": [
+                            "countable",
+                            "uncountable"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "e7feb334-bc91-4775-b02e-29aaa93a71ba",
+                                "sense_id": "3bd9a276-181a-4c5b-9316-399938a15a20",
+                                "text": "She jumped in the air in celebration."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "65a4e9ac-cd46-4763-a0a4-d2457cfa6071",
+                        "entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "glosses": [
+                            "A social gathering for entertainment and fun; a party."
+                        ],
+                        "tags": [
+                            "countable",
+                            "uncountable"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "c8d14082-f199-430a-b346-b890e2b40273",
+                                "sense_id": "65a4e9ac-cd46-4763-a0a4-d2457cfa6071",
+                                "text": "We're having a little celebration tomorrow for Martin's scholarship."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "570643d2-70f1-467f-b9c7-d1efc6211b7f",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "formal performance of a solemn rite",
+                        "target_lang_word": "viering",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "viering",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "2365cc5b-f2e3-42d0-be09-1e91d07aaf0c",
+                                        "entry_id": "274673ea-5d4f-47a3-88ad-a46d09f50054",
+                                        "glosses": [
+                                            "het vieren"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "65fa9e63-6b1e-479c-8053-5dadcbc3fda2",
+                                                "sense_id": "2365cc5b-f2e3-42d0-be09-1e91d07aaf0c",
+                                                "text": "De bedoeling van dit boek is hierbij behulpzaam te zijn. In de vele lees- en voorleesverhalen en de korte documentaties wordt iets van de oorsprong en de viering van onze jaarfeesten belicht."
+                                            },
+                                            {
+                                                "example_id": "0d5e6a86-f9fe-419b-a7f9-160eaf9445ca",
+                                                "sense_id": "2365cc5b-f2e3-42d0-be09-1e91d07aaf0c",
+                                                "text": "Koning Willem-Alexander en koningin Máxima waren afgelopen weekend in Terneuzen. De koning gaf het startschot voor de viering van 75 jaar vrijheid. Want dit jaar is het 75 jaar geleden dat Nederland bevrijd werd."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "eee9a9b7-19c1-4ea0-a6a4-e5f390d6a1d1",
+                                        "entry_id": "274673ea-5d4f-47a3-88ad-a46d09f50054",
+                                        "glosses": [
+                                            "plaats in een kerk of kathedraal waar het schip en de dwarstransepten elkaar kruisen"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "d213796e-ebe9-4f89-b502-8f33358f49ff",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "formal performance of a solemn rite",
+                        "target_lang_word": "celebracja",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "celebracja",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6bf97ddd-04d7-4a61-b4c7-b4af21be46b2",
+                                        "entry_id": "0ac177a1-4456-48d8-a685-2684abdd60dc",
+                                        "glosses": [
+                                            "praktykowanie czegość z namaszczeniem, uroczyście"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "13cea7ca-9a13-479f-a419-da70a9281da2",
+                                                "sense_id": "6bf97ddd-04d7-4a61-b4c7-b4af21be46b2",
+                                                "text": "Ponad dwa miliony wiernych z całego świata wzięło udział w papieskich audiencjach i celebracjach w roku 2009 w Watykanie i Castel Gandolfo."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    },
+                                    {
+                                        "sense_id": "6e09b68e-09f5-4648-8cbb-85ffade2a361",
+                                        "entry_id": "0ac177a1-4456-48d8-a685-2684abdd60dc",
+                                        "glosses": [
+                                            "typ zachowania, odznaczający się przesadną pompatycznością"
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1.2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "8ec00e86-c08c-4b31-ab04-0054766eebe8",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "formal performance of a solemn rite",
+                        "target_lang_word": "celebra",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "celebra",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "a77fc9f0-aa5e-4e6e-be9b-4a95df54692d",
+                                        "entry_id": "59e89e92-a1e6-4b88-8b45-0f92bd9c19d6",
+                                        "glosses": [
+                                            "uroczyste sprawowanie mszy lub nabożeństwa"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "c33c5a36-bb57-4bc2-ba96-ef37eba11b8c",
+                                                "sense_id": "a77fc9f0-aa5e-4e6e-be9b-4a95df54692d",
+                                                "text": "Ojciec Święty przewodniczył uroczystej celebrze w Bazylice św. Jana na Lateranie."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    },
+                                    {
+                                        "sense_id": "930de13e-288f-4cd6-83de-0e9b13744762",
+                                        "entry_id": "59e89e92-a1e6-4b88-8b45-0f92bd9c19d6",
+                                        "glosses": [
+                                            "robienie czegoś z namaszczeniem, z wielką pompą"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "9d3d0465-75fe-44e5-a6b3-5b5454b1ea7f",
+                                                "sense_id": "930de13e-288f-4cd6-83de-0e9b13744762",
+                                                "text": "Znowu idziemy na obiad do jego matki i będę musiała uczestniczyć w tej całej celebrze."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "a06e86f0-afc1-4c50-abda-876184b3e2d7",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "formal performance of a solemn rite",
+                        "target_lang_word": "пра́зднование",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "пра́зднование",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "d39e924a-1221-4c0a-b30b-9e2877bcbb63",
+                                        "entry_id": "373525ae-2eae-43f6-bd8d-b75ee5961caf",
+                                        "glosses": [
+                                            "действие по значению гл. праздновать; отмечание какого-либо праздника"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "56b5c1c7-71f4-474d-aaa0-ab779cdaec8f",
+                                                "sense_id": "d39e924a-1221-4c0a-b30b-9e2877bcbb63",
+                                                "text": "Титул цесарский или императорский дан был Петру и в Голландии при торжественном праздновании его победы."
+                                            },
+                                            {
+                                                "example_id": "2f352edd-c13f-4d74-98d7-7f73d36f257c",
+                                                "sense_id": "d39e924a-1221-4c0a-b30b-9e2877bcbb63",
+                                                "text": "У павлоградцев шли пиры за пирами, празднования полученных за поход наград и поездки в Ольмюц к вновь прибывшей туда Каролине Венгерке, открывшей там трактир с женской прислугой."
+                                            },
+                                            {
+                                                "example_id": "9df0d6b7-4128-463a-8b9a-998f5c4a003d",
+                                                "sense_id": "d39e924a-1221-4c0a-b30b-9e2877bcbb63",
+                                                "text": "А между тем в этой собравшейся кучке граждан, под видом празднования именин, уже находились некоторые, которым были сделаны и определенные предложения."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "c074a7d9-1a76-49aa-bdac-66f1bdc7e96e",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "formal performance of a solemn rite",
+                        "target_lang_word": "торжество́",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "торжество́",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6e75cb6e-de17-45c5-8f94-e58111df8010",
+                                        "entry_id": "b241ff82-314b-453d-b030-dd91f3759961",
+                                        "glosses": [
+                                            "большой праздник"
+                                        ],
+                                        "tags": [
+                                            "часто во мн. ч."
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "03828823-2f6b-47e0-964e-07099c0b3baf",
+                                                "sense_id": "6e75cb6e-de17-45c5-8f94-e58111df8010",
+                                                "text": "Сегодня место торжества ― нижний ресторан «Интуриста» ― дорогое, но рядовое, без выдумки."
+                                            },
+                                            {
+                                                "example_id": "716a691a-8127-4cc3-acdc-ce3764488f39",
+                                                "sense_id": "6e75cb6e-de17-45c5-8f94-e58111df8010",
+                                                "text": "По случаю торжества всех сотрудников поздравили."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f8e67651-f184-4114-936d-b730f48c779b",
+                                        "entry_id": "b241ff82-314b-453d-b030-dd91f3759961",
+                                        "glosses": [
+                                            "радостное чувство собственной силы, ощущение победы"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "83a9409d-ff62-40da-a3c9-1b55d9f19b3a",
+                                                "sense_id": "f8e67651-f184-4114-936d-b730f48c779b",
+                                                "text": "Она едва могла принудить себя не улыбнуться и скрыть своё торжество; ей удалось, однако, довольно скоро принять совершенно равнодушный и даже строгий вид: она небрежно опустила руку на моё плечо, наклонила слегка головку набок, и мы пустились."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "7bcbf2a6-a3bd-4190-a054-1c09c2610a57",
+                                        "entry_id": "b241ff82-314b-453d-b030-dd91f3759961",
+                                        "glosses": [
+                                            "победа, превосходство"
+                                        ],
+                                        "tags": [
+                                            "figuratively"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "9d0ad602-6692-4df6-adf0-08cd6cd68a09",
+                                                "sense_id": "7bcbf2a6-a3bd-4190-a054-1c09c2610a57",
+                                                "text": "Если этот спор ознаменовал окончательный упадок идей естественного права, то в то же время он привёл к торжеству новой школы права ― исторической."
+                                            },
+                                            {
+                                                "example_id": "3788587b-9baf-4f88-91b3-75d4915ed787",
+                                                "sense_id": "7bcbf2a6-a3bd-4190-a054-1c09c2610a57",
+                                                "text": "Торжество над врагами."
+                                            },
+                                            {
+                                                "example_id": "41b24d40-8059-4b8a-a1d4-e23f5e23369c",
+                                                "sense_id": "7bcbf2a6-a3bd-4190-a054-1c09c2610a57",
+                                                "text": "Торжество добра над злом."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "ae400481-6d46-462f-a4fa-9f68c9c337b9",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "formal performance of a solemn rite",
+                        "target_lang_word": "че́ствование",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "че́ствование",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "724dcbd0-01eb-494f-a266-99ad9ba9bed4",
+                                        "entry_id": "4ea1cd3c-5ab7-43db-a0e0-71cebc0c93f5",
+                                        "glosses": [
+                                            "действие по значению гл. чествовать"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "0e5d4e8c-5b56-4b21-b02b-c8a29b619c54",
+                                        "entry_id": "4ea1cd3c-5ab7-43db-a0e0-71cebc0c93f5",
+                                        "glosses": [
+                                            "торжественное собрание, на котором чествуют кого-либо"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "d1253e0e-c87d-4388-b07a-779d77bf58f8",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "act or process of showing gratitude, appreciation or remembrance",
+                        "target_lang_word": "gedachtenis",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "gedachtenis",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "c0992d58-e3f0-4f4a-8c2b-3bef94d00d43",
+                                        "entry_id": "7f5d25ed-441a-44cc-a0e7-9b3f0bc815dd",
+                                        "glosses": [
+                                            "een dag waarop een heilige of een groep van heiligen in de Katholieke Kerk herdacht worden"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "5659c1d1-c701-40ea-82c1-236f3873600d",
+                                        "entry_id": "7f5d25ed-441a-44cc-a0e7-9b3f0bc815dd",
+                                        "glosses": [
+                                            "het oproepen van iets in de gedachten om te voorkomen dat je het zou vergeten; vaak ook als eerbetoon"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "dda8429a-f6b3-42f7-b30f-906fc3cd684f",
+                                                "sense_id": "5659c1d1-c701-40ea-82c1-236f3873600d",
+                                                "text": "Het dienstboek schrijft dan ook: “De taal van de kerk is traditioneel in die zin dat zij in gedachtenis roept wat is geschied. Dat is geen vrijbrief voor archaïsmen. Evenmin is de opdracht tot actualiseren een uitnodiging tot eendimensionaal taalgebruik. Altijd houdt liturgische taal een verwijzend karakter. Zij biedt ruimte om in ieders leven gehoord en beleefd te worden.'"
+                                            },
+                                            {
+                                                "example_id": "369be35a-a980-40e9-bc44-2e4887414d8f",
+                                                "sense_id": "5659c1d1-c701-40ea-82c1-236f3873600d",
+                                                "text": "Bijna twintig jaar geleden is mijn broer, Koning Boudewijn, van ons heengegaan, en ik heb hem dan opgevolgd. Zijn gedachtenis wens ik nogmaals te eren. Hij verstond de kunst om staatsmanschap en het nakomen van zijn plicht te laten samengaan met ware goedheid, met grote eenvoud, en met zorg voor de zwakste in onze samenleving."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "cdd24962-1a2b-4491-a520-bac85f0b698c",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "act or process of showing gratitude, appreciation or remembrance",
+                        "target_lang_word": "herdenking",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "herdenking",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "ae43c74b-e0dd-4054-93f5-627904def186",
+                                        "entry_id": "06f606b6-bec3-4c01-9403-138cc5e97df7",
+                                        "glosses": [
+                                            "de gebeurtenis waarbij stilgestaan wordt bij iets uit het verleden"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "4ccac6cf-86ca-47cc-8e7a-2ce2d7465eee",
+                                                "sense_id": "ae43c74b-e0dd-4054-93f5-627904def186",
+                                                "text": "In veel landen leven mensen niet in vrijheid. In Nederland leven we wel in vrijheid. We moeten niet vergeten dat dat belangrijk en bijzonder is. Daarom zijn er heel het jaar herdenkingen."
+                                            },
+                                            {
+                                                "example_id": "9f7cfcde-bb06-43c7-af9d-29ebf537ab6d",
+                                                "sense_id": "ae43c74b-e0dd-4054-93f5-627904def186",
+                                                "text": "Een jubileum waar niemand bij stil staat, verdient die naam misschien niet. Een herdenking met één deelnemer, dat klinkt niet koosjer. Toch grijp ik de gelegenheid, omdat het kinderboek dat precies 25 jaar geleden verscheen, met elke verhuizing mee mocht: Plinius Pinguïn (1990) van Boudewijn Büch (1948-2002), met tekeningen van Pauline Drost."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "822cdf5c-076d-457d-81fb-672f9ffd8ee1",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "act or process of showing gratitude, appreciation or remembrance",
+                        "target_lang_word": "viering",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "viering",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "2365cc5b-f2e3-42d0-be09-1e91d07aaf0c",
+                                        "entry_id": "274673ea-5d4f-47a3-88ad-a46d09f50054",
+                                        "glosses": [
+                                            "het vieren"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "65fa9e63-6b1e-479c-8053-5dadcbc3fda2",
+                                                "sense_id": "2365cc5b-f2e3-42d0-be09-1e91d07aaf0c",
+                                                "text": "De bedoeling van dit boek is hierbij behulpzaam te zijn. In de vele lees- en voorleesverhalen en de korte documentaties wordt iets van de oorsprong en de viering van onze jaarfeesten belicht."
+                                            },
+                                            {
+                                                "example_id": "0d5e6a86-f9fe-419b-a7f9-160eaf9445ca",
+                                                "sense_id": "2365cc5b-f2e3-42d0-be09-1e91d07aaf0c",
+                                                "text": "Koning Willem-Alexander en koningin Máxima waren afgelopen weekend in Terneuzen. De koning gaf het startschot voor de viering van 75 jaar vrijheid. Want dit jaar is het 75 jaar geleden dat Nederland bevrijd werd."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "eee9a9b7-19c1-4ea0-a6a4-e5f390d6a1d1",
+                                        "entry_id": "274673ea-5d4f-47a3-88ad-a46d09f50054",
+                                        "glosses": [
+                                            "plaats in een kerk of kathedraal waar het schip en de dwarstransepten elkaar kruisen"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "3e0ead31-4e50-4f20-902d-534b31f5e9eb",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "act or process of showing gratitude, appreciation or remembrance",
+                        "target_lang_word": "uroczystość",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "uroczystość",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "4c246c4d-3a8b-4ff9-b9f9-69ad5e506ac5",
+                                        "entry_id": "7cc3f01a-1fae-4c46-b77f-3ababa6b1ebb",
+                                        "glosses": [
+                                            "uroczyste obchodzenie jakiegoś święta, wydarzenia itp."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1fe0cd06-a31c-48af-a861-53a065e97206",
+                                                "sense_id": "4c246c4d-3a8b-4ff9-b9f9-69ad5e506ac5",
+                                                "text": "Uroczystość zakłóciły jakieś krzyki zza okna."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    },
+                                    {
+                                        "sense_id": "2d002fff-c81f-4515-8dd1-b5fb7fb9c01c",
+                                        "entry_id": "7cc3f01a-1fae-4c46-b77f-3ababa6b1ebb",
+                                        "glosses": [
+                                            "uroczysty charakter czegoś"
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1.2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "5622aa65-38ed-4553-93d1-fd2e33087fb9",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "act or process of showing gratitude, appreciation or remembrance",
+                        "target_lang_word": "че́ствование",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "че́ствование",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "724dcbd0-01eb-494f-a266-99ad9ba9bed4",
+                                        "entry_id": "4ea1cd3c-5ab7-43db-a0e0-71cebc0c93f5",
+                                        "glosses": [
+                                            "действие по значению гл. чествовать"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "0e5d4e8c-5b56-4b21-b02b-c8a29b619c54",
+                                        "entry_id": "4ea1cd3c-5ab7-43db-a0e0-71cebc0c93f5",
+                                        "glosses": [
+                                            "торжественное собрание, на котором чествуют кого-либо"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "2f8431cc-e6fa-428b-a5ea-5750f2b46a83",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "act or process of showing gratitude, appreciation or remembrance",
+                        "target_lang_word": "прославле́ние",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "прославле́ние",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "4bbd7fb3-dff7-4a21-b8ad-2bf9564d747e",
+                                        "entry_id": "7b5283b7-4afc-4f9b-8a66-74e18805e99b",
+                                        "glosses": [
+                                            "действие по значению гл. прославлять, прославить"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "ff75e936-75ca-43d8-8d7f-a4efea30c545",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "act or process of showing gratitude, appreciation or remembrance",
+                        "target_lang_word": "восхвале́ние",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "восхвале́ние",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "64ede62c-5070-4830-b074-08f4ce350259",
+                                        "entry_id": "ff53853a-84e1-4cd9-a86b-8df062de698c",
+                                        "glosses": [
+                                            "действие по значению гл. восхвалить"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "8ef3f494-8750-449a-9b28-934d7908f85c",
+                                                "sense_id": "64ede62c-5070-4830-b074-08f4ce350259",
+                                                "text": "Посмертное восхваление Хлебникова Городецким приписало поэту чуть не организаторский талант: создание футуризма, печатание «Пощёчины общественному вкусу» и т. д."
+                                            },
+                                            {
+                                                "example_id": "ea469b7a-3b3b-4563-b42a-d887d83914f4",
+                                                "sense_id": "64ede62c-5070-4830-b074-08f4ce350259",
+                                                "text": "Екатерина 22 февраля издала особый манифест с восхвалением дворянства, а также и купечества."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "859e8c6d-c72d-4f96-b279-21be671a6e8f",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "social gathering for entertainment and fun",
+                        "target_lang_word": "festiviteit",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "festiviteit",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "20b5ffb3-77f5-40a9-9645-a948ad193276",
+                                        "entry_id": "136b6cbf-8595-44df-9138-9c8df97f4832",
+                                        "glosses": [
+                                            "feest, fuif"
+                                        ],
+                                        "tags": [
+                                            "vreugde"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "d03f3ed7-7dc2-49fa-b972-fdc7e5e00287",
+                                                "sense_id": "20b5ffb3-77f5-40a9-9645-a948ad193276",
+                                                "text": "de festiviteit in onze stad heeft veel jongeren aangetrokken."
+                                            },
+                                            {
+                                                "example_id": "64da23cf-ec3c-4570-ba4e-b017f19ecae2",
+                                                "sense_id": "20b5ffb3-77f5-40a9-9645-a948ad193276",
+                                                "text": "De koningin sloot de avond wuivend af met een ererondje langs het publiek. Er staan haar de komende weken nog veel festiviteiten te wachten, met een vierdaagse Platinum Jubileeweekend dat begint op 2 juni."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "ead8e13f-3efc-4806-9d97-5840fa2e5e52",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "social gathering for entertainment and fun",
+                        "target_lang_word": "feest",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "feest",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "7f30873f-8b72-41c4-9eda-aefab9745cd9",
+                                        "entry_id": "143ac3fc-a542-4a79-8b41-cf09daf54f9e",
+                                        "glosses": [
+                                            "vermakelijke en vreugdevolle sociale bijeenkomst"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "542ea1ab-b93d-42dd-bf4b-8f6caebe0957",
+                                                "sense_id": "7f30873f-8b72-41c4-9eda-aefab9745cd9",
+                                                "text": "Ondanks het feit dat Nederland de finale tegen Spanje verloren had, was het bij de huldiging één groot feest."
+                                            },
+                                            {
+                                                "example_id": "5e83aa7a-9285-4352-b6d0-6b29c30403f4",
+                                                "sense_id": "7f30873f-8b72-41c4-9eda-aefab9745cd9",
+                                                "text": "Het was een groot feest in Deventer: Deventer kan zijn geluk niet op na bekerwinst Go Ahead Eagles: 'We gaan Europa in!' De horeca in het centrum van Deventer had al eerder afgesproken om middernacht te sluiten. Vanaf toen stroomde de binnenstad dan ook grotendeels leeg."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f589a034-4739-4144-980e-3ffdd830d761",
+                                        "entry_id": "143ac3fc-a542-4a79-8b41-cf09daf54f9e",
+                                        "glosses": [
+                                            "een fijne gebeurtenis in het algemeen"
+                                        ],
+                                        "tags": [
+                                            "figuratively"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "fe13b97b-bb11-4618-94be-c791c7266fdb",
+                                                "sense_id": "f589a034-4739-4144-980e-3ffdd830d761",
+                                                "text": "Het was altijd een feest als ik op een kleine waterbron recht uit de berg stuitte. Dit frisse water uit de ondergrondse meren (aquifers geheten) dronk ik direct uit de berg, zonder het te hoeven filteren."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "feest",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "a9a6b6ab-3f78-4a82-90d1-e5e188d51c57",
+                                        "entry_id": "4155967d-c079-4591-ab27-c0d418578013",
+                                        "glosses": [
+                                            "enkelvoud tegenwoordige tijd van feesten"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "d754339e-47cb-4a13-aebc-5685fb38e0b6",
+                                        "entry_id": "4155967d-c079-4591-ab27-c0d418578013",
+                                        "glosses": [
+                                            "gebiedende wijs van feesten"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "9d1405a3-597e-4805-9232-f551aa1a7338",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "social gathering for entertainment and fun",
+                        "target_lang_word": "fuif",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "fuif",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "ce4f851d-f55c-4ab6-b54e-384c4868583f",
+                                        "entry_id": "618c93b1-3c24-4db0-810e-931380308d9d",
+                                        "glosses": [
+                                            "vrolijk besloten feest"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "0b614c77-f77e-4cb3-8148-6bc5a23a2c8e",
+                                                "sense_id": "ce4f851d-f55c-4ab6-b54e-384c4868583f",
+                                                "text": "Veel mensen drinken bier op een fuif."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "fuif",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "7320bfae-61ea-48ec-b6b5-ec92a9dc69c9",
+                                        "entry_id": "ecd03d8a-c006-4459-b9f1-b56f68c797a5",
+                                        "glosses": [
+                                            "eerste persoon enkelvoud tegenwoordige tijd van fuiven"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "e8ef5336-b23f-46ce-8316-4c5531102890",
+                                                "sense_id": "7320bfae-61ea-48ec-b6b5-ec92a9dc69c9",
+                                                "text": "Ik fuif."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "328b40e6-6ef0-41a8-9b00-bbdf5baa77c8",
+                                        "entry_id": "ecd03d8a-c006-4459-b9f1-b56f68c797a5",
+                                        "glosses": [
+                                            "gebiedende wijs van fuiven"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c18b791f-a8cd-4064-8d7a-8d0ebd12c8dd",
+                                                "sense_id": "328b40e6-6ef0-41a8-9b00-bbdf5baa77c8",
+                                                "text": "Fuif!"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "ae7ecf68-10da-4641-ba6f-f5ef645670b1",
+                                        "entry_id": "ecd03d8a-c006-4459-b9f1-b56f68c797a5",
+                                        "glosses": [
+                                            "tweede persoon enkelvoud tegenwoordige tijd van fuiven"
+                                        ],
+                                        "tags": [
+                                            "form-of",
+                                            "inversion"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "f3de739b-2e60-49f1-a36f-e3b85bea351c",
+                                                "sense_id": "ae7ecf68-10da-4641-ba6f-f5ef645670b1",
+                                                "text": "Fuif je?"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "497d789c-699a-4759-89a8-9cf745eb2479",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "social gathering for entertainment and fun",
+                        "target_lang_word": "viering",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "viering",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "2365cc5b-f2e3-42d0-be09-1e91d07aaf0c",
+                                        "entry_id": "274673ea-5d4f-47a3-88ad-a46d09f50054",
+                                        "glosses": [
+                                            "het vieren"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "65fa9e63-6b1e-479c-8053-5dadcbc3fda2",
+                                                "sense_id": "2365cc5b-f2e3-42d0-be09-1e91d07aaf0c",
+                                                "text": "De bedoeling van dit boek is hierbij behulpzaam te zijn. In de vele lees- en voorleesverhalen en de korte documentaties wordt iets van de oorsprong en de viering van onze jaarfeesten belicht."
+                                            },
+                                            {
+                                                "example_id": "0d5e6a86-f9fe-419b-a7f9-160eaf9445ca",
+                                                "sense_id": "2365cc5b-f2e3-42d0-be09-1e91d07aaf0c",
+                                                "text": "Koning Willem-Alexander en koningin Máxima waren afgelopen weekend in Terneuzen. De koning gaf het startschot voor de viering van 75 jaar vrijheid. Want dit jaar is het 75 jaar geleden dat Nederland bevrijd werd."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "eee9a9b7-19c1-4ea0-a6a4-e5f390d6a1d1",
+                                        "entry_id": "274673ea-5d4f-47a3-88ad-a46d09f50054",
+                                        "glosses": [
+                                            "plaats in een kerk of kathedraal waar het schip en de dwarstransepten elkaar kruisen"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "52179987-7d7d-4246-9db5-0e913d21d59b",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "social gathering for entertainment and fun",
+                        "target_lang_word": "uroczystość",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "uroczystość",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "4c246c4d-3a8b-4ff9-b9f9-69ad5e506ac5",
+                                        "entry_id": "7cc3f01a-1fae-4c46-b77f-3ababa6b1ebb",
+                                        "glosses": [
+                                            "uroczyste obchodzenie jakiegoś święta, wydarzenia itp."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1fe0cd06-a31c-48af-a861-53a065e97206",
+                                                "sense_id": "4c246c4d-3a8b-4ff9-b9f9-69ad5e506ac5",
+                                                "text": "Uroczystość zakłóciły jakieś krzyki zza okna."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    },
+                                    {
+                                        "sense_id": "2d002fff-c81f-4515-8dd1-b5fb7fb9c01c",
+                                        "entry_id": "7cc3f01a-1fae-4c46-b77f-3ababa6b1ebb",
+                                        "glosses": [
+                                            "uroczysty charakter czegoś"
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1.2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "258e923d-5783-42c3-87ea-26e0a9273828",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "social gathering for entertainment and fun",
+                        "target_lang_word": "świętowanie",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "świętowanie",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "dcba27a2-5629-429c-bad8-8956b022c38b",
+                                        "entry_id": "d9f5d824-0fec-4386-9af4-a69473d32aaf",
+                                        "glosses": [
+                                            "obchodzenie jakiegoś święta, jubileuszu lub innego radosnego wydarzenia poprzez udział w uroczystościach, powstrzymanie się od pracy i oddawanie się przyjemnościom"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ec45b8a1-e02a-4b22-b7ab-d5b6b0b4bfc9",
+                                                "sense_id": "dcba27a2-5629-429c-bad8-8956b022c38b",
+                                                "text": "Możemy zacząć świętowanie. Przyszła informacja, że wygraliśmy ten przetarg."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "7dd11760-590b-44f5-bb4a-bb71270ffa7d",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "social gathering for entertainment and fun",
+                        "target_lang_word": "пра́зднование",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "пра́зднование",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "d39e924a-1221-4c0a-b30b-9e2877bcbb63",
+                                        "entry_id": "373525ae-2eae-43f6-bd8d-b75ee5961caf",
+                                        "glosses": [
+                                            "действие по значению гл. праздновать; отмечание какого-либо праздника"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "56b5c1c7-71f4-474d-aaa0-ab779cdaec8f",
+                                                "sense_id": "d39e924a-1221-4c0a-b30b-9e2877bcbb63",
+                                                "text": "Титул цесарский или императорский дан был Петру и в Голландии при торжественном праздновании его победы."
+                                            },
+                                            {
+                                                "example_id": "2f352edd-c13f-4d74-98d7-7f73d36f257c",
+                                                "sense_id": "d39e924a-1221-4c0a-b30b-9e2877bcbb63",
+                                                "text": "У павлоградцев шли пиры за пирами, празднования полученных за поход наград и поездки в Ольмюц к вновь прибывшей туда Каролине Венгерке, открывшей там трактир с женской прислугой."
+                                            },
+                                            {
+                                                "example_id": "9df0d6b7-4128-463a-8b9a-998f5c4a003d",
+                                                "sense_id": "d39e924a-1221-4c0a-b30b-9e2877bcbb63",
+                                                "text": "А между тем в этой собравшейся кучке граждан, под видом празднования именин, уже находились некоторые, которым были сделаны и определенные предложения."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "0f22f029-1c6b-4880-a24e-00164f912d72",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "social gathering for entertainment and fun",
+                        "target_lang_word": "пра́здник",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "пра́здник",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "8ee7f8ae-1f74-4b80-baa5-8be940efb115",
+                                        "entry_id": "fc7ced08-656e-40f2-8f8c-9df5c505d358",
+                                        "glosses": [
+                                            "торжественное, радостное событие"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "bc5ec872-e0e1-4482-88d6-c3a2947dc08a",
+                                                "sense_id": "8ee7f8ae-1f74-4b80-baa5-8be940efb115",
+                                                "text": "У нас в доме праздник."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "5837e2bd-bb2e-497c-94f5-39cc00a8318a",
+                                        "entry_id": "fc7ced08-656e-40f2-8f8c-9df5c505d358",
+                                        "glosses": [
+                                            "официально отмечаемый торжественный день, связанный с годовщиной радостного события или церковной традицией"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "053c2a1e-f675-44a0-af39-a3d45bf89042",
+                                                "sense_id": "5837e2bd-bb2e-497c-94f5-39cc00a8318a",
+                                                "text": "Праздник Победы."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "78d5aebd-5461-4ef2-a211-6775cf0ae5eb",
+                                        "entry_id": "fc7ced08-656e-40f2-8f8c-9df5c505d358",
+                                        "glosses": [
+                                            "увеселительное, развлекательное или торжественное мероприятие"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "5710b5bf-d222-4ac7-a7a8-d52fdc88c4db",
+                                                "sense_id": "78d5aebd-5461-4ef2-a211-6775cf0ae5eb",
+                                                "text": "Детский праздник."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3475334e-3190-4aa4-b937-d8447a04d19e",
+                                        "entry_id": "fc7ced08-656e-40f2-8f8c-9df5c505d358",
+                                        "glosses": [
+                                            "испытываемое от чего-либо наслаждение, источник наслаждения"
+                                        ],
+                                        "tags": [
+                                            "figuratively"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "adcc117b-f53e-4d7f-b3b8-ddc7add05a1f",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "social gathering for entertainment and fun",
+                        "target_lang_word": "торжество́",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "торжество́",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6e75cb6e-de17-45c5-8f94-e58111df8010",
+                                        "entry_id": "b241ff82-314b-453d-b030-dd91f3759961",
+                                        "glosses": [
+                                            "большой праздник"
+                                        ],
+                                        "tags": [
+                                            "часто во мн. ч."
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "03828823-2f6b-47e0-964e-07099c0b3baf",
+                                                "sense_id": "6e75cb6e-de17-45c5-8f94-e58111df8010",
+                                                "text": "Сегодня место торжества ― нижний ресторан «Интуриста» ― дорогое, но рядовое, без выдумки."
+                                            },
+                                            {
+                                                "example_id": "716a691a-8127-4cc3-acdc-ce3764488f39",
+                                                "sense_id": "6e75cb6e-de17-45c5-8f94-e58111df8010",
+                                                "text": "По случаю торжества всех сотрудников поздравили."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f8e67651-f184-4114-936d-b730f48c779b",
+                                        "entry_id": "b241ff82-314b-453d-b030-dd91f3759961",
+                                        "glosses": [
+                                            "радостное чувство собственной силы, ощущение победы"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "83a9409d-ff62-40da-a3c9-1b55d9f19b3a",
+                                                "sense_id": "f8e67651-f184-4114-936d-b730f48c779b",
+                                                "text": "Она едва могла принудить себя не улыбнуться и скрыть своё торжество; ей удалось, однако, довольно скоро принять совершенно равнодушный и даже строгий вид: она небрежно опустила руку на моё плечо, наклонила слегка головку набок, и мы пустились."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "7bcbf2a6-a3bd-4190-a054-1c09c2610a57",
+                                        "entry_id": "b241ff82-314b-453d-b030-dd91f3759961",
+                                        "glosses": [
+                                            "победа, превосходство"
+                                        ],
+                                        "tags": [
+                                            "figuratively"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "9d0ad602-6692-4df6-adf0-08cd6cd68a09",
+                                                "sense_id": "7bcbf2a6-a3bd-4190-a054-1c09c2610a57",
+                                                "text": "Если этот спор ознаменовал окончательный упадок идей естественного права, то в то же время он привёл к торжеству новой школы права ― исторической."
+                                            },
+                                            {
+                                                "example_id": "3788587b-9baf-4f88-91b3-75d4915ed787",
+                                                "sense_id": "7bcbf2a6-a3bd-4190-a054-1c09c2610a57",
+                                                "text": "Торжество над врагами."
+                                            },
+                                            {
+                                                "example_id": "41b24d40-8059-4b8a-a1d4-e23f5e23369c",
+                                                "sense_id": "7bcbf2a6-a3bd-4190-a054-1c09c2610a57",
+                                                "text": "Торжество добра над злом."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "86f506cd-bdd9-4076-b9df-2c4de8025edd",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_description": "social gathering for entertainment and fun",
+                        "target_lang_word": "пра́зднество",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "пра́зднество",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "70e8dd8f-2c0f-4314-a0c4-aa255c2a2dba",
+                                        "entry_id": "82ab3056-5f46-43ee-bad2-b4f7aae0e884",
+                                        "glosses": [
+                                            "торжественное празднование чего-либо"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": [
+                    {
+                        "linkage_id": "8cc70aef-afaf-4a06-b980-1ee7162f20b7",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "celebration"
+                    },
+                    {
+                        "linkage_id": "3a1fc110-710e-41f3-819e-73342d5121c6",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "entertainment"
+                    },
+                    {
+                        "linkage_id": "e88501d5-b99c-4e0b-a28e-a44e289a1d65",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "feast"
+                    },
+                    {
+                        "linkage_id": "55514589-69c4-4f24-b8d9-2ccec58c62fc",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "festival"
+                    },
+                    {
+                        "linkage_id": "aa2930c8-9dbc-46b5-8514-f26d82f5ff4a",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "festivity"
+                    },
+                    {
+                        "linkage_id": "fd39efe3-f0e6-4023-b5a3-de4319e901e9",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "function"
+                    },
+                    {
+                        "linkage_id": "82e5dcce-5c42-4e71-b169-c13fd3510e10",
+                        "source_entry_id": "ed183d61-179f-4b9d-a575-8ffe3d88951b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "gathering"
+                    }
+                ]
+            }
+        ],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "6cbd119e-7f0a-4e58-86f9-ab111587943c",
+                "word": "celebration",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "90622aa0-99aa-4ee0-98e1-323e80ea93fb",
+                        "entry_id": "6cbd119e-7f0a-4e58-86f9-ab111587943c",
+                        "glosses": [
+                            "uroczystość"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    },
+                    {
+                        "sense_id": "fb44d2ef-35c3-4af5-a474-dc7ce46b60c1",
+                        "entry_id": "6cbd119e-7f0a-4e58-86f9-ab111587943c",
+                        "glosses": [
+                            "świętowanie"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.2\""
+                    },
+                    {
+                        "sense_id": "283f1f5a-3e93-4850-9936-39869304f79b",
+                        "entry_id": "6cbd119e-7f0a-4e58-86f9-ab111587943c",
+                        "glosses": [
+                            "afirmacja"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.3\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "d6ef1a24-7f76-4591-96dd-6327e5b2770f",
+                        "source_entry_id": "6cbd119e-7f0a-4e58-86f9-ab111587943c",
+                        "source_sense_ids": [
+                            "283f1f5a-3e93-4850-9936-39869304f79b"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "affirmation"
+                    }
+                ]
+            }
+        ]
+    }
+}

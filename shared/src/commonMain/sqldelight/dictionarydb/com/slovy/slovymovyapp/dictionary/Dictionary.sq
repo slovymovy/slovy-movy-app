@@ -92,6 +92,12 @@ insertPosEntry:
 INSERT INTO lemma(id, lemma, lemma_normalized, pos)
 VALUES (?, ?, ?, ?);
 
+-- Select lemma by ID (full)
+selectLemmaFullById:
+SELECT l.id, l.lemma, l.pos
+FROM lemma l
+WHERE l.id = ?;
+
 insertForm:
 INSERT INTO form(form_id, lemma_id, form, form_normalized)
 VALUES (?, ?, ?, ?);
@@ -140,8 +146,25 @@ SELECT f.lemma_id, f.lemma_id, f.form
 FROM form f
 WHERE f.lemma_id = ?;
 
+-- Forms with IDs for tag lookups
+selectFormsWithIdByLemmaId:
+SELECT f.form_id, f.form
+FROM form f
+WHERE f.lemma_id = ?;
+
+selectFormTagsByFormId:
+SELECT ft.form_id, ft.tag
+FROM form_tag ft
+WHERE ft.form_id = ?;
+
 selectLemmasByWord:
 SELECT l.id, l.lemma
+FROM lemma l
+WHERE l.lemma = ? COLLATE NOCASE;
+
+-- Queries returning explicit lemma_id to avoid ambiguity in generated code
+selectLemmaIdAndLemmaByWord:
+SELECT l.id AS lemma_id, l.lemma
 FROM lemma l
 WHERE l.lemma = ? COLLATE NOCASE;
 
@@ -150,7 +173,140 @@ SELECT l.id, l.lemma
 FROM lemma l
 WHERE l.id = ?;
 
+selectLemmaIdByLemma:
+SELECT l.id
+FROM lemma l
+WHERE l.lemma = ? COLLATE NOCASE;
+
+-- Senses and related data
+selectSensesByLemmaId:
+SELECT s.sense_id, s.lemma_id, s.sense_definition, s.learner_level, s.frequency, s.semantic_group_id, s.name_type
+FROM sense s
+WHERE s.lemma_id = ?;
+
+selectSenseExamples:
+SELECT se.sense_id, se.example_id, se.text
+FROM sense_example se
+WHERE se.sense_id = ?;
+
+selectSenseSynonyms:
+SELECT ss.sense_id, ss.synonym
+FROM sense_synonym ss
+WHERE ss.sense_id = ?;
+
+selectSenseAntonyms:
+SELECT sa.sense_id, sa.antonym
+FROM sense_antonym sa
+WHERE sa.sense_id = ?;
+
+selectSenseCommonPhrases:
+SELECT scp.sense_id, scp.phrase
+FROM sense_common_phrase scp
+WHERE scp.sense_id = ?;
+
+selectSenseTraits:
+SELECT st.sense_id, st.trait_type, st.comment
+FROM sense_trait st
+WHERE st.sense_id = ?;
+
 selectLemmasByNormalized:
 SELECT l.id, l.lemma
 FROM lemma l
 WHERE l.lemma_normalized = ? COLLATE NOCASE;
+
+selectLemmaIdAndLemmaByNormalized:
+SELECT l.id AS lemma_id, l.lemma
+FROM lemma l
+WHERE l.lemma_normalized = ? COLLATE NOCASE;
+
+-- LIKE-based search queries with limit 20
+selectLemmasLike:
+SELECT l.id, l.lemma
+FROM lemma l
+WHERE l.lemma LIKE ? COLLATE NOCASE
+LIMIT ?;
+
+selectLemmaIdAndLemmaLike:
+SELECT l.id AS lemma_id, l.lemma
+FROM lemma l
+WHERE l.lemma LIKE ? COLLATE NOCASE
+LIMIT ?;
+
+selectLemmasNormalizedLike:
+SELECT l.id, l.lemma
+FROM lemma l
+WHERE l.lemma_normalized LIKE ? COLLATE NOCASE
+LIMIT ?;
+
+selectLemmaIdAndLemmaNormalizedLike:
+SELECT l.id AS lemma_id, l.lemma
+FROM lemma l
+WHERE l.lemma_normalized LIKE ? COLLATE NOCASE
+LIMIT ?;
+
+
+
+-- Form -> Lemma JOIN queries to avoid client-side lookups
+selectLemmasByFormEquals:
+SELECT l.id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form = ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;
+
+selectLemmaIdAndLemmaByFormEquals:
+SELECT l.id AS lemma_id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form = ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;
+
+selectLemmasByFormNormalizedEquals:
+SELECT l.id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form_normalized = ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;
+
+selectLemmaIdAndLemmaByFormNormalizedEquals:
+SELECT l.id AS lemma_id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form_normalized = ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;
+
+selectLemmasFromFormsLike:
+SELECT l.id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form LIKE ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;
+
+selectLemmaIdAndLemmaFromFormsLike:
+SELECT l.id AS lemma_id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form LIKE ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;
+
+selectLemmasFromFormsNormalizedLike:
+SELECT l.id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form_normalized LIKE ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;
+
+selectLemmaIdAndLemmaFromFormsNormalizedLike:
+SELECT l.id AS lemma_id, l.lemma, f.form
+FROM form f
+JOIN lemma l ON l.id = f.lemma_id
+WHERE f.form_normalized LIKE ? COLLATE NOCASE
+GROUP BY l.id, l.lemma, f.form
+LIMIT ?;

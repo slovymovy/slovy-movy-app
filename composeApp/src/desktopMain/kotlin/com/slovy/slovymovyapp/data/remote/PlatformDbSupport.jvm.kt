@@ -105,4 +105,12 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
             null
         }
     }
+
+    actual fun listFiles(path: Path): List<Path> {
+        val dir = File(path.toString())
+        if (!dir.isDirectory) {
+            return dir.parentFile?.listFiles()?.map { Path(it.absolutePath) } ?: emptyList()
+        }
+        return dir.listFiles()?.map { Path(it.absolutePath) } ?: emptyList()
+    }
 }

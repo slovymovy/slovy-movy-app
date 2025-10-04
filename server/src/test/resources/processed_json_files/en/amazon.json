@@ -1,0 +1,419 @@
+{
+    "entries": [
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "000a2542-e328-4b25-ae77-27edac4d3796",
+                    "sense_definition": "In Greek mythology, a member of a race of female warriors.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "WarriorWoman",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The ancient Greeks told stories of the <w>Amazons</w>, a fierce tribe of women warriors.",
+                            "target_lang_translations": {
+                                "ru": "Древние греки рассказывали истории об <w>амазонках</w>, свирепом племени женщин-воительниц."
+                            }
+                        },
+                        {
+                            "text": "Many myths describe the <w>Amazons</w> as skilled archers and horse riders.",
+                            "target_lang_translations": {
+                                "ru": "Многие мифы описывают <w>амазонок</w> как искусных лучниц и наездниц."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "mythical Amazons",
+                        "tribe of Amazons"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "Often capitalized as 'Amazon' when referring to the mythical race."
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "В греческой мифологии, представительница племени женщин-воительниц."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "амазонка",
+                                "target_lang_sense_clarification": "Относится к мифологическим воительницам. Используется с маленькой буквы, если речь идет об одной из них, и с большой, если о племени в целом (Амазонки)."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "8e23187b-d5de-4149-aa6d-49b435133256",
+                    "sense_definition": "A strong, brave woman, especially one who is a fighter or warrior.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "WarriorWoman",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "She fought like an <w>Amazon</w> to defend her family.",
+                            "target_lang_translations": {
+                                "ru": "Она сражалась как <w>амазонка</w>, защищая свою семью."
+                            }
+                        },
+                        {
+                            "text": "The historical records mention several powerful female leaders who were true <w>Amazons</w> in battle.",
+                            "target_lang_translations": {
+                                "ru": "В исторических записях упоминаются несколько могущественных женщин-лидеров, которые были настоящими <w>амазонками</w> в бою."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "fight like an Amazon",
+                        "true Amazon"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Сильная, смелая женщина, особенно воительница или боец."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "амазонка",
+                                "target_lang_sense_clarification": "Переносное значение, описывающее сильную, воинственную или смелую женщину. Часто используется в сравнениях, например, 'сражаться как амазонка'."
+                            },
+                            {
+                                "target_lang_word": "воительница",
+                                "target_lang_sense_clarification": "Более прямой перевод слова 'warrior woman', подчеркивающий боевые качества."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "88d47c90-5740-4047-9f0f-a3ab4b136615",
+                    "sense_definition": "A tall, strong, or athletic woman.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "WomanDescription",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The basketball player was a real <w>Amazon</w> on the court, dominating every game.",
+                            "target_lang_translations": {
+                                "ru": "Баскетболистка была настоящей <w>амазонкой</w> на площадке, доминируя в каждой игре."
+                            }
+                        },
+                        {
+                            "text": "With her impressive height and strength, she looked like an <w>Amazon</w> next to the other contestants.",
+                            "target_lang_translations": {
+                                "ru": "С её впечатляющим ростом и силой она выглядела как <w>амазонка</w> рядом с другими участницами."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "a real Amazon",
+                        "look like an Amazon"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Высокая, сильная или атлетически сложенная женщина."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "амазонка",
+                                "target_lang_sense_clarification": "Используется для описания очень высокой и сильной женщины, часто с атлетическим телосложением. Может иметь как положительную, так и слегка ироничную коннотацию."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "8c2403c5-1510-45cb-9112-304f78772f96",
+                    "sense_definition": "Any of several large, often green, parrots of the genus Amazona, native to tropical America.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "Animal",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "My neighbor has a beautiful green <w>amazon</w> parrot that can mimic human speech.",
+                            "target_lang_translations": {
+                                "ru": "У моего соседа есть красивый зеленый попугай-<w>амазон</w>, который умеет имитировать человеческую речь."
+                            }
+                        },
+                        {
+                            "text": "Many <w>amazons</w> are popular as pets due to their intelligence and ability to talk.",
+                            "target_lang_translations": {
+                                "ru": "Многие <w>амазоны</w> популярны в качестве домашних животных благодаря своему интеллекту и способности говорить."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "amazon parrot"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Любой из нескольких крупных, часто зеленых попугаев рода Amazona, обитающих в тропической Америке."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "амазон",
+                                "target_lang_sense_clarification": "Название вида попугаев (мужской род). Важно не путать с 'амазонка' (женщина-воин или река)."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "785861f6-0eaa-4815-bd64-c5d24cbfffbe",
+                    "sense_definition": "In fairy chess, a piece that combines the moves of a queen and a knight.",
+                    "learner_level": "C1",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "GamePiece",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The <w>amazon</w> is a powerful piece in fairy chess, capable of moving in many directions.",
+                            "target_lang_translations": {
+                                "ru": "<w>Амазонка</w> — это мощная фигура в сказочных шахматах, способная ходить во многих направлениях."
+                            }
+                        },
+                        {
+                            "text": "To understand the game, you need to know how the <w>amazon</w> moves on the board.",
+                            "target_lang_translations": {
+                                "ru": "Чтобы понять игру, нужно знать, как <w>амазонка</w> ходит по доске."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "regional",
+                            "comment": "Used in the context of fairy chess."
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "В сказочных шахматах — фигура, сочетающая ходы ферзя и коня."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "амазонка",
+                                "target_lang_sense_clarification": "Специальный термин в 'сказочных шахматах' (fairy chess). Используется для названия этой конкретной фигуры."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "f6bbbc1c-987d-483d-9781-2d83c7dfec0f",
+                    "sense_definition": "A sexual position where the receptive partner squats onto the insertive partner, who is lying on their back with knees pulled back.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "They explored various positions, including the <w>amazon</w>.",
+                            "target_lang_translations": {
+                                "ru": "Они испробовали различные позы, включая <w>амазонку</w>."
+                            }
+                        },
+                        {
+                            "text": "The <w>amazon</w> allows for deep penetration and clitoral stimulation.",
+                            "target_lang_translations": {
+                                "ru": "<w>Амазонка</w> обеспечивает глубокое проникновение и стимуляцию клитора."
+                            }
+                        }
+                    ],
+                    "antonyms": [
+                        "mating press"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "Informal and explicit."
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Сексуальная позиция, в которой принимающий партнер садится на проникающего партнера, который лежит на спине с согнутыми в коленях ногами."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "амазонка",
+                                "target_lang_sense_clarification": "Название сексуальной позиции. Также может называться 'поза амазонки'."
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "name",
+            "senses": [
+                {
+                    "sense_id": "e4e736a7-5254-4f11-88e1-1ca59ed5011e",
+                    "sense_definition": "Amazon.com Inc., a very large online retail company.",
+                    "learner_level": "A1",
+                    "frequency": "High",
+                    "semantic_group_id": "Company",
+                    "name_type": "organization_name",
+                    "examples": [
+                        {
+                            "text": "I ordered a new book from <w>Amazon</w> last night.",
+                            "target_lang_translations": {
+                                "ru": "Вчера вечером я заказал новую книгу на <w>Amazon</w>."
+                            }
+                        },
+                        {
+                            "text": "Many people use <w>Amazon</w> for online shopping because of its wide selection.",
+                            "target_lang_translations": {
+                                "ru": "Многие люди используют <w>Amazon</w> для онлайн-покупок из-за его широкого выбора."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "Amazon Prime",
+                        "shop on Amazon"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Amazon.com Inc., очень крупная компания в сфере онлайн-торговли."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "Amazon",
+                                "target_lang_sense_clarification": "Название компании. В русском языке используется без перевода, произносится как 'Амазон'."
+                            },
+                            {
+                                "target_lang_word": "Амазон",
+                                "target_lang_sense_clarification": "Транслитерация названия компании. Часто используется в разговорной речи и текстах."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "862fa806-64e8-4258-9a76-b56e716fe69c",
+                    "sense_definition": "A major river in South America, flowing through Brazil to the Atlantic Ocean.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "Geography",
+                    "name_type": "geographical_feature",
+                    "examples": [
+                        {
+                            "text": "The <w>Amazon</w> River is the largest river in the world by discharge volume.",
+                            "target_lang_translations": {
+                                "ru": "Река <w>Амазонка</w> — самая большая река в мире по объему стока."
+                            }
+                        },
+                        {
+                            "text": "Many unique species of fish live in the <w>Amazon</w>.",
+                            "target_lang_translations": {
+                                "ru": "В <w>Амазонке</w> обитает множество уникальных видов рыб."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "the Amazon River"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Крупная река в Южной Америке, впадающая в Атлантический океан."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "Амазонка",
+                                "target_lang_sense_clarification": "Название реки в Южной Америке. Всегда пишется с большой буквы."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "9f34e37c-11b4-4d68-a96e-894a97a467e1",
+                    "sense_definition": "The large region in South America that includes the Amazon River and its rainforest.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "Geography",
+                    "name_type": "geographical_feature",
+                    "examples": [
+                        {
+                            "text": "The <w>Amazon</w> rainforest is home to incredible biodiversity.",
+                            "target_lang_translations": {
+                                "ru": "Тропические леса <w>Амазонии</w> являются домом для невероятного биоразнообразия."
+                            }
+                        },
+                        {
+                            "text": "Deforestation is a major threat to the <w>Amazon</w> and its ecosystems.",
+                            "target_lang_translations": {
+                                "ru": "Вырубка лесов — это серьезная угроза для <w>Амазонии</w> и её экосистем."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "the Amazon rainforest",
+                        "the Amazon basin"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Обширный регион в Южной Америке, включающий реку Амазонку и ее тропические леса."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "Амазония",
+                                "target_lang_sense_clarification": "Географическое название региона (бассейна реки Амазонки). Наиболее точный перевод."
+                            },
+                            {
+                                "target_lang_word": "Амазонка",
+                                "target_lang_sense_clarification": "Может использоваться в разговорной речи для обозначения всего региона, хотя формально это название реки."
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "96d7f0cf-73cc-4c11-8814-0e308794c952",
+                    "sense_definition": "To overwhelm or outcompete a traditional business, especially by using an online business model, similar to how Amazon.com affected retail.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Small bookstores feared being <w>Amazoned</w> by the online giant.",
+                            "target_lang_translations": {
+                                "ru": "Маленькие книжные магазины боялись, что их <w>разорит</w> онлайн-гигант."
+                            }
+                        },
+                        {
+                            "text": "Companies that don't adapt to e-commerce risk being <w>Amazoned</w> by new startups.",
+                            "target_lang_translations": {
+                                "ru": "Компании, которые не адаптируются к электронной коммерции, рискуют <w>разориться</w> из-за новых стартапов."
+                            }
+                        },
+                        {
+                            "text": "The article discussed how traditional retailers are trying not to get <w>Amazoned</w>.",
+                            "target_lang_translations": {
+                                "ru": "В статье обсуждалось, как традиционные ритейлеры пытаются не <w>разориться</w>."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "get Amazoned",
+                        "being Amazoned"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "Informal and specific to business context."
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Вытеснить или превзойти традиционный бизнес с помощью онлайн-модели, по аналогии с компанией Amazon. Прямого однословного перевода на русский язык нет, используются описательные фразы, например, 'вытеснить с рынка' или 'разорить'."
+                    },
+                    "translations": {
+                        "ru": []
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.data.remote
 
 import android.content.Context
+import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
@@ -18,7 +19,16 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     private val ctx: Context = (androidContext as? Context)
         ?: error("Android Context is required for PlatformDbSupport on Android")
 
-    actual fun getDatabasePath(name: String): Path = Path(ctx.getDatabasePath(name).absolutePath)
+    actual fun getDatabasePath(name: String): Path {
+        if (name.isEmpty()) {
+            // Return the databases directory itself when name is empty
+            return Path(
+                ctx.getDatabasePath("placeholder.db").parentFile?.absolutePath
+                    ?: error("Cannot get databases directory")
+            )
+        }
+        return Path(ctx.getDatabasePath(name).absolutePath)
+    }
 
     actual fun ensureDatabasesDir() {
         ctx.getDatabasePath("placeholder.db").parentFile?.mkdirs()
@@ -76,11 +86,27 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         schema: SqlSchema<QueryResult.Value<Unit>>,
         readOnly: Boolean
     ): AndroidSqliteDriver {
-        val name = File(path.toString()).name
+        val file = File(path.toString())
+        val name = file.name
+
         val result = AndroidSqliteDriver(
             schema = schema,
             context = ctx,
-            name = name
+            name = name,
+            callback = if (!readOnly) AndroidSqliteDriver.Callback(schema) else object :
+                AndroidSqliteDriver.Callback(schema) {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    // Do nothing
+                }
+
+                override fun onUpgrade(
+                    db: SupportSQLiteDatabase,
+                    oldVersion: Int,
+                    newVersion: Int
+                ) {
+                    // Do nothing
+                }
+            }
         )
         if (readOnly) {
             enforceQueryOnly(result)
@@ -104,5 +130,13 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         } catch (_: Throwable) {
             null
         }
+    }
+
+    actual fun listFiles(path: Path): List<Path> {
+        val dir = File(path.toString())
+        if (!dir.isDirectory) {
+            return dir.parentFile?.listFiles()?.map { Path(it.absolutePath) } ?: emptyList()
+        }
+        return dir.listFiles()?.map { Path(it.absolutePath) } ?: emptyList()
     }
 }

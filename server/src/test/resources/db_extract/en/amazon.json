@@ -1,0 +1,621 @@
+{
+    "word": "amazon",
+    "lang_code": "en",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "26bdfd75-b82c-4914-bf7e-ef3f74299d51",
+                "word": "Amazon",
+                "pos": "name",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "f60affae-9bd7-4167-960e-4f57cabe0168",
+                        "entry_id": "26bdfd75-b82c-4914-bf7e-ef3f74299d51",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "the Amazon"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "862fa806-64e8-4258-9a76-b56e716fe69c",
+                        "entry_id": "26bdfd75-b82c-4914-bf7e-ef3f74299d51",
+                        "glosses": [
+                            "A river in South America, that flows through Brazil for about 4000 miles to the Atlantic."
+                        ],
+                        "tags": [
+                            "attributive",
+                            "sometimes"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "9f34e37c-11b4-4d68-a96e-894a97a467e1",
+                        "entry_id": "26bdfd75-b82c-4914-bf7e-ef3f74299d51",
+                        "glosses": [
+                            "A region including much of this river; specifically, the region of the Amazon Rainforest, or of the Amazon River Basin."
+                        ],
+                        "tags": [
+                            "attributive",
+                            "sometimes"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "ed9c7c0c-a7c8-49af-8458-78385aa5d318",
+                                "sense_id": "9f34e37c-11b4-4d68-a96e-894a97a467e1",
+                                "text": "Amazon milk frog"
+                            },
+                            {
+                                "example_id": "515fb894-f12e-42dd-8e6b-91e64cf207a6",
+                                "sense_id": "9f34e37c-11b4-4d68-a96e-894a97a467e1",
+                                "text": "In February, a young man from an isolated Indigenous tribe in Brazil made brief contact with the outside world before returning to the Amazon rainforest."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "ccc15ae3-6ec4-4d75-bd89-cca65734c5f1",
+                        "source_entry_id": "26bdfd75-b82c-4914-bf7e-ef3f74299d51",
+                        "source_sense_description": "river",
+                        "target_lang_word": "Amazone",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "Amazone",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "312d84ea-1c90-46e1-8c98-0a3037da7f2c",
+                                        "entry_id": "f53b986b-3470-4744-8578-14dc9eca1d8b",
+                                        "glosses": [
+                                            "rivier in Peru, Colombia en Brazilië, die de op één na langste rivier ter wereld is, en die met afstand de waterrijkste is en een vijfde van het natuurlijke zoet water ter wereld bevat"
+                                        ],
+                                        "tags": [
+                                            "toponymic"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "489bd2ba-cb97-4cf8-8367-78eaed048376",
+                        "source_entry_id": "26bdfd75-b82c-4914-bf7e-ef3f74299d51",
+                        "source_sense_description": "river",
+                        "target_lang_word": "Amazonka",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "Amazonka",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "42107248-54ab-4fc2-a49c-aaf84aa654b9",
+                                        "entry_id": "b8ced663-c6ed-429d-81a2-54eaadd2d083",
+                                        "glosses": [
+                                            "rzeka w Ameryce Południowej"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ee12a478-acb3-440f-9e63-409b7f1fca9a",
+                                                "sense_id": "42107248-54ab-4fc2-a49c-aaf84aa654b9",
+                                                "text": "Amazonka jest najdłuższą rzeką na Ziemi."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    },
+                                    {
+                                        "sense_id": "fa7ee204-71ec-4992-a374-80108258f173",
+                                        "entry_id": "b8ced663-c6ed-429d-81a2-54eaadd2d083",
+                                        "glosses": [
+                                            "członkini plemienia wojowniczych kobiet"
+                                        ],
+                                        "tags": [
+                                            "Ancient-Greek"
+                                        ],
+                                        "examples": [],
+                                        "sense_index_json": "\"1.2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "3f615501-685f-42de-adf3-30612390686d",
+                        "source_entry_id": "26bdfd75-b82c-4914-bf7e-ef3f74299d51",
+                        "source_sense_description": "river",
+                        "target_lang_word": "Амазо́нка",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "Амазо́нка",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f194dd19-23d9-4cf5-bfb2-404c0a4bf80e",
+                                        "entry_id": "75d6e8af-60d8-474f-88c8-8bb54d4555ce",
+                                        "glosses": [
+                                            "река в Южной Америке, протекающая по Амазонской низменности"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "95497e67-941d-408c-9409-3c3560b1cf2d",
+                        "source_entry_id": "26bdfd75-b82c-4914-bf7e-ef3f74299d51",
+                        "source_sense_description": "used attributively in compounds",
+                        "target_lang_word": "амазо́нский",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "ee3e12f5-077a-415a-8588-993c21a6c365",
+                "word": "Amazon",
+                "pos": "name",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "e4e736a7-5254-4f11-88e1-1ca59ed5011e",
+                        "entry_id": "ee3e12f5-077a-415a-8588-993c21a6c365",
+                        "glosses": [
+                            "Amazon.com Inc., a very large Internet retailer."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "c9f704be-1891-4fc0-bfe8-4c14490b2b25",
+                "word": "Amazon",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "fcccb142-c86a-48d2-a3a5-ed043836eb52",
+                        "entry_id": "c9f704be-1891-4fc0-bfe8-4c14490b2b25",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "Amazons"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "000a2542-e328-4b25-ae77-27edac4d3796",
+                        "entry_id": "c9f704be-1891-4fc0-bfe8-4c14490b2b25",
+                        "glosses": [
+                            "A member of a mythical race of female warriors inhabiting the Black Sea area."
+                        ],
+                        "tags": [
+                            "Greek"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "84105fa2-4204-4141-8c3d-01504cc472f4",
+                                "sense_id": "000a2542-e328-4b25-ae77-27edac4d3796",
+                                "text": "When, therefore, one envisions a matriarchy, one should not conjure up visions of a gang of Amazons lopping off breasts and testicles to rule by force of arms."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "8e23187b-d5de-4149-aa6d-49b435133256",
+                        "entry_id": "c9f704be-1891-4fc0-bfe8-4c14490b2b25",
+                        "glosses": [
+                            "A female warrior."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "3e3efd1d-fdf0-4312-80f8-d436c8764100",
+                                "sense_id": "8e23187b-d5de-4149-aa6d-49b435133256",
+                                "text": "In some parts of Africa, Asia, and South America, amazon cultures still existed during the Middle Ages, such as that ruled by Queen Nzingha in Angola, who led her amazon army against the Portuguese in a series of wars during the first half of the seventeenth century. In Dahomey also in traditionally gynarchal West Africa, the army was made up of amazons even through the nineteenth century."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "88d47c90-5740-4047-9f0f-a3ab4b136615",
+                        "entry_id": "c9f704be-1891-4fc0-bfe8-4c14490b2b25",
+                        "glosses": [
+                            "A tall, strong, or athletic woman."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "03e8d311-8a73-499c-8532-6819e41fde46",
+                        "source_entry_id": "c9f704be-1891-4fc0-bfe8-4c14490b2b25",
+                        "source_sense_description": "Mythological female warrior",
+                        "target_lang_word": "Amazonka",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "Amazonka",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "42107248-54ab-4fc2-a49c-aaf84aa654b9",
+                                        "entry_id": "b8ced663-c6ed-429d-81a2-54eaadd2d083",
+                                        "glosses": [
+                                            "rzeka w Ameryce Południowej"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ee12a478-acb3-440f-9e63-409b7f1fca9a",
+                                                "sense_id": "42107248-54ab-4fc2-a49c-aaf84aa654b9",
+                                                "text": "Amazonka jest najdłuższą rzeką na Ziemi."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    },
+                                    {
+                                        "sense_id": "fa7ee204-71ec-4992-a374-80108258f173",
+                                        "entry_id": "b8ced663-c6ed-429d-81a2-54eaadd2d083",
+                                        "glosses": [
+                                            "członkini plemienia wojowniczych kobiet"
+                                        ],
+                                        "tags": [
+                                            "Ancient-Greek"
+                                        ],
+                                        "examples": [],
+                                        "sense_index_json": "\"1.2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "fc6e0963-891e-4eef-97aa-33685f50d796",
+                        "source_entry_id": "c9f704be-1891-4fc0-bfe8-4c14490b2b25",
+                        "source_sense_description": "Mythological female warrior",
+                        "target_lang_word": "амазо́нка",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "амазо́нка",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "a731184e-3d6a-42e3-aa95-8533bc4c98e1",
+                                        "entry_id": "dd4259ae-a95f-40d1-b154-461304b223f5",
+                                        "glosses": [
+                                            "представительница племени воительниц"
+                                        ],
+                                        "tags": [
+                                            "мифол."
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "7c600ae3-871c-4f42-be11-574ab9189df1",
+                                                "sense_id": "a731184e-3d6a-42e3-aa95-8533bc4c98e1",
+                                                "text": "Он взглянул на мать ― она молчала, потупив глаза. ― Ты слышала, она была амазонка. Амазонки не выходят замуж, но… она вышла."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "e07af712-3715-43ce-b74e-7f90deaa4bdb",
+                                        "entry_id": "dd4259ae-a95f-40d1-b154-461304b223f5",
+                                        "glosses": [
+                                            "смелая и ловкая всадница, наездница"
+                                        ],
+                                        "tags": [
+                                            "figuratively",
+                                            "obsolete"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "f98165e4-b9bb-4e7c-a58d-c16701a10835",
+                                                "sense_id": "e07af712-3715-43ce-b74e-7f90deaa4bdb",
+                                                "text": "― Ах нет, нет, мессир, ― отозвалась Маргарита, сидящая в седле, как амазонка, подбоченившись и свесив до земли острый шлейф, ― разрешите ему, пусть он свистнет."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "амазо́нка",
+                                "target_lang_code": "ru",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "c919442d-bb34-4a37-9dd5-4eabbac43e65",
+                                        "entry_id": "a2b8628b-ec1f-47e6-b606-2ec8b7deeae0",
+                                        "glosses": [
+                                            "женское платье для верховой езды"
+                                        ],
+                                        "tags": [
+                                            "historical"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "6bd75fad-4179-45cd-b3bd-b6430f5102a0",
+                                                "sense_id": "c919442d-bb34-4a37-9dd5-4eabbac43e65",
+                                                "text": "Явился к ней попрощаться, а она в амазонке. ― Я с вами еду, Александр."
+                                            },
+                                            {
+                                                "example_id": "7ef35913-81e0-42cc-8c6f-345a93fd2a2e",
+                                                "sense_id": "c919442d-bb34-4a37-9dd5-4eabbac43e65",
+                                                "text": "А если Рио-Рита падает с лошади (что случается крайне редко, почти никогда), она не визжит, как обычно визжат дамы, не созывает всех, чтоб ее подняли, не требует нашатырного спирта, чтоб прийти в себя, и не говорит: «Ах, гадкая лошадь, теперь амазонка вся в пыли»."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "a0cd2175-9968-458c-ad2f-e64ce61db4bc",
+                "word": "Amazon",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "926210ee-54ba-43e8-bc86-8665b317c810",
+                        "entry_id": "a0cd2175-9968-458c-ad2f-e64ce61db4bc",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "Amazons"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "8c2403c5-1510-45cb-9112-304f78772f96",
+                        "entry_id": "a0cd2175-9968-458c-ad2f-e64ce61db4bc",
+                        "glosses": [
+                            "Any of the large parrots from the genus Amazona."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "cbb22db1-cf4c-4d3b-9a2c-f544b88c1a3b",
+                "word": "amazon",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "d45e31f1-42ff-4334-b6e6-0de49ace9e45",
+                        "entry_id": "cbb22db1-cf4c-4d3b-9a2c-f544b88c1a3b",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "amazons"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "8e455e98-fbfa-414d-a72f-415f09bd582e",
+                        "entry_id": "cbb22db1-cf4c-4d3b-9a2c-f544b88c1a3b",
+                        "glosses": [
+                            "a tall, strong, athletic woman"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "ec13a2a7-acf3-4bad-bea7-44afbe869d80",
+                                "sense_id": "8e455e98-fbfa-414d-a72f-415f09bd582e",
+                                "text": "Although the evidence for real Amazons is thin, women athletes are often dubbed amazons."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "785861f6-0eaa-4815-bd64-c5d24cbfffbe",
+                        "entry_id": "cbb22db1-cf4c-4d3b-9a2c-f544b88c1a3b",
+                        "glosses": [
+                            "a fairy chess piece which combines the moves of the queen and the knight"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "66869778-88b6-46a5-980b-4d511e30ba37",
+                        "entry_id": "cbb22db1-cf4c-4d3b-9a2c-f544b88c1a3b",
+                        "glosses": [
+                            "an amazon parrot"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "f6bbbc1c-987d-483d-9781-2d83c7dfec0f",
+                        "entry_id": "cbb22db1-cf4c-4d3b-9a2c-f544b88c1a3b",
+                        "glosses": [
+                            "a position for vaginal sex in which the insertive partner lies on their back with their knees pulled back, and the receptive partner, facing the other person, squats onto the penis"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "ccf988df-d1e8-43e8-9b33-13e9ed50ea75",
+                        "source_entry_id": "cbb22db1-cf4c-4d3b-9a2c-f544b88c1a3b",
+                        "source_sense_ids": [
+                            "f6bbbc1c-987d-483d-9781-2d83c7dfec0f"
+                        ],
+                        "linkage_type": "antonyms",
+                        "word": "mating press"
+                    }
+                ]
+            },
+            {
+                "entry_id": "f44b646d-6b32-46b7-aaef-47bfc6cebd3a",
+                "word": "Amazon",
+                "pos": "verb",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "95224b1e-6658-4771-82db-d50cd0d6d50d",
+                        "entry_id": "f44b646d-6b32-46b7-aaef-47bfc6cebd3a",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "Amazons"
+                    },
+                    {
+                        "form_id": "3c3fa8de-c915-42d2-ac61-b15df9739a9e",
+                        "entry_id": "f44b646d-6b32-46b7-aaef-47bfc6cebd3a",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "Amazoning"
+                    },
+                    {
+                        "form_id": "485103ae-d7c7-4764-9821-a1cf3814a38a",
+                        "entry_id": "f44b646d-6b32-46b7-aaef-47bfc6cebd3a",
+                        "tags": [
+                            "participle",
+                            "past"
+                        ],
+                        "form": "Amazoned"
+                    },
+                    {
+                        "form_id": "35a6884b-2f86-41fa-9069-4e7361c5da4b",
+                        "entry_id": "f44b646d-6b32-46b7-aaef-47bfc6cebd3a",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "Amazoned"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "96d7f0cf-73cc-4c11-8814-0e308794c952",
+                        "entry_id": "f44b646d-6b32-46b7-aaef-47bfc6cebd3a",
+                        "glosses": [
+                            "To overwhelm or obliterate, in the context of an Internet start-up vastly outperforming its brick and mortar competition."
+                        ],
+                        "tags": [
+                            "transitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "b61eef3c-389e-4672-b3e1-47debd5c3a0c",
+                                "sense_id": "96d7f0cf-73cc-4c11-8814-0e308794c952",
+                                "text": "Those who hesitate risk being \"amazoned,\" forfeiting business to an Internet newcomer, in the way that bookstore chains have lost ground to Amazon.com Inc., the online bookseller."
+                            },
+                            {
+                                "example_id": "848ae1a8-1c66-4bf1-97ff-4c4b70d18ac6",
+                                "sense_id": "96d7f0cf-73cc-4c11-8814-0e308794c952",
+                                "text": "Venture capitalists' desks are thick with business plans promising ‘we're going to Amazon the insurance/travel/property business...’"
+                            },
+                            {
+                                "example_id": "3b508d76-98e0-4f5b-8a22-16368ffe89fd",
+                                "sense_id": "96d7f0cf-73cc-4c11-8814-0e308794c952",
+                                "text": "Take the example of MetalSite.com, which is owned by steel companies. The steel companies aren't getting \"Amazoned\" by a start-up but, rather, they are doing the \"Amazoning\" within their own industry."
+                            },
+                            {
+                                "example_id": "06be8b75-c0f8-4a0f-a414-7b61cd4f79dc",
+                                "sense_id": "96d7f0cf-73cc-4c11-8814-0e308794c952",
+                                "text": "Amazon.com may soon be \"amazoning\" a few more industries."
+                            },
+                            {
+                                "example_id": "0ab628b9-5871-4727-9e0d-9026e57c496d",
+                                "sense_id": "96d7f0cf-73cc-4c11-8814-0e308794c952",
+                                "text": "Gone are the days when they agonized about being \"Amazoned\", or blind-sided by a dot-com ...."
+                            },
+                            {
+                                "example_id": "f310aa33-063a-49d8-9124-0b30a943f093",
+                                "sense_id": "96d7f0cf-73cc-4c11-8814-0e308794c952",
+                                "text": "In other industries, established companies are pulling people and money away from their Internet operations, as their fear of being \"Amazoned\" by start-ups has subsided."
+                            },
+                            {
+                                "example_id": "b6a7cfc3-94b6-4e3d-8d2b-1e39e6f60802",
+                                "sense_id": "96d7f0cf-73cc-4c11-8814-0e308794c952",
+                                "text": "Meanwhile, traditional companies would be obliterated — \"Amazoned\" — by Internet upstarts."
+                            },
+                            {
+                                "example_id": "cd4408cf-2727-47e4-ab4b-3ceed5bc216d",
+                                "sense_id": "96d7f0cf-73cc-4c11-8814-0e308794c952",
+                                "text": "\"Everybody was afraid of getting Amazoned,\" Mr. Landan said. \"They didn't want to get left behind.\""
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "eea9cd9c-abe7-4f43-a8a2-e13306fcebf7",
+                "word": "Amazon",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "1412ad61-1c54-426c-876f-82c5eb00a927",
+                        "entry_id": "eea9cd9c-abe7-4f43-a8a2-e13306fcebf7",
+                        "glosses": [
+                            "Amazonka"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "157e598d-d1ff-40bd-b720-412b474824f6",
+                "word": "amazon",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "73c06e0c-c9e4-4016-ae09-c379e2226f23",
+                        "entry_id": "157e598d-d1ff-40bd-b720-412b474824f6",
+                        "glosses": [
+                            "amazonka"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ]
+    }
+}

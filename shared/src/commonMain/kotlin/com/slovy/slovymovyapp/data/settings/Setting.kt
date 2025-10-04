@@ -13,6 +13,7 @@ data class Setting(
         TEST_PROPERTY,
         WELCOME_MESSAGE,
         LANGUAGE,
+        DICTIONARY,
         DATA_VERSION
     }
 }
