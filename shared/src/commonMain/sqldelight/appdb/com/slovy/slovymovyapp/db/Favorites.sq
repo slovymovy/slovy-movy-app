@@ -13,7 +13,7 @@ CREATE INDEX idx_favorites_lang_lemma ON favorites(target_lang, lemma);
 -- Favorites queries
 
 insertFavorite:
-INSERT OR REPLACE INTO favorites(sense_id, target_lang, lemma, created_at)
+INSERT OR IGNORE INTO favorites(sense_id, target_lang, lemma, created_at)
 VALUES (?, ?, ?, ?);
 
 deleteFavorite:
@@ -27,11 +27,6 @@ selectByLangAndLemma:
 SELECT sense_id, target_lang, lemma, created_at FROM favorites
 WHERE target_lang = ? AND lemma = ?
 ORDER BY created_at DESC;
-
-selectGroupedByLangAndLemma:
-SELECT target_lang, lemma, COUNT(*) AS favorite_count FROM favorites
-GROUP BY target_lang, lemma
-ORDER BY lemma ASC;
 
 selectAllOrderedByLangAndLemma:
 SELECT sense_id, target_lang, lemma, created_at FROM favorites

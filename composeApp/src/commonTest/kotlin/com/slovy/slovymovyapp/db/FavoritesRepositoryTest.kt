@@ -74,34 +74,6 @@ open class FavoritesRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun getGroupedByLangAndLemma_returns_correct_groups() {
-        val db: AppDatabase = DataDbManager(platformDbSupport()).openAppDatabase()
-        val repo = FavoritesRepository(db)
-        repo.deleteAll()
-
-        // Add favorites
-        repo.add("sense1", "en", "hello")
-        repo.add("sense2", "en", "hello")
-        repo.add("sense3", "en", "world")
-        repo.add("sense4", "fr", "bonjour")
-        repo.add("sense5", "fr", "bonjour")
-        repo.add("sense6", "fr", "bonjour")
-
-        val groups = repo.getGroupedByLangAndLemma()
-
-        assertEquals(3, groups.size)
-
-        val enHello = groups.find { it.targetLang == "en" && it.lemma == "hello" }
-        assertEquals(2L, enHello?.count)
-
-        val enWorld = groups.find { it.targetLang == "en" && it.lemma == "world" }
-        assertEquals(1L, enWorld?.count)
-
-        val frBonjour = groups.find { it.targetLang == "fr" && it.lemma == "bonjour" }
-        assertEquals(3L, frBonjour?.count)
-    }
-
-    @Test
     fun add_replaces_existing_favorite() {
         val db: AppDatabase = DataDbManager(platformDbSupport()).openAppDatabase()
         val repo = FavoritesRepository(db)

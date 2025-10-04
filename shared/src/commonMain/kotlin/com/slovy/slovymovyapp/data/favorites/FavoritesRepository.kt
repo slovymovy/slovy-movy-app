@@ -44,15 +44,6 @@ class FavoritesRepository(private val db: AppDatabase) {
                 )
             }
 
-    fun getGroupedByLangAndLemma(): List<FavoriteGroup> =
-        db.favoritesQueries.selectGroupedByLangAndLemma().executeAsList().map { row ->
-            FavoriteGroup(
-                targetLang = row.target_lang,
-                lemma = row.lemma,
-                count = row.favorite_count
-            )
-        }
-
     fun getAllGroupedByLangAndLemma(): List<Favorite> =
         db.favoritesQueries.selectAllOrderedByLangAndLemma().executeAsList().map { row ->
             Favorite(
@@ -71,9 +62,3 @@ class FavoritesRepository(private val db: AppDatabase) {
         db.favoritesQueries.deleteAll()
     }
 }
-
-data class FavoriteGroup(
-    val targetLang: String,
-    val lemma: String,
-    val count: Long
-)
