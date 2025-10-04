@@ -14,15 +14,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
-import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.remote.LanguageCard
-import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
-import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
 
@@ -42,16 +42,26 @@ data class SenseUiState(
     val senseId: String,
     val expanded: Boolean = true,
     val examplesExpanded: Boolean = true,
-    val languageExpanded: Map<String, Boolean> = emptyMap()
+    val languageExpanded: Map<String, Boolean> = emptyMap(),
+    val favorite: Boolean,
+    val showNavigationArrow: Boolean = false,
+    val pos: PartOfSpeech? = null
 )
 
-internal fun LanguageCard.toContentUiState(targetSenseId: String? = null): WordDetailUiState.Content =
+internal fun LanguageCard.toContentUiState(
+    targetSenseId: String? = null,
+    isSenseFavorite: (String) -> Boolean
+): WordDetailUiState.Content =
     WordDetailUiState.Content(
         card = this,
-        entries = entries.mapIndexed { index, entry -> entry.toEntryUiState(index, targetSenseId) }
+        entries = entries.mapIndexed { index, entry -> entry.toEntryUiState(index, targetSenseId, isSenseFavorite) }
     )
 
-private fun LanguageCardPosEntry.toEntryUiState(index: Int, targetSenseId: String? = null): EntryUiState = EntryUiState(
+private fun LanguageCardPosEntry.toEntryUiState(
+    index: Int,
+    targetSenseId: String? = null,
+    isSenseFavorite: (String) -> Boolean
+): EntryUiState = EntryUiState(
     entryId = "${pos.name.lowercase()}_$index",
     expanded = true,
     formsExpanded = false,
@@ -61,11 +71,15 @@ private fun LanguageCardPosEntry.toEntryUiState(index: Int, targetSenseId: Strin
         } else {
             senses.size < 2
         }
-        it.toSenseUiState(expanded)
+        it.toSenseUiState(expanded, isSenseFavorite(it.senseId), pos)
     }
 )
 
-private fun LanguageCardResponseSense.toSenseUiState(expanded: Boolean): SenseUiState {
+private fun LanguageCardResponseSense.toSenseUiState(
+    expanded: Boolean,
+    favorite: Boolean,
+    pos: PartOfSpeech? = null
+): SenseUiState {
     val languages = collectLanguageCodes()
     val languageStates = languages.associateWith { false }
     val examplesExpanded = examples.isNotEmpty()
@@ -73,7 +87,9 @@ private fun LanguageCardResponseSense.toSenseUiState(expanded: Boolean): SenseUi
         senseId = senseId,
         expanded = expanded,
         examplesExpanded = examplesExpanded,
-        languageExpanded = languageStates
+        languageExpanded = languageStates,
+        favorite = favorite,
+        pos = pos
     )
 }
 
@@ -136,42 +152,78 @@ private fun SenseUiState.toggleLanguage(languageCode: String): SenseUiState {
 }
 
 class WordDetailViewModel(
-    repository: DictionaryRepository,
-    dictionaryLanguage: String = "",
-    lemma: String = "",
-    targetSenseId: String? = null
+    private val repository: DictionaryRepository,
+    private val favoritesRepository: FavoritesRepository,
+    private val dictionaryLanguage: String = "",
+    private val lemma: String = "",
+    val targetSenseId: String? = null
 ) : ViewModel() {
     var state by mutableStateOf<WordDetailUiState>(WordDetailUiState.Empty())
         private set
 
     val scrollState = ScrollState(0)
-    val targetSenseId: String? = targetSenseId
     var sensePositions by mutableStateOf<Map<String, Float>>(emptyMap())
+        private set
+
+    var favoriteSenses by mutableStateOf<Set<String>>(emptySet())
         private set
 
     private var hasScrolledToTarget = false
 
     init {
+        loadFavorites()
         val card = repository.getLanguageCard(dictionaryLanguage, lemma)
         state =
-            card?.toContentUiState(targetSenseId) ?: WordDetailUiState.Empty(lemma = lemma, message = "Word not found")
+            card?.toContentUiState(targetSenseId, isSenseFavorite = ::isSenseFavorite) ?: WordDetailUiState.Empty(
+                lemma = lemma,
+                message = "Word not found"
+            )
     }
 
-    fun setScrollPosition(position: Int) {
+    fun loadFavorites() {
+        val card = repository.getLanguageCard(dictionaryLanguage, lemma)
+        val allSenseIds = card?.entries?.flatMap { entry ->
+            entry.senses.map { it.senseId }
+        } ?: emptyList()
+
+        val favoriteSenseIds = allSenseIds.filter { senseId ->
+            favoritesRepository.exists(senseId, dictionaryLanguage)
+        }.toSet()
+
+        favoriteSenses = favoriteSenseIds
+        val current = state
+        if (current is WordDetailUiState.Content) {
+            state = current.reloadFavorite(::isSenseFavorite)
+        }
+    }
+
+    fun isSenseFavorite(senseId: String): Boolean {
+        return senseId in favoriteSenses
+    }
+
+    fun toggleFavorite(senseId: String) {
+        if (senseId in favoriteSenses) {
+            favoritesRepository.remove(senseId, dictionaryLanguage)
+        } else {
+            favoritesRepository.add(senseId, dictionaryLanguage, lemma)
+        }
+        loadFavorites()
+    }
+
+    suspend fun setScrollPosition(position: Int) {
         // This will be called when restoring from saved state
-        scrollState.dispatchRawDelta(-scrollState.value.toFloat())
-        scrollState.dispatchRawDelta(position.toFloat())
+        scrollState.scrollTo(position)
     }
 
     fun updateSensePosition(senseId: String, yOffset: Float) {
         sensePositions = sensePositions + (senseId to yOffset)
     }
 
-    fun scrollToTargetSenseIfNeeded() {
+    suspend fun scrollToTargetSenseIfNeeded() {
         if (hasScrolledToTarget) return
         val target = targetSenseId ?: return
         val position = sensePositions[target] ?: return
-        scrollState.dispatchRawDelta(position - scrollState.value.toFloat())
+        scrollState.animateScrollTo(position.toInt())
         hasScrolledToTarget = true
     }
 
@@ -209,6 +261,18 @@ class WordDetailViewModel(
             state = current.toggleSenseLanguage(entryIndex, senseId, languageCode)
         }
     }
+}
+
+private fun WordDetailUiState.Content.reloadFavorite(isSenseFavorite: (String) -> Boolean): WordDetailUiState {
+    return copy(
+        entries = this.entries.map { entry ->
+            entry.copy(
+                senses = entry.senses.map { sense ->
+                    sense.copy(favorite = isSenseFavorite(sense.senseId))
+                }
+            )
+        }
+    )
 }
 
 @Composable
@@ -280,7 +344,8 @@ internal fun ExpandableSection(
 fun WordDetailScreen(
     viewModel: WordDetailViewModel,
     onBack: () -> Unit = {},
-    onNavigateToSearch: () -> Unit = {}
+    onNavigateToSearch: () -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {}
 ) {
     // Restore scroll position after process death
     val savedScrollPosition = rememberSaveable { viewModel.scrollState.value }
@@ -303,6 +368,7 @@ fun WordDetailScreen(
         scrollState = viewModel.scrollState,
         onBack = onBack,
         onNavigateToSearch = onNavigateToSearch,
+        onNavigateToFavorites = onNavigateToFavorites,
         onEntryToggle = { index -> viewModel.toggleEntry(index) },
         onFormsToggle = { index -> viewModel.toggleForms(index) },
         onSenseToggle = { entryIndex, senseId -> viewModel.toggleSense(entryIndex, senseId) },
@@ -310,7 +376,11 @@ fun WordDetailScreen(
         onLanguageToggle = { entryIndex, senseId, languageCode ->
             viewModel.toggleLanguage(entryIndex, senseId, languageCode)
         },
-        onSensePositioned = { senseId, yOffset -> viewModel.updateSensePosition(senseId, yOffset) }
+        onSensePositioned = { senseId, yOffset -> viewModel.updateSensePosition(senseId, yOffset) },
+        isSenseFavorite = { senseId -> viewModel.isSenseFavorite(senseId) },
+        onSenseFavoriteToggle = { senseId ->
+            viewModel.toggleFavorite(senseId)
+        }
     )
 }
 
@@ -321,12 +391,15 @@ fun WordDetailScreenContent(
     scrollState: ScrollState = ScrollState(0),
     onBack: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {},
     onEntryToggle: (Int) -> Unit = {},
     onFormsToggle: (Int) -> Unit = {},
     onSenseToggle: (Int, String) -> Unit = { _, _ -> },
     onSenseExamplesToggle: (Int, String) -> Unit = { _, _ -> },
     onLanguageToggle: (Int, String, String) -> Unit = { _, _, _ -> },
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
+    isSenseFavorite: (String) -> Boolean = { false },
+    onSenseFavoriteToggle: (String) -> Unit = {}
 ) {
     val fallbackTitle = "Word Details"
     val titleText = when (state) {
@@ -376,6 +449,7 @@ fun WordDetailScreenContent(
                 currentScreen = AppScreen.WORD_DETAIL,
                 isWordDetailAvailable = true,
                 onNavigateToSearch = onNavigateToSearch,
+                onNavigateToFavorites = onNavigateToFavorites,
                 onNavigateToWordDetail = {}
             )
         },
@@ -396,7 +470,9 @@ fun WordDetailScreenContent(
                     onSenseToggle = onSenseToggle,
                     onSenseExamplesToggle = onSenseExamplesToggle,
                     onLanguageToggle = onLanguageToggle,
-                    onSensePositioned = onSensePositioned
+                    onSensePositioned = onSensePositioned,
+                    isSenseFavorite = isSenseFavorite,
+                    onSenseFavoriteToggle = onSenseFavoriteToggle
                 )
             }
 
@@ -430,10 +506,16 @@ private fun WordDetailContent(
     onSenseToggle: (Int, String) -> Unit,
     onSenseExamplesToggle: (Int, String) -> Unit,
     onLanguageToggle: (Int, String, String) -> Unit,
-    onSensePositioned: (String, Float) -> Unit = { _, _ -> }
+    onSensePositioned: (String, Float) -> Unit = { _, _ -> },
+    isSenseFavorite: (String) -> Boolean = { false },
+    onSenseFavoriteToggle: (String) -> Unit = {}
 ) {
+    var scrollContainerY by remember { mutableStateOf(0f) }
+
     Column(
-        modifier = modifier,
+        modifier = modifier.onGloballyPositioned { coordinates ->
+            scrollContainerY = coordinates.positionInWindow().y
+        },
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.Start
     ) {
@@ -445,7 +527,10 @@ private fun WordDetailContent(
             )
         } else {
             card.entries.forEachIndexed { index, entry ->
-                val entryState = entryStates.getOrNull(index) ?: entry.toEntryUiState(index)
+                val entryState = entryStates.getOrNull(index) ?: entry.toEntryUiState(
+                    index,
+                    isSenseFavorite = isSenseFavorite
+                )
                 EntryCard(
                     entry = entry,
                     entryState = entryState,
@@ -456,7 +541,12 @@ private fun WordDetailContent(
                     onLanguageToggle = { senseId, languageCode ->
                         onLanguageToggle(index, senseId, languageCode)
                     },
-                    onSensePositioned = onSensePositioned
+                    onSensePositioned = { senseId, windowY ->
+                        // Calculate position relative to scroll container
+                        val relativeY = windowY - scrollContainerY
+                        onSensePositioned(senseId, relativeY)
+                    },
+                    onSenseFavoriteToggle = onSenseFavoriteToggle
                 )
             }
         }

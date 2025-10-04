@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.*
@@ -26,17 +26,19 @@ internal fun SenseCard(
     onExamplesToggle: () -> Unit,
     onLanguageToggle: (String) -> Unit,
     onPositioned: (String, Float) -> Unit = { _, _ -> },
-    otherSenses: List<LanguageCardResponseSense>
+    allSenses: List<LanguageCardResponseSense>,
+    onFavoriteToggle: () -> Unit = {},
+    onNavigateToDetail: () -> Unit = {}
 ) {
     val translationBasedHeader = remember { sense.translationsHeader() }
-    val translationHeaderSuffix = remember { translationsHeaderSuffix(sense, otherSenses) }
+    val translationHeaderSuffix = remember { translationsHeaderSuffix(sense, allSenses) }
 
     val expanded = state.expanded
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .onGloballyPositioned { coordinates ->
-                onPositioned(sense.senseId, coordinates.positionInParent().y)
+                onPositioned(sense.senseId, coordinates.positionInWindow().y)
             },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -75,19 +77,46 @@ internal fun SenseCard(
                     LevelAndFrequencyRow(
                         level = sense.learnerLevel,
                         frequency = sense.frequency,
-                        nameType = sense.nameType
+                        nameType = sense.nameType,
+                        pos = state.pos
                     )
                 }
 
-                Icon(
-                    imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
-                    contentDescription = if (expanded) {
-                        "Collapse sense"
-                    } else {
-                        "Expand sense"
-                    },
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (state.showNavigationArrow) {
+                        IconButton(
+                            onClick = onNavigateToDetail,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = ArrowForwardVector,
+                                contentDescription = "Navigate to word detail",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    IconButton(
+                        onClick = onFavoriteToggle,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Text(
+                            text = if (state.favorite) "❤️" else "🤍",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    Icon(
+                        imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
+                        contentDescription = if (expanded) {
+                            "Collapse sense"
+                        } else {
+                            "Expand sense"
+                        },
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             AnimatedVisibility(
@@ -294,7 +323,12 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
 }
 
 @Composable
-internal fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency, nameType: NameType?) {
+internal fun LevelAndFrequencyRow(
+    level: LearnerLevel,
+    frequency: SenseFrequency,
+    nameType: NameType?,
+    pos: PartOfSpeech? = null
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -302,6 +336,15 @@ internal fun LevelAndFrequencyRow(level: LearnerLevel, frequency: SenseFrequency
     ) {
         val (lc, lcc) = colorsForLevel(level)
         val (fc, fcc) = colorsForFrequency(frequency)
+        if (pos != null) {
+            val (pc, pcc) = colorsForPos(pos)
+            Badge(
+                text = pos.name.lowercase()
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                containerColor = pc,
+                contentColor = pcc
+            )
+        }
         Badge(text = level.name, containerColor = lc, contentColor = lcc)
         Badge(text = frequency.label, containerColor = fc, contentColor = fcc)
         if (nameType != null && nameType != NameType.NO) {

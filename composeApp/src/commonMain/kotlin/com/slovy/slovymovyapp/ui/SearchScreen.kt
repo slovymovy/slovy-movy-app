@@ -61,7 +61,8 @@ fun SearchScreen(
     viewModel: SearchViewModel,
     onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> },
     isWordDetailAvailable: Boolean = false,
-    onNavigateToWordDetail: () -> Unit = {}
+    onNavigateToWordDetail: () -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
@@ -89,7 +90,8 @@ fun SearchScreen(
             onWordSelected(item)
         },
         isWordDetailAvailable = isWordDetailAvailable,
-        onNavigateToWordDetail = onNavigateToWordDetail
+        onNavigateToWordDetail = onNavigateToWordDetail,
+        onNavigateToFavorites = onNavigateToFavorites
     )
 }
 
@@ -100,7 +102,8 @@ fun SearchScreenContent(
     onQueryChange: (String) -> Unit = {},
     onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
     isWordDetailAvailable: Boolean = false,
-    onNavigateToWordDetail: () -> Unit = {}
+    onNavigateToWordDetail: () -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {}
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -118,6 +121,7 @@ fun SearchScreenContent(
                     currentScreen = AppScreen.SEARCH,
                     isWordDetailAvailable = isWordDetailAvailable,
                     onNavigateToSearch = {},
+                    onNavigateToFavorites = onNavigateToFavorites,
                     onNavigateToWordDetail = onNavigateToWordDetail
                 )
             }

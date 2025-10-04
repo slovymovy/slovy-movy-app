@@ -9,6 +9,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class AppScreen {
     SEARCH,
+    FAVORITES,
     WORD_DETAIL
 }
 
@@ -17,6 +18,7 @@ fun AppNavigationBar(
     currentScreen: AppScreen,
     isWordDetailAvailable: Boolean,
     onNavigateToSearch: () -> Unit,
+    onNavigateToFavorites: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit
 ) {
     NavigationBar {
@@ -25,6 +27,12 @@ fun AppNavigationBar(
             label = { Text("Search") },
             selected = currentScreen == AppScreen.SEARCH,
             onClick = onNavigateToSearch
+        )
+        NavigationBarItem(
+            icon = { Text("❤️", style = MaterialTheme.typography.titleLarge) },
+            label = { Text("Favorites") },
+            selected = currentScreen == AppScreen.FAVORITES,
+            onClick = onNavigateToFavorites
         )
         NavigationBarItem(
             icon = { Text("📖", style = MaterialTheme.typography.titleLarge) },
@@ -43,6 +51,7 @@ fun PreviewAppNavigationBar() {
         currentScreen = AppScreen.SEARCH,
         isWordDetailAvailable = true,
         onNavigateToSearch = {},
+        onNavigateToFavorites = {},
         onNavigateToWordDetail = {}
     )
 }
