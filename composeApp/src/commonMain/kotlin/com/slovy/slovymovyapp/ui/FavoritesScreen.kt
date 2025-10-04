@@ -187,7 +187,7 @@ class FavoritesViewModel(
         val updated = state.groups.map { group ->
             group.copy(
                 senses = group.senses.map { favSense ->
-                    if (favSense.sense?.senseId == senseId) {
+                    if (favSense.sense.senseId == senseId) {
                         favSense.copy(
                             state = favSense.state.copy(
                                 favorite = isFavorite

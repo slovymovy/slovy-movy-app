@@ -114,7 +114,7 @@ open class FavoritesRepositoryTest : BaseTest() {
 
         assertEquals(4, results.size)
 
-        // Verify ordering: by targetLang ASC, then lemma ASC
+        // Verify ordering
         assertEquals("en", results[0].targetLang)
         assertEquals("hello", results[0].lemma)
         assertEquals("en", results[1].targetLang)
