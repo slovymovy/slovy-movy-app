@@ -121,14 +121,29 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 
 ## Database (SqlDelight)
 
+### Schema Locations
+
 - App DB schema: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/`
     - Migrations: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/migrations/`
+    - Verification DB: `shared/src/commonMain/sqldelight/appdb/<version>.db` (e.g., `2.db`)
 - Dictionary DB schema: `shared/src/commonMain/sqldelight/dictionarydb/com/slovy/slovymovyapp/dictionary/`
 - Translation DB schema: `shared/src/commonMain/sqldelight/translationdb/com/slovy/slovymovyapp/translation/`
 - Repository pattern: `SettingsRepository` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/settings/`
 - Database bootstrap: `DatabaseProvider` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/db/`
 - Platform DB support: expect/actual `PlatformDbSupport` + helpers in
   `composeApp/src/*/kotlin/com/slovy/slovymovyapp/data/remote/`
+
+### Migrations
+
+- Migration files are named `<version>.sqm` (e.g., `1.sqm` to migrate from version 1 to 2)
+- Stored in the `migrations/` subdirectory alongside schema files
+- Contain SQL statements to upgrade database schema
+- Verification `.db` files (e.g., `2.db`) represent the expected schema after migrations
+- Verification tasks: `gradlew :shared:verifyCommonMainAppDatabaseMigration`
+    - **Windows Note**: Migration verification is disabled on Windows due to
+      [SqlDelight issue #5312](https://github.com/sqldelight/sqldelight/issues/5312)
+    - Configured in `shared/build.gradle.kts` with `verifyMigrations.set(!OperatingSystem.current().isWindows)`
+    - On non-Windows platforms, the verification task confirms migrations produce the expected schema
 
 ## Testing Guidelines
 
