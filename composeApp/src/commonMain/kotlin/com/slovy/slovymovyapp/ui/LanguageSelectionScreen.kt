@@ -6,10 +6,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 val languagesToCode = listOf(
@@ -21,26 +21,30 @@ val languagesToCode = listOf(
 
 val codeToLanguage = languagesToCode.associate { it.second to it.first }
 
+data class LanguageOption(
+    val label: String,
+    val code: String
+)
+
+class LanguageSelectionViewModel(
+    val title: String = "Choose your native language",
+    val languages: List<LanguageOption> = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
+) : ViewModel()
+
 @Composable
 fun LanguageSelectionScreen(
+    viewModel: LanguageSelectionViewModel,
     onLanguageChosen: (String) -> Unit = { _ -> }
 ) {
-    val state = remember {
-        LanguageSelectionUiState(
-            title = "Choose your native language",
-            languages = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
-        )
-    }
-
     LanguageSelectionScreenContent(
-        state = state,
+        state = viewModel,
         onLanguageChosen = onLanguageChosen
     )
 }
 
 @Composable
 fun LanguageSelectionScreenContent(
-    state: LanguageSelectionUiState,
+    state: LanguageSelectionViewModel,
     onLanguageChosen: (String) -> Unit = {}
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
@@ -68,21 +72,11 @@ fun LanguageSelectionScreenContent(
     }
 }
 
-data class LanguageSelectionUiState(
-    val title: String,
-    val languages: List<LanguageOption>
-)
-
-data class LanguageOption(
-    val label: String,
-    val code: String
-)
-
 @Preview
 @Composable
 private fun LanguageSelectionScreenPreviewDefault() {
     LanguageSelectionScreenContent(
-        state = LanguageSelectionUiState(
+        state = LanguageSelectionViewModel(
             title = "Choose your native language",
             languages = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
         )
@@ -93,7 +87,7 @@ private fun LanguageSelectionScreenPreviewDefault() {
 @Composable
 private fun LanguageSelectionScreenPreviewEmpty() {
     LanguageSelectionScreenContent(
-        state = LanguageSelectionUiState(
+        state = LanguageSelectionViewModel(
             title = "Choose your native language",
             languages = emptyList()
         )

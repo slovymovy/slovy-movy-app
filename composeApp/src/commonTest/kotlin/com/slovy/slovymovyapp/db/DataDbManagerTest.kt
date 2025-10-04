@@ -3,11 +3,15 @@ package com.slovy.slovymovyapp.db
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.data.settings.Setting
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.platformDbSupport
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
@@ -144,6 +148,207 @@ class DataDbManagerTest : BaseTest() {
                 mgr.deleteDictionary("en")
                 mgr.deleteTranslation("en", "ru")
             }
+        }
+    }
+
+    @Test
+    fun version_checking_returns_false_when_version_not_set() {
+        val platform = platformDbSupport()
+        val appDbPath = platform.getDatabasePath("test_version_not_set.db")
+        if (platform.fileExists(appDbPath)) {
+            platform.deleteFile(appDbPath)
+        }
+
+        val appDriver = platform.createAppDataDriver(appDbPath)
+        val appDb = DatabaseProvider.createAppDatabase(appDriver)
+        val settingsRepo = SettingsRepository(appDb)
+
+        try {
+            val mgr = DataDbManager(platform, settingsRepo)
+            val hasRequired = runBlocking { mgr.hasRequiredVersion() }
+            assertFalse(hasRequired, "hasRequiredVersion should return false when version is not set")
+        } finally {
+            appDriver.close()
+            platform.deleteFile(appDbPath)
+        }
+    }
+
+    @Test
+    fun version_checking_returns_true_when_version_matches() {
+        val platform = platformDbSupport()
+        val appDbPath = platform.getDatabasePath("test_version_matches.db")
+        if (platform.fileExists(appDbPath)) {
+            platform.deleteFile(appDbPath)
+        }
+
+        val appDriver = platform.createAppDataDriver(appDbPath)
+        val appDb = DatabaseProvider.createAppDatabase(appDriver)
+        val settingsRepo = SettingsRepository(appDb)
+
+        try {
+            val mgr = DataDbManager(platform, settingsRepo)
+
+            settingsRepo.insert(
+                Setting(
+                    id = Setting.Name.DATA_VERSION,
+                    value = Json.parseToJsonElement("\"${DataDbManager.VERSION}\"")
+                )
+            )
+
+            val hasRequired = runBlocking { mgr.hasRequiredVersion() }
+            assertTrue(hasRequired, "hasRequiredVersion should return true when version matches")
+        } finally {
+            appDriver.close()
+            platform.deleteFile(appDbPath)
+        }
+    }
+
+    @Test
+    fun version_checking_returns_false_when_version_outdated() {
+        val platform = platformDbSupport()
+        val appDbPath = platform.getDatabasePath("test_version_outdated.db")
+        if (platform.fileExists(appDbPath)) {
+            platform.deleteFile(appDbPath)
+        }
+
+        val appDriver = platform.createAppDataDriver(appDbPath)
+        val appDb = DatabaseProvider.createAppDatabase(appDriver)
+        val settingsRepo = SettingsRepository(appDb)
+
+        try {
+            val mgr = DataDbManager(platform, settingsRepo)
+
+            settingsRepo.insert(
+                Setting(
+                    id = Setting.Name.DATA_VERSION,
+                    value = Json.parseToJsonElement("\"v0\"")
+                )
+            )
+
+            val hasRequired = runBlocking { mgr.hasRequiredVersion() }
+            assertFalse(hasRequired, "hasRequiredVersion should return false when version is outdated")
+        } finally {
+            appDriver.close()
+            platform.deleteFile(appDbPath)
+        }
+    }
+
+    @Test
+    fun deleteAllDownloadedData_removes_dictionary_and_translation_files() {
+        val platform = platformDbSupport()
+        val mgr = DataDbManager(platform, null)
+
+        val dictPath = mgr.hasDictionary("en").let {
+            platform.getDatabasePath(DataDbManager.dictionaryFileName("en"))
+        }
+        val transPath = platform.getDatabasePath(DataDbManager.translationFileName("nl", "en"))
+
+        platform.ensureDatabasesDir()
+
+        if (!platform.fileExists(dictPath)) {
+            val out = platform.openOutput(dictPath)
+            out.write("test".encodeToByteArray(), 0, 4)
+            out.close()
+        }
+        if (!platform.fileExists(transPath)) {
+            val out = platform.openOutput(transPath)
+            out.write("test".encodeToByteArray(), 0, 4)
+            out.close()
+        }
+
+        assertTrue(platform.fileExists(dictPath), "Dictionary file should exist before deletion")
+        assertTrue(platform.fileExists(transPath), "Translation file should exist before deletion")
+
+        mgr.deleteAllDownloadedData()
+
+        assertFalse(platform.fileExists(dictPath), "Dictionary file should be deleted")
+        assertFalse(platform.fileExists(transPath), "Translation file should be deleted")
+    }
+
+    @Test
+    fun deleteAllDownloadedData_clears_version_setting() {
+        val platform = platformDbSupport()
+        val appDbPath = platform.getDatabasePath("test_delete_clears_version.db")
+        if (platform.fileExists(appDbPath)) {
+            platform.deleteFile(appDbPath)
+        }
+
+        val appDriver = platform.createAppDataDriver(appDbPath)
+        val appDb = DatabaseProvider.createAppDatabase(appDriver)
+        val settingsRepo = SettingsRepository(appDb)
+
+        try {
+            val mgr = DataDbManager(platform, settingsRepo)
+
+            settingsRepo.insert(
+                Setting(
+                    id = Setting.Name.DATA_VERSION,
+                    value = Json.parseToJsonElement("\"v0\"")
+                )
+            )
+
+            val versionBefore = settingsRepo.getById(Setting.Name.DATA_VERSION)
+            assertTrue(versionBefore != null, "Version should exist before deletion")
+
+            mgr.deleteAllDownloadedData()
+
+            val versionAfter = settingsRepo.getById(Setting.Name.DATA_VERSION)
+            assertTrue(versionAfter == null, "Version should be cleared after deleteAllDownloadedData")
+        } finally {
+            appDriver.close()
+            platform.deleteFile(appDbPath)
+        }
+    }
+
+    @Test
+    fun getDatabasePath_with_empty_string_returns_directory() {
+        val platform = platformDbSupport()
+
+        platform.ensureDatabasesDir()
+        val dirPath = platform.getDatabasePath("")
+
+        assertTrue(dirPath.toString().isNotEmpty(), "Directory path should not be empty")
+        assertTrue(platform.fileExists(dirPath), "Directory should exist after ensureDatabasesDir")
+
+        val testFile = platform.getDatabasePath("test_file.db")
+        assertTrue(testFile.toString().startsWith(dirPath.toString()), "File path should be within directory")
+    }
+
+    @Test
+    fun listFiles_on_databases_directory_works() {
+        val platform = platformDbSupport()
+
+        platform.ensureDatabasesDir()
+
+        val dictPath = platform.getDatabasePath(DataDbManager.dictionaryFileName("test"))
+        val transPath = platform.getDatabasePath(DataDbManager.translationFileName("en", "ru"))
+
+        val out1 = platform.openOutput(dictPath)
+        out1.write("test1".encodeToByteArray(), 0, 5)
+        out1.close()
+
+        val out2 = platform.openOutput(transPath)
+        out2.write("test2".encodeToByteArray(), 0, 5)
+        out2.close()
+
+        try {
+            val dirPath = platform.getDatabasePath("")
+            val files = platform.listFiles(dirPath)
+
+            assertTrue(files.isNotEmpty(), "Should list files in directory")
+
+            val fileNames = files.map { it.name }
+            assertTrue(
+                fileNames.any { it.startsWith("dictionary_") },
+                "Should find dictionary files"
+            )
+            assertTrue(
+                fileNames.any { it.startsWith("translation_") },
+                "Should find translation files"
+            )
+        } finally {
+            platform.deleteFile(dictPath)
+            platform.deleteFile(transPath)
         }
     }
 }

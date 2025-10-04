@@ -167,4 +167,21 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
             fileManager.createDirectoryAtPath(path, true, null, null)
         }
     }
+
+    @OptIn(ExperimentalForeignApi::class)
+    actual fun listFiles(path: Path): List<Path> {
+        val fm = NSFileManager.defaultManager
+        val pathStr = path.toString()
+        val dir = if (fm.fileExistsAtPath(pathStr)) {
+            val url = NSURL.fileURLWithPath(pathStr)
+            if (url.hasDirectoryPath) pathStr else (Path(pathStr).parent?.toString() ?: pathStr)
+        } else {
+            Path(pathStr).parent?.toString() ?: pathStr
+        }
+
+        val contents = fm.contentsOfDirectoryAtPath(dir, error = null) as? List<*>
+        return contents?.mapNotNull { filename ->
+            (filename as? String)?.let { Path("$dir/$it") }
+        } ?: emptyList()
+    }
 }

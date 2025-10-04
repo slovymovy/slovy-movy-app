@@ -1,72 +1,95 @@
 package com.slovy.slovymovyapp.ui
 
-// Using a simple text button instead of material icons to keep commonMain lightweight
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.slovy.slovymovyapp.data.remote.DataDbManager
+import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import kotlin.uuid.Uuid
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.uuid.Uuid
+
+data class SearchUiState(
+    val title: String,
+    val query: String,
+    val results: List<DictionaryRepository.SearchItem>,
+    val showNoResults: Boolean,
+    val scrollState: LazyListState = LazyListState()
+)
+
+class SearchViewModel(
+    private val repository: DictionaryRepository
+) : ViewModel() {
+
+    var state by mutableStateOf(SearchUiState("Search", "", emptyList(), false))
+        private set
+
+    suspend fun updateQuery(newQuery: String) {
+        val trimmed = newQuery.trim()
+        val newResults = if (trimmed.isEmpty()) {
+            emptyList()
+        } else {
+            repository.search(trimmed)
+        }
+        state = state.copy(
+            query = trimmed,
+            results = newResults,
+            showNoResults = newResults.isEmpty() && trimmed.isNotEmpty()
+        )
+        // Reset scroll to top when query changes
+        state.scrollState.scrollToItem(0)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    language: String? = null,
-    dictionaryLanguage: String? = null,
-    dataManager: DataDbManager? = null,
-    onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> }
+    viewModel: SearchViewModel,
+    onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> },
+    isWordDetailAvailable: Boolean = false,
+    onNavigateToWordDetail: () -> Unit = {}
 ) {
-    var query by remember { mutableStateOf("") }
-    var showInfo by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
+    // restore after process death
+    val savedQuery = rememberSaveable { viewModel.state.query }
 
-    // Repository instance
-    val repository = remember(dataManager) { dataManager?.let { DictionaryRepository(it) } }
-
-    val results = remember(query, dictionaryLanguage, repository) {
-        val trimmed = query.trim()
-        if (trimmed.isEmpty()) emptyList()
-        else {
-            repository?.search(trimmed, dictionaryLanguage) ?: emptyList()
+    LaunchedEffect(savedQuery) {
+        if (viewModel.state.query.isEmpty() && savedQuery.isNotEmpty()) {
+            viewModel.updateQuery(savedQuery)
         }
     }
 
-    val uiState = remember(query, results, showInfo, language) {
-        SearchUiState(
-            title = "Search",
-            query = query,
-            results = results,
-            isInfoDialogVisible = showInfo,
-            infoText = language ?: "Not selected",
-            showNoResults = query.isNotBlank() && results.isEmpty()
-        )
+    // Clear focus when scrolling starts
+    LaunchedEffect(viewModel.state.scrollState.isScrollInProgress) {
+        if (viewModel.state.scrollState.isScrollInProgress) {
+            focusManager.clearFocus()
+        }
     }
 
     SearchScreenContent(
-        state = uiState,
-        onQueryChange = { query = it },
-        onResultSelected = onWordSelected,
-        onInfoClick = { showInfo = true },
-        onInfoDismiss = { showInfo = false }
+        state = viewModel.state,
+        onQueryChange = { coroutineScope.launch { viewModel.updateQuery(it) } },
+        onResultSelected = { item ->
+            focusManager.clearFocus()
+            onWordSelected(item)
+        },
+        isWordDetailAvailable = isWordDetailAvailable,
+        onNavigateToWordDetail = onNavigateToWordDetail
     )
 }
 
@@ -76,91 +99,209 @@ fun SearchScreenContent(
     state: SearchUiState,
     onQueryChange: (String) -> Unit = {},
     onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
-    onInfoClick: () -> Unit = {},
-    onInfoDismiss: () -> Unit = {},
+    isWordDetailAvailable: Boolean = false,
+    onNavigateToWordDetail: () -> Unit = {}
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(state.title) },
-                    actions = {
-                        TextButton(onClick = onInfoClick) {
-                            Text("ℹ︎")
+                    title = {
+                        Column {
+                            Text(state.title)
                         }
                     }
+                )
+            },
+            bottomBar = {
+                AppNavigationBar(
+                    currentScreen = AppScreen.SEARCH,
+                    isWordDetailAvailable = isWordDetailAvailable,
+                    onNavigateToSearch = {},
+                    onNavigateToWordDetail = onNavigateToWordDetail
                 )
             }
         ) { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
                     .padding(innerPadding)
-                    .padding(16.dp)
             ) {
+                // Search field with padding
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = onQueryChange,
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Search a word") }
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp),
+                    label = { Text("Search a word") },
+                    placeholder = { Text("Type to search...") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    trailingIcon = {
+                        if (state.query.isNotEmpty()) {
+                            TextButton(onClick = { onQueryChange("") }) {
+                                Text("✕")
+                            }
+                        }
+                    }
                 )
 
-                if (state.showNoResults) {
-                    Text(
-                        text = "No results",
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-                } else {
-                    state.results.forEach { item ->
-                        Text(
-                            text = item.display,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onResultSelected(item) }
-                                .padding(vertical = 12.dp)
-                        )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Result area
+                when {
+                    state.query.isEmpty() -> {
+                        EmptySearchState()
+                    }
+
+                    state.showNoResults -> {
+                        NoResultsState(query = state.query)
+                    }
+
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                            state = state.scrollState
+                        ) {
+                            items(state.results) { item ->
+                                SearchResultCard(
+                                    item = item,
+                                    onClick = { onResultSelected(item) }
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+}
 
-        if (state.isInfoDialogVisible) {
-            AlertDialog(
-                onDismissRequest = onInfoDismiss,
-                confirmButton = {
-                    TextButton(onClick = onInfoDismiss) {
-                        Text("OK")
-                    }
+@Composable
+private fun SearchResultCard(
+    item: DictionaryRepository.SearchItem,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.display,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            SuggestionChip(
+                onClick = { },
+                label = {
+                    Text(
+                        text = item.language.uppercase(),
+                        style = MaterialTheme.typography.labelSmall
+                    )
                 },
-                title = { Text("Selected language") },
-                text = { Text(state.infoText) }
+                modifier = Modifier.padding(start = 8.dp)
             )
         }
     }
 }
 
-data class SearchUiState(
-    val title: String,
-    val query: String,
-    val results: List<DictionaryRepository.SearchItem>,
-    val isInfoDialogVisible: Boolean,
-    val infoText: String,
-    val showNoResults: Boolean
-)
+@Composable
+private fun EmptySearchState() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Spacer(modifier = Modifier.height(48.dp))
+        Text(
+            text = "🔍",
+            style = MaterialTheme.typography.displayLarge
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Search for words",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Start typing to find words in your selected language",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
+    }
+}
+
+@Composable
+private fun NoResultsState(query: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Spacer(modifier = Modifier.height(48.dp))
+        Text(
+            text = "🤔",
+            style = MaterialTheme.typography.displayLarge
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "No results found",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "We couldn't find any words matching \"$query\"",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Try a different spelling or search term",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
+    }
+}
 
 @Preview
 @Composable
 private fun SearchScreenPreviewEmptyQuery() {
     SearchScreenContent(
         state = SearchUiState(
-            title = "Search",
+            title = "Dictionary Search",
             query = "",
             results = emptyList(),
-            isInfoDialogVisible = false,
-            infoText = "Not selected",
-            showNoResults = false
-        )
+            showNoResults = false,
+        ),
     )
 }
 
@@ -169,26 +310,68 @@ private fun SearchScreenPreviewEmptyQuery() {
 private fun SearchScreenPreviewWithResults() {
     SearchScreenContent(
         state = SearchUiState(
-            title = "Search",
-            query = "wo",
+            title = "Dictionary Search",
+            query = "cel",
             results = listOf(
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
-                    lemma = "world",
-                    display = "\"world\""
+                    lemma = "celebration",
+                    display = "\"celebration\""
                 ),
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
-                    lemma = "word",
-                    display = "\"word\""
+                    lemma = "celebrity",
+                    display = "\"celebrity\""
+                ),
+                DictionaryRepository.SearchItem(
+                    language = "en",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
+                    lemma = "celestial",
+                    display = "\"celestial\""
+                ),
+                DictionaryRepository.SearchItem(
+                    language = "en",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"),
+                    lemma = "cell",
+                    display = "\"cell\""
                 )
             ),
-            isInfoDialogVisible = false,
-            infoText = "English",
-            showNoResults = false
-        )
+            showNoResults = false,
+        ),
+    )
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewMultilingualResults() {
+    SearchScreenContent(
+        state = SearchUiState(
+            title = "Dictionary Search",
+            query = "program",
+            results = listOf(
+                DictionaryRepository.SearchItem(
+                    language = "en",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                    lemma = "program",
+                    display = "\"program\""
+                ),
+                DictionaryRepository.SearchItem(
+                    language = "en",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
+                    lemma = "programmatically",
+                    display = "\"programmatically\""
+                ),
+                DictionaryRepository.SearchItem(
+                    language = "ru",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
+                    lemma = "программа",
+                    display = "\"программа\""
+                )
+            ),
+            showNoResults = false,
+        ),
     )
 }
 
@@ -197,13 +380,11 @@ private fun SearchScreenPreviewWithResults() {
 private fun SearchScreenPreviewNoResults() {
     SearchScreenContent(
         state = SearchUiState(
-            title = "Search",
-            query = "xyz",
+            title = "Dictionary Search",
+            query = "xyzabc123",
             results = emptyList(),
-            isInfoDialogVisible = false,
-            infoText = "English",
-            showNoResults = true
-        )
+            showNoResults = true,
+        ),
     )
 }
 
@@ -212,12 +393,43 @@ private fun SearchScreenPreviewNoResults() {
 private fun SearchScreenPreviewInfoDialog() {
     SearchScreenContent(
         state = SearchUiState(
-            title = "Search",
+            title = "Dictionary Search",
             query = "world",
-            results = emptyList(),
-            isInfoDialogVisible = true,
-            infoText = "English",
-            showNoResults = false
-        )
+            results = listOf(
+                DictionaryRepository.SearchItem(
+                    language = "en",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                    lemma = "world",
+                    display = "\"world\""
+                )
+            ),
+            showNoResults = false,
+        ),
+    )
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewDutchLanguage() {
+    SearchScreenContent(
+        state = SearchUiState(
+            title = "Dictionary Search",
+            query = "bib",
+            results = listOf(
+                DictionaryRepository.SearchItem(
+                    language = "nl",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                    lemma = "bibliotheek",
+                    display = "\"bibliotheek\""
+                ),
+                DictionaryRepository.SearchItem(
+                    language = "nl",
+                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
+                    lemma = "bijbel",
+                    display = "\"bijbel\""
+                )
+            ),
+            showNoResults = false,
+        ),
     )
 }

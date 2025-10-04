@@ -2,51 +2,79 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.remote.CancelToken
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-@Composable
-fun DownloadScreen(
-    onSuccess: () -> Unit = {},
-    onCancel: () -> Unit = {},
-    onError: (Throwable) -> Unit = {},
-    download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit = { _, _ -> },
-    description: String = "Downloading data"
-) {
-    var state by remember { mutableStateOf<DownloadUiState>(DownloadUiState.Idle) }
-    val cancel = remember { CancelToken() }
+class DownloadViewModel(
+    private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
+    private val onSuccess: () -> Unit,
+    private val onCancel: () -> Unit,
+    private val onError: (Throwable) -> Unit
+) : ViewModel() {
 
-    LaunchedEffect(Unit) {
-        state = DownloadUiState.Running(0, null)
-        try {
-            val onProgress: (DownloadProgress) -> Unit =
-                { p -> state = DownloadUiState.Running(p.percent.coerceAtLeast(0), p.totalBytes) }
+    var state by mutableStateOf<DownloadUiState>(DownloadUiState.Idle)
+        private set
 
-            download(onProgress, cancel)
-            state = DownloadUiState.Done
-            onSuccess()
-        } catch (t: Throwable) {
-            if (cancel.isCancelled) {
-                state = DownloadUiState.Cancelled
-                onCancel()
-            } else {
-                state = DownloadUiState.Failed(t)
-                onError(t)
+    private val cancel = CancelToken()
+
+    init {
+        startDownload()
+    }
+
+    private fun startDownload() {
+        viewModelScope.launch {
+            state = DownloadUiState.Running(0, null)
+            try {
+                val onProgress: (DownloadProgress) -> Unit =
+                    { p -> state = DownloadUiState.Running(p.percent.coerceAtLeast(0), p.totalBytes) }
+
+                download(onProgress, cancel)
+                state = DownloadUiState.Done
+                onSuccess()
+            } catch (t: Throwable) {
+                if (cancel.isCancelled) {
+                    state = DownloadUiState.Cancelled
+                    onCancel()
+                } else {
+                    state = DownloadUiState.Failed(t)
+                    onError(t)
+                }
             }
         }
     }
 
+    fun cancelDownload() {
+        cancel.cancel()
+    }
+
+    fun retry() {
+        state = DownloadUiState.Idle
+        startDownload()
+    }
+}
+
+@Composable
+fun DownloadScreen(
+    viewModel: DownloadViewModel,
+    description: String = "Downloading data"
+) {
     DownloadScreenContent(
-        state = state,
+        state = viewModel.state,
         description = description,
-        onCancelClick = { cancel.cancel() },
-        onRetryClick = { state = DownloadUiState.Idle },
-        onCloseClick = onCancel
+        onCancelClick = { viewModel.cancelDownload() },
+        onRetryClick = { viewModel.retry() },
+        onCloseClick = { viewModel.cancelDownload() }
     )
 }
 
@@ -64,19 +92,19 @@ fun DownloadScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            when (val s = state) {
+            when (state) {
                 is DownloadUiState.Idle -> Text("Preparing download…")
                 is DownloadUiState.Running -> {
                     CircularProgressIndicator()
                     Spacer(Modifier.height(16.dp))
-                    val pct = if (s.percent >= 0) "${s.percent}%" else "…"
+                    val pct = if (state.percent >= 0) "${state.percent}%" else "…"
                     Text("$description $pct", style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(16.dp))
                     OutlinedButton(onClick = onCancelClick) { Text("Cancel") }
                 }
 
                 is DownloadUiState.Failed -> {
-                    val message = s.error.message ?: "Unknown error"
+                    val message = state.error.message ?: "Unknown error"
                     Text("Download failed: $message")
                     Spacer(Modifier.height(16.dp))
                     Button(onClick = onRetryClick) { Text("Retry") }

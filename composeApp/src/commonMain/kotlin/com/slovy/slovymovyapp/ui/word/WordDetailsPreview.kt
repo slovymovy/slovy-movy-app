@@ -362,20 +362,32 @@ private fun WordDetailScreenPreviewLowFrequencyWord() {
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewError() {
-    WordDetailScreenContent(state = WordDetailUiState.Error(message = "Unable to load word"))
-}
-
-@Preview
-@Composable
-private fun WordDetailScreenPreviewLoading() {
-    WordDetailScreenContent(state = WordDetailUiState.Loading)
-}
-
-@Preview
-@Composable
 private fun WordDetailScreenPreviewEmpty() {
     WordDetailScreenContent(state = WordDetailUiState.Empty(lemma = "testing"))
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewWithTraits() {
+    WordDetailScreenContent(state = sampleWordWithTraits().toContentUiState())
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewWithNameTypes() {
+    WordDetailScreenContent(state = sampleRichmondCard().toContentUiState())
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewAllTraitTypes() {
+    WordDetailScreenContent(state = sampleAllTraitTypesCard().toContentUiState())
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewVeryLongWord() {
+    WordDetailScreenContent(state = sampleVeryLongWordCard().toContentUiState())
 }
 
 // Sample word card creators for different types of words
@@ -871,6 +883,16 @@ internal fun sampleNoTranslationCard(): LanguageCard {
                         ),
                         synonyms = listOf("little one", "small fry"),
                         commonPhrases = listOf("just a whippersnapper"),
+                        traits = listOf(
+                            LanguageCardTrait(
+                                TraitType.COLLOQUIAL,
+                                "Informal and somewhat dated usage"
+                            ),
+                            LanguageCardTrait(
+                                TraitType.DATED,
+                                "More commonly used in earlier generations"
+                            )
+                        ),
                         targetLangDefinitions = emptyMap(),
                         translations = emptyMap()
                     )
@@ -1098,5 +1120,202 @@ internal fun sampleTestingCard(): LanguageCard {
                 )
             )
         )
+    )
+}
+
+internal fun sampleWordWithTraits(): LanguageCard {
+    return LanguageCard(
+        lemma = "ain't",
+        entries = listOf(
+            LanguageCardPosEntry(
+                pos = PartOfSpeech.VERB,
+                forms = mutableListOf(),
+                senses = listOf(
+                    LanguageCardResponseSense(
+                        senseId = "trait-example-1",
+                        senseDefinition = "Contraction of 'am not', 'is not', 'are not', 'has not', or 'have not'.",
+                        learnerLevel = LearnerLevel.B1,
+                        frequency = SenseFrequency.MIDDLE,
+                        semanticGroupId = "Contraction",
+                        nameType = NameType.NO,
+                        examples = listOf(
+                            LanguageCardExample(
+                                text = "That <w>ain't</w> right!",
+                                targetLangTranslations = mapOf("ru" to "Это <w>неправильно</w>!")
+                            ),
+                            LanguageCardExample(
+                                text = "I <w>ain't</w> seen nothing like that before.",
+                                targetLangTranslations = mapOf("ru" to "Я никогда раньше такого <w>не видел</w>.")
+                            )
+                        ),
+                        synonyms = listOf("isn't", "aren't", "am not"),
+                        traits = listOf(
+                            LanguageCardTrait(
+                                TraitType.COLLOQUIAL,
+                                "Very informal usage, common in casual speech"
+                            ),
+                            LanguageCardTrait(
+                                TraitType.DIALECTAL,
+                                "Particularly common in Southern American English and African American Vernacular English"
+                            ),
+                            LanguageCardTrait(
+                                TraitType.FORM,
+                                "Considered non-standard in formal writing"
+                            )
+                        ),
+                        targetLangDefinitions = mapOf(
+                            "ru" to "Разговорное сокращение отрицательных форм глаголов 'be' и 'have'."
+                        ),
+                        translations = mapOf(
+                            "ru" to listOf(
+                                LanguageCardTranslation(
+                                    targetLangWord = "не",
+                                    targetLangSenseClarification = "Общее отрицание в разговорной речи."
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+}
+
+internal fun sampleAllTraitTypesCard(): LanguageCard {
+    return LanguageCard(
+        lemma = "thou",
+        entries = listOf(
+            LanguageCardPosEntry(
+                pos = PartOfSpeech.PRONOUN,
+                forms = mutableListOf(),
+                senses = listOf(
+                    LanguageCardResponseSense(
+                        senseId = "all-traits-example",
+                        senseDefinition = "Second person singular pronoun (archaic or dialectal).",
+                        learnerLevel = LearnerLevel.C1,
+                        frequency = SenseFrequency.VERY_LOW,
+                        semanticGroupId = "Pronoun",
+                        nameType = NameType.NO,
+                        examples = listOf(
+                            LanguageCardExample(
+                                text = "<w>Thou</w> shalt not pass!",
+                                targetLangTranslations = mapOf("ru" to "<w>Ты</w> не пройдёшь!")
+                            )
+                        ),
+                        traits = listOf(
+                            LanguageCardTrait(
+                                TraitType.ARCHAIC,
+                                "Rarely used in modern English except in religious or historical contexts"
+                            ),
+                            LanguageCardTrait(
+                                TraitType.DATED,
+                                "Common in Early Modern English (Shakespeare era)"
+                            ),
+                            LanguageCardTrait(
+                                TraitType.DIALECTAL,
+                                "Still used in some Northern English dialects"
+                            ),
+                            LanguageCardTrait(
+                                TraitType.REGIONAL,
+                                "Yorkshire, Lancashire"
+                            ),
+                            LanguageCardTrait(
+                                TraitType.FORM,
+                                "Nominative form; 'thee' is the oblique form"
+                            )
+                        ),
+                        targetLangDefinitions = mapOf(
+                            "ru" to "Архаичное местоимение второго лица единственного числа."
+                        ),
+                        translations = mapOf(
+                            "ru" to listOf(
+                                LanguageCardTranslation(
+                                    targetLangWord = "ты",
+                                    targetLangSenseClarification = "Устаревшая форма обращения."
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+}
+
+internal fun sampleVeryLongWordCard(): LanguageCard {
+    return LanguageCard(
+        lemma = "pneumonoultramicroscopicsilicovolcanoconiosis",
+        entries = listOf(
+            LanguageCardPosEntry(
+                pos = PartOfSpeech.NOUN,
+                forms = mutableListOf(),
+                senses = listOf(
+                    LanguageCardResponseSense(
+                        senseId = "very-long-word-example",
+                        senseDefinition = "A lung disease caused by inhaling very fine silicate or quartz dust.",
+                        learnerLevel = LearnerLevel.C2,
+                        frequency = SenseFrequency.VERY_LOW,
+                        semanticGroupId = "Medical",
+                        nameType = NameType.NO,
+                        examples = listOf(
+                            LanguageCardExample(
+                                text = "<w>Pneumonoultramicroscopicsilicovolcanoconiosis</w> is one of the longest words in the English language.",
+                                targetLangTranslations = mapOf("ru" to "<w>Пневмоноультрамикроскопическийсиликовулканокониоз</w> - одно из самых длинных слов в английском языке.")
+                            )
+                        ),
+                        synonyms = listOf("silicosis", "black lung disease"),
+                        traits = listOf(
+                            LanguageCardTrait(
+                                TraitType.FORM,
+                                "Considered one of the longest words in major dictionaries"
+                            )
+                        ),
+                        targetLangDefinitions = mapOf(
+                            "ru" to "Заболевание легких, вызванное вдыханием мелкодисперсной пыли силикатов или кварца."
+                        ),
+                        translations = mapOf(
+                            "ru" to listOf(
+                                LanguageCardTranslation(
+                                    targetLangWord = "пневмокониоз",
+                                    targetLangSenseClarification = "Медицинский термин для болезни легких."
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewTargetSenseAmazon() {
+    WordDetailScreenContent(
+        state = sampleAmazonCard().toContentUiState(targetSenseId = "4f67890a-bcde-5678-9012-34567890abcd")
+    )
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewTargetSenseAmazonParrot() {
+    WordDetailScreenContent(
+        state = sampleAmazonCard().toContentUiState(targetSenseId = "8c2403c5-1510-45cb-9112-304f78772f96")
+    )
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewTargetSenseMultilingual() {
+    WordDetailScreenContent(
+        state = sampleMultilingualCard().toContentUiState(targetSenseId = "d4e5f6a7-b8c9-0123-def0-456789012345")
+    )
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewTargetSenseRichmondVirginia() {
+    WordDetailScreenContent(
+        state = sampleRichmondCard().toContentUiState(targetSenseId = "2556596a-2eae-4d77-bbb2-dada74364b55")
     )
 }

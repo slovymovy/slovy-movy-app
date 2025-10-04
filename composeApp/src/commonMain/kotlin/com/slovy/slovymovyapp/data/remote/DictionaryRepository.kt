@@ -33,25 +33,14 @@ class DictionaryRepository(
     }
 
     // Search within all installed dictionaries by default; if dictionaryLanguage provided, restrict to it.
-    fun search(query: String, dictionaryLanguage: String? = null, maxItems: Int = 20): List<SearchItem> {
+    fun search(query: String, dictionaryLanguage: String? = null, maxItems: Int = 200): List<SearchItem> {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
 
         val langs = if (dictionaryLanguage != null) listOf(dictionaryLanguage) else installedDictionaries()
         if (langs.isEmpty()) {
             // Fallback to simple in-memory filtering for preview/no DB
-            val fallback = listOf("world", "idea", "bass")
-            return fallback
-                .filter { it.contains(trimmed, ignoreCase = true) }
-                .map {
-                    SearchItem(
-                        language = dictionaryLanguage ?: "en",
-                        lemmaId = Uuid.random(),
-                        lemma = it,
-                        display = "\"$it\""
-                    )
-                }
-                .take(maxItems)
+            return listOf()
         }
 
         val out = mutableListOf<SearchItem>()
@@ -88,36 +77,37 @@ class DictionaryRepository(
                 }
             }
 
-            if (trimmed.length < 3) {
-                val byWord: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByWord> =
-                    q.selectLemmasByWord(trimmed).executeAsList()
-                val byNorm: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByNormalized> =
-                    q.selectLemmasByNormalized(trimmed).executeAsList()
-                byWord.forEach { addLemma(it.id, it.lemma) }
-                byNorm.forEach { addLemma(it.id, it.lemma) }
 
-                val formEq: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByFormEquals> =
-                    q.selectLemmasByFormEquals(trimmed, maxItems.toLong()).executeAsList()
-                val formEqNorm: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByFormNormalizedEquals> =
-                    q.selectLemmasByFormNormalizedEquals(trimmed, maxItems.toLong()).executeAsList()
-                formEq.forEach { addForm(it.id, it.lemma, it.form) }
-                formEqNorm.forEach { addForm(it.id, it.lemma, it.form) }
-            } else {
-                val pattern = "$trimmed%"
-                val lemmaLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasLike> =
-                    q.selectLemmasLike(pattern, maxItems.toLong()).executeAsList()
-                val lemmaNormLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasNormalizedLike> =
-                    q.selectLemmasNormalizedLike(pattern, maxItems.toLong()).executeAsList()
-                lemmaLike.forEach { addLemma(it.id, it.lemma) }
-                lemmaNormLike.forEach { addLemma(it.id, it.lemma) }
+            // search exact matching first
+            val byWord: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByWord> =
+                q.selectLemmasByWord(trimmed).executeAsList()
+            val byNorm: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByNormalized> =
+                q.selectLemmasByNormalized(trimmed).executeAsList()
+            byWord.forEach { addLemma(it.id, it.lemma) }
+            byNorm.forEach { addLemma(it.id, it.lemma) }
 
-                val formLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasFromFormsLike> =
-                    q.selectLemmasFromFormsLike(pattern, maxItems.toLong()).executeAsList()
-                val formNormLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasFromFormsNormalizedLike> =
-                    q.selectLemmasFromFormsNormalizedLike(pattern, maxItems.toLong()).executeAsList()
-                formLike.forEach { addForm(it.id, it.lemma, it.form) }
-                formNormLike.forEach { addForm(it.id, it.lemma, it.form) }
-            }
+            val formEq: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByFormEquals> =
+                q.selectLemmasByFormEquals(trimmed, maxItems.toLong()).executeAsList()
+            val formEqNorm: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByFormNormalizedEquals> =
+                q.selectLemmasByFormNormalizedEquals(trimmed, maxItems.toLong()).executeAsList()
+            formEq.forEach { addForm(it.id, it.lemma, it.form) }
+            formEqNorm.forEach { addForm(it.id, it.lemma, it.form) }
+
+            // and by prefix later
+            val pattern = "$trimmed%"
+            val lemmaLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasLike> =
+                q.selectLemmasLike(pattern, maxItems.toLong()).executeAsList()
+            val lemmaNormLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasNormalizedLike> =
+                q.selectLemmasNormalizedLike(pattern, maxItems.toLong()).executeAsList()
+            lemmaLike.forEach { addLemma(it.id, it.lemma) }
+            lemmaNormLike.forEach { addLemma(it.id, it.lemma) }
+
+            val formLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasFromFormsLike> =
+                q.selectLemmasFromFormsLike(pattern, maxItems.toLong()).executeAsList()
+            val formNormLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasFromFormsNormalizedLike> =
+                q.selectLemmasFromFormsNormalizedLike(pattern, maxItems.toLong()).executeAsList()
+            formLike.forEach { addForm(it.id, it.lemma, it.form) }
+            formNormLike.forEach { addForm(it.id, it.lemma, it.form) }
         }
 
         return out.take(maxItems)

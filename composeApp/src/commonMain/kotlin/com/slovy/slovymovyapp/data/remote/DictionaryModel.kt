@@ -47,17 +47,17 @@ enum class PartOfSpeech {
     NUMERAL;
 }
 
-enum class NameType {
-    NO,
-    PERSON_NAME,
-    PLACE_NAME,
-    GEOGRAPHICAL_FEATURE,
-    ORGANIZATION_NAME,
-    FICTIONAL_NAME,
-    HISTORICAL_NAME,
-    EVENT_NAME,
-    WORK_OF_ART_NAME,
-    OTHER;
+enum class NameType(val displayName: String) {
+    NO("No"),
+    PERSON_NAME("Person Name"),
+    PLACE_NAME("Place Name"),
+    GEOGRAPHICAL_FEATURE("Geographical Feature"),
+    ORGANIZATION_NAME("Organization Name"),
+    FICTIONAL_NAME("Fictional Name"),
+    HISTORICAL_NAME("Historical Name"),
+    EVENT_NAME("Event Name"),
+    WORK_OF_ART_NAME("Work Of Art Name"),
+    OTHER("Other");
 }
 
 data class LanguageCardResponseSense(
@@ -84,16 +84,16 @@ data class LanguageCardTranslation(
     val targetLangWord: String, val targetLangSenseClarification: String? = null
 )
 
-enum class TraitType {
-    DATED,
-    COLLOQUIAL,
-    OBSOLETE,
-    DIALECTAL,
-    ARCHAIC,
-    REGIONAL,
-    SLANG,
-    FORM,
-    SURNAME
+enum class TraitType(val displayName: String) {
+    DATED("Dated"),
+    COLLOQUIAL("Colloquial"),
+    OBSOLETE("Obsolete"),
+    DIALECTAL("Dialectal"),
+    ARCHAIC("Archaic"),
+    REGIONAL("Regional"),
+    SLANG("Slang"),
+    FORM("Form"),
+    SURNAME("Surname");
 }
 
 data class LanguageCardTrait(

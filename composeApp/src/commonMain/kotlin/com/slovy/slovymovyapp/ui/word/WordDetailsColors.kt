@@ -7,9 +7,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import com.slovy.slovymovyapp.data.remote.LearnerLevel
-import com.slovy.slovymovyapp.data.remote.PartOfSpeech
-import com.slovy.slovymovyapp.data.remote.SenseFrequency
+import com.slovy.slovymovyapp.data.remote.*
 
 @Composable
 internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
@@ -43,6 +41,33 @@ internal fun colorsForPos(pos: PartOfSpeech): Pair<Color, Color> = when (pos) {
     PartOfSpeech.NUMERAL -> Color(0xFFE0F2F1) to Color(0xFF004D40)
     PartOfSpeech.ARTICLE -> Color(0xFFE8EAF6) to Color(0xFF283593)
     PartOfSpeech.NAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232)
+}
+
+@Composable
+internal fun colorsForNameType(nameType: NameType): Pair<Color, Color> = when (nameType) {
+    NameType.NO -> Color(0xFFE0E0E0) to Color(0xFF424242)
+    NameType.PERSON_NAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232)
+    NameType.PLACE_NAME -> Color(0xFFE0F2F1) to Color(0xFF004D40)
+    NameType.GEOGRAPHICAL_FEATURE -> Color(0xFFE0F7FA) to Color(0xFF006064)
+    NameType.ORGANIZATION_NAME -> Color(0xFFE8EAF6) to Color(0xFF283593)
+    NameType.FICTIONAL_NAME -> Color(0xFFF3E5F5) to Color(0xFF6A1B9A)
+    NameType.HISTORICAL_NAME -> Color(0xFFFFF3E0) to Color(0xFFEF6C00)
+    NameType.EVENT_NAME -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
+    NameType.WORK_OF_ART_NAME -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
+    NameType.OTHER -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
+}
+
+@Composable
+internal fun colorsForTraitType(traitType: TraitType): Pair<Color, Color> = when (traitType) {
+    TraitType.DATED -> Color(0xFFFFE0B2) to Color(0xFF8C4513)
+    TraitType.COLLOQUIAL -> Color(0xFFE3F2FD) to Color(0xFF0D47A1)
+    TraitType.OBSOLETE -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
+    TraitType.DIALECTAL -> Color(0xFFE0F7FA) to Color(0xFF006064)
+    TraitType.ARCHAIC -> Color(0xFFFFF3E0) to Color(0xFFEF6C00)
+    TraitType.REGIONAL -> Color(0xFFF1F8E9) to Color(0xFF33691E)
+    TraitType.SLANG -> Color(0xFFFFEBEE) to Color(0xFFC62828)
+    TraitType.FORM -> Color(0xFFF3E5F5) to Color(0xFF6A1B9A)
+    TraitType.SURNAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232)
 }
 
 internal val ExpandMoreVector: ImageVector = ImageVector.Builder(
