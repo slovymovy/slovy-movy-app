@@ -8,12 +8,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,7 +38,9 @@ data class FavoriteSenseUiState(
 
 data class FavoritesUiState(
     val groups: List<FavoriteGroupUiState>,
-    val isEmpty: Boolean
+    val query: String = "",
+    val showNoResults: Boolean = false,
+    val hasAnyFavorites: Boolean = false
 )
 
 class FavoritesViewModel(
@@ -48,7 +48,7 @@ class FavoritesViewModel(
     private val dictionaryRepository: DictionaryRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(FavoritesUiState(groups = emptyList(), isEmpty = true))
+    var state by mutableStateOf(FavoritesUiState(groups = emptyList()))
         private set
 
     val scrollState = LazyListState()
@@ -57,8 +57,21 @@ class FavoritesViewModel(
         loadFavorites()
     }
 
+    fun updateQuery(newQuery: String) {
+        state = state.copy(query = newQuery)
+        loadFavorites()
+    }
+
     fun loadFavorites() {
-        val favorites = favoritesRepository.getAllGroupedByLangAndLemma()
+        val allFavorites = favoritesRepository.getAllGroupedByLangAndLemma()
+        val hasAnyFavorites = allFavorites.isNotEmpty()
+
+        val trimmedQuery = state.query.trim()
+        val favorites = if (trimmedQuery.isEmpty()) {
+            allFavorites
+        } else {
+            favoritesRepository.searchByLemma(trimmedQuery)
+        }
         val allFavSenses = favoritesRepository.getAll().map { it.senseId }.toSet()
 
         // Group by (targetLang, lemma)
@@ -114,9 +127,10 @@ class FavoritesViewModel(
             )
         }.filter { it.senses.isNotEmpty() }
 
-        state = FavoritesUiState(
+        state = state.copy(
             groups = groups,
-            isEmpty = groups.isEmpty()
+            showNoResults = groups.isEmpty() && trimmedQuery.isNotEmpty(),
+            hasAnyFavorites = hasAnyFavorites
         )
     }
 
@@ -185,10 +199,20 @@ fun FavoritesScreen(
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {}
 ) {
+    val focusManager = LocalFocusManager.current
+
+    // Clear focus when scrolling starts
+    LaunchedEffect(viewModel.scrollState.isScrollInProgress) {
+        if (viewModel.scrollState.isScrollInProgress) {
+            focusManager.clearFocus()
+        }
+    }
+
     FavoritesScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
         onNavigateToSearch = onNavigateToSearch,
+        onQueryChange = { viewModel.updateQuery(it) },
         onSenseToggle = { senseId -> viewModel.toggleSense(senseId) },
         onSenseExamplesToggle = { senseId -> viewModel.toggleSenseExamples(senseId) },
         onLanguageToggle = { senseId, lang -> viewModel.toggleLanguage(senseId, lang) },
@@ -206,6 +230,7 @@ fun FavoritesScreenContent(
     state: FavoritesUiState,
     scrollState: LazyListState = LazyListState(),
     onNavigateToSearch: () -> Unit = {},
+    onQueryChange: (String) -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
     onSenseExamplesToggle: (String) -> Unit = {},
     onLanguageToggle: (String, String) -> Unit = { _, _ -> },
@@ -240,41 +265,113 @@ fun FavoritesScreenContent(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        if (state.isEmpty) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No favorites yet.\nAdd favorites by tapping the heart icon on any word sense.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            // Search field - only show if there are any favorites
+            if (state.hasAnyFavorites) {
+                OutlinedTextField(
+                    value = state.query,
+                    onValueChange = onQueryChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp),
+                    label = { Text("Search in favorites") },
+                    placeholder = { Text("Type to search...") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    trailingIcon = {
+                        if (state.query.isNotEmpty()) {
+                            TextButton(onClick = { onQueryChange("") }) {
+                                Text("✕")
+                            }
+                        }
+                    }
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
-        } else {
-            LazyColumn(
-                state = scrollState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                contentPadding = PaddingValues(vertical = 24.dp)
-            ) {
-                items(state.groups, key = { "${it.targetLang}_${it.lemma}" }) { group ->
-                    FavoriteGroupCard(
-                        group = group,
-                        onSenseToggle = onSenseToggle,
-                        onSenseExamplesToggle = onSenseExamplesToggle,
-                        onLanguageToggle = onLanguageToggle,
-                        onFavoriteToggle = onFavoriteToggle,
-                        onGroupToggle = { onGroupToggle(group.targetLang, group.lemma) },
-                        onNavigateToWordDetail = onNavigateToWordDetail
-                    )
+
+            // Content
+            when {
+                state.groups.isEmpty() && state.query.isEmpty() -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "🤍🤍🤍\nNo favorites yet.\nAdd favorites by tapping the heart icon on any word sense.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                state.showNoResults -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        Spacer(modifier = Modifier.height(48.dp))
+                        Text(
+                            text = "\uD83D\uDC94",
+                            style = MaterialTheme.typography.displayLarge
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "No favorites found",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "We couldn't find any favorites matching \"${state.query}\"",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 32.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Try a different search term",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 32.dp)
+                        )
+                    }
+                }
+
+                else -> {
+                    LazyColumn(
+                        state = scrollState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(24.dp),
+                        contentPadding = PaddingValues(vertical = 24.dp)
+                    ) {
+                        items(state.groups, key = { "${it.targetLang}_${it.lemma}" }) { group ->
+                            FavoriteGroupCard(
+                                group = group,
+                                onSenseToggle = onSenseToggle,
+                                onSenseExamplesToggle = onSenseExamplesToggle,
+                                onLanguageToggle = onLanguageToggle,
+                                onFavoriteToggle = onFavoriteToggle,
+                                onGroupToggle = { onGroupToggle(group.targetLang, group.lemma) },
+                                onNavigateToWordDetail = onNavigateToWordDetail
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -413,7 +510,10 @@ private fun createMockFavorite(
 @Composable
 fun PreviewFavoritesScreenEmpty() {
     FavoritesScreenContent(
-        state = FavoritesUiState(groups = emptyList(), isEmpty = true)
+        state = FavoritesUiState(
+            groups = emptyList(),
+            hasAnyFavorites = false
+        )
     )
 }
 
@@ -458,7 +558,7 @@ fun PreviewFavoritesScreenSingleGroupCollapsed() {
                 expanded = false
             )
         ),
-        isEmpty = false
+        hasAnyFavorites = true
     )
 
     FavoritesScreenContent(state = state)
@@ -547,7 +647,7 @@ fun PreviewFavoritesScreenMultipleGroupsCollapsed() {
                 expanded = false,
             )
         ),
-        isEmpty = false
+        hasAnyFavorites = true
     )
 
     FavoritesScreenContent(state = state)
@@ -596,7 +696,7 @@ fun PreviewFavoritesScreenGroupExpanded() {
                 expanded = true
             )
         ),
-        isEmpty = false
+        hasAnyFavorites = true
     )
 
     FavoritesScreenContent(state = state)
@@ -683,7 +783,127 @@ fun PreviewFavoritesScreenMixedStates() {
                 expanded = false
             )
         ),
-        isEmpty = false
+        hasAnyFavorites = true
+    )
+
+    FavoritesScreenContent(state = state)
+}
+
+@Preview
+@Composable
+fun PreviewFavoritesScreenWithSearch() {
+    val runSense = createMockSense(
+        id = "run-1",
+        definition = "to move swiftly on foot",
+        level = LearnerLevel.A1,
+        frequency = SenseFrequency.HIGH,
+        translations = mapOf("pl" to listOf(LanguageCardTranslation("biegać")))
+    )
+
+    val state = FavoritesUiState(
+        groups = listOf(
+            FavoriteGroupUiState(
+                targetLang = "en",
+                lemma = "run",
+                senses = listOf(
+                    FavoriteSenseUiState(
+                        favorite = createMockFavorite("run-1", "en", "run"),
+                        sense = runSense,
+                        state = SenseUiState(
+                            "run-1", false,
+                            examplesExpanded = false,
+                            languageExpanded = emptyMap(),
+                            favorite = true,
+                            showNavigationArrow = true,
+                            pos = PartOfSpeech.VERB
+                        )
+                    )
+                ),
+                expanded = false
+            )
+        ),
+        query = "run",
+        hasAnyFavorites = true
+    )
+
+    FavoritesScreenContent(state = state)
+}
+
+@Preview
+@Composable
+fun PreviewFavoritesScreenNoResults() {
+    val state = FavoritesUiState(
+        groups = emptyList(),
+        query = "xyz",
+        showNoResults = true,
+        hasAnyFavorites = true
+    )
+
+    FavoritesScreenContent(state = state)
+}
+
+@Preview
+@Composable
+fun PreviewFavoritesScreenSearchWithMultipleResults() {
+    val bookSense1 = createMockSense(
+        id = "book-1",
+        definition = "a written or printed work",
+        level = LearnerLevel.A1,
+        frequency = SenseFrequency.HIGH,
+        translations = mapOf("pl" to listOf(LanguageCardTranslation("książka")))
+    )
+
+    val bookmarkSense1 = createMockSense(
+        id = "bookmark-1",
+        definition = "a strip of material used to mark one's place in a book",
+        level = LearnerLevel.B1,
+        frequency = SenseFrequency.MIDDLE,
+        translations = mapOf("pl" to listOf(LanguageCardTranslation("zakładka")))
+    )
+
+    val state = FavoritesUiState(
+        groups = listOf(
+            FavoriteGroupUiState(
+                targetLang = "en",
+                lemma = "book",
+                senses = listOf(
+                    FavoriteSenseUiState(
+                        favorite = createMockFavorite("book-1", "en", "book"),
+                        sense = bookSense1,
+                        state = SenseUiState(
+                            "book-1", false,
+                            examplesExpanded = false,
+                            languageExpanded = emptyMap(),
+                            favorite = true,
+                            showNavigationArrow = true,
+                            pos = PartOfSpeech.NOUN
+                        )
+                    )
+                ),
+                expanded = false
+            ),
+            FavoriteGroupUiState(
+                targetLang = "en",
+                lemma = "bookmark",
+                senses = listOf(
+                    FavoriteSenseUiState(
+                        favorite = createMockFavorite("bookmark-1", "en", "bookmark"),
+                        sense = bookmarkSense1,
+                        state = SenseUiState(
+                            "bookmark-1", false,
+                            examplesExpanded = false,
+                            languageExpanded = emptyMap(),
+                            favorite = true,
+                            showNavigationArrow = true,
+                            pos = PartOfSpeech.NOUN
+                        )
+                    )
+                ),
+                expanded = false
+            )
+        ),
+        query = "book",
+        hasAnyFavorites = true
     )
 
     FavoritesScreenContent(state = state)

@@ -32,6 +32,11 @@ selectAllOrderedByLangAndLemma:
 SELECT sense_id, target_lang, lemma, created_at FROM favorites
 ORDER BY (SELECT MAX(created_at) FROM favorites f2 WHERE f2.lemma = favorites.lemma) DESC, target_lang ASC, lemma ASC, created_at DESC;
 
+selectByLemmaSearch:
+SELECT sense_id, target_lang, lemma, created_at FROM favorites
+WHERE lemma LIKE ?
+ORDER BY (SELECT MAX(created_at) FROM favorites f2 WHERE f2.lemma = favorites.lemma) DESC, target_lang ASC, lemma ASC, created_at DESC;
+
 countBySenseIdAndLang:
 SELECT COUNT(*) FROM favorites WHERE sense_id = ? AND target_lang = ?;
 

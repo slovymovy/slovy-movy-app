@@ -54,6 +54,18 @@ class FavoritesRepository(private val db: AppDatabase) {
             )
         }
 
+    fun searchByLemma(query: String): List<Favorite> {
+        val pattern = "%$query%"
+        return db.favoritesQueries.selectByLemmaSearch(pattern).executeAsList().map { row ->
+            Favorite(
+                senseId = row.sense_id,
+                targetLang = row.target_lang,
+                lemma = row.lemma,
+                createdAt = row.created_at
+            )
+        }
+    }
+
     fun exists(senseId: String, targetLang: String): Boolean =
         db.favoritesQueries.countBySenseIdAndLang(sense_id = senseId, target_lang = targetLang)
             .executeAsOne() > 0
