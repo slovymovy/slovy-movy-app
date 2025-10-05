@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.slovy.slovymovyapp.data.remote.DataDbManager
@@ -11,10 +12,10 @@ fun main() = application {
     val repo = SettingsRepository(db)
 
     Window(
-        onCloseRequest = ::exitApplication,
-        title = "Open words"
+        onCloseRequest = ::exitApplication, title = "Open words"
     ) {
         val platform = PlatformDbSupport(null)
-        App(repo, platform)
+
+        App(repo, platform, isSystemInDarkTheme(), false)
     }
 }
