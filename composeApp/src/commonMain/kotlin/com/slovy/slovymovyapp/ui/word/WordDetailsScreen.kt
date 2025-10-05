@@ -450,10 +450,10 @@ fun WordDetailScreenContent(
         bottomBar = {
             AppNavigationBar(
                 currentScreen = AppScreen.WORD_DETAIL,
-                isWordDetailAvailable = true,
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToFavorites = onNavigateToFavorites,
-                onNavigateToWordDetail = {}
+                onNavigateToWordDetail = {},
+                wordDetailLabel = titleText
             )
         },
         containerColor = MaterialTheme.colorScheme.background

@@ -16,10 +16,10 @@ enum class AppScreen {
 @Composable
 fun AppNavigationBar(
     currentScreen: AppScreen,
-    isWordDetailAvailable: Boolean,
     onNavigateToSearch: () -> Unit,
     onNavigateToFavorites: () -> Unit = {},
-    onNavigateToWordDetail: () -> Unit
+    onNavigateToWordDetail: () -> Unit,
+    wordDetailLabel: String? = null
 ) {
     NavigationBar {
         NavigationBarItem(
@@ -36,9 +36,9 @@ fun AppNavigationBar(
         )
         NavigationBarItem(
             icon = { Text("📖", style = MaterialTheme.typography.titleLarge) },
-            label = { Text("Word Detail") },
+            label = { Text(wordDetailLabel ?: "Word Detail") },
             selected = currentScreen == AppScreen.WORD_DETAIL,
-            enabled = isWordDetailAvailable,
+            enabled = wordDetailLabel != null,
             onClick = onNavigateToWordDetail
         )
     }
@@ -49,9 +49,9 @@ fun AppNavigationBar(
 fun PreviewAppNavigationBar() {
     AppNavigationBar(
         currentScreen = AppScreen.SEARCH,
-        isWordDetailAvailable = true,
         onNavigateToSearch = {},
         onNavigateToFavorites = {},
-        onNavigateToWordDetail = {}
+        onNavigateToWordDetail = {},
+        wordDetailLabel = "example"
     )
 }

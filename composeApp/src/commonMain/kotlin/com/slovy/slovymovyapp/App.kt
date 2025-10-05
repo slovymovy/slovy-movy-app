@@ -257,7 +257,7 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                     )
                     navController.navigate(destination)
                 },
-                isWordDetailAvailable = wordDetailViewModels.isNotEmpty(),
+                wordDetailLabel = wordDetailViewModels.keys.lastOrNull()?.lemma,
                 onNavigateToWordDetail = {
                     wordDetailViewModels.keys.lastOrNull()?.let { destination ->
                         navController.navigate(destination)
@@ -296,7 +296,7 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                     )
                     navController.navigate(destination)
                 },
-                isWordDetailAvailable = wordDetailViewModels.isNotEmpty(),
+                wordDetailLabel = wordDetailViewModels.keys.lastOrNull()?.lemma,
                 onNavigateToLastWordDetail = {
                     wordDetailViewModels.keys.lastOrNull()?.let { destination ->
                         navController.navigate(destination)

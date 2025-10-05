@@ -305,7 +305,7 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
                         Text(
                             text = trait.traitType.displayName,
                             style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Companion.SemiBold,
+                                fontWeight = FontWeight.SemiBold,
                                 color = tcc
                             )
                         )

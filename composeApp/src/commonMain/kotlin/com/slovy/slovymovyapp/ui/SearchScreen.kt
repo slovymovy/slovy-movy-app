@@ -60,7 +60,7 @@ class SearchViewModel(
 fun SearchScreen(
     viewModel: SearchViewModel,
     onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> },
-    isWordDetailAvailable: Boolean = false,
+    wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {}
 ) {
@@ -89,7 +89,7 @@ fun SearchScreen(
             focusManager.clearFocus()
             onWordSelected(item)
         },
-        isWordDetailAvailable = isWordDetailAvailable,
+        wordDetailLabel = wordDetailLabel,
         onNavigateToWordDetail = onNavigateToWordDetail,
         onNavigateToFavorites = onNavigateToFavorites
     )
@@ -101,7 +101,7 @@ fun SearchScreenContent(
     state: SearchUiState,
     onQueryChange: (String) -> Unit = {},
     onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
-    isWordDetailAvailable: Boolean = false,
+    wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {}
 ) {
@@ -119,10 +119,10 @@ fun SearchScreenContent(
             bottomBar = {
                 AppNavigationBar(
                     currentScreen = AppScreen.SEARCH,
-                    isWordDetailAvailable = isWordDetailAvailable,
                     onNavigateToSearch = {},
                     onNavigateToFavorites = onNavigateToFavorites,
-                    onNavigateToWordDetail = onNavigateToWordDetail
+                    onNavigateToWordDetail = onNavigateToWordDetail,
+                    wordDetailLabel = wordDetailLabel
                 )
             }
         ) { innerPadding ->

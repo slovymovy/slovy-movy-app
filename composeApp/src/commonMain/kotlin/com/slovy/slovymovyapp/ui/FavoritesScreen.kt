@@ -182,7 +182,7 @@ fun FavoritesScreen(
     viewModel: FavoritesViewModel,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToWordDetail: (String, String, String) -> Unit = { _, _, _ -> },
-    isWordDetailAvailable: Boolean = false,
+    wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {}
 ) {
     FavoritesScreenContent(
@@ -194,7 +194,7 @@ fun FavoritesScreen(
         onLanguageToggle = { senseId, lang -> viewModel.toggleLanguage(senseId, lang) },
         onFavoriteToggle = { senseId, targetLang, lemma -> viewModel.toggleFavorite(senseId, targetLang, lemma) },
         onGroupToggle = { targetLang, lemma -> viewModel.toggleGroup(targetLang, lemma) },
-        isWordDetailAvailable = isWordDetailAvailable,
+        wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
         onNavigateToWordDetail = onNavigateToWordDetail
     )
@@ -211,7 +211,7 @@ fun FavoritesScreenContent(
     onLanguageToggle: (String, String) -> Unit = { _, _ -> },
     onFavoriteToggle: (String, String, String) -> Unit = { _, _, _ -> },
     onGroupToggle: (String, String) -> Unit = { _, _ -> },
-    isWordDetailAvailable: Boolean = false,
+    wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToWordDetail: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
@@ -232,10 +232,10 @@ fun FavoritesScreenContent(
         bottomBar = {
             AppNavigationBar(
                 currentScreen = AppScreen.FAVORITES,
-                isWordDetailAvailable = isWordDetailAvailable,
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToFavorites = {},
-                onNavigateToWordDetail = onNavigateToLastWordDetail
+                onNavigateToWordDetail = onNavigateToLastWordDetail,
+                wordDetailLabel = wordDetailLabel
             )
         },
         containerColor = MaterialTheme.colorScheme.background
