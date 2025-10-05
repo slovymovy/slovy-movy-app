@@ -86,6 +86,17 @@ internal fun SenseCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    if (state.showFavoriteToggle) {
+                        IconButton(
+                            onClick = onFavoriteToggle,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Text(
+                                text = if (state.favorite) "❤️" else "🤍",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
                     if (state.showNavigationArrow) {
                         IconButton(
                             onClick = onNavigateToDetail,
@@ -97,15 +108,6 @@ internal fun SenseCard(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                    }
-                    IconButton(
-                        onClick = onFavoriteToggle,
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Text(
-                            text = if (state.favorite) "❤️" else "🤍",
-                            style = MaterialTheme.typography.titleMedium
-                        )
                     }
                     Icon(
                         imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,

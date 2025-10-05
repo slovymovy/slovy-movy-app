@@ -45,7 +45,8 @@ data class SenseUiState(
     val languageExpanded: Map<String, Boolean> = emptyMap(),
     val favorite: Boolean,
     val showNavigationArrow: Boolean = false,
-    val pos: PartOfSpeech? = null
+    val pos: PartOfSpeech? = null,
+    val showFavoriteToggle: Boolean = expanded
 )
 
 internal fun LanguageCard.toContentUiState(
@@ -89,7 +90,9 @@ private fun LanguageCardResponseSense.toSenseUiState(
         examplesExpanded = examplesExpanded,
         languageExpanded = languageStates,
         favorite = favorite,
-        pos = pos
+        pos = pos,
+        showNavigationArrow = false,
+        showFavoriteToggle = true
     )
 }
 

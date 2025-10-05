@@ -97,6 +97,7 @@ class FavoritesViewModel(
                             languageExpanded = emptyMap(),
                             favorite = true,
                             showNavigationArrow = true,
+                            showFavoriteToggle = false,
                             pos = entry.pos
                         )
                     )
@@ -136,7 +137,7 @@ class FavoritesViewModel(
     }
 
     fun toggleSense(senseId: String) {
-        updateSenseState(senseId) { it.copy(expanded = !it.expanded) }
+        updateSenseState(senseId) { it.copy(expanded = !it.expanded, showFavoriteToggle = !it.showFavoriteToggle) }
     }
 
     fun toggleSenseExamples(senseId: String) {
@@ -360,7 +361,7 @@ private fun FavoriteGroupCard(
                         onLanguageToggle = { lang -> onLanguageToggle(sense.senseId, lang) },
                         allSenses = allSenses,
                         onFavoriteToggle = { onFavoriteToggle(sense.senseId, group.targetLang, group.lemma) },
-                        onNavigateToDetail = { onNavigateToWordDetail(group.targetLang, group.lemma, sense.senseId) }
+                        onNavigateToDetail = { onNavigateToWordDetail(group.targetLang, group.lemma, sense.senseId) },
                     )
                 }
             }
@@ -499,12 +500,28 @@ fun PreviewFavoritesScreenMultipleGroupsCollapsed() {
                     FavoriteSenseUiState(
                         favorite = createMockFavorite("run-1", "en", "run", 1000000),
                         sense = runSense1,
-                        state = SenseUiState("run-1", false, false, emptyMap(), true, true, PartOfSpeech.VERB)
+                        state = SenseUiState(
+                            "run-1",
+                            expanded = false,
+                            examplesExpanded = false,
+                            languageExpanded = emptyMap(),
+                            favorite = true,
+                            showNavigationArrow = true,
+                            pos = PartOfSpeech.VERB
+                        )
                     ),
                     FavoriteSenseUiState(
                         favorite = createMockFavorite("run-2", "en", "run", 900000),
                         sense = runSense2,
-                        state = SenseUiState("run-2", false, false, emptyMap(), true, true, PartOfSpeech.VERB)
+                        state = SenseUiState(
+                            "run-2",
+                            expanded = false,
+                            examplesExpanded = false,
+                            languageExpanded = emptyMap(),
+                            favorite = true,
+                            showNavigationArrow = true,
+                            pos = PartOfSpeech.VERB
+                        )
                     )
                 ),
                 expanded = false
@@ -516,7 +533,15 @@ fun PreviewFavoritesScreenMultipleGroupsCollapsed() {
                     FavoriteSenseUiState(
                         favorite = createMockFavorite("book-1", "en", "book", 800000),
                         sense = bookSense1,
-                        state = SenseUiState("book-1", false, false, emptyMap(), false, true, PartOfSpeech.NOUN)
+                        state = SenseUiState(
+                            "book-1",
+                            expanded = false,
+                            examplesExpanded = false,
+                            languageExpanded = emptyMap(),
+                            favorite = false,
+                            showNavigationArrow = true,
+                            pos = PartOfSpeech.NOUN
+                        )
                     )
                 ),
                 expanded = false,
@@ -614,12 +639,26 @@ fun PreviewFavoritesScreenMixedStates() {
                     FavoriteSenseUiState(
                         favorite = createMockFavorite("love-1", "en", "love", 2000000),
                         sense = sense1,
-                        state = SenseUiState("love-1", true, false, emptyMap(), true, true, PartOfSpeech.NOUN)
+                        state = SenseUiState(
+                            "love-1", true,
+                            examplesExpanded = false,
+                            languageExpanded = emptyMap(),
+                            favorite = true,
+                            showNavigationArrow = true,
+                            pos = PartOfSpeech.NOUN
+                        )
                     ),
                     FavoriteSenseUiState(
                         favorite = createMockFavorite("love-2", "en", "love", 1000000),
                         sense = sense2,
-                        state = SenseUiState("love-2", false, false, emptyMap(), false, true, PartOfSpeech.VERB)
+                        state = SenseUiState(
+                            "love-2", false,
+                            examplesExpanded = false,
+                            languageExpanded = emptyMap(),
+                            favorite = false,
+                            showNavigationArrow = true,
+                            pos = PartOfSpeech.VERB
+                        )
                     )
                 ),
                 expanded = true
@@ -631,7 +670,14 @@ fun PreviewFavoritesScreenMixedStates() {
                     FavoriteSenseUiState(
                         favorite = createMockFavorite("run-1", "en", "run", 1500000),
                         sense = runSense,
-                        state = SenseUiState("run-1", false, false, emptyMap(), true, true, PartOfSpeech.VERB)
+                        state = SenseUiState(
+                            "run-1", false,
+                            examplesExpanded = false,
+                            languageExpanded = emptyMap(),
+                            favorite = true,
+                            showNavigationArrow = true,
+                            pos = PartOfSpeech.VERB
+                        )
                     )
                 ),
                 expanded = false
