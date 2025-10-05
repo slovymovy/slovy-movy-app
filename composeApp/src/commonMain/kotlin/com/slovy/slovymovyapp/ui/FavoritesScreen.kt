@@ -26,7 +26,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 data class FavoriteGroupUiState(
     val targetLang: String,
     val lemma: String,
-    val senses: List<FavoriteSenseUiState>,
+    val senses: List<FavoriteSenseUiState>?,
     val expanded: Boolean = false
 )
 
@@ -72,60 +72,23 @@ class FavoritesViewModel(
         } else {
             favoritesRepository.searchByLemma(trimmedQuery)
         }
-        val allFavSenses = favoritesRepository.getAll().map { it.senseId }.toSet()
 
         // Group by (targetLang, lemma)
         val grouped = favorites.groupBy { it.targetLang to it.lemma }
 
-        val groups = grouped.map { (langLemma, favs) ->
+        val groups = grouped.map { (langLemma, _) ->
             val (targetLang, lemma) = langLemma
-            val card = dictionaryRepository.getLanguageCard(targetLang, lemma)
 
             // Find existing group to preserve state
             val existingGroup = state.groups.find { it.targetLang == targetLang && it.lemma == lemma }
 
-            val senses = favs.mapNotNull { favorite ->
-                // Find the entry and sense
-                val entryAndSense = card?.entries?.firstNotNullOfOrNull { entry ->
-                    entry.senses.find { it.senseId == favorite.senseId }?.let { sense ->
-                        entry to sense
-                    }
-                }
-
-                if (entryAndSense != null) {
-                    val (entry, sense) = entryAndSense
-                    // Find existing sense state to preserve
-                    val existingSenseState =
-                        existingGroup?.senses?.find { it.sense.senseId == sense.senseId }
-                            ?.state?.copy(favorite = allFavSenses.contains(sense.senseId))
-
-
-                    FavoriteSenseUiState(
-                        favorite = favorite,
-                        sense = sense,
-                        state = existingSenseState ?: SenseUiState(
-                            senseId = sense.senseId,
-                            expanded = false,
-                            examplesExpanded = false,
-                            languageExpanded = emptyMap(),
-                            favorite = true,
-                            showNavigationArrow = true,
-                            showFavoriteToggle = false,
-                            pos = entry.pos
-                        )
-                    )
-                } else {
-                    null
-                }
-            }
-
             FavoriteGroupUiState(
                 targetLang = targetLang,
                 lemma = lemma,
-                senses = senses,
+                senses = existingGroup?.senses, // Preserve existing senses or empty
                 expanded = existingGroup?.expanded ?: false
             )
-        }.filter { it.senses.isNotEmpty() }
+        }
 
         state = state.copy(
             groups = groups,
@@ -134,11 +97,72 @@ class FavoritesViewModel(
         )
     }
 
+    private fun loadGroupSenses(targetLang: String, lemma: String) {
+        val favorites = favoritesRepository.getByLangAndLemma(targetLang, lemma)
+        val allFavSenses = favorites.map { it.senseId }
+
+        val card = dictionaryRepository.getLanguageCard(targetLang, lemma)
+
+        val senses = favorites.mapNotNull { favorite ->
+            // Find the entry and sense
+            val entryAndSense = card?.entries?.firstNotNullOfOrNull { entry ->
+                entry.senses.find { it.senseId == favorite.senseId }?.let { sense ->
+                    entry to sense
+                }
+            }
+
+            if (entryAndSense != null) {
+                val (entry, sense) = entryAndSense
+                // Find existing sense state to preserve
+                val existingGroup = state.groups.find { it.targetLang == targetLang && it.lemma == lemma }
+                val existingSenseState =
+                    existingGroup?.senses?.find { it.sense.senseId == sense.senseId }
+                        ?.state?.copy(favorite = allFavSenses.contains(sense.senseId))
+
+                FavoriteSenseUiState(
+                    favorite = favorite,
+                    sense = sense,
+                    state = existingSenseState ?: SenseUiState(
+                        senseId = sense.senseId,
+                        expanded = false,
+                        examplesExpanded = false,
+                        languageExpanded = emptyMap(),
+                        favorite = true,
+                        showNavigationArrow = true,
+                        showFavoriteToggle = false,
+                        pos = entry.pos
+                    )
+                )
+            } else {
+                null
+            }
+        }
+
+        // Update the specific group with loaded senses
+        updateGroupState(targetLang, lemma) { it.copy(senses = senses) }
+    }
+
+    private fun updateGroupState(
+        targetLang: String,
+        lemma: String,
+        updateFn: (FavoriteGroupUiState) -> FavoriteGroupUiState
+    ) {
+        state = state.copy(
+            groups = state.groups.map { group ->
+                if (group.targetLang == targetLang && group.lemma == lemma) {
+                    updateFn(group)
+                } else {
+                    group
+                }
+            }
+        )
+    }
+
     private fun updateSenseState(senseId: String, updateFn: (SenseUiState) -> SenseUiState) {
         state = state.copy(
             groups = state.groups.map { group ->
                 group.copy(
-                    senses = group.senses.map { favSense ->
+                    senses = group.senses ?.map { favSense ->
                         if (favSense.sense.senseId == senseId) {
                             favSense.copy(state = updateFn(favSense.state))
                         } else {
@@ -179,14 +203,18 @@ class FavoritesViewModel(
     }
 
     fun toggleGroup(targetLang: String, lemma: String) {
-        val updated = state.groups.map { group ->
-            if (group.targetLang == targetLang && group.lemma == lemma) {
-                group.copy(expanded = !group.expanded)
-            } else {
-                group
+        val group = state.groups.find { it.targetLang == targetLang && it.lemma == lemma }
+        if (group != null) {
+            val newExpanded = !group.expanded
+
+            // Update expanded state first
+            updateGroupState(targetLang, lemma) { it.copy(expanded = newExpanded) }
+
+            // Load senses only if expanding and not already loaded
+            if (newExpanded && group.senses == null) {
+                loadGroupSenses(targetLang, lemma)
             }
         }
-        state = state.copy(groups = updated)
     }
 }
 
@@ -447,8 +475,8 @@ private fun FavoriteGroupCard(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                val allSenses = group.senses.map { it.sense }.toList()
-                group.senses.forEach { favSense ->
+                val allSenses = group.senses?.map { it.sense }?.toList()
+                group.senses?.forEach { favSense ->
                     val sense = favSense.sense
                     SenseCard(
                         sense = sense,
@@ -456,7 +484,7 @@ private fun FavoriteGroupCard(
                         onToggle = { onSenseToggle(sense.senseId) },
                         onExamplesToggle = { onSenseExamplesToggle(sense.senseId) },
                         onLanguageToggle = { lang -> onLanguageToggle(sense.senseId, lang) },
-                        allSenses = allSenses,
+                        allSenses = allSenses ?: emptyList(),
                         onFavoriteToggle = { onFavoriteToggle(sense.senseId, group.targetLang, group.lemma) },
                         onNavigateToDetail = { onNavigateToWordDetail(group.targetLang, group.lemma, sense.senseId) },
                     )
