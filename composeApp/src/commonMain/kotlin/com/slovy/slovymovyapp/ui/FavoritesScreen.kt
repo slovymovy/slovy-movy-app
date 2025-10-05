@@ -310,7 +310,6 @@ private fun FavoriteGroupCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
-                    modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -321,16 +320,21 @@ private fun FavoriteGroupCard(
                         ),
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                    Text(
-                        text = "• ${codeToLanguage.getOrElse(group.targetLang) { group.targetLang }}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    Icon(
+                        imageVector = if (group.expanded) com.slovy.slovymovyapp.ui.word.ExpandLessVector else com.slovy.slovymovyapp.ui.word.ExpandMoreVector,
+                        contentDescription = if (group.expanded) "Collapse group" else "Expand group",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
-                Icon(
-                    imageVector = if (group.expanded) com.slovy.slovymovyapp.ui.word.ExpandLessVector else com.slovy.slovymovyapp.ui.word.ExpandMoreVector,
-                    contentDescription = if (group.expanded) "Collapse group" else "Expand group",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                SuggestionChip(
+                    onClick = { },
+                    label = {
+                        Text(
+                            text = group.targetLang.uppercase(),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    },
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
         }
