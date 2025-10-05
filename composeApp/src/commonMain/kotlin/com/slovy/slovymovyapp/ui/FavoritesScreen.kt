@@ -59,6 +59,7 @@ class FavoritesViewModel(
 
     fun loadFavorites() {
         val favorites = favoritesRepository.getAllGroupedByLangAndLemma()
+        val allFavSenses = favoritesRepository.getAll().map { it.senseId }.toSet()
 
         // Group by (targetLang, lemma)
         val grouped = favorites.groupBy { it.targetLang to it.lemma }
@@ -81,7 +82,10 @@ class FavoritesViewModel(
                 if (entryAndSense != null) {
                     val (entry, sense) = entryAndSense
                     // Find existing sense state to preserve
-                    val existingSenseState = existingGroup?.senses?.find { it.sense.senseId == sense.senseId }?.state
+                    val existingSenseState =
+                        existingGroup?.senses?.find { it.sense.senseId == sense.senseId }
+                            ?.state?.copy(favorite = allFavSenses.contains(sense.senseId))
+
 
                     FavoriteSenseUiState(
                         favorite = favorite,
@@ -115,65 +119,37 @@ class FavoritesViewModel(
         )
     }
 
-    fun toggleSense(senseId: String) {
-        val updated = state.groups.map { group ->
-            group.copy(
-                senses = group.senses.map { favSense ->
-                    if (favSense.sense.senseId == senseId) {
-                        favSense.copy(
-                            state = favSense.state.copy(
-                                expanded = !favSense.state.expanded
-                            )
-                        )
-                    } else {
-                        favSense
+    private fun updateSenseState(senseId: String, updateFn: (SenseUiState) -> SenseUiState) {
+        state = state.copy(
+            groups = state.groups.map { group ->
+                group.copy(
+                    senses = group.senses.map { favSense ->
+                        if (favSense.sense.senseId == senseId) {
+                            favSense.copy(state = updateFn(favSense.state))
+                        } else {
+                            favSense
+                        }
                     }
-                }
-            )
-        }
-        state = state.copy(groups = updated)
+                )
+            }
+        )
+    }
+
+    fun toggleSense(senseId: String) {
+        updateSenseState(senseId) { it.copy(expanded = !it.expanded) }
     }
 
     fun toggleSenseExamples(senseId: String) {
-        val updated = state.groups.map { group ->
-            group.copy(
-                senses = group.senses.map { favSense ->
-                    if (favSense.sense.senseId == senseId) {
-                        favSense.copy(
-                            state = favSense.state.copy(
-                                examplesExpanded = !favSense.state.examplesExpanded
-                            )
-                        )
-                    } else {
-                        favSense
-                    }
-                }
-            )
-        }
-        state = state.copy(groups = updated)
+        updateSenseState(senseId) { it.copy(examplesExpanded = !it.examplesExpanded) }
     }
 
     fun toggleLanguage(senseId: String, languageCode: String) {
-        val updated = state.groups.map { group ->
-            group.copy(
-                senses = group.senses.map { favSense ->
-                    if (favSense.sense.senseId == senseId) {
-                        val current = favSense.state.languageExpanded[languageCode] ?: favSense.state.expanded
-                        val updatedLanguageExpanded = favSense.state.languageExpanded.toMutableMap().apply {
-                            put(languageCode, !current)
-                        }
-                        favSense.copy(
-                            state = favSense.state.copy(
-                                languageExpanded = updatedLanguageExpanded
-                            )
-                        )
-                    } else {
-                        favSense
-                    }
-                }
+        updateSenseState(senseId) { currentState ->
+            val current = currentState.languageExpanded[languageCode] ?: currentState.expanded
+            currentState.copy(
+                languageExpanded = currentState.languageExpanded + (languageCode to !current)
             )
         }
-        state = state.copy(groups = updated)
     }
 
     fun toggleFavorite(senseId: String, targetLang: String, lemma: String) {
@@ -184,22 +160,7 @@ class FavoritesViewModel(
             favoritesRepository.add(senseId, targetLang, lemma)
             true
         }
-        val updated = state.groups.map { group ->
-            group.copy(
-                senses = group.senses.map { favSense ->
-                    if (favSense.sense.senseId == senseId) {
-                        favSense.copy(
-                            state = favSense.state.copy(
-                                favorite = isFavorite
-                            )
-                        )
-                    } else {
-                        favSense
-                    }
-                }
-            )
-        }
-        state = state.copy(groups = updated)
+        updateSenseState(senseId) { it.copy(favorite = isFavorite) }
     }
 
     fun toggleGroup(targetLang: String, lemma: String) {
