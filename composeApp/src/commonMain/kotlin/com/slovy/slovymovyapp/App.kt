@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -109,7 +111,14 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
 
     val resolvedStart = startDestination ?: return
 
-    NavHost(navController = navController, startDestination = resolvedStart) {
+    NavHost(
+        navController = navController,
+        startDestination = resolvedStart,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None }
+    ) {
         composable<AppDestination.Language> { backStackEntry ->
             val viewModel = viewModel(
                 viewModelStoreOwner = backStackEntry
