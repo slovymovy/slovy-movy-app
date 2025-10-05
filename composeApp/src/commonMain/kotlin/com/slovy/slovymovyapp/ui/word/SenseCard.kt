@@ -30,8 +30,8 @@ internal fun SenseCard(
     onFavoriteToggle: () -> Unit = {},
     onNavigateToDetail: () -> Unit = {}
 ) {
-    val translationBasedHeader = remember { sense.translationsHeader() }
-    val translationHeaderSuffix = remember { translationsHeaderSuffix(sense, allSenses) }
+    val translationBasedHeader = remember(sense.senseId) { sense.translationsHeader() }
+    val translationHeaderSuffix = remember(sense.senseId, allSenses) { translationsHeaderSuffix(sense, allSenses) }
 
     val expanded = state.expanded
     OutlinedCard(
