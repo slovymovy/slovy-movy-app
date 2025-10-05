@@ -168,7 +168,7 @@ fun SearchScreenContent(
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                            contentPadding = PaddingValues(16.dp),
                             state = state.scrollState
                         ) {
                             items(state.results) { item ->

@@ -71,6 +71,8 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
     val navController = rememberNavController()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
+    // Shared ViewModel for Favorites screen to preserve state across navigation
+    val favoritesViewModel = remember { FavoritesViewModel(favoritesRepository, dictionaryRepository) }
 
     suspend fun selectInitialDestination(): AppDestination {
         // Check if data version is current
@@ -269,21 +271,14 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                 }
             )
         }
-        composable<AppDestination.Favorites> { backStackEntry ->
-
-            val viewModel = viewModel(
-                viewModelStoreOwner = backStackEntry
-            ) {
-                FavoritesViewModel(favoritesRepository, dictionaryRepository)
-            }
-
+        composable<AppDestination.Favorites> {
             // Reload favorites when navigating to this screen
             LaunchedEffect(Unit) {
-                viewModel.loadFavorites()
+                favoritesViewModel.loadFavorites()
             }
 
             FavoritesScreen(
-                viewModel = viewModel,
+                viewModel = favoritesViewModel,
                 onNavigateToSearch = {
                     if (!navController.popBackStack(AppDestination.Search, inclusive = false))
                         navController.navigate(AppDestination.Search)
