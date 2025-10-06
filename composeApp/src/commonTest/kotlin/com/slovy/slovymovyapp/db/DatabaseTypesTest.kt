@@ -47,7 +47,8 @@ class DatabaseTypesTest : BaseTest() {
                     id = lemmaId,
                     lemma = lemma,
                     lemma_normalized = lemmaNormalized,
-                    pos = DictionaryPos.VERB
+                    pos = DictionaryPos.VERB,
+                    zipf_frequency = 0.2,
                 )
                 val lemmasByWord = q.selectLemmasByWord(lemma.lowercase()).executeAsList()
                 val formText = "Testing"

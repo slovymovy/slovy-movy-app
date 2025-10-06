@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.ui.word.Badge
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.uuid.Uuid
@@ -205,11 +206,19 @@ private fun SearchResultCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = item.display,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = item.display,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Badge(
+                        text = item.zipfFrequency.toString(),
+                        getFrequencyColor(item.zipfFrequency),
+                        contentColor = MaterialTheme.colorScheme.secondary
+                    )
+                }
             }
 
             SuggestionChip(
@@ -223,6 +232,19 @@ private fun SearchResultCard(
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
+    }
+}
+
+@Composable
+private fun getFrequencyColor(zipfFrequency: Float): androidx.compose.ui.graphics.Color {
+    return when {
+        zipfFrequency >= 7.0f -> androidx.compose.ui.graphics.Color(0xFF00C853) // Bright green
+        zipfFrequency >= 6.0f -> androidx.compose.ui.graphics.Color(0xFF64DD17) // Green
+        zipfFrequency >= 5.0f -> androidx.compose.ui.graphics.Color(0xFFAEEA00) // Light green
+        zipfFrequency >= 4.0f -> androidx.compose.ui.graphics.Color(0xFFFFD600) // Yellow
+        zipfFrequency >= 3.0f -> androidx.compose.ui.graphics.Color(0xFFFFAB00) // Orange
+        zipfFrequency >= 2.0f -> androidx.compose.ui.graphics.Color(0xFFFF6D00) // Deep orange
+        else -> androidx.compose.ui.graphics.Color(0xFFDD2C00) // Red
     }
 }
 
@@ -279,7 +301,7 @@ private fun NoResultsState(query: String) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "We couldn't find any words matching \"$query\"",
+            text = "We couldn't find any words matching $query",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -321,25 +343,29 @@ private fun SearchScreenPreviewWithResults() {
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                     lemma = "celebration",
-                    display = "\"celebration\""
+                    display = "celebration",
+                    zipfFrequency = 4.5f
                 ),
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
                     lemma = "celebrity",
-                    display = "\"celebrity\""
+                    display = "celebrity",
+                    zipfFrequency = 4.3f
                 ),
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
                     lemma = "celestial",
-                    display = "\"celestial\""
+                    display = "celestial",
+                    zipfFrequency = 3.8f
                 ),
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"),
                     lemma = "cell",
-                    display = "\"cell\""
+                    display = "cell",
+                    zipfFrequency = 5.2f
                 )
             ),
             showNoResults = false,
@@ -359,19 +385,22 @@ private fun SearchScreenPreviewMultilingualResults() {
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                     lemma = "program",
-                    display = "\"program\""
+                    display = "program",
+                    zipfFrequency = 5.5f
                 ),
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
                     lemma = "programmatically",
-                    display = "\"programmatically\""
+                    display = "programmatically",
+                    zipfFrequency = 3.2f
                 ),
                 DictionaryRepository.SearchItem(
                     language = "ru",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
                     lemma = "программа",
-                    display = "\"программа\""
+                    display = "программа",
+                    zipfFrequency = 5.8f
                 )
             ),
             showNoResults = false,
@@ -404,7 +433,8 @@ private fun SearchScreenPreviewInfoDialog() {
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                     lemma = "world",
-                    display = "\"world\""
+                    display = "world",
+                    zipfFrequency = 6.2f
                 )
             ),
             showNoResults = false,
@@ -424,13 +454,15 @@ private fun SearchScreenPreviewDutchLanguage() {
                     language = "nl",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                     lemma = "bibliotheek",
-                    display = "\"bibliotheek\""
+                    display = "bibliotheek",
+                    zipfFrequency = 4.1f
                 ),
                 DictionaryRepository.SearchItem(
                     language = "nl",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
                     lemma = "bijbel",
-                    display = "\"bijbel\""
+                    display = "bijbel",
+                    zipfFrequency = 4.8f
                 )
             ),
             showNoResults = false,

@@ -25,9 +25,11 @@ class AllLanguagesIngestionIntegrationTest {
     fun ingest_all_languages_and_files() {
         val outDir = Files.createTempDirectory("ingestion_all_langs_test").toFile()
         val serverDbManager = ServerDbManager(outDir)
-        val builder = JsonIngestionBuilder(serverDbManager)
 
         langs.forEach { lang ->
+            // Build frequency map from test resources
+            val frequencyMap = buildTestFrequencyMap(lang)
+            val builder = JsonIngestionBuilder(serverDbManager, frequencyMap)
             val processedFiles = listResourceJsonFiles("processed_json_files/$lang")
             assertTrue(processedFiles.isNotEmpty(), "No processed files found for $lang")
             processedFiles.forEach { pFile ->
@@ -132,5 +134,17 @@ class AllLanguagesIngestionIntegrationTest {
             }
         }
         return set
+    }
+
+    private fun buildTestFrequencyMap(lang: String): Map<String, Double> {
+        val processedFiles = listResourceJsonFiles("processed_json_files/$lang")
+        val map = mutableMapOf<String, Double>()
+        processedFiles.forEach { pFile ->
+            val rawFile = resourceFile("db_extract/$lang/${pFile.name}")
+            val raw = json.decodeFromString(ExtractedWordData.serializer(), rawFile.readText())
+            // Assign a default test frequency for all words
+            map[raw.word] = 3.0
+        }
+        return map
     }
 }

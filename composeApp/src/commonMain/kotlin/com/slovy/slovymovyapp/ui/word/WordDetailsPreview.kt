@@ -396,6 +396,7 @@ private fun WordDetailScreenPreviewVeryLongWord() {
 internal fun sampleAmazonCard(): LanguageCard {
     return LanguageCard(
         lemma = "amazon",
+        zipfFrequency = 4.5f,
         entries = listOf(
             // Noun entry with multiple meanings
             LanguageCardPosEntry(
@@ -534,6 +535,7 @@ internal fun sampleAmazonCard(): LanguageCard {
 internal fun sampleCelebrationCard(): LanguageCard {
     return LanguageCard(
         lemma = "celebration",
+        zipfFrequency = 4.2f,
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
@@ -587,6 +589,7 @@ internal fun sampleCelebrationCard(): LanguageCard {
 internal fun sampleProgrammaticallyCard(): LanguageCard {
     return LanguageCard(
         lemma = "programmatically",
+        zipfFrequency = 3.1f,
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.ADVERB,
@@ -637,6 +640,7 @@ internal fun sampleProgrammaticallyCard(): LanguageCard {
 internal fun sampleRichmondCard(): LanguageCard {
     return LanguageCard(
         lemma = "Richmond",
+        zipfFrequency = 4.9f,
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NAME,
@@ -713,6 +717,7 @@ internal fun sampleRichmondCard(): LanguageCard {
 internal fun sampleKwartierCard(): LanguageCard {
     return LanguageCard(
         lemma = "kwartier",
+        zipfFrequency = 4.7f,
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
@@ -779,6 +784,7 @@ internal fun sampleKwartierCard(): LanguageCard {
 internal fun sampleProgrammaCard(): LanguageCard {
     return LanguageCard(
         lemma = "программа",
+        zipfFrequency = 5.6f,
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
@@ -836,6 +842,7 @@ internal fun sampleProgrammaCard(): LanguageCard {
 internal fun sampleNoTranslationCard(): LanguageCard {
     return LanguageCard(
         lemma = "whippersnapper",
+        zipfFrequency = 2.1f,
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
@@ -907,6 +914,7 @@ internal fun sampleNoTranslationCard(): LanguageCard {
 internal fun sampleMultilingualCard(): LanguageCard {
     return LanguageCard(
         lemma = "bibliotheek",
+        zipfFrequency = 4.8f,
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
@@ -1042,6 +1050,7 @@ internal fun sampleMultilingualCard(): LanguageCard {
 internal fun sampleTestingCard(): LanguageCard {
     return LanguageCard(
         lemma = "testing",
+        zipfFrequency = 4.6f,
         entries = listOf(
             // Verb entry
             LanguageCardPosEntry(
@@ -1128,6 +1137,7 @@ internal fun sampleTestingCard(): LanguageCard {
 internal fun sampleWordWithTraits(): LanguageCard {
     return LanguageCard(
         lemma = "ain't",
+        zipfFrequency = 3.9f,
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.VERB,
@@ -1186,6 +1196,7 @@ internal fun sampleWordWithTraits(): LanguageCard {
 internal fun sampleAllTraitTypesCard(): LanguageCard {
     return LanguageCard(
         lemma = "thou",
+        zipfFrequency = 3.4f,
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.PRONOUN,
@@ -1247,6 +1258,7 @@ internal fun sampleAllTraitTypesCard(): LanguageCard {
 internal fun sampleVeryLongWordCard(): LanguageCard {
     return LanguageCard(
         lemma = "pneumonoultramicroscopicsilicovolcanoconiosis",
+        zipfFrequency = 1.5f,
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,

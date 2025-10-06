@@ -2,13 +2,14 @@ package com.slovy.slovymovyapp.data.remote
 
 data class LanguageCard(
     val lemma: String,
-    val entries: List<LanguageCardPosEntry>
+    val entries: List<LanguageCardPosEntry>,
+    val zipfFrequency: Float
 )
 
 data class LanguageCardPosEntry(
     val pos: PartOfSpeech,
     val forms: MutableList<LanguageCardForm>,
-    val senses: List<LanguageCardResponseSense>
+    val senses: List<LanguageCardResponseSense>,
 )
 
 data class LanguageCardForm(
