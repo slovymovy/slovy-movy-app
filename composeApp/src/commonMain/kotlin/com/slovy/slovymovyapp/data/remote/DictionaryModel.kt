@@ -33,19 +33,24 @@ enum class SenseFrequency(val label: String) {
     VERY_LOW("Very low");
 }
 
-enum class PartOfSpeech {
-    ARTICLE,
-    NOUN,
-    NAME,
-    VERB,
-    ADJECTIVE,
-    ADVERB,
-    PRONOUN,
-    PREPOSITION,
-    CONJUNCTION,
-    INTERJECTION,
-    DETERMINER,
-    NUMERAL;
+enum class PartOfSpeech(val short: String) {
+    ARTICLE("Art"),
+    NOUN("Noun"),
+    NAME("Name"),
+    VERB("Verb"),
+    ADJECTIVE("Adj"),
+    ADVERB("Adv"),
+    PRONOUN("Pron"),
+    PREPOSITION("Prep"),
+    CONJUNCTION("Conj"),
+    INTERJECTION("Interj"),
+    DETERMINER("Det"),
+    NUMERAL("Num");
+
+    fun capitalized(): String {
+        return name.lowercase()
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+    }
 }
 
 enum class NameType(val displayName: String) {

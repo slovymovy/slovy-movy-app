@@ -71,11 +71,10 @@ internal fun EntryCard(
                 Surface(
                     color = pc,
                     contentColor = pcc,
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = entry.pos.name.lowercase()
-                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                        text = entry.pos.capitalized(),
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )

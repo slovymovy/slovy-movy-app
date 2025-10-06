@@ -1,7 +1,12 @@
 package com.slovy.slovymovyapp.data.remote
 
+import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import kotlin.uuid.Uuid
+
+internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
+    return PartOfSpeech.valueOf(this.name)
+}
 
 // Repository that provides search across installed dictionaries and builds LanguageCard by lemma ID,
 // aggregating translations from all available target languages.
@@ -18,7 +23,8 @@ class DictionaryRepository(
         val lemmaId: Uuid,
         val lemma: String,
         val display: String,
-        val zipfFrequency: Float
+        val zipfFrequency: Float,
+        val pos: List<PartOfSpeech>
     )
 
     fun installedDictionaries(): List<String> = languageCodes.filter { lang ->
@@ -47,6 +53,7 @@ class DictionaryRepository(
         val out = mutableListOf<SearchItem>()
         val seenDisplays = HashSet<String>()
         val seenLemmasPerLang = HashMap<String, HashSet<String>>() // lang -> lowercase lemma set
+        val lemmaPosSets = HashMap<String, LinkedHashSet<PartOfSpeech>>()
 
         for (lang in langs) {
             val db = try {
@@ -56,9 +63,12 @@ class DictionaryRepository(
             } ?: continue
             val q = db.dictionaryQueries
 
-            fun addLemma(id: Uuid, lemma: String, zipfFrequency: Float) {
+            fun addLemma(id: Uuid, lemma: String, zipfFrequency: Float, pos: PartOfSpeech) {
                 val key = "$lang::$lemma"
                 val lemmasSet = seenLemmasPerLang.getOrPut(lang) { HashSet() }
+                val posSet = lemmaPosSets.getOrPut(key) { LinkedHashSet() }
+                posSet.add(pos)
+
                 if (!seenDisplays.contains(key)) {
                     out.add(
                         SearchItem(
@@ -66,19 +76,29 @@ class DictionaryRepository(
                             lemmaId = id,
                             lemma = lemma,
                             display = lemma,
-                            zipfFrequency = zipfFrequency
+                            zipfFrequency = zipfFrequency,
+                            pos = posSet.toList()
                         )
                     )
                     seenDisplays.add(key)
                     lemmasSet.add(lemma.lowercase())
+                } else {
+                    // Update existing item's POS list
+                    val index = out.indexOfFirst { it.language == lang && it.lemma == lemma }
+                    if (index != -1) {
+                        out[index] = out[index].copy(pos = posSet.toList())
+                    }
                 }
             }
 
-            fun addForm(id: Uuid, lemma: String, form: String, zipfFrequency: Float) {
+            fun addForm(id: Uuid, lemma: String, form: String, zipfFrequency: Float, pos: PartOfSpeech) {
                 val lemmasSet = seenLemmasPerLang.getOrPut(lang) { HashSet() }
                 if (lemmasSet.contains(lemma.lowercase())) return // suppress forms if lemma already present
                 val display = "\"$form\" form of \"$lemma\""
                 val key = "$lang::$display"
+                val posSet = lemmaPosSets.getOrPut(key) { LinkedHashSet() }
+                posSet.add(pos)
+
                 if (!seenDisplays.contains(key)) {
                     out.add(
                         SearchItem(
@@ -86,10 +106,17 @@ class DictionaryRepository(
                             lemmaId = id,
                             lemma = lemma,
                             display = display,
-                            zipfFrequency = zipfFrequency
+                            zipfFrequency = zipfFrequency,
+                            pos = posSet.toList()
                         )
                     )
                     seenDisplays.add(key)
+                } else {
+                    // Update existing item's POS list
+                    val index = out.indexOfFirst { it.language == lang && it.display == display }
+                    if (index != -1) {
+                        out[index] = out[index].copy(pos = posSet.toList())
+                    }
                 }
             }
 
@@ -99,15 +126,23 @@ class DictionaryRepository(
                 q.selectLemmasByWord(trimmed).executeAsList()
             val byNorm: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByNormalized> =
                 q.selectLemmasByNormalized(trimmed).executeAsList()
-            byWord.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat()) }
-            byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat()) }
+            byWord.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.pos.toPartOfSpeech()) }
+            byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.pos.toPartOfSpeech()) }
 
             val formEq: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByFormEquals> =
                 q.selectLemmasByFormEquals(trimmed, maxItems.toLong()).executeAsList()
             val formEqNorm: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByFormNormalizedEquals> =
                 q.selectLemmasByFormNormalizedEquals(trimmed, maxItems.toLong()).executeAsList()
-            formEq.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat()) }
-            formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat()) }
+            formEq.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.pos.toPartOfSpeech()) }
+            formEqNorm.forEach {
+                addForm(
+                    it.id,
+                    it.lemma,
+                    it.form,
+                    it.zipf_frequency.toFloat(),
+                    it.pos.toPartOfSpeech()
+                )
+            }
 
             // and by prefix later
             val pattern = "$trimmed%"
@@ -115,15 +150,23 @@ class DictionaryRepository(
                 q.selectLemmasLike(pattern, maxItems.toLong()).executeAsList()
             val lemmaNormLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasNormalizedLike> =
                 q.selectLemmasNormalizedLike(pattern, maxItems.toLong()).executeAsList()
-            lemmaLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat()) }
-            lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat()) }
+            lemmaLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.pos.toPartOfSpeech()) }
+            lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.pos.toPartOfSpeech()) }
 
             val formLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasFromFormsLike> =
                 q.selectLemmasFromFormsLike(pattern, maxItems.toLong()).executeAsList()
             val formNormLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasFromFormsNormalizedLike> =
                 q.selectLemmasFromFormsNormalizedLike(pattern, maxItems.toLong()).executeAsList()
-            formLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat()) }
-            formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat()) }
+            formLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.pos.toPartOfSpeech()) }
+            formNormLike.forEach {
+                addForm(
+                    it.id,
+                    it.lemma,
+                    it.form,
+                    it.zipf_frequency.toFloat(),
+                    it.pos.toPartOfSpeech()
+                )
+            }
         }
 
         return out.take(maxItems)

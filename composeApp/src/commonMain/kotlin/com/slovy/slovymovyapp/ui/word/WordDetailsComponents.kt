@@ -118,12 +118,17 @@ internal fun appendTextWithW(builder: AnnotatedString.Builder, input: String, hi
 }
 
 @Composable
-internal fun Badge(text: String, containerColor: Color, contentColor: Color) {
+internal fun Badge(
+    text: String,
+    containerColor: Color,
+    contentColor: Color,
+    style: TextStyle = MaterialTheme.typography.labelMedium
+) {
     Surface(color = containerColor, contentColor = contentColor, shape = RoundedCornerShape(12.dp)) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.Companion.padding(horizontal = 8.dp, vertical = 4.dp)
+            style = style,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
     }
 }

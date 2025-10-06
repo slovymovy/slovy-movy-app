@@ -20,6 +20,16 @@ internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (lev
 }
 
 @Composable
+internal fun getFrequencyColor(zipfFrequency: Float): Pair<Color, Color> {
+    return when {
+        zipfFrequency >= 5.0f -> Color(0xFFDFF6DD) to Color(0xFF1E7D23)
+        zipfFrequency >= 4.0f -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
+        zipfFrequency >= 3.0f -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
+        else -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
+    }
+}
+
+@Composable
 internal fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> = when (f) {
     SenseFrequency.HIGH -> Color(0xFFDFF6DD) to Color(0xFF1C5E20)
     SenseFrequency.MIDDLE -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
@@ -30,7 +40,7 @@ internal fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> = when (f
 @Composable
 internal fun colorsForPos(pos: PartOfSpeech): Pair<Color, Color> = when (pos) {
     PartOfSpeech.NOUN -> Color(0xFFE3F2FD) to Color(0xFF0D47A1)
-    PartOfSpeech.VERB -> Color(0xFFE8F5E9) to Color(0xFF1B5E20)
+    PartOfSpeech.VERB -> Color(0xFFE8F5E9) to Color(0xFF5E4D1B)
     PartOfSpeech.ADJECTIVE -> Color(0xFFFFF3E0) to Color(0xFFEF6C00)
     PartOfSpeech.ADVERB -> Color(0xFFF3E5F5) to Color(0xFF6A1B9A)
     PartOfSpeech.PRONOUN -> Color(0xFFFFEBEE) to Color(0xFFC62828)

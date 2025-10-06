@@ -19,7 +19,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.ui.word.Badge
+import com.slovy.slovymovyapp.ui.word.colorsForPos
+import com.slovy.slovymovyapp.ui.word.getFrequencyColor
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.uuid.Uuid
@@ -186,6 +189,7 @@ fun SearchScreenContent(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SearchResultCard(
     item: DictionaryRepository.SearchItem,
@@ -196,55 +200,46 @@ private fun SearchResultCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(6.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = item.display,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val (lc, lcc) = getFrequencyColor(item.zipfFrequency)
                     Badge(
-                        text = item.zipfFrequency.toString(),
-                        getFrequencyColor(item.zipfFrequency),
-                        contentColor = MaterialTheme.colorScheme.secondary
+                        text = item.display,
+                        containerColor = lc,
+                        contentColor = lcc,
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }
 
-            SuggestionChip(
-                onClick = { },
-                label = {
-                    Text(
-                        text = item.language.uppercase(),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                },
-                modifier = Modifier.padding(start = 8.dp)
-            )
+            if (item.pos.isNotEmpty()) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    item.pos.forEach { pos ->
+                        val (posLc, posLcc) = colorsForPos(pos)
+                        Badge(
+                            text = pos.short,
+                            containerColor = posLc,
+                            contentColor = posLcc
+                        )
+                    }
+                }
+            }
         }
-    }
-}
-
-@Composable
-private fun getFrequencyColor(zipfFrequency: Float): androidx.compose.ui.graphics.Color {
-    return when {
-        zipfFrequency >= 7.0f -> androidx.compose.ui.graphics.Color(0xFF00C853) // Bright green
-        zipfFrequency >= 6.0f -> androidx.compose.ui.graphics.Color(0xFF64DD17) // Green
-        zipfFrequency >= 5.0f -> androidx.compose.ui.graphics.Color(0xFFAEEA00) // Light green
-        zipfFrequency >= 4.0f -> androidx.compose.ui.graphics.Color(0xFFFFD600) // Yellow
-        zipfFrequency >= 3.0f -> androidx.compose.ui.graphics.Color(0xFFFFAB00) // Orange
-        zipfFrequency >= 2.0f -> androidx.compose.ui.graphics.Color(0xFFFF6D00) // Deep orange
-        else -> androidx.compose.ui.graphics.Color(0xFFDD2C00) // Red
     }
 }
 
@@ -344,28 +339,32 @@ private fun SearchScreenPreviewWithResults() {
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                     lemma = "celebration",
                     display = "celebration",
-                    zipfFrequency = 4.5f
+                    zipfFrequency = 4.5f,
+                    pos = listOf(PartOfSpeech.NOUN)
                 ),
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
                     lemma = "celebrity",
                     display = "celebrity",
-                    zipfFrequency = 4.3f
+                    zipfFrequency = 4.3f,
+                    pos = listOf(PartOfSpeech.NOUN)
                 ),
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
                     lemma = "celestial",
                     display = "celestial",
-                    zipfFrequency = 3.8f
+                    zipfFrequency = 3.8f,
+                    pos = listOf(PartOfSpeech.ADJECTIVE)
                 ),
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"),
                     lemma = "cell",
                     display = "cell",
-                    zipfFrequency = 5.2f
+                    zipfFrequency = 5.2f,
+                    pos = listOf(PartOfSpeech.NOUN)
                 )
             ),
             showNoResults = false,
@@ -386,21 +385,24 @@ private fun SearchScreenPreviewMultilingualResults() {
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                     lemma = "program",
                     display = "program",
-                    zipfFrequency = 5.5f
+                    zipfFrequency = 5.5f,
+                    pos = listOf(PartOfSpeech.NOUN, PartOfSpeech.VERB)
                 ),
                 DictionaryRepository.SearchItem(
                     language = "en",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
                     lemma = "programmatically",
                     display = "programmatically",
-                    zipfFrequency = 3.2f
+                    zipfFrequency = 3.2f,
+                    pos = listOf(PartOfSpeech.ADVERB)
                 ),
                 DictionaryRepository.SearchItem(
                     language = "ru",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
                     lemma = "программа",
                     display = "программа",
-                    zipfFrequency = 5.8f
+                    zipfFrequency = 5.8f,
+                    pos = listOf(PartOfSpeech.NOUN)
                 )
             ),
             showNoResults = false,
@@ -434,7 +436,8 @@ private fun SearchScreenPreviewInfoDialog() {
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                     lemma = "world",
                     display = "world",
-                    zipfFrequency = 6.2f
+                    zipfFrequency = 6.2f,
+                    pos = listOf(PartOfSpeech.NOUN)
                 )
             ),
             showNoResults = false,
@@ -455,14 +458,16 @@ private fun SearchScreenPreviewDutchLanguage() {
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                     lemma = "bibliotheek",
                     display = "bibliotheek",
-                    zipfFrequency = 4.1f
+                    zipfFrequency = 4.1f,
+                    pos = listOf(PartOfSpeech.NOUN)
                 ),
                 DictionaryRepository.SearchItem(
                     language = "nl",
                     lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
                     lemma = "bijbel",
                     display = "bijbel",
-                    zipfFrequency = 4.8f
+                    zipfFrequency = 4.8f,
+                    pos = listOf(PartOfSpeech.NOUN)
                 )
             ),
             showNoResults = false,
