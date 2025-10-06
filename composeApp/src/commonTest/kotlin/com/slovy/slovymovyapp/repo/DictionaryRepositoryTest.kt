@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.platformDbSupport
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -47,6 +48,8 @@ class DictionaryRepositoryTest : BaseTest() {
             val card = repo.getLanguageCard("en", first.lemma)
             assertNotNull(card, "Language card should be built for a real lemma from the English dictionary")
             assertTrue(card.entries.isNotEmpty(), "Language card should have at least one entry")
+            assertEquals(first.lemma, card.lemma, "Card lemma should match search result")
+            assertTrue(card.zipfFrequency >= 0.0f, "Zipf frequency should be non-negative")
         } finally {
             // Clean up downloaded files to keep test environment tidy
             mgr.deleteDictionary("en")
@@ -74,6 +77,7 @@ class DictionaryRepositoryTest : BaseTest() {
             val poses = card.entries.map { it.pos }.toSet()
             assertTrue(poses.contains(PartOfSpeech.NOUN), "Expected NOUN entry for 'voorstellen'")
             assertTrue(poses.contains(PartOfSpeech.VERB), "Expected VERB entry for 'voorstellen'")
+            assertTrue(card.zipfFrequency >= 0.0f, "Zipf frequency should be non-negative")
         } finally {
             // Clean up
             mgr.deleteDictionary("nl")

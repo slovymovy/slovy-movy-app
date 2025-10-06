@@ -26,7 +26,10 @@ val LANG_TO_SOURCE_FILE: Map<String, String> = mapOf(
     "pl" to "pl-extract.jsonl",
 )
 
-class JsonIngestionBuilder(private val serverDbManager: ServerDbManager) {
+class JsonIngestionBuilder(
+    private val serverDbManager: ServerDbManager,
+    private val frequencyMap: Map<String, Double>
+) {
 
     @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
@@ -41,6 +44,9 @@ class JsonIngestionBuilder(private val serverDbManager: ServerDbManager) {
         val raw = json.decodeFromString(ExtractedWordData.serializer(), rawFile.readText())
         val langCode = raw.langCode
         val lemmaWord = raw.word
+
+        val zipfFrequency = frequencyMap[lemmaWord]
+            ?: throw IllegalArgumentException("Lemma '$lemmaWord' not found in frequency map")
 
         val dictDb = serverDbManager.openDictionary(langCode)
         val dictQ = dictDb.dictionaryQueries
@@ -82,6 +88,7 @@ class JsonIngestionBuilder(private val serverDbManager: ServerDbManager) {
                         lemma = lemmaWord,
                         lemma_normalized = unaccent(lemmaWord),
                         pos = pos,
+                        zipf_frequency = zipfFrequency
                     )
                 }
             }
@@ -117,7 +124,8 @@ class JsonIngestionBuilder(private val serverDbManager: ServerDbManager) {
                         id = genId,
                         lemma = lemmaWord,
                         lemma_normalized = unaccent(lemmaWord),
-                        pos = pos
+                        pos = pos,
+                        zipfFrequency,
                     )
                     genId
                 }

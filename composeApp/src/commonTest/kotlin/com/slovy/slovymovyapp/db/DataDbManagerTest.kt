@@ -69,9 +69,9 @@ class DataDbManagerTest : BaseTest() {
             val beId = Uuid.random()
             val loveId = Uuid.random()
             val cafeId = Uuid.random()
-            q.insertPosEntry(beId, "Be", "be", DictionaryPos.VERB)
-            q.insertPosEntry(loveId, "Love", "love", DictionaryPos.VERB)
-            q.insertPosEntry(cafeId, "Café", "cafe", DictionaryPos.NOUN)
+            q.insertPosEntry(beId, "Be", "be", DictionaryPos.VERB, 0.0)
+            q.insertPosEntry(loveId, "Love", "love", DictionaryPos.VERB, 5.0)
+            q.insertPosEntry(cafeId, "Café", "cafe", DictionaryPos.NOUN, 10.0)
 
             // Insert forms (mixed case to test COLLATE NOCASE)
             q.insertForm(Uuid.random(), beId, "am", "am")

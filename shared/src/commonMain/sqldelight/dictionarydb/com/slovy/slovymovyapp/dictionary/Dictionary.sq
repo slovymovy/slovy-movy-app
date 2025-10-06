@@ -11,7 +11,8 @@ CREATE TABLE lemma (
   id BLOB AS Uuid NOT NULL PRIMARY KEY, -- UUID
   pos INTEGER AS DictionaryPos NOT NULL,
   lemma TEXT NOT NULL,
-  lemma_normalized TEXT NOT NULL
+  lemma_normalized TEXT NOT NULL,
+  zipf_frequency REAL NOT NULL
 );
 
 -- Word forms belonging to a POS entry
@@ -80,8 +81,8 @@ CREATE TABLE sense_trait (
 
 
 -- Indexes to speed up searches by lemma
-CREATE INDEX IF NOT EXISTS idx_lemma_lemma ON lemma(lemma COLLATE NOCASE);
-CREATE INDEX IF NOT EXISTS idx_lemma_lemma_normalized ON lemma(lemma_normalized COLLATE NOCASE);
+CREATE INDEX IF NOT EXISTS idx_lemma_lemma ON lemma(lemma COLLATE NOCASE, zipf_frequency DESC);
+CREATE INDEX IF NOT EXISTS idx_lemma_lemma_normalized ON lemma(lemma_normalized COLLATE NOCASE, zipf_frequency DESC);
 
 -- Indexes to speed up searches by form
 CREATE INDEX IF NOT EXISTS idx_form_form ON form(form COLLATE NOCASE);
@@ -89,12 +90,12 @@ CREATE INDEX IF NOT EXISTS idx_form_form_normalized ON form(form_normalized COLL
 
 -- Queries
 insertPosEntry:
-INSERT INTO lemma(id, lemma, lemma_normalized, pos)
-VALUES (?, ?, ?, ?);
+INSERT INTO lemma(id, lemma, lemma_normalized, pos, zipf_frequency)
+VALUES (?, ?, ?, ?, ?);
 
 -- Select lemma by ID (full)
 selectLemmaFullById:
-SELECT l.id, l.lemma, l.pos
+SELECT l.id, l.lemma, l.pos, l.zipf_frequency
 FROM lemma l
 WHERE l.id = ?;
 
@@ -158,18 +159,18 @@ FROM form_tag ft
 WHERE ft.form_id = ?;
 
 selectLemmasByWord:
-SELECT l.id, l.lemma
+SELECT l.id, l.lemma, l.zipf_frequency
 FROM lemma l
 WHERE l.lemma = ? COLLATE NOCASE;
 
 -- Queries returning explicit lemma_id to avoid ambiguity in generated code
 selectLemmaIdAndLemmaByWord:
-SELECT l.id AS lemma_id, l.lemma
+SELECT l.id AS lemma_id, l.lemma, l.zipf_frequency
 FROM lemma l
 WHERE l.lemma = ? COLLATE NOCASE;
 
 selectLemmasById:
-SELECT l.id, l.lemma
+SELECT l.id, l.lemma, l.zipf_frequency
 FROM lemma l
 WHERE l.id = ?;
 
@@ -210,103 +211,115 @@ FROM sense_trait st
 WHERE st.sense_id = ?;
 
 selectLemmasByNormalized:
-SELECT l.id, l.lemma
+SELECT l.id, l.lemma, l.zipf_frequency
 FROM lemma l
 WHERE l.lemma_normalized = ? COLLATE NOCASE;
 
 selectLemmaIdAndLemmaByNormalized:
-SELECT l.id AS lemma_id, l.lemma
+SELECT l.id AS lemma_id, l.lemma, l.zipf_frequency
 FROM lemma l
 WHERE l.lemma_normalized = ? COLLATE NOCASE;
 
 -- LIKE-based search queries with limit 20
 selectLemmasLike:
-SELECT l.id, l.lemma
+SELECT l.id, l.lemma, l.zipf_frequency
 FROM lemma l
 WHERE l.lemma LIKE ? COLLATE NOCASE
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmaIdAndLemmaLike:
-SELECT l.id AS lemma_id, l.lemma
+SELECT l.id AS lemma_id, l.lemma, l.zipf_frequency
 FROM lemma l
 WHERE l.lemma LIKE ? COLLATE NOCASE
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmasNormalizedLike:
-SELECT l.id, l.lemma
+SELECT l.id, l.lemma, l.zipf_frequency
 FROM lemma l
 WHERE l.lemma_normalized LIKE ? COLLATE NOCASE
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmaIdAndLemmaNormalizedLike:
-SELECT l.id AS lemma_id, l.lemma
+SELECT l.id AS lemma_id, l.lemma, l.zipf_frequency
 FROM lemma l
 WHERE l.lemma_normalized LIKE ? COLLATE NOCASE
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 
 
 -- Form -> Lemma JOIN queries to avoid client-side lookups
 selectLemmasByFormEquals:
-SELECT l.id, l.lemma, f.form
+SELECT l.id, l.lemma, l.zipf_frequency, f.form
 FROM form f
 JOIN lemma l ON l.id = f.lemma_id
 WHERE f.form = ? COLLATE NOCASE
-GROUP BY l.id, l.lemma, f.form
+GROUP BY l.id, l.lemma, l.zipf_frequency, f.form
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmaIdAndLemmaByFormEquals:
-SELECT l.id AS lemma_id, l.lemma, f.form
+SELECT l.id AS lemma_id, l.lemma, l.zipf_frequency, f.form
 FROM form f
 JOIN lemma l ON l.id = f.lemma_id
 WHERE f.form = ? COLLATE NOCASE
-GROUP BY l.id, l.lemma, f.form
+GROUP BY l.id, l.lemma, l.zipf_frequency, f.form
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmasByFormNormalizedEquals:
-SELECT l.id, l.lemma, f.form
+SELECT l.id, l.lemma, l.zipf_frequency, f.form
 FROM form f
 JOIN lemma l ON l.id = f.lemma_id
 WHERE f.form_normalized = ? COLLATE NOCASE
-GROUP BY l.id, l.lemma, f.form
+GROUP BY l.id, l.lemma, l.zipf_frequency, f.form
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmaIdAndLemmaByFormNormalizedEquals:
-SELECT l.id AS lemma_id, l.lemma, f.form
+SELECT l.id AS lemma_id, l.lemma, l.zipf_frequency, f.form
 FROM form f
 JOIN lemma l ON l.id = f.lemma_id
 WHERE f.form_normalized = ? COLLATE NOCASE
-GROUP BY l.id, l.lemma, f.form
+GROUP BY l.id, l.lemma, l.zipf_frequency, f.form
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmasFromFormsLike:
-SELECT l.id, l.lemma, f.form
+SELECT l.id, l.lemma, l.zipf_frequency, f.form
 FROM form f
 JOIN lemma l ON l.id = f.lemma_id
 WHERE f.form LIKE ? COLLATE NOCASE
-GROUP BY l.id, l.lemma, f.form
+GROUP BY l.id, l.lemma, l.zipf_frequency, f.form
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmaIdAndLemmaFromFormsLike:
-SELECT l.id AS lemma_id, l.lemma, f.form
+SELECT l.id AS lemma_id, l.lemma, l.zipf_frequency, f.form
 FROM form f
 JOIN lemma l ON l.id = f.lemma_id
 WHERE f.form LIKE ? COLLATE NOCASE
-GROUP BY l.id, l.lemma, f.form
+GROUP BY l.id, l.lemma, l.zipf_frequency, f.form
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmasFromFormsNormalizedLike:
-SELECT l.id, l.lemma, f.form
+SELECT l.id, l.lemma, l.zipf_frequency, f.form
 FROM form f
 JOIN lemma l ON l.id = f.lemma_id
 WHERE f.form_normalized LIKE ? COLLATE NOCASE
-GROUP BY l.id, l.lemma, f.form
+GROUP BY l.id, l.lemma, l.zipf_frequency, f.form
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmaIdAndLemmaFromFormsNormalizedLike:
-SELECT l.id AS lemma_id, l.lemma, f.form
+SELECT l.id AS lemma_id, l.lemma, l.zipf_frequency, f.form
 FROM form f
 JOIN lemma l ON l.id = f.lemma_id
 WHERE f.form_normalized LIKE ? COLLATE NOCASE
-GROUP BY l.id, l.lemma, f.form
+GROUP BY l.id, l.lemma, l.zipf_frequency, f.form
+ORDER BY l.zipf_frequency DESC
 LIMIT ?;
