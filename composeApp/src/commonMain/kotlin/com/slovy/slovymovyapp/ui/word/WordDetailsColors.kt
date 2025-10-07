@@ -22,9 +22,9 @@ internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (lev
 @Composable
 internal fun getFrequencyColor(zipfFrequency: Float): Pair<Color, Color> {
     return when {
-        zipfFrequency >= 5.0f -> Color(0xFFDFF6DD) to Color(0xFF1E7D23)
-        zipfFrequency >= 4.0f -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
-        zipfFrequency >= 3.0f -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
+        zipfFrequency >= 4.0f -> Color(0xFFDFF6DD) to Color(0xFF1E7D23)
+        zipfFrequency >= 3.0f -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
+        zipfFrequency >= 2.0f -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
         else -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
     }
 }
