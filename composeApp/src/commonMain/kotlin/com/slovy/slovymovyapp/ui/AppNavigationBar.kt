@@ -1,9 +1,13 @@
 package com.slovy.slovymovyapp.ui
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -21,21 +25,50 @@ fun AppNavigationBar(
     onNavigateToWordDetail: () -> Unit,
     wordDetailLabel: String? = null
 ) {
-    NavigationBar {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+    ) {
         NavigationBarItem(
-            icon = { Text("🔍", style = MaterialTheme.typography.titleLarge) },
+            icon = {
+                Icon(
+                    imageVector = if (currentScreen == AppScreen.SEARCH) {
+                        Icons.Filled.Search
+                    } else {
+                        Icons.Outlined.Search
+                    },
+                    contentDescription = "Search"
+                )
+            },
             label = { Text("Search") },
             selected = currentScreen == AppScreen.SEARCH,
             onClick = onNavigateToSearch
         )
         NavigationBarItem(
-            icon = { Text("❤️", style = MaterialTheme.typography.titleLarge) },
+            icon = {
+                Icon(
+                    imageVector = if (currentScreen == AppScreen.FAVORITES) {
+                        Icons.Filled.Favorite
+                    } else {
+                        Icons.Outlined.FavoriteBorder
+                    },
+                    contentDescription = "Favorites"
+                )
+            },
             label = { Text("Favorites") },
             selected = currentScreen == AppScreen.FAVORITES,
             onClick = onNavigateToFavorites
         )
         NavigationBarItem(
-            icon = { Text("📖", style = MaterialTheme.typography.titleLarge) },
+            icon = {
+                Icon(
+                    imageVector = if (currentScreen == AppScreen.WORD_DETAIL) {
+                        Icons.Filled.Book
+                    } else {
+                        Icons.Outlined.Book
+                    },
+                    contentDescription = "Word Detail"
+                )
+            },
             label = { Text(wordDetailLabel ?: "Word Detail") },
             selected = currentScreen == AppScreen.WORD_DETAIL,
             enabled = wordDetailLabel != null,

@@ -5,8 +5,6 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,8 +16,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
@@ -416,15 +414,12 @@ fun WordDetailScreenContent(
                 title = {
                     when (state) {
                         is WordDetailUiState.Content ->
-                            BasicText(
+                            Text(
                                 text = state.card.lemma,
                                 style = MaterialTheme.typography.headlineSmall,
-                                autoSize = TextAutoSize.StepBased(
-                                    minFontSize = 5.sp,
-                                    maxFontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                                    stepSize = 1.sp
-                                ),
-                                maxLines = 1
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis
                             )
 
                         is WordDetailUiState.Empty -> HighlightedText(

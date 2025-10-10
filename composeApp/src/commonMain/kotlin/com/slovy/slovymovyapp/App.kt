@@ -15,6 +15,7 @@ import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.ui.*
+import com.slovy.slovymovyapp.ui.theme.AppTheme
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.launch
@@ -111,14 +112,15 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
 
     val resolvedStart = startDestination ?: return
 
-    NavHost(
-        navController = navController,
-        startDestination = resolvedStart,
-        enterTransition = { EnterTransition.None },
-        exitTransition = { ExitTransition.None },
-        popEnterTransition = { EnterTransition.None },
-        popExitTransition = { ExitTransition.None }
-    ) {
+    AppTheme {
+        NavHost(
+            navController = navController,
+            startDestination = resolvedStart,
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
+        ) {
         composable<AppDestination.Language> { backStackEntry ->
             val viewModel = viewModel(
                 viewModelStoreOwner = backStackEntry
@@ -389,6 +391,7 @@ fun App(settingsRepository: SettingsRepository? = null, platformDbSupport: Platf
                     }
                 }
             )
+        }
         }
     }
 }

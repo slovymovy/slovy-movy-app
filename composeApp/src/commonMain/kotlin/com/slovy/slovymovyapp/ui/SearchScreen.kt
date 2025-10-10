@@ -8,6 +8,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -253,9 +256,11 @@ private fun EmptySearchState() {
         verticalArrangement = Arrangement.Top
     ) {
         Spacer(modifier = Modifier.height(48.dp))
-        Text(
-            text = "🔍",
-            style = MaterialTheme.typography.displayLarge
+        Icon(
+            imageVector = Icons.Outlined.Search,
+            contentDescription = "Search",
+            modifier = Modifier.size(72.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -284,9 +289,11 @@ private fun NoResultsState(query: String) {
         verticalArrangement = Arrangement.Top
     ) {
         Spacer(modifier = Modifier.height(48.dp))
-        Text(
-            text = "🤔",
-            style = MaterialTheme.typography.displayLarge
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.HelpOutline,
+            contentDescription = "No results",
+            modifier = Modifier.size(72.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(

@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -162,7 +164,7 @@ class FavoritesViewModel(
         state = state.copy(
             groups = state.groups.map { group ->
                 group.copy(
-                    senses = group.senses ?.map { favSense ->
+                    senses = group.senses?.map { favSense ->
                         if (favSense.sense.senseId == senseId) {
                             favSense.copy(state = updateFn(favSense.state))
                         } else {
@@ -350,9 +352,11 @@ fun FavoritesScreenContent(
                         verticalArrangement = Arrangement.Top
                     ) {
                         Spacer(modifier = Modifier.height(48.dp))
-                        Text(
-                            text = "\uD83D\uDC94",
-                            style = MaterialTheme.typography.displayLarge
+                        Icon(
+                            imageVector = Icons.Outlined.FavoriteBorder,
+                            contentDescription = "No results",
+                            modifier = Modifier.size(72.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
