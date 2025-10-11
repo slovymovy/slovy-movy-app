@@ -280,7 +280,7 @@ fun FavoritesScreenContent(
                         style = MaterialTheme.typography.headlineSmall
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
