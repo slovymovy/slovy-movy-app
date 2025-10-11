@@ -10,6 +10,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.apache.commons.lang3.StringUtils
 import java.io.File
+import java.security.MessageDigest
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import com.slovy.slovymovyapp.data.dictionary.TraitType as DictTraitType
@@ -57,54 +58,85 @@ class JsonIngestionBuilder(
             val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
             val allEntries = raw.sourceFileToEntries.values.flatten()
 
-            // Build mapping from sense_id -> raw entry and entry_id -> processed POS using sense_id
+            // Build mapping from sense_id -> raw entry
             val senseIdToRawEntry = mutableMapOf<Uuid, ExtractedWordEntry>()
             allEntries.forEach { entry ->
                 entry.senses.forEach { s ->
-                    senseIdToRawEntry[uuidParse(s.senseId.toString())] = entry
+                    val sid = uuidParse(s.senseId.toString())
+                    if (senseIdToRawEntry.contains(sid)) {
+                        throw IllegalArgumentException("Duplicate sense_id: $sid")
+                    }
+                    senseIdToRawEntry[sid] = entry
                 }
             }
-            val entryIdToProcessedPos = mutableMapOf<Uuid, DictionaryPos>()
+
+            val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
+            val entryIdToPos = mutableMapOf<Uuid, DictionaryPos>()
             processed.entries.forEach { pEntry ->
-                val pPos = mapPos(pEntry.pos)
+                val pPos = mapPos(pEntry.pos)!!
                 pEntry.senses.forEach { s ->
                     val sid = uuidParse(s.senseId)
                     val rawEntry = senseIdToRawEntry[sid]
-                    if (rawEntry != null) {
-                        entryIdToProcessedPos.putIfAbsent(uuidParse(rawEntry.entryId.toString()), pPos)
+                    if (rawEntry != null && mapPos(rawEntry.pos) == pPos) {
+                        posToEntryId.putIfAbsent(pPos, uuidParse(rawEntry.entryId.toString()))
+                        entryIdToPos[uuidParse(rawEntry.entryId.toString())] = pPos
+                        return@forEach
                     }
                 }
             }
 
-            // Create lemmas per processed POS; use raw entry_id tied via sense_id when available
-            val posToLemmaId = mutableMapOf<DictionaryPos, Uuid>()
-            processed.entries.forEach { pEntry ->
-                val pos = mapPos(pEntry.pos)
-                val candidateEntryId = entryIdToProcessedPos.entries.firstOrNull { it.value == pos }?.key
-                val lemmaId = candidateEntryId ?: Uuid.random()
-                if (posToLemmaId.putIfAbsent(pos, lemmaId) == null) {
-                    dictQ.insertPosEntry(
-                        id = lemmaId,
-                        lemma = lemmaWord,
-                        lemma_normalized = unaccent(lemmaWord),
-                        pos = pos,
-                        zipf_frequency = zipfFrequency
+            processed.entries.forEach { entry ->
+                val key = mapPos(entry.pos)
+                if (!posToEntryId.containsKey(key)) {
+                    posToEntryId[key!!] = Uuid.random() // TODO: make it consistent
+                }
+            }
+
+            // Create single lemma entry (shared across all POS)
+            val md = MessageDigest.getInstance("MD5")
+            val lemmaNormalized = unaccent(lemmaWord)
+            val str = lemmaWord + "_" + lemmaNormalized
+
+            val hash = md.digest(str.toByteArray(Charsets.UTF_8))
+            val baseLemmaId = Uuid.fromByteArray(hash.sliceArray(0..15))
+
+            val selectLemmasById = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
+            if (selectLemmasById != null) {
+                throw IllegalArgumentException("Lemma '$lemmaWord' already exists in database")
+            }
+
+            dictQ.insertLemma(
+                id = baseLemmaId,
+                lemma = lemmaWord,
+                lemma_normalized = lemmaNormalized,
+                zipf_frequency = zipfFrequency
+            )
+
+            // Insert lemma_pos entries for all POSes
+            posToEntryId.forEach { (pos, entryId) ->
+                try {
+                    dictQ.insertLemmaPos(
+                        id = entryId,
+                        lemma_id = baseLemmaId,
+                        pos = pos
                     )
+                } catch (e: Exception) {
+                    throw IllegalArgumentException("Duplicate lemma_pos entry for lemma '$lemmaWord' and POS '$pos'", e)
                 }
             }
 
             // Insert forms (prefer native source; fallback to others when no forms in native)
             val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
             entriesForForms.forEach { entry ->
-                val entryId = uuidParse(entry.entryId.toString())
-                val processedPos = entryIdToProcessedPos[entryId] ?: return@forEach
-                // Skip forms for entries not referenced by processed
-                val lemmaId = posToLemmaId[processedPos] ?: return@forEach
+                val pos = entryIdToPos[uuidParse(entry.entryId.toString())]
+                pos ?: return@forEach
+                val lemmaPosId = posToEntryId[pos] ?: return@forEach
+
                 entry.forms.forEach { f ->
                     val formId = uuidParse(f.formId.toString())
                     dictQ.insertForm(
                         form_id = formId,
-                        lemma_id = lemmaId,
+                        lemma_pos_id = lemmaPosId,
                         form = f.form,
                         form_normalized = unaccent(f.form),
                     )
@@ -118,22 +150,13 @@ class JsonIngestionBuilder(
             // Insert senses and related data from processed JSON, mapped to POS lemma
             processed.entries.forEach { posEntry ->
                 val pos = mapPos(posEntry.pos)
-                val lemmaIdForPos = posToLemmaId.getOrPut(pos) {
-                    val genId = Uuid.random()
-                    dictQ.insertPosEntry(
-                        id = genId,
-                        lemma = lemmaWord,
-                        lemma_normalized = unaccent(lemmaWord),
-                        pos = pos,
-                        zipfFrequency,
-                    )
-                    genId
-                }
+                val lemmaPosIdForPos = posToEntryId[pos]!!
+
                 posEntry.senses.forEachIndexed { sIdx, sense ->
                     val senseId = uuidParse(sense.senseId)
                     dictQ.insertSense(
                         sense_id = senseId,
-                        lemma_id = lemmaIdForPos,
+                        lemma_pos_id = lemmaPosIdForPos,
                         sense_definition = sense.senseDefinition,
                         learner_level = mapLevel(sense.learnerLevel),
                         frequency = mapFrequency(sense.frequency),
@@ -209,7 +232,22 @@ class JsonIngestionBuilder(
         }
     }
 
-    private fun mapPos(pos: String): DictionaryPos = DictionaryPos.valueOf(pos.uppercase())
+    private fun mapPos(pos: String): DictionaryPos? {
+        try {
+            return DictionaryPos.valueOf(pos.uppercase())
+        } catch (e: IllegalArgumentException) {
+            when (pos.uppercase()) {
+                "ADJ" -> return DictionaryPos.ADJECTIVE
+                "ADV" -> return DictionaryPos.ADVERB
+                "PREP" -> return DictionaryPos.PREPOSITION
+                "CONJ" -> return DictionaryPos.CONJUNCTION
+                "PRON" -> return DictionaryPos.PRONOUN
+                "INTJ" -> return DictionaryPos.INTERJECTION
+                "NUM" -> return DictionaryPos.NUMERAL
+            }
+            return null
+        }
+    }
 
     private fun mapLevel(level: String): LearnerLevel = LearnerLevel.valueOf(level.uppercase());
     private fun mapFrequency(freq: String): SenseFrequency = when (freq.uppercase()) {

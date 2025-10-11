@@ -56,7 +56,7 @@ object DatabaseProvider {
     fun createDictionaryDatabase(driver: SqlDriver): DictionaryDatabase = DictionaryDatabase(
         driver,
         formAdapter = Form.Adapter(
-            lemma_idAdapter = UuidByteArrayColumnAdapter(),
+            lemma_pos_idAdapter = UuidByteArrayColumnAdapter(),
             form_idAdapter = UuidByteArrayColumnAdapter(),
         ),
         form_tagAdapter = Form_tag.Adapter(
@@ -64,11 +64,15 @@ object DatabaseProvider {
         ),
         lemmaAdapter = Lemma.Adapter(
             idAdapter = UuidByteArrayColumnAdapter(),
+        ),
+        lemma_posAdapter = Lemma_pos.Adapter(
+            idAdapter = UuidByteArrayColumnAdapter(),
+            lemma_idAdapter = UuidByteArrayColumnAdapter(),
             posAdapter = DictionaryPosIntColumnAdapter(),
         ),
         senseAdapter = Sense.Adapter(
             sense_idAdapter = UuidByteArrayColumnAdapter(),
-            lemma_idAdapter = UuidByteArrayColumnAdapter(),
+            lemma_pos_idAdapter = UuidByteArrayColumnAdapter(),
             learner_levelAdapter = LearnerLevelIntColumnAdapter(),
             frequencyAdapter = SenseFrequencyIntColumnAdapter(),
             name_typeAdapter = NameTypeIntColumnAdapter()
