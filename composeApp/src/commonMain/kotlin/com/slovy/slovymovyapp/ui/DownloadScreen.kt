@@ -102,20 +102,20 @@ fun DownloadScreenContent(
                     val pct = if (state.percent >= 0) "${state.percent}%" else "…"
                     Text("$description $pct", style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(16.dp))
-                    FloatingActionButton(onClick = onCancelClick) { Text("Cancel") }
+                    FilledTonalButton(onClick = onCancelClick) { Text("Cancel") }
                 }
 
                 is DownloadUiState.Failed -> {
                     val message = state.error.message ?: "Unknown error"
                     Text("Download failed: $message")
                     Spacer(Modifier.height(16.dp))
-                    FloatingActionButton(onClick = onRetryClick) { Text("Retry") }
+                    FilledTonalButton(onClick = onRetryClick) { Text("Retry") }
                 }
 
                 is DownloadUiState.Cancelled -> {
                     Text("Download cancelled")
                     Spacer(Modifier.height(16.dp))
-                    FloatingActionButton(onClick = onCloseClick) { Text("Close") }
+                    FilledTonalButton(onClick = onCloseClick) { Text("Close") }
                 }
 
                 is DownloadUiState.Done -> {
