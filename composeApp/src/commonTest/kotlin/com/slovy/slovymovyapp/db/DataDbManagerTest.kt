@@ -69,17 +69,26 @@ class DataDbManagerTest : BaseTest() {
             val beId = Uuid.random()
             val loveId = Uuid.random()
             val cafeId = Uuid.random()
-            q.insertPosEntry(beId, "Be", "be", DictionaryPos.VERB, 0.0)
-            q.insertPosEntry(loveId, "Love", "love", DictionaryPos.VERB, 5.0)
-            q.insertPosEntry(cafeId, "Café", "cafe", DictionaryPos.NOUN, 10.0)
+
+            q.insertLemma(beId, "Be", "be", 0.0)
+            q.insertLemma(loveId, "Love", "love", 5.0)
+            q.insertLemma(cafeId, "Café", "cafe", 10.0)
+
+            val beIdPos = Uuid.random()
+            val loveIdPos = Uuid.random()
+            val cafeIdPost = Uuid.random()
+
+            q.insertLemmaPos(beIdPos, beId, DictionaryPos.VERB)
+            q.insertLemmaPos(loveIdPos, loveId, DictionaryPos.VERB)
+            q.insertLemmaPos(cafeIdPost, cafeId, DictionaryPos.NOUN)
 
             // Insert forms (mixed case to test COLLATE NOCASE)
-            q.insertForm(Uuid.random(), beId, "am", "am")
-            q.insertForm(Uuid.random(), beId, "ARE", "are")
-            q.insertForm(Uuid.random(), beId, "being", "being")
-            q.insertForm(Uuid.random(), loveId, "loved", "loved")
-            q.insertForm(Uuid.random(), loveId, "loving", "loving")
-            q.insertForm(Uuid.random(), cafeId, "CAFÉS", "cafes")
+            q.insertForm(Uuid.random(), beIdPos, "am", "am")
+            q.insertForm(Uuid.random(), beIdPos, "ARE", "are")
+            q.insertForm(Uuid.random(), beIdPos, "being", "being")
+            q.insertForm(Uuid.random(), loveIdPos, "loved", "loved")
+            q.insertForm(Uuid.random(), loveIdPos, "loving", "loving")
+            q.insertForm(Uuid.random(), cafeIdPost, "CAFÉS", "cafes")
 
             // lemma LIKE
             val lemmasLo = q.selectLemmasLike("lo%", 20).executeAsList().map { it.lemma }

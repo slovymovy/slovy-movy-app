@@ -56,12 +56,34 @@ class AllLanguagesIngestionIntegrationTest {
                 val entriesUsedByProcessed = entriesCandidates.filter { e ->
                     e.senses.any { s -> processedSenseIds.contains(uuidParse(s.senseId.toString())) }
                 }
-                // Validate presence of at least first form (if any) from entries used by processed
-                val entry = entriesUsedByProcessed.firstOrNull { it.forms.isNotEmpty() }
-                val anyForm = entry?.forms?.firstOrNull()?.form
-                if (entry != null && anyForm != null) {
-                    val forms = dq.selectFormsByNormalized(unaccent(anyForm)).executeAsList()
-                    assertTrue(forms.isNotEmpty(), "Form '$anyForm' should exist for '$word' in $lang")
+
+                // Validate presence of ALL forms from entries used by processed
+                val allExpectedForms = entriesUsedByProcessed.flatMap { it.forms }.map { it.form }
+                if (allExpectedForms.isNotEmpty()) {
+                    // Verify each form exists in the database
+                    allExpectedForms.forEach { expectedForm ->
+                        val formsInDb = dq.selectFormsByNormalized(unaccent(expectedForm)).executeAsList()
+                        assertTrue(
+                            formsInDb.isNotEmpty(),
+                            "Form '$expectedForm' should exist for '$word' in $lang from ${pFile.name}. " +
+                                    "Expected ${allExpectedForms.size} forms total: ${allExpectedForms.joinToString(", ")}"
+                        )
+                    }
+
+                    // Additionally verify the total count of forms for this lemma
+                    val lemmaIds = lemmas.map { it.id }
+                    val lemmaPosIds = lemmaIds.flatMap { lemmaId ->
+                        dq.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
+                    }
+                    val allFormsForLemma = lemmaPosIds.flatMap { lemmaPosId ->
+                        dq.selectFormsByLemmaPosId(lemmaPosId).executeAsList()
+                    }
+                    assertTrue(
+                        allFormsForLemma.size >= allExpectedForms.size,
+                        "Expected at least ${allExpectedForms.size} forms for '$word' in $lang, but found ${allFormsForLemma.size}. " +
+                                "Expected forms: ${allExpectedForms.joinToString(", ")}. " +
+                                "Found forms: ${allFormsForLemma.joinToString(", ") { it.form }}"
+                    )
                 }
 
                 // Validate translation DBs for each target language in processed

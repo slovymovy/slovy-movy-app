@@ -15,7 +15,7 @@ import kotlin.uuid.Uuid
 class DatabaseTypesTest : BaseTest() {
 
     data class DictionaryOutcome(
-        val lemmaId: Uuid,
+        val lemmaPosId: Uuid,
         val lemma: String,
         val lemmaNormalized: String,
         val lemmasByWordCount: Int,
@@ -40,22 +40,27 @@ class DatabaseTypesTest : BaseTest() {
             driver.use {
                 val db: DictionaryDatabase = DatabaseProvider.createDictionaryDatabase(driver)
                 val q = db.dictionaryQueries
-                val lemmaId = Uuid.random()
+                val baseLemmaId = Uuid.random()
+                val lemmaPosId = Uuid.random()
                 val lemma = "Test"
                 val lemmaNormalized = "test"
-                q.insertPosEntry(
-                    id = lemmaId,
+                q.insertLemma(
+                    id = baseLemmaId,
                     lemma = lemma,
                     lemma_normalized = lemmaNormalized,
-                    pos = DictionaryPos.VERB,
                     zipf_frequency = 0.2,
+                )
+                q.insertLemmaPos(
+                    id = lemmaPosId,
+                    lemma_id = baseLemmaId,
+                    pos = DictionaryPos.VERB
                 )
                 val lemmasByWord = q.selectLemmasByWord(lemma.lowercase()).executeAsList()
                 val formText = "Testing"
                 val formNormalized = "testing"
                 q.insertForm(
                     form_id = Uuid.random(),
-                    lemma_id = lemmaId,
+                    lemma_pos_id = lemmaPosId,
                     form = formText,
                     form_normalized = formNormalized,
                 )
@@ -63,7 +68,7 @@ class DatabaseTypesTest : BaseTest() {
                 val senseId = Uuid.random()
                 q.insertSense(
                     sense_id = senseId,
-                    lemma_id = lemmaId,
+                    lemma_pos_id = lemmaPosId,
                     sense_definition = "to test; to try",
                     learner_level = LearnerLevel.B1,
                     frequency = SenseFrequency.MIDDLE,
@@ -76,9 +81,9 @@ class DatabaseTypesTest : BaseTest() {
                 q.insertSenseExample(sense_id = senseId, example_id = 1, text = "Ми тестуємо систему.")
                 q.insertSenseCommonPhrase(sense_id = senseId, phrase = "тестувати воду")
                 val lemmasByNorm = q.selectLemmasByNormalized(lemmaNormalized).executeAsList()
-                val lemmaFoundByNormalized = lemmasByNorm.any { it.id == lemmaId }
+                val lemmaFoundByNormalized = lemmasByNorm.any { it.id == baseLemmaId }
                 val out = DictionaryOutcome(
-                    lemmaId = lemmaId,
+                    lemmaPosId = lemmaPosId,
                     lemma = lemma,
                     lemmaNormalized = lemmaNormalized,
                     lemmasByWordCount = lemmasByWord.size,
@@ -90,10 +95,10 @@ class DatabaseTypesTest : BaseTest() {
                     "Should find lemma by case-insensitive word; got count=${out.lemmasByWordCount} for lemma='${out.lemma}'"
                 }
                 require(out.formsByNormalizedCount >= 1) {
-                    "Should find form by normalized string; got count=${out.formsByNormalizedCount} (lemmaId=${out.lemmaId})"
+                    "Should find form by normalized string; got count=${out.formsByNormalizedCount} (lemmaPosId=${out.lemmaPosId})"
                 }
                 require(out.lemmaFoundByNormalized) {
-                    "Should find lemma by normalized string; lemmaId=${out.lemmaId}, lemmaNormalized='${out.lemmaNormalized}'"
+                    "Should find lemma by normalized string; lemmaPosId=${out.lemmaPosId}, lemmaNormalized='${out.lemmaNormalized}'"
                 }
             }
         } finally {

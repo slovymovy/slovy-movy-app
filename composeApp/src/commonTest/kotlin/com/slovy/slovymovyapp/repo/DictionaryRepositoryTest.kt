@@ -83,4 +83,86 @@ class DictionaryRepositoryTest : BaseTest() {
             mgr.deleteDictionary("nl")
         }
     }
+
+    @Test
+    fun search_returns_multiple_forms_for_same_lemma() {
+        val platform = platformDbSupport()
+        val mgr = DataDbManager(platform, null)
+
+        // Ensure a clean state
+        mgr.deleteDictionary("en")
+
+        val dictPath = runBlocking { mgr.ensureDictionary("en") }
+        try {
+            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
+
+            val repo = DictionaryRepository(mgr)
+            assertTrue(repo.installedDictionaries().contains("en"), "'en' dictionary should be installed")
+
+            // Search for "test" which should match "test" and its forms (tested, testing, etc.)
+            val results = repo.search("test", dictionaryLanguage = "en")
+            assertTrue(results.isNotEmpty(), "Expected at least one search result for 'test'")
+
+            // Find form results (any form-based results)
+            val formResults = results.filter { it.display.contains("form of", ignoreCase = true) }
+
+            // We expect at least some forms to be returned across all results
+            // The key test: verify that forms have unique display strings (no duplicates due to deduplication bug)
+            if (formResults.isNotEmpty()) {
+                val displayStrings = formResults.map { it.display }.toSet()
+                assertEquals(
+                    formResults.size,
+                    displayStrings.size,
+                    "Expected all form results to have unique display strings (no duplicates). " +
+                            "Found ${formResults.size} forms but only ${displayStrings.size} unique. " +
+                            "Forms: ${formResults.map { it.display }}"
+                )
+            }
+        } finally {
+            // Clean up
+            mgr.deleteDictionary("en")
+        }
+    }
+
+    @Test
+    fun search_suppresses_forms_when_lemma_present() {
+        val platform = platformDbSupport()
+        val mgr = DataDbManager(platform, null)
+
+        // Ensure a clean state
+        mgr.deleteDictionary("en")
+
+        val dictPath = runBlocking { mgr.ensureDictionary("en") }
+        try {
+            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
+
+            val repo = DictionaryRepository(mgr)
+            assertTrue(repo.installedDictionaries().contains("en"), "'en' dictionary should be installed")
+
+            // Search for "test" - should match the base lemma "test"
+            val results = repo.search("test", dictionaryLanguage = "en")
+            assertTrue(results.isNotEmpty(), "Expected at least one search result for 'test'")
+
+            // Find the base lemma "test"
+            val testLemma = results.firstOrNull {
+                it.display.equals("test", ignoreCase = true) &&
+                        !it.display.contains("form of", ignoreCase = true)
+            }
+
+            // If the base lemma "test" is present, no forms of "test" should be shown
+            if (testLemma != null) {
+                val testForms = results.filter {
+                    it.display.contains("form of", ignoreCase = true) &&
+                            it.display.contains("\"test\"", ignoreCase = true)
+                }
+                assertTrue(
+                    testForms.isEmpty(),
+                    "Expected no forms of 'test' when base lemma is present, but found: ${testForms.map { it.display }}"
+                )
+            }
+        } finally {
+            // Clean up
+            mgr.deleteDictionary("en")
+        }
+    }
 }
