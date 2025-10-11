@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 val languagesToCode = listOf(
     "English" to "en",
@@ -74,22 +75,30 @@ fun LanguageSelectionScreenContent(
 
 @Preview
 @Composable
-private fun LanguageSelectionScreenPreviewDefault() {
-    LanguageSelectionScreenContent(
-        state = LanguageSelectionViewModel(
-            title = "Choose your native language",
-            languages = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
+private fun LanguageSelectionScreenPreviewDefault(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        LanguageSelectionScreenContent(
+            state = LanguageSelectionViewModel(
+                title = "Choose your native language",
+                languages = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
+            )
         )
-    )
+    }
 }
 
 @Preview
 @Composable
-private fun LanguageSelectionScreenPreviewEmpty() {
-    LanguageSelectionScreenContent(
-        state = LanguageSelectionViewModel(
-            title = "Choose your native language",
-            languages = emptyList()
+private fun LanguageSelectionScreenPreviewEmpty(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        LanguageSelectionScreenContent(
+            state = LanguageSelectionViewModel(
+                title = "Choose your native language",
+                languages = emptyList()
+            )
         )
-    )
+    }
 }

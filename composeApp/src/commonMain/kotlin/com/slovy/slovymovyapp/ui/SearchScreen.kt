@@ -10,7 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -28,6 +28,7 @@ import com.slovy.slovymovyapp.ui.word.colorsForPos
 import com.slovy.slovymovyapp.ui.word.getFrequencyColor
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 import kotlin.uuid.Uuid
 
 data class SearchUiState(
@@ -257,7 +258,7 @@ private fun EmptySearchState() {
     ) {
         Spacer(modifier = Modifier.height(48.dp))
         Icon(
-            imageVector = Icons.Outlined.Search,
+            imageVector = Icons.Filled.Search,
             contentDescription = "Search",
             modifier = Modifier.size(72.dp),
             tint = MaterialTheme.colorScheme.primary
@@ -290,7 +291,7 @@ private fun NoResultsState(query: String) {
     ) {
         Spacer(modifier = Modifier.height(48.dp))
         Icon(
-            imageVector = Icons.AutoMirrored.Outlined.HelpOutline,
+            imageVector = Icons.Filled.Search,
             contentDescription = "No results",
             modifier = Modifier.size(72.dp),
             tint = MaterialTheme.colorScheme.primary
@@ -322,162 +323,186 @@ private fun NoResultsState(query: String) {
 
 @Preview
 @Composable
-private fun SearchScreenPreviewEmptyQuery() {
-    SearchScreenContent(
-        state = SearchUiState(
-            title = "Dictionary Search",
-            query = "",
-            results = emptyList(),
-            showNoResults = false,
-        ),
-    )
-}
-
-@Preview
-@Composable
-private fun SearchScreenPreviewWithResults() {
-    SearchScreenContent(
-        state = SearchUiState(
-            title = "Dictionary Search",
-            query = "cel",
-            results = listOf(
-                DictionaryRepository.SearchItem(
-                    language = "en",
-                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
-                    lemma = "celebration",
-                    display = "celebration",
-                    zipfFrequency = 4.5f,
-                    pos = listOf(PartOfSpeech.NOUN)
-                ),
-                DictionaryRepository.SearchItem(
-                    language = "en",
-                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
-                    lemma = "celebrity",
-                    display = "celebrity",
-                    zipfFrequency = 4.3f,
-                    pos = listOf(PartOfSpeech.NOUN)
-                ),
-                DictionaryRepository.SearchItem(
-                    language = "en",
-                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
-                    lemma = "celestial",
-                    display = "celestial",
-                    zipfFrequency = 3.8f,
-                    pos = listOf(PartOfSpeech.ADJECTIVE)
-                ),
-                DictionaryRepository.SearchItem(
-                    language = "en",
-                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"),
-                    lemma = "cell",
-                    display = "cell",
-                    zipfFrequency = 5.2f,
-                    pos = listOf(PartOfSpeech.NOUN)
-                )
+private fun SearchScreenPreviewEmptyQuery(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                title = "Dictionary Search",
+                query = "",
+                results = emptyList(),
+                showNoResults = false,
             ),
-            showNoResults = false,
-        ),
-    )
+        )
+    }
 }
 
 @Preview
 @Composable
-private fun SearchScreenPreviewMultilingualResults() {
-    SearchScreenContent(
-        state = SearchUiState(
-            title = "Dictionary Search",
-            query = "program",
-            results = listOf(
-                DictionaryRepository.SearchItem(
-                    language = "en",
-                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
-                    lemma = "program",
-                    display = "program",
-                    zipfFrequency = 5.5f,
-                    pos = listOf(PartOfSpeech.NOUN, PartOfSpeech.VERB)
+private fun SearchScreenPreviewWithResults(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                title = "Dictionary Search",
+                query = "cel",
+                results = listOf(
+                    DictionaryRepository.SearchItem(
+                        language = "en",
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                        lemma = "celebration",
+                        display = "celebration",
+                        zipfFrequency = 4.5f,
+                        pos = listOf(PartOfSpeech.NOUN)
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = "en",
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
+                        lemma = "celebrity",
+                        display = "celebrity",
+                        zipfFrequency = 4.3f,
+                        pos = listOf(PartOfSpeech.NOUN)
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = "en",
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
+                        lemma = "celestial",
+                        display = "celestial",
+                        zipfFrequency = 3.8f,
+                        pos = listOf(PartOfSpeech.ADJECTIVE)
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = "en",
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"),
+                        lemma = "cell",
+                        display = "cell",
+                        zipfFrequency = 5.2f,
+                        pos = listOf(PartOfSpeech.NOUN)
+                    )
                 ),
-                DictionaryRepository.SearchItem(
-                    language = "en",
-                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
-                    lemma = "programmatically",
-                    display = "programmatically",
-                    zipfFrequency = 3.2f,
-                    pos = listOf(PartOfSpeech.ADVERB)
+                showNoResults = false,
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewMultilingualResults(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                title = "Dictionary Search",
+                query = "program",
+                results = listOf(
+                    DictionaryRepository.SearchItem(
+                        language = "en",
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                        lemma = "program",
+                        display = "program",
+                        zipfFrequency = 5.5f,
+                        pos = listOf(PartOfSpeech.NOUN, PartOfSpeech.VERB)
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = "en",
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
+                        lemma = "programmatically",
+                        display = "programmatically",
+                        zipfFrequency = 3.2f,
+                        pos = listOf(PartOfSpeech.ADVERB)
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = "ru",
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
+                        lemma = "программа",
+                        display = "программа",
+                        zipfFrequency = 5.8f,
+                        pos = listOf(PartOfSpeech.NOUN)
+                    )
                 ),
-                DictionaryRepository.SearchItem(
-                    language = "ru",
-                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
-                    lemma = "программа",
-                    display = "программа",
-                    zipfFrequency = 5.8f,
-                    pos = listOf(PartOfSpeech.NOUN)
-                )
+                showNoResults = false,
             ),
-            showNoResults = false,
-        ),
-    )
+        )
+    }
 }
 
 @Preview
 @Composable
-private fun SearchScreenPreviewNoResults() {
-    SearchScreenContent(
-        state = SearchUiState(
-            title = "Dictionary Search",
-            query = "xyzabc123",
-            results = emptyList(),
-            showNoResults = true,
-        ),
-    )
-}
-
-@Preview
-@Composable
-private fun SearchScreenPreviewInfoDialog() {
-    SearchScreenContent(
-        state = SearchUiState(
-            title = "Dictionary Search",
-            query = "world",
-            results = listOf(
-                DictionaryRepository.SearchItem(
-                    language = "en",
-                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
-                    lemma = "world",
-                    display = "world",
-                    zipfFrequency = 6.2f,
-                    pos = listOf(PartOfSpeech.NOUN)
-                )
+private fun SearchScreenPreviewNoResults(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                title = "Dictionary Search",
+                query = "xyzabc123",
+                results = emptyList(),
+                showNoResults = true,
             ),
-            showNoResults = false,
-        ),
-    )
+        )
+    }
 }
 
 @Preview
 @Composable
-private fun SearchScreenPreviewDutchLanguage() {
-    SearchScreenContent(
-        state = SearchUiState(
-            title = "Dictionary Search",
-            query = "bib",
-            results = listOf(
-                DictionaryRepository.SearchItem(
-                    language = "nl",
-                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
-                    lemma = "bibliotheek",
-                    display = "bibliotheek",
-                    zipfFrequency = 4.1f,
-                    pos = listOf(PartOfSpeech.NOUN)
+private fun SearchScreenPreviewInfoDialog(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                title = "Dictionary Search",
+                query = "world",
+                results = listOf(
+                    DictionaryRepository.SearchItem(
+                        language = "en",
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                        lemma = "world",
+                        display = "world",
+                        zipfFrequency = 6.2f,
+                        pos = listOf(PartOfSpeech.NOUN)
+                    )
                 ),
-                DictionaryRepository.SearchItem(
-                    language = "nl",
-                    lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
-                    lemma = "bijbel",
-                    display = "bijbel",
-                    zipfFrequency = 4.8f,
-                    pos = listOf(PartOfSpeech.NOUN)
-                )
+                showNoResults = false,
             ),
-            showNoResults = false,
-        ),
-    )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewDutchLanguage(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                title = "Dictionary Search",
+                query = "bib",
+                results = listOf(
+                    DictionaryRepository.SearchItem(
+                        language = "nl",
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                        lemma = "bibliotheek",
+                        display = "bibliotheek",
+                        zipfFrequency = 4.1f,
+                        pos = listOf(PartOfSpeech.NOUN)
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = "nl",
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
+                        lemma = "bijbel",
+                        display = "bijbel",
+                        zipfFrequency = 4.8f,
+                        pos = listOf(PartOfSpeech.NOUN)
+                    )
+                ),
+                showNoResults = false,
+            ),
+        )
+    }
 }
