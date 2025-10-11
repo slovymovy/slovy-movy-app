@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 class ErrorViewModel(val message: String) : ViewModel()
 
@@ -52,16 +53,24 @@ fun ErrorScreenContent(
 
 @Preview
 @Composable
-private fun ErrorScreenPreviewDefault() {
-    ErrorScreenContent(state = ErrorViewModel("An unexpected error occurred."))
+private fun ErrorScreenPreviewDefault(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        ErrorScreenContent(state = ErrorViewModel("An unexpected error occurred."))
+    }
 }
 
 @Preview
 @Composable
-private fun ErrorScreenPreviewLongMessage() {
-    ErrorScreenContent(
-        state = ErrorViewModel(
-            "We couldn't complete the download. Please check your connection and try again."
+private fun ErrorScreenPreviewLongMessage(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        ErrorScreenContent(
+            state = ErrorViewModel(
+                "We couldn't complete the download. Please check your connection and try again."
+            )
         )
-    )
+    }
 }

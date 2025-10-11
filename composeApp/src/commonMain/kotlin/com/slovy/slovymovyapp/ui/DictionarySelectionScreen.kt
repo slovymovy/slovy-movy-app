@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 private val dictionariesKnown = listOf(
     "English" to "en",
@@ -73,22 +74,30 @@ fun DictionarySelectionScreenContent(
 
 @Preview
 @Composable
-private fun DictionarySelectionScreenPreviewDefault() {
-    DictionarySelectionScreenContent(
-        state = DictionarySelectionViewModel(
-            title = "Choose dictionary",
-            dictionaries = dictionariesKnown.map { (label, code) -> DictionaryOption(label, code) }
+private fun DictionarySelectionScreenPreviewDefault(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DictionarySelectionScreenContent(
+            state = DictionarySelectionViewModel(
+                title = "Choose dictionary",
+                dictionaries = dictionariesKnown.map { (label, code) -> DictionaryOption(label, code) }
+            )
         )
-    )
+    }
 }
 
 @Preview
 @Composable
-private fun DictionarySelectionScreenPreviewEmpty() {
-    DictionarySelectionScreenContent(
-        state = DictionarySelectionViewModel(
-            title = "Choose dictionary",
-            dictionaries = emptyList()
+private fun DictionarySelectionScreenPreviewEmpty(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DictionarySelectionScreenContent(
+            state = DictionarySelectionViewModel(
+                title = "Choose dictionary",
+                dictionaries = emptyList()
+            )
         )
-    )
+    }
 }

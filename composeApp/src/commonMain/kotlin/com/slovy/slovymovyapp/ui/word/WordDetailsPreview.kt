@@ -2,394 +2,521 @@ package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.runtime.Composable
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.ThemedPreview
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 val isSenseFavoritePreview: (String) -> Boolean = { it.hashCode() % 2 == 0 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewContent() {
-    WordDetailScreenContent(state = sampleTestingCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewContent(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleTestingCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewCollapsed() {
-    val base = sampleTestingCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val collapsedEntries = base.entries.map { entryState ->
-        entryState.copy(
-            expanded = false,
-            formsExpanded = false,
-            senses = entryState.senses.map { senseState ->
-                senseState.copy(
-                    expanded = false,
-                    examplesExpanded = false,
-                    languageExpanded = senseState.languageExpanded.mapValues { false }
-                )
-            }
+private fun WordDetailScreenPreviewCollapsed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val base = sampleTestingCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val collapsedEntries = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = false,
+                formsExpanded = false,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = false,
+                        examplesExpanded = false,
+                        languageExpanded = senseState.languageExpanded.mapValues { false }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = collapsedEntries)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = collapsedEntries)
-    )
 }
 
 
 // Amazon word previews - multiple POS and senses
 @Preview
 @Composable
-private fun WordDetailScreenPreviewAmazon() {
-    WordDetailScreenContent(state = sampleAmazonCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewAmazon(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleAmazonCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewAmazonCollapsed() {
-    val base = sampleAmazonCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val collapsedEntries = base.entries.map { entryState ->
-        entryState.copy(
-            expanded = false,
-            formsExpanded = false,
-            senses = entryState.senses.map { senseState ->
-                senseState.copy(
-                    expanded = false,
-                    examplesExpanded = false,
-                    languageExpanded = senseState.languageExpanded.mapValues { false }
-                )
-            }
+private fun WordDetailScreenPreviewAmazonCollapsed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val base = sampleAmazonCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val collapsedEntries = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = false,
+                formsExpanded = false,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = false,
+                        examplesExpanded = false,
+                        languageExpanded = senseState.languageExpanded.mapValues { false }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = collapsedEntries)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = collapsedEntries)
-    )
 }
 
 // Celebration word previews - noun with multiple senses
 @Preview
 @Composable
-private fun WordDetailScreenPreviewCelebration() {
-    WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewCelebration(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewCelebrationCollapsed() {
-    val base = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val collapsedEntries = base.entries.map { entryState ->
-        entryState.copy(
-            expanded = false,
-            formsExpanded = false,
-            senses = entryState.senses.map { senseState ->
-                senseState.copy(
-                    expanded = false,
-                    examplesExpanded = false,
-                    languageExpanded = senseState.languageExpanded.mapValues { false }
-                )
-            }
+private fun WordDetailScreenPreviewCelebrationCollapsed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val base = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val collapsedEntries = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = false,
+                formsExpanded = false,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = false,
+                        examplesExpanded = false,
+                        languageExpanded = senseState.languageExpanded.mapValues { false }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = collapsedEntries)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = collapsedEntries)
-    )
 }
 
 // Programmatically word previews - adverb
 @Preview
 @Composable
-private fun WordDetailScreenPreviewProgrammatically() {
-    WordDetailScreenContent(state = sampleProgrammaticallyCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewProgrammatically(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleProgrammaticallyCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewProgrammaticallyCollapsed() {
-    val base = sampleProgrammaticallyCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val collapsedEntries = base.entries.map { entryState ->
-        entryState.copy(
-            expanded = false,
-            formsExpanded = false,
-            senses = entryState.senses.map { senseState ->
-                senseState.copy(
-                    expanded = false,
-                    examplesExpanded = false,
-                    languageExpanded = senseState.languageExpanded.mapValues { false }
-                )
-            }
+private fun WordDetailScreenPreviewProgrammaticallyCollapsed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val base = sampleProgrammaticallyCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val collapsedEntries = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = false,
+                formsExpanded = false,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = false,
+                        examplesExpanded = false,
+                        languageExpanded = senseState.languageExpanded.mapValues { false }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = collapsedEntries)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = collapsedEntries)
-    )
 }
 
 // Richmond word previews - proper noun/name with multiple places
 @Preview
 @Composable
-private fun WordDetailScreenPreviewRichmond() {
-    WordDetailScreenContent(state = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewRichmond(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewRichmondCollapsed() {
-    val base = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val collapsedEntries = base.entries.map { entryState ->
-        entryState.copy(
-            expanded = false,
-            formsExpanded = false,
-            senses = entryState.senses.map { senseState ->
-                senseState.copy(
-                    expanded = false,
-                    examplesExpanded = false,
-                    languageExpanded = senseState.languageExpanded.mapValues { false }
-                )
-            }
+private fun WordDetailScreenPreviewRichmondCollapsed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val base = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val collapsedEntries = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = false,
+                formsExpanded = false,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = false,
+                        examplesExpanded = false,
+                        languageExpanded = senseState.languageExpanded.mapValues { false }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = collapsedEntries)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = collapsedEntries)
-    )
 }
 
 // Dutch word previews - kwartier (quarter hour)
 @Preview
 @Composable
-private fun WordDetailScreenPreviewKwartier() {
-    WordDetailScreenContent(state = sampleKwartierCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewKwartier(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleKwartierCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewKwartierCollapsed() {
-    val base = sampleKwartierCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val collapsedEntries = base.entries.map { entryState ->
-        entryState.copy(
-            expanded = false,
-            formsExpanded = false,
-            senses = entryState.senses.map { senseState ->
-                senseState.copy(
-                    expanded = false,
-                    examplesExpanded = false,
-                    languageExpanded = senseState.languageExpanded.mapValues { false }
-                )
-            }
+private fun WordDetailScreenPreviewKwartierCollapsed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val base = sampleKwartierCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val collapsedEntries = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = false,
+                formsExpanded = false,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = false,
+                        examplesExpanded = false,
+                        languageExpanded = senseState.languageExpanded.mapValues { false }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = collapsedEntries)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = collapsedEntries)
-    )
 }
 
 // Russian word previews - программа (program)
 @Preview
 @Composable
-private fun WordDetailScreenPreviewProgramma() {
-    WordDetailScreenContent(state = sampleProgrammaCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewProgramma(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleProgrammaCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewProgrammaCollapsed() {
-    val base = sampleProgrammaCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val collapsedEntries = base.entries.map { entryState ->
-        entryState.copy(
-            expanded = false,
-            formsExpanded = false,
-            senses = entryState.senses.map { senseState ->
-                senseState.copy(
-                    expanded = false,
-                    examplesExpanded = false,
-                    languageExpanded = senseState.languageExpanded.mapValues { false }
-                )
-            }
+private fun WordDetailScreenPreviewProgrammaCollapsed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val base = sampleProgrammaCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val collapsedEntries = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = false,
+                formsExpanded = false,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = false,
+                        examplesExpanded = false,
+                        languageExpanded = senseState.languageExpanded.mapValues { false }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = collapsedEntries)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = collapsedEntries)
-    )
 }
 
 // Special UI state previews for different word complexity
 @Preview
 @Composable
-private fun WordDetailScreenPreviewSimpleWord() {
-    // Simple single-sense word like "celebration"
-    WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewSimpleWord(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        // Simple single-sense word like "celebration"
+        WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewComplexWord() {
-    // Complex multi-POS word like "amazon"
-    WordDetailScreenContent(state = sampleAmazonCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewComplexWord(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        // Complex multi-POS word like "amazon"
+        WordDetailScreenContent(state = sampleAmazonCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewProperNoun() {
-    // Proper noun with multiple geographical meanings like "Richmond"
-    WordDetailScreenContent(state = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewProperNoun(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        // Proper noun with multiple geographical meanings like "Richmond"
+        WordDetailScreenContent(state = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewAdverb() {
-    // Technical adverb like "programmatically"
-    WordDetailScreenContent(state = sampleProgrammaticallyCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewAdverb(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        // Technical adverb like "programmatically"
+        WordDetailScreenContent(state = sampleProgrammaticallyCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 
 // Edge case preview functions
 @Preview
 @Composable
-private fun WordDetailScreenPreviewNoTranslations() {
-    // Word with no translations available
-    WordDetailScreenContent(state = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewNoTranslations(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        // Word with no translations available
+        WordDetailScreenContent(state = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 // Edge case preview functions
 @Preview
 @Composable
-private fun WordDetailScreenPreviewNoTranslationsAllExpanded() {
-    val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val expanded = base.entries.map { entryState ->
-        entryState.copy(
-            expanded = true,
-            formsExpanded = true,
-            senses = entryState.senses.map { senseState ->
-                senseState.copy(
-                    expanded = true,
-                    examplesExpanded = true,
-                    languageExpanded = senseState.languageExpanded.mapValues { true }
-                )
-            }
+private fun WordDetailScreenPreviewNoTranslationsAllExpanded(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val expanded = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = true,
+                formsExpanded = true,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = true,
+                        examplesExpanded = true,
+                        languageExpanded = senseState.languageExpanded.mapValues { true }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = expanded)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = expanded)
-    )
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewNoTranslationsCollapsed() {
-    val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val collapsedEntries = base.entries.map { entryState ->
-        entryState.copy(
-            expanded = false,
-            formsExpanded = false,
-            senses = entryState.senses.map { senseState ->
-                senseState.copy(
-                    expanded = false,
-                    examplesExpanded = false,
-                    languageExpanded = senseState.languageExpanded.mapValues { false }
-                )
-            }
+private fun WordDetailScreenPreviewNoTranslationsCollapsed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val collapsedEntries = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = false,
+                formsExpanded = false,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = false,
+                        examplesExpanded = false,
+                        languageExpanded = senseState.languageExpanded.mapValues { false }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = collapsedEntries)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = collapsedEntries)
-    )
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewMultilingual() {
-    // Dutch word with both Russian and English translations
-    WordDetailScreenContent(state = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewMultilingual(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        // Dutch word with both Russian and English translations
+        WordDetailScreenContent(state = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewMultilingualCollapsed() {
-    val base = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val collapsedEntries = base.entries.map { entryState ->
-        entryState.copy(
-            expanded = false,
-            formsExpanded = false,
-            senses = entryState.senses.map { senseState ->
-                senseState.copy(
-                    expanded = false,
-                    examplesExpanded = false,
-                    languageExpanded = senseState.languageExpanded.mapValues { false }
-                )
-            }
+private fun WordDetailScreenPreviewMultilingualCollapsed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val base = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val collapsedEntries = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = false,
+                formsExpanded = false,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = false,
+                        examplesExpanded = false,
+                        languageExpanded = senseState.languageExpanded.mapValues { false }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = collapsedEntries)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = collapsedEntries)
-    )
 }
 
 // UI state edge cases
 @Preview
 @Composable
-private fun WordDetailScreenPreviewPartiallyExpanded() {
-    // Show a complex word with some sections expanded and others collapsed
-    val base = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
-    val mixedEntries = base.entries.mapIndexed { entryIndex, entryState ->
-        entryState.copy(
-            expanded = true,
-            formsExpanded = entryIndex == 0, // Only first entry has forms expanded
-            senses = entryState.senses.mapIndexed { senseIndex, senseState ->
-                senseState.copy(
-                    expanded = senseIndex == 0, // Only first sense expanded
-                    examplesExpanded = senseIndex == 0 && entryIndex == 0, // Only first sense of first entry has examples expanded
-                    languageExpanded = senseState.languageExpanded.mapValues { (lang, _) ->
-                        lang == "ru" && senseIndex == 0 // Only Russian expanded for first sense
-                    }
-                )
-            }
+private fun WordDetailScreenPreviewPartiallyExpanded(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        // Show a complex word with some sections expanded and others collapsed
+        val base = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
+        val mixedEntries = base.entries.mapIndexed { entryIndex, entryState ->
+            entryState.copy(
+                expanded = true,
+                formsExpanded = entryIndex == 0, // Only first entry has forms expanded
+                senses = entryState.senses.mapIndexed { senseIndex, senseState ->
+                    senseState.copy(
+                        expanded = senseIndex == 0, // Only first sense expanded
+                        examplesExpanded = senseIndex == 0 && entryIndex == 0, // Only first sense of first entry has examples expanded
+                        languageExpanded = senseState.languageExpanded.mapValues { (lang, _) ->
+                            lang == "ru" && senseIndex == 0 // Only Russian expanded for first sense
+                        }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = mixedEntries)
         )
     }
-    WordDetailScreenContent(
-        state = base.copy(entries = mixedEntries)
-    )
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewHighFrequencyWord() {
-    // Show a high-frequency word (celebration)
-    WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewHighFrequencyWord(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        // Show a high-frequency word (celebration)
+        WordDetailScreenContent(state = sampleCelebrationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewLowFrequencyWord() {
-    // Show a low-frequency/rare word (whippersnapper)
-    WordDetailScreenContent(state = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewLowFrequencyWord(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        // Show a low-frequency/rare word (whippersnapper)
+        WordDetailScreenContent(state = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewEmpty() {
-    WordDetailScreenContent(state = WordDetailUiState.Empty(lemma = "testing"))
+private fun WordDetailScreenPreviewEmpty(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = WordDetailUiState.Empty(lemma = "testing"))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewWithTraits() {
-    WordDetailScreenContent(state = sampleWordWithTraits().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewWithTraits(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleWordWithTraits().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewWithNameTypes() {
-    WordDetailScreenContent(state = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewWithNameTypes(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleRichmondCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewAllTraitTypes() {
-    WordDetailScreenContent(state = sampleAllTraitTypesCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewAllTraitTypes(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleAllTraitTypesCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewVeryLongWord() {
-    WordDetailScreenContent(state = sampleVeryLongWordCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+private fun WordDetailScreenPreviewVeryLongWord(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleVeryLongWordCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
 }
 
 // Sample word card creators for different types of words
@@ -1304,44 +1431,60 @@ internal fun sampleVeryLongWordCard(): LanguageCard {
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewTargetSenseAmazon() {
-    WordDetailScreenContent(
-        state = sampleAmazonCard().toContentUiState(
-            targetSenseId = "4f67890a-bcde-5678-9012-34567890abcd",
-            isSenseFavorite = isSenseFavoritePreview,
+private fun WordDetailScreenPreviewTargetSenseAmazon(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(
+            state = sampleAmazonCard().toContentUiState(
+                targetSenseId = "4f67890a-bcde-5678-9012-34567890abcd",
+                isSenseFavorite = isSenseFavoritePreview,
+            )
         )
-    )
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewTargetSenseAmazonParrot() {
-    WordDetailScreenContent(
-        state = sampleAmazonCard().toContentUiState(
-            targetSenseId = "8c2403c5-1510-45cb-9112-304f78772f96",
-            isSenseFavorite = isSenseFavoritePreview,
+private fun WordDetailScreenPreviewTargetSenseAmazonParrot(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(
+            state = sampleAmazonCard().toContentUiState(
+                targetSenseId = "8c2403c5-1510-45cb-9112-304f78772f96",
+                isSenseFavorite = isSenseFavoritePreview,
+            )
         )
-    )
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewTargetSenseMultilingual() {
-    WordDetailScreenContent(
-        state = sampleMultilingualCard().toContentUiState(
-            targetSenseId = "d4e5f6a7-b8c9-0123-def0-456789012345",
-            isSenseFavorite = isSenseFavoritePreview,
+private fun WordDetailScreenPreviewTargetSenseMultilingual(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(
+            state = sampleMultilingualCard().toContentUiState(
+                targetSenseId = "d4e5f6a7-b8c9-0123-def0-456789012345",
+                isSenseFavorite = isSenseFavoritePreview,
+            )
         )
-    )
+    }
 }
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewTargetSenseRichmondVirginia() {
-    WordDetailScreenContent(
-        state = sampleRichmondCard().toContentUiState(
-            targetSenseId = "2556596a-2eae-4d77-bbb2-dada74364b55",
-            isSenseFavorite = isSenseFavoritePreview,
+private fun WordDetailScreenPreviewTargetSenseRichmondVirginia(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(
+            state = sampleRichmondCard().toContentUiState(
+                targetSenseId = "2556596a-2eae-4d77-bbb2-dada74364b55",
+                isSenseFavorite = isSenseFavoritePreview,
+            )
         )
-    )
+    }
 }

@@ -80,6 +80,29 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - When deriving default UI state from domain models (e.g., `LanguageCard`), add helper mappers (`toUiState()`) rather
   than embedding logic inside composables.
 
+#### Preview Functions
+
+- All `@Preview` functions must support both light and dark themes using the themed preview pattern.
+- Use `@PreviewParameter(ThemePreviewProvider::class) isDark: Boolean` to receive theme parameter.
+- Wrap preview content with `ThemedPreview(darkTheme = isDark) { ... }` to apply the theme.
+- Import required types: `PreviewParameter` from `org.jetbrains.compose.ui.tooling.preview.PreviewParameter`.
+- The `ThemePreviewProvider` and `ThemedPreview` are defined in
+  `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/ui/Preview.kt`.
+
+Example:
+
+```kotlin
+@Preview
+@Composable
+private fun MyScreenPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        MyScreenContent(state = MyUiState(...))
+    }
+}
+```
+
 ### ViewModel pattern
 
 - Every screen should use a ViewModel to manage state and survive configuration changes.

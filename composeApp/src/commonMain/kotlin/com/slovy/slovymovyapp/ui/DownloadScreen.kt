@@ -15,6 +15,7 @@ import com.slovy.slovymovyapp.data.remote.CancelToken
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 class DownloadViewModel(
     private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
@@ -78,6 +79,7 @@ fun DownloadScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DownloadScreenContent(
     state: DownloadUiState,
@@ -95,25 +97,25 @@ fun DownloadScreenContent(
             when (state) {
                 is DownloadUiState.Idle -> Text("Preparing download…")
                 is DownloadUiState.Running -> {
-                    CircularProgressIndicator()
+                    LoadingIndicator()
                     Spacer(Modifier.height(16.dp))
                     val pct = if (state.percent >= 0) "${state.percent}%" else "…"
                     Text("$description $pct", style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(16.dp))
-                    OutlinedButton(onClick = onCancelClick) { Text("Cancel") }
+                    FilledTonalButton(onClick = onCancelClick) { Text("Cancel") }
                 }
 
                 is DownloadUiState.Failed -> {
                     val message = state.error.message ?: "Unknown error"
                     Text("Download failed: $message")
                     Spacer(Modifier.height(16.dp))
-                    Button(onClick = onRetryClick) { Text("Retry") }
+                    FilledTonalButton(onClick = onRetryClick) { Text("Retry") }
                 }
 
                 is DownloadUiState.Cancelled -> {
                     Text("Download cancelled")
                     Spacer(Modifier.height(16.dp))
-                    Button(onClick = onCloseClick) { Text("Close") }
+                    FilledTonalButton(onClick = onCloseClick) { Text("Close") }
                 }
 
                 is DownloadUiState.Done -> {
@@ -134,30 +136,50 @@ sealed interface DownloadUiState {
 
 @Preview
 @Composable
-private fun DownloadScreenPreviewIdle() {
-    DownloadScreenContent(state = DownloadUiState.Idle)
+private fun DownloadScreenPreviewIdle(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DownloadScreenContent(state = DownloadUiState.Idle)
+    }
 }
 
 @Preview
 @Composable
-private fun DownloadScreenPreviewRunning() {
-    DownloadScreenContent(state = DownloadUiState.Running(percent = 42, total = 1000L))
+private fun DownloadScreenPreviewRunning(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DownloadScreenContent(state = DownloadUiState.Running(percent = 42, total = 1000L))
+    }
 }
 
 @Preview
 @Composable
-private fun DownloadScreenPreviewFailed() {
-    DownloadScreenContent(state = DownloadUiState.Failed(Throwable("Network error")))
+private fun DownloadScreenPreviewFailed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DownloadScreenContent(state = DownloadUiState.Failed(Throwable("Network error")))
+    }
 }
 
 @Preview
 @Composable
-private fun DownloadScreenPreviewCancelled() {
-    DownloadScreenContent(state = DownloadUiState.Cancelled)
+private fun DownloadScreenPreviewCancelled(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DownloadScreenContent(state = DownloadUiState.Cancelled)
+    }
 }
 
 @Preview
 @Composable
-private fun DownloadScreenPreviewDone() {
-    DownloadScreenContent(state = DownloadUiState.Done)
+private fun DownloadScreenPreviewDone(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DownloadScreenContent(state = DownloadUiState.Done)
+    }
 }

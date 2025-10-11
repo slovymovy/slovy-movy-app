@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 enum class AppScreen {
     SEARCH,
@@ -79,12 +80,16 @@ fun AppNavigationBar(
 
 @Preview
 @Composable
-fun PreviewAppNavigationBar() {
-    AppNavigationBar(
-        currentScreen = AppScreen.SEARCH,
-        onNavigateToSearch = {},
-        onNavigateToFavorites = {},
-        onNavigateToWordDetail = {},
-        wordDetailLabel = "example"
-    )
+fun PreviewAppNavigationBar(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        AppNavigationBar(
+            currentScreen = AppScreen.SEARCH,
+            onNavigateToSearch = {},
+            onNavigateToFavorites = {},
+            onNavigateToWordDetail = {},
+            wordDetailLabel = "example"
+        )
+    }
 }
