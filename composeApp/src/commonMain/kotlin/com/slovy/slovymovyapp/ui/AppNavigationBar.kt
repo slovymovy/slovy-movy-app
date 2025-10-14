@@ -4,9 +4,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -15,7 +17,8 @@ import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 enum class AppScreen {
     SEARCH,
     FAVORITES,
-    WORD_DETAIL
+    WORD_DETAIL,
+    SETTINGS
 }
 
 @Composable
@@ -24,7 +27,8 @@ fun AppNavigationBar(
     onNavigateToSearch: () -> Unit,
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit,
-    wordDetailLabel: String? = null
+    wordDetailLabel: String? = null,
+    onNavigateToSettings: () -> Unit = {}
 ) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -74,6 +78,21 @@ fun AppNavigationBar(
             selected = currentScreen == AppScreen.WORD_DETAIL,
             enabled = wordDetailLabel != null,
             onClick = onNavigateToWordDetail
+        )
+        NavigationBarItem(
+            icon = {
+                Icon(
+                    imageVector = if (currentScreen == AppScreen.SETTINGS) {
+                        Icons.Filled.Settings
+                    } else {
+                        Icons.Outlined.Settings
+                    },
+                    contentDescription = "Settings"
+                )
+            },
+            label = { Text("Settings") },
+            selected = currentScreen == AppScreen.SETTINGS,
+            onClick = onNavigateToSettings
         )
     }
 }

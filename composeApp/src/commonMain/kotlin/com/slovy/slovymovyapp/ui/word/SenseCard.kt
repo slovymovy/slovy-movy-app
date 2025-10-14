@@ -19,7 +19,6 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.*
-import com.slovy.slovymovyapp.ui.codeToLanguage
 import kotlin.text.Typography.bullet
 
 @Composable
@@ -254,7 +253,7 @@ private fun LanguageSection(
     expanded: Boolean,
     onToggle: () -> Unit
 ) {
-    val languageLabel = codeToLanguage.getOrElse(languageCode) { languageCode }
+    val languageLabel = codeToLanguageName.getOrElse(languageCode) { languageCode }
     val translations = sense.translations[languageCode].orEmpty()
 
     ExpandableSection(

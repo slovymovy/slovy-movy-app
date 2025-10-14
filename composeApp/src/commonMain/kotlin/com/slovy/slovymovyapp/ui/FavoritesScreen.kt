@@ -228,7 +228,8 @@ fun FavoritesScreen(
     onNavigateToSearch: () -> Unit = {},
     onNavigateToWordDetail: (String, String, String) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
-    onNavigateToLastWordDetail: () -> Unit = {}
+    onNavigateToLastWordDetail: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -251,7 +252,8 @@ fun FavoritesScreen(
         onGroupToggle = { targetLang, lemma -> viewModel.toggleGroup(targetLang, lemma) },
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
-        onNavigateToWordDetail = onNavigateToWordDetail
+        onNavigateToWordDetail = onNavigateToWordDetail,
+        onNavigateToSettings = onNavigateToSettings
     )
 }
 
@@ -269,7 +271,8 @@ fun FavoritesScreenContent(
     onGroupToggle: (String, String) -> Unit = { _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
-    onNavigateToWordDetail: (String, String, String) -> Unit = { _, _, _ -> }
+    onNavigateToWordDetail: (String, String, String) -> Unit = { _, _, _ -> },
+    onNavigateToSettings: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -291,7 +294,8 @@ fun FavoritesScreenContent(
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToFavorites = {},
                 onNavigateToWordDetail = onNavigateToLastWordDetail,
-                wordDetailLabel = wordDetailLabel
+                wordDetailLabel = wordDetailLabel,
+                onNavigateToSettings = onNavigateToSettings
             )
         },
         containerColor = MaterialTheme.colorScheme.background

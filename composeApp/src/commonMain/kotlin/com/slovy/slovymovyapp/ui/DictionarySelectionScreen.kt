@@ -10,15 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import com.slovy.slovymovyapp.data.remote.dictionariesKnown
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
-
-private val dictionariesKnown = listOf(
-    "English" to "en",
-    "Русский" to "ru",
-    "Nederlands" to "nl",
-    "Polski" to "pl"
-)
 
 data class DictionaryOption(
     val label: String,

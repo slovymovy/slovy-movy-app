@@ -1,5 +1,15 @@
 package com.slovy.slovymovyapp.data.remote
 
+
+val dictionariesKnown = listOf(
+    "English" to "en",
+    "Русский" to "ru",
+    "Nederlands" to "nl",
+    "Polski" to "pl"
+)
+
+val codeToLanguageName = dictionariesKnown.associate { it.second to it.first }
+
 data class LanguageCard(
     val lemma: String,
     val entries: List<LanguageCardPosEntry>,

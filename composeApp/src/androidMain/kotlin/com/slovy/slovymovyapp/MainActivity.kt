@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
             val db = DataDbManager(PlatformDbSupport(this)).openAppDatabase()
             val repo = SettingsRepository(db)
             val platform = PlatformDbSupport(this)
-            App(repo, platform)
+            App(repo, platform, androidContext = this)
         }
     }
 }
