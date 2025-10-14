@@ -9,7 +9,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -70,7 +69,8 @@ fun SearchScreen(
     onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> },
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {}
+    onNavigateToFavorites: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
@@ -99,7 +99,8 @@ fun SearchScreen(
         },
         wordDetailLabel = wordDetailLabel,
         onNavigateToWordDetail = onNavigateToWordDetail,
-        onNavigateToFavorites = onNavigateToFavorites
+        onNavigateToFavorites = onNavigateToFavorites,
+        onNavigateToSettings = onNavigateToSettings
     )
 }
 
@@ -111,7 +112,8 @@ fun SearchScreenContent(
     onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {}
+    onNavigateToFavorites: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {}
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -130,7 +132,8 @@ fun SearchScreenContent(
                     onNavigateToSearch = {},
                     onNavigateToFavorites = onNavigateToFavorites,
                     onNavigateToWordDetail = onNavigateToWordDetail,
-                    wordDetailLabel = wordDetailLabel
+                    wordDetailLabel = wordDetailLabel,
+                    onNavigateToSettings = onNavigateToSettings
                 )
             }
         ) { innerPadding ->

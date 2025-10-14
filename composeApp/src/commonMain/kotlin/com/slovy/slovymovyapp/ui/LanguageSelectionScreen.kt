@@ -10,17 +10,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import com.slovy.slovymovyapp.data.remote.dictionariesKnown
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
-val languagesToCode = listOf(
-    "English" to "en",
-    "Русский" to "ru",
-    "Nederlands" to "nl",
-    "Polski" to "pl"
-)
-
-val codeToLanguage = languagesToCode.associate { it.second to it.first }
 
 data class LanguageOption(
     val label: String,
@@ -29,7 +22,7 @@ data class LanguageOption(
 
 class LanguageSelectionViewModel(
     val title: String = "Choose your native language",
-    val languages: List<LanguageOption> = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
+    val languages: List<LanguageOption> = dictionariesKnown.map { (label, code) -> LanguageOption(label, code) }
 ) : ViewModel()
 
 @Composable
@@ -82,7 +75,7 @@ private fun LanguageSelectionScreenPreviewDefault(
         LanguageSelectionScreenContent(
             state = LanguageSelectionViewModel(
                 title = "Choose your native language",
-                languages = languagesToCode.map { (label, code) -> LanguageOption(label, code) }
+                languages = dictionariesKnown.map { (label, code) -> LanguageOption(label, code) }
             )
         )
     }
