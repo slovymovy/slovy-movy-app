@@ -8,11 +8,11 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 
     actual suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> {
-        TODO("Not yet implemented")
+        return listOf()
     }
 
     actual suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> {
-        TODO("Not yet implemented")
+        return listOf()
     }
 
     actual fun setVoice(voice: Text2SpeechVoice) {
