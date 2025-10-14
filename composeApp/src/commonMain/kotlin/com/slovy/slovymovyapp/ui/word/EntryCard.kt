@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.LanguageCardForm
 import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
 import kotlin.text.Typography
@@ -48,7 +49,7 @@ internal fun EntryCard(
     onFormsToggle: () -> Unit,
     onSenseToggle: (String) -> Unit,
     onSenseExamplesToggle: (String) -> Unit,
-    onLanguageToggle: (String, String) -> Unit,
+    onLanguageToggle: (String, Language) -> Unit,
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     onSenseFavoriteToggle: (String) -> Unit = {}
 ) {
@@ -173,8 +174,8 @@ internal fun EntryCard(
                                     allSenses = entry.senses,
                                     onToggle = { onSenseToggle(sense.senseId) },
                                     onExamplesToggle = { onSenseExamplesToggle(sense.senseId) },
-                                    onLanguageToggle = { languageCode ->
-                                        onLanguageToggle(sense.senseId, languageCode)
+                                    onLanguageToggle = { language ->
+                                        onLanguageToggle(sense.senseId, language)
                                     },
                                     onPositioned = onSensePositioned,
                                     onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) }

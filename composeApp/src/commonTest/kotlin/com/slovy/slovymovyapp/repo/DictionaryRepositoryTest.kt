@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.repo
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
@@ -18,12 +19,12 @@ class DictionaryRepositoryTest : BaseTest() {
         val mgr = DataDbManager(platform, null)
 
         // Ensure a clean state
-        mgr.deleteDictionary("en")
-        mgr.deleteTranslation("en", "ru")
+        mgr.deleteDictionary(Language.ENGLISH)
+        mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
 
         // Download actual English dictionary and English->Russian translation
-        val dictPath = runBlocking { mgr.ensureDictionary("en") }
-        val trPath = runBlocking { mgr.ensureTranslation("en", "ru") }
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+        val trPath = runBlocking { mgr.ensureTranslation(Language.ENGLISH, Language.RUSSIAN) }
 
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
@@ -32,28 +33,28 @@ class DictionaryRepositoryTest : BaseTest() {
             val repo = DictionaryRepository(mgr)
 
             // Verify installed sets reflect downloads
-            assertTrue(repo.installedDictionaries().contains("en"), "'en' dictionary should be installed")
+            assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
             assertTrue(
-                repo.installedTranslationTargets("en").contains("ru"),
+                repo.installedTranslationTargets(Language.ENGLISH).contains(Language.RUSSIAN),
                 "'ru' should be an installed translation target for 'en'"
             )
 
             // Search for 'test' in the English dictionary
-            val results = repo.search("test", dictionaryLanguage = "en")
+            val results = repo.search("test", dictionaryLanguage = Language.ENGLISH)
             assertTrue(results.isNotEmpty(), "Expected at least one search result for 'test'")
             val first = results.first()
             assertTrue(first.display.contains("test", ignoreCase = true), "First result display should mention 'test'")
 
             // Build a language card for the first result's lemma to ensure repository wiring works on real data
-            val card = repo.getLanguageCard("en", first.lemma)
+            val card = repo.getLanguageCard(Language.ENGLISH, first.lemma)
             assertNotNull(card, "Language card should be built for a real lemma from the English dictionary")
             assertTrue(card.entries.isNotEmpty(), "Language card should have at least one entry")
             assertEquals(first.lemma, card.lemma, "Card lemma should match search result")
             assertTrue(card.zipfFrequency >= 0.0f, "Zipf frequency should be non-negative")
         } finally {
             // Clean up downloaded files to keep test environment tidy
-            mgr.deleteDictionary("en")
-            mgr.deleteTranslation("en", "ru")
+            mgr.deleteDictionary(Language.ENGLISH)
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
         }
     }
 
@@ -63,16 +64,16 @@ class DictionaryRepositoryTest : BaseTest() {
         val mgr = DataDbManager(platform, null)
 
         // Ensure a clean state
-        mgr.deleteDictionary("nl")
+        mgr.deleteDictionary(Language.DUTCH)
 
-        val dictPath = runBlocking { mgr.ensureDictionary("nl") }
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.DUTCH) }
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
             val repo = DictionaryRepository(mgr)
-            assertTrue(repo.installedDictionaries().contains("nl"), "'nl' dictionary should be installed")
+            assertTrue(repo.installedDictionaries().contains(Language.DUTCH), "'nl' dictionary should be installed")
 
-            val card = repo.getLanguageCard("nl", "voorstellen")
+            val card = repo.getLanguageCard(Language.DUTCH, "voorstellen")
             assertNotNull(card, "Language card should be built for 'voorstellen'")
             val poses = card.entries.map { it.pos }.toSet()
             assertTrue(poses.contains(PartOfSpeech.NOUN), "Expected NOUN entry for 'voorstellen'")
@@ -80,7 +81,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(card.zipfFrequency >= 0.0f, "Zipf frequency should be non-negative")
         } finally {
             // Clean up
-            mgr.deleteDictionary("nl")
+            mgr.deleteDictionary(Language.DUTCH)
         }
     }
 
@@ -90,17 +91,17 @@ class DictionaryRepositoryTest : BaseTest() {
         val mgr = DataDbManager(platform, null)
 
         // Ensure a clean state
-        mgr.deleteDictionary("en")
+        mgr.deleteDictionary(Language.ENGLISH)
 
-        val dictPath = runBlocking { mgr.ensureDictionary("en") }
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
             val repo = DictionaryRepository(mgr)
-            assertTrue(repo.installedDictionaries().contains("en"), "'en' dictionary should be installed")
+            assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "test" which should match "test" and its forms (tested, testing, etc.)
-            val results = repo.search("test", dictionaryLanguage = "en")
+            val results = repo.search("test", dictionaryLanguage = Language.ENGLISH)
             assertTrue(results.isNotEmpty(), "Expected at least one search result for 'test'")
 
             // Find form results (any form-based results)
@@ -120,7 +121,7 @@ class DictionaryRepositoryTest : BaseTest() {
             }
         } finally {
             // Clean up
-            mgr.deleteDictionary("en")
+            mgr.deleteDictionary(Language.ENGLISH)
         }
     }
 
@@ -130,17 +131,17 @@ class DictionaryRepositoryTest : BaseTest() {
         val mgr = DataDbManager(platform, null)
 
         // Ensure a clean state
-        mgr.deleteDictionary("en")
+        mgr.deleteDictionary(Language.ENGLISH)
 
-        val dictPath = runBlocking { mgr.ensureDictionary("en") }
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
             val repo = DictionaryRepository(mgr)
-            assertTrue(repo.installedDictionaries().contains("en"), "'en' dictionary should be installed")
+            assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "test" - should match the base lemma "test"
-            val results = repo.search("test", dictionaryLanguage = "en")
+            val results = repo.search("test", dictionaryLanguage = Language.ENGLISH)
             assertTrue(results.isNotEmpty(), "Expected at least one search result for 'test'")
 
             // Find the base lemma "test"
@@ -162,7 +163,7 @@ class DictionaryRepositoryTest : BaseTest() {
             }
         } finally {
             // Clean up
-            mgr.deleteDictionary("en")
+            mgr.deleteDictionary(Language.ENGLISH)
         }
     }
 }

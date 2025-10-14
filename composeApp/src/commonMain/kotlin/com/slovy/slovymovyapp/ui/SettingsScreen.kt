@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
-import com.slovy.slovymovyapp.data.remote.codeToLanguageName
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.speech.*
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -42,10 +42,10 @@ data class SettingsUiState(
 
 // Test phrases for each language
 private val TEST_PHRASES = mapOf(
-    "e" to "Hello! This is a test of the text to speech system.",
-    "ru" to "Привет! Это тест системы синтеза речи.",
-    "pl" to "Cześć! To jest test systemu syntezy mowy.",
-    "nl" to "Hallo! Dit is een test van het tekst-naar-spraak systeem."
+    Language.ENGLISH to "Hello! This is a test of the text to speech system.",
+    Language.RUSSIAN to "Привет! Это тест системы синтеза речи.",
+    Language.POLISH to "Cześć! To jest test systemu syntezy mowy.",
+    Language.DUTCH to "Hallo! Dit is een test van het tekst-naar-spraak systeem."
 )
 
 class SettingsViewModel(
@@ -143,7 +143,7 @@ class SettingsViewModel(
             return
         }
 
-        val text = TEST_PHRASES[voice.langCode] ?: "Hello, this is a test."
+        val text = TEST_PHRASES[voice.language] ?: "Hello, this is a test."
         state = state.copy(testingVoice = voice)
         try {
             ttsManager.setVoice(voice)
@@ -405,7 +405,7 @@ private fun LanguageCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = codeToLanguageName[language.code] ?: language.code,
+                            text = language.language.selfName,
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -427,7 +427,7 @@ private fun LanguageCard(
                     }
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = language.code,
+                        text = language.language.selfName,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -653,22 +653,22 @@ private fun SettingsScreenPreviewWithLanguages(
                 isLoading = false,
                 languages = mapOf(
                     Text2SpeechLanguage(
-                        code = "en",
+                        language = Language.ENGLISH,
                         isAvailable = true,
                         missingData = false
                     ) to LanguageUiState(),
                     Text2SpeechLanguage(
-                        code = "ru",
+                        language = Language.RUSSIAN,
                         isAvailable = true,
                         missingData = false
                     ) to LanguageUiState(),
                     Text2SpeechLanguage(
-                        code = "nl",
+                        language = Language.DUTCH,
                         isAvailable = true,
                         missingData = true
                     ) to LanguageUiState(),
                     Text2SpeechLanguage(
-                        code = "pl",
+                        language = Language.POLISH,
                         isAvailable = false,
                         missingData = false
                     ) to LanguageUiState(),
@@ -689,7 +689,7 @@ private fun SettingsScreenPreviewWithExpandedLanguage(
                 isLoading = false,
                 languages = mapOf(
                     Text2SpeechLanguage(
-                        code = "en",
+                        language = Language.ENGLISH,
                         isAvailable = true,
                         missingData = false
                     ) to LanguageUiState(
@@ -698,28 +698,28 @@ private fun SettingsScreenPreviewWithExpandedLanguage(
                             Text2SpeechVoice(
                                 id = "en-us-x-sfg#female_1-local",
                                 name = "Female 1",
-                                langCode = "en",
+                                language = Language.ENGLISH,
                                 quality = VoiceQuality.BEST,
                                 networkConnectionRequired = true
                             ),
                             Text2SpeechVoice(
                                 id = "en-us-x-sfg#male_1-local",
                                 name = "Male 1",
-                                langCode = "en",
+                                language = Language.ENGLISH,
                                 quality = VoiceQuality.GOOD,
                                 networkConnectionRequired = true
                             ),
                             Text2SpeechVoice(
                                 id = "en-us-x-tpf-network",
                                 name = "Network Voice",
-                                langCode = "en",
+                                language = Language.ENGLISH,
                                 quality = VoiceQuality.MEDIUM,
                                 networkConnectionRequired = false
                             )
                         )
                     ),
                     Text2SpeechLanguage(
-                        code = "ru",
+                        language = Language.RUSSIAN,
                         isAvailable = true,
                         missingData = false
                     ) to LanguageUiState()
@@ -740,7 +740,7 @@ private fun SettingsScreenPreviewWithError(
                 isLoading = false,
                 languages = mapOf(
                     Text2SpeechLanguage(
-                        code = "en",
+                        language = Language.ENGLISH,
                         isAvailable = true,
                         missingData = false
                     ) to

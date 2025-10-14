@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.speech.TTSStatus
@@ -48,7 +49,7 @@ data class SenseUiState(
     val senseId: String,
     val expanded: Boolean = true,
     val examplesExpanded: Boolean = true,
-    val languageExpanded: Map<String, Boolean> = emptyMap(),
+    val languageExpanded: Map<Language, Boolean> = emptyMap(),
     val favorite: Boolean,
     val showNavigationArrow: Boolean = false,
     val pos: PartOfSpeech? = null,
@@ -87,7 +88,7 @@ private fun LanguageCardResponseSense.toSenseUiState(
     favorite: Boolean,
     pos: PartOfSpeech? = null
 ): SenseUiState {
-    val languages = collectLanguageCodes()
+    val languages = collectLanguages()
     val languageStates = languages.associateWith { false }
     val examplesExpanded = examples.isNotEmpty()
     return SenseUiState(
@@ -102,8 +103,8 @@ private fun LanguageCardResponseSense.toSenseUiState(
     )
 }
 
-private fun LanguageCardResponseSense.collectLanguageCodes(): List<String> {
-    val ordered = linkedSetOf<String>()
+private fun LanguageCardResponseSense.collectLanguages(): List<Language> {
+    val ordered = linkedSetOf<Language>()
     ordered += targetLangDefinitions.keys
     ordered += translations.keys
     examples.forEach { ex -> ordered += ex.targetLangTranslations.keys }
@@ -125,10 +126,10 @@ private fun WordDetailUiState.Content.toggleSenseExamples(entryIndex: Int, sense
 private fun WordDetailUiState.Content.toggleSenseLanguage(
     entryIndex: Int,
     senseId: String,
-    languageCode: String
+    language: Language
 ): WordDetailUiState.Content =
     updateEntry(entryIndex) { entry ->
-        entry.updateSense(senseId) { sense -> sense.toggleLanguage(languageCode) }
+        entry.updateSense(senseId) { sense -> sense.toggleLanguage(language) }
     }
 
 private inline fun WordDetailUiState.Content.updateEntry(
@@ -154,9 +155,9 @@ private inline fun EntryUiState.updateSense(
     return copy(senses = updatedSenses)
 }
 
-private fun SenseUiState.toggleLanguage(languageCode: String): SenseUiState {
-    val current = languageExpanded[languageCode] ?: expanded
-    val updated = languageExpanded.toMutableMap().apply { put(languageCode, !current) }
+private fun SenseUiState.toggleLanguage(language: Language): SenseUiState {
+    val current = languageExpanded[language] ?: expanded
+    val updated = languageExpanded.toMutableMap().apply { put(language, !current) }
     return copy(languageExpanded = updated)
 }
 
@@ -164,7 +165,7 @@ class WordDetailViewModel(
     private val repository: DictionaryRepository,
     private val favoritesRepository: FavoritesRepository,
     private val ttsManager: TextToSpeechManager,
-    private val dictionaryLanguage: String = "",
+    private val dictionaryLanguage: Language,
     private val lemma: String = "",
     val targetSenseId: String? = null
 ) : ViewModel() {
@@ -191,7 +192,7 @@ class WordDetailViewModel(
     private var hasScrolledToTarget = false
 
     init {
-        val card = repository.getLanguageCard(dictionaryLanguage, lemma)
+        val card = dictionaryLanguage?.let { repository.getLanguageCard(it, lemma) }
         state =
             card?.toContentUiState(targetSenseId, isSenseFavorite = ::isSenseFavorite) ?: WordDetailUiState.Empty(
                 lemma = lemma,
@@ -220,14 +221,16 @@ class WordDetailViewModel(
     }
 
     private fun loadFavorites() {
-        val card = repository.getLanguageCard(dictionaryLanguage, lemma)
+        val card = dictionaryLanguage?.let { repository.getLanguageCard(it, lemma) }
         val allSenseIds = card?.entries?.flatMap { entry ->
             entry.senses.map { it.senseId }
         } ?: emptyList()
 
-        val favoriteSenseIds = allSenseIds.filter { senseId ->
-            favoritesRepository.exists(senseId, dictionaryLanguage)
-        }.toSet()
+        val favoriteSenseIds = dictionaryLanguage?.let { lang ->
+            allSenseIds.filter { senseId ->
+                favoritesRepository.exists(senseId, lang)
+            }.toSet()
+        } ?: emptySet()
 
         favoriteSenses = favoriteSenseIds
         val current = state
@@ -240,7 +243,7 @@ class WordDetailViewModel(
         viewModelScope.launch {
             try {
                 val languages = ttsManager.getAvailableLanguages()
-                val targetLanguage = languages.firstOrNull { it.code == dictionaryLanguage }
+                val targetLanguage = languages.firstOrNull { it.language == dictionaryLanguage }
                 if (targetLanguage != null) {
                     availableVoices = ttsManager.getVoicesForLanguage(targetLanguage)
                     // Start from a random voice index
@@ -260,12 +263,14 @@ class WordDetailViewModel(
     }
 
     fun toggleFavorite(senseId: String) {
-        if (senseId in favoriteSenses) {
-            favoritesRepository.remove(senseId, dictionaryLanguage)
-        } else {
-            favoritesRepository.add(senseId, dictionaryLanguage, lemma)
+        dictionaryLanguage?.let { lang ->
+            if (senseId in favoriteSenses) {
+                favoritesRepository.remove(senseId, lang)
+            } else {
+                favoritesRepository.add(senseId, lang, lemma)
+            }
+            loadFavorites()
         }
-        loadFavorites()
     }
 
     suspend fun setScrollPosition(position: Int) {
@@ -313,10 +318,10 @@ class WordDetailViewModel(
         }
     }
 
-    fun toggleLanguage(entryIndex: Int, senseId: String, languageCode: String) {
+    fun toggleLanguage(entryIndex: Int, senseId: String, language: Language) {
         val current = state
         if (current is WordDetailUiState.Content) {
-            state = current.toggleSenseLanguage(entryIndex, senseId, languageCode)
+            state = current.toggleSenseLanguage(entryIndex, senseId, language)
         }
     }
 
@@ -463,8 +468,8 @@ fun WordDetailScreen(
         onFormsToggle = { index -> viewModel.toggleForms(index) },
         onSenseToggle = { entryIndex, senseId -> viewModel.toggleSense(entryIndex, senseId) },
         onSenseExamplesToggle = { entryIndex, senseId -> viewModel.toggleSenseExamples(entryIndex, senseId) },
-        onLanguageToggle = { entryIndex, senseId, languageCode ->
-            viewModel.toggleLanguage(entryIndex, senseId, languageCode)
+        onLanguageToggle = { entryIndex, senseId, language ->
+            viewModel.toggleLanguage(entryIndex, senseId, language)
         },
         onSensePositioned = { senseId, yOffset -> viewModel.updateSensePosition(senseId, yOffset) },
         isSenseFavorite = { senseId -> viewModel.isSenseFavorite(senseId) },
@@ -492,7 +497,7 @@ fun WordDetailScreenContent(
     onFormsToggle: (Int) -> Unit = {},
     onSenseToggle: (Int, String) -> Unit = { _, _ -> },
     onSenseExamplesToggle: (Int, String) -> Unit = { _, _ -> },
-    onLanguageToggle: (Int, String, String) -> Unit = { _, _, _ -> },
+    onLanguageToggle: (Int, String, Language) -> Unit = { _, _, _ -> },
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {}
@@ -630,7 +635,7 @@ private fun WordDetailContent(
     onFormsToggle: (Int) -> Unit,
     onSenseToggle: (Int, String) -> Unit,
     onSenseExamplesToggle: (Int, String) -> Unit,
-    onLanguageToggle: (Int, String, String) -> Unit,
+    onLanguageToggle: (Int, String, Language) -> Unit,
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {}
@@ -663,8 +668,8 @@ private fun WordDetailContent(
                     onFormsToggle = { onFormsToggle(index) },
                     onSenseToggle = { senseId -> onSenseToggle(index, senseId) },
                     onSenseExamplesToggle = { senseId -> onSenseExamplesToggle(index, senseId) },
-                    onLanguageToggle = { senseId, languageCode ->
-                        onLanguageToggle(index, senseId, languageCode)
+                    onLanguageToggle = { senseId, language ->
+                        onLanguageToggle(index, senseId, language)
                     },
                     onSensePositioned = { senseId, windowY ->
                         // Calculate position relative to scroll container

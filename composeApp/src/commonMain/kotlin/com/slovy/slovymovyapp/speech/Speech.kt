@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.speech
 
+import com.slovy.slovymovyapp.data.Language
+
 expect class TextToSpeechManager(androidContext: Any? = null) {
     fun speak(text: String)
     fun stop()
@@ -13,7 +15,7 @@ expect class TextToSpeechManager(androidContext: Any? = null) {
 }
 
 data class Text2SpeechLanguage(
-    val code: String,
+    val language: Language,
     val isAvailable: Boolean,
     val missingData: Boolean
 )
@@ -21,7 +23,7 @@ data class Text2SpeechLanguage(
 data class Text2SpeechVoice(
     val id: String,
     val name: String?,
-    val langCode: String,
+    val language: Language,
     val quality: VoiceQuality,
     val networkConnectionRequired: Boolean
 )

@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.data.remote
 
 import app.cash.sqldelight.db.SqlDriver
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
@@ -36,13 +37,13 @@ class DataDbManager(
         // TODO: we use HTTP for now to workaround some issues with IOS emulator
         // https://github.com/slovymovy/slovy-movy-app/issues/34
         const val BASE_URL = "http://storage.googleapis.com/slovymovy/$VERSION/"
-        fun dictionaryFileName(lang: String): String = "dictionary_${lang.lowercase()}.db"
-        fun translationFileName(src: String, tgt: String): String =
-            "translation_${src.lowercase()}_${tgt.lowercase()}.db"
+        fun dictionaryFileName(lang: Language): String = "dictionary_${lang.code.lowercase()}.db"
+        fun translationFileName(src: Language, tgt: Language): String =
+            "translation_${src.code.lowercase()}_${tgt.code.lowercase()}.db"
     }
 
     suspend fun ensureDictionary(
-        lang: String,
+        lang: Language,
         onProgress: (DownloadProgress) -> Unit = {},
         cancelToken: CancelToken? = null
     ): Path {
@@ -50,14 +51,14 @@ class DataDbManager(
         return ensureFile(name, onProgress, cancelToken)
     }
 
-    fun deleteDictionary(lang: String) {
+    fun deleteDictionary(lang: Language) {
         val name = dictionaryFileName(lang)
         platform.deleteFile(platform.getDatabasePath(name))
     }
 
     suspend fun ensureTranslation(
-        src: String,
-        tgt: String,
+        src: Language,
+        tgt: Language,
         onProgress: (DownloadProgress) -> Unit = {},
         cancelToken: CancelToken? = null
     ): Path {
@@ -65,7 +66,7 @@ class DataDbManager(
         return ensureFile(name, onProgress, cancelToken)
     }
 
-    fun deleteTranslation(src: String, tgt: String) {
+    fun deleteTranslation(src: Language, tgt: Language) {
         val name = translationFileName(src, tgt)
         platform.deleteFile(platform.getDatabasePath(name))
     }
@@ -100,21 +101,21 @@ class DataDbManager(
         return DatabaseProvider.createAppDatabase(driver)
     }
 
-    fun hasDictionary(lang: String): Boolean {
+    fun hasDictionary(lang: Language): Boolean {
         return platform.fileExists(platform.getDatabasePath(dictionaryFileName(lang)))
     }
 
-    fun hasTranslation(src: String, tgt: String): Boolean {
+    fun hasTranslation(src: Language, tgt: Language): Boolean {
         return platform.fileExists(platform.getDatabasePath(translationFileName(src, tgt)))
     }
 
-    fun openDictionaryReadOnly(lang: String): DictionaryDatabase {
+    fun openDictionaryReadOnly(lang: Language): DictionaryDatabase {
         val file = platform.getDatabasePath(dictionaryFileName(lang))
         val driver = platform.createDictionaryDataDriver(file, true)
         return DatabaseProvider.createDictionaryDatabase(driver)
     }
 
-    fun openTranslationReadOnly(src: String, tgt: String): TranslationDatabase {
+    fun openTranslationReadOnly(src: Language, tgt: Language): TranslationDatabase {
         val file = platform.getDatabasePath(translationFileName(src, tgt))
         val driver = platform.createTranslationDataDriver(file, true)
         return DatabaseProvider.createTranslationDatabase(driver)

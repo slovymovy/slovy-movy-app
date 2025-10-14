@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.db
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.test.BaseTest
@@ -18,7 +19,7 @@ open class FavoritesRepositoryTest : BaseTest() {
         repo.deleteAll()
 
         val senseId = "sense123"
-        val targetLang = "en"
+        val targetLang = Language.ENGLISH
         val lemma = "test"
 
         // Add favorite
@@ -41,16 +42,16 @@ open class FavoritesRepositoryTest : BaseTest() {
         repo.deleteAll()
 
         // Add multiple favorites
-        repo.add("sense1", "en", "hello")
-        repo.add("sense2", "en", "world")
-        repo.add("sense3", "fr", "bonjour")
+        repo.add("sense1", Language.ENGLISH, "hello")
+        repo.add("sense2", Language.ENGLISH, "world")
+        repo.add("sense3", Language.RUSSIAN, "bonjour")
 
         val all = repo.getAll()
 
         assertEquals(3, all.size)
-        assertTrue(all.any { it.senseId == "sense1" && it.targetLang == "en" && it.lemma == "hello" })
-        assertTrue(all.any { it.senseId == "sense2" && it.targetLang == "en" && it.lemma == "world" })
-        assertTrue(all.any { it.senseId == "sense3" && it.targetLang == "fr" && it.lemma == "bonjour" })
+        assertTrue(all.any { it.senseId == "sense1" && it.targetLang == Language.ENGLISH && it.lemma == "hello" })
+        assertTrue(all.any { it.senseId == "sense2" && it.targetLang == Language.ENGLISH && it.lemma == "world" })
+        assertTrue(all.any { it.senseId == "sense3" && it.targetLang == Language.RUSSIAN && it.lemma == "bonjour" })
     }
 
     @Test
@@ -60,15 +61,15 @@ open class FavoritesRepositoryTest : BaseTest() {
         repo.deleteAll()
 
         // Add favorites with different languages and lemmas
-        repo.add("sense1", "en", "hello")
-        repo.add("sense2", "en", "hello")
-        repo.add("sense3", "en", "world")
-        repo.add("sense4", "fr", "hello")
+        repo.add("sense1", Language.ENGLISH, "hello")
+        repo.add("sense2", Language.ENGLISH, "hello")
+        repo.add("sense3", Language.ENGLISH, "world")
+        repo.add("sense4", Language.RUSSIAN, "hello")
 
-        val results = repo.getByLangAndLemma("en", "hello")
+        val results = repo.getByLangAndLemma(Language.ENGLISH, "hello")
 
         assertEquals(2, results.size)
-        assertTrue(results.all { it.targetLang == "en" && it.lemma == "hello" })
+        assertTrue(results.all { it.targetLang == Language.ENGLISH && it.lemma == "hello" })
         assertTrue(results.any { it.senseId == "sense1" })
         assertTrue(results.any { it.senseId == "sense2" })
     }
@@ -80,8 +81,8 @@ open class FavoritesRepositoryTest : BaseTest() {
         repo.deleteAll()
 
         // Add favorite twice with same senseId and targetLang
-        repo.add("sense1", "en", "hello")
-        repo.add("sense1", "en", "hello")
+        repo.add("sense1", Language.ENGLISH, "hello")
+        repo.add("sense1", Language.ENGLISH, "hello")
 
         val all = repo.getAll()
 
@@ -95,7 +96,7 @@ open class FavoritesRepositoryTest : BaseTest() {
         val repo = FavoritesRepository(db)
         repo.deleteAll()
 
-        assertFalse(repo.exists("nonexistent", "en"))
+        assertFalse(repo.exists("nonexistent", Language.ENGLISH))
     }
 
     @Test
@@ -105,23 +106,23 @@ open class FavoritesRepositoryTest : BaseTest() {
         repo.deleteAll()
 
         // Add favorites in mixed order
-        repo.add("sense3", "fr", "bonjour")
-        repo.add("sense1", "en", "hello")
-        repo.add("sense4", "fr", "monde")
-        repo.add("sense2", "en", "world")
+        repo.add("sense3", Language.RUSSIAN, "bonjour")
+        repo.add("sense1", Language.ENGLISH, "hello")
+        repo.add("sense4", Language.RUSSIAN, "monde")
+        repo.add("sense2", Language.ENGLISH, "world")
 
         val results = repo.getAllGroupedByLangAndLemma()
 
         assertEquals(4, results.size)
 
         // Verify ordering
-        assertEquals("en", results[0].targetLang)
+        assertEquals(Language.ENGLISH, results[0].targetLang)
         assertEquals("hello", results[0].lemma)
-        assertEquals("en", results[1].targetLang)
+        assertEquals(Language.ENGLISH, results[1].targetLang)
         assertEquals("world", results[1].lemma)
-        assertEquals("fr", results[2].targetLang)
+        assertEquals(Language.RUSSIAN, results[2].targetLang)
         assertEquals("bonjour", results[2].lemma)
-        assertEquals("fr", results[3].targetLang)
+        assertEquals(Language.RUSSIAN, results[3].targetLang)
         assertEquals("monde", results[3].lemma)
     }
 }

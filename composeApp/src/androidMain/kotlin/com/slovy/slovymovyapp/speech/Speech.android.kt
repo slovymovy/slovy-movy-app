@@ -10,7 +10,7 @@ import android.speech.tts.TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice.QUALITY_HIGH
 import android.speech.tts.Voice.QUALITY_VERY_HIGH
-import com.slovy.slovymovyapp.data.remote.codeToLanguageName
+import com.slovy.slovymovyapp.data.Language
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -78,8 +78,8 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         val languages = mutableListOf<Text2SpeechLanguage>()
 
 
-        codeToLanguageName.forEach { (code, _) ->
-            val locale = parseLocale(code)
+        Language.entries.forEach { lang ->
+            val locale = toLocale(lang)
             val availability = tts.isLanguageAvailable(locale)
 
             val isAvailable = availability in listOf(
@@ -90,7 +90,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
             languages.add(
                 Text2SpeechLanguage(
-                    code = code,
+                    language = lang,
                     isAvailable = isAvailable,
                     missingData = availability == TextToSpeech.LANG_MISSING_DATA
                 )
@@ -103,7 +103,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     actual suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> =
         withContext(Dispatchers.IO) {
 
-            val locale = parseLocale(language.code)
+            val locale = toLocale(language.language)
             val voices = tts.voices?.filter { voice ->
                 voice.locale.language == locale.language &&
                         (locale.country.isEmpty() || voice.locale.country == locale.country)
@@ -113,7 +113,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                 Text2SpeechVoice(
                     id = voice.name,
                     name = if (voice.name.contains("#")) voice.name.split("#").lastOrNull() else null,
-                    langCode = language.code,
+                    language = language.language,
                     quality = when {
                         voice.quality >= QUALITY_VERY_HIGH -> VoiceQuality.BEST
                         voice.quality >= QUALITY_HIGH -> VoiceQuality.GOOD
@@ -144,9 +144,9 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         }
     }
 
-    private fun parseLocale(code: String): Locale {
+    private fun toLocale(lang: Language): Locale {
         val builder = Locale.Builder()
-        return builder.setLanguage(code).build()
+        return builder.setLanguage(lang.code).build()
     }
 
     actual fun stop() {

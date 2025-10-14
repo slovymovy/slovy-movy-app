@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
 import kotlin.text.Typography.bullet
 
@@ -27,7 +28,7 @@ internal fun SenseCard(
     state: SenseUiState,
     onToggle: () -> Unit,
     onExamplesToggle: () -> Unit,
-    onLanguageToggle: (String) -> Unit,
+    onLanguageToggle: (Language) -> Unit,
     onPositioned: (String, Float) -> Unit = { _, _ -> },
     allSenses: List<LanguageCardResponseSense>,
     onFavoriteToggle: () -> Unit = {},
@@ -233,7 +234,7 @@ internal fun SenseCard(
                         if (sense.translations[lang]?.isNotEmpty() ?: false) {
                             val langExpanded = state.languageExpanded[lang] ?: expanded
                             LanguageSection(
-                                languageCode = lang,
+                                language = lang,
                                 sense = sense,
                                 expanded = langExpanded,
                                 onToggle = { onLanguageToggle(lang) }
@@ -248,13 +249,13 @@ internal fun SenseCard(
 
 @Composable
 private fun LanguageSection(
-    languageCode: String,
+    language: Language,
     sense: LanguageCardResponseSense,
     expanded: Boolean,
     onToggle: () -> Unit
 ) {
-    val languageLabel = codeToLanguageName.getOrElse(languageCode) { languageCode }
-    val translations = sense.translations[languageCode].orEmpty()
+    val languageLabel = language.selfName
+    val translations = sense.translations[language].orEmpty()
 
     ExpandableSection(
         title = languageLabel,

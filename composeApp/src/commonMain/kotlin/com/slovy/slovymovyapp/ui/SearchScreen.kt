@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.ui.word.Badge
@@ -353,7 +354,7 @@ private fun SearchScreenPreviewWithResults(
                 query = "cel",
                 results = listOf(
                     DictionaryRepository.SearchItem(
-                        language = "en",
+                        language = Language.ENGLISH,
                         lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                         lemma = "celebration",
                         display = "celebration",
@@ -361,7 +362,7 @@ private fun SearchScreenPreviewWithResults(
                         pos = listOf(PartOfSpeech.NOUN)
                     ),
                     DictionaryRepository.SearchItem(
-                        language = "en",
+                        language = Language.ENGLISH,
                         lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
                         lemma = "celebrity",
                         display = "celebrity",
@@ -369,7 +370,7 @@ private fun SearchScreenPreviewWithResults(
                         pos = listOf(PartOfSpeech.NOUN)
                     ),
                     DictionaryRepository.SearchItem(
-                        language = "en",
+                        language = Language.ENGLISH,
                         lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
                         lemma = "celestial",
                         display = "celestial",
@@ -377,7 +378,7 @@ private fun SearchScreenPreviewWithResults(
                         pos = listOf(PartOfSpeech.ADJECTIVE)
                     ),
                     DictionaryRepository.SearchItem(
-                        language = "en",
+                        language = Language.ENGLISH,
                         lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"),
                         lemma = "cell",
                         display = "cell",
@@ -403,7 +404,7 @@ private fun SearchScreenPreviewMultilingualResults(
                 query = "program",
                 results = listOf(
                     DictionaryRepository.SearchItem(
-                        language = "en",
+                        language = Language.ENGLISH,
                         lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                         lemma = "program",
                         display = "program",
@@ -411,7 +412,7 @@ private fun SearchScreenPreviewMultilingualResults(
                         pos = listOf(PartOfSpeech.NOUN, PartOfSpeech.VERB)
                     ),
                     DictionaryRepository.SearchItem(
-                        language = "en",
+                        language = Language.ENGLISH,
                         lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
                         lemma = "programmatically",
                         display = "programmatically",
@@ -419,7 +420,7 @@ private fun SearchScreenPreviewMultilingualResults(
                         pos = listOf(PartOfSpeech.ADVERB)
                     ),
                     DictionaryRepository.SearchItem(
-                        language = "ru",
+                        language = Language.RUSSIAN,
                         lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
                         lemma = "программа",
                         display = "программа",
@@ -462,7 +463,7 @@ private fun SearchScreenPreviewInfoDialog(
                 query = "world",
                 results = listOf(
                     DictionaryRepository.SearchItem(
-                        language = "en",
+                        language = Language.ENGLISH,
                         lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                         lemma = "world",
                         display = "world",
@@ -488,7 +489,7 @@ private fun SearchScreenPreviewDutchLanguage(
                 query = "bib",
                 results = listOf(
                     DictionaryRepository.SearchItem(
-                        language = "nl",
+                        language = Language.DUTCH,
                         lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
                         lemma = "bibliotheek",
                         display = "bibliotheek",
@@ -496,7 +497,7 @@ private fun SearchScreenPreviewDutchLanguage(
                         pos = listOf(PartOfSpeech.NOUN)
                     ),
                     DictionaryRepository.SearchItem(
-                        language = "nl",
+                        language = Language.DUTCH,
                         lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
                         lemma = "bijbel",
                         display = "bijbel",

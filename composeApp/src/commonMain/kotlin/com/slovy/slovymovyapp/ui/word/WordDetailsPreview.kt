@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.runtime.Composable
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
@@ -434,7 +435,7 @@ private fun WordDetailScreenPreviewPartiallyExpanded(
                         expanded = senseIndex == 0, // Only first sense expanded
                         examplesExpanded = senseIndex == 0 && entryIndex == 0, // Only first sense of first entry has examples expanded
                         languageExpanded = senseState.languageExpanded.mapValues { (lang, _) ->
-                            lang == "ru" && senseIndex == 0 // Only Russian expanded for first sense
+                            lang == Language.RUSSIAN && senseIndex == 0 // Only Russian expanded for first sense
                         }
                     )
                 }
@@ -540,7 +541,7 @@ internal fun sampleAmazonCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "The ancient Greeks told stories of the <w>Amazons</w>, a fierce tribe of women warriors.",
-                                targetLangTranslations = mapOf("ru" to "Древние греки рассказывали истории об <w>амазонках</w>, свирепом племени женщин-воительниц.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Древние греки рассказывали истории об <w>амазонках</w>, свирепом племени женщин-воительниц.")
                             )
                         ),
                         commonPhrases = listOf("mythical Amazons", "tribe of Amazons"),
@@ -551,10 +552,10 @@ internal fun sampleAmazonCard(): LanguageCard {
                             )
                         ),
                         targetLangDefinitions = mapOf(
-                            "ru" to "В греческой мифологии, представительница племени женщин-воительниц."
+                            Language.RUSSIAN to "В греческой мифологии, представительница племени женщин-воительниц."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "амазонка",
                                     targetLangSenseClarification = "Относится к мифологическим воительницам."
@@ -572,7 +573,7 @@ internal fun sampleAmazonCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "The <w>Amazon</w> River flows through several South American countries.",
-                                targetLangTranslations = mapOf("ru" to "Река <w>Амазонка</w> протекает через несколько южноамериканских стран.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Река <w>Амазонка</w> протекает через несколько южноамериканских стран.")
                             )
                         ),
                         commonPhrases = listOf("Amazon River", "Amazon Basin", "Amazon Rainforest"),
@@ -583,10 +584,10 @@ internal fun sampleAmazonCard(): LanguageCard {
                             )
                         ),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Крупнейшая река в Южной Америке, самая полноводная река в мире."
+                            Language.RUSSIAN to "Крупнейшая река в Южной Америке, самая полноводная река в мире."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "амазонка",
                                     targetLangSenseClarification = "Название реки."
@@ -604,15 +605,15 @@ internal fun sampleAmazonCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "My neighbor has a beautiful green <w>amazon</w> parrot that can mimic human speech.",
-                                targetLangTranslations = mapOf("ru" to "У моего соседа есть красивый зеленый попугай-<w>амазон</w>.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "У моего соседа есть красивый зеленый попугай-<w>амазон</w>.")
                             )
                         ),
                         commonPhrases = listOf("amazon parrot"),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Любой из нескольких крупных, часто зеленых попугаев рода Amazona."
+                            Language.RUSSIAN to "Любой из нескольких крупных, часто зеленых попугаев рода Amazona."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "амазон",
                                     targetLangSenseClarification = "Название вида попугаев (мужской род)."
@@ -637,15 +638,15 @@ internal fun sampleAmazonCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "I ordered a new book from <w>Amazon</w> last night.",
-                                targetLangTranslations = mapOf("ru" to "Вчера вечером я заказал новую книгу на <w>Amazon</w>.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Вчера вечером я заказал новую книгу на <w>Amazon</w>.")
                             )
                         ),
                         commonPhrases = listOf("Amazon Prime", "shop on Amazon"),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Amazon.com Inc., очень крупная компания в сфере онлайн-торговли."
+                            Language.RUSSIAN to "Amazon.com Inc., очень крупная компания в сфере онлайн-торговли."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "Amazon",
                                     targetLangSenseClarification = "Название компании."
@@ -678,11 +679,11 @@ internal fun sampleCelebrationCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "We're having a little <w>celebration</w> tomorrow for Martin's scholarship.",
-                                targetLangTranslations = mapOf("ru" to "Завтра мы устраиваем небольшое <w>празднование</w> по случаю стипендии Мартина.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Завтра мы устраиваем небольшое <w>празднование</w> по случаю стипендии Мартина.")
                             ),
                             LanguageCardExample(
                                 text = "The birthday <w>celebration</w> was a lot of fun.",
-                                targetLangTranslations = mapOf("ru" to "<w>Празднование</w> дня рождения было очень весёлым.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "<w>Празднование</w> дня рождения было очень весёлым.")
                             )
                         ),
                         synonyms = listOf("entertainment", "festivity", "function", "gathering"),
@@ -692,10 +693,10 @@ internal fun sampleCelebrationCard(): LanguageCard {
                             "anniversary celebration"
                         ),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Собрание людей или вечеринка, устраиваемые в честь особого случая."
+                            Language.RUSSIAN to "Собрание людей или вечеринка, устраиваемые в честь особого случая."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "праздник",
                                     targetLangSenseClarification = "Обычно относится к самому событию, вечеринке или дню."
@@ -732,21 +733,21 @@ internal fun sampleProgrammaticallyCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "The robot moved <w>programmatically</w> along the assembly line.",
-                                targetLangTranslations = mapOf("ru" to "Робот <w>программно</w> двигался по сборочной линии.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Робот <w>программно</w> двигался по сборочной линии.")
                             ),
                             LanguageCardExample(
                                 text = "The company decided to expand <w>programmatically</w> into new markets.",
-                                targetLangTranslations = mapOf("ru" to "Компания решила <w>планомерно</w> выходить на новые рынки.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Компания решила <w>планомерно</w> выходить на новые рынки.")
                             )
                         ),
                         synonyms = listOf("systematically", "methodically", "by design"),
                         antonyms = listOf("randomly", "haphazardly", "spontaneously"),
                         commonPhrases = listOf("programmatically controlled", "programmatically managed"),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Планомерно, систематически, в соответствии с заранее определенной программой."
+                            Language.RUSSIAN to "Планомерно, систематически, в соответствии с заранее определенной программой."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "программно",
                                     targetLangSenseClarification = "В техническом контексте, с помощью программного обеспечения."
@@ -783,7 +784,7 @@ internal fun sampleRichmondCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "They decided to spend the day exploring <w>Richmond</w> Park in London.",
-                                targetLangTranslations = mapOf("ru" to "Они решили провести день, исследуя <w>Ричмонд</w>-парк в Лондоне.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Они решили провести день, исследуя <w>Ричмонд</w>-парк в Лондоне.")
                             )
                         ),
                         traits = listOf(
@@ -793,10 +794,10 @@ internal fun sampleRichmondCard(): LanguageCard {
                             )
                         ),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Город на юго-западе Большого Лондона, Англия."
+                            Language.RUSSIAN to "Город на юго-западе Большого Лондона, Англия."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "Ричмонд",
                                     targetLangSenseClarification = "город в Англии, на Темзе"
@@ -814,7 +815,7 @@ internal fun sampleRichmondCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "<w>Richmond</w> is known for its historic architecture and Civil War history.",
-                                targetLangTranslations = mapOf("ru" to "<w>Ричмонд</w> известен своей исторической архитектурой и историей Гражданской войны.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "<w>Ричмонд</w> известен своей исторической архитектурой и историей Гражданской войны.")
                             )
                         ),
                         traits = listOf(
@@ -824,10 +825,10 @@ internal fun sampleRichmondCard(): LanguageCard {
                             )
                         ),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Столица штата Виргиния, США."
+                            Language.RUSSIAN to "Столица штата Виргиния, США."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "Ричмонд",
                                     targetLangSenseClarification = "столица штата Виргиния"
@@ -861,26 +862,26 @@ internal fun sampleKwartierCard(): LanguageCard {
                             LanguageCardExample(
                                 text = "Ik ben over een <w>kwartier</w> thuis.",
                                 targetLangTranslations = mapOf(
-                                    "ru" to "Я буду дома через <w>четверть часа</w>.",
-                                    "en" to "I'll be home in a <w>quarter of an hour</w>."
+                                    Language.RUSSIAN to "Я буду дома через <w>четверть часа</w>.",
+                                    Language.ENGLISH to "I'll be home in a <w>quarter of an hour</w>."
                                 )
                             ),
                             LanguageCardExample(
                                 text = "De vergadering duurt nog een <w>kwartier</w>.",
                                 targetLangTranslations = mapOf(
-                                    "ru" to "Собрание продлится ещё <w>четверть часа</w>.",
-                                    "en" to "The meeting will last for another <w>fifteen minutes</w>."
+                                    Language.RUSSIAN to "Собрание продлится ещё <w>четверть часа</w>.",
+                                    Language.ENGLISH to "The meeting will last for another <w>fifteen minutes</w>."
                                 )
                             )
                         ),
                         synonyms = listOf("vijftien minuten", "een vierde uur"),
                         commonPhrases = listOf("over een kwartier", "binnen een kwartier"),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Период в пятнадцать минут, четверть часа.",
-                            "en" to "A period of fifteen minutes, a quarter of an hour."
+                            Language.RUSSIAN to "Период в пятнадцать минут, четверть часа.",
+                            Language.ENGLISH to "A period of fifteen minutes, a quarter of an hour."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "четверть часа",
                                     targetLangSenseClarification = "Основной перевод, обозначающий 15 минут."
@@ -890,7 +891,7 @@ internal fun sampleKwartierCard(): LanguageCard {
                                     targetLangSenseClarification = "Более прямой перевод временного периода."
                                 )
                             ),
-                            "en" to listOf(
+                            Language.ENGLISH to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "quarter of an hour",
                                     targetLangSenseClarification = "Literal translation referring to 15 minutes."
@@ -927,24 +928,24 @@ internal fun sampleProgrammaCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "<w>Программа</w> телепередач на завтра.",
-                                targetLangTranslations = mapOf("en" to "Tomorrow's TV <w>schedule</w>.")
+                                targetLangTranslations = mapOf(Language.ENGLISH to "Tomorrow's TV <w>schedule</w>.")
                             ),
                             LanguageCardExample(
                                 text = "В <w>программе</w> пианист стоит вторым.",
-                                targetLangTranslations = mapOf("en" to "The pianist is second on the <w>program</w>.")
+                                targetLangTranslations = mapOf(Language.ENGLISH to "The pianist is second on the <w>program</w>.")
                             ),
                             LanguageCardExample(
                                 text = "Театральная <w>программа</w> была очень интересной.",
-                                targetLangTranslations = mapOf("en" to "The theater <w>program</w> was very interesting.")
+                                targetLangTranslations = mapOf(Language.ENGLISH to "The theater <w>program</w> was very interesting.")
                             )
                         ),
                         synonyms = listOf("расписание", "план", "репертуар"),
                         commonPhrases = listOf("программа передач", "телевизионная программа"),
                         targetLangDefinitions = mapOf(
-                            "en" to "A schedule of radio or television broadcasts, or a list of acts performed at a concert, evening, or show."
+                            Language.ENGLISH to "A schedule of radio or television broadcasts, or a list of acts performed at a concert, evening, or show."
                         ),
                         translations = mapOf(
-                            "en" to listOf(
+                            Language.ENGLISH to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "program",
                                     targetLangSenseClarification = "American spelling, commonly used for entertainment shows and events."
@@ -1058,22 +1059,22 @@ internal fun sampleMultilingualCard(): LanguageCard {
                             LanguageCardExample(
                                 text = "Ik ga naar de <w>bibliotheek</w> om een boek te lenen.",
                                 targetLangTranslations = mapOf(
-                                    "ru" to "Я иду в <w>библиотеку</w>, чтобы взять книгу.",
-                                    "en" to "I'm going to the <w>library</w> to borrow a book."
+                                    Language.RUSSIAN to "Я иду в <w>библиотеку</w>, чтобы взять книгу.",
+                                    Language.ENGLISH to "I'm going to the <w>library</w> to borrow a book."
                                 )
                             ),
                             LanguageCardExample(
                                 text = "De <w>bibliotheek</w> is elke dag open van 9 tot 17 uur.",
                                 targetLangTranslations = mapOf(
-                                    "ru" to "<w>Библиотека</w> открыта каждый день с 9 до 17 часов.",
-                                    "en" to "The <w>library</w> is open every day from 9 to 5."
+                                    Language.RUSSIAN to "<w>Библиотека</w> открыта каждый день с 9 до 17 часов.",
+                                    Language.ENGLISH to "The <w>library</w> is open every day from 9 to 5."
                                 )
                             ),
                             LanguageCardExample(
                                 text = "In de universitaire <w>bibliotheek</w> vind je alle wetenschappelijke boeken.",
                                 targetLangTranslations = mapOf(
-                                    "ru" to "В университетской <w>библиотеке</w> можно найти все научные книги.",
-                                    "en" to "In the university <w>library</w> you can find all academic books."
+                                    Language.RUSSIAN to "В университетской <w>библиотеке</w> можно найти все научные книги.",
+                                    Language.ENGLISH to "In the university <w>library</w> you can find all academic books."
                                 )
                             )
                         ),
@@ -1090,11 +1091,11 @@ internal fun sampleMultilingualCard(): LanguageCard {
                             )
                         ),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Здание или помещение, где хранятся книги и другие материалы, которые выдаются населению.",
-                            "en" to "A building or room where books and other media are kept and lent to the public."
+                            Language.RUSSIAN to "Здание или помещение, где хранятся книги и другие материалы, которые выдаются населению.",
+                            Language.ENGLISH to "A building or room where books and other media are kept and lent to the public."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "библиотека",
                                     targetLangSenseClarification = "Основной перевод. Обозначает как здание, так и учреждение."
@@ -1104,7 +1105,7 @@ internal fun sampleMultilingualCard(): LanguageCard {
                                     targetLangSenseClarification = "Более формальный термин, обычно для крупных собраний книг."
                                 )
                             ),
-                            "en" to listOf(
+                            Language.ENGLISH to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "library",
                                     targetLangSenseClarification = "Standard translation for a public lending library."
@@ -1127,26 +1128,26 @@ internal fun sampleMultilingualCard(): LanguageCard {
                             LanguageCardExample(
                                 text = "Hij heeft een uitgebreide <w>bibliotheek</w> over kunstgeschiedenis.",
                                 targetLangTranslations = mapOf(
-                                    "ru" to "У него есть обширная <w>библиотека</w> по истории искусства.",
-                                    "en" to "He has an extensive <w>library</w> on art history."
+                                    Language.RUSSIAN to "У него есть обширная <w>библиотека</w> по истории искусства.",
+                                    Language.ENGLISH to "He has an extensive <w>library</w> on art history."
                                 )
                             ),
                             LanguageCardExample(
                                 text = "De professor toonde ons zijn persoonlijke <w>bibliotheek</w>.",
                                 targetLangTranslations = mapOf(
-                                    "ru" to "Профессор показал нам свою личную <w>библиотеку</w>.",
-                                    "en" to "The professor showed us his personal <w>library</w>."
+                                    Language.RUSSIAN to "Профессор показал нам свою личную <w>библиотеку</w>.",
+                                    Language.ENGLISH to "The professor showed us his personal <w>library</w>."
                                 )
                             )
                         ),
                         synonyms = listOf("boekenverzameling", "collectie"),
                         commonPhrases = listOf("persoonlijke bibliotheek", "digitale bibliotheek"),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Коллекция книг или документов, часто специализированная по определённой теме.",
-                            "en" to "A collection of books or documents, often specialized in a particular subject."
+                            Language.RUSSIAN to "Коллекция книг или документов, часто специализированная по определённой теме.",
+                            Language.ENGLISH to "A collection of books or documents, often specialized in a particular subject."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "библиотека",
                                     targetLangSenseClarification = "Личная или частная коллекция книг."
@@ -1156,7 +1157,7 @@ internal fun sampleMultilingualCard(): LanguageCard {
                                     targetLangSenseClarification = "Более описательный перевод."
                                 )
                             ),
-                            "en" to listOf(
+                            Language.ENGLISH to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "library",
                                     targetLangSenseClarification = "Personal or private collection of books."
@@ -1194,11 +1195,11 @@ internal fun sampleTestingCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "The scientist is <w>testing</w> the new hypothesis in the lab.",
-                                targetLangTranslations = mapOf("ru" to "Учёный <w>проверяет</w> новую гипотезу в лаборатории.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Учёный <w>проверяет</w> новую гипотезу в лаборатории.")
                             ),
                             LanguageCardExample(
                                 text = "<w>Testing</w> the water before swimming is a good idea.",
-                                targetLangTranslations = mapOf("ru" to "<w>Проверять</w> воду перед плаванием — хорошая идея.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "<w>Проверять</w> воду перед плаванием — хорошая идея.")
                             )
                         ),
                         synonyms = listOf("examining", "evaluating", "checking", "trying out"),
@@ -1210,10 +1211,10 @@ internal fun sampleTestingCard(): LanguageCard {
                             )
                         ),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Причастие настоящего времени или герундий от глагола 'to test'."
+                            Language.RUSSIAN to "Причастие настоящего времени или герундий от глагола 'to test'."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "тестирование",
                                     targetLangSenseClarification = "Процесс проверки или испытания чего-либо."
@@ -1238,16 +1239,16 @@ internal fun sampleTestingCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "The software is currently undergoing rigorous <w>testing</w> before its release.",
-                                targetLangTranslations = mapOf("ru" to "Программное обеспечение проходит тщательное <w>тестирование</w> перед выпуском.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Программное обеспечение проходит тщательное <w>тестирование</w> перед выпуском.")
                             )
                         ),
                         synonyms = listOf("examination", "evaluation", "trial", "assessment"),
                         commonPhrases = listOf("product testing", "software testing", "quality testing"),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Процесс проверки чего-либо с целью убедиться, что оно работает правильно."
+                            Language.RUSSIAN to "Процесс проверки чего-либо с целью убедиться, что оно работает правильно."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "тестирование",
                                     targetLangSenseClarification = "Процесс испытания или проверки чего-либо."
@@ -1280,11 +1281,11 @@ internal fun sampleWordWithTraits(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "That <w>ain't</w> right!",
-                                targetLangTranslations = mapOf("ru" to "Это <w>неправильно</w>!")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Это <w>неправильно</w>!")
                             ),
                             LanguageCardExample(
                                 text = "I <w>ain't</w> seen nothing like that before.",
-                                targetLangTranslations = mapOf("ru" to "Я никогда раньше такого <w>не видел</w>.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Я никогда раньше такого <w>не видел</w>.")
                             )
                         ),
                         synonyms = listOf("isn't", "aren't", "am not"),
@@ -1303,10 +1304,10 @@ internal fun sampleWordWithTraits(): LanguageCard {
                             )
                         ),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Разговорное сокращение отрицательных форм глаголов 'be' и 'have'."
+                            Language.RUSSIAN to "Разговорное сокращение отрицательных форм глаголов 'be' и 'have'."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "не",
                                     targetLangSenseClarification = "Общее отрицание в разговорной речи."
@@ -1339,7 +1340,7 @@ internal fun sampleAllTraitTypesCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "<w>Thou</w> shalt not pass!",
-                                targetLangTranslations = mapOf("ru" to "<w>Ты</w> не пройдёшь!")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "<w>Ты</w> не пройдёшь!")
                             )
                         ),
                         traits = listOf(
@@ -1365,10 +1366,10 @@ internal fun sampleAllTraitTypesCard(): LanguageCard {
                             )
                         ),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Архаичное местоимение второго лица единственного числа."
+                            Language.RUSSIAN to "Архаичное местоимение второго лица единственного числа."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "ты",
                                     targetLangSenseClarification = "Устаревшая форма обращения."
@@ -1401,7 +1402,7 @@ internal fun sampleVeryLongWordCard(): LanguageCard {
                         examples = listOf(
                             LanguageCardExample(
                                 text = "<w>Pneumonoultramicroscopicsilicovolcanoconiosis</w> is one of the longest words in the English language.",
-                                targetLangTranslations = mapOf("ru" to "<w>Пневмоноультрамикроскопическийсиликовулканокониоз</w> - одно из самых длинных слов в английском языке.")
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "<w>Пневмоноультрамикроскопическийсиликовулканокониоз</w> - одно из самых длинных слов в английском языке.")
                             )
                         ),
                         synonyms = listOf("silicosis", "black lung disease"),
@@ -1412,10 +1413,10 @@ internal fun sampleVeryLongWordCard(): LanguageCard {
                             )
                         ),
                         targetLangDefinitions = mapOf(
-                            "ru" to "Заболевание легких, вызванное вдыханием мелкодисперсной пыли силикатов или кварца."
+                            Language.RUSSIAN to "Заболевание легких, вызванное вдыханием мелкодисперсной пыли силикатов или кварца."
                         ),
                         translations = mapOf(
-                            "ru" to listOf(
+                            Language.RUSSIAN to listOf(
                                 LanguageCardTranslation(
                                     targetLangWord = "пневмокониоз",
                                     targetLangSenseClarification = "Медицинский термин для болезни легких."

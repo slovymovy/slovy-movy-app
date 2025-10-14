@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.db
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.remote.DataDbManager
@@ -23,30 +24,30 @@ class DataDbManagerTest : BaseTest() {
         val mgr = DataDbManager(platform, null)
 
         runBlocking {
-            mgr.deleteDictionary("en")
+            mgr.deleteDictionary(Language.ENGLISH)
             mgr.deleteTranslation(
-                src = "nl",
-                tgt = "en"
+                src = Language.DUTCH,
+                tgt = Language.ENGLISH
             )
         }
 
         // ensure files (use smallest remote DBs)
-        val dict = runBlocking { mgr.ensureDictionary("en") }
-        val tr = runBlocking { mgr.ensureTranslation("nl", "en") }
+        val dict = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+        val tr = runBlocking { mgr.ensureTranslation(Language.DUTCH, Language.ENGLISH) }
 
         try {
             assertTrue(platform.fileExists(dict), "Dictionary file should exist: $dict")
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
             // open read-only — should not throw
-            mgr.openTranslationReadOnly("nl", "en")
-            mgr.openDictionaryReadOnly("en")
+            mgr.openTranslationReadOnly(Language.DUTCH, Language.ENGLISH)
+            mgr.openDictionaryReadOnly(Language.ENGLISH)
         } finally {
             runBlocking {
-                mgr.deleteDictionary("en")
+                mgr.deleteDictionary(Language.ENGLISH)
                 mgr.deleteTranslation(
-                    src = "nl",
-                    tgt = "en"
+                    src = Language.DUTCH,
+                    tgt = Language.ENGLISH
                 )
             }
         }
@@ -135,15 +136,15 @@ class DataDbManagerTest : BaseTest() {
         val mgr = DataDbManager(platform, null)
 
         // Ensure required files exist (English dictionary, English->Russian translation)
-        val dict = runBlocking { mgr.ensureDictionary("en") }
-        val tr = runBlocking { mgr.ensureTranslation("en", "ru") }
+        val dict = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+        val tr = runBlocking { mgr.ensureTranslation(Language.ENGLISH, Language.RUSSIAN) }
 
         try {
             assertTrue(platform.fileExists(dict), "Dictionary file should exist: $dict")
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
             // Open dictionary and search for 'test%'
-            val db = mgr.openDictionaryReadOnly("en")
+            val db = mgr.openDictionaryReadOnly(Language.ENGLISH)
             val q = db.dictionaryQueries
 
             val lemmaLike = q.selectLemmasLike("test%", 20).executeAsList().map { it.lemma }
@@ -154,8 +155,8 @@ class DataDbManagerTest : BaseTest() {
         } finally {
             // Clean up to keep environment tidy
             runBlocking {
-                mgr.deleteDictionary("en")
-                mgr.deleteTranslation("en", "ru")
+                mgr.deleteDictionary(Language.ENGLISH)
+                mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
             }
         }
     }
@@ -247,10 +248,10 @@ class DataDbManagerTest : BaseTest() {
         val platform = platformDbSupport()
         val mgr = DataDbManager(platform, null)
 
-        val dictPath = mgr.hasDictionary("en").let {
-            platform.getDatabasePath(DataDbManager.dictionaryFileName("en"))
+        val dictPath = mgr.hasDictionary(Language.ENGLISH).let {
+            platform.getDatabasePath(DataDbManager.dictionaryFileName(Language.ENGLISH))
         }
-        val transPath = platform.getDatabasePath(DataDbManager.translationFileName("nl", "en"))
+        val transPath = platform.getDatabasePath(DataDbManager.translationFileName(Language.DUTCH, Language.ENGLISH))
 
         platform.ensureDatabasesDir()
 
@@ -329,8 +330,8 @@ class DataDbManagerTest : BaseTest() {
 
         platform.ensureDatabasesDir()
 
-        val dictPath = platform.getDatabasePath(DataDbManager.dictionaryFileName("test"))
-        val transPath = platform.getDatabasePath(DataDbManager.translationFileName("en", "ru"))
+        val dictPath = platform.getDatabasePath(DataDbManager.dictionaryFileName(Language.DUTCH))
+        val transPath = platform.getDatabasePath(DataDbManager.translationFileName(Language.ENGLISH, Language.RUSSIAN))
 
         val out1 = platform.openOutput(dictPath)
         out1.write("test1".encodeToByteArray(), 0, 5)

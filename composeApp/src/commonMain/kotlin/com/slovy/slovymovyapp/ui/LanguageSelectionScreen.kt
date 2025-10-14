@@ -10,25 +10,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import com.slovy.slovymovyapp.data.remote.dictionariesKnown
+import com.slovy.slovymovyapp.data.Language
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 
 data class LanguageOption(
     val label: String,
-    val code: String
+    val language: Language
 )
 
 class LanguageSelectionViewModel(
     val title: String = "Choose your native language",
-    val languages: List<LanguageOption> = dictionariesKnown.map { (label, code) -> LanguageOption(label, code) }
+    val languages: List<LanguageOption> = Language.entries.map { LanguageOption(it.selfName, it) }
 ) : ViewModel()
 
 @Composable
 fun LanguageSelectionScreen(
     viewModel: LanguageSelectionViewModel,
-    onLanguageChosen: (String) -> Unit = { _ -> }
+    onLanguageChosen: (Language) -> Unit = { _ -> }
 ) {
     LanguageSelectionScreenContent(
         state = viewModel,
@@ -39,7 +39,7 @@ fun LanguageSelectionScreen(
 @Composable
 fun LanguageSelectionScreenContent(
     state: LanguageSelectionViewModel,
-    onLanguageChosen: (String) -> Unit = {}
+    onLanguageChosen: (Language) -> Unit = {}
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(
@@ -58,7 +58,7 @@ fun LanguageSelectionScreenContent(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onLanguageChosen(option.code) }
+                        .clickable { onLanguageChosen(option.language) }
                         .padding(vertical = 12.dp)
                 )
             }
@@ -75,7 +75,7 @@ private fun LanguageSelectionScreenPreviewDefault(
         LanguageSelectionScreenContent(
             state = LanguageSelectionViewModel(
                 title = "Choose your native language",
-                languages = dictionariesKnown.map { (label, code) -> LanguageOption(label, code) }
+                languages = Language.entries.map { LanguageOption(it.selfName, it) }
             )
         )
     }

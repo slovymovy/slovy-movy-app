@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.data.remote
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import kotlin.uuid.Uuid
@@ -12,14 +13,11 @@ internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
 // aggregating translations from all available target languages.
 class DictionaryRepository(
     private val dataDbManager: DataDbManager,
-    private val languageCodes: List<String> = DEFAULT_LANGUAGE_CODES,
+    private val languages: List<Language> = Language.entries,
 ) {
-    companion object {
-        val DEFAULT_LANGUAGE_CODES = listOf("en", "ru", "nl", "pl")
-    }
 
     data class SearchItem(
-        val language: String,
+        val language: Language,
         val lemmaId: Uuid, // Base lemma ID (not lemma_pos ID)
         val lemma: String,
         val display: String,
@@ -27,7 +25,7 @@ class DictionaryRepository(
         val pos: List<PartOfSpeech>
     )
 
-    fun installedDictionaries(): List<String> = languageCodes.filter { lang ->
+    fun installedDictionaries(): List<Language> = languages.filter { lang ->
         try {
             dataDbManager.hasDictionary(lang)
         } catch (_: Throwable) {
@@ -35,12 +33,12 @@ class DictionaryRepository(
         }
     }
 
-    fun installedTranslationTargets(src: String): List<String> = languageCodes.filter { tgt ->
+    fun installedTranslationTargets(src: Language): List<Language> = languages.filter { tgt ->
         tgt != src && dataDbManager.hasTranslation(src, tgt)
     }
 
     // Search within all installed dictionaries by default; if dictionaryLanguage provided, restrict to it.
-    fun search(query: String, dictionaryLanguage: String? = null, maxItems: Int = 200): List<SearchItem> {
+    fun search(query: String, dictionaryLanguage: Language? = null, maxItems: Int = 200): List<SearchItem> {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
 
@@ -65,33 +63,32 @@ class DictionaryRepository(
             } ?: continue
             val q = db.dictionaryQueries
             fun addLemma(lemmaId: Uuid, lemma: String, zipfFrequency: Float) {
-                val display = lemma
-                val key = "$lang::$display"
+                val key = "${lang.code}::$lemma"
                 if (!seenDisplays.contains(key)) {
                     out.add(
                         SearchItem(
                             language = lang,
                             lemmaId = lemmaId,
                             lemma = lemma,
-                            display = display,
+                            display = lemma,
                             zipfFrequency = zipfFrequency,
                             pos = emptyList()
                         )
                     )
                     seenDisplays.add(key)
-                    seenLemmas.add("$lang::${lemma.lowercase()}")
+                    seenLemmas.add("${lang.code}::${lemma.lowercase()}")
                 }
             }
 
             fun addForm(lemmaId: Uuid, lemma: String, form: String, zipfFrequency: Float) {
                 // Skip forms if the base lemma is already in the results
-                val lemmaKey = "$lang::${lemma.lowercase()}"
+                val lemmaKey = "${lang.code}::${lemma.lowercase()}"
                 if (seenLemmas.contains(lemmaKey)) {
                     return
                 }
 
                 val display = "\"$form\" form of \"$lemma\""
-                val key = "$lang::$display"
+                val key = "${lang.code}::$display"
                 if (!seenDisplays.contains(key)) {
                     out.add(
                         SearchItem(
@@ -172,7 +169,7 @@ class DictionaryRepository(
         return out.take(maxItems)
     }
 
-    fun getLanguageCard(language: String, lemma: String): LanguageCard? {
+    fun getLanguageCard(language: Language, lemma: String): LanguageCard? {
         val db = dataDbManager.openDictionaryReadOnly(language)
         val q = db.dictionaryQueries
 
@@ -216,13 +213,13 @@ class DictionaryRepository(
 
                 // Aggregate per-target language translations/definitions
                 val targetLangs = installedTranslationTargets(language)
-                val openTdbs: Map<String, TranslationDatabase> = targetLangs.associateWith { tgt ->
+                val openTdbs: Map<Language, TranslationDatabase> = targetLangs.associateWith { tgt ->
                     val tdb = dataDbManager.openTranslationReadOnly(language, tgt)
                     tdb
                 }
 
-                val tgtDefinitions = LinkedHashMap<String, String>()
-                val tgtTranslations = LinkedHashMap<String, List<LanguageCardTranslation>>()
+                val tgtDefinitions = LinkedHashMap<Language, String>()
+                val tgtTranslations = LinkedHashMap<Language, List<LanguageCardTranslation>>()
                 for ((tgt, tdb) in openTdbs) {
                     val tq = tdb.translationQueries
                     val def: String? = tq.selectDefinitionsBySense(s.sense_id).executeAsList().firstOrNull()
@@ -241,7 +238,7 @@ class DictionaryRepository(
                 }
 
                 val examples = q.selectSenseExamples(s.sense_id).executeAsList().map { ex ->
-                    val trMap = LinkedHashMap<String, String>()
+                    val trMap = LinkedHashMap<Language, String>()
                     for ((tgt, tdb) in openTdbs) {
                         val translation: String? =
                             tdb.translationQueries.selectExampleTranslations(s.sense_id, ex.example_id).executeAsList()

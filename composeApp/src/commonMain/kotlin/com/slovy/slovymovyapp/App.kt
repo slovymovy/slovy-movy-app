@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
@@ -34,10 +35,10 @@ private sealed interface AppDestination {
     data object DownloadTranslation : AppDestination
 
     @Serializable
-    data object Language : AppDestination
+    data object SelectLanguage : AppDestination
 
     @Serializable
-    data object Dictionary : AppDestination
+    data object SelectDictionary : AppDestination
 
     @Serializable
     data object Search : AppDestination
@@ -47,7 +48,7 @@ private sealed interface AppDestination {
 
     @Serializable
     data class WordDetail(
-        val dictionaryLanguage: String,
+        val dictionaryLanguage: Language,
         val lemma: String,
         val targetSenseId: String? = null,
     ) : AppDestination
@@ -69,8 +70,8 @@ fun App(
     platformDbSupport: PlatformDbSupport? = null,
     androidContext: Any? = null
 ) {
-    var nativeLanguage by remember { mutableStateOf<String?>(null) }
-    var dictionaryLanguage by remember { mutableStateOf<String?>(null) }
+    var nativeLanguage by remember { mutableStateOf<Language?>(null) }
+    var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
 
     val platform = remember(platformDbSupport) { platformDbSupport ?: PlatformDbSupport(null) }
     val dataManager = remember(platform, settingsRepository) { DataDbManager(platform, settingsRepository) }
@@ -97,10 +98,12 @@ fun App(
             }
         }
 
-        val native = settingsRepository?.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
+        val nativeCode = settingsRepository?.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
+        val native = nativeCode?.let { Language.fromCodeOrNull(it) }
         if (native != null) {
             nativeLanguage = native
-            val dictionary = settingsRepository.getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
+            val dictionaryCode = settingsRepository.getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
+            val dictionary = dictionaryCode?.let { Language.fromCodeOrNull(it) }
             if (dictionary != null) {
                 dictionaryLanguage = dictionary
                 return when {
@@ -109,9 +112,9 @@ fun App(
                     else -> AppDestination.Search
                 }
             }
-            return AppDestination.Dictionary
+            return AppDestination.SelectDictionary
         }
-        return AppDestination.Language
+        return AppDestination.SelectLanguage
     }
 
     LaunchedEffect(Unit) {
@@ -131,7 +134,7 @@ fun App(
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
         ) {
-            composable<AppDestination.Language> { backStackEntry ->
+            composable<AppDestination.SelectLanguage> { backStackEntry ->
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
                 ) {
@@ -144,15 +147,15 @@ fun App(
                         settingsRepository?.insert(
                             Setting(
                                 id = Setting.Name.LANGUAGE,
-                                value = Json.parseToJsonElement("\"$lang\"")
+                                value = Json.parseToJsonElement("\"${lang.code}\"")
                             )
                         )
                         nativeLanguage = lang
-                        navController.navigate(AppDestination.Dictionary)
+                        navController.navigate(AppDestination.SelectDictionary)
                     }
                 )
             }
-            composable<AppDestination.Dictionary> { backStackEntry ->
+            composable<AppDestination.SelectDictionary> { backStackEntry ->
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
                 ) {
@@ -165,7 +168,7 @@ fun App(
                         settingsRepository?.insert(
                             Setting(
                                 id = Setting.Name.DICTIONARY,
-                                value = Json.parseToJsonElement("\"$lang\"")
+                                value = Json.parseToJsonElement("\"${lang.code}\"")
                             )
                         )
                         dictionaryLanguage = lang
@@ -193,7 +196,7 @@ fun App(
                                 val native = nativeLanguage
                                 if (native != null && dataManager.hasTranslation(dictLang, native)) {
                                     navController.navigate(AppDestination.Search) {
-                                        popUpTo<AppDestination.Dictionary> { inclusive = false }
+                                        popUpTo<AppDestination.SelectDictionary> { inclusive = false }
                                     }
                                 } else {
                                     navController.navigate(AppDestination.DownloadTranslation) {
@@ -239,7 +242,7 @@ fun App(
                             },
                             onSuccess = {
                                 navController.navigate(AppDestination.Search) {
-                                    popUpTo<AppDestination.Dictionary> { inclusive = false }
+                                    popUpTo<AppDestination.SelectDictionary> { inclusive = false }
                                 }
                             },
                             onCancel = {

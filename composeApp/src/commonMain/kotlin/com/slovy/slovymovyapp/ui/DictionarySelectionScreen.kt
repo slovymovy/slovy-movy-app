@@ -10,25 +10,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import com.slovy.slovymovyapp.data.remote.dictionariesKnown
+import com.slovy.slovymovyapp.data.Language
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 data class DictionaryOption(
     val label: String,
-    val code: String
+    val language: Language
 )
 
 class DictionarySelectionViewModel(
     val title: String = "Choose dictionary",
-    val dictionaries: List<DictionaryOption> = dictionariesKnown.map { (label, code) -> DictionaryOption(label, code) }
+    val dictionaries: List<DictionaryOption> = Language.entries.map { DictionaryOption(it.selfName, it) }
 ) : ViewModel() {
 }
 
 @Composable
 fun DictionarySelectionScreen(
     viewModel: DictionarySelectionViewModel,
-    onDictionaryChosen: (String) -> Unit = { _ -> }
+    onDictionaryChosen: (Language) -> Unit = { _ -> }
 ) {
     DictionarySelectionScreenContent(
         state = viewModel,
@@ -39,7 +39,7 @@ fun DictionarySelectionScreen(
 @Composable
 fun DictionarySelectionScreenContent(
     state: DictionarySelectionViewModel,
-    onDictionaryChosen: (String) -> Unit = {}
+    onDictionaryChosen: (Language) -> Unit = {}
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(
@@ -58,7 +58,7 @@ fun DictionarySelectionScreenContent(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onDictionaryChosen(option.code) }
+                        .clickable { onDictionaryChosen(option.language) }
                         .padding(vertical = 12.dp)
                 )
             }
@@ -75,7 +75,7 @@ private fun DictionarySelectionScreenPreviewDefault(
         DictionarySelectionScreenContent(
             state = DictionarySelectionViewModel(
                 title = "Choose dictionary",
-                dictionaries = dictionariesKnown.map { (label, code) -> DictionaryOption(label, code) }
+                dictionaries = Language.entries.map { DictionaryOption(it.selfName, it) }
             )
         )
     }

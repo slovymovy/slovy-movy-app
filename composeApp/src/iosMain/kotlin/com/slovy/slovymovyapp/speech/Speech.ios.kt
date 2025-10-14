@@ -1,7 +1,7 @@
 package com.slovy.slovymovyapp.speech
 
 
-import com.slovy.slovymovyapp.data.remote.codeToLanguageName
+import com.slovy.slovymovyapp.data.Language
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
@@ -49,19 +49,18 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
             val languages = mutableListOf<Text2SpeechLanguage>()
             val availableVoices = AVSpeechSynthesisVoice.speechVoices()
 
-            // Получаем список уникальных языковых кодов
-            val availableLanguageCodes = availableVoices
+            val availableLanguage = availableVoices
                 .map { (it as AVSpeechSynthesisVoice).language }
                 .toSet()
 
-            codeToLanguageName.forEach { (code, _) ->
-                val isAvailable = availableLanguageCodes.any {
-                    it.startsWith(code) || code.startsWith(it as String)
+            Language.entries.forEach { language ->
+                val isAvailable = availableLanguage.any {
+                    it.startsWith(language.code) || language.code.startsWith(it)
                 }
 
                 languages.add(
                     Text2SpeechLanguage(
-                        code = code,
+                        language = language,
                         isAvailable = isAvailable,
                         missingData = false // iOS автоматически скачивает голоса
                     )
@@ -78,14 +77,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
             allVoices
                 .map { it as AVSpeechSynthesisVoice }
                 .filter { voice ->
-                    voice.language.startsWith(language.code) ||
-                            language.code.startsWith(voice.language)
+                    voice.language.startsWith(language.language.code) ||
+                            language.language.code.startsWith(voice.language)
                 }
                 .map { voice ->
                     Text2SpeechVoice(
                         id = voice.identifier,
                         name = voice.name,
-                        langCode = voice.language,
+                        language = language.language,
                         quality = when (voice.quality) {
                             AVSpeechSynthesisVoiceQualityPremium -> VoiceQuality.BEST
                             AVSpeechSynthesisVoiceQualityEnhanced -> VoiceQuality.GOOD

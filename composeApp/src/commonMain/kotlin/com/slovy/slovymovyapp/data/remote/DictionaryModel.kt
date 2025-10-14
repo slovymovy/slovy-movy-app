@@ -1,14 +1,6 @@
 package com.slovy.slovymovyapp.data.remote
 
-
-val dictionariesKnown = listOf(
-    "English" to "en",
-    "Русский" to "ru",
-    "Nederlands" to "nl",
-    "Polski" to "pl"
-)
-
-val codeToLanguageName = dictionariesKnown.associate { it.second to it.first }
+import com.slovy.slovymovyapp.data.Language
 
 data class LanguageCard(
     val lemma: String,
@@ -88,12 +80,12 @@ data class LanguageCardResponseSense(
     val antonyms: List<String> = emptyList(),
     val commonPhrases: List<String> = emptyList(),
     val traits: List<LanguageCardTrait> = emptyList(),
-    val targetLangDefinitions: Map<String, String> = emptyMap(),
-    val translations: Map<String, List<LanguageCardTranslation>> = emptyMap()
+    val targetLangDefinitions: Map<Language, String> = emptyMap(),
+    val translations: Map<Language, List<LanguageCardTranslation>> = emptyMap()
 )
 
 data class LanguageCardExample(
-    val text: String, val targetLangTranslations: Map<String, String> = emptyMap()
+    val text: String, val targetLangTranslations: Map<Language, String> = emptyMap()
 )
 
 data class LanguageCardTranslation(
