@@ -1,6 +1,5 @@
 package com.slovy.slovymovyapp.speech
 
-// commonMain - базовые интерфейсы
 expect class TextToSpeechManager(androidContext: Any? = null) {
     fun speak(text: String)
     fun stop()
@@ -21,20 +20,14 @@ data class Text2SpeechLanguage(
 
 data class Text2SpeechVoice(
     val id: String,
-    val name: String,
+    val name: String?,
     val langCode: String,
     val quality: VoiceQuality,
     val networkConnectionRequired: Boolean
 )
 
 enum class VoiceQuality {
-    STANDARD, ENHANCED, PREMIUM
-}
-
-enum class LanguageAvailability {
-    AVAILABLE,
-    NEEDS_DOWNLOAD,
-    NOT_SUPPORTED
+    MEDIUM, GOOD, BEST
 }
 
 enum class TTSStatus {

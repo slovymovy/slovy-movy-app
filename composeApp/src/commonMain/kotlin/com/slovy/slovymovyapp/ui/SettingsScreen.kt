@@ -78,11 +78,18 @@ class SettingsViewModel(
 
     private fun loadLanguages() {
         viewModelScope.launch {
-            state = state.copy(isLoading = true, errorMessage = null)
+            if (state.languages.isEmpty()) {
+                state = state.copy(isLoading = true, errorMessage = null)
+            } else {
+                state = state.copy(errorMessage = null)
+            }
             try {
                 val languages = ttsManager.getAvailableLanguages()
                 state = state.copy(
-                    languages = languages.associateWith { LanguageUiState() },
+                    languages = languages.associateWith { language ->
+                        // Preserve existing state if language already exists
+                        state.languages[language] ?: LanguageUiState()
+                    },
                     isLoading = false
                 )
             } catch (e: Exception) {
@@ -100,56 +107,34 @@ class SettingsViewModel(
             loadVoicesForLanguage(language)
         }
 
-        state = state.copy(
-            languages = state.languages.mapValues { (lang, state) ->
-                if (lang == language) {
-                    state.copy(isExpanded = !state.isExpanded)
-                } else {
-                    state
-                }
-            }
-        )
+        updateLanguageState(language) { it.copy(isExpanded = !it.isExpanded) }
     }
 
     private fun loadVoicesForLanguage(language: Text2SpeechLanguage) {
         viewModelScope.launch {
-            state = state.copy(
-                languages = state.languages.mapValues { (lang, state) ->
-                    if (lang == language) {
-                        state.copy(isLoadingVoices = true)
-                    } else {
-                        state
-                    }
-                }
-            )
+            updateLanguageState(language) { it.copy(isLoadingVoices = true) }
 
             try {
                 val voices = ttsManager.getVoicesForLanguage(language)
-                state = state.copy(
-                    languages = state.languages.mapValues { (lang, state) ->
-                        if (lang == language) {
-                            state.copy(
-                                voices = voices,
-                                isLoadingVoices = false
-                            )
-                        } else {
-                            state
-                        }
-                    }
-                )
+                updateLanguageState(language) {
+                    it.copy(voices = voices, isLoadingVoices = false)
+                }
             } catch (e: Exception) {
-                state = state.copy(
-                    languages = state.languages.mapValues { (lang, state) ->
-                        if (lang == language) {
-                            state.copy(isLoadingVoices = false)
-                        } else {
-                            state
-                        }
-                    },
-                    errorMessage = "Failed to load voices: ${e.message}"
-                )
+                updateLanguageState(language) { it.copy(isLoadingVoices = false) }
+                state = state.copy(errorMessage = "Failed to load voices: ${e.message}")
             }
         }
+    }
+
+    private fun updateLanguageState(
+        language: Text2SpeechLanguage,
+        transform: (LanguageUiState) -> LanguageUiState
+    ) {
+        state = state.copy(
+            languages = state.languages.mapValues { (lang, langState) ->
+                if (lang == language) transform(langState) else langState
+            }
+        )
     }
 
     fun testVoice(voice: Text2SpeechVoice) {
@@ -270,7 +255,7 @@ fun SettingsScreenContent(
             ) {
                 when {
                     state.isLoading -> {
-                        CircularProgressIndicator(
+                        LoadingIndicator(
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
@@ -327,10 +312,10 @@ fun SettingsScreenContent(
                                             Icon(
                                                 imageVector = Icons.Outlined.Settings,
                                                 contentDescription = "Open Settings",
-                                                modifier = Modifier.size(20.dp)
+                                                modifier = Modifier.size(30.dp)
                                             )
                                             Spacer(modifier = Modifier.width(6.dp))
-                                            Text("Open")
+                                            Text("Open", style = MaterialTheme.typography.labelLarge)
                                         }
                                     }
                                 }
@@ -543,14 +528,16 @@ private fun VoiceItem(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    text = voice.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
+                if (voice.name != null) {
+                    Text(
+                        text = voice.name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
                 Text(
                     text = voice.id,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Row(
@@ -563,33 +550,33 @@ private fun VoiceItem(
                         label = {
                             Text(
                                 text = when (voice.quality) {
-                                    VoiceQuality.PREMIUM -> "Premium"
-                                    VoiceQuality.ENHANCED -> "Enhanced"
-                                    VoiceQuality.STANDARD -> "Standard"
+                                    VoiceQuality.BEST -> "Premium"
+                                    VoiceQuality.GOOD -> "Enhanced"
+                                    VoiceQuality.MEDIUM -> "Standard"
                                 },
                                 style = MaterialTheme.typography.labelMedium
                             )
                         },
                         colors = AssistChipDefaults.assistChipColors(
                             containerColor = when (voice.quality) {
-                                VoiceQuality.PREMIUM -> MaterialTheme.colorScheme.primaryContainer
-                                VoiceQuality.ENHANCED -> MaterialTheme.colorScheme.secondaryContainer
-                                VoiceQuality.STANDARD -> MaterialTheme.colorScheme.surfaceVariant
+                                VoiceQuality.BEST -> MaterialTheme.colorScheme.primaryContainer
+                                VoiceQuality.GOOD -> MaterialTheme.colorScheme.secondaryContainer
+                                VoiceQuality.MEDIUM -> MaterialTheme.colorScheme.surfaceVariant
                             },
                             labelColor = when (voice.quality) {
-                                VoiceQuality.PREMIUM -> MaterialTheme.colorScheme.onPrimaryContainer
-                                VoiceQuality.ENHANCED -> MaterialTheme.colorScheme.onSecondaryContainer
-                                VoiceQuality.STANDARD -> MaterialTheme.colorScheme.onSurfaceVariant
+                                VoiceQuality.BEST -> MaterialTheme.colorScheme.onPrimaryContainer
+                                VoiceQuality.GOOD -> MaterialTheme.colorScheme.onSecondaryContainer
+                                VoiceQuality.MEDIUM -> MaterialTheme.colorScheme.onSurfaceVariant
                             },
                             disabledContainerColor = when (voice.quality) {
-                                VoiceQuality.PREMIUM -> MaterialTheme.colorScheme.primaryContainer
-                                VoiceQuality.ENHANCED -> MaterialTheme.colorScheme.secondaryContainer
-                                VoiceQuality.STANDARD -> MaterialTheme.colorScheme.surfaceVariant
+                                VoiceQuality.BEST -> MaterialTheme.colorScheme.primaryContainer
+                                VoiceQuality.GOOD -> MaterialTheme.colorScheme.secondaryContainer
+                                VoiceQuality.MEDIUM -> MaterialTheme.colorScheme.surfaceVariant
                             },
                             disabledLabelColor = when (voice.quality) {
-                                VoiceQuality.PREMIUM -> MaterialTheme.colorScheme.onPrimaryContainer
-                                VoiceQuality.ENHANCED -> MaterialTheme.colorScheme.onSecondaryContainer
-                                VoiceQuality.STANDARD -> MaterialTheme.colorScheme.onSurfaceVariant
+                                VoiceQuality.BEST -> MaterialTheme.colorScheme.onPrimaryContainer
+                                VoiceQuality.GOOD -> MaterialTheme.colorScheme.onSecondaryContainer
+                                VoiceQuality.MEDIUM -> MaterialTheme.colorScheme.onSurfaceVariant
                             }
                         )
                     )
@@ -712,21 +699,21 @@ private fun SettingsScreenPreviewWithExpandedLanguage(
                                 id = "en-us-x-sfg#female_1-local",
                                 name = "Female 1",
                                 langCode = "en",
-                                quality = VoiceQuality.PREMIUM,
+                                quality = VoiceQuality.BEST,
                                 networkConnectionRequired = true
                             ),
                             Text2SpeechVoice(
                                 id = "en-us-x-sfg#male_1-local",
                                 name = "Male 1",
                                 langCode = "en",
-                                quality = VoiceQuality.ENHANCED,
+                                quality = VoiceQuality.GOOD,
                                 networkConnectionRequired = true
                             ),
                             Text2SpeechVoice(
                                 id = "en-us-x-tpf-network",
                                 name = "Network Voice",
                                 langCode = "en",
-                                quality = VoiceQuality.STANDARD,
+                                quality = VoiceQuality.MEDIUM,
                                 networkConnectionRequired = false
                             )
                         )

@@ -85,6 +85,7 @@ fun App(
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember { FavoritesViewModel(favoritesRepository, dictionaryRepository) }
+    val settingsViewModel = remember { SettingsViewModel(ttsManager) }
 
     suspend fun selectInitialDestination(): AppDestination {
         // Check if data version is current
@@ -327,15 +328,9 @@ fun App(
                     }
                 )
             }
-            composable<AppDestination.Settings> { backStackEntry ->
-                val viewModel = viewModel(
-                    viewModelStoreOwner = backStackEntry
-                ) {
-                    SettingsViewModel(ttsManager)
-                }
-
+            composable<AppDestination.Settings> {
                 SettingsScreen(
-                    viewModel = viewModel,
+                    viewModel = settingsViewModel,
                     onNavigateToSearch = {
                         if (!navController.popBackStack(AppDestination.Search, inclusive = false))
                             navController.navigate(AppDestination.Search)

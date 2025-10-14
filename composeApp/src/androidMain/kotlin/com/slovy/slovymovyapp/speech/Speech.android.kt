@@ -18,7 +18,7 @@ import java.util.*
 // androidMain
 actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     private val context: Context = androidContext as Context
-    private var tts: TextToSpeech? = null
+    private lateinit var tts: TextToSpeech
 
     private var onWordBoundary: ((IntRange) -> Unit)? = null
     private var onStatusChange: ((TTSStatus) -> Unit)? = null
@@ -36,7 +36,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 
     private fun setupUtteranceProgressListener() {
-        tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+        tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {
                 onStatusChange?.invoke(TTSStatus.SPEAKING)
             }
@@ -67,10 +67,11 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 
     actual fun speak(text: String) {
+        val id = "tts_${System.currentTimeMillis()}"
         val params = Bundle().apply {
-            putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "tts_${System.currentTimeMillis()}")
+            putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id)
         }
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, params, "tts_id")
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, id)
     }
 
     actual suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> = withContext(Dispatchers.IO) {
@@ -79,7 +80,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
         codeToLanguageName.forEach { (code, _) ->
             val locale = parseLocale(code)
-            val availability = tts?.isLanguageAvailable(locale)
+            val availability = tts.isLanguageAvailable(locale)
 
             val isAvailable = availability in listOf(
                 TextToSpeech.LANG_AVAILABLE,
@@ -103,7 +104,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         withContext(Dispatchers.IO) {
 
             val locale = parseLocale(language.code)
-            val voices = tts?.voices?.filter { voice ->
+            val voices = tts.voices?.filter { voice ->
                 voice.locale.language == locale.language &&
                         (locale.country.isEmpty() || voice.locale.country == locale.country)
             } ?: emptyList()
@@ -111,12 +112,12 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
             voices.map { voice ->
                 Text2SpeechVoice(
                     id = voice.name,
-                    name = voice.name.split("#").lastOrNull() ?: voice.name,
+                    name = voice.name.split("#").lastOrNull(),
                     langCode = language.code,
                     quality = when {
-                        voice.quality >= QUALITY_VERY_HIGH -> VoiceQuality.PREMIUM
-                        voice.quality >= QUALITY_HIGH -> VoiceQuality.ENHANCED
-                        else -> VoiceQuality.STANDARD
+                        voice.quality >= QUALITY_VERY_HIGH -> VoiceQuality.BEST
+                        voice.quality >= QUALITY_HIGH -> VoiceQuality.GOOD
+                        else -> VoiceQuality.MEDIUM
                     },
                     networkConnectionRequired = !voice.isNetworkConnectionRequired
                 )
@@ -144,15 +145,12 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 
     private fun parseLocale(code: String): Locale {
-        val parts = code.split("-")
-        return when (parts.size) {
-            2 -> Locale(parts[0], parts[1])
-            else -> Locale(code)
-        }
+        val builder = Locale.Builder()
+        return builder.setLanguage(code).build()
     }
 
     actual fun stop() {
-        tts?.stop()
+        tts.stop()
         onStatusChange?.invoke(TTSStatus.IDLE)
     }
 
