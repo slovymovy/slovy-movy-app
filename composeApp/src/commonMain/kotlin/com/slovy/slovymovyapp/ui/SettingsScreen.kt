@@ -550,9 +550,9 @@ private fun VoiceItem(
                         label = {
                             Text(
                                 text = when (voice.quality) {
-                                    VoiceQuality.BEST -> "Premium"
-                                    VoiceQuality.GOOD -> "Enhanced"
-                                    VoiceQuality.MEDIUM -> "Standard"
+                                    VoiceQuality.BEST -> "Best"
+                                    VoiceQuality.GOOD -> "Good"
+                                    VoiceQuality.MEDIUM -> "Medium"
                                 },
                                 style = MaterialTheme.typography.labelMedium
                             )

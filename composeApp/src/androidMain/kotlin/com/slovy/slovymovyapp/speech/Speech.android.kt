@@ -112,7 +112,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
             voices.map { voice ->
                 Text2SpeechVoice(
                     id = voice.name,
-                    name = voice.name.split("#").lastOrNull(),
+                    name = if (voice.name.contains("#")) voice.name.split("#").lastOrNull() else null,
                     langCode = language.code,
                     quality = when {
                         voice.quality >= QUALITY_VERY_HIGH -> VoiceQuality.BEST

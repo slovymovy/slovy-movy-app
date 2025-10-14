@@ -357,6 +357,7 @@ fun App(
                     wordDetailViewModels[args] ?: WordDetailViewModel(
                         dictionaryRepository,
                         favoritesRepository,
+                        ttsManager,
                         args.dictionaryLanguage,
                         args.lemma,
                         args.targetSenseId
@@ -370,9 +371,9 @@ fun App(
                 }
 
 
-                // Reload favorites when navigating to this screen
+                // Reload favorites and voices when navigating to this screen
                 LaunchedEffect(Unit) {
-                    viewModel.loadFavorites()
+                    viewModel.reload()
                 }
 
                 WordDetailScreen(
@@ -384,6 +385,10 @@ fun App(
                     onNavigateToFavorites = {
                         if (!navController.popBackStack(AppDestination.Favorites, inclusive = false))
                             navController.navigate(AppDestination.Favorites)
+                    },
+                    onNavigateToSettings = {
+                        if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
+                            navController.navigate(AppDestination.Settings)
                     }
                 )
             }

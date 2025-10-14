@@ -6,6 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayCircleFilled
+import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -19,10 +22,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.speech.TTSStatus
+import com.slovy.slovymovyapp.speech.Text2SpeechVoice
+import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
+import kotlinx.coroutines.launch
 
 sealed interface WordDetailUiState {
     data class Empty(val lemma: String? = null, val message: String = "No entries available.") : WordDetailUiState
@@ -155,6 +163,7 @@ private fun SenseUiState.toggleLanguage(languageCode: String): SenseUiState {
 class WordDetailViewModel(
     private val repository: DictionaryRepository,
     private val favoritesRepository: FavoritesRepository,
+    private val ttsManager: TextToSpeechManager,
     private val dictionaryLanguage: String = "",
     private val lemma: String = "",
     val targetSenseId: String? = null
@@ -169,19 +178,48 @@ class WordDetailViewModel(
     var favoriteSenses by mutableStateOf<Set<String>>(emptySet())
         private set
 
+    var isPlaying by mutableStateOf(false)
+        private set
+
+    var isPreparing by mutableStateOf(false)
+        private set
+
+    var availableVoices by mutableStateOf<List<Text2SpeechVoice>>(emptyList())
+        private set
+
+    private var currentVoiceIndex: Int = 0
     private var hasScrolledToTarget = false
 
     init {
-        loadFavorites()
         val card = repository.getLanguageCard(dictionaryLanguage, lemma)
         state =
             card?.toContentUiState(targetSenseId, isSenseFavorite = ::isSenseFavorite) ?: WordDetailUiState.Empty(
                 lemma = lemma,
                 message = "Word not found"
             )
+
+        // Setup TTS status listener
+        ttsManager.setOnStatusChangeListener { status ->
+            when (status) {
+                TTSStatus.SPEAKING -> {
+                    isPreparing = false
+                    isPlaying = true
+                }
+
+                TTSStatus.IDLE -> {
+                    isPreparing = false
+                    isPlaying = false
+                }
+            }
+        }
     }
 
-    fun loadFavorites() {
+    fun reload() {
+        loadFavorites()
+        loadVoices()
+    }
+
+    private fun loadFavorites() {
         val card = repository.getLanguageCard(dictionaryLanguage, lemma)
         val allSenseIds = card?.entries?.flatMap { entry ->
             entry.senses.map { it.senseId }
@@ -195,6 +233,25 @@ class WordDetailViewModel(
         val current = state
         if (current is WordDetailUiState.Content) {
             state = current.reloadFavorite(::isSenseFavorite)
+        }
+    }
+
+    private fun loadVoices() {
+        viewModelScope.launch {
+            try {
+                val languages = ttsManager.getAvailableLanguages()
+                val targetLanguage = languages.firstOrNull { it.code == dictionaryLanguage }
+                if (targetLanguage != null) {
+                    availableVoices = ttsManager.getVoicesForLanguage(targetLanguage)
+                    // Start from a random voice index
+                    if (availableVoices.isNotEmpty()) {
+                        currentVoiceIndex = availableVoices.indices.random()
+                    }
+                }
+            } catch (_: Exception) {
+                // Failed to load voices, button will be disabled
+                availableVoices = emptyList()
+            }
         }
     }
 
@@ -261,6 +318,31 @@ class WordDetailViewModel(
         if (current is WordDetailUiState.Content) {
             state = current.toggleSenseLanguage(entryIndex, senseId, languageCode)
         }
+    }
+
+    fun playWord() {
+        if (availableVoices.isEmpty()) return
+
+        try {
+            // Rotate to the next voice
+            currentVoiceIndex = (currentVoiceIndex + 1) % availableVoices.size
+            val selectedVoice = availableVoices[currentVoiceIndex]
+            isPreparing = true
+            ttsManager.setVoice(selectedVoice)
+            ttsManager.speak(lemma)
+        } catch (_: Exception) {
+            // Failed to play, ignore
+            isPreparing = false
+        }
+    }
+
+    fun stopPlayback() {
+        ttsManager.stop()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        ttsManager.stop()
     }
 }
 
@@ -346,7 +428,8 @@ fun WordDetailScreen(
     viewModel: WordDetailViewModel,
     onBack: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {}
+    onNavigateToFavorites: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {}
 ) {
     // Restore scroll position after process death
     val savedScrollPosition = rememberSaveable { viewModel.scrollState.value }
@@ -367,9 +450,15 @@ fun WordDetailScreen(
     WordDetailScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
+        isPlaying = viewModel.isPlaying,
+        isPreparing = viewModel.isPreparing,
+        canPlay = viewModel.availableVoices.isNotEmpty(),
         onBack = onBack,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
+        onNavigateToSettings = onNavigateToSettings,
+        onPlayWord = { viewModel.playWord() },
+        onStopWord = { viewModel.stopPlayback() },
         onEntryToggle = { index -> viewModel.toggleEntry(index) },
         onFormsToggle = { index -> viewModel.toggleForms(index) },
         onSenseToggle = { entryIndex, senseId -> viewModel.toggleSense(entryIndex, senseId) },
@@ -390,9 +479,15 @@ fun WordDetailScreen(
 fun WordDetailScreenContent(
     state: WordDetailUiState,
     scrollState: ScrollState = ScrollState(0),
+    isPlaying: Boolean = false,
+    isPreparing: Boolean = false,
+    canPlay: Boolean = false,
     onBack: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
+    onPlayWord: () -> Unit = {},
+    onStopWord: () -> Unit = {},
     onEntryToggle: (Int) -> Unit = {},
     onFormsToggle: (Int) -> Unit = {},
     onSenseToggle: (Int, String) -> Unit = { _, _ -> },
@@ -412,21 +507,52 @@ fun WordDetailScreenContent(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    when (state) {
-                        is WordDetailUiState.Content ->
-                            Text(
-                                text = state.card.lemma,
-                                style = MaterialTheme.typography.headlineSmall,
-                                maxLines = 1,
-                                softWrap = false,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        when (state) {
+                            is WordDetailUiState.Content ->
+                                Text(
+                                    text = state.card.lemma,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis
+                                )
 
-                        is WordDetailUiState.Empty -> HighlightedText(
-                            text = titleText,
-                            style = MaterialTheme.typography.headlineSmall,
-                            textAlign = TextAlign.Center
-                        )
+                            is WordDetailUiState.Empty -> HighlightedText(
+                                text = titleText,
+                                style = MaterialTheme.typography.headlineSmall,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        if (state is WordDetailUiState.Content) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            IconButton(
+                                onClick = { if (isPlaying) onStopWord() else onPlayWord() },
+                                enabled = canPlay && !isPreparing,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                when {
+                                    isPreparing -> CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        strokeWidth = 2.dp
+                                    )
+
+                                    else -> Icon(
+                                        imageVector = if (isPlaying) Icons.Filled.StopCircle else Icons.Filled.PlayCircleFilled,
+                                        contentDescription = if (isPlaying) "Stop" else "Play word",
+                                        tint = if (isPlaying) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            LocalContentColor.current
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 },
                 navigationIcon = {
@@ -448,6 +574,7 @@ fun WordDetailScreenContent(
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToFavorites = onNavigateToFavorites,
                 onNavigateToWordDetail = {},
+                onNavigateToSettings = onNavigateToSettings,
                 wordDetailLabel = titleText
             )
         },
