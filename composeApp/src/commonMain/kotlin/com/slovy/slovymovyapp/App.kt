@@ -48,10 +48,13 @@ private sealed interface AppDestination {
 
     @Serializable
     data class WordDetail(
-        val dictionaryLanguage: Language,
+        val dictionaryLanguageCode: String,
         val lemma: String,
         val targetSenseId: String? = null,
-    ) : AppDestination
+    ) : AppDestination {
+        val dictionaryLanguage: Language
+            get() = Language.fromCode(dictionaryLanguageCode)
+    }
 
     @Serializable
     data object Settings : AppDestination
@@ -278,7 +281,7 @@ fun App(
                     viewModel = viewModel,
                     onWordSelected = { item ->
                         val destination = AppDestination.WordDetail(
-                            dictionaryLanguage = item.language,
+                            dictionaryLanguageCode = item.language.code,
                             lemma = item.lemma,
                         )
                         navController.navigate(destination)
@@ -313,7 +316,7 @@ fun App(
                     },
                     onNavigateToWordDetail = { targetLang, lemma, senseId ->
                         val destination = AppDestination.WordDetail(
-                            dictionaryLanguage = targetLang,
+                            dictionaryLanguageCode = targetLang.code,
                             lemma = lemma,
                             targetSenseId = senseId
                         )
