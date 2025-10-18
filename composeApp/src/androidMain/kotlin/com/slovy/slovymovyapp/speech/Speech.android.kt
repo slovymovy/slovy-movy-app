@@ -102,7 +102,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> =
         withContext(Dispatchers.IO) {
-
             val locale = toLocale(language.language)
             val voices = tts.voices?.filter { voice ->
                 voice.locale.language == locale.language &&
@@ -119,17 +118,17 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                         voice.quality >= QUALITY_HIGH -> VoiceQuality.GOOD
                         else -> VoiceQuality.MEDIUM
                     },
-                    networkConnectionRequired = !voice.isNetworkConnectionRequired
+                    networkConnectionRequired = voice.isNetworkConnectionRequired
                 )
             }
         }
 
     actual fun setVoice(voice: Text2SpeechVoice) {
-        val tssVoice = tts?.voices?.find { it.name == voice.id }
+        val tssVoice = tts.voices?.find { it.name == voice.id }
         if (tssVoice == null) {
             throw IllegalStateException("Voice with id ${voice.id} not found")
         }
-        tts?.voice = tssVoice
+        tts.voice = tssVoice
     }
 
     actual fun openSettings() {

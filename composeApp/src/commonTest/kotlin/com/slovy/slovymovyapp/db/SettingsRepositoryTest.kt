@@ -18,7 +18,7 @@ open class SettingsRepositoryTest : BaseTest() {
 
         val setting = Setting(
             id = Setting.Name.TEST_PROPERTY,
-            value = Json.Default.parseToJsonElement("{\"mode\": \"dark\"}")
+            value = Json.parseToJsonElement("{\"mode\": \"dark\"}")
         )
 
         // Insert
