@@ -105,17 +105,19 @@ open class FavoritesRepositoryTest : BaseTest() {
         val repo = FavoritesRepository(db)
         repo.deleteAll()
 
-        // Add favorites in mixed order
-        repo.add("sense3", Language.RUSSIAN, "bonjour")
-        repo.add("sense1", Language.ENGLISH, "hello")
-        repo.add("sense4", Language.RUSSIAN, "monde")
-        repo.add("sense2", Language.ENGLISH, "world")
+        // Add favorites with explicit timestamps to ensure consistent ordering
+        // All added at the same time (timestamp = 1000) to test secondary sorting
+        val baseTimestamp = 1000L
+        db.favoritesQueries.insertFavorite("sense3", Language.RUSSIAN.code, "bonjour", baseTimestamp)
+        db.favoritesQueries.insertFavorite("sense1", Language.ENGLISH.code, "hello", baseTimestamp)
+        db.favoritesQueries.insertFavorite("sense4", Language.RUSSIAN.code, "monde", baseTimestamp)
+        db.favoritesQueries.insertFavorite("sense2", Language.ENGLISH.code, "world", baseTimestamp)
 
         val results = repo.getAllGroupedByLangAndLemma()
 
         assertEquals(4, results.size)
 
-        // Verify ordering
+        // Verify ordering: when all timestamps equal, sorts by target_lang ASC, lemma ASC
         assertEquals(Language.ENGLISH, results[0].targetLang)
         assertEquals("hello", results[0].lemma)
         assertEquals(Language.ENGLISH, results[1].targetLang)
