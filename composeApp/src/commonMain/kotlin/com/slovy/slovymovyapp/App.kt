@@ -52,6 +52,7 @@ private sealed interface AppDestination {
         val lemma: String,
         val targetSenseId: String? = null,
     ) : AppDestination {
+        @Deprecated("temporal hack, looks like IOS can;t handle enums here")
         val dictionaryLanguage: Language
             get() = Language.fromCode(dictionaryLanguageCode)
     }
