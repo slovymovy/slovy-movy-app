@@ -65,6 +65,18 @@ enum class NameType(val displayName: String) {
     HISTORICAL_NAME("Historical Name"),
     EVENT_NAME("Event Name"),
     WORK_OF_ART_NAME("Work Of Art Name"),
+    LANGUAGE_NAME("Language Name"),
+    ETHNIC_GROUP_NAME("Ethnic Group Name"),
+    DEITY_OR_RELIGIOUS_NAME("Deity or Religious Name"),
+    RELIGION_OR_PHILOSOPHY_NAME("Religion or Philosophy Name"),
+    ASTRONOMICAL_NAME("Astronomical Name"),
+    TITLE_OR_HONORIFIC_NAME("Title or Honorific Name"),
+    BRAND_OR_PRODUCT_NAME("Brand or Product Name"),
+    TECHNOLOGY_OR_SOFTWARE_NAME("Technology or Software Name"),
+    GAME_OR_SPORT_NAME("Game or Sport Name"),
+    IDEOLOGY_OR_MOVEMENT_NAME("Ideology or Movement Name"),
+    MYTHOLOGICAL_OR_ASTROLOGICAL_ENTITY("Mythological or Astrological Entity"),
+    DOCUMENT_OR_PROGRAM_NAME("Document or Program Name"),
     OTHER("Other");
 }
 

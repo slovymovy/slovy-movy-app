@@ -64,6 +64,18 @@ internal fun colorsForNameType(nameType: NameType): Pair<Color, Color> = when (n
     NameType.HISTORICAL_NAME -> Color(0xFFFFF3E0) to Color(0xFFEF6C00)
     NameType.EVENT_NAME -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
     NameType.WORK_OF_ART_NAME -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
+    NameType.LANGUAGE_NAME -> Color(0xFFE1F5FE) to Color(0xFF01579B)
+    NameType.ETHNIC_GROUP_NAME -> Color(0xFFFCE4EC) to Color(0xFF880E4F)
+    NameType.DEITY_OR_RELIGIOUS_NAME -> Color(0xFFF9E7FA) to Color(0xFF7B1FA2)
+    NameType.RELIGION_OR_PHILOSOPHY_NAME -> Color(0xFFEDE7F6) to Color(0xFF512DA8)
+    NameType.ASTRONOMICAL_NAME -> Color(0xFFE8EAF6) to Color(0xFF1A237E)
+    NameType.TITLE_OR_HONORIFIC_NAME -> Color(0xFFFFF9C4) to Color(0xFFF57F17)
+    NameType.BRAND_OR_PRODUCT_NAME -> Color(0xFFFFE0E9) to Color(0xFFC2185B)
+    NameType.TECHNOLOGY_OR_SOFTWARE_NAME -> Color(0xFFE0F2F1) to Color(0xFF00695C)
+    NameType.GAME_OR_SPORT_NAME -> Color(0xFFE8F5E9) to Color(0xFF2E7D32)
+    NameType.IDEOLOGY_OR_MOVEMENT_NAME -> Color(0xFFFFF8E1) to Color(0xFFF57C00)
+    NameType.MYTHOLOGICAL_OR_ASTROLOGICAL_ENTITY -> Color(0xFFF3E5F5) to Color(0xFF4A148C)
+    NameType.DOCUMENT_OR_PROGRAM_NAME -> Color(0xFFECEFF1) to Color(0xFF37474F)
     NameType.OTHER -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
 }
 
