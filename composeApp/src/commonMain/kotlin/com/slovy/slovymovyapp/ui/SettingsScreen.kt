@@ -29,7 +29,8 @@ import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 data class LanguageUiState(
     val voices: List<Text2SpeechVoice> = emptyList(),
     val isExpanded: Boolean = false,
-    val isLoadingVoices: Boolean = false
+    val isLoadingVoices: Boolean = false,
+    val enabledVoiceIds: Set<String> = emptySet()
 )
 
 data class SettingsUiState(
@@ -49,7 +50,8 @@ private val TEST_PHRASES = mapOf(
 )
 
 class SettingsViewModel(
-    private val ttsManager: TextToSpeechManager
+    private val ttsManager: TextToSpeechManager,
+    private val voiceFilterHelper: VoiceFilterHelper
 ) : ViewModel() {
 
     var state by mutableStateOf(SettingsUiState())
@@ -116,8 +118,15 @@ class SettingsViewModel(
 
             try {
                 val voices = ttsManager.getVoicesForLanguage(language)
+
+                // Initialize default voices if needed
+                if (!voiceFilterHelper.hasEnabledVoices(language)) {
+                    voiceFilterHelper.initializeDefaultVoices(language, voices)
+                }
+
+                val enabledIds = voiceFilterHelper.getEnabledVoices(language)
                 updateLanguageState(language) {
-                    it.copy(voices = voices, isLoadingVoices = false)
+                    it.copy(voices = voices, enabledVoiceIds = enabledIds, isLoadingVoices = false)
                 }
             } catch (e: Exception) {
                 updateLanguageState(language) { it.copy(isLoadingVoices = false) }
@@ -140,7 +149,6 @@ class SettingsViewModel(
     fun testVoice(voice: Text2SpeechVoice) {
         if (state.ttsStatus == TTSStatus.SPEAKING && state.testingVoice != voice) {
             ttsManager.stop()
-            return
         }
 
         val text = TEST_PHRASES[voice.language] ?: "Hello, this is a test."
@@ -162,6 +170,25 @@ class SettingsViewModel(
 
     fun dismissError() {
         state = state.copy(errorMessage = null)
+    }
+
+    fun toggleVoiceEnabled(language: Text2SpeechLanguage, voiceId: String) {
+        viewModelScope.launch {
+            try {
+                val langState = state.languages[language] ?: return@launch
+                val currentEnabled = langState.enabledVoiceIds
+                val newEnabled = if (voiceId in currentEnabled) {
+                    currentEnabled - voiceId
+                } else {
+                    currentEnabled + voiceId
+                }
+
+                voiceFilterHelper.setEnabledVoices(language, newEnabled)
+                updateLanguageState(language) { it.copy(enabledVoiceIds = newEnabled) }
+            } catch (e: Exception) {
+                state = state.copy(errorMessage = "Failed to update voice selection: ${e.message}")
+            }
+        }
     }
 
     override fun onCleared() {
@@ -191,6 +218,7 @@ fun SettingsScreen(
         snackbarHostState = viewModel.snackbarHostState,
         onLanguageExpand = { viewModel.toggleLanguageExpansion(it) },
         onTestVoice = { voice -> viewModel.testVoice(voice) },
+        onToggleVoiceEnabled = { language, voiceId -> viewModel.toggleVoiceEnabled(language, voiceId) },
         onOpenSettings = { viewModel.openSystemSettings() },
         onDismissError = { viewModel.dismissError() },
         wordDetailLabel = wordDetailLabel,
@@ -208,6 +236,7 @@ fun SettingsScreenContent(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onLanguageExpand: (Text2SpeechLanguage) -> Unit = {},
     onTestVoice: (Text2SpeechVoice) -> Unit = { _ -> },
+    onToggleVoiceEnabled: (Text2SpeechLanguage, String) -> Unit = { _, _ -> },
     onOpenSettings: () -> Unit = {},
     onDismissError: () -> Unit = {},
     wordDetailLabel: String? = null,
@@ -327,6 +356,7 @@ fun SettingsScreenContent(
                                     languageState = e.value,
                                     onExpand = { onLanguageExpand(e.key) },
                                     onTestVoice = { voice -> onTestVoice(voice) },
+                                    onToggleVoiceEnabled = { voiceId -> onToggleVoiceEnabled(e.key, voiceId) },
                                     testingVoice = state.testingVoice
                                 )
                             }
@@ -380,6 +410,7 @@ private fun LanguageCard(
     languageState: LanguageUiState,
     onExpand: () -> Unit,
     onTestVoice: (Text2SpeechVoice) -> Unit,
+    onToggleVoiceEnabled: (String) -> Unit,
     testingVoice: Text2SpeechVoice? = null
 ) {
     ElevatedCard(
@@ -491,7 +522,9 @@ private fun LanguageCard(
                             VoiceItem(
                                 voice = voice,
                                 onTest = { onTestVoice(voice) },
-                                isTesting = (testingVoice == voice)
+                                isTesting = (testingVoice == voice),
+                                isEnabled = voice.id in languageState.enabledVoiceIds,
+                                onToggleEnabled = { onToggleVoiceEnabled(voice.id) }
                             )
                         }
                     }
@@ -506,7 +539,9 @@ private fun LanguageCard(
 private fun VoiceItem(
     voice: Text2SpeechVoice,
     onTest: () -> Unit = {},
-    isTesting: Boolean = false
+    isTesting: Boolean = false,
+    isEnabled: Boolean = true,
+    onToggleEnabled: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -580,7 +615,7 @@ private fun VoiceItem(
                             }
                         )
                     )
-                    if (!voice.networkConnectionRequired) {
+                    if (voice.networkConnectionRequired) {
                         AssistChip(
                             onClick = {},
                             enabled = false,
@@ -602,6 +637,11 @@ private fun VoiceItem(
             }
 
             Spacer(modifier = Modifier.width(8.dp))
+            Checkbox(
+                checked = isEnabled,
+                onCheckedChange = { onToggleEnabled() }
+            )
+            Spacer(modifier = Modifier.width(4.dp))
             Surface(
                 shape = MaterialTheme.shapes.small,
                 color = if (isTesting) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
@@ -700,21 +740,21 @@ private fun SettingsScreenPreviewWithExpandedLanguage(
                                 name = "Female 1",
                                 language = Language.ENGLISH,
                                 quality = VoiceQuality.BEST,
-                                networkConnectionRequired = true
+                                networkConnectionRequired = false
                             ),
                             Text2SpeechVoice(
                                 id = "en-us-x-sfg#male_1-local",
                                 name = "Male 1",
                                 language = Language.ENGLISH,
                                 quality = VoiceQuality.GOOD,
-                                networkConnectionRequired = true
+                                networkConnectionRequired = false
                             ),
                             Text2SpeechVoice(
                                 id = "en-us-x-tpf-network",
                                 name = "Network Voice",
                                 language = Language.ENGLISH,
                                 quality = VoiceQuality.MEDIUM,
-                                networkConnectionRequired = false
+                                networkConnectionRequired = true
                             )
                         )
                     ),

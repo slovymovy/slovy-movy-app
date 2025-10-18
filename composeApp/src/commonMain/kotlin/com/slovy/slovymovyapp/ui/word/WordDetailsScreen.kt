@@ -29,6 +29,7 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.speech.TTSStatus
 import com.slovy.slovymovyapp.speech.Text2SpeechVoice
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
+import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
 import kotlinx.coroutines.launch
@@ -165,6 +166,7 @@ class WordDetailViewModel(
     private val repository: DictionaryRepository,
     private val favoritesRepository: FavoritesRepository,
     private val ttsManager: TextToSpeechManager,
+    private val voiceFilterHelper: VoiceFilterHelper,
     private val dictionaryLanguage: Language,
     private val lemma: String = "",
     val targetSenseId: String? = null
@@ -245,7 +247,15 @@ class WordDetailViewModel(
                 val languages = ttsManager.getAvailableLanguages()
                 val targetLanguage = languages.firstOrNull { it.language == dictionaryLanguage }
                 if (targetLanguage != null) {
-                    availableVoices = ttsManager.getVoicesForLanguage(targetLanguage)
+                    val allVoices = ttsManager.getVoicesForLanguage(targetLanguage)
+
+                    // Initialize default voices if needed
+                    if (!voiceFilterHelper.hasEnabledVoices(targetLanguage)) {
+                        voiceFilterHelper.initializeDefaultVoices(targetLanguage, allVoices)
+                    }
+
+                    // Filter to enabled voices only
+                    availableVoices = voiceFilterHelper.filterVoicesByEnabled(allVoices, targetLanguage)
                     // Start from a random voice index
                     if (availableVoices.isNotEmpty()) {
                         currentVoiceIndex = availableVoices.indices.random()

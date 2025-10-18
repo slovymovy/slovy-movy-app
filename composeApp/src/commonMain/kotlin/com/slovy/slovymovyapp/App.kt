@@ -16,6 +16,7 @@ import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
+import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.*
 import com.slovy.slovymovyapp.ui.theme.AppTheme
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
@@ -48,11 +49,11 @@ private sealed interface AppDestination {
 
     @Serializable
     data class WordDetail(
+        @Deprecated("temporal hack, looks like IOS can't handle enums here")
         val dictionaryLanguageCode: String,
         val lemma: String,
         val targetSenseId: String? = null,
     ) : AppDestination {
-        @Deprecated("temporal hack, looks like IOS can;t handle enums here")
         val dictionaryLanguage: Language
             get() = Language.fromCode(dictionaryLanguageCode)
     }
@@ -84,13 +85,14 @@ fun App(
         FavoritesRepository(dataManager.openAppDatabase())
     }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
+    val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
 
     val navController = rememberNavController()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember { FavoritesViewModel(favoritesRepository, dictionaryRepository) }
-    val settingsViewModel = remember { SettingsViewModel(ttsManager) }
+    val settingsViewModel = remember { SettingsViewModel(ttsManager, voiceFilterHelper) }
 
     suspend fun selectInitialDestination(): AppDestination {
         // Check if data version is current
@@ -365,6 +367,7 @@ fun App(
                         dictionaryRepository,
                         favoritesRepository,
                         ttsManager,
+                        voiceFilterHelper,
                         args.dictionaryLanguage,
                         args.lemma,
                         args.targetSenseId

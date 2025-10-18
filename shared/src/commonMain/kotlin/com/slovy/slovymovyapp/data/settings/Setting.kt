@@ -14,6 +14,7 @@ data class Setting(
         WELCOME_MESSAGE,
         LANGUAGE,
         DICTIONARY,
-        DATA_VERSION
+        DATA_VERSION,
+        ENABLED_VOICES
     }
 }
