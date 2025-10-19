@@ -1,0 +1,442 @@
+{
+    "entries": [
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "2d7c6abb-f669-44ad-8046-992dcdfd1d0b",
+                    "sense_definition": "Een voorwerp met een ingesneden oppervlak waarmee afdrukken gemaakt kunnen worden met inkt of in lak.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "Afdrukmiddel",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De leraar gebruikte een rode <w>stempel</w> om de opdrachten te markeren.",
+                            "target_lang_translations": {
+                                "ru": "Учитель использовал красный <w>штамп</w>, чтобы отметить задания.",
+                                "en": "The teacher used a red <w>stamp</w> to mark the assignments."
+                            }
+                        },
+                        {
+                            "text": "Vergeet niet je <w>stempel</w> op het formulier te zetten.",
+                            "target_lang_translations": {
+                                "ru": "Не забудьте поставить свою <w>печать</w> на бланк.",
+                                "en": "Don't forget to put your <w>stamp</w> on the form."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "zegel",
+                        "keurmerk"
+                    ],
+                    "common_phrases": [
+                        "een stempel zetten"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Предмет с рельефной поверхностью для нанесения оттисков с помощью чернил или краски.",
+                        "en": "An object with a carved or engraved surface used for imprinting a design with ink, paint, or wax."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "печать",
+                                "target_lang_sense_clarification": "Обычно для официальных документов, с названием организации."
+                            },
+                            {
+                                "target_lang_word": "штамп",
+                                "target_lang_sense_clarification": "Часто прямоугольной формы, для отметок, дат, адресов."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "stamp",
+                                "target_lang_sense_clarification": "Refers to the physical object used to make an impression, like a rubber stamp."
+                            },
+                            {
+                                "target_lang_word": "seal",
+                                "target_lang_sense_clarification": "Often refers to a device used for official purposes or with wax to seal documents."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "5a9b6193-7bfa-4fd0-994e-7afc4c1439ff",
+                    "sense_definition": "Een afdruk of indruk gemaakt door een daarvoor bestemd voorwerp.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "Afdruk",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De <w>stempel</w> op de postzegel liet zien dat de brief in Rolde gepost was.",
+                            "target_lang_translations": {
+                                "ru": "<w>Штемпель</w> на почтовой марке показывал, что письмо было отправлено из Ролде.",
+                                "en": "The <w>postmark</w> on the postage stamp showed that the letter was mailed in Rolde."
+                            }
+                        },
+                        {
+                            "text": "Controleer de <w>stempel</w> op je paspoort bij aankomst.",
+                            "target_lang_translations": {
+                                "ru": "Проверьте <w>штамп</w> в вашем паспорте по прибытии.",
+                                "en": "Check the <w>stamp</w> in your passport upon arrival."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "afdruk",
+                        "merk",
+                        "indruk"
+                    ],
+                    "common_phrases": [
+                        "de stempel van de post"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Отпечаток или оттиск, оставленный специальным предметом.",
+                        "en": "The impression or mark made by a stamping device."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "штемпель",
+                                "target_lang_sense_clarification": "Почтовая отметка на конверте или марке."
+                            },
+                            {
+                                "target_lang_word": "оттиск",
+                                "target_lang_sense_clarification": "След, оставленный печатью или штампом."
+                            },
+                            {
+                                "target_lang_word": "печать",
+                                "target_lang_sense_clarification": "Отпечаток на документе, подтверждающий его подлинность."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "stamp",
+                                "target_lang_sense_clarification": "The mark left by the stamping device, e.g., on a passport or a letter."
+                            },
+                            {
+                                "target_lang_word": "postmark",
+                                "target_lang_sense_clarification": "A specific type of stamp used by a post office to cancel a postage stamp, showing the date and place of mailing."
+                            },
+                            {
+                                "target_lang_word": "mark",
+                                "target_lang_sense_clarification": "A general term for the impression left on a surface."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "3a42f051-006f-417f-b989-728976d3411d",
+                    "sense_definition": "Een kenmerkende invloed, spoor of eigenschap van een bepaalde maker of herkomst.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "Invloed/Kenmerk",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Hoewel zij maar vier jaar burgemeester was, heeft ze toch haar <w>stempel</w> op de gemeente gezet.",
+                            "target_lang_translations": {
+                                "ru": "Хотя она была мэром всего четыре года, она всё же наложила свой <w>отпечаток</w> на муниципалитет.",
+                                "en": "Although she was only mayor for four years, she still put her <w>stamp</w> on the municipality."
+                            }
+                        },
+                        {
+                            "text": "Dit schilderij draagt duidelijk de <w>stempel</w> van de impressionistische periode.",
+                            "target_lang_translations": {
+                                "ru": "Эта картина явно несёт на себе <w>печать</w> импрессионистического периода.",
+                                "en": "This painting clearly bears the <w>stamp</w> of the impressionist period."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "kenmerk",
+                        "invloed",
+                        "spoor",
+                        "signatuur"
+                    ],
+                    "common_phrases": [
+                        "zijn/haar stempel drukken op",
+                        "de stempel dragen van"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Характерное влияние, след или особенность, указывающая на создателя или происхождение.",
+                        "en": "A characteristic influence, trace, or quality that identifies a particular creator, origin, or period."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "отпечаток",
+                                "target_lang_sense_clarification": "Фигурально, о влиянии или следе, оставленном кем-либо или чем-либо."
+                            },
+                            {
+                                "target_lang_word": "печать",
+                                "target_lang_sense_clarification": "Фигурально, о характерной черте, знаке чего-либо."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "stamp",
+                                "target_lang_sense_clarification": "Used figuratively to mean a distinctive mark or influence, as in 'to put one's stamp on something'."
+                            },
+                            {
+                                "target_lang_word": "mark",
+                                "target_lang_sense_clarification": "A lasting effect or influence, used in phrases like 'to leave one's mark on something'."
+                            },
+                            {
+                                "target_lang_word": "hallmark",
+                                "target_lang_sense_clarification": "A distinguishing characteristic, feature, or trait, often of high quality."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "6fb880ef-d290-426c-8c45-40fa30797d27",
+                    "sense_definition": "Een negatief kenmerk of brandmerk dat aan iets of iemand kleeft.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "Negatief kenmerk",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Het dragen van een strafblad kan een sociale <w>stempel</w> zijn.",
+                            "target_lang_translations": {
+                                "ru": "Наличие судимости может быть социальным <w>клеймом</w>.",
+                                "en": "Having a criminal record can be a social <w>stigma</w>."
+                            }
+                        },
+                        {
+                            "text": "Er rust nog steeds een <w>stempel</w> op psychische aandoeningen.",
+                            "target_lang_translations": {
+                                "ru": "На психических заболеваниях всё ещё лежит <w>клеймо</w>.",
+                                "en": "There is still a <w>stigma</w> attached to mental illness."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "stigma",
+                        "brandmerk",
+                        "schandvlek"
+                    ],
+                    "antonyms": [
+                        "eer",
+                        "lof"
+                    ],
+                    "common_phrases": [
+                        "een stempel van schande"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Негативная характеристика или клеймо, связанное с кем-либо или чем-либо.",
+                        "en": "A mark of disgrace or infamy associated with a particular circumstance, quality, or person."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "клеймо",
+                                "target_lang_sense_clarification": "Негативный ярлык, позорный знак."
+                            },
+                            {
+                                "target_lang_word": "стигма",
+                                "target_lang_sense_clarification": "Социальное клеймо, связанное с каким-либо качеством или обстоятельством."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "stigma",
+                                "target_lang_sense_clarification": "A strong feeling of societal disapproval of something, such as a particular illness or quality."
+                            },
+                            {
+                                "target_lang_word": "stamp",
+                                "target_lang_sense_clarification": "Can be used negatively, as in 'the stamp of shame'."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "830d6270-7abc-40fc-92b6-c2f984a6feb8",
+                    "sense_definition": "Een werktuig dat gebruikt wordt om met kracht een vorm of patroon in een ander voorwerp te slaan of te drukken, bijvoorbeeld bij het maken van munten.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "Gereedschap",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Munten worden geslagen met stalen <w>stempels</w>.",
+                            "target_lang_translations": {
+                                "ru": "Монеты чеканят стальными <w>штемпелями</w>.",
+                                "en": "Coins are minted with steel <w>dies</w>."
+                            }
+                        },
+                        {
+                            "text": "De juwelier gebruikt kleine <w>stempels</w> om initialen in sieraden te graveren.",
+                            "target_lang_translations": {
+                                "ru": "Ювелир использует маленькие <w>клейма</w> для гравировки инициалов на украшениях.",
+                                "en": "The jeweler uses small <w>stamps</w> to engrave initials in jewelry."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "matrijs",
+                        "pons"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "Technisch, gebruikt in productie"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Инструмент для нанесения рельефного изображения или формы на другой предмет путём удара или давления, например, при чеканке монет.",
+                        "en": "A tool used to impress a design or shape onto another object by force, such as in coining or metalworking."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "штемпель",
+                                "target_lang_sense_clarification": "Инструмент для чеканки монет или медалей."
+                            },
+                            {
+                                "target_lang_word": "клеймо",
+                                "target_lang_sense_clarification": "Инструмент для нанесения знака на изделие (например, у ювелиров)."
+                            },
+                            {
+                                "target_lang_word": "пуансон",
+                                "target_lang_sense_clarification": "Рабочая часть штампа, непосредственно создающая оттиск или форму."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "die",
+                                "target_lang_sense_clarification": "The specific technical term for a tool used in manufacturing to cut or shape material, especially for minting coins."
+                            },
+                            {
+                                "target_lang_word": "stamp",
+                                "target_lang_sense_clarification": "A general term for a tool that impresses a mark or design."
+                            },
+                            {
+                                "target_lang_word": "punch",
+                                "target_lang_sense_clarification": "A tool for making holes or indentations, often by striking it."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "8634e300-a711-4b36-a559-35e7abd8ec2d",
+                    "sense_definition": "Een tijdelijke balk of schoor die gebruikt wordt ter ondersteuning van constructies, bijvoorbeeld in de bouw.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "Bouwkunde",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De <w>stempels</w> blijven onder de bekisting van de betonbalken staan totdat deze voldoende verhard zijn.",
+                            "target_lang_translations": {
+                                "ru": "<w>Стойки</w> остаются под опалубкой бетонных балок до тех пор, пока бетон достаточно не затвердеет.",
+                                "en": "The <w>props</w> remain under the formwork of the concrete beams until they have hardened sufficiently."
+                            }
+                        },
+                        {
+                            "text": "Er worden <w>stempels</w> gebruikt om de keerwanden van een bouwkuip uiteen te houden.",
+                            "target_lang_translations": {
+                                "ru": "Используются <w>распорки</w>, чтобы удерживать подпорные стенки котлована.",
+                                "en": "<w>Props</w> are used to keep the retaining walls of an excavation pit apart."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "schoor",
+                        "steunbalk",
+                        "onderslag"
+                    ],
+                    "common_phrases": [
+                        "stempels plaatsen"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "Bouwkundige term"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Временная опора или распорка, используемая для поддержки конструкций, например, в строительстве.",
+                        "en": "A temporary support post or prop, typically adjustable, used in construction to shore up structures."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "стойка",
+                                "target_lang_sense_clarification": "Вертикальная опора, подпорка (в строительстве)."
+                            },
+                            {
+                                "target_lang_word": "подпорка",
+                                "target_lang_sense_clarification": "Опора, поддерживающая что-либо от падения или прогиба."
+                            },
+                            {
+                                "target_lang_word": "распорка",
+                                "target_lang_sense_clarification": "Элемент, работающий на сжатие и удерживающий конструкции на расстоянии."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "prop",
+                                "target_lang_sense_clarification": "A common term for a temporary support in construction, often an adjustable steel post."
+                            },
+                            {
+                                "target_lang_word": "shore",
+                                "target_lang_sense_clarification": "A beam or timber propped against a structure to support it; often used in the verb 'to shore up'."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "5a6cf8a5-de69-4807-8794-0d4ae0fc7cc6",
+                    "sense_definition": "Het bovenste, vaak kleverige, gedeelte van de stamper van een bloem, dat stuifmeel opvangt.",
+                    "learner_level": "C1",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "Plantenkunde",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Het stuifmeel landt op de <w>stempel</w> van de bloem.",
+                            "target_lang_translations": {
+                                "ru": "Пыльца попадает на <w>рыльце</w> цветка.",
+                                "en": "The pollen lands on the flower's <w>stigma</w>."
+                            }
+                        },
+                        {
+                            "text": "De vorm van de <w>stempel</w> kan variëren per plantensoort.",
+                            "target_lang_translations": {
+                                "ru": "Форма <w>рыльца</w> может различаться в зависимости от вида растения.",
+                                "en": "The shape of the <w>stigma</w> can vary between plant species."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "Botanische term"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Верхняя часть пестика цветка, служащая для улавливания пыльцы.",
+                        "en": "The receptive tip of a carpel in a flower, which receives pollen during pollination."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "рыльце",
+                                "target_lang_sense_clarification": "Ботанический термин: верхняя часть пестика цветка."
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "stigma",
+                                "target_lang_sense_clarification": "The specific botanical term for the part of a flower's pistil that receives pollen."
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

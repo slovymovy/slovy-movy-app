@@ -127,12 +127,27 @@ class JsonIngestionBuilder(
 
             // Insert forms (prefer native source; fallback to others when no forms in native)
             val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
+
+            // Group forms by lemma_pos_id and deduplicate
+            data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+            val lemmaPosIdToForms = mutableMapOf<Uuid, MutableMap<FormKey, ExtractedWordForm>>()
+
             entriesForForms.forEach { entry ->
                 val pos = entryIdToPos[uuidParse(entry.entryId.toString())]
                 pos ?: return@forEach
                 val lemmaPosId = posToEntryId[pos] ?: return@forEach
 
+                val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
                 entry.forms.forEach { f ->
+                    val key = FormKey(f.form, unaccent(f.form), f.tags.toSet())
+                    // Keep first occurrence of each unique form
+                    formsMap.putIfAbsent(key, f)
+                }
+            }
+
+            // Insert deduplicated forms
+            lemmaPosIdToForms.forEach { (lemmaPosId, formsMap) ->
+                formsMap.values.forEach { f ->
                     val formId = uuidParse(f.formId.toString())
                     dictQ.insertForm(
                         form_id = formId,

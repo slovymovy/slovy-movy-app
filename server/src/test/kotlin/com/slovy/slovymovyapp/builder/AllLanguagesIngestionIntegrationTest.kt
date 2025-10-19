@@ -57,20 +57,24 @@ class AllLanguagesIngestionIntegrationTest {
                     e.senses.any { s -> processedSenseIds.contains(uuidParse(s.senseId.toString())) }
                 }
 
-                // Validate presence of ALL forms from entries used by processed
-                val allExpectedForms = entriesUsedByProcessed.flatMap { it.forms }.map { it.form }
-                if (allExpectedForms.isNotEmpty()) {
-                    // Verify each form exists in the database
-                    allExpectedForms.forEach { expectedForm ->
-                        val formsInDb = dq.selectFormsByNormalized(unaccent(expectedForm)).executeAsList()
+                // Validate presence of all UNIQUE forms from entries used by processed
+                data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+                val allExpectedFormKeys = entriesUsedByProcessed.flatMap { it.forms }.map { f ->
+                    FormKey(f.form, unaccent(f.form), f.tags.toSet())
+                }.toSet() // Deduplicate expected forms
+
+                if (allExpectedFormKeys.isNotEmpty()) {
+                    // Verify each unique form exists in the database
+                    allExpectedFormKeys.forEach { expectedFormKey ->
+                        val formsInDb = dq.selectFormsByNormalized(expectedFormKey.formNormalized).executeAsList()
                         assertTrue(
                             formsInDb.isNotEmpty(),
-                            "Form '$expectedForm' should exist for '$word' in $lang from ${pFile.name}. " +
-                                    "Expected ${allExpectedForms.size} forms total: ${allExpectedForms.joinToString(", ")}"
+                            "Form '${expectedFormKey.form}' should exist for '$word' in $lang from ${pFile.name}. " +
+                                    "Expected ${allExpectedFormKeys.size} unique forms total: ${allExpectedFormKeys.joinToString(", ") { it.form }}"
                         )
                     }
 
-                    // Additionally verify the total count of forms for this lemma
+                    // Additionally verify the total count of forms for this lemma matches unique forms
                     val lemmaIds = lemmas.map { it.id }
                     val lemmaPosIds = lemmaIds.flatMap { lemmaId ->
                         dq.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
@@ -78,10 +82,11 @@ class AllLanguagesIngestionIntegrationTest {
                     val allFormsForLemma = lemmaPosIds.flatMap { lemmaPosId ->
                         dq.selectFormsByLemmaPosId(lemmaPosId).executeAsList()
                     }
-                    assertTrue(
-                        allFormsForLemma.size >= allExpectedForms.size,
-                        "Expected at least ${allExpectedForms.size} forms for '$word' in $lang, but found ${allFormsForLemma.size}. " +
-                                "Expected forms: ${allExpectedForms.joinToString(", ")}. " +
+                    assertEquals(
+                        allExpectedFormKeys.size,
+                        allFormsForLemma.size,
+                        "Expected exactly ${allExpectedFormKeys.size} unique forms for '$word' in $lang, but found ${allFormsForLemma.size}. " +
+                                "Expected forms: ${allExpectedFormKeys.joinToString(", ") { it.form }}. " +
                                 "Found forms: ${allFormsForLemma.joinToString(", ") { it.form }}"
                     )
                 }
