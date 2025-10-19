@@ -1,0 +1,1123 @@
+{
+    "word": "stempel",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "dea23e72-13d8-45ec-be35-cee0d8647ff2",
+                "word": "stempel",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "7ea4dc1f-d132-4b55-95f3-7d958d4bb9e9",
+                        "entry_id": "dea23e72-13d8-45ec-be35-cee0d8647ff2",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "stempels"
+                    },
+                    {
+                        "form_id": "1c7903ee-f110-4518-9686-0065be73bc95",
+                        "entry_id": "dea23e72-13d8-45ec-be35-cee0d8647ff2",
+                        "tags": [
+                            "diminutive",
+                            "neuter"
+                        ],
+                        "form": "stempeltje"
+                    },
+                    {
+                        "form_id": "9c961c0c-1ff9-4cfa-aac7-89bf36cc62d6",
+                        "entry_id": "dea23e72-13d8-45ec-be35-cee0d8647ff2",
+                        "tags": [
+                            "neuter"
+                        ],
+                        "form": "when used in senses 2 and 3"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "62650c66-6461-4910-a6db-e5e2fcbf4bb1",
+                        "entry_id": "dea23e72-13d8-45ec-be35-cee0d8647ff2",
+                        "glosses": [
+                            "stamp, die, seal (of wax)"
+                        ],
+                        "tags": [
+                            "masculine",
+                            "neuter"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "730162d7-ad63-408a-86a4-cf3fd2053768",
+                        "entry_id": "dea23e72-13d8-45ec-be35-cee0d8647ff2",
+                        "glosses": [
+                            "stamp, postmark (of ink)"
+                        ],
+                        "tags": [
+                            "masculine",
+                            "neuter"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "39e337d2-753b-455f-89fd-390f2395a4ec",
+                        "entry_id": "dea23e72-13d8-45ec-be35-cee0d8647ff2",
+                        "glosses": [
+                            "any kind of mark or sign of influence"
+                        ],
+                        "tags": [
+                            "figuratively",
+                            "masculine",
+                            "neuter"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "6fb880ef-d290-426c-8c45-40fa30797d27",
+                        "entry_id": "dea23e72-13d8-45ec-be35-cee0d8647ff2",
+                        "glosses": [
+                            "stigma"
+                        ],
+                        "tags": [
+                            "masculine",
+                            "neuter"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [
+            {
+                "entry_id": "1b9d2838-7a8b-4ddb-9ef7-97dcf2333a1f",
+                "word": "stempel",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "1da25b47-7756-4009-be58-da3d67850a80",
+                        "entry_id": "1b9d2838-7a8b-4ddb-9ef7-97dcf2333a1f",
+                        "glosses": [
+                            "штемпель"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "fb5768d9-e38c-478a-95f0-94b0c96c6621",
+                        "entry_id": "1b9d2838-7a8b-4ddb-9ef7-97dcf2333a1f",
+                        "glosses": [
+                            "штамп, почтовая марка"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "d193778c-2c48-4879-a806-84e3f835ed6a",
+                "word": "stempel",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "d0b1a172-cb06-4b0f-8c6d-d0a5d0e2ff12",
+                        "entry_id": "d193778c-2c48-4879-a806-84e3f835ed6a",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "stempels"
+                    },
+                    {
+                        "form_id": "010f5cdc-cefc-4704-8354-04e3ac7273f5",
+                        "entry_id": "d193778c-2c48-4879-a806-84e3f835ed6a",
+                        "tags": [
+                            "diminutive",
+                            "singular"
+                        ],
+                        "form": "stempeltje"
+                    },
+                    {
+                        "form_id": "e0ff8506-0505-4241-8ce8-f890b3282032",
+                        "entry_id": "d193778c-2c48-4879-a806-84e3f835ed6a",
+                        "tags": [
+                            "diminutive",
+                            "plural"
+                        ],
+                        "form": "stempeltjes"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "2d7c6abb-f669-44ad-8046-992dcdfd1d0b",
+                        "entry_id": "d193778c-2c48-4879-a806-84e3f835ed6a",
+                        "glosses": [
+                            "voorwerp met een ingesneden oppervlak waarmee afdrukken gemaakt kunnen worden met inkt of in lak\\nZo'n afdruk wordt het stempel genoemd."
+                        ],
+                        "tags": [
+                            "neuter"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "23b51556-b7e3-4f16-b6ab-8d71cb195571",
+                                "sense_id": "2d7c6abb-f669-44ad-8046-992dcdfd1d0b",
+                                "text": "Hij zette er zijn stempel op."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "830d6270-7abc-40fc-92b6-c2f984a6feb8",
+                        "entry_id": "d193778c-2c48-4879-a806-84e3f835ed6a",
+                        "glosses": [
+                            "werktuig om met kracht een indruk van een bepaalde vorm in een ander voorwerp aan te brengen"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "952f4e96-27a9-4292-b0a5-a7d9742618ee",
+                                "sense_id": "830d6270-7abc-40fc-92b6-c2f984a6feb8",
+                                "text": "Munten worden geslagen met stalen stempels."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "5a6cf8a5-de69-4807-8794-0d4ae0fc7cc6",
+                        "entry_id": "d193778c-2c48-4879-a806-84e3f835ed6a",
+                        "glosses": [
+                            "bovenste gedeelte van de stamper in een bloem"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "5a9b6193-7bfa-4fd0-994e-7afc4c1439ff",
+                        "entry_id": "d193778c-2c48-4879-a806-84e3f835ed6a",
+                        "glosses": [
+                            "afdruk of indruk gemaakt door een daarvoor bestemd voorwerp\\nDit voorwerp wordt de stempel genoemd."
+                        ],
+                        "tags": [
+                            "masculine"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "006b8e9f-c6c2-440e-9d19-4eaf51a583aa",
+                                "sense_id": "5a9b6193-7bfa-4fd0-994e-7afc4c1439ff",
+                                "text": "Het stempel op de postzegel liet zien dat de brief in Rolde gepost was."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "3a42f051-006f-417f-b989-728976d3411d",
+                        "entry_id": "d193778c-2c48-4879-a806-84e3f835ed6a",
+                        "glosses": [
+                            "kenmerkende sporen van een bepaalde maker of herkomst"
+                        ],
+                        "tags": [
+                            "figuratively"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "9996c5dc-bda0-4a53-88f1-d79dd8a69998",
+                                "sense_id": "3a42f051-006f-417f-b989-728976d3411d",
+                                "text": "Hoewel zij maar vier jaar burgemeester was, heeft ze toch haar stempel op de gemeente gezet."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "211d37fe-fbc2-40e6-a6d5-35fb7f140ef6",
+                "word": "stempel",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "9d59a6c3-aaea-4266-b947-8f4fe6dbbebb",
+                        "entry_id": "211d37fe-fbc2-40e6-a6d5-35fb7f140ef6",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "stempels"
+                    },
+                    {
+                        "form_id": "86fc2ffb-aeff-45eb-b039-eb15aa42867f",
+                        "entry_id": "211d37fe-fbc2-40e6-a6d5-35fb7f140ef6",
+                        "tags": [
+                            "diminutive",
+                            "singular"
+                        ],
+                        "form": "stempeltje"
+                    },
+                    {
+                        "form_id": "edda813f-a89a-4d28-86d4-8afc58006fca",
+                        "entry_id": "211d37fe-fbc2-40e6-a6d5-35fb7f140ef6",
+                        "tags": [
+                            "diminutive",
+                            "plural"
+                        ],
+                        "form": "stempeltjes"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "8634e300-a711-4b36-a559-35e7abd8ec2d",
+                        "entry_id": "211d37fe-fbc2-40e6-a6d5-35fb7f140ef6",
+                        "glosses": [
+                            "balk of schoor ter ondersteuning"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "d02a9c20-1c4f-4b48-81d4-eff7fb8179c1",
+                                "sense_id": "8634e300-a711-4b36-a559-35e7abd8ec2d",
+                                "text": "De stempels blijven onder de bekisting van de betonbalken staan totdat deze voldoende verhard zijn."
+                            },
+                            {
+                                "example_id": "ae5fddff-5c61-46d3-9177-012dd00a2fda",
+                                "sense_id": "8634e300-a711-4b36-a559-35e7abd8ec2d",
+                                "text": "Er worden stempels gebruikt om de keerwanden van een bouwkuip uiteen te houden."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "ae8302ab-7dec-4a05-8b5c-b050c125e18c",
+                        "source_entry_id": "211d37fe-fbc2-40e6-a6d5-35fb7f140ef6",
+                        "source_sense_id": "8634e300-a711-4b36-a559-35e7abd8ec2d",
+                        "source_sense_description": "A:1. voorwerp met een ingesneden oppervlak waarmee afdrukken gemaakt kunnen worden met inkt of in lak",
+                        "target_lang_word": "stamp",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "stamp",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "0f5f7393-5a19-4146-b182-069e05fc142d",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "An act of stamping the foot, paw or hoof."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "207a7061-8fb9-499e-a3f6-5e52fc62c046",
+                                                "sense_id": "0f5f7393-5a19-4146-b182-069e05fc142d",
+                                                "text": "The horse gave two quick stamps and rose up on its hind legs."
+                                            },
+                                            {
+                                                "example_id": "fe03f76d-8d07-4338-91ff-d4683492a10f",
+                                                "sense_id": "0f5f7393-5a19-4146-b182-069e05fc142d",
+                                                "text": "Just then there was a sound of footsteps, and the Boy ran past near them, and with a stamp of feet and a flash of white tails the two strange rabbits disappeared."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "bdba163f-4747-49c4-80c1-bb27c26cf288",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "An indentation, imprint, or mark made by stamping."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "4380663b-759e-4259-9f44-cf9111aa3f92",
+                                                "sense_id": "bdba163f-4747-49c4-80c1-bb27c26cf288",
+                                                "text": "My passport has quite a collection of stamps."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "02eafbac-b411-4134-b23f-63d4256c309f",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A device for imprinting designs."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "8151b80b-9b4e-4c7c-9e70-654e8a3d347a",
+                                                "sense_id": "02eafbac-b411-4134-b23f-63d4256c309f",
+                                                "text": "She loved to make designs with her collection of stamps."
+                                            },
+                                            {
+                                                "example_id": "d938eb68-10df-4d4f-a234-fe94103bbe9f",
+                                                "sense_id": "02eafbac-b411-4134-b23f-63d4256c309f",
+                                                "text": "Close to the register is a box of stamps adorned with logos of local business, including one for B cup cafe around the block."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "598a0582-fd7c-4bbe-9851-cc79f20c7ca6",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A small piece of paper, with a design and a face value, used to prepay postage or other dues such as tax or licence fees."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "e7a7c07c-ce6b-48f4-9521-da8677610790",
+                                                "sense_id": "598a0582-fd7c-4bbe-9851-cc79f20c7ca6",
+                                                "text": "I need one first-class stamp to send this letter."
+                                            },
+                                            {
+                                                "example_id": "9d8fff0d-a2b4-418d-ae62-c328cc2ec2a4",
+                                                "sense_id": "598a0582-fd7c-4bbe-9851-cc79f20c7ca6",
+                                                "text": "Now that commerce is done electronically, tax stamps are no longer issued here."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "29208475-29c8-47f4-9f91-29434b19cbe1",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A small piece of paper bearing a design on one side and adhesive on the other, used to decorate letters or craft work."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "3b905668-1aa1-4489-90d0-bec88fb31031",
+                                                "sense_id": "29208475-29c8-47f4-9f91-29434b19cbe1",
+                                                "text": "These stamps have a Christmas theme."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "9e977554-360c-4af9-a3f3-02094fe0eae1",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A tattoo."
+                                        ],
+                                        "tags": [
+                                            "figuratively",
+                                            "slang"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "4fb0f9df-5371-4418-b8a8-95b848ae2557",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A single dose of lysergic acid diethylamide."
+                                        ],
+                                        "tags": [
+                                            "slang"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "cda180d3-b0d3-49b7-8ff8-8c2d3d13bfe7",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A kind of heavy pestle, raised by water or steam power, for crushing ores."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "6dad3824-3263-4fdd-ba18-6251548ccec7",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "Cast; form; character; distinguishing mark or sign; evidence."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "aceb3bc5-7ed5-4318-92d6-a4bb6edcd2e1",
+                                                "sense_id": "6dad3824-3263-4fdd-ba18-6251548ccec7",
+                                                "text": "the stamp of criminality"
+                                            },
+                                            {
+                                                "example_id": "8175be65-5948-437a-9ad6-17d38ea4b9cc",
+                                                "sense_id": "6dad3824-3263-4fdd-ba18-6251548ccec7",
+                                                "text": "It is trial and examination must give it price, and not any antique fashion; and though it be not yet current by the public stamp, yet it may, for all that, be as old as nature, and is certainly not the less genuine."
+                                            },
+                                            {
+                                                "example_id": "f2f66e0e-ecaf-49c0-8c38-a4a179a99bea",
+                                                "sense_id": "6dad3824-3263-4fdd-ba18-6251548ccec7",
+                                                "text": "At a short distance from her were a pair of bathers of a very different stamp, if their operations deserved the name of bathing at all, viz., two girls on the confines of womanhood, presenting strong contrast to each other […]"
+                                            },
+                                            {
+                                                "example_id": "0780d2b3-d615-4119-8108-77781395b1a3",
+                                                "sense_id": "6dad3824-3263-4fdd-ba18-6251548ccec7",
+                                                "text": "Now, the horses at that period were all of a sturdy stamp[…]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "stamp",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "5790aa40-f3a3-4067-b54e-62dc8d2ff15f",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To step quickly and heavily, once or repeatedly."
+                                        ],
+                                        "tags": [
+                                            "intransitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "dc47e1e7-57c7-4ac8-9576-9fa9715ada07",
+                                                "sense_id": "5790aa40-f3a3-4067-b54e-62dc8d2ff15f",
+                                                "text": "The toddler screamed and stamped, but still got no candy."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f5bcd6e9-21f4-4acb-9e82-845eb50df9fd",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To move (the foot or feet) quickly and heavily, once or repeatedly."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "f3cc4e76-5e23-4b71-a06e-5fe8ee2eee21",
+                                                "sense_id": "f5bcd6e9-21f4-4acb-9e82-845eb50df9fd",
+                                                "text": "The crowd cheered and stamped their feet in appreciation."
+                                            },
+                                            {
+                                                "example_id": "77330b93-48e2-4f2c-a136-beb0c22e8afa",
+                                                "sense_id": "f5bcd6e9-21f4-4acb-9e82-845eb50df9fd",
+                                                "text": "The native peoples with vocal cords located in the respiratory organs initiate simple communication with slimes by stamping their feet."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c30b0e02-6065-4442-a976-2b4f50276acc",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To strike, beat, or press forcibly with the bottom of the foot, or by thrusting the foot downward."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "2e799acd-a940-4c60-ab0b-f16fda236d9c",
+                                                "sense_id": "c30b0e02-6065-4442-a976-2b4f50276acc",
+                                                "text": "Vnder my feet I stampe thy Cardinalls Hat:"
+                                            },
+                                            {
+                                                "example_id": "a64ebfb1-ac28-4fde-b1d5-667e7416fa85",
+                                                "sense_id": "c30b0e02-6065-4442-a976-2b4f50276acc",
+                                                "text": "He frets, he fumes, he stares, he stamps the ground."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c5920da5-a2d6-40f7-aa49-2e260a0d5285",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To mark by pressing quickly and heavily."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "0f2d842e-e99e-48a4-bf93-6876f1dec34f",
+                                                "sense_id": "c5920da5-a2d6-40f7-aa49-2e260a0d5285",
+                                                "text": "This machine stamps the metal cover with a design."
+                                            },
+                                            {
+                                                "example_id": "0a96837b-89c2-47cb-9bd7-af54225605bc",
+                                                "sense_id": "c5920da5-a2d6-40f7-aa49-2e260a0d5285",
+                                                "text": "This machine stamps the design into the metal cover."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "e71426dc-4d14-404f-93c3-fb8009923faa",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To give an official marking to, generally by impressing or imprinting a design or symbol."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c4d79958-27f9-4ace-bfd3-a1bd0ef17903",
+                                                "sense_id": "e71426dc-4d14-404f-93c3-fb8009923faa",
+                                                "text": "The immigration officer stamped my passport."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "ed55d706-412e-463e-9bea-f101b57457f0",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To apply postage stamps to."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "98d29e5f-3afa-4334-97f0-64b03122a42e",
+                                                "sense_id": "ed55d706-412e-463e-9bea-f101b57457f0",
+                                                "text": "I forgot to stamp this letter."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "54bb06f3-24df-4c62-aa72-160bc8296ca4",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To mark; to impress."
+                                        ],
+                                        "tags": [
+                                            "figuratively",
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "264f2a88-93e7-4dd7-b7e5-7bdea78fe061",
+                                                "sense_id": "54bb06f3-24df-4c62-aa72-160bc8296ca4",
+                                                "text": ", Book IV, Chapter X\nGod […] has stamped no original characters on our minds wherein we may read his being."
+                                            },
+                                            {
+                                                "example_id": "ed01a60c-90e8-43d2-a3b6-499385e44438",
+                                                "sense_id": "54bb06f3-24df-4c62-aa72-160bc8296ca4",
+                                                "text": "England's superior conditioning began to show in the final quarter and as the game began to break up, their three-quarters began to stamp their authority on the game. And when Foden went on a mazy run from inside his own 22 and put Ashton in for a long-range try, any threat of an upset was when and truly snuffed out."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "f002b4a8-5010-462f-a1fb-9c01ec479d71",
+                        "source_entry_id": "211d37fe-fbc2-40e6-a6d5-35fb7f140ef6",
+                        "source_sense_id": "8634e300-a711-4b36-a559-35e7abd8ec2d",
+                        "source_sense_description": "A2. een afdruk van [1]",
+                        "target_lang_word": "stamp",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "stamp",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "0f5f7393-5a19-4146-b182-069e05fc142d",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "An act of stamping the foot, paw or hoof."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "207a7061-8fb9-499e-a3f6-5e52fc62c046",
+                                                "sense_id": "0f5f7393-5a19-4146-b182-069e05fc142d",
+                                                "text": "The horse gave two quick stamps and rose up on its hind legs."
+                                            },
+                                            {
+                                                "example_id": "fe03f76d-8d07-4338-91ff-d4683492a10f",
+                                                "sense_id": "0f5f7393-5a19-4146-b182-069e05fc142d",
+                                                "text": "Just then there was a sound of footsteps, and the Boy ran past near them, and with a stamp of feet and a flash of white tails the two strange rabbits disappeared."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "bdba163f-4747-49c4-80c1-bb27c26cf288",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "An indentation, imprint, or mark made by stamping."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "4380663b-759e-4259-9f44-cf9111aa3f92",
+                                                "sense_id": "bdba163f-4747-49c4-80c1-bb27c26cf288",
+                                                "text": "My passport has quite a collection of stamps."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "02eafbac-b411-4134-b23f-63d4256c309f",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A device for imprinting designs."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "8151b80b-9b4e-4c7c-9e70-654e8a3d347a",
+                                                "sense_id": "02eafbac-b411-4134-b23f-63d4256c309f",
+                                                "text": "She loved to make designs with her collection of stamps."
+                                            },
+                                            {
+                                                "example_id": "d938eb68-10df-4d4f-a234-fe94103bbe9f",
+                                                "sense_id": "02eafbac-b411-4134-b23f-63d4256c309f",
+                                                "text": "Close to the register is a box of stamps adorned with logos of local business, including one for B cup cafe around the block."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "598a0582-fd7c-4bbe-9851-cc79f20c7ca6",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A small piece of paper, with a design and a face value, used to prepay postage or other dues such as tax or licence fees."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "e7a7c07c-ce6b-48f4-9521-da8677610790",
+                                                "sense_id": "598a0582-fd7c-4bbe-9851-cc79f20c7ca6",
+                                                "text": "I need one first-class stamp to send this letter."
+                                            },
+                                            {
+                                                "example_id": "9d8fff0d-a2b4-418d-ae62-c328cc2ec2a4",
+                                                "sense_id": "598a0582-fd7c-4bbe-9851-cc79f20c7ca6",
+                                                "text": "Now that commerce is done electronically, tax stamps are no longer issued here."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "29208475-29c8-47f4-9f91-29434b19cbe1",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A small piece of paper bearing a design on one side and adhesive on the other, used to decorate letters or craft work."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "3b905668-1aa1-4489-90d0-bec88fb31031",
+                                                "sense_id": "29208475-29c8-47f4-9f91-29434b19cbe1",
+                                                "text": "These stamps have a Christmas theme."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "9e977554-360c-4af9-a3f3-02094fe0eae1",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A tattoo."
+                                        ],
+                                        "tags": [
+                                            "figuratively",
+                                            "slang"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "4fb0f9df-5371-4418-b8a8-95b848ae2557",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A single dose of lysergic acid diethylamide."
+                                        ],
+                                        "tags": [
+                                            "slang"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "cda180d3-b0d3-49b7-8ff8-8c2d3d13bfe7",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "A kind of heavy pestle, raised by water or steam power, for crushing ores."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "6dad3824-3263-4fdd-ba18-6251548ccec7",
+                                        "entry_id": "8646066a-57d3-4cab-9364-4c88029b37c8",
+                                        "glosses": [
+                                            "Cast; form; character; distinguishing mark or sign; evidence."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "aceb3bc5-7ed5-4318-92d6-a4bb6edcd2e1",
+                                                "sense_id": "6dad3824-3263-4fdd-ba18-6251548ccec7",
+                                                "text": "the stamp of criminality"
+                                            },
+                                            {
+                                                "example_id": "8175be65-5948-437a-9ad6-17d38ea4b9cc",
+                                                "sense_id": "6dad3824-3263-4fdd-ba18-6251548ccec7",
+                                                "text": "It is trial and examination must give it price, and not any antique fashion; and though it be not yet current by the public stamp, yet it may, for all that, be as old as nature, and is certainly not the less genuine."
+                                            },
+                                            {
+                                                "example_id": "f2f66e0e-ecaf-49c0-8c38-a4a179a99bea",
+                                                "sense_id": "6dad3824-3263-4fdd-ba18-6251548ccec7",
+                                                "text": "At a short distance from her were a pair of bathers of a very different stamp, if their operations deserved the name of bathing at all, viz., two girls on the confines of womanhood, presenting strong contrast to each other […]"
+                                            },
+                                            {
+                                                "example_id": "0780d2b3-d615-4119-8108-77781395b1a3",
+                                                "sense_id": "6dad3824-3263-4fdd-ba18-6251548ccec7",
+                                                "text": "Now, the horses at that period were all of a sturdy stamp[…]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "stamp",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "5790aa40-f3a3-4067-b54e-62dc8d2ff15f",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To step quickly and heavily, once or repeatedly."
+                                        ],
+                                        "tags": [
+                                            "intransitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "dc47e1e7-57c7-4ac8-9576-9fa9715ada07",
+                                                "sense_id": "5790aa40-f3a3-4067-b54e-62dc8d2ff15f",
+                                                "text": "The toddler screamed and stamped, but still got no candy."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f5bcd6e9-21f4-4acb-9e82-845eb50df9fd",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To move (the foot or feet) quickly and heavily, once or repeatedly."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "f3cc4e76-5e23-4b71-a06e-5fe8ee2eee21",
+                                                "sense_id": "f5bcd6e9-21f4-4acb-9e82-845eb50df9fd",
+                                                "text": "The crowd cheered and stamped their feet in appreciation."
+                                            },
+                                            {
+                                                "example_id": "77330b93-48e2-4f2c-a136-beb0c22e8afa",
+                                                "sense_id": "f5bcd6e9-21f4-4acb-9e82-845eb50df9fd",
+                                                "text": "The native peoples with vocal cords located in the respiratory organs initiate simple communication with slimes by stamping their feet."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c30b0e02-6065-4442-a976-2b4f50276acc",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To strike, beat, or press forcibly with the bottom of the foot, or by thrusting the foot downward."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "2e799acd-a940-4c60-ab0b-f16fda236d9c",
+                                                "sense_id": "c30b0e02-6065-4442-a976-2b4f50276acc",
+                                                "text": "Vnder my feet I stampe thy Cardinalls Hat:"
+                                            },
+                                            {
+                                                "example_id": "a64ebfb1-ac28-4fde-b1d5-667e7416fa85",
+                                                "sense_id": "c30b0e02-6065-4442-a976-2b4f50276acc",
+                                                "text": "He frets, he fumes, he stares, he stamps the ground."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c5920da5-a2d6-40f7-aa49-2e260a0d5285",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To mark by pressing quickly and heavily."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "0f2d842e-e99e-48a4-bf93-6876f1dec34f",
+                                                "sense_id": "c5920da5-a2d6-40f7-aa49-2e260a0d5285",
+                                                "text": "This machine stamps the metal cover with a design."
+                                            },
+                                            {
+                                                "example_id": "0a96837b-89c2-47cb-9bd7-af54225605bc",
+                                                "sense_id": "c5920da5-a2d6-40f7-aa49-2e260a0d5285",
+                                                "text": "This machine stamps the design into the metal cover."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "e71426dc-4d14-404f-93c3-fb8009923faa",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To give an official marking to, generally by impressing or imprinting a design or symbol."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c4d79958-27f9-4ace-bfd3-a1bd0ef17903",
+                                                "sense_id": "e71426dc-4d14-404f-93c3-fb8009923faa",
+                                                "text": "The immigration officer stamped my passport."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "ed55d706-412e-463e-9bea-f101b57457f0",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To apply postage stamps to."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "98d29e5f-3afa-4334-97f0-64b03122a42e",
+                                                "sense_id": "ed55d706-412e-463e-9bea-f101b57457f0",
+                                                "text": "I forgot to stamp this letter."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "54bb06f3-24df-4c62-aa72-160bc8296ca4",
+                                        "entry_id": "073f13d8-14d1-4750-bc47-ce9789a2f86f",
+                                        "glosses": [
+                                            "To mark; to impress."
+                                        ],
+                                        "tags": [
+                                            "figuratively",
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "264f2a88-93e7-4dd7-b7e5-7bdea78fe061",
+                                                "sense_id": "54bb06f3-24df-4c62-aa72-160bc8296ca4",
+                                                "text": ", Book IV, Chapter X\nGod […] has stamped no original characters on our minds wherein we may read his being."
+                                            },
+                                            {
+                                                "example_id": "ed01a60c-90e8-43d2-a3b6-499385e44438",
+                                                "sense_id": "54bb06f3-24df-4c62-aa72-160bc8296ca4",
+                                                "text": "England's superior conditioning began to show in the final quarter and as the game began to break up, their three-quarters began to stamp their authority on the game. And when Foden went on a mazy run from inside his own 22 and put Ashton in for a long-range try, any threat of an upset was when and truly snuffed out."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "79305596-df25-4ced-8d9a-a03ef8723531",
+                        "source_entry_id": "211d37fe-fbc2-40e6-a6d5-35fb7f140ef6",
+                        "source_sense_id": "8634e300-a711-4b36-a559-35e7abd8ec2d",
+                        "source_sense_description": "A3. beschrijvende plantkunde: bovenste gedeelte van de stamper in een bloem",
+                        "target_lang_word": "stigma",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "stigma",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "2dcb73e9-fac3-408f-a8ce-d4f4b289ff42",
+                                        "entry_id": "351f4528-04af-43ab-94fa-d161adf45d0d",
+                                        "glosses": [
+                                            "A mark of infamy or disgrace."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "8d10c748-47a5-4cd8-9b9d-765b8753d8bc",
+                                                "sense_id": "2dcb73e9-fac3-408f-a8ce-d4f4b289ff42",
+                                                "text": "stigma of mental health disorders"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "29a8d877-f501-4542-a2a2-12730cc59fee",
+                                        "entry_id": "351f4528-04af-43ab-94fa-d161adf45d0d",
+                                        "glosses": [
+                                            "A mark of infamy or disgrace.",
+                                            "A discriminatory attitude."
+                                        ],
+                                        "tags": [
+                                            "figuratively"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "17c67bb7-f436-4c0c-8748-c4c25f74b59d",
+                                                "sense_id": "29a8d877-f501-4542-a2a2-12730cc59fee",
+                                                "text": "stigma towards mental health"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f6d36393-debf-43d1-83c1-1ca376137bd7",
+                                        "entry_id": "351f4528-04af-43ab-94fa-d161adf45d0d",
+                                        "glosses": [
+                                            "A scar or birthmark."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "cda1c5b7-27b8-475b-bfb7-6cfac4083373",
+                                        "entry_id": "351f4528-04af-43ab-94fa-d161adf45d0d",
+                                        "glosses": [
+                                            "A mark on the body corresponding to one of the wounds of the Crucifixion on Jesus's body, and sometimes reported to bleed periodically."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "acb739bb-c6f4-4a1e-aebe-d336a2ecb5e1",
+                                        "entry_id": "351f4528-04af-43ab-94fa-d161adf45d0d",
+                                        "glosses": [
+                                            "An outward sign; an indication."
+                                        ],
+                                        "tags": [
+                                            "figuratively",
+                                            "literary"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "965d5f40-5151-49aa-a497-12830a4056c8",
+                                                "sense_id": "acb739bb-c6f4-4a1e-aebe-d336a2ecb5e1",
+                                                "text": "Bradly scowled - the stigmata of alarm. What ultimate threat to his peace and privacy did this dropping in by young Podson imply?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "72cf5618-d4e7-41a1-b912-5f3007dd140a",
+                                        "entry_id": "351f4528-04af-43ab-94fa-d161adf45d0d",
+                                        "glosses": [
+                                            "The sticky part of a flower that receives pollen during pollination."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "3754f1a1-68ea-46bb-be32-4ef202a9b5df",
+                                                "sense_id": "72cf5618-d4e7-41a1-b912-5f3007dd140a",
+                                                "text": "Black crowberry. Empetrum nigrum. Crowberry Family. Fruit. — The black drupe is berrylike, globular, and incloses six to nine seedlike nutlets with a seed in each. The calyx is at the base and the stigma is at the apex. The drupes are solitary in the leaf axils. They are juicy, acid, edible, and serve as food for the Arctic birds."
+                                            },
+                                            {
+                                                "example_id": "d7fcecb4-6d86-4a9e-bf01-8e072753c55c",
+                                                "sense_id": "72cf5618-d4e7-41a1-b912-5f3007dd140a",
+                                                "text": "Now you see just how the stamen gets its lusty dust onto the stigma / And why this frenzied chlorophyllous orgy starts in spring is no enigma!"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "5530f769-cb4e-4301-aad5-d8a222550af6",
+                                        "entry_id": "351f4528-04af-43ab-94fa-d161adf45d0d",
+                                        "glosses": [
+                                            "A visible sign or characteristic of a disease."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "stigma",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "d82b5287-a128-484e-b339-3df91862090d",
+                                        "entry_id": "3ec6c39e-3820-4c9e-a0c6-7544846d32aa",
+                                        "glosses": [
+                                            "A ligature of the Greek letters sigma and tau, (Ϛ/ϛ)."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "23f7cb7e-e7ca-49d8-91d8-d1ca58b399f5",
+                "word": "stempel",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "ce6b0352-03e7-4abe-89ac-71edf758279a",
+                        "entry_id": "23f7cb7e-e7ca-49d8-91d8-d1ca58b399f5",
+                        "glosses": [
+                            "eerste persoon enkelvoud tegenwoordige tijd van stempelen"
+                        ],
+                        "tags": [
+                            "form-of"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "a8fd3e3c-c17b-4d15-88ba-8cc929ad69c7",
+                                "sense_id": "ce6b0352-03e7-4abe-89ac-71edf758279a",
+                                "text": "Ik stempel."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "56f2e1ef-5429-4b16-9b3b-962be388f20c",
+                        "entry_id": "23f7cb7e-e7ca-49d8-91d8-d1ca58b399f5",
+                        "glosses": [
+                            "gebiedende wijs van stempelen"
+                        ],
+                        "tags": [
+                            "form-of"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "06d9aec7-36a3-4f61-a309-79f3fea3e6f3",
+                                "sense_id": "56f2e1ef-5429-4b16-9b3b-962be388f20c",
+                                "text": "Stempel!"
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "374704dc-9838-4e44-b384-96afe5669abd",
+                        "entry_id": "23f7cb7e-e7ca-49d8-91d8-d1ca58b399f5",
+                        "glosses": [
+                            "tweede persoon enkelvoud tegenwoordige tijd van stempelen"
+                        ],
+                        "tags": [
+                            "form-of",
+                            "inversion"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "5b6b5560-26aa-455e-9024-4be7c17bf633",
+                                "sense_id": "374704dc-9838-4e44-b384-96afe5669abd",
+                                "text": "Stempel je?"
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": []
+    }
+}
