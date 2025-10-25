@@ -70,6 +70,9 @@ object DatabaseProvider {
             lemma_idAdapter = UuidByteArrayColumnAdapter(),
             posAdapter = DictionaryPosIntColumnAdapter(),
         ),
+        lemma_word_familyAdapter = Lemma_word_family.Adapter(
+            lemma_idAdapter = UuidByteArrayColumnAdapter(),
+        ),
         senseAdapter = Sense.Adapter(
             sense_idAdapter = UuidByteArrayColumnAdapter(),
             lemma_pos_idAdapter = UuidByteArrayColumnAdapter(),

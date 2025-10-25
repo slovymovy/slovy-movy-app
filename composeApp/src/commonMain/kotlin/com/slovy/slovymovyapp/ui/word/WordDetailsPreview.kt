@@ -1430,6 +1430,82 @@ internal fun sampleVeryLongWordCard(): LanguageCard {
     )
 }
 
+internal fun sampleDoubleCard(): LanguageCard {
+    return LanguageCard(
+        lemma = "double",
+        zipfFrequency = 5.2f,
+        wordFamily = listOf("doubling", "doubly", "doublet"),
+        entries = listOf(
+            LanguageCardPosEntry(
+                pos = PartOfSpeech.ADJECTIVE,
+                forms = mutableListOf(),
+                senses = listOf(
+                    LanguageCardResponseSense(
+                        senseId = "double-adj-1",
+                        senseDefinition = "Made up of two matching or complementary elements.",
+                        learnerLevel = LearnerLevel.A2,
+                        frequency = SenseFrequency.HIGH,
+                        semanticGroupId = "Two/Pair",
+                        nameType = NameType.NO,
+                        examples = listOf(
+                            LanguageCardExample(
+                                text = "The house has <w>double</w> doors at the entrance.",
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "У дома <w>двойные</w> двери на входе.")
+                            )
+                        ),
+                        commonPhrases = listOf("double doors", "double bed"),
+                        targetLangDefinitions = mapOf(
+                            Language.RUSSIAN to "Состоящий из двух одинаковых или дополняющих друг друга элементов."
+                        ),
+                        translations = mapOf(
+                            Language.RUSSIAN to listOf(
+                                LanguageCardTranslation(
+                                    targetLangWord = "двойной",
+                                    targetLangSenseClarification = "Состоящий из двух частей."
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            LanguageCardPosEntry(
+                pos = PartOfSpeech.VERB,
+                forms = mutableListOf(),
+                senses = listOf(
+                    LanguageCardResponseSense(
+                        senseId = "double-verb-1",
+                        senseDefinition = "To multiply by two.",
+                        learnerLevel = LearnerLevel.A2,
+                        frequency = SenseFrequency.HIGH,
+                        semanticGroupId = "Multiply/Increase",
+                        nameType = NameType.NO,
+                        examples = listOf(
+                            LanguageCardExample(
+                                text = "The company managed to <w>double</w> its profits this year.",
+                                targetLangTranslations = mapOf(Language.RUSSIAN to "Компании удалось <w>удвоить</w> свою прибыль в этом году.")
+                            )
+                        ),
+                        synonyms = listOf("redouble", "duplicate"),
+                        antonyms = listOf("halve", "bisect"),
+                        commonPhrases = listOf("double the amount", "double your money"),
+                        targetLangDefinitions = mapOf(
+                            Language.RUSSIAN to "Умножить на два."
+                        ),
+                        translations = mapOf(
+                            Language.RUSSIAN to listOf(
+                                LanguageCardTranslation(
+                                    targetLangWord = "удвоить",
+                                    targetLangSenseClarification = "Увеличить в два раза."
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+}
+
 @Preview
 @Composable
 private fun WordDetailScreenPreviewTargetSenseAmazon(
@@ -1487,5 +1563,30 @@ private fun WordDetailScreenPreviewTargetSenseRichmondVirginia(
                 isSenseFavorite = isSenseFavoritePreview,
             )
         )
+    }
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewWithWordFamily(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(
+            state = sampleDoubleCard().toContentUiState(
+                isSenseFavorite = isSenseFavoritePreview,
+                wordFamilyExpanded = true
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewWithWordFamilyCollapsed(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(state = sampleDoubleCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
     }
 }

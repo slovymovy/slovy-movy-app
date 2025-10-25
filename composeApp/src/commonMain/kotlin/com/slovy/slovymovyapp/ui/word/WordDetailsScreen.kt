@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -36,7 +37,11 @@ import kotlinx.coroutines.launch
 
 sealed interface WordDetailUiState {
     data class Empty(val lemma: String? = null, val message: String = "No entries available.") : WordDetailUiState
-    data class Content(val card: LanguageCard, val entries: List<EntryUiState>) : WordDetailUiState
+    data class Content(
+        val card: LanguageCard,
+        val entries: List<EntryUiState>,
+        val wordFamilyExpanded: Boolean = false
+    ) : WordDetailUiState
 }
 
 data class EntryUiState(
@@ -59,10 +64,12 @@ data class SenseUiState(
 
 internal fun LanguageCard.toContentUiState(
     targetSenseId: String? = null,
+    wordFamilyExpanded: Boolean = false,
     isSenseFavorite: (String) -> Boolean
 ): WordDetailUiState.Content =
     WordDetailUiState.Content(
         card = this,
+        wordFamilyExpanded = wordFamilyExpanded,
         entries = entries.mapIndexed { index, entry -> entry.toEntryUiState(index, targetSenseId, isSenseFavorite) }
     )
 
@@ -335,6 +342,13 @@ class WordDetailViewModel(
         }
     }
 
+    fun toggleWordFamily() {
+        val current = state
+        if (current is WordDetailUiState.Content) {
+            state = current.copy(wordFamilyExpanded = !current.wordFamilyExpanded)
+        }
+    }
+
     fun playWord() {
         if (availableVoices.isEmpty()) return
 
@@ -474,6 +488,7 @@ fun WordDetailScreen(
         onNavigateToSettings = onNavigateToSettings,
         onPlayWord = { viewModel.playWord() },
         onStopWord = { viewModel.stopPlayback() },
+        onWordFamilyToggle = { viewModel.toggleWordFamily() },
         onEntryToggle = { index -> viewModel.toggleEntry(index) },
         onFormsToggle = { index -> viewModel.toggleForms(index) },
         onSenseToggle = { entryIndex, senseId -> viewModel.toggleSense(entryIndex, senseId) },
@@ -503,6 +518,7 @@ fun WordDetailScreenContent(
     onNavigateToSettings: () -> Unit = {},
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
+    onWordFamilyToggle: () -> Unit = {},
     onEntryToggle: (Int) -> Unit = {},
     onFormsToggle: (Int) -> Unit = {},
     onSenseToggle: (Int, String) -> Unit = { _, _ -> },
@@ -600,6 +616,8 @@ fun WordDetailScreenContent(
                 WordDetailContent(
                     card = state.card,
                     entryStates = state.entries,
+                    wordFamilyExpanded = state.wordFamilyExpanded,
+                    onWordFamilyToggle = onWordFamilyToggle,
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
@@ -641,6 +659,8 @@ private fun WordDetailContent(
     card: LanguageCard,
     entryStates: List<EntryUiState>,
     modifier: Modifier = Modifier,
+    wordFamilyExpanded: Boolean = false,
+    onWordFamilyToggle: () -> Unit = {},
     onEntryToggle: (Int) -> Unit,
     onFormsToggle: (Int) -> Unit,
     onSenseToggle: (Int, String) -> Unit,
@@ -657,8 +677,52 @@ private fun WordDetailContent(
             scrollContainerY = coordinates.positionInWindow().y
         },
         verticalArrangement = Arrangement.spacedBy(24.dp),
-        horizontalAlignment = Alignment.Start
     ) {
+        // Display word family if available
+        if (card.wordFamily.isNotEmpty()) {
+            val colorScheme = MaterialTheme.colorScheme
+            ExpandableSection(
+                title = "Word Family",
+                expanded = wordFamilyExpanded,
+                onToggle = onWordFamilyToggle,
+                modifier = Modifier.fillMaxWidth(),
+                supportingText = "${card.wordFamily.size} related word${if (card.wordFamily.size != 1) "s" else ""}",
+                headlineStyle = MaterialTheme.typography.titleMedium
+            ) {
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    card.wordFamily.forEach { familyWord ->
+                        val wordFamilyColor = getWordFamilyColor(familyWord, colorScheme)
+
+                        val backgroundColor = wordFamilyColor.first
+                        val textColor = wordFamilyColor.second
+
+                        SuggestionChip(
+                            onClick = { /* TODO: navigate to word */ },
+                            label = {
+                                Text(
+                                    text = familyWord,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                                    )
+                                )
+                            },
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = backgroundColor,
+                                labelColor = textColor
+                            ),
+                            border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.5f))
+                        )
+                    }
+                }
+            }
+        }
+
         if (card.entries.isEmpty()) {
             Text(
                 text = "No entries available.",

@@ -5,7 +5,8 @@ import com.slovy.slovymovyapp.data.Language
 data class LanguageCard(
     val lemma: String,
     val entries: List<LanguageCardPosEntry>,
-    val zipfFrequency: Float
+    val zipfFrequency: Float,
+    val wordFamily: List<String> = emptyList()
 )
 
 data class LanguageCardPosEntry(

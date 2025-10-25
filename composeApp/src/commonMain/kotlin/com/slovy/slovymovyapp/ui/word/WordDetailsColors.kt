@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui.word
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
@@ -8,6 +9,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.*
+import kotlin.math.abs
 
 @Composable
 internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
@@ -157,3 +159,19 @@ internal val ArrowForwardVector: ImageVector = ImageVector.Builder(
         close()
     }
 }.build()
+
+@Composable
+internal fun getWordFamilyColor(word: String, colorScheme: ColorScheme): Pair<Color, Color> {
+    return when (    // Generate consistent color based on word hash
+        (abs(word.hashCode())) % 8) {
+        0 -> colorScheme.primaryContainer to colorScheme.onPrimaryContainer
+        1 -> colorScheme.secondaryContainer to colorScheme.onSecondaryContainer
+        2 -> colorScheme.tertiaryContainer to colorScheme.onTertiaryContainer
+        3 -> colorScheme.errorContainer to colorScheme.onErrorContainer
+        4 -> colorScheme.primary to colorScheme.onPrimary
+        5 -> colorScheme.secondary to colorScheme.onSecondary
+        6 -> colorScheme.tertiary to colorScheme.onTertiary
+        7 -> colorScheme.surfaceVariant to colorScheme.onSurfaceVariant
+        else -> error("Unknown word family color index")
+    }
+}

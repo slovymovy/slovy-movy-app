@@ -166,4 +166,46 @@ class DictionaryRepositoryTest : BaseTest() {
             mgr.deleteDictionary(Language.ENGLISH)
         }
     }
+
+    @Test
+    fun word_family_is_retrieved_correctly() {
+        val platform = platformDbSupport()
+        val mgr = DataDbManager(platform, null)
+
+        // Ensure a clean state
+        mgr.deleteDictionary(Language.ENGLISH)
+
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+        try {
+            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
+
+            val repo = DictionaryRepository(mgr)
+            assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
+
+            // Test with "double" which should have word_family in the processed JSON
+            val card = repo.getLanguageCard(Language.ENGLISH, "double")
+            assertNotNull(card, "Language card should be built for 'double'")
+
+            // Verify word_family is present and contains expected members
+            assertTrue(card.wordFamily.isNotEmpty(), "Word family should not be empty for 'double'")
+
+            // Verify the word family contains the expected words from double.json
+            val expectedMembers = listOf("doubling", "doubly", "doublet")
+            expectedMembers.forEach { member ->
+                assertTrue(
+                    card.wordFamily.contains(member),
+                    "Word family should contain '$member'. Found: ${card.wordFamily}"
+                )
+            }
+
+            assertEquals(
+                expectedMembers.size,
+                card.wordFamily.size,
+                "Word family should have exactly ${expectedMembers.size} members. Found: ${card.wordFamily}"
+            )
+        } finally {
+            // Clean up
+            mgr.deleteDictionary(Language.ENGLISH)
+        }
+    }
 }

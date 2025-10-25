@@ -14,6 +14,13 @@ CREATE TABLE lemma (
   zipf_frequency REAL NOT NULL
 );
 
+-- Word family members for each lemma
+CREATE TABLE lemma_word_family (
+  lemma_id BLOB AS Uuid NOT NULL REFERENCES lemma(id) ON DELETE CASCADE,
+  word TEXT NOT NULL,
+  PRIMARY KEY(lemma_id, word)
+);
+
 -- Parts of speech for each lemma
 CREATE TABLE lemma_pos (
   id BLOB AS Uuid NOT NULL PRIMARY KEY,
@@ -303,3 +310,13 @@ WHERE f.form_normalized LIKE ? COLLATE NOCASE
 GROUP BY l.id, l.lemma, l.zipf_frequency, f.form
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
+
+-- Word family queries
+insertLemmaWordFamily:
+INSERT OR IGNORE INTO lemma_word_family(lemma_id, word)
+VALUES (?, ?);
+
+selectWordFamilyByLemmaId:
+SELECT word
+FROM lemma_word_family
+WHERE lemma_id = ?;

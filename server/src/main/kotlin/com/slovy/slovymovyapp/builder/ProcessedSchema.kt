@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LanguageCardResponse(
+    @SerialName("word_family")
+    val wordFamily: List<String>? = null,
     val entries: List<LanguageCardPosEntry>
 )
 
