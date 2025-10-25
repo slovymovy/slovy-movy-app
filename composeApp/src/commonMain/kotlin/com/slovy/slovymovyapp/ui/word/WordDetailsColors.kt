@@ -172,6 +172,6 @@ internal fun getWordFamilyColor(word: String, colorScheme: ColorScheme): Pair<Co
         5 -> colorScheme.secondary to colorScheme.onSecondary
         6 -> colorScheme.tertiary to colorScheme.onTertiary
         7 -> colorScheme.surfaceVariant to colorScheme.onSurfaceVariant
-        else -> throw IllegalArgumentException("Unknown word family color index")
+        else -> error("Unknown word family color index")
     }
 }
