@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.*
+import kotlin.math.abs
 
 @Composable
 internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
@@ -161,7 +162,8 @@ internal val ArrowForwardVector: ImageVector = ImageVector.Builder(
 
 @Composable
 internal fun getWordFamilyColor(word: String, colorScheme: ColorScheme): Pair<Color, Color> {
-    return when (getWordFamilyColorIndex(word)) {
+    return when (    // Generate consistent color based on word hash
+        (abs(word.hashCode())) % 8) {
         0 -> colorScheme.primaryContainer to colorScheme.onPrimaryContainer
         1 -> colorScheme.secondaryContainer to colorScheme.onSecondaryContainer
         2 -> colorScheme.tertiaryContainer to colorScheme.onTertiaryContainer
@@ -172,10 +174,4 @@ internal fun getWordFamilyColor(word: String, colorScheme: ColorScheme): Pair<Co
         7 -> colorScheme.surfaceVariant to colorScheme.onSurfaceVariant
         else -> throw IllegalArgumentException("Unknown word family color index")
     }
-}
-
-private fun getWordFamilyColorIndex(word: String): Int {
-    // Generate consistent color based on word hash
-    val hash = word.hashCode()
-    return (hash and 0x7FFFFFFF) % 8
 }

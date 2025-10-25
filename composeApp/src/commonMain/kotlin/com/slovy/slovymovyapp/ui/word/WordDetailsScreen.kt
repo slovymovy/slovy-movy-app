@@ -677,7 +677,6 @@ private fun WordDetailContent(
             scrollContainerY = coordinates.positionInWindow().y
         },
         verticalArrangement = Arrangement.spacedBy(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Display word family if available
         if (card.wordFamily.isNotEmpty()) {

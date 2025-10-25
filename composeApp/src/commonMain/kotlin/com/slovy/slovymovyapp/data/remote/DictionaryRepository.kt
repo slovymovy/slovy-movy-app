@@ -174,19 +174,13 @@ class DictionaryRepository(
         val q = db.dictionaryQueries
 
         // Collect all base lemma IDs for the given lemma text (case-insensitive), including normalized matches
-        val byWord = q.selectLemmasByWord(lemma).executeAsList()
-        val byNorm = q.selectLemmasByNormalized(lemma).executeAsList()
-        val lemmaIds = LinkedHashSet<Uuid>()
-        byWord.forEach { lemmaIds.add(it.id) }
-        byNorm.forEach { lemmaIds.add(it.id) }
-        if (lemmaIds.isEmpty()) return null
+        val lemmaId = q.selectLemmasByWord(lemma).executeAsOneOrNull()?.id ?: return null
 
         // Get all lemma_pos IDs for these lemmas
         val lemmaPosIds = LinkedHashSet<Uuid>()
-        lemmaIds.forEach { lemmaId ->
-            val posIds = q.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
-            posIds.forEach { lemmaPosIds.add(it) }
-        }
+
+        val posIds = q.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
+        posIds.forEach { lemmaPosIds.add(it) }
 
         val entries = mutableListOf<LanguageCardPosEntry>()
         var zipfFrequency = 0.0f
@@ -274,9 +268,8 @@ class DictionaryRepository(
         }
 
         // Fetch word family for all collected lemma IDs
-        val wordFamily = lemmaIds.flatMap { lemmaId ->
+        val wordFamily =
             q.selectWordFamilyByLemmaId(lemmaId).executeAsList()
-        }
 
         if (entries.isEmpty()) return null
         return LanguageCard(
