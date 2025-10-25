@@ -91,6 +91,21 @@ class AllLanguagesIngestionIntegrationTest {
                     )
                 }
 
+                // Validate word_family if present in processed JSON
+                val expectedWordFamily = processed.wordFamily
+                if (expectedWordFamily != null && expectedWordFamily.isNotEmpty()) {
+                    val lemmaIds = lemmas.map { it.id }
+                    val actualWordFamily = lemmaIds.flatMap { lemmaId ->
+                        dq.selectWordFamilyByLemmaId(lemmaId).executeAsList()
+                    }
+                    assertEquals(
+                        expectedWordFamily.sorted(),
+                        actualWordFamily.sorted(),
+                        "Word family mismatch for '$word' in $lang from ${pFile.name}. " +
+                                "Expected: ${expectedWordFamily.sorted()}, Found: ${actualWordFamily.sorted()}"
+                    )
+                }
+
                 // Validate translation DBs for each target language in processed
                 val targetLangs = collectTargetLanguages(processed)
                 processed.entries.forEach { entry ->

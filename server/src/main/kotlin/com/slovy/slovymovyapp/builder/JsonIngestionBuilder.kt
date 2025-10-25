@@ -112,6 +112,11 @@ class JsonIngestionBuilder(
                 zipf_frequency = zipfFrequency
             )
 
+            // Insert word family
+            processed.wordFamily?.forEach { familyWord ->
+                dictQ.insertLemmaWordFamily(lemma_id = baseLemmaId, word = familyWord)
+            }
+
             // Insert lemma_pos entries for all POSes
             posToEntryId.forEach { (pos, entryId) ->
                 try {

@@ -272,7 +272,18 @@ class DictionaryRepository(
             )
             entries.add(entry)
         }
+
+        // Fetch word family for all collected lemma IDs
+        val wordFamily = lemmaIds.flatMap { lemmaId ->
+            q.selectWordFamilyByLemmaId(lemmaId).executeAsList()
+        }
+
         if (entries.isEmpty()) return null
-        return LanguageCard(entries = entries, lemma = lemma, zipfFrequency = zipfFrequency)
+        return LanguageCard(
+            entries = entries,
+            lemma = lemma,
+            zipfFrequency = zipfFrequency,
+            wordFamily = wordFamily
+        )
     }
 }

@@ -32,7 +32,7 @@ class DataDbManager(
     private val settingsRepository: SettingsRepository? = null,
 ) {
     companion object {
-        const val VERSION = "v3"
+        const val VERSION = "v4"
 
         // TODO: we use HTTP for now to workaround some issues with IOS emulator
         // https://github.com/slovymovy/slovy-movy-app/issues/34
