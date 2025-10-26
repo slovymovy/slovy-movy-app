@@ -36,11 +36,10 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     actual fun speak(text: String) {
         val utterance = AVSpeechUtterance.speechUtteranceWithString(text)
 
-        // Настройки скорости и тона
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
         utterance.pitchMultiplier = 1.0f
         utterance.volume = 1.0f
-        currentUtterance?.voice = currentVoice ?: return
+        utterance.voice = currentVoice ?: return
 
         currentUtterance = utterance
         synthesizer.speakUtterance(utterance)
@@ -64,7 +63,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                     Text2SpeechLanguage(
                         language = language,
                         isAvailable = isAvailable,
-                        missingData = false // iOS автоматически скачивает голоса
+                        missingData = false
                     )
                 )
             }
@@ -108,7 +107,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         if (settingsUrl != null && UIApplication.sharedApplication.canOpenURL(settingsUrl)) {
             UIApplication.sharedApplication.openURL(settingsUrl)
         } else {
-            // Fallback на общие настройки
             val generalSettingsUrl = NSURL.URLWithString("App-prefs:root=General")
             if (generalSettingsUrl != null) {
                 UIApplication.sharedApplication.openURL(generalSettingsUrl)
