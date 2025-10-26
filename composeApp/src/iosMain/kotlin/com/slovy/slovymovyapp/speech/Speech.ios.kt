@@ -53,7 +53,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     actual fun speak(text: String) {
         val utterance = AVSpeechUtterance.speechUtteranceWithString(text)
         //TODO maybe we need to make speed configurable
-        utterance.rate = 0.1f
+        utterance.rate = 0.3f
         utterance.pitchMultiplier = 1.0f
         utterance.volume = 1.0f
         utterance.voice = currentVoice ?: return
