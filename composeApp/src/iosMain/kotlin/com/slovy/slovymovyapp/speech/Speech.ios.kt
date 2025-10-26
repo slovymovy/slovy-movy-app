@@ -31,6 +31,23 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
             onFinish = { onStatusChange?.invoke(TTSStatus.IDLE) },
             onWordBoundary = { range -> onWordBoundary?.invoke(range) }
         )
+        configureAudioSession()
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    //TODO it is right place to configure audio session?
+    private fun configureAudioSession() {
+        val audioSession = AVAudioSession.sharedInstance()
+        try {
+            audioSession.setCategory(
+                AVAudioSessionCategoryPlayback,
+                AVAudioSessionCategoryOptions.MIN_VALUE,
+                null
+            )
+            audioSession.setActive(true, null)
+        } catch (e: Exception) {
+            // Audio session configuration failed
+        }
     }
 
     actual fun speak(text: String) {
