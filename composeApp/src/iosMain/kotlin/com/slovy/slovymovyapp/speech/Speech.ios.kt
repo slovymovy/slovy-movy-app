@@ -105,11 +105,11 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         val settingsUrl = NSURL.URLWithString("App-prefs:root=General&path=ACCESSIBILITY/VOICEOVER/Speech")
 
         if (settingsUrl != null && UIApplication.sharedApplication.canOpenURL(settingsUrl)) {
-            UIApplication.sharedApplication.openURL(settingsUrl)
+            UIApplication.sharedApplication.openURL(settingsUrl, emptyMap<Any?, Any>(), null)
         } else {
             val generalSettingsUrl = NSURL.URLWithString("App-prefs:root=General")
             if (generalSettingsUrl != null) {
-                UIApplication.sharedApplication.openURL(generalSettingsUrl)
+                UIApplication.sharedApplication.openURL(generalSettingsUrl, emptyMap<Any?, Any>(), null)
             }
         }
     }
