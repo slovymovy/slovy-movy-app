@@ -19,3 +19,4 @@ captures
 /.claude/settings.local.json
 /iosApp/Configuration/Config.local.xcconfig 
 .db-files
+/composeApp/release/*

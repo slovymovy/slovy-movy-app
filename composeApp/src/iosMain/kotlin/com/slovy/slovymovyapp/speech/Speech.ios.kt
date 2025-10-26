@@ -19,6 +19,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     private val synthesizer = AVSpeechSynthesizer()
     private val delegate = TTSDelegate()
     private var currentUtterance: AVSpeechUtterance? = null
+    private var currentVoice: AVSpeechSynthesisVoice? = null
 
     private var onWordBoundary: ((IntRange) -> Unit)? = null
     private var onStatusChange: ((TTSStatus) -> Unit)? = null
@@ -39,6 +40,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
         utterance.pitchMultiplier = 1.0f
         utterance.volume = 1.0f
+        currentUtterance?.voice = currentVoice ?: return
 
         currentUtterance = utterance
         synthesizer.speakUtterance(utterance)
@@ -97,7 +99,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual fun setVoice(voice: Text2SpeechVoice) {
         val selectedVoice = AVSpeechSynthesisVoice.voiceWithIdentifier(voice.id)
-        currentUtterance?.voice = selectedVoice
+        currentVoice = selectedVoice
     }
 
     actual fun openSettings() {
