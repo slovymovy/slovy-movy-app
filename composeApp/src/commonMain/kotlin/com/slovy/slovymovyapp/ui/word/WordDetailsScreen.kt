@@ -70,13 +70,21 @@ internal fun LanguageCard.toContentUiState(
     WordDetailUiState.Content(
         card = this,
         wordFamilyExpanded = wordFamilyExpanded,
-        entries = entries.mapIndexed { index, entry -> entry.toEntryUiState(index, targetSenseId, isSenseFavorite) }
+        entries = entries.mapIndexed { index, entry ->
+            entry.toEntryUiState(
+                index,
+                targetSenseId,
+                isSenseFavorite,
+                entries.size
+            )
+        }
     )
 
 private fun LanguageCardPosEntry.toEntryUiState(
     index: Int,
     targetSenseId: String? = null,
-    isSenseFavorite: (String) -> Boolean
+    isSenseFavorite: (String) -> Boolean,
+    numPos: Int
 ): EntryUiState = EntryUiState(
     entryId = "${pos.name.lowercase()}_$index",
     expanded = true,
@@ -85,7 +93,7 @@ private fun LanguageCardPosEntry.toEntryUiState(
         val expanded = if (targetSenseId != null) {
             it.senseId == targetSenseId
         } else {
-            senses.size < 2
+            senses.size < 2 && numPos == 1
         }
         it.toSenseUiState(expanded, isSenseFavorite(it.senseId), pos)
     }
@@ -733,7 +741,8 @@ private fun WordDetailContent(
             card.entries.forEachIndexed { index, entry ->
                 val entryState = entryStates.getOrNull(index) ?: entry.toEntryUiState(
                     index,
-                    isSenseFavorite = isSenseFavorite
+                    isSenseFavorite = isSenseFavorite,
+                    numPos = card.entries.size
                 )
                 EntryCard(
                     entry = entry,
