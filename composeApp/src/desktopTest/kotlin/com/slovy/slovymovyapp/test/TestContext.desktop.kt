@@ -7,3 +7,6 @@ actual object TestContext {
 }
 
 actual abstract class BaseTest actual constructor()
+
+@Target(allowedTargets = [AnnotationTarget.CLASS, AnnotationTarget.FUNCTION])
+actual annotation class IgnoreIos actual constructor()

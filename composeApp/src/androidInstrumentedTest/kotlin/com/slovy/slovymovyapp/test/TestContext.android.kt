@@ -12,3 +12,6 @@ actual object TestContext {
 
 @RunWith(AndroidJUnit4::class)
 actual abstract class BaseTest actual constructor()
+
+@Target(allowedTargets = [AnnotationTarget.CLASS, AnnotationTarget.FUNCTION])
+actual annotation class IgnoreIos actual constructor()

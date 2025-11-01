@@ -36,6 +36,7 @@ data class SearchUiState(
     val query: String,
     val results: List<DictionaryRepository.SearchItem>,
     val showNoResults: Boolean,
+    val showLanguageIndicators: Boolean = false,
     val scrollState: LazyListState = LazyListState()
 )
 
@@ -43,7 +44,15 @@ class SearchViewModel(
     private val repository: DictionaryRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(SearchUiState("Search", "", emptyList(), false))
+    var state by mutableStateOf(
+        SearchUiState(
+            title = "Search",
+            query = "",
+            results = emptyList(),
+            showNoResults = false,
+            showLanguageIndicators = repository.installedDictionaries().size > 1
+        )
+    )
         private set
 
     suspend fun updateQuery(newQuery: String) {
@@ -61,6 +70,12 @@ class SearchViewModel(
         // Reset scroll to top when query changes
         state.scrollState.scrollToItem(0)
     }
+
+    fun refreshLanguageIndicators() {
+        state = state.copy(
+            showLanguageIndicators = repository.installedDictionaries().size > 1
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,6 +92,11 @@ fun SearchScreen(
     val coroutineScope = rememberCoroutineScope()
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
+
+    // Refresh language indicators when screen is opened
+    LaunchedEffect(Unit) {
+        viewModel.refreshLanguageIndicators()
+    }
 
     LaunchedEffect(savedQuery) {
         if (viewModel.state.query.isEmpty() && savedQuery.isNotEmpty()) {
@@ -186,6 +206,7 @@ fun SearchScreenContent(
                             items(state.results) { item ->
                                 SearchResultCard(
                                     item = item,
+                                    showLanguageIndicator = state.showLanguageIndicators,
                                     onClick = { onResultSelected(item) }
                                 )
                             }
@@ -201,6 +222,7 @@ fun SearchScreenContent(
 @Composable
 private fun SearchResultCard(
     item: DictionaryRepository.SearchItem,
+    showLanguageIndicator: Boolean = false,
     onClick: () -> Unit
 ) {
     Card(
@@ -232,11 +254,22 @@ private fun SearchResultCard(
                 }
             }
 
-            if (item.pos.isNotEmpty()) {
+            if (showLanguageIndicator || item.pos.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
+                    // Show language badge first if searching multiple dictionaries
+                    if (showLanguageIndicator) {
+                        Badge(
+                            text = item.language.selfName,
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                    }
+
+                    // Then show POS badges with rounder corners
                     item.pos.forEach { pos ->
                         val (posLc, posLcc) = colorsForPos(pos)
                         Badge(
@@ -426,9 +459,18 @@ private fun SearchScreenPreviewMultilingualResults(
                         display = "программа",
                         zipfFrequency = 5.8f,
                         pos = listOf(PartOfSpeech.NOUN)
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = Language.POLISH,
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"),
+                        lemma = "program",
+                        display = "program",
+                        zipfFrequency = 5.4f,
+                        pos = listOf(PartOfSpeech.NOUN)
                     )
                 ),
                 showNoResults = false,
+                showLanguageIndicators = true, // Multiple dictionaries - show language badges
             ),
         )
     }
@@ -479,7 +521,7 @@ private fun SearchScreenPreviewInfoDialog(
 
 @Preview
 @Composable
-private fun SearchScreenPreviewDutchLanguage(
+private fun SearchScreenPreviewSingleLanguage(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
@@ -506,6 +548,101 @@ private fun SearchScreenPreviewDutchLanguage(
                     )
                 ),
                 showNoResults = false,
+                showLanguageIndicators = false, // Single dictionary - no language badges
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewMultilingualWithoutPOS(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                title = "Dictionary Search",
+                query = "word",
+                results = listOf(
+                    DictionaryRepository.SearchItem(
+                        language = Language.ENGLISH,
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                        lemma = "word",
+                        display = "word",
+                        zipfFrequency = 6.1f,
+                        pos = emptyList()
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = Language.RUSSIAN,
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
+                        lemma = "ворд",
+                        display = "ворд",
+                        zipfFrequency = 3.5f,
+                        pos = emptyList()
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = Language.POLISH,
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
+                        lemma = "wyraz",
+                        display = "wyraz",
+                        zipfFrequency = 4.2f,
+                        pos = listOf(PartOfSpeech.NOUN)
+                    )
+                ),
+                showNoResults = false,
+                showLanguageIndicators = true, // Multiple dictionaries - language badges shown even without POS
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewMixedLanguagesAndForms(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                title = "Dictionary Search",
+                query = "run",
+                results = listOf(
+                    DictionaryRepository.SearchItem(
+                        language = Language.ENGLISH,
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"),
+                        lemma = "run",
+                        display = "run",
+                        zipfFrequency = 6.3f,
+                        pos = listOf(PartOfSpeech.VERB, PartOfSpeech.NOUN)
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = Language.ENGLISH,
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"),
+                        lemma = "run",
+                        display = "\"running\" form of \"run\"",
+                        zipfFrequency = 5.8f,
+                        pos = emptyList()
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = Language.DUTCH,
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"),
+                        lemma = "rennen",
+                        display = "rennen",
+                        zipfFrequency = 4.9f,
+                        pos = listOf(PartOfSpeech.VERB)
+                    ),
+                    DictionaryRepository.SearchItem(
+                        language = Language.DUTCH,
+                        lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"),
+                        lemma = "rund",
+                        display = "rund",
+                        zipfFrequency = 3.7f,
+                        pos = listOf(PartOfSpeech.NOUN)
+                    )
+                ),
+                showNoResults = false,
+                showLanguageIndicators = true,
             ),
         )
     }

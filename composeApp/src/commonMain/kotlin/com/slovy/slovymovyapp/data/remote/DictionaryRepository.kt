@@ -54,13 +54,9 @@ class DictionaryRepository(
         // Track lemmas that were added as base lemmas to suppress their forms
         val seenLemmas = HashSet<String>()
 
-
         for (lang in langs) {
-            val db = try {
+            val db =
                 dataDbManager.openDictionaryReadOnly(lang)
-            } catch (_: Throwable) {
-                null
-            } ?: continue
             val q = db.dictionaryQueries
             fun addLemma(lemmaId: Uuid, lemma: String, zipfFrequency: Float) {
                 val key = "${lang.code}::$lemma"

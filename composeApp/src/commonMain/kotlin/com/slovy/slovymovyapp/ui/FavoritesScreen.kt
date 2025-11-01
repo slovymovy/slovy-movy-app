@@ -22,6 +22,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.SenseCard
 import com.slovy.slovymovyapp.ui.word.SenseUiState
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -44,7 +45,8 @@ data class FavoritesUiState(
     val groups: List<FavoriteGroupUiState>,
     val query: String = "",
     val showNoResults: Boolean = false,
-    val hasAnyFavorites: Boolean = false
+    val hasAnyFavorites: Boolean = false,
+    val showLanguageIndicators: Boolean = false
 )
 
 class FavoritesViewModel(
@@ -52,7 +54,12 @@ class FavoritesViewModel(
     private val dictionaryRepository: DictionaryRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(FavoritesUiState(groups = emptyList()))
+    var state by mutableStateOf(
+        FavoritesUiState(
+            groups = emptyList(),
+            showLanguageIndicators = dictionaryRepository.installedDictionaries().size > 1
+        )
+    )
         private set
 
     val scrollState = LazyListState()
@@ -220,6 +227,12 @@ class FavoritesViewModel(
             }
         }
     }
+
+    fun refreshLanguageIndicators() {
+        state = state.copy(
+            showLanguageIndicators = dictionaryRepository.installedDictionaries().size > 1
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -233,6 +246,11 @@ fun FavoritesScreen(
     onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
+
+    // Refresh language indicators when screen is opened
+    LaunchedEffect(Unit) {
+        viewModel.refreshLanguageIndicators()
+    }
 
     // Clear focus when scrolling starts
     LaunchedEffect(viewModel.scrollState.isScrollInProgress) {
@@ -401,6 +419,7 @@ fun FavoritesScreenContent(
                         items(state.groups, key = { "${it.targetLang.code}_${it.lemma}" }) { group ->
                             FavoriteGroupCard(
                                 group = group,
+                                showLanguageIndicator = state.showLanguageIndicators,
                                 onSenseToggle = onSenseToggle,
                                 onSenseExamplesToggle = onSenseExamplesToggle,
                                 onLanguageToggle = onLanguageToggle,
@@ -419,6 +438,7 @@ fun FavoritesScreenContent(
 @Composable
 private fun FavoriteGroupCard(
     group: FavoriteGroupUiState,
+    showLanguageIndicator: Boolean = false,
     onSenseToggle: (String) -> Unit,
     onSenseExamplesToggle: (String) -> Unit,
     onLanguageToggle: (String, Language) -> Unit,
@@ -462,16 +482,14 @@ private fun FavoriteGroupCard(
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
-                SuggestionChip(
-                    onClick = { },
-                    label = {
-                        Text(
-                            text = group.targetLang.code.uppercase(),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    },
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+                if (showLanguageIndicator) {
+                    Badge(
+                        text = group.targetLang.selfName,
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                }
             }
         }
 
@@ -952,8 +970,8 @@ fun PreviewFavoritesScreenSearchWithMultipleResults(
                     expanded = false
                 ),
                 FavoriteGroupUiState(
-                    targetLang = Language.ENGLISH,
-                    lemma = "bookmark",
+                    targetLang = Language.RUSSIAN,
+                    lemma = "книга",
                     senses = listOf(
                         FavoriteSenseUiState(
                             favorite = createMockFavorite("bookmark-1", Language.ENGLISH, "bookmark"),
@@ -972,7 +990,8 @@ fun PreviewFavoritesScreenSearchWithMultipleResults(
                 )
             ),
             query = "book",
-            hasAnyFavorites = true
+            hasAnyFavorites = true,
+            showLanguageIndicators = true
         )
 
         FavoritesScreenContent(state = state)

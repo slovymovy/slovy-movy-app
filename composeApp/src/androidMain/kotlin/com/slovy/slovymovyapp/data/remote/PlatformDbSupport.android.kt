@@ -139,4 +139,13 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         }
         return dir.listFiles()?.map { Path(it.absolutePath) } ?: emptyList()
     }
+
+    actual fun getFileSize(path: Path): Long? {
+        return try {
+            val file = File(path.toString())
+            if (file.exists() && file.isFile) file.length() else null
+        } catch (_: Throwable) {
+            null
+        }
+    }
 }

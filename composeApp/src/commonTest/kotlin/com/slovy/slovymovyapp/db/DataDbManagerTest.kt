@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
+import com.slovy.slovymovyapp.test.IgnoreIos
 import com.slovy.slovymovyapp.test.platformDbSupport
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -359,6 +360,37 @@ class DataDbManagerTest : BaseTest() {
         } finally {
             platform.deleteFile(dictPath)
             platform.deleteFile(transPath)
+        }
+    }
+
+    @Test
+    @IgnoreIos
+    // https://github.com/slovymovy/slovy-movy-app/issues/34
+    fun testAvailableDictionaries() = runBlocking {
+        val platform = platformDbSupport()
+        val appDbPath = platform.getDatabasePath("any.db")
+        if (platform.fileExists(appDbPath)) {
+            platform.deleteFile(appDbPath)
+        }
+
+        val appDriver = platform.createAppDataDriver(appDbPath)
+        val appDb = DatabaseProvider.createAppDatabase(appDriver)
+        val settingsRepo = SettingsRepository(appDb)
+
+        try {
+            val mgr = DataDbManager(platform, settingsRepo)
+            val fetchAvailableLanguages = mgr.fetchAvailableLanguages()
+            assertTrue { fetchAvailableLanguages.isNotEmpty() }
+            assertTrue { fetchAvailableLanguages.any { it.dictionarySizeBytes != null } }
+            assertTrue { fetchAvailableLanguages.firstOrNull { it.language == Language.ENGLISH } != null }
+            assertTrue {
+                Language.RUSSIAN in
+                        fetchAvailableLanguages.firstOrNull { it.language == Language.ENGLISH }?.availableTranslations!!.map { it.targetLanguage }
+            }
+
+        } finally {
+            appDriver.close()
+            platform.deleteFile(appDbPath)
         }
     }
 }

@@ -184,4 +184,17 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
             (filename as? String)?.let { Path("$dir/$it") }
         } ?: emptyList()
     }
+
+    @OptIn(ExperimentalForeignApi::class)
+    actual fun getFileSize(path: Path): Long? {
+        return try {
+            val fm = NSFileManager.defaultManager
+            val pathStr = path.toString()
+            if (!fm.fileExistsAtPath(pathStr)) return null
+            val attrs = fm.attributesOfItemAtPath(pathStr, error = null)
+            (attrs?.get(NSFileSize) as? NSNumber)?.longLongValue
+        } catch (_: Throwable) {
+            null
+        }
+    }
 }
