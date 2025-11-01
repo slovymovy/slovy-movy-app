@@ -7,3 +7,5 @@ actual object TestContext {
 }
 
 actual abstract class BaseTest actual constructor()
+
+actual typealias IgnoreIos = kotlin.test.Ignore

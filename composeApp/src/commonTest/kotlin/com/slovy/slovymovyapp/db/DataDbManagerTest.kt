@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
+import com.slovy.slovymovyapp.test.IgnoreIos
 import com.slovy.slovymovyapp.test.platformDbSupport
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -363,6 +364,8 @@ class DataDbManagerTest : BaseTest() {
     }
 
     @Test
+    @IgnoreIos
+    // https://github.com/slovymovy/slovy-movy-app/issues/34
     fun testAvailableDictionaries() = runBlocking {
         val platform = platformDbSupport()
         val appDbPath = platform.getDatabasePath("any.db")

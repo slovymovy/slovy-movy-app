@@ -9,3 +9,6 @@ expect object TestContext {
 expect abstract class BaseTest()
 
 fun platformDbSupport(): PlatformDbSupport = PlatformDbSupport(TestContext.androidContext())
+
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+expect annotation class IgnoreIos()
