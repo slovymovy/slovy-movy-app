@@ -21,6 +21,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.remote.AvailableLanguageInfo
+import com.slovy.slovymovyapp.data.remote.DownloadProgress
 import com.slovy.slovymovyapp.speech.*
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -42,7 +44,10 @@ data class DatabaseItemUiState(
 data class SettingsUiState(
     val languages: Map<Text2SpeechLanguage, LanguageUiState> = emptyMap(),
     val databases: List<DatabaseItemUiState> = emptyList(),
+    val availableLanguages: List<AvailableLanguageInfo> = emptyList(),
+    val downloadingItems: Map<String, DownloadProgress> = emptyMap(),
     val isLoading: Boolean = true,
+    val isLoadingAvailable: Boolean = false,
     val errorMessage: String? = null,
     val testingVoice: Text2SpeechVoice? = null,
     val ttsStatus: TTSStatus = TTSStatus.IDLE,
@@ -51,6 +56,7 @@ data class SettingsUiState(
 
 data class DeleteConfirmationState(
     val displayName: String,
+    val additionalInfo: String? = null,
     val onConfirm: () -> Unit
 )
 
@@ -77,6 +83,7 @@ class SettingsViewModel(
     init {
         loadLanguages()
         loadDatabases()
+        loadAvailableLanguages()
         setupTTSListeners()
     }
 
@@ -92,6 +99,7 @@ class SettingsViewModel(
     fun reloadSettings() {
         loadLanguages()
         loadDatabases()
+        loadAvailableLanguages()
     }
 
     private fun loadDatabases() {
@@ -102,10 +110,23 @@ class SettingsViewModel(
                     when (fileInfo) {
                         is com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Dictionary -> {
                             val displayName = "Dictionary: ${fileInfo.language.selfName}"
+                            // Count how many translations will be deleted along with the dictionary
+                            val translationCount = files.count {
+                                it is com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Translation &&
+                                        it.sourceLanguage == fileInfo.language
+                            }
+                            val additionalInfo = if (translationCount > 0) {
+                                "$translationCount translation${if (translationCount > 1) "s" else ""} will also be deleted"
+                            } else null
+
                             DatabaseItemUiState(
                                 displayName = displayName,
                                 sizeBytes = fileInfo.sizeBytes,
-                                deleteAction = { showDeleteConfirmation(displayName) { deleteDictionary(fileInfo.language) } }
+                                deleteAction = {
+                                    showDeleteConfirmation(displayName, additionalInfo) {
+                                        deleteDictionary(fileInfo.language)
+                                    }
+                                }
                             )
                         }
 
@@ -134,10 +155,29 @@ class SettingsViewModel(
         }
     }
 
-    private fun showDeleteConfirmation(displayName: String, onConfirm: () -> Unit) {
+    private fun loadAvailableLanguages() {
+        viewModelScope.launch {
+            state = state.copy(isLoadingAvailable = true)
+            try {
+                val available = dataDbManager.fetchAvailableLanguages()
+                state = state.copy(
+                    availableLanguages = available,
+                    isLoadingAvailable = false
+                )
+            } catch (e: Exception) {
+                state = state.copy(
+                    isLoadingAvailable = false,
+                    errorMessage = "Failed to load available languages: ${e.message}"
+                )
+            }
+        }
+    }
+
+    private fun showDeleteConfirmation(displayName: String, additionalInfo: String? = null, onConfirm: () -> Unit) {
         state = state.copy(
             deleteConfirmation = DeleteConfirmationState(
                 displayName = displayName,
+                additionalInfo = additionalInfo,
                 onConfirm = onConfirm
             )
         )
@@ -172,6 +212,61 @@ class SettingsViewModel(
                 snackbarHostState.showSnackbar("Database deleted successfully")
             } catch (e: Exception) {
                 state = state.copy(errorMessage = "Failed to delete database: ${e.message}")
+            }
+        }
+    }
+
+    fun downloadDictionary(language: Language) {
+        val downloadKey = "dict_${language.code}"
+        viewModelScope.launch {
+            try {
+                dataDbManager.ensureDictionary(
+                    lang = language,
+                    onProgress = { progress ->
+                        state = state.copy(
+                            downloadingItems = state.downloadingItems + (downloadKey to progress)
+                        )
+                    }
+                )
+                // Remove from downloading items and reload databases
+                state = state.copy(
+                    downloadingItems = state.downloadingItems - downloadKey
+                )
+                loadDatabases()
+                snackbarHostState.showSnackbar("Dictionary downloaded successfully")
+            } catch (e: Exception) {
+                state = state.copy(
+                    downloadingItems = state.downloadingItems - downloadKey,
+                    errorMessage = "Failed to download dictionary: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun downloadTranslation(sourceLanguage: Language, targetLanguage: Language) {
+        val downloadKey = "trans_${sourceLanguage.code}_${targetLanguage.code}"
+        viewModelScope.launch {
+            try {
+                dataDbManager.ensureTranslation(
+                    src = sourceLanguage,
+                    tgt = targetLanguage,
+                    onProgress = { progress ->
+                        state = state.copy(
+                            downloadingItems = state.downloadingItems + (downloadKey to progress)
+                        )
+                    }
+                )
+                // Remove from downloading items and reload databases
+                state = state.copy(
+                    downloadingItems = state.downloadingItems - downloadKey
+                )
+                loadDatabases()
+                snackbarHostState.showSnackbar("Translation downloaded successfully")
+            } catch (e: Exception) {
+                state = state.copy(
+                    downloadingItems = state.downloadingItems - downloadKey,
+                    errorMessage = "Failed to download translation: ${e.message}"
+                )
             }
         }
     }
@@ -321,6 +416,8 @@ fun SettingsScreen(
         onDismissError = { viewModel.dismissError() },
         onConfirmDelete = { viewModel.confirmDelete() },
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
+        onDownloadDictionary = { language -> viewModel.downloadDictionary(language) },
+        onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
         wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -341,6 +438,8 @@ fun SettingsScreenContent(
     onDismissError: () -> Unit = {},
     onConfirmDelete: () -> Unit = {},
     onDismissDeleteConfirmation: () -> Unit = {},
+    onDownloadDictionary: (Language) -> Unit = {},
+    onDownloadTranslation: (Language, Language) -> Unit = { _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -479,26 +578,52 @@ fun SettingsScreenContent(
                             // Databases section
                             item {
                                 Text(
-                                    text = "Downloaded Databases",
+                                    text = "Databases",
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
                                 )
                             }
 
-                            if (state.databases.isEmpty()) {
+                            if (state.isLoadingAvailable) {
+                                item {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth().padding(20.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(modifier = Modifier.size(28.dp))
+                                    }
+                                }
+                            } else if (state.availableLanguages.isEmpty()) {
                                 item {
                                     Text(
-                                        text = "No databases downloaded yet",
+                                        text = "No databases available",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             } else {
-                                items(state.databases) { db ->
-                                    DatabaseCard(
-                                        database = db,
-                                        onDelete = db.deleteAction
+                                items(state.availableLanguages) { langInfo ->
+                                    val dictDb = state.databases.find {
+                                        it.displayName == "Dictionary: ${langInfo.language.selfName}"
+                                    }
+                                    DatabaseLanguageCard(
+                                        languageInfo = langInfo,
+                                        dictionaryDb = dictDb,
+                                        onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
+                                        onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
+                                        onDownloadTranslation = { tgtLang ->
+                                            onDownloadTranslation(langInfo.language, tgtLang)
+                                        },
+                                        onDeleteTranslation = { tgtLang ->
+                                            state.databases.find {
+                                                it.displayName == "Translation: ${langInfo.language.selfName} → ${tgtLang.selfName}"
+                                            }?.deleteAction?.invoke()
+                                        },
+                                        downloadedTranslations = state.databases.filter {
+                                            it.displayName.startsWith("Translation: ${langInfo.language.selfName} →")
+                                        },
+                                        downloadingItems = state.downloadingItems
                                     )
                                 }
                             }
@@ -512,6 +637,7 @@ fun SettingsScreenContent(
         state.deleteConfirmation?.let { confirmation ->
             DeleteConfirmationDialog(
                 displayName = confirmation.displayName,
+                additionalInfo = confirmation.additionalInfo,
                 onConfirm = onConfirmDelete,
                 onDismiss = onDismissDeleteConfirmation
             )
@@ -523,6 +649,7 @@ fun SettingsScreenContent(
 @Composable
 private fun DeleteConfirmationDialog(
     displayName: String,
+    additionalInfo: String? = null,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -532,7 +659,17 @@ private fun DeleteConfirmationDialog(
             Text("Delete Database?")
         },
         text = {
-            Text("Are you sure you want to delete $displayName?")
+            Column {
+                Text("Are you sure you want to delete $displayName?")
+                if (additionalInfo != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = additionalInfo,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         },
         confirmButton = {
             TextButton(
@@ -844,9 +981,15 @@ private fun VoiceItem(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun DatabaseCard(
-    database: DatabaseItemUiState,
-    onDelete: () -> Unit = {}
+private fun DatabaseLanguageCard(
+    languageInfo: AvailableLanguageInfo,
+    dictionaryDb: DatabaseItemUiState?,
+    onDownloadDictionary: () -> Unit,
+    onDeleteDictionary: () -> Unit,
+    onDownloadTranslation: (Language) -> Unit,
+    onDeleteTranslation: (Language) -> Unit,
+    downloadedTranslations: List<DatabaseItemUiState>,
+    downloadingItems: Map<String, DownloadProgress>
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -854,37 +997,156 @@ private fun DatabaseCard(
             defaultElevation = 1.dp
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            // Dictionary section
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Dictionary: ${languageInfo.language.selfName}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    val sizeBytes = dictionaryDb?.sizeBytes ?: languageInfo.dictionarySizeBytes
+                    if (sizeBytes != null) {
+                        Text(
+                            text = formatFileSize(sizeBytes),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+
+                val dictDownloadKey = "dict_${languageInfo.language.code}"
+                val dictDownloading = downloadingItems.containsKey(dictDownloadKey)
+                val dictProgress = downloadingItems[dictDownloadKey]
+
+                if (dictionaryDb != null) {
+                    // Downloaded - show delete button
+                    FilledTonalButton(
+                        onClick = onDeleteDictionary,
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    ) {
+                        Text("Delete")
+                    }
+                } else if (dictDownloading) {
+                    // Downloading - show progress
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        if (dictProgress?.percent != null && dictProgress.percent >= 0) {
+                            Text(
+                                text = "${dictProgress.percent}%",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else {
+                    // Not downloaded - show download button
+                    FilledTonalButton(onClick = onDownloadDictionary) {
+                        Icon(
+                            imageVector = Icons.Filled.Download,
+                            contentDescription = "Download",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Download")
+                    }
+                }
+            }
+
+            // Translations section
+            if (languageInfo.availableTranslations.isNotEmpty()) {
+                HorizontalDivider(thickness = 1.dp)
                 Text(
-                    text = database.displayName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = formatFileSize(database.sizeBytes),
+                    text = "Translations:",
                     style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            FilledTonalButton(
-                onClick = onDelete,
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                )
-            ) {
-                Text("Delete")
+                languageInfo.availableTranslations.forEach { translation ->
+                    val transDownloadKey = "trans_${languageInfo.language.code}_${translation.targetLanguage.code}"
+                    val transDownloading = downloadingItems.containsKey(transDownloadKey)
+                    val transProgress = downloadingItems[transDownloadKey]
+                    val transDb = downloadedTranslations.find {
+                        it.displayName == "Translation: ${languageInfo.language.selfName} → ${translation.targetLanguage.selfName}"
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "→ ${translation.targetLanguage.selfName}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            val transSizeBytes = transDb?.sizeBytes ?: translation.sizeBytes
+                            Text(
+                                text = formatFileSize(transSizeBytes),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        if (transDb != null) {
+                            // Downloaded - show delete button
+                            FilledTonalButton(
+                                onClick = { onDeleteTranslation(translation.targetLanguage) },
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                ),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                            ) {
+                                Text("Delete", style = MaterialTheme.typography.labelMedium)
+                            }
+                        } else if (transDownloading) {
+                            // Downloading - show progress
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                if (transProgress?.percent != null && transProgress.percent >= 0) {
+                                    Text(
+                                        text = "${transProgress.percent}%",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        } else {
+                            // Not downloaded - show download button (disabled if dictionary not downloaded)
+                            FilledTonalButton(
+                                onClick = { onDownloadTranslation(translation.targetLanguage) },
+                                enabled = dictionaryDb != null, // Only allow download if dictionary is downloaded
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Download,
+                                    contentDescription = "Download",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Download", style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -960,6 +1222,28 @@ private fun SettingsScreenPreviewWithDatabases(
                         displayName = "Translation: Русский → English",
                         sizeBytes = 7500 * 1024,
                         deleteAction = {}
+                    )
+                ),
+                availableLanguages = listOf(
+                    AvailableLanguageInfo(
+                        language = Language.ENGLISH,
+                        dictionarySizeBytes = 15 * 1024 * 1024,
+                        availableTranslations = listOf(
+                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                                targetLanguage = Language.RUSSIAN,
+                                sizeBytes = 8 * 1024 * 1024
+                            )
+                        )
+                    ),
+                    AvailableLanguageInfo(
+                        language = Language.RUSSIAN,
+                        dictionarySizeBytes = 12 * 1024 * 1024,
+                        availableTranslations = listOf(
+                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                                targetLanguage = Language.ENGLISH,
+                                sizeBytes = 8 * 1024 * 1024
+                            )
+                        )
                     )
                 )
             )
@@ -1133,6 +1417,68 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
                 deleteConfirmation = DeleteConfirmationState(
                     displayName = "Dictionary: English",
                     onConfirm = {}
+                )
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsScreenPreviewWithMixedDatabaseStates(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SettingsScreenContent(
+            state = SettingsUiState(
+                isLoading = false,
+                languages = emptyMap(),
+                databases = listOf(
+                    DatabaseItemUiState(
+                        displayName = "Dictionary: English",
+                        sizeBytes = 15 * 1024 * 1024,
+                        deleteAction = {}
+                    ),
+                    DatabaseItemUiState(
+                        displayName = "Translation: English → Русский",
+                        sizeBytes = 8 * 1024 * 1024,
+                        deleteAction = {}
+                    )
+                ),
+                availableLanguages = listOf(
+                    AvailableLanguageInfo(
+                        language = Language.ENGLISH,
+                        dictionarySizeBytes = 15 * 1024 * 1024,
+                        availableTranslations = listOf(
+                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                                targetLanguage = Language.RUSSIAN,
+                                sizeBytes = 8 * 1024 * 1024
+                            ),
+                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                                targetLanguage = Language.POLISH,
+                                sizeBytes = 7 * 1024 * 1024
+                            )
+                        )
+                    ),
+                    AvailableLanguageInfo(
+                        language = Language.RUSSIAN,
+                        dictionarySizeBytes = 12 * 1024 * 1024,
+                        availableTranslations = listOf(
+                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                                targetLanguage = Language.ENGLISH,
+                                sizeBytes = 8 * 1024 * 1024
+                            )
+                        )
+                    ),
+                    AvailableLanguageInfo(
+                        language = Language.DUTCH,
+                        dictionarySizeBytes = 10 * 1024 * 1024,
+                        availableTranslations = emptyList()
+                    )
+                ),
+                downloadingItems = mapOf(
+                    "dict_ru" to DownloadProgress(5 * 1024 * 1024, 12 * 1024 * 1024),
+                    "trans_en_pl" to DownloadProgress(2 * 1024 * 1024, 7 * 1024 * 1024)
                 )
             )
         )

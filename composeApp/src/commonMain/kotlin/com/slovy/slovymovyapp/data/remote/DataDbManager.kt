@@ -41,6 +41,7 @@ class DataDbManager(
         // TODO: we use HTTP for now to workaround some issues with IOS emulator
         // https://github.com/slovymovy/slovy-movy-app/issues/34
         const val BASE_URL = "http://storage.googleapis.com/slovymovy/$VERSION/"
+        const val LIST_API_URL = "https://storage.googleapis.com/storage/v1/b/slovymovy/o?prefix=$VERSION/"
 
         private const val DICTIONARY_PREFIX = "dictionary_"
         private const val TRANSLATION_PREFIX = "translation_"
@@ -50,6 +51,8 @@ class DataDbManager(
         fun translationFileName(src: Language, tgt: Language): String =
             "$TRANSLATION_PREFIX${src.code.lowercase()}_${tgt.code.lowercase()}$DB_EXTENSION"
     }
+
+    private var cachedAvailableLanguages: List<AvailableLanguageInfo>? = null
 
     suspend fun ensureDictionary(
         lang: Language,
@@ -61,8 +64,21 @@ class DataDbManager(
     }
 
     fun deleteDictionary(lang: Language) {
+        // Delete the dictionary
         val name = dictionaryFileName(lang)
         platform.deleteFile(platform.getDatabasePath(name))
+
+        // Also delete all translations that use this language as the source
+        val allLanguages = Language.entries
+        allLanguages.forEach { targetLang ->
+            if (targetLang != lang) {
+                val transName = translationFileName(lang, targetLang)
+                val transPath = platform.getDatabasePath(transName)
+                if (platform.fileExists(transPath)) {
+                    platform.deleteFile(transPath)
+                }
+            }
+        }
     }
 
     suspend fun ensureTranslation(
@@ -146,12 +162,21 @@ class DataDbManager(
 
     /**
      * Fetches available languages with their dictionaries and translations grouped by source language.
+     * Uses in-memory cache if available.
      */
     suspend fun fetchAvailableLanguages(): List<AvailableLanguageInfo> = withContext(Dispatchers.IO) {
-        val url = "https://storage.googleapis.com/storage/v1/b/slovymovy/o?prefix=$VERSION/"
+        // Return cached value if available
+        cachedAvailableLanguages?.let { return@withContext it }
+
+        val result = fetchAvailableLanguagesFromRemote()
+        cachedAvailableLanguages = result
+        result
+    }
+
+    private suspend fun fetchAvailableLanguagesFromRemote(): List<AvailableLanguageInfo> = withContext(Dispatchers.IO) {
         val client = platform.createHttpClient()
         try {
-            val response = client.get(url).bodyAsText()
+            val response = client.get(LIST_API_URL).bodyAsText()
             val storageResponse = Json.decodeFromString<StorageListResponse>(response)
 
             // Parse all files
