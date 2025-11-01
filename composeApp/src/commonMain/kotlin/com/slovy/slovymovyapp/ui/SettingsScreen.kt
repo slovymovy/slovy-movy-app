@@ -33,12 +33,25 @@ data class LanguageUiState(
     val enabledVoiceIds: Set<String> = emptySet()
 )
 
+data class DatabaseItemUiState(
+    val displayName: String,
+    val sizeBytes: Long,
+    val deleteAction: () -> Unit
+)
+
 data class SettingsUiState(
     val languages: Map<Text2SpeechLanguage, LanguageUiState> = emptyMap(),
+    val databases: List<DatabaseItemUiState> = emptyList(),
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
     val testingVoice: Text2SpeechVoice? = null,
-    val ttsStatus: TTSStatus = TTSStatus.IDLE
+    val ttsStatus: TTSStatus = TTSStatus.IDLE,
+    val deleteConfirmation: DeleteConfirmationState? = null
+)
+
+data class DeleteConfirmationState(
+    val displayName: String,
+    val onConfirm: () -> Unit
 )
 
 // Test phrases for each language
@@ -51,7 +64,8 @@ private val TEST_PHRASES = mapOf(
 
 class SettingsViewModel(
     private val ttsManager: TextToSpeechManager,
-    private val voiceFilterHelper: VoiceFilterHelper
+    private val voiceFilterHelper: VoiceFilterHelper,
+    private val dataDbManager: com.slovy.slovymovyapp.data.remote.DataDbManager
 ) : ViewModel() {
 
     var state by mutableStateOf(SettingsUiState())
@@ -62,6 +76,7 @@ class SettingsViewModel(
 
     init {
         loadLanguages()
+        loadDatabases()
         setupTTSListeners()
     }
 
@@ -74,8 +89,91 @@ class SettingsViewModel(
         }
     }
 
-    fun reloadLanguages() {
+    fun reloadSettings() {
         loadLanguages()
+        loadDatabases()
+    }
+
+    private fun loadDatabases() {
+        viewModelScope.launch {
+            try {
+                val files = dataDbManager.listDownloadedDatabases()
+                val uiItems = files.map { fileInfo ->
+                    when (fileInfo) {
+                        is com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Dictionary -> {
+                            val displayName = "Dictionary: ${fileInfo.language.selfName}"
+                            DatabaseItemUiState(
+                                displayName = displayName,
+                                sizeBytes = fileInfo.sizeBytes,
+                                deleteAction = { showDeleteConfirmation(displayName) { deleteDictionary(fileInfo.language) } }
+                            )
+                        }
+
+                        is com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Translation -> {
+                            val displayName =
+                                "Translation: ${fileInfo.sourceLanguage.selfName} → ${fileInfo.targetLanguage.selfName}"
+                            DatabaseItemUiState(
+                                displayName = displayName,
+                                sizeBytes = fileInfo.sizeBytes,
+                                deleteAction = {
+                                    showDeleteConfirmation(displayName) {
+                                        deleteTranslation(
+                                            fileInfo.sourceLanguage,
+                                            fileInfo.targetLanguage
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+                state = state.copy(databases = uiItems)
+            } catch (e: Exception) {
+                state = state.copy(errorMessage = "Failed to load databases: ${e.message}")
+            }
+        }
+    }
+
+    private fun showDeleteConfirmation(displayName: String, onConfirm: () -> Unit) {
+        state = state.copy(
+            deleteConfirmation = DeleteConfirmationState(
+                displayName = displayName,
+                onConfirm = onConfirm
+            )
+        )
+    }
+
+    fun dismissDeleteConfirmation() {
+        state = state.copy(deleteConfirmation = null)
+    }
+
+    fun confirmDelete() {
+        state.deleteConfirmation?.onConfirm?.invoke()
+        state = state.copy(deleteConfirmation = null)
+    }
+
+    private fun deleteDictionary(language: Language) {
+        viewModelScope.launch {
+            try {
+                dataDbManager.deleteDictionary(language)
+                loadDatabases()
+                snackbarHostState.showSnackbar("Database deleted successfully")
+            } catch (e: Exception) {
+                state = state.copy(errorMessage = "Failed to delete database: ${e.message}")
+            }
+        }
+    }
+
+    private fun deleteTranslation(src: Language, tgt: Language) {
+        viewModelScope.launch {
+            try {
+                dataDbManager.deleteTranslation(src, tgt)
+                loadDatabases()
+                snackbarHostState.showSnackbar("Database deleted successfully")
+            } catch (e: Exception) {
+                state = state.copy(errorMessage = "Failed to delete database: ${e.message}")
+            }
+        }
     }
 
     private fun loadLanguages() {
@@ -206,9 +304,9 @@ fun SettingsScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit = {}
 ) {
-    // Reload languages when returning from system settings
+    // Reload settings when returning from system settings
     LifecycleResumeEffect(Unit) {
-        viewModel.reloadLanguages()
+        viewModel.reloadSettings()
         onPauseOrDispose { }
     }
 
@@ -221,6 +319,8 @@ fun SettingsScreen(
         onToggleVoiceEnabled = { language, voiceId -> viewModel.toggleVoiceEnabled(language, voiceId) },
         onOpenSettings = { viewModel.openSystemSettings() },
         onDismissError = { viewModel.dismissError() },
+        onConfirmDelete = { viewModel.confirmDelete() },
+        onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
         wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -239,6 +339,8 @@ fun SettingsScreenContent(
     onToggleVoiceEnabled: (Text2SpeechLanguage, String) -> Unit = { _, _ -> },
     onOpenSettings: () -> Unit = {},
     onDismissError: () -> Unit = {},
+    onConfirmDelete: () -> Unit = {},
+    onDismissDeleteConfirmation: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -260,7 +362,7 @@ fun SettingsScreenContent(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Text-to-Speech Settings") }
+                    title = { Text("Settings") }
                 )
             },
             bottomBar = {
@@ -289,13 +391,6 @@ fun SettingsScreenContent(
                         )
                     }
 
-                    state.languages.isEmpty() -> {
-                        EmptySettingsState(
-                            onOpenSettings = onOpenSettings,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-
                     else -> {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
@@ -303,6 +398,16 @@ fun SettingsScreenContent(
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
+                            // Voices section header
+                            item {
+                                Text(
+                                    text = "Text-to-Speech Voices",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
+                            }
+
                             item {
                                 ElevatedCard(
                                     modifier = Modifier.fillMaxWidth(),
@@ -350,22 +455,101 @@ fun SettingsScreenContent(
                                 }
                             }
 
-                            items(state.languages.entries.toList()) { e ->
-                                LanguageCard(
-                                    language = e.key,
-                                    languageState = e.value,
-                                    onExpand = { onLanguageExpand(e.key) },
-                                    onTestVoice = { voice -> onTestVoice(voice) },
-                                    onToggleVoiceEnabled = { voiceId -> onToggleVoiceEnabled(e.key, voiceId) },
-                                    testingVoice = state.testingVoice
+                            if (state.languages.isEmpty()) {
+                                item {
+                                    Text(
+                                        text = "No voices available. Download language data from system settings to enable text-to-speech.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            } else {
+                                items(state.languages.entries.toList()) { e ->
+                                    LanguageCard(
+                                        language = e.key,
+                                        languageState = e.value,
+                                        onExpand = { onLanguageExpand(e.key) },
+                                        onTestVoice = { voice -> onTestVoice(voice) },
+                                        onToggleVoiceEnabled = { voiceId -> onToggleVoiceEnabled(e.key, voiceId) },
+                                        testingVoice = state.testingVoice
+                                    )
+                                }
+                            }
+
+                            // Databases section
+                            item {
+                                Text(
+                                    text = "Downloaded Databases",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
                                 )
+                            }
+
+                            if (state.databases.isEmpty()) {
+                                item {
+                                    Text(
+                                        text = "No databases downloaded yet",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            } else {
+                                items(state.databases) { db ->
+                                    DatabaseCard(
+                                        database = db,
+                                        onDelete = db.deleteAction
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
         }
+
+        // Delete confirmation dialog
+        state.deleteConfirmation?.let { confirmation ->
+            DeleteConfirmationDialog(
+                displayName = confirmation.displayName,
+                onConfirm = onConfirmDelete,
+                onDismiss = onDismissDeleteConfirmation
+            )
+        }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DeleteConfirmationDialog(
+    displayName: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Delete Database?")
+        },
+        text = {
+            Text("Are you sure you want to delete $displayName?")
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Delete")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
@@ -658,6 +842,66 @@ private fun VoiceItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun DatabaseCard(
+    database: DatabaseItemUiState,
+    onDelete: () -> Unit = {}
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 1.dp
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = database.displayName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = formatFileSize(database.sizeBytes),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            FilledTonalButton(
+                onClick = onDelete,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            ) {
+                Text("Delete")
+            }
+        }
+    }
+}
+
+private fun formatFileSize(bytes: Long): String {
+    return when {
+        bytes < 1024 -> "$bytes B"
+        bytes < 1024 * 1024 -> "${bytes / 1024} KB"
+        bytes < 1024 * 1024 * 1024 -> "${bytes / (1024 * 1024)} MB"
+        else -> {
+            val gb = (bytes * 100 / (1024 * 1024 * 1024)).toDouble() / 100.0
+            "$gb GB"
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun SettingsScreenPreviewLoading(
@@ -677,7 +921,48 @@ private fun SettingsScreenPreviewEmpty(
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
-            state = SettingsUiState(isLoading = false, languages = emptyMap())
+            state = SettingsUiState(
+                isLoading = false,
+                languages = emptyMap(),
+                databases = emptyList()
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsScreenPreviewWithDatabases(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SettingsScreenContent(
+            state = SettingsUiState(
+                isLoading = false,
+                languages = emptyMap(),
+                databases = listOf(
+                    DatabaseItemUiState(
+                        displayName = "Dictionary: English",
+                        sizeBytes = 15 * 1024 * 1024,
+                        deleteAction = {}
+                    ),
+                    DatabaseItemUiState(
+                        displayName = "Dictionary: Русский",
+                        sizeBytes = 12 * 1024 * 1024,
+                        deleteAction = {}
+                    ),
+                    DatabaseItemUiState(
+                        displayName = "Translation: English → Русский",
+                        sizeBytes = 8 * 1024 * 1024,
+                        deleteAction = {}
+                    ),
+                    DatabaseItemUiState(
+                        displayName = "Translation: Русский → English",
+                        sizeBytes = 7500 * 1024,
+                        deleteAction = {}
+                    )
+                )
+            )
         )
     }
 }
@@ -712,6 +997,18 @@ private fun SettingsScreenPreviewWithLanguages(
                         isAvailable = false,
                         missingData = false
                     ) to LanguageUiState(),
+                ),
+                databases = listOf(
+                    DatabaseItemUiState(
+                        displayName = "Dictionary: English",
+                        sizeBytes = 15 * 1024 * 1024,
+                        deleteAction = {}
+                    ),
+                    DatabaseItemUiState(
+                        displayName = "Translation: English → Русский",
+                        sizeBytes = 8 * 1024 * 1024,
+                        deleteAction = {}
+                    )
                 )
             )
         )
@@ -763,6 +1060,13 @@ private fun SettingsScreenPreviewWithExpandedLanguage(
                         isAvailable = true,
                         missingData = false
                     ) to LanguageUiState()
+                ),
+                databases = listOf(
+                    DatabaseItemUiState(
+                        displayName = "Dictionary: English",
+                        sizeBytes = 15 * 1024 * 1024,
+                        deleteAction = {}
+                    )
                 )
             )
         )
@@ -783,10 +1087,53 @@ private fun SettingsScreenPreviewWithError(
                         language = Language.ENGLISH,
                         isAvailable = true,
                         missingData = false
-                    ) to
-                            LanguageUiState()
+                    ) to LanguageUiState()
+                ),
+                databases = listOf(
+                    DatabaseItemUiState(
+                        displayName = "Dictionary: English",
+                        sizeBytes = 15 * 1024 * 1024,
+                        deleteAction = {}
+                    )
                 ),
                 errorMessage = "Failed to load voices for this language"
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsScreenPreviewWithDeleteConfirmation(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SettingsScreenContent(
+            state = SettingsUiState(
+                isLoading = false,
+                languages = mapOf(
+                    Text2SpeechLanguage(
+                        language = Language.ENGLISH,
+                        isAvailable = true,
+                        missingData = false
+                    ) to LanguageUiState()
+                ),
+                databases = listOf(
+                    DatabaseItemUiState(
+                        displayName = "Dictionary: English",
+                        sizeBytes = 15 * 1024 * 1024,
+                        deleteAction = {}
+                    ),
+                    DatabaseItemUiState(
+                        displayName = "Translation: English → Русский",
+                        sizeBytes = 8 * 1024 * 1024,
+                        deleteAction = {}
+                    )
+                ),
+                deleteConfirmation = DeleteConfirmationState(
+                    displayName = "Dictionary: English",
+                    onConfirm = {}
+                )
             )
         )
     }

@@ -15,9 +15,13 @@ import io.ktor.http.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.max
 
@@ -37,9 +41,14 @@ class DataDbManager(
         // TODO: we use HTTP for now to workaround some issues with IOS emulator
         // https://github.com/slovymovy/slovy-movy-app/issues/34
         const val BASE_URL = "http://storage.googleapis.com/slovymovy/$VERSION/"
-        fun dictionaryFileName(lang: Language): String = "dictionary_${lang.code.lowercase()}.db"
+
+        private const val DICTIONARY_PREFIX = "dictionary_"
+        private const val TRANSLATION_PREFIX = "translation_"
+        private const val DB_EXTENSION = ".db"
+
+        fun dictionaryFileName(lang: Language): String = "$DICTIONARY_PREFIX${lang.code.lowercase()}$DB_EXTENSION"
         fun translationFileName(src: Language, tgt: Language): String =
-            "translation_${src.code.lowercase()}_${tgt.code.lowercase()}.db"
+            "$TRANSLATION_PREFIX${src.code.lowercase()}_${tgt.code.lowercase()}$DB_EXTENSION"
     }
 
     suspend fun ensureDictionary(
@@ -81,7 +90,7 @@ class DataDbManager(
         val files = platform.listFiles(databasesDir)
         files.forEach { file ->
             val fileName = file.name
-            if (fileName.startsWith("dictionary_") || fileName.startsWith("translation_")) {
+            if (fileName.startsWith(DICTIONARY_PREFIX) || fileName.startsWith(TRANSLATION_PREFIX)) {
                 platform.deleteFile(file)
             }
         }
@@ -133,6 +142,88 @@ class DataDbManager(
                 value = Json.parseToJsonElement("\"$VERSION\"")
             )
         )
+    }
+
+    /**
+     * Fetches available languages with their dictionaries and translations grouped by source language.
+     */
+    suspend fun fetchAvailableLanguages(): List<AvailableLanguageInfo> = withContext(Dispatchers.IO) {
+        val url = "https://storage.googleapis.com/storage/v1/b/slovymovy/o?prefix=$VERSION/"
+        val client = platform.createHttpClient()
+        try {
+            val response = client.get(url).bodyAsText()
+            val storageResponse = Json.decodeFromString<StorageListResponse>(response)
+
+            // Parse all files
+            val dictionaries = mutableMapOf<Language, Long>()
+            val translations = mutableMapOf<Language, MutableList<AvailableTranslationInfo>>()
+
+            storageResponse.items.forEach { obj ->
+                val fileName = obj.name.removePrefix("$VERSION/")
+                if (fileName.isEmpty() || fileName == "$VERSION/") return@forEach
+
+                val size = obj.size.toLongOrNull() ?: return@forEach
+
+                when {
+                    fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                        val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
+                        val language = Language.fromCodeOrNull(langCode) ?: return@forEach
+                        dictionaries[language] = size
+                    }
+
+                    fileName.startsWith(TRANSLATION_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                        val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
+                        if (parts.size != 2) return@forEach
+                        val srcLang = Language.fromCodeOrNull(parts[0]) ?: return@forEach
+                        val tgtLang = Language.fromCodeOrNull(parts[1]) ?: return@forEach
+
+                        translations.getOrPut(srcLang) { mutableListOf() }
+                            .add(AvailableTranslationInfo(tgtLang, size))
+                    }
+                }
+            }
+
+            // Combine into AvailableLanguageInfo
+            val allLanguages = (dictionaries.keys + translations.keys).toSet()
+            allLanguages.map { lang ->
+                AvailableLanguageInfo(
+                    language = lang,
+                    dictionarySizeBytes = dictionaries[lang],
+                    availableTranslations = translations[lang] ?: emptyList()
+                )
+            }.sortedBy { it.language.selfName }
+        } finally {
+            client.close()
+        }
+    }
+
+    /**
+     * Lists all downloaded dictionary and translation databases with their sizes.
+     */
+    fun listDownloadedDatabases(): List<DatabaseFileInfo> {
+        val databasesDir = platform.getDatabasePath("")
+        val files = platform.listFiles(databasesDir)
+        return files.mapNotNull { file ->
+            val fileName = file.name
+            val size = platform.getFileSize(file) ?: return@mapNotNull null
+            when {
+                fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                    val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
+                    val language = Language.fromCodeOrNull(langCode) ?: return@mapNotNull null
+                    DatabaseFileInfo.Dictionary(language, size)
+                }
+
+                fileName.startsWith(TRANSLATION_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                    val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
+                    if (parts.size != 2) return@mapNotNull null
+                    val srcLang = Language.fromCodeOrNull(parts[0]) ?: return@mapNotNull null
+                    val tgtLang = Language.fromCodeOrNull(parts[1]) ?: return@mapNotNull null
+                    DatabaseFileInfo.Translation(srcLang, tgtLang, size)
+                }
+
+                else -> null
+            }
+        }
     }
 
     private suspend fun ensureFile(
@@ -249,6 +340,49 @@ class DownloadProgress(bytesDownloaded: Long, val totalBytes: Long?) {
     } else -1
 }
 
+// Database file info
+sealed class DatabaseFileInfo(
+    open val sizeBytes: Long
+) {
+    data class Dictionary(
+        val language: Language,
+        override val sizeBytes: Long
+    ) : DatabaseFileInfo(sizeBytes)
+
+    data class Translation(
+        val sourceLanguage: Language,
+        val targetLanguage: Language,
+        override val sizeBytes: Long
+    ) : DatabaseFileInfo(sizeBytes)
+}
+
+// Google Cloud Storage API models
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable
+@JsonIgnoreUnknownKeys
+private data class StorageListResponse(
+    val items: List<StorageObject>
+)
+
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable
+@JsonIgnoreUnknownKeys
+private data class StorageObject(
+    val name: String,
+    val size: String
+)
+
+data class AvailableLanguageInfo(
+    val language: Language,
+    val dictionarySizeBytes: Long?,
+    val availableTranslations: List<AvailableTranslationInfo>
+)
+
+data class AvailableTranslationInfo(
+    val targetLanguage: Language,
+    val sizeBytes: Long
+)
+
 /**
  * Platform-specific support for file locations, and read-only driver creation.
  */
@@ -268,6 +402,9 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
 
     // Returns available bytes for the filesystem containing the provided path. Null if unknown.
     fun getAvailableBytesForPath(path: Path): Long?
+
+    // Returns file size in bytes. Null if file doesn't exist or size cannot be determined.
+    fun getFileSize(path: Path): Long?
 }
 
 interface PlatformFileOutput {

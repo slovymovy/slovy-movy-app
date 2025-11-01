@@ -104,8 +104,12 @@ android {
         }
     }
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = false
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
         }
     }
     compileOptions {

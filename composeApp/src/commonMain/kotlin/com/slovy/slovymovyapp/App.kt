@@ -92,7 +92,7 @@ fun App(
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember { FavoritesViewModel(favoritesRepository, dictionaryRepository) }
-    val settingsViewModel = remember { SettingsViewModel(ttsManager, voiceFilterHelper) }
+    val settingsViewModel = remember { SettingsViewModel(ttsManager, voiceFilterHelper, dataManager) }
 
     suspend fun selectInitialDestination(): AppDestination {
         // Check if data version is current
@@ -144,7 +144,7 @@ fun App(
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
                 ) {
-                    LanguageSelectionViewModel()
+                    LanguageSelectionViewModel(dataManager)
                 }
 
                 LanguageSelectionScreen(
@@ -165,7 +165,7 @@ fun App(
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
                 ) {
-                    DictionarySelectionViewModel()
+                    DictionarySelectionViewModel(dataManager)
                 }
 
                 DictionarySelectionScreen(

@@ -361,4 +361,33 @@ class DataDbManagerTest : BaseTest() {
             platform.deleteFile(transPath)
         }
     }
+
+    @Test
+    fun testAvailableDictionaries() = runBlocking {
+        val platform = platformDbSupport()
+        val appDbPath = platform.getDatabasePath("any.db")
+        if (platform.fileExists(appDbPath)) {
+            platform.deleteFile(appDbPath)
+        }
+
+        val appDriver = platform.createAppDataDriver(appDbPath)
+        val appDb = DatabaseProvider.createAppDatabase(appDriver)
+        val settingsRepo = SettingsRepository(appDb)
+
+        try {
+            val mgr = DataDbManager(platform, settingsRepo)
+            val fetchAvailableLanguages = mgr.fetchAvailableLanguages()
+            assertTrue { fetchAvailableLanguages.isNotEmpty() }
+            assertTrue { fetchAvailableLanguages.any { it.dictionarySizeBytes != null } }
+            assertTrue { fetchAvailableLanguages.firstOrNull { it.language == Language.ENGLISH } != null }
+            assertTrue {
+                Language.RUSSIAN in
+                        fetchAvailableLanguages.firstOrNull { it.language == Language.ENGLISH }?.availableTranslations!!.map { it.targetLanguage }
+            }
+
+        } finally {
+            appDriver.close()
+            platform.deleteFile(appDbPath)
+        }
+    }
 }
