@@ -37,7 +37,10 @@ data class SearchUiState(
     val results: List<DictionaryRepository.SearchItem>,
     val showNoResults: Boolean,
     val showLanguageIndicators: Boolean = false,
-    val scrollState: LazyListState = LazyListState()
+    val scrollState: LazyListState = LazyListState(),
+    val availableLanguages: List<Language> = emptyList(),
+    val selectedLanguage: Language? = null,
+    val isLanguageDropdownExpanded: Boolean = false
 )
 
 class SearchViewModel(
@@ -50,7 +53,8 @@ class SearchViewModel(
             query = "",
             results = emptyList(),
             showNoResults = false,
-            showLanguageIndicators = repository.installedDictionaries().size > 1
+            showLanguageIndicators = repository.installedDictionaries().size > 1,
+            availableLanguages = repository.installedDictionaries()
         )
     )
         private set
@@ -60,7 +64,7 @@ class SearchViewModel(
         val newResults = if (trimmed.isEmpty()) {
             emptyList()
         } else {
-            repository.search(trimmed)
+            repository.search(trimmed, state.selectedLanguage)
         }
         state = state.copy(
             query = trimmed,
@@ -73,8 +77,21 @@ class SearchViewModel(
 
     fun refreshLanguageIndicators() {
         state = state.copy(
-            showLanguageIndicators = repository.installedDictionaries().size > 1
+            showLanguageIndicators = repository.installedDictionaries().size > 1,
+            availableLanguages = repository.installedDictionaries()
         )
+    }
+
+    fun setSelectedLanguage(language: Language?) {
+        state = state.copy(selectedLanguage = language)
+    }
+
+    fun toggleLanguageDropdown() {
+        state = state.copy(isLanguageDropdownExpanded = !state.isLanguageDropdownExpanded)
+    }
+
+    fun dismissLanguageDropdown() {
+        state = state.copy(isLanguageDropdownExpanded = false)
     }
 }
 
@@ -118,6 +135,12 @@ fun SearchScreen(
             focusManager.clearFocus()
             onWordSelected(item)
         },
+        onLanguageSelected = { language ->
+            viewModel.setSelectedLanguage(language)
+            coroutineScope.launch { viewModel.updateQuery(viewModel.state.query) }
+        },
+        onToggleLanguageDropdown = { viewModel.toggleLanguageDropdown() },
+        onDismissLanguageDropdown = { viewModel.dismissLanguageDropdown() },
         wordDetailLabel = wordDetailLabel,
         onNavigateToWordDetail = onNavigateToWordDetail,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -131,6 +154,9 @@ fun SearchScreenContent(
     state: SearchUiState,
     onQueryChange: (String) -> Unit = {},
     onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
+    onLanguageSelected: (Language?) -> Unit = {},
+    onToggleLanguageDropdown: () -> Unit = {},
+    onDismissLanguageDropdown: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -163,6 +189,75 @@ fun SearchScreenContent(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
+                // Language filter dropdown
+                if (state.availableLanguages.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 8.dp)
+                    ) {
+                        ExposedDropdownMenuBox(
+                            expanded = state.isLanguageDropdownExpanded,
+                            onExpandedChange = { onToggleLanguageDropdown() }
+                        ) {
+                            OutlinedTextField(
+                                value = state.selectedLanguage?.selfName ?: "All languages",
+                                onValueChange = {},
+                                readOnly = true,
+                                modifier = Modifier.menuAnchor(),
+                                leadingIcon = {
+                                    Text(
+                                        text = state.selectedLanguage?.flag ?: "🌍",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = state.isLanguageDropdownExpanded) },
+                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            ExposedDropdownMenu(
+                                expanded = state.isLanguageDropdownExpanded,
+                                onDismissRequest = onDismissLanguageDropdown
+                            ) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text("🌍")
+                                            Text("All languages")
+                                        }
+                                    },
+                                    onClick = {
+                                        onLanguageSelected(null)
+                                        onDismissLanguageDropdown()
+                                    },
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                )
+                                state.availableLanguages.forEach { language ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(language.flag)
+                                                Text(language.selfName)
+                                            }
+                                        },
+                                        onClick = {
+                                            onLanguageSelected(language)
+                                            onDismissLanguageDropdown()
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Search field with padding
                 OutlinedTextField(
                     value = state.query,
@@ -171,10 +266,15 @@ fun SearchScreenContent(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(top = 16.dp),
-                    label = { Text("Search a word") },
                     placeholder = { Text("Type to search...") },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search"
+                        )
+                    },
                     trailingIcon = {
                         if (state.query.isNotEmpty()) {
                             TextButton(onClick = { onQueryChange("") }) {
@@ -370,6 +470,7 @@ private fun SearchScreenPreviewEmptyQuery(
                 query = "",
                 results = emptyList(),
                 showNoResults = false,
+                availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN)
             ),
         )
     }
@@ -420,6 +521,8 @@ private fun SearchScreenPreviewWithResults(
                     )
                 ),
                 showNoResults = false,
+                availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN),
+                selectedLanguage = Language.ENGLISH
             ),
         )
     }
@@ -471,6 +574,7 @@ private fun SearchScreenPreviewMultilingualResults(
                 ),
                 showNoResults = false,
                 showLanguageIndicators = true, // Multiple dictionaries - show language badges
+                availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN, Language.POLISH)
             ),
         )
     }
@@ -488,6 +592,7 @@ private fun SearchScreenPreviewNoResults(
                 query = "xyzabc123",
                 results = emptyList(),
                 showNoResults = true,
+                availableLanguages = listOf(Language.ENGLISH)
             ),
         )
     }
@@ -514,6 +619,7 @@ private fun SearchScreenPreviewInfoDialog(
                     )
                 ),
                 showNoResults = false,
+                availableLanguages = listOf(Language.ENGLISH)
             ),
         )
     }
@@ -549,6 +655,7 @@ private fun SearchScreenPreviewSingleLanguage(
                 ),
                 showNoResults = false,
                 showLanguageIndicators = false, // Single dictionary - no language badges
+                availableLanguages = listOf(Language.DUTCH)
             ),
         )
     }
@@ -592,6 +699,7 @@ private fun SearchScreenPreviewMultilingualWithoutPOS(
                 ),
                 showNoResults = false,
                 showLanguageIndicators = true, // Multiple dictionaries - language badges shown even without POS
+                availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN, Language.POLISH)
             ),
         )
     }
@@ -643,6 +751,7 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                 ),
                 showNoResults = false,
                 showLanguageIndicators = true,
+                availableLanguages = listOf(Language.ENGLISH, Language.DUTCH)
             ),
         )
     }
