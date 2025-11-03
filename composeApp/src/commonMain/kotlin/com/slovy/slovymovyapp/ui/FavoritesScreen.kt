@@ -326,24 +326,14 @@ fun FavoritesScreenContent(
         ) {
             // Search field - only show if there are any favorites
             if (state.hasAnyFavorites) {
-                OutlinedTextField(
-                    value = state.query,
-                    onValueChange = onQueryChange,
+                com.slovy.slovymovyapp.ui.components.AppSearchBar(
+                    query = state.query,
+                    onQueryChange = onQueryChange,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(top = 16.dp),
-                    label = { Text("Search in favorites") },
-                    placeholder = { Text("Type to search...") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    trailingIcon = {
-                        if (state.query.isNotEmpty()) {
-                            TextButton(onClick = { onQueryChange("") }) {
-                                Text("✕")
-                            }
-                        }
-                    }
+                    placeholder = "Search in favorites..."
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -353,16 +343,13 @@ fun FavoritesScreenContent(
             when {
                 state.groups.isEmpty() && state.query.isEmpty() -> {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 24.dp),
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "🤍🤍🤍\nNo favorites yet.\nAdd favorites by tapping the heart icon on any word sense.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
+                        com.slovy.slovymovyapp.ui.components.EmptyState(
+                            icon = Icons.Outlined.FavoriteBorder,
+                            title = "No Favorites Yet",
+                            description = "Save words you want to learn by tapping the heart icon on any word meaning"
                         )
                     }
                 }

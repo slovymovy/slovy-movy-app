@@ -1,6 +1,6 @@
 package com.slovy.slovymovyapp.ui
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -11,28 +11,28 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
+import com.slovy.slovymovyapp.ui.components.AppCard
+import com.slovy.slovymovyapp.ui.components.AppSearchBar
+import com.slovy.slovymovyapp.ui.components.CompactFrequencyBadge
 import com.slovy.slovymovyapp.ui.word.Badge
-import com.slovy.slovymovyapp.ui.word.colorsForPos
-import com.slovy.slovymovyapp.ui.word.getFrequencyColor
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 import kotlin.uuid.Uuid
 
 data class SearchUiState(
-    val title: String,
     val query: String,
     val results: List<DictionaryRepository.SearchItem>,
     val showNoResults: Boolean,
@@ -49,11 +49,9 @@ class SearchViewModel(
 
     var state by mutableStateOf(
         SearchUiState(
-            title = "Search",
             query = "",
             results = emptyList(),
             showNoResults = false,
-            showLanguageIndicators = repository.installedDictionaries().size > 1,
             availableLanguages = repository.installedDictionaries()
         )
     )
@@ -77,7 +75,6 @@ class SearchViewModel(
 
     fun refreshLanguageIndicators() {
         state = state.copy(
-            showLanguageIndicators = repository.installedDictionaries().size > 1,
             availableLanguages = repository.installedDictionaries()
         )
     }
@@ -92,6 +89,10 @@ class SearchViewModel(
 
     fun dismissLanguageDropdown() {
         state = state.copy(isLanguageDropdownExpanded = false)
+    }
+
+    fun setShowLanguageIndicators(show: Boolean) {
+        state = state.copy(showLanguageIndicators = show)
     }
 }
 
@@ -136,6 +137,7 @@ fun SearchScreen(
             onWordSelected(item)
         },
         onLanguageSelected = { language ->
+            viewModel.setShowLanguageIndicators(language == null)
             viewModel.setSelectedLanguage(language)
             coroutineScope.launch { viewModel.updateQuery(viewModel.state.query) }
         },
@@ -147,6 +149,25 @@ fun SearchScreen(
         onNavigateToSettings = onNavigateToSettings
     )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun languageFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedContainerColor = MaterialTheme.colorScheme.surface,
+    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+    focusedBorderColor = Color.Transparent,
+    unfocusedBorderColor = Color.Transparent,
+    disabledBorderColor = Color.Transparent,
+    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+    focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+    unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    focusedTrailingIconColor = MaterialTheme.colorScheme.primary,
+    unfocusedTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -164,15 +185,6 @@ fun SearchScreenContent(
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Column {
-                            Text(state.title)
-                        }
-                    }
-                )
-            },
             bottomBar = {
                 AppNavigationBar(
                     currentScreen = AppScreen.SEARCH,
@@ -191,97 +203,107 @@ fun SearchScreenContent(
             ) {
                 // Language filter dropdown
                 if (state.availableLanguages.isNotEmpty()) {
+                    val isSingleLanguage = state.availableLanguages.size == 1
+                    val currentLanguage =
+                        if (isSingleLanguage) state.availableLanguages.first() else state.selectedLanguage
+                    val interactionSource = remember { MutableInteractionSource() }
+
                     Row(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .padding(top = 8.dp)
                     ) {
                         ExposedDropdownMenuBox(
-                            expanded = state.isLanguageDropdownExpanded,
-                            onExpandedChange = { onToggleLanguageDropdown() }
+                            expanded = state.isLanguageDropdownExpanded && !isSingleLanguage,
+                            onExpandedChange = { if (!isSingleLanguage) onToggleLanguageDropdown() }
                         ) {
                             OutlinedTextField(
-                                value = state.selectedLanguage?.selfName ?: "All languages",
+                                value = if (state.isLanguageDropdownExpanded) {
+                                    currentLanguage?.selfName ?: "All languages"
+                                } else {
+                                    currentLanguage?.flag ?: "🌍"
+                                },
                                 onValueChange = {},
                                 readOnly = true,
-                                modifier = Modifier.menuAnchor(),
-                                leadingIcon = {
-                                    Text(
-                                        text = state.selectedLanguage?.flag ?: "🌍",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = state.isLanguageDropdownExpanded) },
-                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                                shape = RoundedCornerShape(12.dp)
+                                enabled = !isSingleLanguage,
+                                modifier = Modifier
+                                    .menuAnchor(PrimaryEditable, !isSingleLanguage)
+                                    .height(56.dp)
+                                    .wrapContentWidth(),
+                                leadingIcon = if (state.isLanguageDropdownExpanded) {
+                                    {
+                                        Text(
+                                            text = currentLanguage?.flag ?: "🌍",
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                    }
+                                } else null,
+                                trailingIcon = if (!isSingleLanguage) {
+                                    {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(
+                                            expanded = state.isLanguageDropdownExpanded
+                                        )
+                                    }
+                                } else null,
+                                colors = languageFieldColors(),
+                                shape = MaterialTheme.shapes.extraLarge,
+                                textStyle = MaterialTheme.typography.bodyLarge,
+                                interactionSource = interactionSource
                             )
-                            ExposedDropdownMenu(
-                                expanded = state.isLanguageDropdownExpanded,
-                                onDismissRequest = onDismissLanguageDropdown
-                            ) {
-                                DropdownMenuItem(
-                                    text = {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text("🌍")
-                                            Text("All languages")
-                                        }
-                                    },
-                                    onClick = {
-                                        onLanguageSelected(null)
-                                        onDismissLanguageDropdown()
-                                    },
-                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                )
-                                state.availableLanguages.forEach { language ->
+                            if (!isSingleLanguage) {
+                                ExposedDropdownMenu(
+                                    expanded = state.isLanguageDropdownExpanded,
+                                    onDismissRequest = onDismissLanguageDropdown
+                                ) {
                                     DropdownMenuItem(
                                         text = {
                                             Row(
                                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(language.flag)
-                                                Text(language.selfName)
+                                                Text("🌍")
+                                                Text("All languages")
                                             }
                                         },
                                         onClick = {
-                                            onLanguageSelected(language)
+                                            onLanguageSelected(null)
                                             onDismissLanguageDropdown()
                                         },
                                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                                     )
+                                    state.availableLanguages.forEach { language ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(language.flag)
+                                                    Text(language.selfName)
+                                                }
+                                            },
+                                            onClick = {
+                                                onLanguageSelected(language)
+                                                onDismissLanguageDropdown()
+                                            },
+                                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                // Search field with padding
-                OutlinedTextField(
-                    value = state.query,
-                    onValueChange = onQueryChange,
+                // Search field with new AppSearchBar component
+                AppSearchBar(
+                    query = state.query,
+                    onQueryChange = onQueryChange,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(top = 16.dp),
-                    placeholder = { Text("Type to search...") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = "Search"
-                        )
-                    },
-                    trailingIcon = {
-                        if (state.query.isNotEmpty()) {
-                            TextButton(onClick = { onQueryChange("") }) {
-                                Text("✕")
-                            }
-                        }
-                    }
+                    placeholder = "Search in ${state.selectedLanguage?.selfName ?: "all languages"}..."
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -325,59 +347,61 @@ private fun SearchResultCard(
     showLanguageIndicator: Boolean = false,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(6.dp)
+    AppCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(6.dp),
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    val (lc, lcc) = getFrequencyColor(item.zipfFrequency)
-                    Badge(
-                        text = item.display,
-                        containerColor = lc,
-                        contentColor = lcc,
-                        style = MaterialTheme.typography.labelLarge
+            // Word display
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = item.display,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                // Meaning count could be shown here if available
+                if (item.pos.isNotEmpty()) {
+                    Text(
+                        text = "${item.pos.size} ${if (item.pos.size == 1) "meaning" else "meanings"}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            if (showLanguageIndicator || item.pos.isNotEmpty()) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    // Show language badge first if searching multiple dictionaries
-                    if (showLanguageIndicator) {
-                        Badge(
-                            text = item.language.selfName,
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                    }
+            // Badges section
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Frequency badge
+                val frequencyLevel = when {
+                    item.zipfFrequency >= 5.0f -> "high"
+                    item.zipfFrequency >= 3.0f -> "medium"
+                    else -> "low"
+                }
+                CompactFrequencyBadge(
+                    frequency = frequencyLevel
+                )
 
-                    // Then show POS badges with rounder corners
-                    item.pos.forEach { pos ->
-                        val (posLc, posLcc) = colorsForPos(pos)
-                        Badge(
-                            text = pos.short,
-                            containerColor = posLc,
-                            contentColor = posLcc
-                        )
-                    }
+                // Show language badge if searching multiple dictionaries
+                if (showLanguageIndicator) {
+                    Badge(
+                        text = item.language.selfName,
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        shape = RoundedCornerShape(4.dp)
+                    )
                 }
             }
         }
@@ -386,74 +410,32 @@ private fun SearchResultCard(
 
 @Composable
 private fun EmptySearchState() {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        contentAlignment = Alignment.Center
     ) {
-        Spacer(modifier = Modifier.height(48.dp))
-        Icon(
-            imageVector = Icons.Filled.Search,
-            contentDescription = "Search",
-            modifier = Modifier.size(72.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Search for words",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Start typing to find words in your selected language",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 32.dp)
+        com.slovy.slovymovyapp.ui.components.EmptyState(
+            icon = Icons.Filled.Search,
+            title = "Expand Your Vocabulary",
+            description = "Search for words to discover their meanings, pronunciations, and examples"
         )
     }
 }
 
 @Composable
 private fun NoResultsState(query: String) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        contentAlignment = Alignment.Center
     ) {
-        Spacer(modifier = Modifier.height(48.dp))
-        Icon(
-            imageVector = Icons.Filled.Search,
-            contentDescription = "No results",
-            modifier = Modifier.size(72.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "No results found",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "We couldn't find any words matching $query",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 32.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Try a different spelling or search term",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 32.dp)
+        com.slovy.slovymovyapp.ui.components.EmptyState(
+            icon = Icons.Filled.Search,
+            title = "No results found",
+            description = "We couldn't find any words matching \"$query\". Try a different spelling or search term."
         )
     }
 }
@@ -466,7 +448,6 @@ private fun SearchScreenPreviewEmptyQuery(
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
             state = SearchUiState(
-                title = "Dictionary Search",
                 query = "",
                 results = emptyList(),
                 showNoResults = false,
@@ -484,7 +465,6 @@ private fun SearchScreenPreviewWithResults(
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
             state = SearchUiState(
-                title = "Dictionary Search",
                 query = "cel",
                 results = listOf(
                     DictionaryRepository.SearchItem(
@@ -536,7 +516,6 @@ private fun SearchScreenPreviewMultilingualResults(
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
             state = SearchUiState(
-                title = "Dictionary Search",
                 query = "program",
                 results = listOf(
                     DictionaryRepository.SearchItem(
@@ -588,7 +567,6 @@ private fun SearchScreenPreviewNoResults(
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
             state = SearchUiState(
-                title = "Dictionary Search",
                 query = "xyzabc123",
                 results = emptyList(),
                 showNoResults = true,
@@ -606,7 +584,6 @@ private fun SearchScreenPreviewInfoDialog(
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
             state = SearchUiState(
-                title = "Dictionary Search",
                 query = "world",
                 results = listOf(
                     DictionaryRepository.SearchItem(
@@ -633,7 +610,6 @@ private fun SearchScreenPreviewSingleLanguage(
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
             state = SearchUiState(
-                title = "Dictionary Search",
                 query = "bib",
                 results = listOf(
                     DictionaryRepository.SearchItem(
@@ -669,7 +645,6 @@ private fun SearchScreenPreviewMultilingualWithoutPOS(
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
             state = SearchUiState(
-                title = "Dictionary Search",
                 query = "word",
                 results = listOf(
                     DictionaryRepository.SearchItem(
@@ -713,7 +688,6 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
             state = SearchUiState(
-                title = "Dictionary Search",
                 query = "run",
                 results = listOf(
                     DictionaryRepository.SearchItem(

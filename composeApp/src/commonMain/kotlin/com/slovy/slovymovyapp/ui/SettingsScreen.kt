@@ -273,10 +273,10 @@ class SettingsViewModel(
 
     private fun loadLanguages() {
         viewModelScope.launch {
-            if (state.languages.isEmpty()) {
-                state = state.copy(isLoading = true, errorMessage = null)
+            state = if (state.languages.isEmpty()) {
+                state.copy(isLoading = true, errorMessage = null)
             } else {
-                state = state.copy(errorMessage = null)
+                state.copy(errorMessage = null)
             }
             try {
                 val languages = ttsManager.getAvailableLanguages()

@@ -3,13 +3,9 @@ package com.slovy.slovymovyapp.ui.word
 import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,7 +15,8 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.LanguageCardForm
 import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
-import kotlin.text.Typography
+import com.slovy.slovymovyapp.ui.components.AppCard
+import com.slovy.slovymovyapp.ui.components.PartOfSpeechIndicator
 
 @Composable
 private fun FormsList(forms: List<LanguageCardForm>) {
@@ -54,32 +51,23 @@ internal fun EntryCard(
     onSenseFavoriteToggle: (String) -> Unit = {}
 ) {
     val expanded = entryState.expanded
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    AppCard(
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                    .clip(MaterialTheme.shapes.extraLarge)
                     .clickable(onClick = onEntryToggle)
                     .padding(horizontal = 20.dp, vertical = 18.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                val (pc, pcc) = colorsForPos(entry.pos)
-                Surface(
-                    color = pc,
-                    contentColor = pcc,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        text = entry.pos.capitalized(),
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
-                }
+                // Use new PartOfSpeechIndicator
+                PartOfSpeechIndicator(
+                    partOfSpeech = entry.pos.name
+                )
 
                 Spacer(modifier = Modifier.width(8.dp))
 
