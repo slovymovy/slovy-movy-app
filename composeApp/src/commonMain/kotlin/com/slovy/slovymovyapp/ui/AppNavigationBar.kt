@@ -32,6 +32,7 @@ fun AppNavigationBar(
 ) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        tonalElevation = com.slovy.slovymovyapp.ui.theme.AppElevation.level3
     ) {
         NavigationBarItem(
             icon = {

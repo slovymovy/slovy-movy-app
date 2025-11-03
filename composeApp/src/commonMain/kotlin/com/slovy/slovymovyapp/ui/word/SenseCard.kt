@@ -51,7 +51,7 @@ internal fun SenseCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .clickable(onClick = onToggle)
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -82,7 +82,6 @@ internal fun SenseCard(
                         level = sense.learnerLevel,
                         frequency = sense.frequency,
                         nameType = sense.nameType,
-                        pos = state.pos
                     )
                 }
 
@@ -149,7 +148,7 @@ internal fun SenseCard(
                     if (sense.targetLangDefinitions.isNotEmpty()) {
                         OutlinedCard(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
                             if (translationBasedHeader != null) {
@@ -342,7 +341,6 @@ internal fun LevelAndFrequencyRow(
     level: LearnerLevel,
     frequency: SenseFrequency,
     nameType: NameType?,
-    pos: PartOfSpeech? = null
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -351,15 +349,6 @@ internal fun LevelAndFrequencyRow(
     ) {
         val (lc, lcc) = colorsForLevel(level)
         val (fc, fcc) = colorsForFrequency(frequency)
-        if (pos != null) {
-            val (pc, pcc) = colorsForPos(pos)
-            Badge(
-                text = pos.name.lowercase()
-                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
-                containerColor = pc,
-                contentColor = pcc
-            )
-        }
         Badge(text = level.name, containerColor = lc, contentColor = lcc)
         Badge(text = frequency.label, containerColor = fc, contentColor = fcc)
         if (nameType != null && nameType != NameType.NO) {

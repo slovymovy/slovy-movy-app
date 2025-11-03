@@ -1,14 +1,13 @@
 package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayCircleFilled
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,6 +32,8 @@ import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
+import com.slovy.slovymovyapp.ui.components.AppCard
+import com.slovy.slovymovyapp.ui.components.CompactCard
 import kotlinx.coroutines.launch
 
 sealed interface WordDetailUiState {
@@ -209,7 +210,7 @@ class WordDetailViewModel(
     private var hasScrolledToTarget = false
 
     init {
-        val card = dictionaryLanguage?.let { repository.getLanguageCard(it, lemma) }
+        val card = dictionaryLanguage.let { repository.getLanguageCard(it, lemma) }
         state =
             card?.toContentUiState(targetSenseId, isSenseFavorite = ::isSenseFavorite) ?: WordDetailUiState.Empty(
                 lemma = lemma,
@@ -238,16 +239,16 @@ class WordDetailViewModel(
     }
 
     private fun loadFavorites() {
-        val card = dictionaryLanguage?.let { repository.getLanguageCard(it, lemma) }
+        val card = dictionaryLanguage.let { repository.getLanguageCard(it, lemma) }
         val allSenseIds = card?.entries?.flatMap { entry ->
             entry.senses.map { it.senseId }
         } ?: emptyList()
 
-        val favoriteSenseIds = dictionaryLanguage?.let { lang ->
+        val favoriteSenseIds = dictionaryLanguage.let { lang ->
             allSenseIds.filter { senseId ->
                 favoritesRepository.exists(senseId, lang)
             }.toSet()
-        } ?: emptySet()
+        }
 
         favoriteSenses = favoriteSenseIds
         val current = state
@@ -288,7 +289,7 @@ class WordDetailViewModel(
     }
 
     fun toggleFavorite(senseId: String) {
-        dictionaryLanguage?.let { lang ->
+        dictionaryLanguage.let { lang ->
             if (senseId in favoriteSenses) {
                 favoritesRepository.remove(senseId, lang)
             } else {
@@ -581,13 +582,9 @@ fun WordDetailScreenContent(
                                     )
 
                                     else -> Icon(
-                                        imageVector = if (isPlaying) Icons.Filled.StopCircle else Icons.Filled.PlayCircleFilled,
+                                        imageVector = if (isPlaying) Icons.Filled.StopCircle else Icons.AutoMirrored.Filled.VolumeUp,
                                         contentDescription = if (isPlaying) "Stop" else "Play word",
-                                        tint = if (isPlaying) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            LocalContentColor.current
-                                        }
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
@@ -688,44 +685,34 @@ private fun WordDetailContent(
     ) {
         // Display word family if available
         if (card.wordFamily.isNotEmpty()) {
-            val colorScheme = MaterialTheme.colorScheme
-            ExpandableSection(
-                title = "Word Family",
-                expanded = wordFamilyExpanded,
-                onToggle = onWordFamilyToggle,
-                modifier = Modifier.fillMaxWidth(),
-                supportingText = "${card.wordFamily.size} related word${if (card.wordFamily.size != 1) "s" else ""}",
-                headlineStyle = MaterialTheme.typography.titleMedium
+            AppCard(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                FlowRow(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    card.wordFamily.forEach { familyWord ->
-                        val wordFamilyColor = getWordFamilyColor(familyWord, colorScheme)
-
-                        val backgroundColor = wordFamilyColor.first
-                        val textColor = wordFamilyColor.second
-
-                        SuggestionChip(
-                            onClick = { /* TODO: navigate to word */ },
-                            label = {
+                    Text(
+                        text = "Word Family",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        card.wordFamily.forEach { familyWord ->
+                            CompactCard {
                                 Text(
                                     text = familyWord,
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
-                                    )
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                                 )
-                            },
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = backgroundColor,
-                                labelColor = textColor
-                            ),
-                            border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.5f))
-                        )
+                            }
+                        }
                     }
                 }
             }
