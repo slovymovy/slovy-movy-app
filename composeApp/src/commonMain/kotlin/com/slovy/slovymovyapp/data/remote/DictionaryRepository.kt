@@ -101,7 +101,7 @@ class DictionaryRepository(
             }
 
             fun addTranslation(lemmaId: Uuid, lemma: String, translation: String, zipfFrequency: Float) {
-                // Skip forms if the base lemma is already in the results
+                // Skip translation if the base lemma is already in the results
                 val lemmaKey = "${lang.code}::${lemma.lowercase()}"
                 if (seenLemmas.contains(lemmaKey)) {
                     return
@@ -181,6 +181,7 @@ class DictionaryRepository(
                 q.selectLemmasFromFormsNormalizedLike(pattern, maxItems.toLong()).executeAsList()
             formLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat()) }
             formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat()) }
+            if (shouldEarlyReturn()) return out.take(maxItems)
 
             // 3) search by translation (target language words) using normalized index
             val targets = installedTranslationTargets(lang)
