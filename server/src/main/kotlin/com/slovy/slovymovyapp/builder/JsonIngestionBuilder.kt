@@ -135,6 +135,7 @@ class JsonIngestionBuilder(
 
             // Group forms by lemma_pos_id and deduplicate
             data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+
             val lemmaPosIdToForms = mutableMapOf<Uuid, MutableMap<FormKey, ExtractedWordForm>>()
 
             entriesForForms.forEach { entry ->
@@ -217,6 +218,8 @@ class JsonIngestionBuilder(
                 val trQ = trDb.translationQueries
                 trDb.transaction {
                     processed.entries.forEach { posEntry ->
+                        val pos = mapPos(posEntry.pos)
+                        val lemmaPosIdForPos = posToEntryId[pos]!!
                         posEntry.senses.forEach { sense ->
                             val senseId = uuidParse(sense.senseId)
                             // definitions
@@ -228,10 +231,13 @@ class JsonIngestionBuilder(
                             val translations = sense.translations[trg] ?: emptyList()
                             translations.forEachIndexed { idx, t ->
                                 trQ.insertSenseTranslation(
-                                    sense_id = senseId,
-                                    idx = idx.toLong(),
-                                    target_lang_word = t.targetLangWord,
-                                    target_lang_sense_clarification = t.targetLangSenseClarification
+                                    senseId,
+                                    idx.toLong(),
+                                    t.targetLangWord,
+                                    unaccent(t.targetLangWord),
+                                    t.targetLangSenseClarification,
+                                    baseLemmaId,
+                                    lemmaPosIdForPos
                                 )
                             }
                             // example translations by index

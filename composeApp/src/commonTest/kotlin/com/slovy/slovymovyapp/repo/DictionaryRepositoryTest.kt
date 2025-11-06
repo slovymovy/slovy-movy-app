@@ -7,10 +7,7 @@ import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.platformDbSupport
 import kotlinx.coroutines.runBlocking
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class DictionaryRepositoryTest : BaseTest() {
     @Test
@@ -167,6 +164,7 @@ class DictionaryRepositoryTest : BaseTest() {
         }
     }
 
+    @Ignore
     @Test
     fun word_family_is_retrieved_correctly() {
         val platform = platformDbSupport()

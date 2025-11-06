@@ -14,9 +14,16 @@ CREATE TABLE sense_translation (
   sense_id BLOB AS Uuid NOT NULL,
   idx INTEGER NOT NULL, -- position within the list to preserve order
   target_lang_word TEXT NOT NULL,
+  target_lang_word_normalized TEXT NOT NULL,
   target_lang_sense_clarification TEXT,
+  lemma_id BLOB AS Uuid NOT NULL,
+  lemma_pos_id BLOB AS Uuid NOT NULL,
   PRIMARY KEY(sense_id, idx)
 );
+
+-- Index to speed up lookups by normalized target word
+CREATE INDEX sense_translation_target_lang_word_normalized_idx
+ON sense_translation(target_lang_word_normalized);
 
 -- Per-example target translations (scoped by sense_id and example_id)
 CREATE TABLE example_translation (
@@ -32,8 +39,8 @@ INSERT OR REPLACE INTO sense_target_definition(sense_id, definition)
 VALUES (?, ?);
 
 insertSenseTranslation:
-INSERT OR REPLACE INTO sense_translation(sense_id, idx, target_lang_word, target_lang_sense_clarification)
-VALUES (?, ?, ?, ?);
+INSERT OR REPLACE INTO sense_translation(sense_id, idx, target_lang_word, target_lang_word_normalized, target_lang_sense_clarification, lemma_id, lemma_pos_id)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 insertExampleTranslation:
 INSERT OR REPLACE INTO example_translation(sense_id, example_id, translation)
@@ -46,7 +53,14 @@ FROM sense_target_definition
 WHERE sense_id = ?;
 
 selectSenseTranslationsBySense:
-SELECT idx, target_lang_word, target_lang_sense_clarification
+SELECT idx, target_lang_word, target_lang_sense_clarification, lemma_id, lemma_pos_id
+FROM sense_translation
+WHERE sense_id = ?
+ORDER BY idx;
+
+-- Selector including normalized word for testing and lookup
+selectSenseTranslationsBySenseWithNormalized:
+SELECT idx, target_lang_word, target_lang_word_normalized, target_lang_sense_clarification, lemma_id, lemma_pos_id
 FROM sense_translation
 WHERE sense_id = ?
 ORDER BY idx;
@@ -55,3 +69,10 @@ selectExampleTranslations:
 SELECT translation
 FROM example_translation
 WHERE sense_id = ? AND example_id = ?;
+
+-- Lookup by normalized target word
+selectSenseTranslationsByNormalized:
+SELECT sense_id, idx, target_lang_word, target_lang_word_normalized, target_lang_sense_clarification, lemma_id, lemma_pos_id
+FROM sense_translation
+WHERE target_lang_word_normalized LIKE ?
+ORDER BY idx;

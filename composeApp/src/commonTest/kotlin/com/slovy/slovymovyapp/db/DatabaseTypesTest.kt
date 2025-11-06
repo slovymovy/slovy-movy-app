@@ -117,17 +117,25 @@ class DatabaseTypesTest : BaseTest() {
                 val q = db.translationQueries
                 val senseId = Uuid.random()
                 q.insertSenseTargetDefinition(sense_id = senseId, definition = "target definition")
+                val lemmaId = Uuid.random()
+                val lemmaPosId = Uuid.random()
                 q.insertSenseTranslation(
                     sense_id = senseId,
                     idx = 0,
                     target_lang_word = "test",
-                    target_lang_sense_clarification = "n."
+                    target_lang_word_normalized = "test",
+                    target_lang_sense_clarification = "n.",
+                    lemma_id = lemmaId,
+                    lemma_pos_id = lemmaPosId,
                 )
                 q.insertSenseTranslation(
                     sense_id = senseId,
                     idx = 1,
                     target_lang_word = "trial",
-                    target_lang_sense_clarification = null
+                    target_lang_word_normalized = "trial",
+                    target_lang_sense_clarification = null,
+                    lemma_id = lemmaId,
+                    lemma_pos_id = lemmaPosId,
                 )
                 q.insertExampleTranslation(sense_id = senseId, example_id = 42, translation = "Мы тестируем.")
                 val defs = q.selectDefinitionsBySense(senseId).executeAsList()

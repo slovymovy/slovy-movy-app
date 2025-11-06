@@ -55,9 +55,9 @@ class DictionaryRepository(
         val seenLemmas = HashSet<String>()
 
         for (lang in langs) {
-            val db =
-                dataDbManager.openDictionaryReadOnly(lang)
+            val db = dataDbManager.openDictionaryReadOnly(lang)
             val q = db.dictionaryQueries
+
             fun addLemma(lemmaId: Uuid, lemma: String, zipfFrequency: Float) {
                 val key = "${lang.code}::$lemma"
                 if (!seenDisplays.contains(key)) {
@@ -100,30 +100,72 @@ class DictionaryRepository(
                 }
             }
 
+            fun addTranslation(lemmaId: Uuid, lemma: String, translation: String, zipfFrequency: Float) {
+                // Skip forms if the base lemma is already in the results
+                val lemmaKey = "${lang.code}::${lemma.lowercase()}"
+                if (seenLemmas.contains(lemmaKey)) {
+                    return
+                }
 
-            // search exact matching first
+                val display = "\"$translation\" translation of \"$lemma\""
+                val key = "${lang.code}::$display"
+                if (!seenDisplays.contains(key)) {
+                    out.add(
+                        SearchItem(
+                            language = lang,
+                            lemmaId = lemmaId,
+                            lemma = lemma,
+                            display = display,
+                            zipfFrequency = zipfFrequency,
+                            pos = emptyList()
+                        )
+                    )
+                    seenDisplays.add(key)
+                }
+            }
+
+            fun enrichPosForLang() {
+                // Fetch POS values for all collected lemma IDs for this language
+                val lemmaIds = out.filter { it.language == lang }.map { it.lemmaId }.toSet().toList()
+                if (lemmaIds.isNotEmpty()) {
+                    val posResults = q.selectLemmaIdAndPosByLemmaIds(lemmaIds).executeAsList()
+                    val lemmaIdToPosMap = posResults.groupBy({ it.id }, { it.pos.toPartOfSpeech() })
+                    for (i in out.indices) {
+                        if (out[i].language == lang) {
+                            val posList = lemmaIdToPosMap[out[i].lemmaId] ?: emptyList()
+                            out[i] = out[i].copy(pos = posList)
+                        }
+                    }
+                }
+            }
+
+            fun shouldEarlyReturn(): Boolean {
+                if (out.size >= maxItems) {
+                    enrichPosForLang()
+                    return true
+                }
+                return false
+            }
+
+            // 1) search exact lemma matches first
             val byWord: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByWord> =
                 q.selectLemmasByWord(trimmed).executeAsList()
             val byNorm: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByNormalized> =
                 q.selectLemmasByNormalized(trimmed).executeAsList()
             byWord.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat()) }
             byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat()) }
+            if (shouldEarlyReturn()) return out.take(maxItems)
 
+            // 2) search exact form equals (including normalized)
             val formEq: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByFormEquals> =
                 q.selectLemmasByFormEquals(trimmed, maxItems.toLong()).executeAsList()
             val formEqNorm: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByFormNormalizedEquals> =
                 q.selectLemmasByFormNormalizedEquals(trimmed, maxItems.toLong()).executeAsList()
             formEq.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat()) }
-            formEqNorm.forEach {
-                addForm(
-                    it.id,
-                    it.lemma,
-                    it.form,
-                    it.zipf_frequency.toFloat()
-                )
-            }
+            formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat()) }
+            if (shouldEarlyReturn()) return out.take(maxItems)
 
-            // and by prefix later
+            // 4) and by prefix later (lemma and forms)
             val pattern = "$trimmed%"
             val lemmaLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasLike> =
                 q.selectLemmasLike(pattern, maxItems.toLong()).executeAsList()
@@ -131,35 +173,40 @@ class DictionaryRepository(
                 q.selectLemmasNormalizedLike(pattern, maxItems.toLong()).executeAsList()
             lemmaLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat()) }
             lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat()) }
+            if (shouldEarlyReturn()) return out.take(maxItems)
 
             val formLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasFromFormsLike> =
                 q.selectLemmasFromFormsLike(pattern, maxItems.toLong()).executeAsList()
             val formNormLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasFromFormsNormalizedLike> =
                 q.selectLemmasFromFormsNormalizedLike(pattern, maxItems.toLong()).executeAsList()
             formLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat()) }
-            formNormLike.forEach {
-                addForm(
-                    it.id,
-                    it.lemma,
-                    it.form,
-                    it.zipf_frequency.toFloat()
-                )
-            }
+            formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat()) }
 
-            // Fetch POS values for all collected lemma IDs
-            val lemmaIds = out.filter { it.language == lang }.map { it.lemmaId }.toSet().toList()
-            if (lemmaIds.isNotEmpty()) {
-                val posResults = q.selectLemmaIdAndPosByLemmaIds(lemmaIds).executeAsList()
-                val lemmaIdToPosMap = posResults.groupBy({ it.id }, { it.pos.toPartOfSpeech() })
-
-                // Update search items with their POS lists
-                for (i in out.indices) {
-                    if (out[i].language == lang) {
-                        val posList = lemmaIdToPosMap[out[i].lemmaId] ?: emptyList()
-                        out[i] = out[i].copy(pos = posList)
+            // 3) search by translation (target language words) using normalized index
+            val targets = installedTranslationTargets(lang)
+            for (tgt in targets) {
+                val tdb = dataDbManager.openTranslationReadOnly(lang, tgt)
+                val tq = tdb.translationQueries
+                val trRows = tq.selectSenseTranslationsByNormalized(pattern).executeAsList()
+                val lemmaRows = q.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
+                val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
+                for (row in trRowsSorted) {
+                    // Map translation hit back to base lemma
+                    val lemmaRow = lemmaRows[row.lemma_id]
+                    if (lemmaRow != null) {
+                        addTranslation(
+                            lemmaRow.id,
+                            lemmaRow.lemma,
+                            row.target_lang_word,
+                            lemmaRow.zipf_frequency.toFloat()
+                        )
+                        if (shouldEarlyReturn()) return out.take(maxItems)
                     }
                 }
             }
+
+            // Enrich POS for this language before moving to the next
+            enrichPosForLang()
         }
 
         return out.take(maxItems)

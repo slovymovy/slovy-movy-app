@@ -49,7 +49,9 @@ object DatabaseProvider {
             sense_idAdapter = UuidByteArrayColumnAdapter()
         ),
         sense_translationAdapter = Sense_translation.Adapter(
-            sense_idAdapter = UuidByteArrayColumnAdapter()
+            sense_idAdapter = UuidByteArrayColumnAdapter(),
+            lemma_idAdapter = UuidByteArrayColumnAdapter(),
+            lemma_pos_idAdapter = UuidByteArrayColumnAdapter(),
         ),
     )
 

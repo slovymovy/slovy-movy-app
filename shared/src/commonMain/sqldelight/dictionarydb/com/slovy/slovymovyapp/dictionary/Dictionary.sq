@@ -185,6 +185,11 @@ SELECT l.id, l.lemma, l.lemma_normalized, l.zipf_frequency
 FROM lemma l
 WHERE l.id = ? COLLATE NOCASE;
 
+selectLemmasByIds:
+SELECT l.id, l.lemma, l.lemma_normalized, l.zipf_frequency
+FROM lemma l
+WHERE l.id IN ?
+ORDER BY zipf_frequency DESC;
 
 selectLemmasByWord:
 SELECT l.id, l.lemma, l.zipf_frequency

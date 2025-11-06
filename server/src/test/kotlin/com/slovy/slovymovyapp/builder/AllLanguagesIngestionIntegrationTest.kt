@@ -59,6 +59,7 @@ class AllLanguagesIngestionIntegrationTest {
 
                 // Validate presence of all UNIQUE forms from entries used by processed
                 data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+
                 val allExpectedFormKeys = entriesUsedByProcessed.flatMap { it.forms }.map { f ->
                     FormKey(f.form, unaccent(f.form), f.tags.toSet())
                 }.toSet() // Deduplicate expected forms
@@ -70,7 +71,11 @@ class AllLanguagesIngestionIntegrationTest {
                         assertTrue(
                             formsInDb.isNotEmpty(),
                             "Form '${expectedFormKey.form}' should exist for '$word' in $lang from ${pFile.name}. " +
-                                    "Expected ${allExpectedFormKeys.size} unique forms total: ${allExpectedFormKeys.joinToString(", ") { it.form }}"
+                                    "Expected ${allExpectedFormKeys.size} unique forms total: ${
+                                        allExpectedFormKeys.joinToString(
+                                            ", "
+                                        ) { it.form }
+                                    }"
                         )
                     }
 
@@ -125,7 +130,7 @@ class AllLanguagesIngestionIntegrationTest {
                             }
                             val expectedTranslations = sense.translations[trg]
                             if (!expectedTranslations.isNullOrEmpty()) {
-                                val rows = tq.selectSenseTranslationsBySense(senseId).executeAsList()
+                                val rows = tq.selectSenseTranslationsBySenseWithNormalized(senseId).executeAsList()
                                 val words = rows.map { it.target_lang_word }
                                 val expectedWords = expectedTranslations.map { it.targetLangWord }
                                 assertEquals(
@@ -133,6 +138,14 @@ class AllLanguagesIngestionIntegrationTest {
                                     words,
                                     "Translation words order mismatch for $lang->$trg in ${pFile.name}"
                                 )
+                                // also check normalized values
+                                rows.forEachIndexed { i, row ->
+                                    assertEquals(
+                                        unaccent(expectedWords[i]),
+                                        row.target_lang_word_normalized,
+                                        "Normalized translation mismatch for '${expectedWords[i]}' in $lang->$trg from ${pFile.name}"
+                                    )
+                                }
                             }
                             // Example index 0 if exists
                             val ex0 = sense.examples.firstOrNull()?.targetLangTranslations?.get(trg)
