@@ -77,6 +77,9 @@ class SearchViewModel(
         state = state.copy(
             availableLanguages = repository.installedDictionaries()
         )
+        if (state.selectedLanguage !in state.availableLanguages) {
+            setSelectedLanguage(null)
+        }
     }
 
     fun setSelectedLanguage(language: Language?) {
@@ -137,7 +140,7 @@ fun SearchScreen(
             onWordSelected(item)
         },
         onLanguageSelected = { language ->
-            viewModel.setShowLanguageIndicators(language == null)
+            viewModel.setShowLanguageIndicators(language == null && viewModel.state.availableLanguages.size > 1)
             viewModel.setSelectedLanguage(language)
             coroutineScope.launch { viewModel.updateQuery(viewModel.state.query) }
         },
@@ -201,59 +204,60 @@ fun SearchScreenContent(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                // Language filter dropdown
-                if (state.availableLanguages.isNotEmpty()) {
-                    val isSingleLanguage = state.availableLanguages.size == 1
-                    val currentLanguage =
-                        if (isSingleLanguage) state.availableLanguages.first() else state.selectedLanguage
-                    val interactionSource = remember { MutableInteractionSource() }
+                // Search field with language dropdown on the same row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Search field
+                    AppSearchBar(
+                        query = state.query,
+                        onQueryChange = onQueryChange,
+                        modifier = Modifier.weight(1f),
+                        placeholder = "Search in ${state.selectedLanguage?.selfName ?: "all languages"}..."
+                    )
 
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 8.dp)
-                    ) {
-                        ExposedDropdownMenuBox(
-                            expanded = state.isLanguageDropdownExpanded && !isSingleLanguage,
-                            onExpandedChange = { if (!isSingleLanguage) onToggleLanguageDropdown() }
-                        ) {
-                            OutlinedTextField(
-                                value = if (state.isLanguageDropdownExpanded) {
-                                    currentLanguage?.selfName ?: "All languages"
-                                } else {
-                                    currentLanguage?.flag ?: "🌍"
-                                },
-                                onValueChange = {},
-                                readOnly = true,
-                                enabled = !isSingleLanguage,
-                                modifier = Modifier
-                                    .menuAnchor(PrimaryEditable, !isSingleLanguage)
-                                    .height(56.dp)
-                                    .wrapContentWidth(),
-                                leadingIcon = if (state.isLanguageDropdownExpanded) {
-                                    {
-                                        Text(
-                                            text = currentLanguage?.flag ?: "🌍",
-                                            style = MaterialTheme.typography.titleMedium
-                                        )
-                                    }
-                                } else null,
-                                trailingIcon = if (!isSingleLanguage) {
-                                    {
-                                        ExposedDropdownMenuDefaults.TrailingIcon(
-                                            expanded = state.isLanguageDropdownExpanded
-                                        )
-                                    }
-                                } else null,
-                                colors = languageFieldColors(),
-                                shape = MaterialTheme.shapes.extraLarge,
-                                textStyle = MaterialTheme.typography.bodyLarge,
-                                interactionSource = interactionSource
-                            )
-                            if (!isSingleLanguage) {
+                    // Language filter dropdown
+                    if (state.availableLanguages.isNotEmpty()) {
+                        val isSingleLanguage = state.availableLanguages.size == 1
+                        val currentLanguage =
+                            if (isSingleLanguage) state.availableLanguages.first() else state.selectedLanguage
+                        val interactionSource = remember { MutableInteractionSource() }
+
+                        if (!isSingleLanguage) {
+                            ExposedDropdownMenuBox(
+                                expanded = state.isLanguageDropdownExpanded,
+                                onExpandedChange = { onToggleLanguageDropdown() }
+                            ) {
+                                OutlinedTextField(
+                                    value = currentLanguage?.flag ?: "🌍",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    modifier = Modifier
+                                        .menuAnchor(PrimaryEditable)
+                                        .width(87.dp),
+                                    trailingIcon = run {
+                                        {
+                                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                                expanded = state.isLanguageDropdownExpanded
+                                            )
+                                        }
+                                    },
+                                    colors = languageFieldColors(),
+                                    shape = MaterialTheme.shapes.extraLarge,
+                                    textStyle = MaterialTheme.typography.bodyLarge,
+                                    interactionSource = interactionSource
+                                )
                                 ExposedDropdownMenu(
                                     expanded = state.isLanguageDropdownExpanded,
-                                    onDismissRequest = onDismissLanguageDropdown
+                                    onDismissRequest = onDismissLanguageDropdown,
+                                    modifier = Modifier
+                                        .menuAnchor(PrimaryEditable)
+                                        .width(200.dp)
                                 ) {
                                     DropdownMenuItem(
                                         text = {
@@ -294,17 +298,6 @@ fun SearchScreenContent(
                         }
                     }
                 }
-
-                // Search field with new AppSearchBar component
-                AppSearchBar(
-                    query = state.query,
-                    onQueryChange = onQueryChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp),
-                    placeholder = "Search in ${state.selectedLanguage?.selfName ?: "all languages"}..."
-                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -452,6 +445,24 @@ private fun SearchScreenPreviewEmptyQuery(
                 results = emptyList(),
                 showNoResults = false,
                 availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN)
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewEmptyQueryLanguageExpanded(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                query = "",
+                results = emptyList(),
+                showNoResults = false,
+                availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN),
+                isLanguageDropdownExpanded = true
             ),
         )
     }
