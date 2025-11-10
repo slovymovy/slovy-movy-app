@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
@@ -73,6 +74,17 @@ class SearchViewModel(
         state.scrollState.scrollToItem(0)
     }
 
+    fun refreshFavorites() {
+        // Refresh search results to update favorite status without resetting scroll
+        if (state.query.isNotEmpty()) {
+            val newResults = repository.search(state.query, state.selectedLanguage)
+            state = state.copy(
+                results = newResults,
+                showNoResults = newResults.isEmpty() && state.query.isNotEmpty()
+            )
+        }
+    }
+
     fun refreshLanguageIndicators() {
         state = state.copy(
             availableLanguages = repository.installedDictionaries()
@@ -114,9 +126,10 @@ fun SearchScreen(
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
 
-    // Refresh language indicators when screen is opened
+    // Refresh language indicators and search results when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
+        viewModel.refreshFavorites()
     }
 
     LaunchedEffect(savedQuery) {
@@ -377,15 +390,35 @@ private fun SearchResultCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Frequency badge
-                val frequencyLevel = when {
-                    item.zipfFrequency >= 5.0f -> "high"
-                    item.zipfFrequency >= 3.0f -> "medium"
-                    else -> "low"
+                // Favorite indicator - always reserve space for alignment
+                Box(
+                    modifier = Modifier.size(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (item.isFavorite) {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = "Favorite",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
-                CompactFrequencyBadge(
-                    frequency = frequencyLevel
-                )
+
+                // Frequency badge - fixed width for alignment
+                Box(
+                    modifier = Modifier.width(64.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    val frequencyLevel = when {
+                        item.zipfFrequency >= 5.0f -> "high"
+                        item.zipfFrequency >= 3.0f -> "medium"
+                        else -> "low"
+                    }
+                    CompactFrequencyBadge(
+                        frequency = frequencyLevel
+                    )
+                }
 
                 // Show language badge if searching multiple dictionaries
                 if (showLanguageIndicator) {
@@ -484,7 +517,8 @@ private fun SearchScreenPreviewWithResults(
                         lemma = "celebration",
                         display = "celebration",
                         zipfFrequency = 4.5f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        isFavorite = true
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -508,7 +542,8 @@ private fun SearchScreenPreviewWithResults(
                         lemma = "cell",
                         display = "cell",
                         zipfFrequency = 5.2f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        isFavorite = true
                     )
                 ),
                 showNoResults = false,
@@ -535,7 +570,8 @@ private fun SearchScreenPreviewMultilingualResults(
                         lemma = "program",
                         display = "program",
                         zipfFrequency = 5.5f,
-                        pos = listOf(PartOfSpeech.NOUN, PartOfSpeech.VERB)
+                        pos = listOf(PartOfSpeech.NOUN, PartOfSpeech.VERB),
+                        isFavorite = true
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -551,7 +587,8 @@ private fun SearchScreenPreviewMultilingualResults(
                         lemma = "программа",
                         display = "программа",
                         zipfFrequency = 5.8f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        isFavorite = true
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.POLISH,
@@ -603,7 +640,8 @@ private fun SearchScreenPreviewInfoDialog(
                         lemma = "world",
                         display = "world",
                         zipfFrequency = 6.2f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        isFavorite = true
                     )
                 ),
                 showNoResults = false,
@@ -664,7 +702,8 @@ private fun SearchScreenPreviewMultilingualWithoutPOS(
                         lemma = "word",
                         display = "word",
                         zipfFrequency = 6.1f,
-                        pos = emptyList()
+                        pos = emptyList(),
+                        isFavorite = true
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.RUSSIAN,
@@ -707,7 +746,8 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                         lemma = "run",
                         display = "run",
                         zipfFrequency = 6.3f,
-                        pos = listOf(PartOfSpeech.VERB, PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.VERB, PartOfSpeech.NOUN),
+                        isFavorite = true
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -731,7 +771,8 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                         lemma = "rund",
                         display = "rund",
                         zipfFrequency = 3.7f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        isFavorite = true
                     )
                 ),
                 showNoResults = false,

@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.repo
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
@@ -27,7 +28,8 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
             assertTrue(platform.fileExists(trPath), "Translation file should exist: $trPath")
 
-            val repo = DictionaryRepository(mgr)
+            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val repo = DictionaryRepository(mgr, favoritesRepo)
 
             // Verify installed sets reflect downloads
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
@@ -67,7 +69,8 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val repo = DictionaryRepository(mgr)
+            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.DUTCH), "'nl' dictionary should be installed")
 
             val card = repo.getLanguageCard(Language.DUTCH, "voorstellen")
@@ -94,7 +97,8 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val repo = DictionaryRepository(mgr)
+            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "test" which should match "test" and its forms (tested, testing, etc.)
@@ -134,7 +138,8 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val repo = DictionaryRepository(mgr)
+            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "test" - should match the base lemma "test"
@@ -177,7 +182,8 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val repo = DictionaryRepository(mgr)
+            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Test with "double" which should have word_family in the processed JSON
@@ -217,7 +223,8 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
             assertTrue(platform.fileExists(trPath), "Translation file should exist: $trPath")
 
-            val repo = DictionaryRepository(mgr)
+            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             repo.getLanguageCard(Language.ENGLISH, "simultaneously")?.let { card ->

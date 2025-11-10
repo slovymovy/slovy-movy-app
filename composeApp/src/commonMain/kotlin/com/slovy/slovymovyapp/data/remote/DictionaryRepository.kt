@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import kotlin.uuid.Uuid
@@ -14,6 +15,7 @@ internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
 // aggregating translations from all available target languages.
 class DictionaryRepository(
     private val dataDbManager: DataDbManager,
+    private val favoritesRepository: FavoritesRepository,
     private val languages: List<Language> = Language.entries,
 ) {
 
@@ -23,7 +25,8 @@ class DictionaryRepository(
         val lemma: String,
         val display: String,
         val zipfFrequency: Float,
-        val pos: List<PartOfSpeech>
+        val pos: List<PartOfSpeech>,
+        val isFavorite: Boolean = false
     )
 
     fun installedDictionaries(): List<Language> = languages.filter { lang ->
@@ -43,8 +46,8 @@ class DictionaryRepository(
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
 
-        val langs = if (dictionaryLanguage != null) listOf(dictionaryLanguage) else installedDictionaries()
-        if (langs.isEmpty()) {
+        val languages = if (dictionaryLanguage != null) listOf(dictionaryLanguage) else installedDictionaries()
+        if (languages.isEmpty()) {
             // Fallback to simple in-memory filtering for preview/no DB
             return listOf()
         }
@@ -55,7 +58,7 @@ class DictionaryRepository(
         // Track lemmas that were added as base lemmas to suppress their forms
         val seenLemmas = HashSet<String>()
 
-        for (lang in langs) {
+        for (lang in languages) {
             val db = dataDbManager.openDictionaryReadOnly(lang)
             val q = db.dictionaryQueries
 
@@ -211,7 +214,19 @@ class DictionaryRepository(
             enrichPosForLang()
         }
 
-        return out.take(maxItems)
+        // Check favorite status for all items (single query instead of N queries)
+        val result = out.take(maxItems)
+        val allFavorites = favoritesRepository.getAll()
+        val favoriteItems = allFavorites.map { "${it.targetLang.code}::${it.lemma.lowercase()}" }.toSet()
+
+        return result.map { item ->
+            val key = "${item.language.code}::${item.lemma.lowercase()}"
+            if (favoriteItems.contains(key)) {
+                item.copy(isFavorite = true)
+            } else {
+                item
+            }
+        }
     }
 
     fun getLanguageCard(language: Language, lemma: String): LanguageCard? {
