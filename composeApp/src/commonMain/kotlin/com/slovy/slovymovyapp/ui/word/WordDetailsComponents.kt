@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.data.util.HtmlTagParser
 
 @Composable
 internal fun SectionLabel(text: String) {
@@ -47,7 +48,7 @@ internal fun EntryList(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         values.forEach { word ->
-            val isClickable = clickableWords.contains(word)
+            val isClickable = clickableWords.any { it.equals(word, ignoreCase = true) }
             Badge(
                 text = word,
                 containerColor = containerColor,
@@ -157,50 +158,37 @@ internal fun appendTextWithW(
     clickableWords: Set<String> = emptySet(),
     onWordClick: (String) -> Unit = {}
 ) {
-    var i = 0
-    while (i < input.length) {
-        val startTag = "<w>"
-        val endTag = "</w>"
+    val segments = HtmlTagParser.parseTextSegments(input)
 
-        val start = input.indexOf(startTag, i)
-        if (start == -1) {
-            builder.append(input.substring(i))
-            break
-        }
-        // Append text before <w>
-        if (start > i) builder.append(input.substring(i, start))
-        val end = input.indexOf(endTag, start + startTag.length)
-        if (end == -1) {
-            // No closing tag – append the rest verbatim
-            builder.append(input.substring(start))
-            break
-        }
-        val word = input.substring(start + startTag.length, end)
+    segments.forEach { segment ->
+        if (segment.isTagged) {
+            // This is a word inside <w> tags
+            val word = segment.text
+            val isClickable = clickableWords.any { it.equals(word, ignoreCase = true) }
+            val styleToUse = if (isClickable) clickableHighlight else highlight
 
-        // Check if this word is clickable
-        val isClickable = clickableWords.contains(word)
-        val styleToUse = if (isClickable) clickableHighlight else highlight
-
-        if (isClickable) {
-            // Use LinkAnnotation for clickable words
-            val link = LinkAnnotation.Clickable(
-                tag = "CLICKABLE_WORD_$word",
-                linkInteractionListener = {
-                    onWordClick(word)
+            if (isClickable) {
+                // Use LinkAnnotation for clickable words
+                val link = LinkAnnotation.Clickable(
+                    tag = "CLICKABLE_WORD_$word",
+                    linkInteractionListener = {
+                        onWordClick(word)
+                    }
+                )
+                builder.withLink(link) {
+                    builder.withStyle(styleToUse) {
+                        builder.append(word)
+                    }
                 }
-            )
-            builder.withLink(link) {
+            } else {
                 builder.withStyle(styleToUse) {
                     builder.append(word)
                 }
             }
         } else {
-            builder.withStyle(styleToUse) {
-                builder.append(word)
-            }
+            // Regular text, no highlighting
+            builder.append(segment.text)
         }
-
-        i = end + endTag.length // move after </w>
     }
 }
 

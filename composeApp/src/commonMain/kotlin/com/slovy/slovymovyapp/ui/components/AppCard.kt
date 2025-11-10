@@ -78,7 +78,6 @@ fun CompactCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val isClickable = onClick != null
     AppCard(
         modifier = modifier,
         onClick = onClick,
@@ -86,12 +85,12 @@ fun CompactCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
-        border = if (isClickable) {
+        border = if (onClick != null) {
             BorderStroke(1.5.dp, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f))
         } else {
             BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         },
-        elevation = if (isClickable) {
+        elevation = if (onClick != null) {
             CardDefaults.cardElevation(
                 defaultElevation = 2.dp,
                 pressedElevation = 4.dp,
