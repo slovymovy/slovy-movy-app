@@ -315,12 +315,76 @@ class DictionaryRepository(
         val wordFamily =
             q.selectWordFamilyByLemmaId(lemmaId).executeAsList()
 
+        // Helper to extract words from <w>...</w> tags
+        fun extractHighlightedWords(text: String): List<String> {
+            val words = mutableListOf<String>()
+            var i = 0
+            while (i < text.length) {
+                val startTag = "<w>"
+                val endTag = "</w>"
+
+                val start = text.indexOf(startTag, i)
+                if (start == -1) break
+                val end = text.indexOf(endTag, start + startTag.length)
+                if (end == -1) break
+                val word = text.substring(start + startTag.length, end).trim()
+                if (word.isNotEmpty()) {
+                    words.add(word)
+                }
+                i = end + endTag.length
+            }
+            return words
+        }
+
+        // Collect all unique related words (synonyms, antonyms, family, highlighted words)
+        val allRelatedWords = mutableSetOf<String>()
+
+        // Add synonyms and antonyms from all senses
+        entries.forEach { entry ->
+            entry.senses.forEach { sense ->
+                allRelatedWords.addAll(sense.synonyms)
+                allRelatedWords.addAll(sense.antonyms)
+
+                // Extract highlighted words from sense definition
+                allRelatedWords.addAll(extractHighlightedWords(sense.senseDefinition))
+
+                // Extract highlighted words from examples
+                sense.examples.forEach { example ->
+                    allRelatedWords.addAll(extractHighlightedWords(example.text))
+                }
+
+                // Extract highlighted words from common phrases
+                sense.commonPhrases.forEach { phrase ->
+                    allRelatedWords.addAll(extractHighlightedWords(phrase))
+                }
+            }
+        }
+
+        // Add word family
+        allRelatedWords.addAll(wordFamily)
+
+        // Remove the main lemma itself (case-insensitive)
+        allRelatedWords.removeAll { it.equals(lemma, ignoreCase = true) }
+
+        // Query DB for zipf frequencies
+        val relatedWordsMap = mutableMapOf<String, RelatedWord>()
+        for (word in allRelatedWords) {
+            val lemmaRow = q.selectLemmasByWord(word).executeAsOneOrNull()
+            if (lemmaRow != null) {
+                relatedWordsMap[word] = RelatedWord(
+                    lemma = word,
+                    zipfFrequency = lemmaRow.zipf_frequency.toFloat()
+                )
+            }
+        }
+
         if (entries.isEmpty()) return null
         return LanguageCard(
             entries = entries,
             lemma = lemma,
             zipfFrequency = zipfFrequency,
-            wordFamily = wordFamily
+            wordFamily = wordFamily,
+            relatedWords = relatedWordsMap
         )
     }
 }

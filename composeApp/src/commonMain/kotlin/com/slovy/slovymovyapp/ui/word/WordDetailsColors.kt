@@ -1,6 +1,5 @@
 package com.slovy.slovymovyapp.ui.word
 
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
@@ -8,8 +7,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import com.slovy.slovymovyapp.data.remote.*
-import kotlin.math.abs
+import com.slovy.slovymovyapp.data.remote.LearnerLevel
+import com.slovy.slovymovyapp.data.remote.NameType
+import com.slovy.slovymovyapp.data.remote.SenseFrequency
+import com.slovy.slovymovyapp.data.remote.TraitType
 
 @Composable
 internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
@@ -22,37 +23,11 @@ internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (lev
 }
 
 @Composable
-internal fun getFrequencyColor(zipfFrequency: Float): Pair<Color, Color> {
-    return when {
-        zipfFrequency >= 4.0f -> Color(0xFFDFF6DD) to Color(0xFF1E7D23)
-        zipfFrequency >= 3.0f -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
-        zipfFrequency >= 2.0f -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
-        else -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
-    }
-}
-
-@Composable
 internal fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> = when (f) {
     SenseFrequency.HIGH -> Color(0xFFDFF6DD) to Color(0xFF1C5E20)
     SenseFrequency.MIDDLE -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
     SenseFrequency.LOW -> Color(0xFFFFE0B2) to Color(0xFF8C4513)
     SenseFrequency.VERY_LOW -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
-}
-
-@Composable
-internal fun colorsForPos(pos: PartOfSpeech): Pair<Color, Color> = when (pos) {
-    PartOfSpeech.NOUN -> Color(0xFFE3F2FD) to Color(0xFF0D47A1)
-    PartOfSpeech.VERB -> Color(0xFFE8F5E9) to Color(0xFF5E4D1B)
-    PartOfSpeech.ADJECTIVE -> Color(0xFFFFF3E0) to Color(0xFFEF6C00)
-    PartOfSpeech.ADVERB -> Color(0xFFF3E5F5) to Color(0xFF6A1B9A)
-    PartOfSpeech.PRONOUN -> Color(0xFFFFEBEE) to Color(0xFFC62828)
-    PartOfSpeech.PREPOSITION -> Color(0xFFE0F7FA) to Color(0xFF006064)
-    PartOfSpeech.CONJUNCTION -> Color(0xFFEDE7F6) to Color(0xFF4527A0)
-    PartOfSpeech.INTERJECTION -> Color(0xFFFFFDE7) to Color(0xFFF9A825)
-    PartOfSpeech.DETERMINER -> Color(0xFFF1F8E9) to Color(0xFF33691E)
-    PartOfSpeech.NUMERAL -> Color(0xFFE0F2F1) to Color(0xFF004D40)
-    PartOfSpeech.ARTICLE -> Color(0xFFE8EAF6) to Color(0xFF283593)
-    PartOfSpeech.NAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232)
 }
 
 @Composable
@@ -159,19 +134,3 @@ internal val ArrowForwardVector: ImageVector = ImageVector.Builder(
         close()
     }
 }.build()
-
-@Composable
-internal fun getWordFamilyColor(word: String, colorScheme: ColorScheme): Pair<Color, Color> {
-    return when (    // Generate consistent color based on word hash
-        (abs(word.hashCode())) % 8) {
-        0 -> colorScheme.primaryContainer to colorScheme.onPrimaryContainer
-        1 -> colorScheme.secondaryContainer to colorScheme.onSecondaryContainer
-        2 -> colorScheme.tertiaryContainer to colorScheme.onTertiaryContainer
-        3 -> colorScheme.errorContainer to colorScheme.onErrorContainer
-        4 -> colorScheme.primary to colorScheme.onPrimary
-        5 -> colorScheme.secondary to colorScheme.onSecondary
-        6 -> colorScheme.tertiary to colorScheme.onTertiary
-        7 -> colorScheme.surfaceVariant to colorScheme.onSurfaceVariant
-        else -> error("Unknown word family color index")
-    }
-}

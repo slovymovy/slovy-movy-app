@@ -6,8 +6,11 @@ data class LanguageCard(
     val lemma: String,
     val entries: List<LanguageCardPosEntry>,
     val zipfFrequency: Float,
-    val wordFamily: List<String> = emptyList()
+    val wordFamily: List<String> = emptyList(),
+    val relatedWords: Map<String, RelatedWord> = emptyMap()
 )
+
+data class RelatedWord(val lemma: String, val zipfFrequency: Float)
 
 data class LanguageCardPosEntry(
     val pos: PartOfSpeech,

@@ -32,7 +32,9 @@ internal fun SenseCard(
     onPositioned: (String, Float) -> Unit = { _, _ -> },
     allSenses: List<LanguageCardResponseSense>,
     onFavoriteToggle: () -> Unit = {},
-    onNavigateToDetail: () -> Unit = {}
+    onNavigateToDetail: () -> Unit = {},
+    relatedWords: Set<String> = emptySet(),
+    onWordClick: (String) -> Unit = {}
 ) {
     val translationBasedHeader = remember(sense.senseId) { sense.translationsHeader() }
     val translationHeaderSuffix = remember(sense.senseId, allSenses) { translationsHeaderSuffix(sense, allSenses) }
@@ -63,17 +65,23 @@ internal fun SenseCard(
                     if (translationBasedHeader == null) {
                         HighlightedText(
                             text = sense.senseDefinition,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            clickableWords = relatedWords,
+                            onWordClick = onWordClick
                         )
                     } else {
                         HighlightedText(
                             text = translationBasedHeader,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            clickableWords = relatedWords,
+                            onWordClick = onWordClick
                         )
                         if (translationHeaderSuffix != null) {
                             HighlightedText(
                                 text = translationHeaderSuffix,
-                                style = MaterialTheme.typography.titleSmall
+                                style = MaterialTheme.typography.titleSmall,
+                                clickableWords = relatedWords,
+                                onWordClick = onWordClick
                             )
                         }
                     }
@@ -188,7 +196,9 @@ internal fun SenseCard(
                                 sense.examples.forEach { ex ->
                                     BulletHighlightedText(
                                         text = ex.text,
-                                        style = MaterialTheme.typography.bodyLarge
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        clickableWords = relatedWords,
+                                        onWordClick = onWordClick
                                     )
                                     if (ex.targetLangTranslations.isNotEmpty()) {
                                         ex.targetLangTranslations.forEach { (_, translation) ->
@@ -196,7 +206,9 @@ internal fun SenseCard(
                                                 prefix = "– ",
                                                 text = translation,
                                                 style = MaterialTheme.typography.bodySmall,
-                                                modifier = Modifier.padding(start = 24.dp)
+                                                modifier = Modifier.padding(start = 24.dp),
+                                                clickableWords = relatedWords,
+                                                onWordClick = onWordClick
                                             )
                                         }
                                     }
@@ -209,19 +221,25 @@ internal fun SenseCard(
                         "Common phrases",
                         sense.commonPhrases,
                         MaterialTheme.colorScheme.tertiaryContainer,
-                        MaterialTheme.colorScheme.onTertiaryContainer
+                        MaterialTheme.colorScheme.onTertiaryContainer,
+                        clickableWords = relatedWords,
+                        onWordClick = onWordClick
                     )
                     EntryList(
                         "Synonyms",
                         sense.synonyms,
                         MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.colorScheme.onPrimaryContainer
+                        MaterialTheme.colorScheme.onPrimaryContainer,
+                        clickableWords = relatedWords,
+                        onWordClick = onWordClick
                     )
                     EntryList(
                         "Antonyms",
                         sense.antonyms,
                         MaterialTheme.colorScheme.errorContainer,
-                        MaterialTheme.colorScheme.onErrorContainer
+                        MaterialTheme.colorScheme.onErrorContainer,
+                        clickableWords = relatedWords,
+                        onWordClick = onWordClick
                     )
 
                     val languageOrder = buildList {
@@ -236,7 +254,9 @@ internal fun SenseCard(
                                 language = lang,
                                 sense = sense,
                                 expanded = langExpanded,
-                                onToggle = { onLanguageToggle(lang) }
+                                onToggle = { onLanguageToggle(lang) },
+                                relatedWords = relatedWords,
+                                onWordClick = onWordClick
                             )
                         }
                     }
@@ -251,7 +271,9 @@ private fun LanguageSection(
     language: Language,
     sense: LanguageCardResponseSense,
     expanded: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    relatedWords: Set<String> = emptySet(),
+    onWordClick: (String) -> Unit = {}
 ) {
     val languageLabel = language.selfName
     val translations = sense.translations[language].orEmpty()
@@ -263,18 +285,28 @@ private fun LanguageSection(
         supportingText = null,
         headlineStyle = MaterialTheme.typography.titleSmall
     ) {
-        TranslationList(translations = translations)
+        TranslationList(
+            translations = translations,
+            clickableWords = relatedWords,
+            onWordClick = onWordClick
+        )
     }
 }
 
 @Composable
-private fun TranslationList(translations: List<LanguageCardTranslation>) {
+private fun TranslationList(
+    translations: List<LanguageCardTranslation>,
+    clickableWords: Set<String> = emptySet(),
+    onWordClick: (String) -> Unit = {}
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         translations.forEach { translation ->
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 BulletHighlightedText(
                     text = translation.targetLangWord,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    clickableWords = clickableWords,
+                    onWordClick = onWordClick
                 )
                 translation.targetLangSenseClarification?.takeIf { it.isNotBlank() }?.let { clarification ->
                     Text(

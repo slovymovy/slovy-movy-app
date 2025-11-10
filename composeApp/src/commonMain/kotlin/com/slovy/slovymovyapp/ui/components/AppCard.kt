@@ -66,6 +66,11 @@ fun AppCard(
 /**
  * Compact card variant with medium rounded corners (12dp).
  * Used for secondary content, badges, and compact layouts.
+ *
+ * When clickable (onClick != null):
+ * - Adds a subtle border
+ * - Increases elevation
+ * - Provides visual feedback
  */
 @Composable
 fun CompactCard(
@@ -73,6 +78,7 @@ fun CompactCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val isClickable = onClick != null
     AppCard(
         modifier = modifier,
         onClick = onClick,
@@ -80,6 +86,20 @@ fun CompactCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
+        border = if (isClickable) {
+            BorderStroke(1.5.dp, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f))
+        } else {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        },
+        elevation = if (isClickable) {
+            CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 4.dp,
+                hoveredElevation = 3.dp
+            )
+        } else {
+            CardDefaults.elevationLevel1()
+        },
         content = content
     )
 }
