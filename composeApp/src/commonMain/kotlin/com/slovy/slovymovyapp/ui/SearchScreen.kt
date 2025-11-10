@@ -129,12 +129,12 @@ fun SearchScreen(
     // Refresh language indicators and search results when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
+        viewModel.refreshFavorites()
     }
 
     LaunchedEffect(savedQuery) {
         if (viewModel.state.query.isEmpty() && savedQuery.isNotEmpty()) {
             viewModel.updateQuery(savedQuery)
-            viewModel.refreshFavorites()
         }
     }
 
