@@ -80,10 +80,10 @@ fun App(
 
     val platform = remember(platformDbSupport) { platformDbSupport ?: PlatformDbSupport(null) }
     val dataManager = remember(platform, settingsRepository) { DataDbManager(platform, settingsRepository) }
-    val dictionaryRepository = remember(dataManager) { DictionaryRepository(dataManager) }
     val favoritesRepository = remember(dataManager) {
         FavoritesRepository(dataManager.openAppDatabase())
     }
+    val dictionaryRepository = remember(dataManager, favoritesRepository) { DictionaryRepository(dataManager, favoritesRepository) }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
     val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
 
@@ -277,7 +277,7 @@ fun App(
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
                 ) {
-                    SearchViewModel(DictionaryRepository(dataManager))
+                    SearchViewModel(dictionaryRepository)
                 }
 
                 SearchScreen(
