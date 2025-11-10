@@ -70,9 +70,10 @@ SELECT translation
 FROM example_translation
 WHERE sense_id = ? AND example_id = ?;
 
--- Lookup by normalized target word
-selectSenseTranslationsByNormalized:
+-- Lookup by normalized target word (excludes multi-word translations)
+selectSenseTranslationsByNormalizedSingleWord:
 SELECT sense_id, idx, target_lang_word, target_lang_word_normalized, target_lang_sense_clarification, lemma_id, lemma_pos_id
 FROM sense_translation
 WHERE target_lang_word_normalized LIKE ?
+  AND target_lang_word NOT LIKE '% %'
 ORDER BY idx;

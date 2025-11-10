@@ -189,7 +189,7 @@ class DictionaryRepository(
             for (tgt in targets) {
                 val tdb = dataDbManager.openTranslationReadOnly(lang, tgt)
                 val tq = tdb.translationQueries
-                val trRows = tq.selectSenseTranslationsByNormalized(pattern).executeAsList()
+                val trRows = tq.selectSenseTranslationsByNormalizedSingleWord(pattern).executeAsList()
                 val lemmaRows = q.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
                 val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
                 for (row in trRowsSorted) {
