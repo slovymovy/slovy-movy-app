@@ -74,7 +74,7 @@ class SearchViewModel(
         state.scrollState.scrollToItem(0)
     }
 
-    suspend fun refreshFavorites() {
+    fun refreshFavorites() {
         // Refresh search results to update favorite status without resetting scroll
         if (state.query.isNotEmpty()) {
             val newResults = repository.search(state.query, state.selectedLanguage)
@@ -129,13 +129,12 @@ fun SearchScreen(
     // Refresh language indicators and search results when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
-        // Refresh search results to update favorite status without resetting scroll
-        viewModel.refreshFavorites()
     }
 
     LaunchedEffect(savedQuery) {
         if (viewModel.state.query.isEmpty() && savedQuery.isNotEmpty()) {
             viewModel.updateQuery(savedQuery)
+            viewModel.refreshFavorites()
         }
     }
 
