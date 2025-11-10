@@ -48,7 +48,9 @@ internal fun EntryCard(
     onSenseExamplesToggle: (String) -> Unit,
     onLanguageToggle: (String, Language) -> Unit,
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
-    onSenseFavoriteToggle: (String) -> Unit = {}
+    onSenseFavoriteToggle: (String) -> Unit = {},
+    relatedWords: Set<String> = emptySet(),
+    onWordClick: (String) -> Unit = {}
 ) {
     val expanded = entryState.expanded
     AppCard(
@@ -166,7 +168,9 @@ internal fun EntryCard(
                                         onLanguageToggle(sense.senseId, language)
                                     },
                                     onPositioned = onSensePositioned,
-                                    onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) }
+                                    onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
+                                    relatedWords = relatedWords,
+                                    onWordClick = onWordClick
                                 )
                                 if (senseIndex < senseList.lastIndex) {
                                     HorizontalDivider(

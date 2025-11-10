@@ -399,6 +399,13 @@ fun App(
                     onNavigateToSettings = {
                         if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
                             navController.navigate(AppDestination.Settings)
+                    },
+                    onNavigateToWordDetail = { language, lemma ->
+                        val destination = AppDestination.WordDetail(
+                            dictionaryLanguageCode = language.code,
+                            lemma = lemma
+                        )
+                        navController.navigate(destination)
                     }
                 )
             }

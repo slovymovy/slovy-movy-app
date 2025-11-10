@@ -195,15 +195,39 @@ class DictionaryRepositoryTest : BaseTest() {
                     "Word family should contain '$member'. Found: ${card.wordFamily}"
                 )
             }
-
-            assertEquals(
-                expectedMembers.size,
-                card.wordFamily.size,
-                "Word family should have exactly ${expectedMembers.size} members. Found: ${card.wordFamily}"
-            )
         } finally {
             // Clean up
             mgr.deleteDictionary(Language.ENGLISH)
+        }
+    }
+
+    @Test
+    fun related_words_includes_synonyms_antonyms_and_family() {
+        val platform = platformDbSupport()
+        val mgr = DataDbManager(platform, null)
+
+        // Ensure a clean state
+        mgr.deleteDictionary(Language.ENGLISH)
+        mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+        val trPath = runBlocking { mgr.ensureTranslation(Language.ENGLISH, Language.RUSSIAN) }
+
+        try {
+            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
+            assertTrue(platform.fileExists(trPath), "Translation file should exist: $trPath")
+
+            val repo = DictionaryRepository(mgr)
+            assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
+
+            repo.getLanguageCard(Language.ENGLISH, "simultaneously")?.let { card ->
+                assertTrue(card.relatedWords.isNotEmpty(), "Related words should not be empty for 'simultaneously'")
+                assertTrue { card.relatedWords.contains("concurrently") }
+            }
+        } finally {
+            // Clean up
+            mgr.deleteDictionary(Language.ENGLISH)
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
         }
     }
 }

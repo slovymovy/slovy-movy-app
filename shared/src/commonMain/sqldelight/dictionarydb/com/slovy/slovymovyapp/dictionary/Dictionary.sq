@@ -194,7 +194,14 @@ ORDER BY zipf_frequency DESC;
 selectLemmasByWord:
 SELECT l.id, l.lemma, l.zipf_frequency
 FROM lemma l
-WHERE l.lemma = ? COLLATE NOCASE;
+WHERE l.lemma = ? COLLATE NOCASE
+ORDER BY l.zipf_frequency DESC;
+
+selectLemmasByWords:
+SELECT l.id, l.lemma, l.zipf_frequency
+FROM lemma l
+WHERE LOWER(l.lemma) IN ?
+ORDER BY l.zipf_frequency DESC;
 
 -- Queries returning explicit lemma_pos_id to avoid ambiguity in generated code
 selectLemmaPosIdAndLemmaByWord:

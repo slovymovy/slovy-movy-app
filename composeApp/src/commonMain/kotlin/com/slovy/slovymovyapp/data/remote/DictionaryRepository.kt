@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import kotlin.uuid.Uuid
 
@@ -218,7 +219,8 @@ class DictionaryRepository(
         val q = db.dictionaryQueries
 
         // Collect all base lemma IDs for the given lemma text (case-insensitive), including normalized matches
-        val lemmaId = q.selectLemmasByWord(lemma).executeAsOneOrNull()?.id ?: return null
+        // Use firstOrNull to avoid exception if multiple rows exist; query orders by frequency DESC
+        val lemmaId = q.selectLemmasByWord(lemma).executeAsList().firstOrNull()?.id ?: return null
 
         // Get all lemma_pos IDs for these lemmas
         val lemmaPosIds = LinkedHashSet<Uuid>()
@@ -315,12 +317,58 @@ class DictionaryRepository(
         val wordFamily =
             q.selectWordFamilyByLemmaId(lemmaId).executeAsList()
 
+        // Collect all unique related words (synonyms, antonyms, family, highlighted words)
+        val allRelatedWords = mutableSetOf<String>()
+
+        // Add synonyms and antonyms from all senses
+        entries.forEach { entry ->
+            entry.senses.forEach { sense ->
+                allRelatedWords.addAll(sense.synonyms)
+                allRelatedWords.addAll(sense.antonyms)
+
+                // Extract highlighted words from sense definition
+                allRelatedWords.addAll(HtmlTagParser.extractTaggedWords(sense.senseDefinition))
+
+                // Extract highlighted words from examples
+                sense.examples.forEach { example ->
+                    allRelatedWords.addAll(HtmlTagParser.extractTaggedWords(example.text))
+                }
+
+                // Extract highlighted words from common phrases
+                sense.commonPhrases.forEach { phrase ->
+                    allRelatedWords.addAll(HtmlTagParser.extractTaggedWords(phrase))
+                }
+            }
+        }
+
+        // Add word family
+        allRelatedWords.addAll(wordFamily)
+
+        // Remove the main lemma itself (case-insensitive)
+        allRelatedWords.removeAll { it.equals(lemma, ignoreCase = true) }
+
+        // Query DB for zipf frequencies
+        // Lowercase words for case-insensitive matching
+        val relatedWordsMap = if (allRelatedWords.isEmpty()) {
+            emptyMap()
+        } else {
+            q.selectLemmasByWords(allRelatedWords.map { it.lowercase() })
+                .executeAsList()
+                .associate { row ->
+                    row.lemma to RelatedWord(
+                        lemma = row.lemma,
+                        zipfFrequency = row.zipf_frequency.toFloat()
+                    )
+                }
+        }
+
         if (entries.isEmpty()) return null
         return LanguageCard(
             entries = entries,
             lemma = lemma,
             zipfFrequency = zipfFrequency,
-            wordFamily = wordFamily
+            wordFamily = wordFamily,
+            relatedWords = relatedWordsMap
         )
     }
 }

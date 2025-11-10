@@ -1435,6 +1435,13 @@ internal fun sampleDoubleCard(): LanguageCard {
         lemma = "double",
         zipfFrequency = 5.2f,
         wordFamily = listOf("doubling", "doubly", "doublet"),
+        relatedWords = mapOf(
+            "doubling" to RelatedWord("doubling", 4.1f),
+            "doubly" to RelatedWord("doubly", 3.8f),
+            "redouble" to RelatedWord("redouble", 2.9f),
+            "duplicate" to RelatedWord("duplicate", 4.5f),
+            "halve" to RelatedWord("halve", 3.2f)
+        ),
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.ADJECTIVE,
@@ -1588,5 +1595,80 @@ private fun WordDetailScreenPreviewWithWordFamilyCollapsed(
 ) {
     ThemedPreview(darkTheme = isDark) {
         WordDetailScreenContent(state = sampleDoubleCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
+    }
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewClickableRelatedWords(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(
+            state = sampleDoubleCard().toContentUiState(
+                isSenseFavorite = isSenseFavoritePreview,
+                wordFamilyExpanded = true
+            ),
+            onWordClick = { /* Preview - no action */ }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewWithRelatedWordsInSynonyms(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val programmaticallyWithRelated = sampleProgrammaticallyCard().copy(
+            relatedWords = mapOf(
+                "systematically" to RelatedWord("systematically", 3.9f),
+                "methodically" to RelatedWord("methodically", 3.2f),
+                "randomly" to RelatedWord("randomly", 4.1f),
+                "haphazardly" to RelatedWord("haphazardly", 2.7f)
+            )
+        )
+        WordDetailScreenContent(
+            state = programmaticallyWithRelated.toContentUiState(isSenseFavorite = isSenseFavoritePreview),
+            onWordClick = { /* Preview - no action */ }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewWithClickableHighlightedWords(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val amazonWithRelated = sampleAmazonCard().copy(
+            relatedWords = mapOf(
+                "Amazons" to RelatedWord("Amazons", 3.2f),
+                "Amazon" to RelatedWord("Amazon", 5.1f),
+                "parrot" to RelatedWord("parrot", 4.3f),
+                "river" to RelatedWord("river", 5.8f),
+                "warrior" to RelatedWord("warrior", 4.7f)
+            )
+        )
+        val base = amazonWithRelated.toContentUiState(
+            isSenseFavorite = isSenseFavoritePreview,
+        )
+        val expanded = base.entries.map { entryState ->
+            entryState.copy(
+                expanded = true,
+                formsExpanded = true,
+                senses = entryState.senses.map { senseState ->
+                    senseState.copy(
+                        expanded = true,
+                        examplesExpanded = true,
+                        languageExpanded = senseState.languageExpanded.mapValues { true }
+                    )
+                }
+            )
+        }
+        WordDetailScreenContent(
+            state = base.copy(entries = expanded),
+            onWordClick = { /* Preview - no action */ }
+        )
     }
 }
