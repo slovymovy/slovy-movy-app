@@ -18,26 +18,22 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
 import kotlin.text.Typography.bullet
 
 @Composable
 internal fun SenseCard(
+    lemma: String?,
     sense: LanguageCardResponseSense,
     state: SenseUiState,
     onToggle: () -> Unit,
-    onExamplesToggle: () -> Unit,
-    onLanguageToggle: (Language) -> Unit,
     onPositioned: (String, Float) -> Unit = { _, _ -> },
     allSenses: List<LanguageCardResponseSense>,
     onFavoriteToggle: () -> Unit = {},
-    onNavigateToDetail: () -> Unit = {},
     relatedWords: Set<String> = emptySet(),
     onWordClick: (String) -> Unit = {}
 ) {
     val translationBasedHeader = remember(sense.senseId) { sense.translationsHeader() }
-    val translationHeaderSuffix = remember(sense.senseId, allSenses) { translationsHeaderSuffix(sense, allSenses) }
 
     val expanded = state.expanded
     OutlinedCard(
@@ -62,6 +58,12 @@ internal fun SenseCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    lemma?.let {
+                        HighlightedText(
+                            text = it,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                     if (translationBasedHeader == null) {
                         HighlightedText(
                             text = sense.senseDefinition,
@@ -76,14 +78,6 @@ internal fun SenseCard(
                             clickableWords = relatedWords,
                             onWordClick = onWordClick
                         )
-                        if (translationHeaderSuffix != null) {
-                            HighlightedText(
-                                text = translationHeaderSuffix,
-                                style = MaterialTheme.typography.titleSmall,
-                                clickableWords = relatedWords,
-                                onWordClick = onWordClick
-                            )
-                        }
                     }
 
                     LevelAndFrequencyRow(
@@ -117,18 +111,6 @@ internal fun SenseCard(
                             )
                         }
                     }
-                    if (state.showNavigationArrow) {
-                        IconButton(
-                            onClick = onNavigateToDetail,
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            Icon(
-                                imageVector = ArrowForwardVector,
-                                contentDescription = "Navigate to word detail",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
                     Icon(
                         imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
                         contentDescription = if (expanded) {
@@ -149,33 +131,24 @@ internal fun SenseCard(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 0.dp)
-                        .padding(bottom = 16.dp),
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     if (sense.targetLangDefinitions.isNotEmpty()) {
-                        OutlinedCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            if (translationBasedHeader != null) {
-                                Text(
-                                    text = sense.senseDefinition,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
-                            }
-                            if (translationHeaderSuffix == null) {
-                                sense.targetLangDefinitions.forEach {
-                                    Text(
-                                        text = it.value,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                    )
-                                }
-                            }
+                        SectionLabel("Definition")
+                        if (translationBasedHeader != null) {
+                            HighlightedText(
+                                text = sense.senseDefinition,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
                         }
+                        HighlightedText(
+                            text = sense.targetLangDefinitions.map { definition -> definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() } }
+                                .joinToString("\n"),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        )
                     }
 
                     if (sense.traits.isNotEmpty()) {
@@ -183,30 +156,27 @@ internal fun SenseCard(
                     }
 
                     if (sense.examples.isNotEmpty()) {
-                        val examplePreview = sense.examples.first().text
-                            .replace("\n", " ")
-                        ExpandableSection(
-                            title = "Examples",
-                            expanded = state.examplesExpanded,
-                            onToggle = onExamplesToggle,
-                            supportingText = examplePreview.ifBlank { null },
-                            headlineStyle = MaterialTheme.typography.titleSmall
-                        ) {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                sense.examples.forEach { ex ->
-                                    BulletHighlightedText(
+                        SectionLabel(text = "Examples")
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            sense.examples.forEach { ex ->
+                                OutlinedCard(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    HighlightedText(
                                         text = ex.text,
                                         style = MaterialTheme.typography.bodyLarge,
                                         clickableWords = relatedWords,
-                                        onWordClick = onWordClick
+                                        onWordClick = onWordClick,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )
                                     if (ex.targetLangTranslations.isNotEmpty()) {
                                         ex.targetLangTranslations.forEach { (_, translation) ->
-                                            PrefixedHighlightedText(
-                                                prefix = "– ",
+                                            HighlightedText(
                                                 text = translation,
                                                 style = MaterialTheme.typography.bodySmall,
-                                                modifier = Modifier.padding(start = 24.dp),
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                                 clickableWords = relatedWords,
                                                 onWordClick = onWordClick
                                             )
@@ -241,80 +211,6 @@ internal fun SenseCard(
                         clickableWords = relatedWords,
                         onWordClick = onWordClick
                     )
-
-                    val languageOrder = buildList {
-                        sense.targetLangDefinitions.keys.forEach { add(it) }
-                        sense.translations.keys.forEach { if (!contains(it)) add(it) }
-                    }
-
-                    languageOrder.forEach { lang ->
-                        if (sense.translations[lang]?.isNotEmpty() ?: false) {
-                            val langExpanded = state.languageExpanded[lang] ?: expanded
-                            LanguageSection(
-                                language = lang,
-                                sense = sense,
-                                expanded = langExpanded,
-                                onToggle = { onLanguageToggle(lang) },
-                                relatedWords = relatedWords,
-                                onWordClick = onWordClick
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LanguageSection(
-    language: Language,
-    sense: LanguageCardResponseSense,
-    expanded: Boolean,
-    onToggle: () -> Unit,
-    relatedWords: Set<String> = emptySet(),
-    onWordClick: (String) -> Unit = {}
-) {
-    val languageLabel = language.selfName
-    val translations = sense.translations[language].orEmpty()
-
-    ExpandableSection(
-        title = languageLabel,
-        expanded = expanded,
-        onToggle = onToggle,
-        supportingText = null,
-        headlineStyle = MaterialTheme.typography.titleSmall
-    ) {
-        TranslationList(
-            translations = translations,
-            clickableWords = relatedWords,
-            onWordClick = onWordClick
-        )
-    }
-}
-
-@Composable
-private fun TranslationList(
-    translations: List<LanguageCardTranslation>,
-    clickableWords: Set<String> = emptySet(),
-    onWordClick: (String) -> Unit = {}
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        translations.forEach { translation ->
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                BulletHighlightedText(
-                    text = translation.targetLangWord,
-                    style = MaterialTheme.typography.bodyMedium,
-                    clickableWords = clickableWords,
-                    onWordClick = onWordClick
-                )
-                translation.targetLangSenseClarification?.takeIf { it.isNotBlank() }?.let { clarification ->
-                    Text(
-                        text = clarification,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 24.dp)
-                    )
                 }
             }
         }
@@ -329,7 +225,7 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        SectionLabel("Notes")
+        SectionLabel("Usage Context")
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -386,24 +282,6 @@ internal fun LevelAndFrequencyRow(
         if (nameType != null && nameType != NameType.NO) {
             val (nc, ncc) = colorsForNameType(nameType)
             Badge(text = nameType.displayName, containerColor = nc, contentColor = ncc)
-        }
-    }
-}
-
-private fun translationsHeaderSuffix(
-    sense: LanguageCardResponseSense,
-    allSenses: List<LanguageCardResponseSense>
-): String? {
-    if (sense.translations.isEmpty()) {
-        return null
-    } else {
-        val eachCount = allSenses.map { it.translationsHeader() }.groupingBy { it }.eachCount()
-        val translationsHeader = sense.translationsHeader()
-        return if (eachCount[translationsHeader] == 1) {
-            null
-        } else {
-            sense.targetLangDefinitions.map { definition -> definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() } }
-                .joinToString(",")
         }
     }
 }

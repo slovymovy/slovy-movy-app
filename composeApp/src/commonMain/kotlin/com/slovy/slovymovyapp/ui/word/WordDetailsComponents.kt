@@ -98,7 +98,8 @@ internal fun BulletHighlightedText(
     text: String,
     style: TextStyle,
     clickableWords: Set<String> = emptySet(),
-    onWordClick: (String) -> Unit = {}
+    onWordClick: (String) -> Unit = {},
+    modifier: Modifier = Modifier.Companion,
 ) {
     val highlight = SpanStyle(
         color = MaterialTheme.colorScheme.secondary,
@@ -116,7 +117,8 @@ internal fun BulletHighlightedText(
 
     Text(
         text = annotated,
-        style = style.merge(TextStyle(color = style.color))
+        style = style.merge(TextStyle(color = style.color)),
+        modifier = modifier
     )
 }
 
