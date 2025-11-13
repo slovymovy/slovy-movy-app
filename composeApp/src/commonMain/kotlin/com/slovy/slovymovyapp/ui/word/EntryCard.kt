@@ -159,14 +159,11 @@ internal fun EntryCard(
                                 val senseState = entryState.senses.find { it.senseId == sense.senseId }
                                     ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
                                 SenseCard(
+                                    lemma = null,
                                     sense = sense,
                                     state = senseState,
                                     allSenses = entry.senses,
                                     onToggle = { onSenseToggle(sense.senseId) },
-                                    onExamplesToggle = { onSenseExamplesToggle(sense.senseId) },
-                                    onLanguageToggle = { language ->
-                                        onLanguageToggle(sense.senseId, language)
-                                    },
                                     onPositioned = onSensePositioned,
                                     onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
                                     relatedWords = relatedWords,

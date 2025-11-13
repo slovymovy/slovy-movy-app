@@ -1,12 +1,9 @@
 package com.slovy.slovymovyapp.ui
 
-import androidx.compose.animation.*
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
@@ -14,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -22,7 +18,6 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
-import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.SenseCard
 import com.slovy.slovymovyapp.ui.word.SenseUiState
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -46,7 +41,6 @@ data class FavoritesUiState(
     val query: String = "",
     val showNoResults: Boolean = false,
     val hasAnyFavorites: Boolean = false,
-    val showLanguageIndicators: Boolean = false
 )
 
 class FavoritesViewModel(
@@ -56,8 +50,7 @@ class FavoritesViewModel(
 
     var state by mutableStateOf(
         FavoritesUiState(
-            groups = emptyList(),
-            showLanguageIndicators = dictionaryRepository.installedDictionaries().size > 1
+            groups = emptyList()
         )
     )
         private set
@@ -93,10 +86,17 @@ class FavoritesViewModel(
             // Find existing group to preserve state
             val existingGroup = state.groups.find { it.targetLang == targetLang && it.lemma == lemma }
 
+            // Load senses immediately for collapsed view preview
+            val senses = if (existingGroup?.senses != null) {
+                existingGroup.senses
+            } else {
+                loadGroupSensesData(targetLang, lemma)
+            }
+
             FavoriteGroupUiState(
                 targetLang = targetLang,
                 lemma = lemma,
-                senses = existingGroup?.senses, // Preserve existing senses or empty
+                senses = senses,
                 expanded = existingGroup?.expanded ?: false
             )
         }
@@ -108,13 +108,13 @@ class FavoritesViewModel(
         )
     }
 
-    private fun loadGroupSenses(targetLang: Language, lemma: String) {
+    private fun loadGroupSensesData(targetLang: Language, lemma: String): List<FavoriteSenseUiState> {
         val favorites = favoritesRepository.getByLangAndLemma(targetLang, lemma)
         val allFavSenses = favorites.map { it.senseId }
 
         val card = dictionaryRepository.getLanguageCard(targetLang, lemma)
 
-        val senses = favorites.mapNotNull { favorite ->
+        return favorites.mapNotNull { favorite ->
             // Find the entry and sense
             val entryAndSense = card?.entries?.firstNotNullOfOrNull { entry ->
                 entry.senses.find { it.senseId == favorite.senseId }?.let { sense ->
@@ -139,7 +139,6 @@ class FavoritesViewModel(
                         examplesExpanded = false,
                         languageExpanded = emptyMap(),
                         favorite = true,
-                        showNavigationArrow = true,
                         showFavoriteToggle = false,
                         pos = entry.pos
                     )
@@ -148,25 +147,6 @@ class FavoritesViewModel(
                 null
             }
         }
-
-        // Update the specific group with loaded senses
-        updateGroupState(targetLang, lemma) { it.copy(senses = senses) }
-    }
-
-    private fun updateGroupState(
-        targetLang: Language,
-        lemma: String,
-        updateFn: (FavoriteGroupUiState) -> FavoriteGroupUiState
-    ) {
-        state = state.copy(
-            groups = state.groups.map { group ->
-                if (group.targetLang == targetLang && group.lemma == lemma) {
-                    updateFn(group)
-                } else {
-                    group
-                }
-            }
-        )
     }
 
     private fun updateSenseState(senseId: String, updateFn: (SenseUiState) -> SenseUiState) {
@@ -189,19 +169,6 @@ class FavoritesViewModel(
         updateSenseState(senseId) { it.copy(expanded = !it.expanded, showFavoriteToggle = !it.showFavoriteToggle) }
     }
 
-    fun toggleSenseExamples(senseId: String) {
-        updateSenseState(senseId) { it.copy(examplesExpanded = !it.examplesExpanded) }
-    }
-
-    fun toggleLanguage(senseId: String, language: Language) {
-        updateSenseState(senseId) { currentState ->
-            val current = currentState.languageExpanded[language] ?: currentState.expanded
-            currentState.copy(
-                languageExpanded = currentState.languageExpanded + (language to !current)
-            )
-        }
-    }
-
     fun toggleFavorite(senseId: String, targetLang: Language, lemma: String) {
         val isFavorite = if (favoritesRepository.exists(senseId, targetLang)) {
             favoritesRepository.remove(senseId, targetLang)
@@ -213,26 +180,6 @@ class FavoritesViewModel(
         updateSenseState(senseId) { it.copy(favorite = isFavorite) }
     }
 
-    fun toggleGroup(targetLang: Language, lemma: String) {
-        val group = state.groups.find { it.targetLang == targetLang && it.lemma == lemma }
-        if (group != null) {
-            val newExpanded = !group.expanded
-
-            // Update expanded state first
-            updateGroupState(targetLang, lemma) { it.copy(expanded = newExpanded) }
-
-            // Load senses only if expanding and not already loaded
-            if (newExpanded && group.senses == null) {
-                loadGroupSenses(targetLang, lemma)
-            }
-        }
-    }
-
-    fun refreshLanguageIndicators() {
-        state = state.copy(
-            showLanguageIndicators = dictionaryRepository.installedDictionaries().size > 1
-        )
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -240,17 +187,11 @@ class FavoritesViewModel(
 fun FavoritesScreen(
     viewModel: FavoritesViewModel,
     onNavigateToSearch: () -> Unit = {},
-    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
-
-    // Refresh language indicators when screen is opened
-    LaunchedEffect(Unit) {
-        viewModel.refreshLanguageIndicators()
-    }
 
     // Clear focus when scrolling starts
     LaunchedEffect(viewModel.scrollState.isScrollInProgress) {
@@ -265,13 +206,9 @@ fun FavoritesScreen(
         onNavigateToSearch = onNavigateToSearch,
         onQueryChange = { viewModel.updateQuery(it) },
         onSenseToggle = { senseId -> viewModel.toggleSense(senseId) },
-        onSenseExamplesToggle = { senseId -> viewModel.toggleSenseExamples(senseId) },
-        onLanguageToggle = { senseId, lang -> viewModel.toggleLanguage(senseId, lang) },
         onFavoriteToggle = { senseId, targetLang, lemma -> viewModel.toggleFavorite(senseId, targetLang, lemma) },
-        onGroupToggle = { targetLang, lemma -> viewModel.toggleGroup(targetLang, lemma) },
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
-        onNavigateToWordDetail = onNavigateToWordDetail,
         onNavigateToSettings = onNavigateToSettings
     )
 }
@@ -284,13 +221,9 @@ fun FavoritesScreenContent(
     onNavigateToSearch: () -> Unit = {},
     onQueryChange: (String) -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
-    onSenseExamplesToggle: (String) -> Unit = {},
-    onLanguageToggle: (String, Language) -> Unit = { _, _ -> },
     onFavoriteToggle: (String, Language, String) -> Unit = { _, _, _ -> },
-    onGroupToggle: (Language, String) -> Unit = { _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
-    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> },
     onNavigateToSettings: () -> Unit = {}
 ) {
     Scaffold(
@@ -298,7 +231,7 @@ fun FavoritesScreenContent(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Favorites",
+                        text = "My words",
                         style = MaterialTheme.typography.headlineSmall
                     )
                 },
@@ -333,7 +266,7 @@ fun FavoritesScreenContent(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(top = 16.dp),
-                    placeholder = "Search in favorites..."
+                    placeholder = "Search my word..."
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -342,50 +275,38 @@ fun FavoritesScreenContent(
             // Content
             when {
                 state.groups.isEmpty() && state.query.isEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        com.slovy.slovymovyapp.ui.components.EmptyState(
-                            icon = Icons.Outlined.FavoriteBorder,
-                            title = "No Favorites Yet",
-                            description = "Save words you want to learn by tapping the heart icon on any word meaning"
-                        )
-                    }
-                }
-
-                state.showNoResults -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Top
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        Spacer(modifier = Modifier.height(48.dp))
-                        Icon(
-                            imageVector = Icons.Outlined.FavoriteBorder,
-                            contentDescription = "No results",
-                            modifier = Modifier.size(72.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                        Surface(
+                            modifier = Modifier.size(96.dp),
+                            shape = MaterialTheme.shapes.extraLarge,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.FavoriteBorder,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(48.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "No favorites found",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            text = "No Favorites Yet",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "We couldn't find any favorites matching \"${state.query}\"",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 32.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Try a different search term",
+                            text = "Start adding meanings to your favorites by tapping the heart icon",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
@@ -394,26 +315,46 @@ fun FavoritesScreenContent(
                     }
                 }
 
-                else -> {
-                    LazyColumn(
-                        state = scrollState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp),
-                        contentPadding = PaddingValues(vertical = 24.dp)
+                state.showNoResults -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        items(state.groups, key = { "${it.targetLang.code}_${it.lemma}" }) { group ->
-                            FavoriteGroupCard(
-                                group = group,
-                                showLanguageIndicator = state.showLanguageIndicators,
-                                onSenseToggle = onSenseToggle,
-                                onSenseExamplesToggle = onSenseExamplesToggle,
-                                onLanguageToggle = onLanguageToggle,
-                                onFavoriteToggle = onFavoriteToggle,
-                                onGroupToggle = { onGroupToggle(group.targetLang, group.lemma) },
-                                onNavigateToWordDetail = onNavigateToWordDetail
-                            )
+                        Text(
+                            text = "No favorites match your search",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                else -> {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        // Meaning count
+                        val meaningCount = state.groups.sumOf { it.senses?.size ?: 0 }
+                        Text(
+                            text = if (meaningCount == 1) "1 meaning" else "$meaningCount meanings",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                        )
+
+                        LazyColumn(
+                            state = scrollState,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(bottom = 16.dp)
+                        ) {
+                            items(state.groups, key = { "${it.targetLang.code}_${it.lemma}" }) { group ->
+                                FavoriteGroupCard(
+                                    group = group,
+                                    onSenseToggle = onSenseToggle,
+                                    onFavoriteToggle = onFavoriteToggle
+                                )
+                            }
                         }
                     }
                 }
@@ -425,86 +366,23 @@ fun FavoritesScreenContent(
 @Composable
 private fun FavoriteGroupCard(
     group: FavoriteGroupUiState,
-    showLanguageIndicator: Boolean = false,
     onSenseToggle: (String) -> Unit,
-    onSenseExamplesToggle: (String) -> Unit,
-    onLanguageToggle: (String, Language) -> Unit,
-    onFavoriteToggle: (String, Language, String) -> Unit,
-    onGroupToggle: () -> Unit = {},
-    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> }
+    onFavoriteToggle: (String, Language, String) -> Unit
 ) {
+
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // Header with language and lemma
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onGroupToggle() },
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.primaryContainer
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = group.lemma,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Icon(
-                        imageVector = if (group.expanded) com.slovy.slovymovyapp.ui.word.ExpandLessVector else com.slovy.slovymovyapp.ui.word.ExpandMoreVector,
-                        contentDescription = if (group.expanded) "Collapse group" else "Expand group",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-                if (showLanguageIndicator) {
-                    Badge(
-                        text = group.targetLang.selfName,
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                }
-            }
-        }
-
-        // Senses
-        AnimatedVisibility(
-            visible = group.expanded,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-
-                val allSenses = group.senses?.map { it.sense }?.toList()
-                group.senses?.forEach { favSense ->
-                    val sense = favSense.sense
-                    SenseCard(
-                        sense = sense,
-                        state = favSense.state,
-                        onToggle = { onSenseToggle(sense.senseId) },
-                        onExamplesToggle = { onSenseExamplesToggle(sense.senseId) },
-                        onLanguageToggle = { lang -> onLanguageToggle(sense.senseId, lang) },
-                        allSenses = allSenses ?: emptyList(),
-                        onFavoriteToggle = { onFavoriteToggle(sense.senseId, group.targetLang, group.lemma) },
-                        onNavigateToDetail = { onNavigateToWordDetail(group.targetLang, group.lemma, sense.senseId) },
-                    )
-                }
-            }
+        val allSenses = group.senses?.map { it.sense }?.toList()
+        group.senses?.forEach { favSense ->
+            val sense = favSense.sense
+            SenseCard(
+                lemma = group?.lemma,
+                sense = sense,
+                state = favSense.state,
+                onToggle = { onSenseToggle(sense.senseId) },
+                allSenses = allSenses ?: emptyList(),
+                onFavoriteToggle = { onFavoriteToggle(sense.senseId, group.targetLang, group.lemma) })
         }
     }
 }
@@ -516,7 +394,8 @@ private fun createMockSense(
     level: LearnerLevel = LearnerLevel.B1,
     frequency: SenseFrequency = SenseFrequency.MIDDLE,
     examples: List<LanguageCardExample> = emptyList(),
-    translations: Map<Language, List<LanguageCardTranslation>> = emptyMap()
+    synonyms: List<String> = emptyList(),
+    antonyms: List<String> = emptyList(),
 ): LanguageCardResponseSense {
     return LanguageCardResponseSense(
         senseId = id,
@@ -526,12 +405,11 @@ private fun createMockSense(
         semanticGroupId = "group1",
         nameType = null,
         examples = examples,
-        synonyms = emptyList(),
-        antonyms = emptyList(),
+        synonyms = synonyms,
+        antonyms = antonyms,
         commonPhrases = emptyList(),
         traits = emptyList(),
         targetLangDefinitions = mapOf(Language.ENGLISH to definition),
-        translations = translations
     )
 }
 
@@ -578,11 +456,8 @@ fun PreviewFavoritesScreenSingleGroupCollapsed(
             examples = listOf(
                 LanguageCardExample("She runs every morning", mapOf(Language.POLISH to "Ona biegnie każdego ranka"))
             ),
-            translations = mapOf(
-                Language.POLISH to listOf(
-                    LanguageCardTranslation("biegać", null)
-                )
-            )
+            synonyms = listOf("walk", "stride"),
+            antonyms = listOf("hitchhike", "stop")
         )
 
         val state = FavoritesUiState(
@@ -600,8 +475,8 @@ fun PreviewFavoritesScreenSingleGroupCollapsed(
                                 examplesExpanded = false,
                                 languageExpanded = emptyMap(),
                                 favorite = true,
-                                showNavigationArrow = true,
-                                pos = PartOfSpeech.VERB
+                                pos = PartOfSpeech.VERB,
+                                showFavoriteToggle = false
                             )
                         )
                     ),
@@ -625,24 +500,21 @@ fun PreviewFavoritesScreenMultipleGroupsCollapsed(
             id = "run-1",
             definition = "to move swiftly on foot",
             level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH,
-            translations = mapOf(Language.POLISH to listOf(LanguageCardTranslation("biegać")))
+            frequency = SenseFrequency.HIGH
         )
 
         val runSense2 = createMockSense(
             id = "run-2",
             definition = "to operate or control",
             level = LearnerLevel.B1,
-            frequency = SenseFrequency.MIDDLE,
-            translations = mapOf(Language.POLISH to listOf(LanguageCardTranslation("prowadzić")))
+            frequency = SenseFrequency.MIDDLE
         )
 
         val bookSense1 = createMockSense(
             id = "book-1",
             definition = "a written or printed work",
             level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH,
-            translations = mapOf(Language.POLISH to listOf(LanguageCardTranslation("książka")))
+            frequency = SenseFrequency.HIGH
         )
 
         val state = FavoritesUiState(
@@ -655,26 +527,26 @@ fun PreviewFavoritesScreenMultipleGroupsCollapsed(
                             favorite = createMockFavorite("run-1", Language.ENGLISH, "run", 1000000),
                             sense = runSense1,
                             state = SenseUiState(
-                                "run-1",
+                                senseId = "run-1",
                                 expanded = false,
                                 examplesExpanded = false,
                                 languageExpanded = emptyMap(),
                                 favorite = true,
-                                showNavigationArrow = true,
-                                pos = PartOfSpeech.VERB
+                                pos = PartOfSpeech.VERB,
+                                showFavoriteToggle = false
                             )
                         ),
                         FavoriteSenseUiState(
                             favorite = createMockFavorite("run-2", Language.ENGLISH, "run", 900000),
                             sense = runSense2,
                             state = SenseUiState(
-                                "run-2",
+                                senseId = "run-2",
                                 expanded = false,
                                 examplesExpanded = false,
                                 languageExpanded = emptyMap(),
                                 favorite = true,
-                                showNavigationArrow = true,
-                                pos = PartOfSpeech.VERB
+                                pos = PartOfSpeech.VERB,
+                                showFavoriteToggle = false
                             )
                         )
                     ),
@@ -688,13 +560,13 @@ fun PreviewFavoritesScreenMultipleGroupsCollapsed(
                             favorite = createMockFavorite("book-1", Language.ENGLISH, "book", 800000),
                             sense = bookSense1,
                             state = SenseUiState(
-                                "book-1",
+                                senseId = "book-1",
                                 expanded = false,
                                 examplesExpanded = false,
                                 languageExpanded = emptyMap(),
                                 favorite = false,
-                                showNavigationArrow = true,
-                                pos = PartOfSpeech.NOUN
+                                pos = PartOfSpeech.NOUN,
+                                showFavoriteToggle = false
                             )
                         )
                     ),
@@ -722,12 +594,6 @@ fun PreviewFavoritesScreenGroupExpanded(
             examples = listOf(
                 LanguageCardExample("I'm so happy today!", mapOf(Language.POLISH to "Jestem dzisiaj taki szczęśliwy!")),
                 LanguageCardExample("She looks happy", mapOf(Language.POLISH to "Ona wygląda na szczęśliwą"))
-            ),
-            translations = mapOf(
-                Language.POLISH to listOf(
-                    LanguageCardTranslation("szczęśliwy", "in a good mood"),
-                    LanguageCardTranslation("zadowolony", "satisfied")
-                )
             )
         )
 
@@ -746,8 +612,8 @@ fun PreviewFavoritesScreenGroupExpanded(
                                 examplesExpanded = true,
                                 languageExpanded = mapOf(Language.POLISH to true),
                                 favorite = true,
-                                showNavigationArrow = true,
-                                pos = PartOfSpeech.ADJECTIVE
+                                pos = PartOfSpeech.ADJECTIVE,
+                                showFavoriteToggle = true
                             )
                         )
                     ),
@@ -771,8 +637,7 @@ fun PreviewFavoritesScreenMixedStates(
             id = "love-1",
             definition = "an intense feeling of deep affection",
             level = LearnerLevel.A2,
-            frequency = SenseFrequency.HIGH,
-            translations = mapOf(Language.POLISH to listOf(LanguageCardTranslation("miłość")))
+            frequency = SenseFrequency.HIGH
         )
 
         val sense2 = createMockSense(
@@ -780,16 +645,14 @@ fun PreviewFavoritesScreenMixedStates(
             definition = "to feel deep affection for someone",
             level = LearnerLevel.A2,
             frequency = SenseFrequency.HIGH,
-            examples = listOf(LanguageCardExample("I love you", mapOf(Language.POLISH to "Kocham cię"))),
-            translations = mapOf(Language.POLISH to listOf(LanguageCardTranslation("kochać")))
+            examples = listOf(LanguageCardExample("I love you", mapOf(Language.POLISH to "Kocham cię")))
         )
 
         val runSense = createMockSense(
             id = "run-1",
             definition = "to move swiftly on foot",
             level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH,
-            translations = mapOf(Language.POLISH to listOf(LanguageCardTranslation("biegać")))
+            frequency = SenseFrequency.HIGH
         )
 
         val state = FavoritesUiState(
@@ -802,24 +665,26 @@ fun PreviewFavoritesScreenMixedStates(
                             favorite = createMockFavorite("love-1", Language.ENGLISH, "love", 2000000),
                             sense = sense1,
                             state = SenseUiState(
-                                "love-1", true,
+                                senseId = "love-1",
+                                expanded = true,
                                 examplesExpanded = false,
                                 languageExpanded = emptyMap(),
                                 favorite = true,
-                                showNavigationArrow = true,
-                                pos = PartOfSpeech.NOUN
+                                pos = PartOfSpeech.NOUN,
+                                showFavoriteToggle = true
                             )
                         ),
                         FavoriteSenseUiState(
                             favorite = createMockFavorite("love-2", Language.ENGLISH, "love", 1000000),
                             sense = sense2,
                             state = SenseUiState(
-                                "love-2", false,
+                                senseId = "love-2",
+                                expanded = false,
                                 examplesExpanded = false,
                                 languageExpanded = emptyMap(),
                                 favorite = false,
-                                showNavigationArrow = true,
-                                pos = PartOfSpeech.VERB
+                                pos = PartOfSpeech.VERB,
+                                showFavoriteToggle = false
                             )
                         )
                     ),
@@ -833,12 +698,13 @@ fun PreviewFavoritesScreenMixedStates(
                             favorite = createMockFavorite("run-1", Language.ENGLISH, "run", 1500000),
                             sense = runSense,
                             state = SenseUiState(
-                                "run-1", false,
+                                senseId = "run-1",
+                                expanded = false,
                                 examplesExpanded = false,
                                 languageExpanded = emptyMap(),
                                 favorite = true,
-                                showNavigationArrow = true,
-                                pos = PartOfSpeech.VERB
+                                pos = PartOfSpeech.VERB,
+                                showFavoriteToggle = false
                             )
                         )
                     ),
@@ -862,8 +728,7 @@ fun PreviewFavoritesScreenWithSearch(
             id = "run-1",
             definition = "to move swiftly on foot",
             level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH,
-            translations = mapOf(Language.POLISH to listOf(LanguageCardTranslation("biegać")))
+            frequency = SenseFrequency.HIGH
         )
 
         val state = FavoritesUiState(
@@ -876,12 +741,13 @@ fun PreviewFavoritesScreenWithSearch(
                             favorite = createMockFavorite("run-1", Language.ENGLISH, "run"),
                             sense = runSense,
                             state = SenseUiState(
-                                "run-1", false,
+                                senseId = "run-1",
+                                expanded = false,
                                 examplesExpanded = false,
                                 languageExpanded = emptyMap(),
                                 favorite = true,
-                                showNavigationArrow = true,
-                                pos = PartOfSpeech.VERB
+                                pos = PartOfSpeech.VERB,
+                                showFavoriteToggle = false
                             )
                         )
                     ),
@@ -923,16 +789,14 @@ fun PreviewFavoritesScreenSearchWithMultipleResults(
             id = "book-1",
             definition = "a written or printed work",
             level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH,
-            translations = mapOf(Language.POLISH to listOf(LanguageCardTranslation("książka")))
+            frequency = SenseFrequency.HIGH
         )
 
         val bookmarkSense1 = createMockSense(
             id = "bookmark-1",
             definition = "a strip of material used to mark one's place in a book",
             level = LearnerLevel.B1,
-            frequency = SenseFrequency.MIDDLE,
-            translations = mapOf(Language.POLISH to listOf(LanguageCardTranslation("zakładka")))
+            frequency = SenseFrequency.MIDDLE
         )
 
         val state = FavoritesUiState(
@@ -945,12 +809,13 @@ fun PreviewFavoritesScreenSearchWithMultipleResults(
                             favorite = createMockFavorite("book-1", Language.ENGLISH, "book"),
                             sense = bookSense1,
                             state = SenseUiState(
-                                "book-1", false,
+                                senseId = "book-1",
+                                expanded = false,
                                 examplesExpanded = false,
                                 languageExpanded = emptyMap(),
                                 favorite = true,
-                                showNavigationArrow = true,
-                                pos = PartOfSpeech.NOUN
+                                pos = PartOfSpeech.NOUN,
+                                showFavoriteToggle = false
                             )
                         )
                     ),
@@ -964,11 +829,11 @@ fun PreviewFavoritesScreenSearchWithMultipleResults(
                             favorite = createMockFavorite("bookmark-1", Language.ENGLISH, "bookmark"),
                             sense = bookmarkSense1,
                             state = SenseUiState(
-                                "bookmark-1", false,
+                                senseId = "bookmark-1",
+                                expanded = false,
                                 examplesExpanded = false,
                                 languageExpanded = emptyMap(),
                                 favorite = true,
-                                showNavigationArrow = true,
                                 pos = PartOfSpeech.NOUN
                             )
                         )
@@ -977,8 +842,7 @@ fun PreviewFavoritesScreenSearchWithMultipleResults(
                 )
             ),
             query = "book",
-            hasAnyFavorites = true,
-            showLanguageIndicators = true
+            hasAnyFavorites = true
         )
 
         FavoritesScreenContent(state = state)
