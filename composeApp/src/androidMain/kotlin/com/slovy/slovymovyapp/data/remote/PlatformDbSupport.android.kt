@@ -119,7 +119,13 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     actual fun createHttpClient(): HttpClient {
-        return HttpClient(OkHttp)
+        return HttpClient(OkHttp) {
+            engine {
+                config {
+                    retryOnConnectionFailure(true)
+                }
+            }
+        }
     }
 
     actual fun getAvailableBytesForPath(path: Path): Long? {

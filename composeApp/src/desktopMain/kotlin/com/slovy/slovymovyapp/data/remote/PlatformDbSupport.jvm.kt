@@ -129,7 +129,15 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     actual fun createHttpClient(): HttpClient {
-        return HttpClient(CIO)
+        return HttpClient(CIO) {
+            engine {
+                requestTimeout = 0
+                endpoint {
+                    connectTimeout = 10000
+                    connectAttempts = 5
+                }
+            }
+        }
     }
 
     @Suppress("UsableSpace")
