@@ -136,18 +136,6 @@ private fun WordDetailUiState.Content.toggleForms(entryIndex: Int): WordDetailUi
 private fun WordDetailUiState.Content.toggleSense(entryIndex: Int, senseId: String): WordDetailUiState.Content =
     updateEntry(entryIndex) { entry -> entry.updateSense(senseId) { sense -> sense.copy(expanded = !sense.expanded) } }
 
-private fun WordDetailUiState.Content.toggleSenseExamples(entryIndex: Int, senseId: String): WordDetailUiState.Content =
-    updateEntry(entryIndex) { entry -> entry.updateSense(senseId) { sense -> sense.copy(examplesExpanded = !sense.examplesExpanded) } }
-
-private fun WordDetailUiState.Content.toggleSenseLanguage(
-    entryIndex: Int,
-    senseId: String,
-    language: Language
-): WordDetailUiState.Content =
-    updateEntry(entryIndex) { entry ->
-        entry.updateSense(senseId) { sense -> sense.toggleLanguage(language) }
-    }
-
 private inline fun WordDetailUiState.Content.updateEntry(
     entryIndex: Int,
     transform: (EntryUiState) -> EntryUiState
@@ -169,12 +157,6 @@ private inline fun EntryUiState.updateSense(
         if (index == idx) transform(sense) else sense
     }
     return copy(senses = updatedSenses)
-}
-
-private fun SenseUiState.toggleLanguage(language: Language): SenseUiState {
-    val current = languageExpanded[language] ?: expanded
-    val updated = languageExpanded.toMutableMap().apply { put(language, !current) }
-    return copy(languageExpanded = updated)
 }
 
 class WordDetailViewModel(
@@ -336,27 +318,6 @@ class WordDetailViewModel(
         }
     }
 
-    fun toggleSenseExamples(entryIndex: Int, senseId: String) {
-        val current = state
-        if (current is WordDetailUiState.Content) {
-            state = current.toggleSenseExamples(entryIndex, senseId)
-        }
-    }
-
-    fun toggleLanguage(entryIndex: Int, senseId: String, language: Language) {
-        val current = state
-        if (current is WordDetailUiState.Content) {
-            state = current.toggleSenseLanguage(entryIndex, senseId, language)
-        }
-    }
-
-    fun toggleWordFamily() {
-        val current = state
-        if (current is WordDetailUiState.Content) {
-            state = current.copy(wordFamilyExpanded = !current.wordFamilyExpanded)
-        }
-    }
-
     fun playWord() {
         if (availableVoices.isEmpty()) return
 
@@ -497,14 +458,9 @@ fun WordDetailScreen(
         onNavigateToSettings = onNavigateToSettings,
         onPlayWord = { viewModel.playWord() },
         onStopWord = { viewModel.stopPlayback() },
-        onWordFamilyToggle = { viewModel.toggleWordFamily() },
         onEntryToggle = { index -> viewModel.toggleEntry(index) },
         onFormsToggle = { index -> viewModel.toggleForms(index) },
         onSenseToggle = { entryIndex, senseId -> viewModel.toggleSense(entryIndex, senseId) },
-        onSenseExamplesToggle = { entryIndex, senseId -> viewModel.toggleSenseExamples(entryIndex, senseId) },
-        onLanguageToggle = { entryIndex, senseId, language ->
-            viewModel.toggleLanguage(entryIndex, senseId, language)
-        },
         onSensePositioned = { senseId, yOffset -> viewModel.updateSensePosition(senseId, yOffset) },
         isSenseFavorite = { senseId -> viewModel.isSenseFavorite(senseId) },
         onSenseFavoriteToggle = { senseId ->
@@ -530,12 +486,9 @@ fun WordDetailScreenContent(
     onNavigateToSettings: () -> Unit = {},
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
-    onWordFamilyToggle: () -> Unit = {},
     onEntryToggle: (Int) -> Unit = {},
     onFormsToggle: (Int) -> Unit = {},
     onSenseToggle: (Int, String) -> Unit = { _, _ -> },
-    onSenseExamplesToggle: (Int, String) -> Unit = { _, _ -> },
-    onLanguageToggle: (Int, String, Language) -> Unit = { _, _, _ -> },
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {},
@@ -633,8 +586,6 @@ fun WordDetailScreenContent(
                     onEntryToggle = onEntryToggle,
                     onFormsToggle = onFormsToggle,
                     onSenseToggle = onSenseToggle,
-                    onSenseExamplesToggle = onSenseExamplesToggle,
-                    onLanguageToggle = onLanguageToggle,
                     onSensePositioned = onSensePositioned,
                     isSenseFavorite = isSenseFavorite,
                     onSenseFavoriteToggle = onSenseFavoriteToggle,
@@ -670,8 +621,6 @@ private fun WordDetailContent(
     onEntryToggle: (Int) -> Unit,
     onFormsToggle: (Int) -> Unit,
     onSenseToggle: (Int, String) -> Unit,
-    onSenseExamplesToggle: (Int, String) -> Unit,
-    onLanguageToggle: (Int, String, Language) -> Unit,
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {},
@@ -758,10 +707,6 @@ private fun WordDetailContent(
                     onEntryToggle = { onEntryToggle(index) },
                     onFormsToggle = { onFormsToggle(index) },
                     onSenseToggle = { senseId -> onSenseToggle(index, senseId) },
-                    onSenseExamplesToggle = { senseId -> onSenseExamplesToggle(index, senseId) },
-                    onLanguageToggle = { senseId, language ->
-                        onLanguageToggle(index, senseId, language)
-                    },
                     onSensePositioned = { senseId, windowY ->
                         // Calculate position relative to scroll container
                         val relativeY = windowY - scrollContainerY

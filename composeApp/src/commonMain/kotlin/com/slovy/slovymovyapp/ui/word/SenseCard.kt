@@ -28,7 +28,6 @@ internal fun SenseCard(
     state: SenseUiState,
     onToggle: () -> Unit,
     onPositioned: (String, Float) -> Unit = { _, _ -> },
-    allSenses: List<LanguageCardResponseSense>,
     onFavoriteToggle: () -> Unit = {},
     relatedWords: Set<String> = emptySet(),
     onWordClick: (String) -> Unit = {}

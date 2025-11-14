@@ -373,15 +373,13 @@ private fun FavoriteGroupCard(
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        val allSenses = group.senses?.map { it.sense }?.toList()
         group.senses?.forEach { favSense ->
             val sense = favSense.sense
             SenseCard(
-                lemma = group?.lemma,
+                lemma = group.lemma,
                 sense = sense,
                 state = favSense.state,
                 onToggle = { onSenseToggle(sense.senseId) },
-                allSenses = allSenses ?: emptyList(),
                 onFavoriteToggle = { onFavoriteToggle(sense.senseId, group.targetLang, group.lemma) })
         }
     }
