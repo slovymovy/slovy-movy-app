@@ -38,7 +38,7 @@ fun main(args: Array<String>) {
     require(frequencyDir.exists() && frequencyDir.isDirectory) { "Frequency directory not found: ${params.frequencyDir}" }
 
     if (params.testMode) {
-        println("[TEST MODE] Enabled. Will ingest at most 1000 words per language in a deterministic order (by hash).")
+        println("[TEST MODE] Enabled. Will ingest at most 50 words per language in a deterministic order (by hash).")
     }
 
     // languages are subdirectories inside processed_root

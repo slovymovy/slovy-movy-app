@@ -102,6 +102,7 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v5
         with:
+          ref: ${{ github.head_ref }}
           fetch-depth: 1
 
       - name: setup Java
