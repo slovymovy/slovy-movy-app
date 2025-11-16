@@ -18,7 +18,8 @@ class GithubRepoDataProvider(
     private val owner: String = "slovymovy",
     private val repo: String = "slovy-movy-app",
     private val path: String = ".test-db-files",
-    private val ref: String = "main"
+    private val ref: String = "main",
+    private val authToken: String? = null
 ) : RemoteDataProvider {
     private fun listApiUrl(): String =
         "https://api.github.com/repos/$owner/$repo/contents/${encodePath(path)}?ref=${encodeRef(ref)}"
@@ -26,10 +27,20 @@ class GithubRepoDataProvider(
     private fun rawBaseUrl(): String =
         "https://raw.githubusercontent.com/$owner/$repo/${encodeRef(ref)}/${trimSlashes(path)}/"
 
+    fun headersForHttp(): Map<String, String> {
+        return authToken?.let {
+            mapOf("Authorization" to "Bearer $it")
+        } ?: emptyMap()
+    }
+
     override suspend fun listFiles(platform: PlatformDbSupport): List<RemoteFile> = withContext(Dispatchers.IO) {
         val client = platform.createHttpClient()
         try {
-            val responseText = client.get(listApiUrl()).bodyAsText()
+            val responseText = client.get(listApiUrl()) {
+                headersForHttp().forEach { (key, value) ->
+                    header(key, value)
+                }
+            }.bodyAsText()
             val items = Json.decodeFromString<List<GithubContentItem>>(responseText)
             items.filter { it.type == "file" }
                 .mapNotNull { item ->

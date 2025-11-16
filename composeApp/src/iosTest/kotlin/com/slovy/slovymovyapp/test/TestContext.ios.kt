@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.test
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.toKString
 import platform.posix.getenv
 
 actual object TestContext {
@@ -10,7 +11,7 @@ actual object TestContext {
 
     @OptIn(ExperimentalForeignApi::class)
     actual fun getCiEnv(name: String): String? {
-        return getenv(name).toString()
+        return getenv(name)?.toKString()
     }
 }
 

@@ -25,5 +25,11 @@ fun testDataDbManager(): DataDbManager {
     return mgr
 }
 
-fun testRemoteDataProvider(): GithubRepoDataProvider =
-    GithubRepoDataProvider(ref = "issues/165") // TODO: detect actual branch
+const val gitBranchRefEnv = "GIT_BRANCH_REF"
+
+fun testRemoteDataProvider(): GithubRepoDataProvider {
+    return GithubRepoDataProvider(
+        ref = TestContext.getCiEnv(gitBranchRefEnv) ?: "main",
+        authToken = TestContext.getCiEnv("ACCESS_TO_GH_TOKEN")
+    )
+}
