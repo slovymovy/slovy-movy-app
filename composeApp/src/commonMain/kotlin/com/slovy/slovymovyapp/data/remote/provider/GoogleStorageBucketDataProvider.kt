@@ -16,9 +16,7 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 
 class GoogleStorageBucketDataProvider : RemoteDataProvider {
     companion object {
-        // TODO: we use HTTP for now to workaround some issues with IOS emulator
-        // https://github.com/slovymovy/slovy-movy-app/issues/34
-        private const val BASE_URL = "http://storage.googleapis.com/slovymovy/"
+        private const val BASE_URL = "https://storage.googleapis.com/slovymovy/"
         private const val LIST_API_URL = "https://storage.googleapis.com/storage/v1/b/slovymovy/o?prefix="
     }
 

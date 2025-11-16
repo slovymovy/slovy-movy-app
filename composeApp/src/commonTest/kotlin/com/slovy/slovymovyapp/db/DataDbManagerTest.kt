@@ -16,6 +16,9 @@ import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
 
+// TODO: we use HTTP for now to workaround some issues with IOS emulator
+// https://github.com/slovymovy/slovy-movy-app/issues/34
+@IgnoreIos
 class DataDbManagerTest : BaseTest() {
     @Test
     fun download_and_open_readonly() {

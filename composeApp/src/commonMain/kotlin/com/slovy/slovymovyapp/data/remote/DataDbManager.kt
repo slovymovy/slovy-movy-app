@@ -116,7 +116,7 @@ class DataDbManager(
      * Clears the stored data version from settings.
      */
     fun clearVersion() {
-        settingsRepository?.deleteById(Setting.Name.DATA_VERSION)
+        settingsRepository.deleteById(Setting.Name.DATA_VERSION)
     }
 
     fun hasDictionary(lang: Language): Boolean {
@@ -140,12 +140,12 @@ class DataDbManager(
     }
 
     suspend fun hasRequiredVersion(): Boolean = withContext(Dispatchers.Default) {
-        val saved = settingsRepository?.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
+        val saved = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
         saved == VERSION
     }
 
     fun setDownloadedVersion() {
-        settingsRepository?.insert(
+        settingsRepository.insert(
             Setting(
                 id = Setting.Name.DATA_VERSION,
                 value = Json.parseToJsonElement("\"$VERSION\"")

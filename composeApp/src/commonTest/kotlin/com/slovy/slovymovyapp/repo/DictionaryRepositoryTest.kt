@@ -6,11 +6,15 @@ import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.test.BaseTest
+import com.slovy.slovymovyapp.test.IgnoreIos
 import com.slovy.slovymovyapp.test.testDataDbManager
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
 import kotlin.test.*
 
+// TODO: we use HTTP for now to workaround some issues with IOS emulator
+// https://github.com/slovymovy/slovy-movy-app/issues/34
+@IgnoreIos
 class DictionaryRepositoryTest : BaseTest() {
     @Test
     fun download_en_ru_and_search_test() {
