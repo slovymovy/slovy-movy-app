@@ -190,4 +190,9 @@ tasks.withType<KotlinNativeTest> {
     environment(githubTokenEnvName, System.getenv(githubTokenEnvName) ?: "")
     environment(isTest, "true")
     environment(gitBranchEnvName, provider { gitBranchProvider.get() }.get())
+    // iOS simulator needs SIMCTL_CHILD_ prefix to propagate environment variables
+    val prefix = "SIMCTL_CHILD_"
+    environment("$prefix$githubTokenEnvName", System.getenv(githubTokenEnvName) ?: "")
+    environment("$prefix$isTest", "true")
+    environment("$prefix$gitBranchEnvName", provider { gitBranchProvider.get() }.get())
 }
