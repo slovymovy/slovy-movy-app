@@ -27,7 +27,7 @@ class GithubRepoDataProvider(
     private fun rawBaseUrl(): String =
         "https://raw.githubusercontent.com/$owner/$repo/${encodeRef(ref)}/${trimSlashes(path)}/"
 
-    fun headersForHttp(): Map<String, String> {
+    override fun headersForHttp(): Map<String, String> {
         return authToken?.let {
             mapOf("Authorization" to "Bearer $it")
         } ?: emptyMap()

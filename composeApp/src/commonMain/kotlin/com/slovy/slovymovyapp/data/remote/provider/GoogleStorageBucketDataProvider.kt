@@ -23,7 +23,9 @@ class GoogleStorageBucketDataProvider : RemoteDataProvider {
     override suspend fun listFiles(platform: PlatformDbSupport): List<RemoteFile> = withContext(Dispatchers.IO) {
         val client = platform.createHttpClient()
         try {
-            val response = client.get(LIST_API_URL + DataDbManager.VERSION + "/").bodyAsText()
+            val response = client.get(LIST_API_URL + DataDbManager.VERSION + "/") {
+                headersForHttp().forEach { (key, value) -> header(key, value) }
+            }.bodyAsText()
             val storageResponse = Json.decodeFromString<GcsStorageListResponse>(response)
             storageResponse.items.mapNotNull { obj ->
                 val fileName = obj.name.removePrefix(DataDbManager.VERSION + "/")
@@ -37,6 +39,10 @@ class GoogleStorageBucketDataProvider : RemoteDataProvider {
         } finally {
             client.close()
         }
+    }
+
+    override fun headersForHttp(): Map<String, String> {
+        return emptyMap()
     }
 
     override fun downloadUrlFor(fileName: String): String = BASE_URL + DataDbManager.VERSION + "/" + fileName

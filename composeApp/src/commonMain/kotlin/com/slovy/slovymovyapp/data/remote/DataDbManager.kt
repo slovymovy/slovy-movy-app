@@ -250,7 +250,7 @@ class DataDbManager(
         if (!platform.fileExists(path)) {
             val url = remoteDataProvider.downloadUrlFor(name)
             platform.ensureDatabasesDir()
-            downloadToFile(url, path, onProgress, cancelToken ?: CancelToken())
+            downloadToFile(url, remoteDataProvider.headersForHttp(), path, onProgress, cancelToken ?: CancelToken())
             platform.markNoBackup(path)
             // After first successful download, save version
             setDownloadedVersion()
@@ -260,6 +260,7 @@ class DataDbManager(
 
     private suspend fun downloadToFile(
         url: String,
+        headers: Map<String, String>,
         destPath: Path,
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken,
@@ -374,6 +375,7 @@ sealed class DatabaseFileInfo(
 interface RemoteDataProvider {
     suspend fun listFiles(platform: PlatformDbSupport): List<RemoteFile>
     fun downloadUrlFor(fileName: String): String
+    fun headersForHttp(): Map<String, String>
 }
 
 data class RemoteFile(
