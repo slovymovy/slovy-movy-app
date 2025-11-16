@@ -42,7 +42,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ matrix.api-level }}
+          key: avd-key-${{ matrix.api-level }}
 
       - name: check (all host-available targets)
         run: |
