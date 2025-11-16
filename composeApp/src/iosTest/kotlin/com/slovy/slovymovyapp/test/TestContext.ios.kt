@@ -11,7 +11,8 @@ actual object TestContext {
 
     @OptIn(ExperimentalForeignApi::class)
     actual fun getCiEnv(name: String): String? {
-        return getenv(name)?.toKString()
+        val env = getenv(name)?.toKString()
+        return if (env.isNullOrEmpty()) null else env
     }
 }
 

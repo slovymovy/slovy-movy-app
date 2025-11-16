@@ -11,7 +11,8 @@ actual object TestContext {
     }
 
     actual fun getCiEnv(name: String): String? {
-        return InstrumentationRegistry.getArguments().getCharSequence(name) as String?
+        val env = InstrumentationRegistry.getArguments().getCharSequence(name) as String?
+        return if (env.isNullOrEmpty()) null else env
     }
 }
 

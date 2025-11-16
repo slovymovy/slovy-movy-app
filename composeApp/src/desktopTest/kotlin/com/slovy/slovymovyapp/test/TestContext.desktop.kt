@@ -6,7 +6,8 @@ actual object TestContext {
     }
 
     actual fun getCiEnv(name: String): String? {
-        return System.getenv(name)
+        val env = System.getenv(name)
+        return if (env.isNullOrEmpty()) null else env
     }
 }
 
