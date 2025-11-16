@@ -18,10 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.max
 
@@ -33,15 +30,11 @@ import kotlin.math.max
  */
 class DataDbManager(
     private val platform: PlatformDbSupport,
-    private val settingsRepository: SettingsRepository? = null,
+    private val settingsRepository: SettingsRepository,
+    private val remoteDataProvider: RemoteDataProvider
 ) {
     companion object {
         const val VERSION = "v5"
-
-        // TODO: we use HTTP for now to workaround some issues with IOS emulator
-        // https://github.com/slovymovy/slovy-movy-app/issues/34
-        const val BASE_URL = "http://storage.googleapis.com/slovymovy/$VERSION/"
-        const val LIST_API_URL = "https://storage.googleapis.com/storage/v1/b/slovymovy/o?prefix=$VERSION/"
 
         private const val DICTIONARY_PREFIX = "dictionary_"
         private const val TRANSLATION_PREFIX = "translation_"
@@ -50,6 +43,12 @@ class DataDbManager(
         fun dictionaryFileName(lang: Language): String = "$DICTIONARY_PREFIX${lang.code.lowercase()}$DB_EXTENSION"
         fun translationFileName(src: Language, tgt: Language): String =
             "$TRANSLATION_PREFIX${src.code.lowercase()}_${tgt.code.lowercase()}$DB_EXTENSION"
+
+        fun openAppDatabase(platform: PlatformDbSupport): AppDatabase {
+            val file = platform.getDatabasePath("app.db")
+            val driver = platform.createAppDataDriver(file)
+            return DatabaseProvider.createAppDatabase(driver)
+        }
     }
 
     private var cachedAvailableLanguages: List<AvailableLanguageInfo>? = null
@@ -120,12 +119,6 @@ class DataDbManager(
         settingsRepository?.deleteById(Setting.Name.DATA_VERSION)
     }
 
-    fun openAppDatabase(): AppDatabase {
-        val file = platform.getDatabasePath("app.db")
-        val driver = platform.createAppDataDriver(file)
-        return DatabaseProvider.createAppDatabase(driver)
-    }
-
     fun hasDictionary(lang: Language): Boolean {
         return platform.fileExists(platform.getDatabasePath(dictionaryFileName(lang)))
     }
@@ -174,52 +167,48 @@ class DataDbManager(
     }
 
     private suspend fun fetchAvailableLanguagesFromRemote(): List<AvailableLanguageInfo> = withContext(Dispatchers.IO) {
-        val client = platform.createHttpClient()
-        try {
-            val response = client.get(LIST_API_URL).bodyAsText()
-            val storageResponse = Json.decodeFromString<StorageListResponse>(response)
+        val remoteFiles = remoteDataProvider.listFiles(platform)
 
-            // Parse all files
-            val dictionaries = mutableMapOf<Language, Long>()
-            val translations = mutableMapOf<Language, MutableList<AvailableTranslationInfo>>()
+        // Parse all files
+        val dictionaries = mutableMapOf<Language, Long>()
+        val translations = mutableMapOf<Language, MutableList<AvailableTranslationInfo>>()
 
-            storageResponse.items.forEach { obj ->
-                val fileName = obj.name.removePrefix("$VERSION/")
-                if (fileName.isEmpty() || fileName == "$VERSION/") return@forEach
+        remoteFiles.forEach { rf ->
+            val fileName = rf.name
+            val size = rf.sizeBytes
 
-                val size = obj.size.toLongOrNull() ?: return@forEach
-
-                when {
-                    fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
-                        val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
-                        val language = Language.fromCodeOrNull(langCode) ?: return@forEach
+            when {
+                fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                    val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
+                    val language = Language.fromCodeOrNull(langCode)
+                    if (language != null) {
                         dictionaries[language] = size
                     }
+                }
 
-                    fileName.startsWith(TRANSLATION_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
-                        val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
-                        if (parts.size != 2) return@forEach
-                        val srcLang = Language.fromCodeOrNull(parts[0]) ?: return@forEach
-                        val tgtLang = Language.fromCodeOrNull(parts[1]) ?: return@forEach
-
-                        translations.getOrPut(srcLang) { mutableListOf() }
-                            .add(AvailableTranslationInfo(tgtLang, size))
+                fileName.startsWith(TRANSLATION_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                    val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
+                    if (parts.size == 2) {
+                        val srcLang = Language.fromCodeOrNull(parts[0])
+                        val tgtLang = Language.fromCodeOrNull(parts[1])
+                        if (srcLang != null && tgtLang != null) {
+                            translations.getOrPut(srcLang) { mutableListOf() }
+                                .add(AvailableTranslationInfo(tgtLang, size))
+                        }
                     }
                 }
             }
-
-            // Combine into AvailableLanguageInfo
-            val allLanguages = (dictionaries.keys + translations.keys).toSet()
-            allLanguages.map { lang ->
-                AvailableLanguageInfo(
-                    language = lang,
-                    dictionarySizeBytes = dictionaries[lang],
-                    availableTranslations = translations[lang] ?: emptyList()
-                )
-            }.sortedBy { it.language.selfName }
-        } finally {
-            client.close()
         }
+
+        // Combine into AvailableLanguageInfo
+        val allLanguages = (dictionaries.keys + translations.keys).toSet()
+        allLanguages.map { lang ->
+            AvailableLanguageInfo(
+                language = lang,
+                dictionarySizeBytes = dictionaries[lang],
+                availableTranslations = translations[lang] ?: emptyList()
+            )
+        }.sortedBy { it.language.selfName }
     }
 
     /**
@@ -259,7 +248,7 @@ class DataDbManager(
         val path = platform.getDatabasePath(name)
         val file = Path(path)
         if (!platform.fileExists(path)) {
-            val url = BASE_URL + name
+            val url = remoteDataProvider.downloadUrlFor(name)
             platform.ensureDatabasesDir()
             downloadToFile(url, path, onProgress, cancelToken ?: CancelToken())
             platform.markNoBackup(path)
@@ -381,20 +370,15 @@ sealed class DatabaseFileInfo(
     ) : DatabaseFileInfo(sizeBytes)
 }
 
-// Google Cloud Storage API models
-@OptIn(ExperimentalSerializationApi::class)
-@Serializable
-@JsonIgnoreUnknownKeys
-private data class StorageListResponse(
-    val items: List<StorageObject>
-)
+// Remote data source abstraction and implementations
+interface RemoteDataProvider {
+    suspend fun listFiles(platform: PlatformDbSupport): List<RemoteFile>
+    fun downloadUrlFor(fileName: String): String
+}
 
-@OptIn(ExperimentalSerializationApi::class)
-@Serializable
-@JsonIgnoreUnknownKeys
-private data class StorageObject(
+data class RemoteFile(
     val name: String,
-    val size: String
+    val sizeBytes: Long
 )
 
 data class AvailableLanguageInfo(

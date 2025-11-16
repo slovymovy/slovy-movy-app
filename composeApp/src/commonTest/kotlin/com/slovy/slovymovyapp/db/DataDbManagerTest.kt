@@ -6,9 +6,7 @@ import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
-import com.slovy.slovymovyapp.test.BaseTest
-import com.slovy.slovymovyapp.test.IgnoreIos
-import com.slovy.slovymovyapp.test.platformDbSupport
+import com.slovy.slovymovyapp.test.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -21,8 +19,8 @@ import kotlin.uuid.Uuid
 class DataDbManagerTest : BaseTest() {
     @Test
     fun download_and_open_readonly() {
-        val platform = platformDbSupport()
-        val mgr = DataDbManager(platform, null)
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
 
         runBlocking {
             mgr.deleteDictionary(Language.ENGLISH)
@@ -56,7 +54,7 @@ class DataDbManagerTest : BaseTest() {
 
     @Test
     fun dictionary_like_and_join_queries() {
-        val platform = platformDbSupport()
+        val platform = testPlatformDbSupport()
         val path = platform.getDatabasePath("test_dictionary_queries.db")
         if (platform.fileExists(path)) {
             platform.deleteFile(path)
@@ -133,8 +131,8 @@ class DataDbManagerTest : BaseTest() {
 
     @Test
     fun download_en_ru_and_search_test_prefix() {
-        val platform = platformDbSupport()
-        val mgr = DataDbManager(platform, null)
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
 
         // Ensure required files exist (English dictionary, English->Russian translation)
         val dict = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
@@ -148,11 +146,11 @@ class DataDbManagerTest : BaseTest() {
             val db = mgr.openDictionaryReadOnly(Language.ENGLISH)
             val q = db.dictionaryQueries
 
-            val lemmaLike = q.selectLemmasLike("test%", 20).executeAsList().map { it.lemma }
-            assertTrue(lemmaLike.isNotEmpty(), "English dictionary should contain lemmas starting with 'test'")
+            val lemmaLike = q.selectLemmasLike("bu%", 20).executeAsList().map { it.lemma }
+            assertTrue(lemmaLike.isNotEmpty(), "English dictionary should contain lemmas starting with 'bu'")
 
-            val formLike = q.selectLemmasFromFormsLike("test%", 20).executeAsList().map { it.form }
-            assertTrue(formLike.isNotEmpty(), "Form LIKE 'test%' should return at least one match")
+            val formLike = q.selectLemmasFromFormsLike("bu%", 20).executeAsList().map { it.form }
+            assertTrue(formLike.isNotEmpty(), "Form LIKE 'bu%' should return at least one match")
         } finally {
             // Clean up to keep environment tidy
             runBlocking {
@@ -164,7 +162,7 @@ class DataDbManagerTest : BaseTest() {
 
     @Test
     fun version_checking_returns_false_when_version_not_set() {
-        val platform = platformDbSupport()
+        val platform = testPlatformDbSupport()
         val appDbPath = platform.getDatabasePath("test_version_not_set.db")
         if (platform.fileExists(appDbPath)) {
             platform.deleteFile(appDbPath)
@@ -175,7 +173,7 @@ class DataDbManagerTest : BaseTest() {
         val settingsRepo = SettingsRepository(appDb)
 
         try {
-            val mgr = DataDbManager(platform, settingsRepo)
+            val mgr = DataDbManager(platform, settingsRepo, testRemoteDataProvider())
             val hasRequired = runBlocking { mgr.hasRequiredVersion() }
             assertFalse(hasRequired, "hasRequiredVersion should return false when version is not set")
         } finally {
@@ -186,7 +184,7 @@ class DataDbManagerTest : BaseTest() {
 
     @Test
     fun version_checking_returns_true_when_version_matches() {
-        val platform = platformDbSupport()
+        val platform = testPlatformDbSupport()
         val appDbPath = platform.getDatabasePath("test_version_matches.db")
         if (platform.fileExists(appDbPath)) {
             platform.deleteFile(appDbPath)
@@ -197,7 +195,7 @@ class DataDbManagerTest : BaseTest() {
         val settingsRepo = SettingsRepository(appDb)
 
         try {
-            val mgr = DataDbManager(platform, settingsRepo)
+            val mgr = DataDbManager(platform, settingsRepo, testRemoteDataProvider())
 
             settingsRepo.insert(
                 Setting(
@@ -216,7 +214,7 @@ class DataDbManagerTest : BaseTest() {
 
     @Test
     fun version_checking_returns_false_when_version_outdated() {
-        val platform = platformDbSupport()
+        val platform = testPlatformDbSupport()
         val appDbPath = platform.getDatabasePath("test_version_outdated.db")
         if (platform.fileExists(appDbPath)) {
             platform.deleteFile(appDbPath)
@@ -227,7 +225,7 @@ class DataDbManagerTest : BaseTest() {
         val settingsRepo = SettingsRepository(appDb)
 
         try {
-            val mgr = DataDbManager(platform, settingsRepo)
+            val mgr = DataDbManager(platform, settingsRepo, testRemoteDataProvider())
 
             settingsRepo.insert(
                 Setting(
@@ -246,8 +244,8 @@ class DataDbManagerTest : BaseTest() {
 
     @Test
     fun deleteAllDownloadedData_removes_dictionary_and_translation_files() {
-        val platform = platformDbSupport()
-        val mgr = DataDbManager(platform, null)
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
 
         val dictPath = mgr.hasDictionary(Language.ENGLISH).let {
             platform.getDatabasePath(DataDbManager.dictionaryFileName(Language.ENGLISH))
@@ -278,7 +276,7 @@ class DataDbManagerTest : BaseTest() {
 
     @Test
     fun deleteAllDownloadedData_clears_version_setting() {
-        val platform = platformDbSupport()
+        val platform = testPlatformDbSupport()
         val appDbPath = platform.getDatabasePath("test_delete_clears_version.db")
         if (platform.fileExists(appDbPath)) {
             platform.deleteFile(appDbPath)
@@ -289,7 +287,7 @@ class DataDbManagerTest : BaseTest() {
         val settingsRepo = SettingsRepository(appDb)
 
         try {
-            val mgr = DataDbManager(platform, settingsRepo)
+            val mgr = DataDbManager(platform, settingsRepo, testRemoteDataProvider())
 
             settingsRepo.insert(
                 Setting(
@@ -313,7 +311,7 @@ class DataDbManagerTest : BaseTest() {
 
     @Test
     fun getDatabasePath_with_empty_string_returns_directory() {
-        val platform = platformDbSupport()
+        val platform = testPlatformDbSupport()
 
         platform.ensureDatabasesDir()
         val dirPath = platform.getDatabasePath("")
@@ -327,7 +325,7 @@ class DataDbManagerTest : BaseTest() {
 
     @Test
     fun listFiles_on_databases_directory_works() {
-        val platform = platformDbSupport()
+        val platform = testPlatformDbSupport()
 
         platform.ensureDatabasesDir()
 
@@ -367,7 +365,7 @@ class DataDbManagerTest : BaseTest() {
     @IgnoreIos
     // https://github.com/slovymovy/slovy-movy-app/issues/34
     fun testAvailableDictionaries() = runBlocking {
-        val platform = platformDbSupport()
+        val platform = testPlatformDbSupport()
         val appDbPath = platform.getDatabasePath("any.db")
         if (platform.fileExists(appDbPath)) {
             platform.deleteFile(appDbPath)
@@ -378,7 +376,7 @@ class DataDbManagerTest : BaseTest() {
         val settingsRepo = SettingsRepository(appDb)
 
         try {
-            val mgr = DataDbManager(platform, settingsRepo)
+            val mgr = DataDbManager(platform, settingsRepo, testRemoteDataProvider())
             val fetchAvailableLanguages = mgr.fetchAvailableLanguages()
             assertTrue { fetchAvailableLanguages.isNotEmpty() }
             assertTrue { fetchAvailableLanguages.any { it.dictionarySizeBytes != null } }

@@ -4,7 +4,7 @@ import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
-import com.slovy.slovymovyapp.test.platformDbSupport
+import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,7 +13,7 @@ open class SettingsRepositoryTest : BaseTest() {
 
     @Test
     fun insert_and_query_and_delete_setting() {
-        val db: AppDatabase = DataDbManager(platformDbSupport()).openAppDatabase()
+        val db: AppDatabase = DataDbManager.openAppDatabase(testPlatformDbSupport())
         val repo = SettingsRepository(db)
 
         val setting = Setting(

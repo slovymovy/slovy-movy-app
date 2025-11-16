@@ -1,6 +1,9 @@
 package com.slovy.slovymovyapp.test
 
+import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
+import com.slovy.slovymovyapp.data.remote.provider.GithubRepoDataProvider
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 
 expect object TestContext {
     fun androidContext(): Any?
@@ -8,7 +11,17 @@ expect object TestContext {
 
 expect abstract class BaseTest()
 
-fun platformDbSupport(): PlatformDbSupport = PlatformDbSupport(TestContext.androidContext())
+fun testPlatformDbSupport(): PlatformDbSupport = PlatformDbSupport(TestContext.androidContext())
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 expect annotation class IgnoreIos()
+
+fun testDataDbManager(): DataDbManager {
+    val platform = testPlatformDbSupport()
+    val db = DataDbManager.openAppDatabase(platform)
+    val settingRepo = SettingsRepository(db)
+    val mgr = DataDbManager(platform, settingRepo, testRemoteDataProvider())
+    return mgr
+}
+
+fun testRemoteDataProvider(): GithubRepoDataProvider = GithubRepoDataProvider(ref = "issues/165") // TODO: detect actual branch
