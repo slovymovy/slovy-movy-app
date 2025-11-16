@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.builder
 
 import java.io.File
+import java.security.MessageDigest
 
 // Small CLI utility to prepare SQLite DB files from a folder with
 // - db_extract/<lang>/*.json (raw wiktextract per-word files)
@@ -12,6 +13,8 @@ import java.io.File
 //     --db-extract <path> --processed <path> --out <path> --freq <path>
 //  Example:
 //     -d "\\wsl.localhost\Ubuntu-24.04\home\nkey\kaikki-parser\output\db-extract" -p "C:\Dev\kaikki-parser\words" -o "C:\Dev\slovy-movy-app\.db-files" -f "\\wsl.localhost\Ubuntu-24.04\home\nkey\wordfreq-extract\output"
+// For test files:
+//     -t -d "\\wsl.localhost\Ubuntu-24.04\home\nkey\kaikki-parser\output\db-extract" -p "C:\Dev\kaikki-parser\words" -o "C:\Dev\slovy-movy-app\.test-db-files" -f "\\wsl.localhost\Ubuntu-24.04\home\nkey\wordfreq-extract\output"
 //
 // It matches files by name within the same language subfolder and ingests
 // pairs using JsonIngestionBuilder into output DB files under --out.
@@ -33,6 +36,10 @@ fun main(args: Array<String>) {
     // Load frequency directory from params or use default
     val frequencyDir = File(params.frequencyDir)
     require(frequencyDir.exists() && frequencyDir.isDirectory) { "Frequency directory not found: ${params.frequencyDir}" }
+
+    if (params.testMode) {
+        println("[TEST MODE] Enabled. Will ingest at most 1000 words per language in a deterministic order (by hash).")
+    }
 
     // languages are subdirectories inside processed_root
     val languages = processedRoot.listFiles()?.filter { it.isDirectory }?.map { it.name }?.sorted().orEmpty()
@@ -60,7 +67,12 @@ fun main(args: Array<String>) {
         if (!rawDir.exists()) {
             error("Raw DB folder not found for language $lang: ${rawDir.absolutePath}")
         }
-        procDir.listFiles().filter { it.isFile && it.extension.equals("json", ignoreCase = true) }.forEach { pFile ->
+        procDir.listFiles()
+            .orEmpty()
+            .filter { it.isFile && it.extension.equals("json", ignoreCase = true) }
+            .sortedBy { sha256HexLower(it.name) }
+            .let { files -> if (params.testMode) files.take(50) else files }
+            .forEach { pFile ->
             val rawFile = File(rawDir, pFile.name)
             if (!rawFile.exists()) {
                 error("Raw DB file not found for language $lang: ${rawFile.absolutePath}")
@@ -76,10 +88,11 @@ fun main(args: Array<String>) {
 
 private fun printUsageAndExit(): Nothing {
     val msg = buildString {
-        appendLine("Usage: DbPrepTool --db-extract <path> --processed <path> --out <path> --freq <path>")
+        appendLine("Usage: DbPrepTool --db-extract <path> --processed <path> --out <path> --freq <path> [--test]")
         appendLine("  db_extract folder layout: <root>/<lang>/*.json")
         appendLine("  processed folder layout:  <root>/<lang>/*.json")
         appendLine("  freq folder layout:       <root>/<lang>_kaikki_words.txt")
+        appendLine("  --test (-t): enable test mode to ingest only 50 words per language (deterministic by file hash)")
     }
     throw IllegalArgumentException(msg)
 }
@@ -88,7 +101,8 @@ private data class Params(
     val dbExtract: String,
     val processed: String,
     val out: String,
-    val frequencyDir: String
+    val frequencyDir: String,
+    val testMode: Boolean
 )
 
 private fun parseArgs(args: List<String>): Params {
@@ -103,7 +117,8 @@ private fun parseArgs(args: List<String>): Params {
     val out = readOpt("--out") ?: readOpt("-o")
     val freq = readOpt("--freq") ?: readOpt("-f")
     if (db == null || pr == null || out == null || freq == null) printUsageAndExit()
-    return Params(db, pr, out, freq)
+    val test = args.contains("--test") || args.contains("-t")
+    return Params(db, pr, out, freq, test)
 }
 
 private fun loadFrequencyMap(file: File): Map<String, Double> {
@@ -121,4 +136,20 @@ private fun loadFrequencyMap(file: File): Map<String, Double> {
         }
     }
     return map
+}
+
+// Deterministic, case-insensitive SHA-256 hex of a file name to use for ordering
+private fun sha256HexLower(inputName: String): String {
+    val normalized = inputName.lowercase()
+    val digest = MessageDigest.getInstance("SHA-256")
+    val hash = digest.digest(normalized.toByteArray(Charsets.UTF_8))
+    val hexChars = CharArray(hash.size * 2)
+    val hexArray = "0123456789abcdef".toCharArray()
+    var i = 0
+    for (b in hash) {
+        val v = b.toInt() and 0xFF
+        hexChars[i++] = hexArray[v ushr 4]
+        hexChars[i++] = hexArray[v and 0x0F]
+    }
+    return String(hexChars)
 }
