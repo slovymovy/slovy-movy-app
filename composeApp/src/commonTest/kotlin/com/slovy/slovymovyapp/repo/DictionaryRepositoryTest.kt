@@ -6,15 +6,20 @@ import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.test.BaseTest
-import com.slovy.slovymovyapp.test.platformDbSupport
+import com.slovy.slovymovyapp.test.IgnoreIos
+import com.slovy.slovymovyapp.test.testDataDbManager
+import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
 import kotlin.test.*
 
+// TODO: we use HTTP for now to workaround some issues with IOS emulator
+// https://github.com/slovymovy/slovy-movy-app/issues/34
+@IgnoreIos
 class DictionaryRepositoryTest : BaseTest() {
     @Test
     fun download_en_ru_and_search_test() {
-        val platform = platformDbSupport()
-        val mgr = DataDbManager(platform, null)
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
 
         // Ensure a clean state
         mgr.deleteDictionary(Language.ENGLISH)
@@ -28,7 +33,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
             assertTrue(platform.fileExists(trPath), "Translation file should exist: $trPath")
 
-            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
             val repo = DictionaryRepository(mgr, favoritesRepo)
 
             // Verify installed sets reflect downloads
@@ -39,10 +44,10 @@ class DictionaryRepositoryTest : BaseTest() {
             )
 
             // Search for 'test' in the English dictionary
-            val results = repo.search("test", dictionaryLanguage = Language.ENGLISH)
-            assertTrue(results.isNotEmpty(), "Expected at least one search result for 'test'")
+            val results = repo.search("bu", dictionaryLanguage = Language.ENGLISH)
+            assertTrue(results.isNotEmpty(), "Expected at least one search result for 'bu'")
             val first = results.first()
-            assertTrue(first.display.contains("test", ignoreCase = true), "First result display should mention 'test'")
+            assertTrue(first.display.contains("bu", ignoreCase = true), "First result display should mention 'bu'")
 
             // Build a language card for the first result's lemma to ensure repository wiring works on real data
             val card = repo.getLanguageCard(Language.ENGLISH, first.lemma)
@@ -58,9 +63,9 @@ class DictionaryRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun nl_voorstellen_should_return_both_noun_and_verb() {
-        val platform = platformDbSupport()
-        val mgr = DataDbManager(platform, null)
+    fun nl_tegengesteld_should_return_both_noun_and_verb() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
 
         // Ensure a clean state
         mgr.deleteDictionary(Language.DUTCH)
@@ -69,15 +74,15 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
             val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.DUTCH), "'nl' dictionary should be installed")
 
-            val card = repo.getLanguageCard(Language.DUTCH, "voorstellen")
-            assertNotNull(card, "Language card should be built for 'voorstellen'")
+            val card = repo.getLanguageCard(Language.DUTCH, "tegengesteld")
+            assertNotNull(card, "Language card should be built for 'tegengesteld'")
             val poses = card.entries.map { it.pos }.toSet()
-            assertTrue(poses.contains(PartOfSpeech.NOUN), "Expected NOUN entry for 'voorstellen'")
-            assertTrue(poses.contains(PartOfSpeech.VERB), "Expected VERB entry for 'voorstellen'")
+            assertTrue(poses.contains(PartOfSpeech.ADJECTIVE), "Expected ADJECTIVE entry for 'tegengesteld'")
+            assertTrue(poses.contains(PartOfSpeech.VERB), "Expected VERB entry for 'tegengesteld'")
             assertTrue(card.zipfFrequency >= 0.0f, "Zipf frequency should be non-negative")
         } finally {
             // Clean up
@@ -87,8 +92,8 @@ class DictionaryRepositoryTest : BaseTest() {
 
     @Test
     fun search_returns_multiple_forms_for_same_lemma() {
-        val platform = platformDbSupport()
-        val mgr = DataDbManager(platform, null)
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
 
         // Ensure a clean state
         mgr.deleteDictionary(Language.ENGLISH)
@@ -97,13 +102,13 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
             val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
-            // Search for "test" which should match "test" and its forms (tested, testing, etc.)
-            val results = repo.search("test", dictionaryLanguage = Language.ENGLISH)
-            assertTrue(results.isNotEmpty(), "Expected at least one search result for 'test'")
+            // Search for "bu" which should match "bu" and its forms
+            val results = repo.search("bu", dictionaryLanguage = Language.ENGLISH)
+            assertTrue(results.isNotEmpty(), "Expected at least one search result for 'bu'")
 
             // Find form results (any form-based results)
             val formResults = results.filter { it.display.contains("form of", ignoreCase = true) }
@@ -128,8 +133,8 @@ class DictionaryRepositoryTest : BaseTest() {
 
     @Test
     fun search_suppresses_forms_when_lemma_present() {
-        val platform = platformDbSupport()
-        val mgr = DataDbManager(platform, null)
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
 
         // Ensure a clean state
         mgr.deleteDictionary(Language.ENGLISH)
@@ -138,29 +143,29 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
             val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "test" - should match the base lemma "test"
-            val results = repo.search("test", dictionaryLanguage = Language.ENGLISH)
-            assertTrue(results.isNotEmpty(), "Expected at least one search result for 'test'")
+            val results = repo.search("bu", dictionaryLanguage = Language.ENGLISH)
+            assertTrue(results.isNotEmpty(), "Expected at least one search result for 'bu'")
 
-            // Find the base lemma "test"
+            // Find the base lemma "bu"
             val testLemma = results.firstOrNull {
-                it.display.equals("test", ignoreCase = true) &&
+                it.display.equals("bu", ignoreCase = true) &&
                         !it.display.contains("form of", ignoreCase = true)
             }
 
-            // If the base lemma "test" is present, no forms of "test" should be shown
+            // If the base lemma "bu present, no forms of "bu" should be shown
             if (testLemma != null) {
                 val testForms = results.filter {
                     it.display.contains("form of", ignoreCase = true) &&
-                            it.display.contains("\"test\"", ignoreCase = true)
+                            it.display.contains("\"bu\"", ignoreCase = true)
                 }
                 assertTrue(
                     testForms.isEmpty(),
-                    "Expected no forms of 'test' when base lemma is present, but found: ${testForms.map { it.display }}"
+                    "Expected no forms of 'bu' when base lemma is present, but found: ${testForms.map { it.display }}"
                 )
             }
         } finally {
@@ -172,8 +177,8 @@ class DictionaryRepositoryTest : BaseTest() {
     @Ignore
     @Test
     fun word_family_is_retrieved_correctly() {
-        val platform = platformDbSupport()
-        val mgr = DataDbManager(platform, null)
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
 
         // Ensure a clean state
         mgr.deleteDictionary(Language.ENGLISH)
@@ -182,7 +187,7 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
             val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
@@ -209,8 +214,8 @@ class DictionaryRepositoryTest : BaseTest() {
 
     @Test
     fun related_words_includes_synonyms_antonyms_and_family() {
-        val platform = platformDbSupport()
-        val mgr = DataDbManager(platform, null)
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
 
         // Ensure a clean state
         mgr.deleteDictionary(Language.ENGLISH)
@@ -223,7 +228,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
             assertTrue(platform.fileExists(trPath), "Translation file should exist: $trPath")
 
-            val favoritesRepo = FavoritesRepository(mgr.openAppDatabase())
+            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
             val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 

@@ -1,7 +1,7 @@
 package com.slovy.slovymovyapp.platform
 
 import com.slovy.slovymovyapp.test.BaseTest
-import com.slovy.slovymovyapp.test.platformDbSupport
+import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -11,14 +11,14 @@ class PlatformDbSupportFileSizeTest : BaseTest() {
 
     @Test
     fun getFileSize_returns_null_for_nonexistent_file() {
-        val path = platformDbSupport().getDatabasePath("nonexistent_file.db")
-        val size = platformDbSupport().getFileSize(path)
+        val path = testPlatformDbSupport().getDatabasePath("nonexistent_file.db")
+        val size = testPlatformDbSupport().getFileSize(path)
         assertNull(size, "File size should be null for nonexistent file")
     }
 
     @Test
     fun getFileSize_returns_correct_size_for_existing_file() {
-        val support = platformDbSupport()
+        val support = testPlatformDbSupport()
         val path = support.getDatabasePath("test_file_size.db")
 
         // Create file with known content
@@ -40,7 +40,7 @@ class PlatformDbSupportFileSizeTest : BaseTest() {
 
     @Test
     fun getFileSize_returns_zero_for_empty_file() {
-        val support = platformDbSupport()
+        val support = testPlatformDbSupport()
         val path = support.getDatabasePath("test_empty_file.db")
 
         // Create empty file
@@ -59,7 +59,7 @@ class PlatformDbSupportFileSizeTest : BaseTest() {
 
     @Test
     fun getFileSize_handles_larger_files() {
-        val support = platformDbSupport()
+        val support = testPlatformDbSupport()
         val path = support.getDatabasePath("test_large_file.db")
 
         // Create file with larger content (10 KB)

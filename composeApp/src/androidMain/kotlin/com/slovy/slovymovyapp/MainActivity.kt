@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
+import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvider
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 
 class MainActivity : ComponentActivity() {
@@ -14,10 +15,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val db = DataDbManager(PlatformDbSupport(this)).openAppDatabase()
-            val repo = SettingsRepository(db)
             val platform = PlatformDbSupport(this)
-            App(repo, platform, androidContext = this)
+            val db = DataDbManager.openAppDatabase(platform)
+            val settingRepo = SettingsRepository(db)
+            val dataDbManager = DataDbManager(platform, settingRepo, GoogleStorageBucketDataProvider())
+            App(settingRepo, dataDbManager, platform, this)
         }
     }
 }

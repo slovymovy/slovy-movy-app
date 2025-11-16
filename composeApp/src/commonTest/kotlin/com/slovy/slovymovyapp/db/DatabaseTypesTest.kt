@@ -5,7 +5,7 @@ import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.dictionary.*
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.test.BaseTest
-import com.slovy.slovymovyapp.test.platformDbSupport
+import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import kotlinx.io.files.Path
 import kotlin.test.Test
@@ -35,7 +35,7 @@ class DatabaseTypesTest : BaseTest() {
     fun dictionary_types_round_trip() {
         val path = Path(Uuid.random().toString() + "dictionary_types.db")
         try {
-            val driver = platformDbSupport()
+            val driver = testPlatformDbSupport()
                 .createDictionaryDataDriver(path, false)
             driver.use {
                 val db: DictionaryDatabase = DatabaseProvider.createDictionaryDatabase(driver)
@@ -102,7 +102,7 @@ class DatabaseTypesTest : BaseTest() {
                 }
             }
         } finally {
-            platformDbSupport().deleteFile(path)
+            testPlatformDbSupport().deleteFile(path)
         }
     }
 
@@ -110,7 +110,7 @@ class DatabaseTypesTest : BaseTest() {
     fun translation_types_round_trip() {
         val path = Path(Uuid.random().toString() + "translation_types.db")
         try {
-            val driver = platformDbSupport()
+            val driver = testPlatformDbSupport()
                 .createTranslationDataDriver(path, false)
             driver.use {
                 val db: TranslationDatabase = DatabaseProvider.createTranslationDatabase(driver)
@@ -167,7 +167,7 @@ class DatabaseTypesTest : BaseTest() {
                 }
             }
         } finally {
-            platformDbSupport().deleteFile(path)
+            testPlatformDbSupport().deleteFile(path)
         }
     }
 }

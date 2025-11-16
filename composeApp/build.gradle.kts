@@ -2,6 +2,8 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
+import java.io.ByteArrayOutputStream
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -86,6 +88,35 @@ kotlin {
     }
 }
 
+val githubTokenEnvName = "ACCESS_TO_GH_TOKEN"
+val isTest = "IS_TEST"
+val gitBranchEnvName = "GIT_BRANCH_REF"
+
+abstract class GitBranchValueSource : ValueSource<String, ValueSourceParameters.None> {
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    override fun obtain(): String {
+
+        val branchOutput = ByteArrayOutputStream()
+        execOperations.exec {
+            commandLine = listOf("git", "rev-parse", "--abbrev-ref", "HEAD")
+            standardOutput = branchOutput
+        }
+        val branchName = branchOutput.toString().trim()
+
+        // Check if branch exists on remote
+        val remoteCheckResult = execOperations.exec {
+            commandLine = listOf("git", "rev-parse", "--verify", "refs/remotes/origin/$branchName")
+            isIgnoreExitValue = true
+        }
+
+        return if (remoteCheckResult.exitValue == 0) branchName else "main"
+    }
+}
+
+val gitBranchProvider = providers.of(GitBranchValueSource::class.java) {}
+
 android {
     namespace = "com.slovy.slovymovyapp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -97,6 +128,10 @@ android {
         versionCode = 2
         versionName = "Alpha"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments[githubTokenEnvName] =
+            System.getenv(githubTokenEnvName) ?: ""
+        testInstrumentationRunnerArguments[isTest] = "true"
+        testInstrumentationRunnerArguments[gitBranchEnvName] = provider { gitBranchProvider.get() }.get()
     }
     packaging {
         resources {
@@ -143,4 +178,21 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+tasks.withType<Test> {
+    environment(githubTokenEnvName, System.getenv(githubTokenEnvName) ?: "")
+    environment(isTest, "true")
+    environment(gitBranchEnvName, provider { gitBranchProvider.get() }.get())
+}
+
+tasks.withType<KotlinNativeTest> {
+    environment(githubTokenEnvName, System.getenv(githubTokenEnvName) ?: "")
+    environment(isTest, "true")
+    environment(gitBranchEnvName, provider { gitBranchProvider.get() }.get())
+    // iOS simulator needs SIMCTL_CHILD_ prefix to propagate environment variables
+    val prefix = "SIMCTL_CHILD_"
+    environment("$prefix$githubTokenEnvName", System.getenv(githubTokenEnvName) ?: "")
+    environment("$prefix$isTest", "true")
+    environment("$prefix$gitBranchEnvName", provider { gitBranchProvider.get() }.get())
 }

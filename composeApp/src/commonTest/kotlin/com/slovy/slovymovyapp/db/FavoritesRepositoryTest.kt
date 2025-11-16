@@ -4,7 +4,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.test.BaseTest
-import com.slovy.slovymovyapp.test.platformDbSupport
+import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -14,8 +14,7 @@ open class FavoritesRepositoryTest : BaseTest() {
 
     @Test
     fun add_and_remove_favorite() {
-        val db: AppDatabase = DataDbManager(platformDbSupport()).openAppDatabase()
-        val repo = FavoritesRepository(db)
+        val repo = favoritesRepository()
         repo.deleteAll()
 
         val senseId = "sense123"
@@ -37,8 +36,7 @@ open class FavoritesRepositoryTest : BaseTest() {
 
     @Test
     fun getAll_returns_all_favorites() {
-        val db: AppDatabase = DataDbManager(platformDbSupport()).openAppDatabase()
-        val repo = FavoritesRepository(db)
+        val repo = favoritesRepository()
         repo.deleteAll()
 
         // Add multiple favorites
@@ -56,8 +54,7 @@ open class FavoritesRepositoryTest : BaseTest() {
 
     @Test
     fun getByLangAndLemma_filters_correctly() {
-        val db: AppDatabase = DataDbManager(platformDbSupport()).openAppDatabase()
-        val repo = FavoritesRepository(db)
+        val repo = favoritesRepository()
         repo.deleteAll()
 
         // Add favorites with different languages and lemmas
@@ -76,8 +73,7 @@ open class FavoritesRepositoryTest : BaseTest() {
 
     @Test
     fun add_replaces_existing_favorite() {
-        val db: AppDatabase = DataDbManager(platformDbSupport()).openAppDatabase()
-        val repo = FavoritesRepository(db)
+        val repo = favoritesRepository()
         repo.deleteAll()
 
         // Add favorite twice with same senseId and targetLang
@@ -92,16 +88,21 @@ open class FavoritesRepositoryTest : BaseTest() {
 
     @Test
     fun exists_returns_false_for_nonexistent_favorite() {
-        val db: AppDatabase = DataDbManager(platformDbSupport()).openAppDatabase()
-        val repo = FavoritesRepository(db)
+        val repo = favoritesRepository()
         repo.deleteAll()
 
         assertFalse(repo.exists("nonexistent", Language.ENGLISH))
     }
 
+    private fun favoritesRepository(): FavoritesRepository {
+        val db: AppDatabase = DataDbManager.openAppDatabase(testPlatformDbSupport())
+        val repo = FavoritesRepository(db)
+        return repo
+    }
+
     @Test
     fun getAllGroupedByLangAndLemma_returns_ordered_list() {
-        val db: AppDatabase = DataDbManager(platformDbSupport()).openAppDatabase()
+        val db: AppDatabase = DataDbManager.openAppDatabase(testPlatformDbSupport())
         val repo = FavoritesRepository(db)
         repo.deleteAll()
 

@@ -18,10 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.max
 
@@ -33,15 +30,11 @@ import kotlin.math.max
  */
 class DataDbManager(
     private val platform: PlatformDbSupport,
-    private val settingsRepository: SettingsRepository? = null,
+    private val settingsRepository: SettingsRepository,
+    private val remoteDataProvider: RemoteDataProvider
 ) {
     companion object {
         const val VERSION = "v5"
-
-        // TODO: we use HTTP for now to workaround some issues with IOS emulator
-        // https://github.com/slovymovy/slovy-movy-app/issues/34
-        const val BASE_URL = "http://storage.googleapis.com/slovymovy/$VERSION/"
-        const val LIST_API_URL = "https://storage.googleapis.com/storage/v1/b/slovymovy/o?prefix=$VERSION/"
 
         private const val DICTIONARY_PREFIX = "dictionary_"
         private const val TRANSLATION_PREFIX = "translation_"
@@ -50,6 +43,12 @@ class DataDbManager(
         fun dictionaryFileName(lang: Language): String = "$DICTIONARY_PREFIX${lang.code.lowercase()}$DB_EXTENSION"
         fun translationFileName(src: Language, tgt: Language): String =
             "$TRANSLATION_PREFIX${src.code.lowercase()}_${tgt.code.lowercase()}$DB_EXTENSION"
+
+        fun openAppDatabase(platform: PlatformDbSupport): AppDatabase {
+            val file = platform.getDatabasePath("app.db")
+            val driver = platform.createAppDataDriver(file)
+            return DatabaseProvider.createAppDatabase(driver)
+        }
     }
 
     private var cachedAvailableLanguages: List<AvailableLanguageInfo>? = null
@@ -117,13 +116,7 @@ class DataDbManager(
      * Clears the stored data version from settings.
      */
     fun clearVersion() {
-        settingsRepository?.deleteById(Setting.Name.DATA_VERSION)
-    }
-
-    fun openAppDatabase(): AppDatabase {
-        val file = platform.getDatabasePath("app.db")
-        val driver = platform.createAppDataDriver(file)
-        return DatabaseProvider.createAppDatabase(driver)
+        settingsRepository.deleteById(Setting.Name.DATA_VERSION)
     }
 
     fun hasDictionary(lang: Language): Boolean {
@@ -147,12 +140,12 @@ class DataDbManager(
     }
 
     suspend fun hasRequiredVersion(): Boolean = withContext(Dispatchers.Default) {
-        val saved = settingsRepository?.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
+        val saved = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
         saved == VERSION
     }
 
     fun setDownloadedVersion() {
-        settingsRepository?.insert(
+        settingsRepository.insert(
             Setting(
                 id = Setting.Name.DATA_VERSION,
                 value = Json.parseToJsonElement("\"$VERSION\"")
@@ -174,52 +167,48 @@ class DataDbManager(
     }
 
     private suspend fun fetchAvailableLanguagesFromRemote(): List<AvailableLanguageInfo> = withContext(Dispatchers.IO) {
-        val client = platform.createHttpClient()
-        try {
-            val response = client.get(LIST_API_URL).bodyAsText()
-            val storageResponse = Json.decodeFromString<StorageListResponse>(response)
+        val remoteFiles = remoteDataProvider.listFiles(platform)
 
-            // Parse all files
-            val dictionaries = mutableMapOf<Language, Long>()
-            val translations = mutableMapOf<Language, MutableList<AvailableTranslationInfo>>()
+        // Parse all files
+        val dictionaries = mutableMapOf<Language, Long>()
+        val translations = mutableMapOf<Language, MutableList<AvailableTranslationInfo>>()
 
-            storageResponse.items.forEach { obj ->
-                val fileName = obj.name.removePrefix("$VERSION/")
-                if (fileName.isEmpty() || fileName == "$VERSION/") return@forEach
+        remoteFiles.forEach { rf ->
+            val fileName = rf.name
+            val size = rf.sizeBytes
 
-                val size = obj.size.toLongOrNull() ?: return@forEach
-
-                when {
-                    fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
-                        val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
-                        val language = Language.fromCodeOrNull(langCode) ?: return@forEach
+            when {
+                fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                    val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
+                    val language = Language.fromCodeOrNull(langCode)
+                    if (language != null) {
                         dictionaries[language] = size
                     }
+                }
 
-                    fileName.startsWith(TRANSLATION_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
-                        val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
-                        if (parts.size != 2) return@forEach
-                        val srcLang = Language.fromCodeOrNull(parts[0]) ?: return@forEach
-                        val tgtLang = Language.fromCodeOrNull(parts[1]) ?: return@forEach
-
-                        translations.getOrPut(srcLang) { mutableListOf() }
-                            .add(AvailableTranslationInfo(tgtLang, size))
+                fileName.startsWith(TRANSLATION_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                    val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
+                    if (parts.size == 2) {
+                        val srcLang = Language.fromCodeOrNull(parts[0])
+                        val tgtLang = Language.fromCodeOrNull(parts[1])
+                        if (srcLang != null && tgtLang != null) {
+                            translations.getOrPut(srcLang) { mutableListOf() }
+                                .add(AvailableTranslationInfo(tgtLang, size))
+                        }
                     }
                 }
             }
-
-            // Combine into AvailableLanguageInfo
-            val allLanguages = (dictionaries.keys + translations.keys).toSet()
-            allLanguages.map { lang ->
-                AvailableLanguageInfo(
-                    language = lang,
-                    dictionarySizeBytes = dictionaries[lang],
-                    availableTranslations = translations[lang] ?: emptyList()
-                )
-            }.sortedBy { it.language.selfName }
-        } finally {
-            client.close()
         }
+
+        // Combine into AvailableLanguageInfo
+        val allLanguages = (dictionaries.keys + translations.keys).toSet()
+        allLanguages.map { lang ->
+            AvailableLanguageInfo(
+                language = lang,
+                dictionarySizeBytes = dictionaries[lang],
+                availableTranslations = translations[lang] ?: emptyList()
+            )
+        }.sortedBy { it.language.selfName }
     }
 
     /**
@@ -259,9 +248,9 @@ class DataDbManager(
         val path = platform.getDatabasePath(name)
         val file = Path(path)
         if (!platform.fileExists(path)) {
-            val url = BASE_URL + name
+            val url = remoteDataProvider.downloadUrlFor(name)
             platform.ensureDatabasesDir()
-            downloadToFile(url, path, onProgress, cancelToken ?: CancelToken())
+            downloadToFile(url, remoteDataProvider.headersForHttp(), path, onProgress, cancelToken ?: CancelToken())
             platform.markNoBackup(path)
             // After first successful download, save version
             setDownloadedVersion()
@@ -271,6 +260,7 @@ class DataDbManager(
 
     private suspend fun downloadToFile(
         url: String,
+        headers: Map<String, String>,
         destPath: Path,
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken,
@@ -282,54 +272,57 @@ class DataDbManager(
             if (platform.fileExists(tempPath)) {
                 platform.deleteFile(tempPath)
             }
-            client.prepareGet(url).execute { response ->
-                // Fail early on non-success HTTP responses
-                if (!response.status.isSuccess()) {
-                    val snippet = try {
-                        response.bodyAsText().take(512)
-                    } catch (_: Throwable) {
-                        null
-                    }
-                    val baseMsg =
-                        "HTTP ${response.status.value} ${response.status.description} while downloading $url"
-                    throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
-                }
-
-                val total = response.headers["Content-Length"]?.toLongOrNull()
-                // Check available disk space if total size is known
-                if (total != null) {
-                    val available = platform.getAvailableBytesForPath(destPath)
-                    val headroom = 1024L * 1024L // 1 MiB safety margin
-                    if (available != null && available < total + headroom) {
-                        throw IllegalStateException("Not enough free space to download file: required=${total + headroom}, available=$available")
-                    }
-                }
-                val out = platform.openOutput(tempPath)
-                try {
-                    val channel = response.bodyAsChannel()
-                    val buffer = ByteArray(1024 * 1024) // Smaller buffer for better memory efficiency
-                    var downloaded = 0L
-
-                    while (!channel.isClosedForRead) {
-                        if (cancelToken.isCancelled) {
-                            out.flush()
-                            out.close()
-                            platform.deleteFile(tempPath)
-                            throw CancellationException("Download cancelled")
+            client.prepareGet(url)
+            {
+                headers.forEach { (key, value) -> header(key, value) }
+            }.execute { response ->
+                    // Fail early on non-success HTTP responses
+                    if (!response.status.isSuccess()) {
+                        val snippet = try {
+                            response.bodyAsText().take(512)
+                        } catch (_: Throwable) {
+                            null
                         }
-
-                        val read = channel.readAvailable(buffer, 0, buffer.size)
-                        if (read <= 0) break
-
-                        out.write(buffer, 0, read)
-                        out.flush() // Flush more frequently to avoid buffering
-                        downloaded += read
-                        onProgress(DownloadProgress(downloaded, total))
+                        val baseMsg =
+                            "HTTP ${response.status.value} ${response.status.description} while downloading $url"
+                        throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
                     }
-                } finally {
-                    out.close()
+
+                    val total = response.headers["Content-Length"]?.toLongOrNull()
+                    // Check available disk space if total size is known
+                    if (total != null) {
+                        val available = platform.getAvailableBytesForPath(destPath)
+                        val headroom = 1024L * 1024L // 1 MiB safety margin
+                        if (available != null && available < total + headroom) {
+                            throw IllegalStateException("Not enough free space to download file: required=${total + headroom}, available=$available")
+                        }
+                    }
+                    val out = platform.openOutput(tempPath)
+                    try {
+                        val channel = response.bodyAsChannel()
+                        val buffer = ByteArray(1024 * 1024) // Smaller buffer for better memory efficiency
+                        var downloaded = 0L
+
+                        while (!channel.isClosedForRead) {
+                            if (cancelToken.isCancelled) {
+                                out.flush()
+                                out.close()
+                                platform.deleteFile(tempPath)
+                                throw CancellationException("Download cancelled")
+                            }
+
+                            val read = channel.readAvailable(buffer, 0, buffer.size)
+                            if (read <= 0) break
+
+                            out.write(buffer, 0, read)
+                            out.flush() // Flush more frequently to avoid buffering
+                            downloaded += read
+                            onProgress(DownloadProgress(downloaded, total))
+                        }
+                    } finally {
+                        out.close()
+                    }
                 }
-            }
             // After successful download, move temp to destination
             if (!platform.moveFile(tempPath, destPath)) {
                 // Best effort cleanup
@@ -381,20 +374,16 @@ sealed class DatabaseFileInfo(
     ) : DatabaseFileInfo(sizeBytes)
 }
 
-// Google Cloud Storage API models
-@OptIn(ExperimentalSerializationApi::class)
-@Serializable
-@JsonIgnoreUnknownKeys
-private data class StorageListResponse(
-    val items: List<StorageObject>
-)
+// Remote data source abstraction and implementations
+interface RemoteDataProvider {
+    suspend fun listFiles(platform: PlatformDbSupport): List<RemoteFile>
+    fun downloadUrlFor(fileName: String): String
+    fun headersForHttp(): Map<String, String>
+}
 
-@OptIn(ExperimentalSerializationApi::class)
-@Serializable
-@JsonIgnoreUnknownKeys
-private data class StorageObject(
+data class RemoteFile(
     val name: String,
-    val size: String
+    val sizeBytes: Long
 )
 
 data class AvailableLanguageInfo(

@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Serializable
 private sealed interface AppDestination {
@@ -69,21 +68,19 @@ private sealed interface AppDestination {
 }
 
 @Composable
-@Preview
 fun App(
-    settingsRepository: SettingsRepository? = null,
-    platformDbSupport: PlatformDbSupport? = null,
-    androidContext: Any? = null
+    settingsRepository: SettingsRepository,
+    dataManager: DataDbManager,
+    platform: PlatformDbSupport,
+    androidContext: Any? = null,
 ) {
     var nativeLanguage by remember { mutableStateOf<Language?>(null) }
     var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
-
-    val platform = remember(platformDbSupport) { platformDbSupport ?: PlatformDbSupport(null) }
-    val dataManager = remember(platform, settingsRepository) { DataDbManager(platform, settingsRepository) }
     val favoritesRepository = remember(dataManager) {
-        FavoritesRepository(dataManager.openAppDatabase())
+        FavoritesRepository(DataDbManager.openAppDatabase(platform))
     }
-    val dictionaryRepository = remember(dataManager, favoritesRepository) { DictionaryRepository(dataManager, favoritesRepository) }
+    val dictionaryRepository =
+        remember(dataManager, favoritesRepository) { DictionaryRepository(dataManager, favoritesRepository) }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
     val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
 
@@ -97,14 +94,14 @@ fun App(
     suspend fun selectInitialDestination(): AppDestination {
         // Check if data version is current
         if (!dataManager.hasRequiredVersion()) {
-            val savedVersion = settingsRepository?.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
+            val savedVersion = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
             // If version exists but is outdated, show error before deleting
             if (savedVersion != null) {
                 return AppDestination.DataVersionMismatch
             }
         }
 
-        val nativeCode = settingsRepository?.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
+        val nativeCode = settingsRepository.getById(Setting.Name.LANGUAGE)?.value?.jsonPrimitive?.content
         val native = nativeCode?.let { Language.fromCodeOrNull(it) }
         if (native != null) {
             nativeLanguage = native
@@ -150,7 +147,7 @@ fun App(
                 LanguageSelectionScreen(
                     viewModel = viewModel,
                     onLanguageChosen = { lang ->
-                        settingsRepository?.insert(
+                        settingsRepository.insert(
                             Setting(
                                 id = Setting.Name.LANGUAGE,
                                 value = Json.parseToJsonElement("\"${lang.code}\"")
@@ -171,7 +168,7 @@ fun App(
                 DictionarySelectionScreen(
                     viewModel = viewModel,
                     onDictionaryChosen = { lang ->
-                        settingsRepository?.insert(
+                        settingsRepository.insert(
                             Setting(
                                 id = Setting.Name.DICTIONARY,
                                 value = Json.parseToJsonElement("\"${lang.code}\"")
@@ -257,7 +254,7 @@ fun App(
                                 }
                             },
                             onError = { t ->
-                                settingsRepository!!.deleteById(Setting.Name.LANGUAGE)
+                                settingsRepository.deleteById(Setting.Name.LANGUAGE)
                                 settingsRepository.deleteById(Setting.Name.DICTIONARY)
                                 navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
                                     popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
