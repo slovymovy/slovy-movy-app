@@ -2,6 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -86,6 +87,9 @@ kotlin {
     }
 }
 
+val githubTokenEnvName = "ACCESS_TO_GH_TOKEN"
+val isTest = "IS_TEST"
+
 android {
     namespace = "com.slovy.slovymovyapp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -97,6 +101,9 @@ android {
         versionCode = 2
         versionName = "Alpha"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments[githubTokenEnvName] =
+            System.getenv(githubTokenEnvName) ?: ""
+        testInstrumentationRunnerArguments[isTest] = "true"
     }
     packaging {
         resources {
@@ -143,4 +150,14 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+tasks.withType<Test> {
+    environment(githubTokenEnvName, System.getenv(githubTokenEnvName) ?: "")
+    environment(isTest, "true")
+}
+
+tasks.withType<KotlinNativeTest> {
+    environment(githubTokenEnvName, System.getenv(githubTokenEnvName) ?: "")
+    environment(isTest, "true")
 }

@@ -16,6 +16,10 @@ actual object TestContext {
         ShadowStatFs.registerStats(databasePath, 1000000000, 1000000, 100000)
         return applicationContext
     }
+
+    actual fun getCiEnv(name: String): String? {
+        return System.getenv(name)
+    }
 }
 
 @RunWith(RobolectricTestRunner::class)

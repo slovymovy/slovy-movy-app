@@ -2,11 +2,16 @@ package com.slovy.slovymovyapp.test
 
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.runner.RunWith
 
 actual object TestContext {
     actual fun androidContext(): Any? {
         return ApplicationProvider.getApplicationContext()
+    }
+
+    actual fun getCiEnv(name: String): String? {
+        return InstrumentationRegistry.getArguments().getCharSequence(name) as String?
     }
 }
 

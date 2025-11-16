@@ -4,6 +4,10 @@ actual object TestContext {
     actual fun androidContext(): Any? {
         return null
     }
+
+    actual fun getCiEnv(name: String): String? {
+        return System.getenv(name)
+    }
 }
 
 actual abstract class BaseTest actual constructor()

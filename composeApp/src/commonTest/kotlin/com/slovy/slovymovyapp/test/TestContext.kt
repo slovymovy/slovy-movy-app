@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 
 expect object TestContext {
     fun androidContext(): Any?
+    fun getCiEnv(name: String): String?
 }
 
 expect abstract class BaseTest()
@@ -24,4 +25,5 @@ fun testDataDbManager(): DataDbManager {
     return mgr
 }
 
-fun testRemoteDataProvider(): GithubRepoDataProvider = GithubRepoDataProvider(ref = "issues/165") // TODO: detect actual branch
+fun testRemoteDataProvider(): GithubRepoDataProvider =
+    GithubRepoDataProvider(ref = "issues/165") // TODO: detect actual branch

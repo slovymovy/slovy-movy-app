@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Serializable
 private sealed interface AppDestination {
@@ -69,7 +68,6 @@ private sealed interface AppDestination {
 }
 
 @Composable
-@Preview
 fun App(
     settingsRepository: SettingsRepository,
     dataManager: DataDbManager,

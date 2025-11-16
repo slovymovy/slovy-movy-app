@@ -45,11 +45,15 @@ jobs:
           key: avd-key-${{ matrix.api-level }}
 
       - name: check (all host-available targets)
+        env:
+          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
         run: |
           chmod +x gradlew
           ./gradlew check
 
       - name: run Android unit tests
+        env:
+          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
         run: ./gradlew testDebugUnitTest
 
       - name: create AVD and generate snapshot for caching
@@ -64,6 +68,8 @@ jobs:
 
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
         with:
           api-level: ${{ matrix.api-level }}
           force-avd-creation: false
@@ -107,6 +113,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: check (all host-available targets)
+        env:
+          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
         run: |
           chmod +x gradlew
           ./gradlew check
@@ -114,12 +122,14 @@ jobs:
       - name: run iOS simulator tests
         env:
           SDK_NAME: iphonesimulator
+          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
         run: |
           ./gradlew iosSimulatorArm64Test
 
       - name: run iOS x64 tests
         env:
           SDK_NAME: iphonesimulator
+          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
         run: |
           ./gradlew iosX64Test
 
