@@ -2,15 +2,17 @@ package com.slovy.slovymovyapp.db
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
-import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.test.BaseTest
-import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 open class FavoritesRepositoryTest : BaseTest() {
+
+    private fun favoritesRepository(): FavoritesRepository {
+        return FavoritesRepository(testAppDatabaseHolder().database)
+    }
 
     @Test
     fun add_and_remove_favorite() {
@@ -94,15 +96,9 @@ open class FavoritesRepositoryTest : BaseTest() {
         assertFalse(repo.exists("nonexistent", Language.ENGLISH))
     }
 
-    private fun favoritesRepository(): FavoritesRepository {
-        val db: AppDatabase = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = FavoritesRepository(db)
-        return repo
-    }
-
     @Test
     fun getAllGroupedByLangAndLemma_returns_ordered_list() {
-        val db: AppDatabase = DataDbManager.openAppDatabase(testPlatformDbSupport())
+        val db = testAppDatabaseHolder().database
         val repo = FavoritesRepository(db)
         repo.deleteAll()
 

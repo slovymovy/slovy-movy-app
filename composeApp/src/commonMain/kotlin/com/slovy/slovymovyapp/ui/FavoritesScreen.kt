@@ -14,12 +14,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.word.SenseCard
 import com.slovy.slovymovyapp.ui.word.SenseUiState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
@@ -67,6 +69,12 @@ class FavoritesViewModel(
     }
 
     fun loadFavorites() {
+        viewModelScope.launch {
+            loadFavoritesInternal()
+        }
+    }
+
+    private suspend fun loadFavoritesInternal() {
         val allFavorites = favoritesRepository.getAllGroupedByLangAndLemma()
         val hasAnyFavorites = allFavorites.isNotEmpty()
 
@@ -108,7 +116,7 @@ class FavoritesViewModel(
         )
     }
 
-    private fun loadGroupSensesData(targetLang: Language, lemma: String): List<FavoriteSenseUiState> {
+    private suspend fun loadGroupSensesData(targetLang: Language, lemma: String): List<FavoriteSenseUiState> {
         val favorites = favoritesRepository.getByLangAndLemma(targetLang, lemma)
         val allFavSenses = favorites.map { it.senseId }
 

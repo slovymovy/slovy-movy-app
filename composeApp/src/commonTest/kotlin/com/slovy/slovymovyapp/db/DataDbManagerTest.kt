@@ -21,7 +21,7 @@ import kotlin.uuid.Uuid
 @IgnoreIos
 class DataDbManagerTest : BaseTest() {
     @Test
-    fun download_and_open_readonly() {
+    fun  download_and_open_readonly() {
         val platform = testPlatformDbSupport()
         val mgr = testDataDbManager()
 
@@ -42,8 +42,8 @@ class DataDbManagerTest : BaseTest() {
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
             // open read-only — should not throw
-            mgr.openTranslationReadOnly(Language.DUTCH, Language.ENGLISH)
-            mgr.openDictionaryReadOnly(Language.ENGLISH)
+            runBlocking {  mgr.openTranslationReadOnly(Language.DUTCH, Language.ENGLISH) }
+            runBlocking {  mgr.openDictionaryReadOnly(Language.ENGLISH) }
         } finally {
             runBlocking {
                 mgr.deleteDictionary(Language.ENGLISH)
@@ -145,8 +145,8 @@ class DataDbManagerTest : BaseTest() {
             assertTrue(platform.fileExists(dict), "Dictionary file should exist: $dict")
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
-            // Open dictionary and search for 'test%'
-            val db = mgr.openDictionaryReadOnly(Language.ENGLISH)
+            // Open dictionary and search for 'bu%'
+            val db = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
             val q = db.dictionaryQueries
 
             val lemmaLike = q.selectLemmasLike("bu%", 20).executeAsList().map { it.lemma }

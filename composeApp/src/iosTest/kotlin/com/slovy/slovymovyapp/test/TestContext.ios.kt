@@ -16,6 +16,6 @@ actual object TestContext {
     }
 }
 
-actual abstract class BaseTest actual constructor()
+actual abstract class BaseTest actual constructor() : BaseTestImpl()
 
 actual typealias IgnoreIos = kotlin.test.Ignore

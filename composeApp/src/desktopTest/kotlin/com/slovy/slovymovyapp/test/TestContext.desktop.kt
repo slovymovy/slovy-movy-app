@@ -11,7 +11,7 @@ actual object TestContext {
     }
 }
 
-actual abstract class BaseTest actual constructor()
+actual abstract class BaseTest actual constructor() : BaseTestImpl()
 
 @Target(allowedTargets = [AnnotationTarget.CLASS, AnnotationTarget.FUNCTION])
 actual annotation class IgnoreIos actual constructor()

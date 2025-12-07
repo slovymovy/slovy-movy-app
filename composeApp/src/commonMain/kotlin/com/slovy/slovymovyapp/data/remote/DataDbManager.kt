@@ -16,6 +16,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
@@ -33,6 +34,10 @@ class DataDbManager(
     private val settingsRepository: SettingsRepository,
     private val remoteDataProvider: RemoteDataProvider
 ) {
+    /**
+     * Thread-safe cache for read-only dictionary and translation databases.
+     */
+    internal val databaseCache = ReadOnlyDatabaseCache(platform)
     companion object {
         const val VERSION = "v5"
 
@@ -45,9 +50,18 @@ class DataDbManager(
             "$TRANSLATION_PREFIX${src.code.lowercase()}_${tgt.code.lowercase()}$DB_EXTENSION"
 
         fun openAppDatabase(platform: PlatformDbSupport): AppDatabase {
+            return openAppDatabaseHolder(platform).database
+        }
+
+        /**
+         * Opens the app database and returns a holder that allows proper cleanup.
+         * Call [AppDatabaseHolder.close] when done to release the database connection.
+         */
+        fun openAppDatabaseHolder(platform: PlatformDbSupport): AppDatabaseHolder {
             val file = platform.getDatabasePath("app.db")
             val driver = platform.createAppDataDriver(file)
-            return DatabaseProvider.createAppDatabase(driver)
+            val database = DatabaseProvider.createAppDatabase(driver)
+            return AppDatabaseHolder(driver, database)
         }
     }
 
@@ -63,6 +77,9 @@ class DataDbManager(
     }
 
     fun deleteDictionary(lang: Language) {
+        // Close cached connections before deleting files
+        runBlocking { databaseCache.closeAllForLanguage(lang) }
+
         // Delete the dictionary
         val name = dictionaryFileName(lang)
         platform.deleteFile(platform.getDatabasePath(name))
@@ -91,6 +108,9 @@ class DataDbManager(
     }
 
     fun deleteTranslation(src: Language, tgt: Language) {
+        // Close cached connection before deleting file
+        runBlocking { databaseCache.closeTranslation(src, tgt) }
+
         val name = translationFileName(src, tgt)
         platform.deleteFile(platform.getDatabasePath(name))
     }
@@ -101,6 +121,9 @@ class DataDbManager(
      * Used when data version changes.
      */
     fun deleteAllDownloadedData() {
+        // Close all cached connections before deleting files
+        runBlocking { databaseCache.closeAll() }
+
         val databasesDir = platform.getDatabasePath("")
         val files = platform.listFiles(databasesDir)
         files.forEach { file ->
@@ -119,6 +142,14 @@ class DataDbManager(
         settingsRepository.deleteById(Setting.Name.DATA_VERSION)
     }
 
+    /**
+     * Closes all cached read-only database connections.
+     * Call this when switching languages or during cleanup.
+     */
+    fun closeAllReadOnlyDatabases() {
+        runBlocking { databaseCache.closeAll() }
+    }
+
     fun hasDictionary(lang: Language): Boolean {
         return platform.fileExists(platform.getDatabasePath(dictionaryFileName(lang)))
     }
@@ -127,16 +158,12 @@ class DataDbManager(
         return platform.fileExists(platform.getDatabasePath(translationFileName(src, tgt)))
     }
 
-    fun openDictionaryReadOnly(lang: Language): DictionaryDatabase {
-        val file = platform.getDatabasePath(dictionaryFileName(lang))
-        val driver = platform.createDictionaryDataDriver(file, true)
-        return DatabaseProvider.createDictionaryDatabase(driver)
+    suspend fun openDictionaryReadOnly(lang: Language): DictionaryDatabase {
+        return databaseCache.getDictionary(lang)
     }
 
-    fun openTranslationReadOnly(src: Language, tgt: Language): TranslationDatabase {
-        val file = platform.getDatabasePath(translationFileName(src, tgt))
-        val driver = platform.createTranslationDataDriver(file, true)
-        return DatabaseProvider.createTranslationDatabase(driver)
+    suspend fun openTranslationReadOnly(src: Language, tgt: Language): TranslationDatabase {
+        return databaseCache.getTranslation(src, tgt)
     }
 
     suspend fun hasRequiredVersion(): Boolean = withContext(Dispatchers.Default) {
@@ -433,5 +460,18 @@ fun enforceQueryOnly(driver: SqlDriver) {
         driver.execute(null, "PRAGMA query_only = ON", 0)
     } catch (_: Throwable) {
         // best effort
+    }
+}
+
+/**
+ * Holder for app database that allows proper resource cleanup.
+ * Call [close] when done to release the database connection.
+ */
+class AppDatabaseHolder(
+    private val driver: SqlDriver,
+    val database: AppDatabase
+) : AutoCloseable {
+    override fun close() {
+        driver.close()
     }
 }

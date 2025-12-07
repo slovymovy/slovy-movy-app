@@ -2,12 +2,10 @@ package com.slovy.slovymovyapp.repo
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
-import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
-import com.slovy.slovymovyapp.test.testDataDbManager
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
 import kotlin.test.*
@@ -16,6 +14,11 @@ import kotlin.test.*
 // https://github.com/slovymovy/slovy-movy-app/issues/34
 @IgnoreIos
 class DictionaryRepositoryTest : BaseTest() {
+
+    private fun favoritesRepository(): FavoritesRepository {
+        return FavoritesRepository(testAppDatabaseHolder().database)
+    }
+
     @Test
     fun download_en_ru_and_search_test() {
         val platform = testPlatformDbSupport()
@@ -33,7 +36,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
             assertTrue(platform.fileExists(trPath), "Translation file should exist: $trPath")
 
-            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
+            val favoritesRepo = favoritesRepository()
             val repo = DictionaryRepository(mgr, favoritesRepo)
 
             // Verify installed sets reflect downloads
@@ -44,13 +47,13 @@ class DictionaryRepositoryTest : BaseTest() {
             )
 
             // Search for 'test' in the English dictionary
-            val results = repo.search("bu", dictionaryLanguage = Language.ENGLISH)
+            val results = runBlocking { repo.search("bu", dictionaryLanguage = Language.ENGLISH) }
             assertTrue(results.isNotEmpty(), "Expected at least one search result for 'bu'")
             val first = results.first()
             assertTrue(first.display.contains("bu", ignoreCase = true), "First result display should mention 'bu'")
 
             // Build a language card for the first result's lemma to ensure repository wiring works on real data
-            val card = repo.getLanguageCard(Language.ENGLISH, first.lemma)
+            val card = runBlocking { repo.getLanguageCard(Language.ENGLISH, first.lemma) }
             assertNotNull(card, "Language card should be built for a real lemma from the English dictionary")
             assertTrue(card.entries.isNotEmpty(), "Language card should have at least one entry")
             assertEquals(first.lemma, card.lemma, "Card lemma should match search result")
@@ -74,11 +77,11 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
+            val favoritesRepo = favoritesRepository()
             val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.DUTCH), "'nl' dictionary should be installed")
 
-            val card = repo.getLanguageCard(Language.DUTCH, "tegengesteld")
+            val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "tegengesteld") }
             assertNotNull(card, "Language card should be built for 'tegengesteld'")
             val poses = card.entries.map { it.pos }.toSet()
             assertTrue(poses.contains(PartOfSpeech.ADJECTIVE), "Expected ADJECTIVE entry for 'tegengesteld'")
@@ -102,12 +105,12 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
+            val favoritesRepo = favoritesRepository()
             val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "bu" which should match "bu" and its forms
-            val results = repo.search("bu", dictionaryLanguage = Language.ENGLISH)
+            val results = runBlocking { repo.search("bu", dictionaryLanguage = Language.ENGLISH) }
             assertTrue(results.isNotEmpty(), "Expected at least one search result for 'bu'")
 
             // Find form results (any form-based results)
@@ -143,12 +146,12 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
+            val favoritesRepo = favoritesRepository()
             val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "test" - should match the base lemma "test"
-            val results = repo.search("bu", dictionaryLanguage = Language.ENGLISH)
+            val results = runBlocking { repo.search("bu", dictionaryLanguage = Language.ENGLISH) }
             assertTrue(results.isNotEmpty(), "Expected at least one search result for 'bu'")
 
             // Find the base lemma "bu"
@@ -187,12 +190,12 @@ class DictionaryRepositoryTest : BaseTest() {
         try {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
-            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
+            val favoritesRepo = favoritesRepository()
             val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Test with "double" which should have word_family in the processed JSON
-            val card = repo.getLanguageCard(Language.ENGLISH, "double")
+            val card = runBlocking { repo.getLanguageCard(Language.ENGLISH, "double") }
             assertNotNull(card, "Language card should be built for 'double'")
 
             // Verify word_family is present and contains expected members
@@ -228,11 +231,11 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
             assertTrue(platform.fileExists(trPath), "Translation file should exist: $trPath")
 
-            val favoritesRepo = FavoritesRepository(DataDbManager.openAppDatabase(testPlatformDbSupport()))
+            val favoritesRepo = favoritesRepository()
             val repo = DictionaryRepository(mgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
-            repo.getLanguageCard(Language.ENGLISH, "simultaneously")?.let { card ->
+            runBlocking { repo.getLanguageCard(Language.ENGLISH, "simultaneously") }?.let { card ->
                 assertTrue(card.relatedWords.isNotEmpty(), "Related words should not be empty for 'simultaneously'")
                 assertTrue { card.relatedWords.contains("concurrently") }
             }
