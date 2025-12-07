@@ -6,7 +6,10 @@ import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
-import com.slovy.slovymovyapp.test.*
+import com.slovy.slovymovyapp.test.BaseTest
+import com.slovy.slovymovyapp.test.IgnoreIos
+import com.slovy.slovymovyapp.test.testPlatformDbSupport
+import com.slovy.slovymovyapp.test.testRemoteDataProvider
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -42,8 +45,8 @@ class DataDbManagerTest : BaseTest() {
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
             // open read-only — should not throw
-            mgr.openTranslationReadOnly(Language.DUTCH, Language.ENGLISH)
-            mgr.openDictionaryReadOnly(Language.ENGLISH)
+            runBlocking { mgr.openTranslationReadOnly(Language.DUTCH, Language.ENGLISH) }
+            runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
         } finally {
             runBlocking {
                 mgr.deleteDictionary(Language.ENGLISH)
@@ -145,8 +148,8 @@ class DataDbManagerTest : BaseTest() {
             assertTrue(platform.fileExists(dict), "Dictionary file should exist: $dict")
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
-            // Open dictionary and search for 'test%'
-            val db = mgr.openDictionaryReadOnly(Language.ENGLISH)
+            // Open dictionary and search for 'bu%'
+            val db = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
             val q = db.dictionaryQueries
 
             val lemmaLike = q.selectLemmasLike("bu%", 20).executeAsList().map { it.lemma }

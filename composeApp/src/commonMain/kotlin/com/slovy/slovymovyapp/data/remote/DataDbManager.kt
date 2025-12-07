@@ -13,10 +13,8 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
@@ -33,6 +31,11 @@ class DataDbManager(
     private val settingsRepository: SettingsRepository,
     private val remoteDataProvider: RemoteDataProvider
 ) {
+    /**
+     * Thread-safe cache for read-only dictionary and translation databases.
+     */
+    internal val databaseCache = ReadOnlyDatabaseCache(platform)
+
     companion object {
         const val VERSION = "v5"
 
@@ -45,9 +48,18 @@ class DataDbManager(
             "$TRANSLATION_PREFIX${src.code.lowercase()}_${tgt.code.lowercase()}$DB_EXTENSION"
 
         fun openAppDatabase(platform: PlatformDbSupport): AppDatabase {
+            return openAppDatabaseHolder(platform).database
+        }
+
+        /**
+         * Opens the app database and returns a holder that allows proper cleanup.
+         * Call [AppDatabaseHolder.close] when done to release the database connection.
+         */
+        fun openAppDatabaseHolder(platform: PlatformDbSupport): AppDatabaseHolder {
             val file = platform.getDatabasePath("app.db")
             val driver = platform.createAppDataDriver(file)
-            return DatabaseProvider.createAppDatabase(driver)
+            val database = DatabaseProvider.createAppDatabase(driver)
+            return AppDatabaseHolder(driver, database)
         }
     }
 
@@ -62,7 +74,10 @@ class DataDbManager(
         return ensureFile(name, onProgress, cancelToken)
     }
 
-    fun deleteDictionary(lang: Language) {
+    suspend fun deleteDictionary(lang: Language) {
+        // Close cached connections before deleting files
+        databaseCache.closeAllForLanguage(lang)
+
         // Delete the dictionary
         val name = dictionaryFileName(lang)
         platform.deleteFile(platform.getDatabasePath(name))
@@ -90,7 +105,10 @@ class DataDbManager(
         return ensureFile(name, onProgress, cancelToken)
     }
 
-    fun deleteTranslation(src: Language, tgt: Language) {
+    suspend fun deleteTranslation(src: Language, tgt: Language) {
+        // Close cached connection before deleting file
+        databaseCache.closeTranslation(src, tgt)
+
         val name = translationFileName(src, tgt)
         platform.deleteFile(platform.getDatabasePath(name))
     }
@@ -101,6 +119,9 @@ class DataDbManager(
      * Used when data version changes.
      */
     fun deleteAllDownloadedData() {
+        // Close all cached connections before deleting files
+        runBlocking { databaseCache.closeAll() }
+
         val databasesDir = platform.getDatabasePath("")
         val files = platform.listFiles(databasesDir)
         files.forEach { file ->
@@ -119,6 +140,14 @@ class DataDbManager(
         settingsRepository.deleteById(Setting.Name.DATA_VERSION)
     }
 
+    /**
+     * Closes all cached read-only database connections.
+     * Call this when switching languages or during cleanup.
+     */
+    fun closeAllReadOnlyDatabases() {
+        runBlocking { databaseCache.closeAll() }
+    }
+
     fun hasDictionary(lang: Language): Boolean {
         return platform.fileExists(platform.getDatabasePath(dictionaryFileName(lang)))
     }
@@ -127,16 +156,12 @@ class DataDbManager(
         return platform.fileExists(platform.getDatabasePath(translationFileName(src, tgt)))
     }
 
-    fun openDictionaryReadOnly(lang: Language): DictionaryDatabase {
-        val file = platform.getDatabasePath(dictionaryFileName(lang))
-        val driver = platform.createDictionaryDataDriver(file, true)
-        return DatabaseProvider.createDictionaryDatabase(driver)
+    suspend fun openDictionaryReadOnly(lang: Language): DictionaryDatabase {
+        return databaseCache.getDictionary(lang)
     }
 
-    fun openTranslationReadOnly(src: Language, tgt: Language): TranslationDatabase {
-        val file = platform.getDatabasePath(translationFileName(src, tgt))
-        val driver = platform.createTranslationDataDriver(file, true)
-        return DatabaseProvider.createTranslationDatabase(driver)
+    suspend fun openTranslationReadOnly(src: Language, tgt: Language): TranslationDatabase {
+        return databaseCache.getTranslation(src, tgt)
     }
 
     suspend fun hasRequiredVersion(): Boolean = withContext(Dispatchers.Default) {
@@ -276,53 +301,53 @@ class DataDbManager(
             {
                 headers.forEach { (key, value) -> header(key, value) }
             }.execute { response ->
-                    // Fail early on non-success HTTP responses
-                    if (!response.status.isSuccess()) {
-                        val snippet = try {
-                            response.bodyAsText().take(512)
-                        } catch (_: Throwable) {
-                            null
-                        }
-                        val baseMsg =
-                            "HTTP ${response.status.value} ${response.status.description} while downloading $url"
-                        throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
+                // Fail early on non-success HTTP responses
+                if (!response.status.isSuccess()) {
+                    val snippet = try {
+                        response.bodyAsText().take(512)
+                    } catch (_: Throwable) {
+                        null
                     }
+                    val baseMsg =
+                        "HTTP ${response.status.value} ${response.status.description} while downloading $url"
+                    throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
+                }
 
-                    val total = response.headers["Content-Length"]?.toLongOrNull()
-                    // Check available disk space if total size is known
-                    if (total != null) {
-                        val available = platform.getAvailableBytesForPath(destPath)
-                        val headroom = 1024L * 1024L // 1 MiB safety margin
-                        if (available != null && available < total + headroom) {
-                            throw IllegalStateException("Not enough free space to download file: required=${total + headroom}, available=$available")
-                        }
-                    }
-                    val out = platform.openOutput(tempPath)
-                    try {
-                        val channel = response.bodyAsChannel()
-                        val buffer = ByteArray(1024 * 1024) // Smaller buffer for better memory efficiency
-                        var downloaded = 0L
-
-                        while (!channel.isClosedForRead) {
-                            if (cancelToken.isCancelled) {
-                                out.flush()
-                                out.close()
-                                platform.deleteFile(tempPath)
-                                throw CancellationException("Download cancelled")
-                            }
-
-                            val read = channel.readAvailable(buffer, 0, buffer.size)
-                            if (read <= 0) break
-
-                            out.write(buffer, 0, read)
-                            out.flush() // Flush more frequently to avoid buffering
-                            downloaded += read
-                            onProgress(DownloadProgress(downloaded, total))
-                        }
-                    } finally {
-                        out.close()
+                val total = response.headers["Content-Length"]?.toLongOrNull()
+                // Check available disk space if total size is known
+                if (total != null) {
+                    val available = platform.getAvailableBytesForPath(destPath)
+                    val headroom = 1024L * 1024L // 1 MiB safety margin
+                    if (available != null && available < total + headroom) {
+                        throw IllegalStateException("Not enough free space to download file: required=${total + headroom}, available=$available")
                     }
                 }
+                val out = platform.openOutput(tempPath)
+                try {
+                    val channel = response.bodyAsChannel()
+                    val buffer = ByteArray(1024 * 1024) // Smaller buffer for better memory efficiency
+                    var downloaded = 0L
+
+                    while (!channel.isClosedForRead) {
+                        if (cancelToken.isCancelled) {
+                            out.flush()
+                            out.close()
+                            platform.deleteFile(tempPath)
+                            throw CancellationException("Download cancelled")
+                        }
+
+                        val read = channel.readAvailable(buffer, 0, buffer.size)
+                        if (read <= 0) break
+
+                        out.write(buffer, 0, read)
+                        out.flush() // Flush more frequently to avoid buffering
+                        downloaded += read
+                        onProgress(DownloadProgress(downloaded, total))
+                    }
+                } finally {
+                    out.close()
+                }
+            }
             // After successful download, move temp to destination
             if (!platform.moveFile(tempPath, destPath)) {
                 // Best effort cleanup
@@ -433,5 +458,18 @@ fun enforceQueryOnly(driver: SqlDriver) {
         driver.execute(null, "PRAGMA query_only = ON", 0)
     } catch (_: Throwable) {
         // best effort
+    }
+}
+
+/**
+ * Holder for app database that allows proper resource cleanup.
+ * Call [close] when done to release the database connection.
+ */
+class AppDatabaseHolder(
+    private val driver: SqlDriver,
+    val database: AppDatabase
+) : AutoCloseable {
+    override fun close() {
+        driver.close()
     }
 }

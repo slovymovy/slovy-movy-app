@@ -42,7 +42,7 @@ class DictionaryRepository(
     }
 
     // Search within all installed dictionaries by default; if dictionaryLanguage provided, restrict to it.
-    fun search(query: String, dictionaryLanguage: Language? = null, maxItems: Int = 200): List<SearchItem> {
+    suspend fun search(query: String, dictionaryLanguage: Language? = null, maxItems: Int = 200): List<SearchItem> {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
 
@@ -229,8 +229,8 @@ class DictionaryRepository(
         }
     }
 
-    fun getLanguageCard(language: Language, lemma: String): LanguageCard? {
-        val db = dataDbManager.openDictionaryReadOnly(language)
+    suspend fun getLanguageCard(language: Language, lemma: String): LanguageCard? {
+        val db =  dataDbManager.openDictionaryReadOnly(language)
         val q = db.dictionaryQueries
 
         // Collect all base lemma IDs for the given lemma text (case-insensitive), including normalized matches

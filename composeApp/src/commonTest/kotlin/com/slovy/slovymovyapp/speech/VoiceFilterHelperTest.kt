@@ -1,11 +1,9 @@
 package com.slovy.slovymovyapp.speech
 
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
-import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
 import kotlin.test.*
 
@@ -41,17 +39,18 @@ open class VoiceFilterHelperTest : BaseTest() {
         )
     )
 
+    private fun settingsRepository(): SettingsRepository {
+        return SettingsRepository(testAppDatabaseHolder().database)
+    }
+
     @BeforeTest
     fun before() {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
-        repo.deleteById(Setting.Name.ENABLED_VOICES)
+        settingsRepository().deleteById(Setting.Name.ENABLED_VOICES)
     }
 
     @Test
     fun getEnabledVoices_returns_empty_when_no_setting() = runBlocking {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
+        val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         val result = helper.getEnabledVoices(testLanguage)
@@ -61,8 +60,7 @@ open class VoiceFilterHelperTest : BaseTest() {
 
     @Test
     fun setEnabledVoices_stores_voice_ids() = runBlocking {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
+        val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         val voiceIds = setOf("voice1", "voice3")
@@ -74,8 +72,7 @@ open class VoiceFilterHelperTest : BaseTest() {
 
     @Test
     fun setEnabledVoices_updates_existing_setting() = runBlocking {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
+        val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         // Set initial voices
@@ -91,8 +88,7 @@ open class VoiceFilterHelperTest : BaseTest() {
 
     @Test
     fun setEnabledVoices_maintains_other_languages() = runBlocking {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
+        val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         val otherLanguage = Text2SpeechLanguage(
@@ -117,8 +113,7 @@ open class VoiceFilterHelperTest : BaseTest() {
 
     @Test
     fun isVoiceEnabled_returns_true_when_no_filter_set() = runBlocking {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
+        val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         val result = helper.isVoiceEnabled("voice1", testLanguage)
@@ -128,8 +123,7 @@ open class VoiceFilterHelperTest : BaseTest() {
 
     @Test
     fun isVoiceEnabled_returns_true_for_enabled_voice() = runBlocking {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
+        val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         helper.setEnabledVoices(testLanguage, setOf("voice1", "voice2"))
@@ -140,8 +134,7 @@ open class VoiceFilterHelperTest : BaseTest() {
 
     @Test
     fun isVoiceEnabled_returns_false_for_disabled_voice() = runBlocking {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
+        val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         helper.setEnabledVoices(testLanguage, setOf("voice1"))
@@ -151,8 +144,7 @@ open class VoiceFilterHelperTest : BaseTest() {
 
     @Test
     fun initializeDefaultVoices_selects_local_voices_only() = runBlocking {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
+        val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         val result = helper.initializeDefaultVoices(testLanguage, testVoices)
@@ -167,8 +159,7 @@ open class VoiceFilterHelperTest : BaseTest() {
 
     @Test
     fun filterVoicesByEnabled_returns_all_when_no_filter() = runBlocking {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
+        val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         val result = helper.filterVoicesByEnabled(testVoices, testLanguage)
@@ -178,8 +169,7 @@ open class VoiceFilterHelperTest : BaseTest() {
 
     @Test
     fun filterVoicesByEnabled_filters_correctly() = runBlocking {
-        val db = DataDbManager.openAppDatabase(testPlatformDbSupport())
-        val repo = SettingsRepository(db)
+        val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         helper.setEnabledVoices(testLanguage, setOf("voice1", "voice3"))

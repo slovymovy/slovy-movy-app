@@ -74,7 +74,7 @@ class SearchViewModel(
         state.scrollState.scrollToItem(0)
     }
 
-    fun refreshFavorites() {
+    suspend fun refreshFavorites() {
         // Refresh search results to update favorite status without resetting scroll
         if (state.query.isNotEmpty()) {
             val newResults = repository.search(state.query, state.selectedLanguage)

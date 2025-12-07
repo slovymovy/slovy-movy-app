@@ -191,12 +191,14 @@ class WordDetailViewModel(
     private var hasScrolledToTarget = false
 
     init {
-        val card = dictionaryLanguage.let { repository.getLanguageCard(it, lemma) }
-        state =
-            card?.toContentUiState(targetSenseId, isSenseFavorite = ::isSenseFavorite) ?: WordDetailUiState.Empty(
-                lemma = lemma,
-                message = "Word not found"
-            )
+        viewModelScope.launch {
+            val card = dictionaryLanguage.let { repository.getLanguageCard(it, lemma) }
+            state =
+                card?.toContentUiState(targetSenseId, isSenseFavorite = ::isSenseFavorite) ?: WordDetailUiState.Empty(
+                    lemma = lemma,
+                    message = "Word not found"
+                )
+        }
 
         // Setup TTS status listener
         ttsManager.setOnStatusChangeListener { status ->
@@ -220,21 +222,23 @@ class WordDetailViewModel(
     }
 
     private fun loadFavorites() {
-        val card = dictionaryLanguage.let { repository.getLanguageCard(it, lemma) }
-        val allSenseIds = card?.entries?.flatMap { entry ->
-            entry.senses.map { it.senseId }
-        } ?: emptyList()
+        viewModelScope.launch {
+            val card = dictionaryLanguage.let { repository.getLanguageCard(it, lemma) }
+            val allSenseIds = card?.entries?.flatMap { entry ->
+                entry.senses.map { it.senseId }
+            } ?: emptyList()
 
-        val favoriteSenseIds = dictionaryLanguage.let { lang ->
-            allSenseIds.filter { senseId ->
-                favoritesRepository.exists(senseId, lang)
-            }.toSet()
-        }
+            val favoriteSenseIds = dictionaryLanguage.let { lang ->
+                allSenseIds.filter { senseId ->
+                    favoritesRepository.exists(senseId, lang)
+                }.toSet()
+            }
 
-        favoriteSenses = favoriteSenseIds
-        val current = state
-        if (current is WordDetailUiState.Content) {
-            state = current.reloadFavorite(::isSenseFavorite)
+            favoriteSenses = favoriteSenseIds
+            val current = state
+            if (current is WordDetailUiState.Content) {
+                state = current.reloadFavorite(::isSenseFavorite)
+            }
         }
     }
 
