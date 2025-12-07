@@ -25,8 +25,10 @@ class DictionaryRepositoryTest : BaseTest() {
         val mgr = testDataDbManager()
 
         // Ensure a clean state
-        mgr.deleteDictionary(Language.ENGLISH)
-        mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
 
         // Download actual English dictionary and English->Russian translation
         val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
@@ -60,8 +62,10 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(card.zipfFrequency >= 0.0f, "Zipf frequency should be non-negative")
         } finally {
             // Clean up downloaded files to keep test environment tidy
-            mgr.deleteDictionary(Language.ENGLISH)
-            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+            runBlocking {
+                mgr.deleteDictionary(Language.ENGLISH)
+                mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+            }
         }
     }
 
@@ -71,7 +75,9 @@ class DictionaryRepositoryTest : BaseTest() {
         val mgr = testDataDbManager()
 
         // Ensure a clean state
-        mgr.deleteDictionary(Language.DUTCH)
+        runBlocking {
+            mgr.deleteDictionary(Language.DUTCH)
+        }
 
         val dictPath = runBlocking { mgr.ensureDictionary(Language.DUTCH) }
         try {
@@ -89,7 +95,9 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(card.zipfFrequency >= 0.0f, "Zipf frequency should be non-negative")
         } finally {
             // Clean up
-            mgr.deleteDictionary(Language.DUTCH)
+            runBlocking {
+                mgr.deleteDictionary(Language.DUTCH)
+            }
         }
     }
 
@@ -99,7 +107,9 @@ class DictionaryRepositoryTest : BaseTest() {
         val mgr = testDataDbManager()
 
         // Ensure a clean state
-        mgr.deleteDictionary(Language.ENGLISH)
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+        }
 
         val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
         try {
@@ -130,7 +140,9 @@ class DictionaryRepositoryTest : BaseTest() {
             }
         } finally {
             // Clean up
-            mgr.deleteDictionary(Language.ENGLISH)
+            runBlocking {
+                mgr.deleteDictionary(Language.ENGLISH)
+            }
         }
     }
 
@@ -140,7 +152,9 @@ class DictionaryRepositoryTest : BaseTest() {
         val mgr = testDataDbManager()
 
         // Ensure a clean state
-        mgr.deleteDictionary(Language.ENGLISH)
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+        }
 
         val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
         try {
@@ -173,7 +187,9 @@ class DictionaryRepositoryTest : BaseTest() {
             }
         } finally {
             // Clean up
-            mgr.deleteDictionary(Language.ENGLISH)
+            runBlocking {
+                mgr.deleteDictionary(Language.ENGLISH)
+            }
         }
     }
 
@@ -184,7 +200,9 @@ class DictionaryRepositoryTest : BaseTest() {
         val mgr = testDataDbManager()
 
         // Ensure a clean state
-        mgr.deleteDictionary(Language.ENGLISH)
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+        }
 
         val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
         try {
@@ -211,7 +229,9 @@ class DictionaryRepositoryTest : BaseTest() {
             }
         } finally {
             // Clean up
-            mgr.deleteDictionary(Language.ENGLISH)
+            runBlocking {
+                mgr.deleteDictionary(Language.ENGLISH)
+            }
         }
     }
 
@@ -221,8 +241,10 @@ class DictionaryRepositoryTest : BaseTest() {
         val mgr = testDataDbManager()
 
         // Ensure a clean state
-        mgr.deleteDictionary(Language.ENGLISH)
-        mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
 
         val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
         val trPath = runBlocking { mgr.ensureTranslation(Language.ENGLISH, Language.RUSSIAN) }
@@ -241,8 +263,10 @@ class DictionaryRepositoryTest : BaseTest() {
             }
         } finally {
             // Clean up
-            mgr.deleteDictionary(Language.ENGLISH)
-            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+            runBlocking {
+                mgr.deleteDictionary(Language.ENGLISH)
+                mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+            }
         }
     }
 }

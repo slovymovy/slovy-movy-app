@@ -6,7 +6,10 @@ import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
-import com.slovy.slovymovyapp.test.*
+import com.slovy.slovymovyapp.test.BaseTest
+import com.slovy.slovymovyapp.test.IgnoreIos
+import com.slovy.slovymovyapp.test.testPlatformDbSupport
+import com.slovy.slovymovyapp.test.testRemoteDataProvider
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -21,7 +24,7 @@ import kotlin.uuid.Uuid
 @IgnoreIos
 class DataDbManagerTest : BaseTest() {
     @Test
-    fun  download_and_open_readonly() {
+    fun download_and_open_readonly() {
         val platform = testPlatformDbSupport()
         val mgr = testDataDbManager()
 
@@ -42,8 +45,8 @@ class DataDbManagerTest : BaseTest() {
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
             // open read-only — should not throw
-            runBlocking {  mgr.openTranslationReadOnly(Language.DUTCH, Language.ENGLISH) }
-            runBlocking {  mgr.openDictionaryReadOnly(Language.ENGLISH) }
+            runBlocking { mgr.openTranslationReadOnly(Language.DUTCH, Language.ENGLISH) }
+            runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
         } finally {
             runBlocking {
                 mgr.deleteDictionary(Language.ENGLISH)

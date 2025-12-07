@@ -13,11 +13,8 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
@@ -38,6 +35,7 @@ class DataDbManager(
      * Thread-safe cache for read-only dictionary and translation databases.
      */
     internal val databaseCache = ReadOnlyDatabaseCache(platform)
+
     companion object {
         const val VERSION = "v5"
 
@@ -76,9 +74,9 @@ class DataDbManager(
         return ensureFile(name, onProgress, cancelToken)
     }
 
-    fun deleteDictionary(lang: Language) {
+    suspend fun deleteDictionary(lang: Language) {
         // Close cached connections before deleting files
-        runBlocking { databaseCache.closeAllForLanguage(lang) }
+        databaseCache.closeAllForLanguage(lang)
 
         // Delete the dictionary
         val name = dictionaryFileName(lang)
@@ -107,9 +105,9 @@ class DataDbManager(
         return ensureFile(name, onProgress, cancelToken)
     }
 
-    fun deleteTranslation(src: Language, tgt: Language) {
+    suspend fun deleteTranslation(src: Language, tgt: Language) {
         // Close cached connection before deleting file
-        runBlocking { databaseCache.closeTranslation(src, tgt) }
+        databaseCache.closeTranslation(src, tgt)
 
         val name = translationFileName(src, tgt)
         platform.deleteFile(platform.getDatabasePath(name))
@@ -303,53 +301,53 @@ class DataDbManager(
             {
                 headers.forEach { (key, value) -> header(key, value) }
             }.execute { response ->
-                    // Fail early on non-success HTTP responses
-                    if (!response.status.isSuccess()) {
-                        val snippet = try {
-                            response.bodyAsText().take(512)
-                        } catch (_: Throwable) {
-                            null
-                        }
-                        val baseMsg =
-                            "HTTP ${response.status.value} ${response.status.description} while downloading $url"
-                        throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
+                // Fail early on non-success HTTP responses
+                if (!response.status.isSuccess()) {
+                    val snippet = try {
+                        response.bodyAsText().take(512)
+                    } catch (_: Throwable) {
+                        null
                     }
+                    val baseMsg =
+                        "HTTP ${response.status.value} ${response.status.description} while downloading $url"
+                    throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
+                }
 
-                    val total = response.headers["Content-Length"]?.toLongOrNull()
-                    // Check available disk space if total size is known
-                    if (total != null) {
-                        val available = platform.getAvailableBytesForPath(destPath)
-                        val headroom = 1024L * 1024L // 1 MiB safety margin
-                        if (available != null && available < total + headroom) {
-                            throw IllegalStateException("Not enough free space to download file: required=${total + headroom}, available=$available")
-                        }
-                    }
-                    val out = platform.openOutput(tempPath)
-                    try {
-                        val channel = response.bodyAsChannel()
-                        val buffer = ByteArray(1024 * 1024) // Smaller buffer for better memory efficiency
-                        var downloaded = 0L
-
-                        while (!channel.isClosedForRead) {
-                            if (cancelToken.isCancelled) {
-                                out.flush()
-                                out.close()
-                                platform.deleteFile(tempPath)
-                                throw CancellationException("Download cancelled")
-                            }
-
-                            val read = channel.readAvailable(buffer, 0, buffer.size)
-                            if (read <= 0) break
-
-                            out.write(buffer, 0, read)
-                            out.flush() // Flush more frequently to avoid buffering
-                            downloaded += read
-                            onProgress(DownloadProgress(downloaded, total))
-                        }
-                    } finally {
-                        out.close()
+                val total = response.headers["Content-Length"]?.toLongOrNull()
+                // Check available disk space if total size is known
+                if (total != null) {
+                    val available = platform.getAvailableBytesForPath(destPath)
+                    val headroom = 1024L * 1024L // 1 MiB safety margin
+                    if (available != null && available < total + headroom) {
+                        throw IllegalStateException("Not enough free space to download file: required=${total + headroom}, available=$available")
                     }
                 }
+                val out = platform.openOutput(tempPath)
+                try {
+                    val channel = response.bodyAsChannel()
+                    val buffer = ByteArray(1024 * 1024) // Smaller buffer for better memory efficiency
+                    var downloaded = 0L
+
+                    while (!channel.isClosedForRead) {
+                        if (cancelToken.isCancelled) {
+                            out.flush()
+                            out.close()
+                            platform.deleteFile(tempPath)
+                            throw CancellationException("Download cancelled")
+                        }
+
+                        val read = channel.readAvailable(buffer, 0, buffer.size)
+                        if (read <= 0) break
+
+                        out.write(buffer, 0, read)
+                        out.flush() // Flush more frequently to avoid buffering
+                        downloaded += read
+                        onProgress(DownloadProgress(downloaded, total))
+                    }
+                } finally {
+                    out.close()
+                }
+            }
             // After successful download, move temp to destination
             if (!platform.moveFile(tempPath, destPath)) {
                 // Best effort cleanup
