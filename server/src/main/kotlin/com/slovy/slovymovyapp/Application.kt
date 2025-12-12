@@ -28,5 +28,11 @@ fun Application.module() {
                 getById(Setting.Name.WELCOME_MESSAGE)?.value?.jsonPrimitive?.content.toString()
             })
         }
+        get("/health") {
+            call.respondText(repo.run {
+                "ok"
+            })
+        }
+
     }
 }
