@@ -1,7 +1,14 @@
 steps:
-  - name: 'gcr.io/cloud-builders/gradle:9.2.1-jdk25'
+  - name: 'eclipse-temurin:25-jdk'
+    entrypoint: './gradlew'
     args:
-        [':server:build', '-PexcludeMobile=true', '-x test', '--build-cache', '--no-daemon', '--quiet']
+      - ':server:build'
+      - '-PexcludeMobile=true'
+      - '-x'
+      - 'test'
+      - '--build-cache'
+      - '--no-daemon'
+      - '--quiet'
 
 options:
   logging: CLOUD_LOGGING_ONLY
