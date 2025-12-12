@@ -1,5 +1,5 @@
 steps:
-  - name: 'gcr.io/cloud-builders/gradle'
+  - name: 'gcr.io/cloud-builders/gradle:9.2.1-jdk25'
     args:
         [':server:build', '-PexcludeMobile=true', '-x test', '--build-cache', '--no-daemon', '--quiet']
 
