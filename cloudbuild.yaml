@@ -1,14 +1,11 @@
 steps:
   - name: 'eclipse-temurin:25-jdk'
-    entrypoint: './gradlew'
+    entrypoint: 'bash'
     args:
-      - ':server:build'
-      - '-PexcludeMobile=true'
-      - '-x'
-      - 'test'
-      - '--build-cache'
-      - '--no-daemon'
-      - '--quiet'
+      - '-c'
+      - |
+        apt-get update -qq && apt-get install -y -qq git
+        ./gradlew :server:build -PexcludeMobile=true -x test --build-cache --no-daemon --quiet
 
 options:
   logging: CLOUD_LOGGING_ONLY
