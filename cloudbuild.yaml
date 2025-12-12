@@ -1,5 +1,5 @@
 steps:
-  - name: 'eclipse-temurin:25-jdk'
+  - name: 'eclipse-temurin:21-jdk'
     entrypoint: 'bash'
     args:
       - '-c'
