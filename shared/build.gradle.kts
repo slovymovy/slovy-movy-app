@@ -3,21 +3,28 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
+val excludeMobile = project.findProperty("excludeMobile")?.toString()?.toBoolean() ?: false
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
     alias(libs.plugins.sqldelight)
     alias(libs.plugins.serialization)
 }
 
+if (!excludeMobile) {
+    apply(plugin = libs.plugins.androidLibrary.get().pluginId)
+}
+
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-        instrumentedTestVariant {
-            sourceSetTree.set(KotlinSourceSetTree.test)
+    if (!excludeMobile) {
+        androidTarget {
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_11)
+            }
+            instrumentedTestVariant {
+                sourceSetTree.set(KotlinSourceSetTree.test)
+            }
         }
     }
 
@@ -37,11 +44,14 @@ kotlin {
             implementation(libs.sqldelight.runtime)
             implementation(libs.kotlinx.serializationJson)
         }
-        androidMain.dependencies {
-            implementation(libs.sqldelight.androidDriver)
-        }
-        iosMain.dependencies {
-            implementation(libs.sqldelight.nativeDriver)
+        if (!excludeMobile) {
+            androidMain.dependencies {
+                implementation(libs.sqldelight.androidDriver)
+            }
+
+            iosMain.dependencies {
+                implementation(libs.sqldelight.nativeDriver)
+            }
         }
         jvmMain.dependencies {
             implementation(libs.sqldelight.sqliteDriver)
@@ -84,16 +94,18 @@ sqldelight {
     }
 }
 
-android {
-    namespace = "com.slovy.slovymovyapp.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+if (!excludeMobile) {
+    extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
+        namespace = "com.slovy.slovymovyapp.shared"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_11
+            targetCompatibility = JavaVersion.VERSION_11
+        }
+        defaultConfig {
+            minSdk = libs.versions.android.minSdk.get().toInt()
+            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
     }
 }
 

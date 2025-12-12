@@ -1,0 +1,15 @@
+steps:
+  - name: 'openjdk:21-slim'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        ./gradlew :server:build \
+          -PexcludeMobile=true \
+          -x test \
+          --build-cache \
+          --no-daemon \
+          --quiet
+
+options:
+  logging: CLOUD_LOGGING_ONLY
