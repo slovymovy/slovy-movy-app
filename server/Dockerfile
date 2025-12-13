@@ -1,7 +1,7 @@
 FROM eclipse-temurin:21-jdk-jammy
 
 # Copy the built application
-COPY server/build/install/server /app
+COPY build/install/server /app
 
 # Set the working directory
 WORKDIR /app
