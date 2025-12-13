@@ -1,11 +1,37 @@
 steps:
+  # Build the server
   - name: 'eclipse-temurin:21-jdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        apt-get update -qq && apt-get install -y -qq git
-        ./gradlew :server:build -PexcludeMobile=true -x test --build-cache --no-daemon --quiet
+        ./gradlew :server:installDist -PexcludeMobile=true -x test --build-cache --no-daemon --quiet
+
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/open-words-backend:$BRANCH_NAME-$SHORT_SHA', './server']
+
+  # Push the container image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/open-words-backend:$BRANCH_NAME-$SHORT_SHA']
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'open-words-backend'
+      - '--image'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/open-words-backend:$BRANCH_NAME-$SHORT_SHA'
+      - '--region'
+      - 'europe-west1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+
+images:
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/open-words-backend:$BRANCH_NAME-$SHORT_SHA'
 
 options:
   logging: CLOUD_LOGGING_ONLY
