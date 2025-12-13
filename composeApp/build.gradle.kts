@@ -97,6 +97,10 @@ abstract class GitBranchValueSource : ValueSource<String, ValueSourceParameters.
     abstract val execOperations: ExecOperations
 
     override fun obtain(): String {
+        val branchNameFromEnv = System.getenv("BRANCH_NAME")
+        if (branchNameFromEnv != null) {
+            return branchNameFromEnv
+        }
 
         val branchOutput = ByteArrayOutputStream()
         execOperations.exec {

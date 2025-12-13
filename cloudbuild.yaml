@@ -6,7 +6,7 @@ steps:
       - '-c'
       - |
         apt-get update -qq && apt-get install -y -qq git
-        ./gradlew :server:installDist -PexcludeMobile=true -x test --build-cache --no-daemon --quiet
+        ./gradlew :server:installDist -PexcludeMobile=true -x test --build-cache --no-daemon
 
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
