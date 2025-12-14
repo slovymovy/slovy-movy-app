@@ -6,14 +6,17 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
+import com.slovy.slovymovyapp.ingestion.IngestionDbManager
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import java.io.File
 
 /**
  * Simple DB manager that creates per-language dictionary DBs and per-translation-pair DBs.
  * Files are created under the provided outputDir.
+ *
+ * Implements [IngestionDbManager] for use with [com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder].
  */
-class ServerDbManager(private val outputDir: File) {
+class ServerDbManager(private val outputDir: File) : IngestionDbManager {
     init {
         if (!outputDir.exists()) outputDir.mkdirs()
     }
@@ -23,14 +26,14 @@ class ServerDbManager(private val outputDir: File) {
     fun translationDbFile(sourceLang: String, targetLang: String): File =
         File(outputDir, "translation_${sourceLang.lowercase()}_${targetLang.lowercase()}.db")
 
-    fun openDictionary(langCode: String): DictionaryDatabase {
+    override fun openDictionary(langCode: String): DictionaryDatabase {
         val file = dictionaryDbFile(langCode)
         val schema = DictionaryDatabase.Schema
         val driver = driver(file, schema)
         return DatabaseProvider.createDictionaryDatabase(driver)
     }
 
-    fun openTranslation(sourceLang: String, targetLang: String): TranslationDatabase {
+    override fun openTranslation(sourceLang: String, targetLang: String): TranslationDatabase {
         val file = translationDbFile(sourceLang, targetLang)
         val schema = TranslationDatabase.Schema
         val driver = driver(file, schema)

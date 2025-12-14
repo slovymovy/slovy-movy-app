@@ -1,7 +1,7 @@
 package com.slovy.slovymovyapp.builder
 
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.File
 import kotlin.test.Test

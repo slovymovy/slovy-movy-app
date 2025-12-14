@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.builder
 
+import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import java.io.File
 import java.security.MessageDigest
 
@@ -73,14 +74,14 @@ fun main(args: Array<String>) {
             .sortedBy { sha256HexLower(it.name) }
             .let { files -> if (params.testMode) files.take(50) else files }
             .forEach { pFile ->
-            val rawFile = File(rawDir, pFile.name)
-            if (!rawFile.exists()) {
-                error("Raw DB file not found for language $lang: ${rawFile.absolutePath}")
+                val rawFile = File(rawDir, pFile.name)
+                if (!rawFile.exists()) {
+                    error("Raw DB file not found for language $lang: ${rawFile.absolutePath}")
+                }
+                builder.ingest(pFile.readText(), rawFile.readText())
+                words++
+                if (words % 100 == 0) println("Ingested $words words to $lang")
             }
-            builder.ingest(pFile, rawFile)
-            words++
-            if (words % 100 == 0) println("Ingested $words words to $lang")
-        }
 
         println("lang: $lang; ingested words: $words")
     }

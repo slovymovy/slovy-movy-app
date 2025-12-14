@@ -2,6 +2,9 @@
 
 package com.slovy.slovymovyapp.builder
 
+import com.slovy.slovymovyapp.ingestion.ExtractedWordData
+import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
+import com.slovy.slovymovyapp.ingestion.LANG_TO_SOURCE_FILE
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -66,7 +69,7 @@ class FormDeduplicationTest {
         )
 
         // Ingest the data
-        builder.ingest(processedFile, rawFile)
+        builder.ingest(processedFile.readText(), rawFile.readText())
 
         // Verify forms are deduplicated in database
         val dictDb = serverDbManager.openDictionary(lang)
@@ -107,10 +110,12 @@ class FormDeduplicationTest {
                     tags.contains("plural"),
                     "Form 'stempels' should have 'plural' tag. Found: $tags"
                 )
+
                 "stempeltje" -> assertTrue(
                     tags.containsAll(listOf("diminutive", "singular")),
                     "Form 'stempeltje' should have 'diminutive' and 'singular' tags. Found: $tags"
                 )
+
                 "stempeltjes" -> assertTrue(
                     tags.containsAll(listOf("diminutive", "plural")),
                     "Form 'stempeltjes' should have 'diminutive' and 'plural' tags. Found: $tags"

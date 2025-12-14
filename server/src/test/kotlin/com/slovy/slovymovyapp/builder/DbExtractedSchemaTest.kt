@@ -1,8 +1,8 @@
 package com.slovy.slovymovyapp.builder
 
+import com.slovy.slovymovyapp.ingestion.ExtractedWordData
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertTrue

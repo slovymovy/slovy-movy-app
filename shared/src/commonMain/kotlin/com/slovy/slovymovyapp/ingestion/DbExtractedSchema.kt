@@ -1,11 +1,13 @@
-@file:UseSerializers(UUIDSerializer::class)
+@file:OptIn(ExperimentalUuidApi::class)
+@file:UseSerializers(UuidSerializer::class)
 
-package com.slovy.slovymovyapp.builder
+package com.slovy.slovymovyapp.ingestion
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
-import java.util.*
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
  * Data classes for extracted Wiktionary data with database IDs included.
@@ -27,7 +29,7 @@ data class ExtractedWordData(
  */
 @Serializable
 data class ExtractedWordEntry(
-    @SerialName("entry_id") val entryId: UUID,
+    @SerialName("entry_id") val entryId: Uuid,
     val word: String,
     val pos: String,
     @SerialName("lang_code") val langCode: String,
@@ -42,8 +44,8 @@ data class ExtractedWordEntry(
  */
 @Serializable
 data class ExtractedWordForm(
-    @SerialName("form_id") val formId: UUID,
-    @SerialName("entry_id") val entryId: UUID,
+    @SerialName("form_id") val formId: Uuid,
+    @SerialName("entry_id") val entryId: Uuid,
     val tags: MutableList<String>,
     val form: String,
     val note: String? = null
@@ -54,8 +56,8 @@ data class ExtractedWordForm(
  */
 @Serializable
 data class ExtractedWordSense(
-    @SerialName("sense_id") val senseId: UUID,
-    @SerialName("entry_id") val entryId: UUID,
+    @SerialName("sense_id") val senseId: Uuid,
+    @SerialName("entry_id") val entryId: Uuid,
     val glosses: MutableList<String>,
     val tags: MutableList<String>,
     val note: String? = null,
@@ -68,8 +70,8 @@ data class ExtractedWordSense(
  */
 @Serializable
 data class ExtractedExample(
-    @SerialName("example_id") val exampleId: UUID,
-    @SerialName("sense_id") val senseId: UUID,
+    @SerialName("example_id") val exampleId: Uuid,
+    @SerialName("sense_id") val senseId: Uuid,
     val text: String,
     val translation: String? = null,
     val english: String? = null,
@@ -81,15 +83,15 @@ data class ExtractedExample(
  */
 @Serializable
 data class ExtractedTranslation(
-    @SerialName("translation_id") val translationId: UUID,
-    @SerialName("source_entry_id") val sourceEntryId: UUID,
-    @SerialName("source_sense_id") var sourceSenseId: UUID? = null,
+    @SerialName("translation_id") val translationId: Uuid,
+    @SerialName("source_entry_id") val sourceEntryId: Uuid,
+    @SerialName("source_sense_id") var sourceSenseId: Uuid? = null,
     @SerialName("source_sense_description") val sourceSenseDescription: String? = null,
     @SerialName("target_lang_word") val targetLangWord: String,
     @SerialName("target_lang_code") val targetLangCode: String,
     val note: String? = null,
 
-    @SerialName("target_sense_ids") var targetSenseIds: MutableList<UUID>,
+    @SerialName("target_sense_ids") var targetSenseIds: MutableList<Uuid>,
     @SerialName("cross_references") val crossReferences: MutableList<ExtractedCrossReference>
 )
 
@@ -98,9 +100,9 @@ data class ExtractedTranslation(
  */
 @Serializable
 data class ExtractedWordLinkage(
-    @SerialName("linkage_id") val linkageId: UUID,
-    @SerialName("source_entry_id") val sourceEntryId: UUID,
-    @SerialName("source_sense_ids") var sourceSenseIds: MutableList<UUID>,
+    @SerialName("linkage_id") val linkageId: Uuid,
+    @SerialName("source_entry_id") val sourceEntryId: Uuid,
+    @SerialName("source_sense_ids") var sourceSenseIds: MutableList<Uuid>,
     @SerialName("source_sense_description") val sourceSenseDescription: String? = null,
     @SerialName("linkage_type") val linkageType: String,
     val word: String,

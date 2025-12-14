@@ -2,6 +2,8 @@
 
 package com.slovy.slovymovyapp.builder
 
+import com.slovy.slovymovyapp.ingestion.*
+import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -35,7 +37,7 @@ class AllLanguagesIngestionIntegrationTest {
             processedFiles.forEach { pFile ->
                 val rawFile = resourceFile("db_extract/$lang/${pFile.name}")
                 // run ingestion
-                builder.ingest(pFile, rawFile)
+                builder.ingest(pFile.readText(), rawFile.readText())
 
                 // Validate dictionary DB: lemma existence and forms from raw
                 val dictDb = serverDbManager.openDictionary(lang)
@@ -61,7 +63,7 @@ class AllLanguagesIngestionIntegrationTest {
                 data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
 
                 val allExpectedFormKeys = entriesUsedByProcessed.flatMap { it.forms }.map { f ->
-                    FormKey(f.form, unaccent(f.form), f.tags.toSet())
+                    FormKey(f.form, stripAccents(f.form), f.tags.toSet())
                 }.toSet() // Deduplicate expected forms
 
                 if (allExpectedFormKeys.isNotEmpty()) {
@@ -141,7 +143,7 @@ class AllLanguagesIngestionIntegrationTest {
                                 // also check normalized values
                                 rows.forEachIndexed { i, row ->
                                     assertEquals(
-                                        unaccent(expectedWords[i]),
+                                        stripAccents(expectedWords[i]),
                                         row.target_lang_word_normalized,
                                         "Normalized translation mismatch for '${expectedWords[i]}' in $lang->$trg from ${pFile.name}"
                                     )
