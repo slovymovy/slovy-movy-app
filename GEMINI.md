@@ -12,7 +12,9 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 
 ## Build Commands
 
-**Windows/WSL Note**: Use `cmd.exe /c gradlew.bat` prefix (Windows paths in output)
+**Environment Notes**:
+- **MSYS/Git Bash (native Windows)**: Use `./gradlew.bat` directly
+- **WSL**: Use `cmd.exe /c gradlew.bat` prefix (Windows paths in output)
 
 ### Core Tasks
 
