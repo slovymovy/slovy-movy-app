@@ -1,0 +1,30 @@
+@file:OptIn(ExperimentalUuidApi::class)
+
+package com.slovy.slovymovyapp.ingestion
+
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+
+/**
+ * Serializer for kotlin.uuid.Uuid that encodes/decodes as a string.
+ *
+ * Uses the standard UUID string format (8-4-4-4-12 hex digits).
+ * This is deterministic and produces identical output on all platforms.
+ */
+object UuidSerializer : KSerializer<Uuid> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Uuid", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Uuid) {
+        encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): Uuid {
+        return Uuid.parse(decoder.decodeString())
+    }
+}

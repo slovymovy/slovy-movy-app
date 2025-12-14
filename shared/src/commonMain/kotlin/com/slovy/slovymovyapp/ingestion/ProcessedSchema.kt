@@ -1,4 +1,4 @@
-package com.slovy.slovymovyapp.builder
+package com.slovy.slovymovyapp.ingestion
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

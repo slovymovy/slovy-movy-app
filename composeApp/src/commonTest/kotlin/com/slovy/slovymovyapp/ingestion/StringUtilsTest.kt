@@ -1,10 +1,14 @@
-package com.slovy.slovymovyapp.builder
+package com.slovy.slovymovyapp.ingestion
 
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class UnaccentTest {
+/**
+ * Cross-platform tests for stripAccents() function.
+ * These tests verify deterministic behavior across Android, iOS, and Desktop.
+ */
+class StringUtilsTest {
 
     @Test
     fun latin_unaccent_and_lowercase() {

@@ -1,16 +1,15 @@
 @file:OptIn(ExperimentalUuidApi::class)
 
-package com.slovy.slovymovyapp.builder
+package com.slovy.slovymovyapp.ingestion
 
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
 import com.slovy.slovymovyapp.data.dictionary.NameType
 import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
+import com.slovy.slovymovyapp.util.md5
+import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import org.apache.commons.lang3.StringUtils
-import java.io.File
-import java.security.MessageDigest
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import com.slovy.slovymovyapp.data.dictionary.TraitType as DictTraitType
@@ -27,8 +26,19 @@ val LANG_TO_SOURCE_FILE: Map<String, String> = mapOf(
     "pl" to "pl-extract.jsonl",
 )
 
+/**
+ * Builder for ingesting processed JSON and raw extracted data into dictionary and translation databases.
+ *
+ * This class is KMP-compatible and produces deterministic results across all platforms:
+ * - Lemma IDs are derived from MD5 hash of lemma + normalized lemma (RFC 1321 compliant)
+ * - All other IDs come from the input JSON
+ * - Iteration order is preserved for consistent database insertion
+ *
+ * @param dbManager The database manager for opening dictionary and translation databases
+ * @param frequencyMap Map of lemma words to their Zipf frequency values
+ */
 class JsonIngestionBuilder(
-    private val serverDbManager: ServerDbManager,
+    private val dbManager: IngestionDbManager,
     private val frequencyMap: Map<String, Double>
 ) {
 
@@ -39,17 +49,23 @@ class JsonIngestionBuilder(
         allowTrailingComma = false
     }
 
-
-    fun ingest(processedFile: File, rawFile: File) {
-        val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedFile.readText())
-        val raw = json.decodeFromString(ExtractedWordData.serializer(), rawFile.readText())
+    /**
+     * Ingests processed and raw JSON data into the dictionary and translation databases.
+     *
+     * @param processedJson JSON string containing the processed LanguageCardResponse
+     * @param rawJson JSON string containing the raw ExtractedWordData
+     * @throws IllegalArgumentException if lemma not found in frequency map, duplicate IDs, or lemma already exists
+     */
+    fun ingest(processedJson: String, rawJson: String) {
+        val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedJson)
+        val raw = json.decodeFromString(ExtractedWordData.serializer(), rawJson)
         val langCode = raw.langCode
         val lemmaWord = raw.word
 
         val zipfFrequency = frequencyMap[lemmaWord]
             ?: throw IllegalArgumentException("Lemma '$lemmaWord' not found in frequency map")
 
-        val dictDb = serverDbManager.openDictionary(langCode)
+        val dictDb = dbManager.openDictionary(langCode)
         val dictQ = dictDb.dictionaryQueries
         dictDb.transaction {
 
@@ -78,7 +94,9 @@ class JsonIngestionBuilder(
                     val sid = uuidParse(s.senseId)
                     val rawEntry = senseIdToRawEntry[sid]
                     if (rawEntry != null && mapPos(rawEntry.pos) == pPos) {
-                        posToEntryId.putIfAbsent(pPos, uuidParse(rawEntry.entryId.toString()))
+                        if (!posToEntryId.containsKey(pPos)) {
+                            posToEntryId[pPos] = uuidParse(rawEntry.entryId.toString())
+                        }
                         entryIdToPos[uuidParse(rawEntry.entryId.toString())] = pPos
                         return@forEach
                     }
@@ -93,11 +111,11 @@ class JsonIngestionBuilder(
             }
 
             // Create single lemma entry (shared across all POS)
-            val md = MessageDigest.getInstance("MD5")
-            val lemmaNormalized = unaccent(lemmaWord)
+            // Deterministic lemma ID generation using MD5 hash
+            val lemmaNormalized = stripAccents(lemmaWord)
             val str = lemmaWord + "_" + lemmaNormalized
 
-            val hash = md.digest(str.toByteArray(Charsets.UTF_8))
+            val hash = md5(str.encodeToByteArray())
             val baseLemmaId = Uuid.fromByteArray(hash.sliceArray(0..15))
 
             val selectLemmasById = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
@@ -145,9 +163,11 @@ class JsonIngestionBuilder(
 
                 val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
                 entry.forms.forEach { f ->
-                    val key = FormKey(f.form, unaccent(f.form), f.tags.toSet())
+                    val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet())
                     // Keep first occurrence of each unique form
-                    formsMap.putIfAbsent(key, f)
+                    if (!formsMap.containsKey(key)) {
+                        formsMap[key] = f
+                    }
                 }
             }
 
@@ -159,7 +179,7 @@ class JsonIngestionBuilder(
                         form_id = formId,
                         lemma_pos_id = lemmaPosId,
                         form = f.form,
-                        form_normalized = unaccent(f.form),
+                        form_normalized = stripAccents(f.form),
                     )
                     // tags
                     f.tags.forEach { tag ->
@@ -214,7 +234,7 @@ class JsonIngestionBuilder(
             // Build translation DBs per target language encountered
             val targetLangs = collectTargetLanguages(processed)
             targetLangs.forEach { trg ->
-                val trDb = serverDbManager.openTranslation(raw.langCode, trg)
+                val trDb = dbManager.openTranslation(raw.langCode, trg)
                 val trQ = trDb.translationQueries
                 trDb.transaction {
                     processed.entries.forEach { posEntry ->
@@ -234,7 +254,7 @@ class JsonIngestionBuilder(
                                     senseId,
                                     idx.toLong(),
                                     t.targetLangWord,
-                                    unaccent(t.targetLangWord),
+                                    stripAccents(t.targetLangWord),
                                     t.targetLangSenseClarification,
                                     baseLemmaId,
                                     lemmaPosIdForPos
@@ -261,7 +281,7 @@ class JsonIngestionBuilder(
     private fun mapPos(pos: String): DictionaryPos? {
         try {
             return DictionaryPos.valueOf(pos.uppercase())
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             when (pos.uppercase()) {
                 "ADJ" -> return DictionaryPos.ADJECTIVE
                 "ADV" -> return DictionaryPos.ADVERB
@@ -275,7 +295,7 @@ class JsonIngestionBuilder(
         }
     }
 
-    private fun mapLevel(level: String): LearnerLevel = LearnerLevel.valueOf(level.uppercase());
+    private fun mapLevel(level: String): LearnerLevel = LearnerLevel.valueOf(level.uppercase())
     private fun mapFrequency(freq: String): SenseFrequency = when (freq.uppercase()) {
         "HIGH" -> SenseFrequency.HIGH
         "MIDDLE" -> SenseFrequency.MIDDLE
@@ -286,10 +306,10 @@ class JsonIngestionBuilder(
 
     private fun mapNameType(name: String?): NameType? {
         if (name == null) return null
-        return NameType.valueOf(name.trim().uppercase());
+        return NameType.valueOf(name.trim().uppercase())
     }
 
-    private fun mapTraitType(t: com.slovy.slovymovyapp.builder.TraitType): DictTraitType = DictTraitType.valueOf(t.name)
+    private fun mapTraitType(t: TraitType): DictTraitType = DictTraitType.valueOf(t.name)
 
 
     private fun collectTargetLanguages(p: LanguageCardResponse): Set<String> {
@@ -305,6 +325,15 @@ class JsonIngestionBuilder(
     }
 }
 
+/**
+ * Parses a UUID string, with fallback handling for incomplete UUIDs.
+ *
+ * If the standard parse fails, attempts to pad the hex digits to 32 characters.
+ *
+ * @param string The UUID string to parse
+ * @return The parsed Uuid
+ * @throws IllegalArgumentException if the string cannot be parsed as a valid UUID
+ */
 fun uuidParse(string: String): Uuid = try {
     Uuid.parse(string)
 } catch (_: IllegalArgumentException) {
@@ -316,17 +345,4 @@ fun uuidParse(string: String): Uuid = try {
     } catch (e: IllegalArgumentException) {
         throw IllegalArgumentException("Invalid UUID: $string", e)
     }
-}
-
-
-fun unaccent(s: String): String {
-    // Normalize to lowercase first, then handle specific Latin ligatures/letters
-    val lower = s.lowercase()
-    val replaced = lower
-        .replace("æ", "ae")
-        .replace("œ", "oe")
-        .replace("ø", "o")
-        .replace("ł", "l")
-    // Strip remaining accents/diacritics (does not affect Cyrillic)
-    return StringUtils.stripAccents(replaced)
 }

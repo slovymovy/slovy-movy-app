@@ -2,6 +2,8 @@
 
 package com.slovy.slovymovyapp.builder
 
+import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -36,7 +38,7 @@ class WordFamilyIngestionTest {
         val rawFile = resourceFile("db_extract/$lang/$word.json")
 
         // Run ingestion
-        builder.ingest(processedFile, rawFile)
+        builder.ingest(processedFile.readText(), rawFile.readText())
 
         // Validate dictionary DB
         val dictDb = serverDbManager.openDictionary(lang)
@@ -85,7 +87,7 @@ class WordFamilyIngestionTest {
         val rawFile = resourceFile("db_extract/$lang/$word.json")
 
         // Ingest twice
-        builder.ingest(processedFile, rawFile)
+        builder.ingest(processedFile.readText(), rawFile.readText())
 
         // Second ingestion should not duplicate word_family entries (INSERT OR IGNORE)
         // This will throw an exception because lemma already exists, but we can test the query directly
@@ -121,7 +123,7 @@ class WordFamilyIngestionTest {
         val processedFile = resourceFile("processed_json_files/$lang/$word.json")
         val rawFile = resourceFile("db_extract/$lang/$word.json")
 
-        builder.ingest(processedFile, rawFile)
+        builder.ingest(processedFile.readText(), rawFile.readText())
 
         val dictDb = serverDbManager.openDictionary(lang)
         val dq = dictDb.dictionaryQueries
