@@ -11,6 +11,9 @@ plugins {
     alias(libs.plugins.serialization)
 }
 
+group = "com.slovy.slovymovyapp"
+version = "1.0.0"
+
 if (!excludeMobile) {
     apply(plugin = libs.plugins.androidLibrary.get().pluginId)
 }
