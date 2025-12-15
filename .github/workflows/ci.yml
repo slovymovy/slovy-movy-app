@@ -83,7 +83,7 @@ jobs:
 
       - name: Upload test results and reports (Linux)
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test-reports-linux-api-${{ matrix.api-level }}
           if-no-files-found: ignore
@@ -137,7 +137,7 @@ jobs:
 
       - name: Upload test results and reports (macOS)
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test-reports-macos
           if-no-files-found: ignore
