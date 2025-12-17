@@ -51,7 +51,8 @@ data class SettingsUiState(
     val errorMessage: String? = null,
     val testingVoice: Text2SpeechVoice? = null,
     val ttsStatus: TTSStatus = TTSStatus.IDLE,
-    val deleteConfirmation: DeleteConfirmationState? = null
+    val deleteConfirmation: DeleteConfirmationState? = null,
+    val showAcknowledgments: Boolean = false
 )
 
 data class DeleteConfirmationState(
@@ -190,6 +191,14 @@ class SettingsViewModel(
     fun confirmDelete() {
         state.deleteConfirmation?.onConfirm?.invoke()
         state = state.copy(deleteConfirmation = null)
+    }
+
+    fun showAcknowledgments() {
+        state = state.copy(showAcknowledgments = true)
+    }
+
+    fun dismissAcknowledgments() {
+        state = state.copy(showAcknowledgments = false)
     }
 
     private fun deleteDictionary(language: Language) {
@@ -418,6 +427,8 @@ fun SettingsScreen(
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
         onDownloadDictionary = { language -> viewModel.downloadDictionary(language) },
         onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
+        onShowAcknowledgments = { viewModel.showAcknowledgments() },
+        onDismissAcknowledgments = { viewModel.dismissAcknowledgments() },
         wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -440,6 +451,8 @@ fun SettingsScreenContent(
     onDismissDeleteConfirmation: () -> Unit = {},
     onDownloadDictionary: (Language) -> Unit = {},
     onDownloadTranslation: (Language, Language) -> Unit = { _, _ -> },
+    onShowAcknowledgments: () -> Unit = {},
+    onDismissAcknowledgments: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -628,6 +641,51 @@ fun SettingsScreenContent(
                                 }
                             }
                         }
+
+                            // About section
+                            item {
+                                Text(
+                                    text = "About",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
+                                )
+                            }
+
+                            item {
+                                ElevatedCard(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.elevatedCardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                                    ),
+                                    elevation = CardDefaults.elevatedCardElevation(
+                                        defaultElevation = 1.dp
+                                    )
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable(onClick = onShowAcknowledgments)
+                                            .padding(18.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = "Open Source Acknowledgments",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = "View libraries and data sources",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                     }
                 }
             }
@@ -640,6 +698,13 @@ fun SettingsScreenContent(
                 additionalInfo = confirmation.additionalInfo,
                 onConfirm = onConfirmDelete,
                 onDismiss = onDismissDeleteConfirmation
+            )
+        }
+
+        // Acknowledgments dialog
+        if (state.showAcknowledgments) {
+            AcknowledgmentsDialog(
+                onDismiss = onDismissAcknowledgments
             )
         }
     }
@@ -684,6 +749,58 @@ private fun DeleteConfirmationDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AcknowledgmentsDialog(
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Open Source Acknowledgments")
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "This application is made possible by the following open source projects and data sources:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                acknowledgments.forEachIndexed { index, ack ->
+                    if (index > 0) {
+                        HorizontalDivider()
+                    }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = ack.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = ack.description,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = ack.license,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
             }
         }
     )
@@ -1480,6 +1597,23 @@ private fun SettingsScreenPreviewWithMixedDatabaseStates(
                     "dict_ru" to DownloadProgress(5 * 1024 * 1024, 12 * 1024 * 1024),
                     "trans_en_pl" to DownloadProgress(2 * 1024 * 1024, 7 * 1024 * 1024)
                 )
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsScreenPreviewWithAcknowledgments(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SettingsScreenContent(
+            state = SettingsUiState(
+                isLoading = false,
+                languages = emptyMap(),
+                databases = emptyList(),
+                showAcknowledgments = true
             )
         )
     }
