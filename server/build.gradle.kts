@@ -29,6 +29,9 @@ dependencies {
     }
     api(libs.openai.java)
 
+    // GitHub client
+    api(libs.github.api)
+
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
     testImplementation(libs.junit.jupiter.api)
