@@ -4,6 +4,8 @@ import com.slovy.slovymovyapp.builder.ServerDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
+import com.slovy.slovymovyapp.server.github.GitHubClient
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -32,6 +34,30 @@ fun Application.module() {
             call.respondText(repo.run {
                 "ok"
             })
+        }
+
+        get("/extract/{lang}/{word}") {
+            val lang = call.parameters["lang"]
+            val word = call.parameters["word"]
+
+            if (lang.isNullOrBlank() || word.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing lang or word parameter")
+                return@get
+            }
+
+            if (!GitHubClient.isAvailable()) {
+                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+                return@get
+            }
+
+            try {
+                val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
+                call.respondText(content, ContentType.Application.Json)
+            } catch (_: org.kohsuke.github.GHFileNotFoundException) {
+                call.respond(HttpStatusCode.NotFound, "Word '$word' not found for language '$lang'")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Failed to fetch content: ${e.message}")
+            }
         }
 
     }

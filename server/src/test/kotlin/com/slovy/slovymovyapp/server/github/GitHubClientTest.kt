@@ -1,10 +1,9 @@
 package com.slovy.slovymovyapp.server.github
 
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assumptions.assumeTrue
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 /**
  * Integration tests for GitHubClient.
@@ -16,14 +15,14 @@ class GitHubClientTest {
 
     @Test
     fun isAvailable_returnsTrueWhenTokenExists() {
-        assumeTrue(GitHubClient.isAvailable(), "Skipping: GitHub token not available")
+        if (!GitHubClient.isAvailable()) return
 
         assertTrue(GitHubClient.isAvailable())
     }
 
     @Test
     fun getToken_returnsNonBlankToken() {
-        assumeTrue(GitHubClient.isAvailable(), "Skipping: GitHub token not available")
+        if (!GitHubClient.isAvailable()) return
 
         val token = GitHubClient.getToken()
 
@@ -33,7 +32,7 @@ class GitHubClientTest {
 
     @Test
     fun loadDbExtractContent_loadsEnTestJson() {
-        assumeTrue(GitHubClient.isAvailable(), "Skipping: GitHub token not available")
+        if (!GitHubClient.isAvailable()) return
 
         val content = GitHubClient.loadDbExtractContent("en", "test.json")
 
@@ -47,7 +46,7 @@ class GitHubClientTest {
 
     @Test
     fun loadFileContent_loadsSpecificFile() {
-        assumeTrue(GitHubClient.isAvailable(), "Skipping: GitHub token not available")
+        if (!GitHubClient.isAvailable()) return
 
         val content = GitHubClient.loadFileContent(
             owner = "slovymovy",
@@ -62,9 +61,9 @@ class GitHubClientTest {
 
     @Test
     fun loadDbExtractContent_throwsForNonExistentFile() {
-        assumeTrue(GitHubClient.isAvailable(), "Skipping: GitHub token not available")
+        if (!GitHubClient.isAvailable()) return
 
-        assertThrows<Exception> {
+        assertFailsWith<Exception> {
             GitHubClient.loadDbExtractContent("en", "nonexistent-file-12345.json")
         }
     }
