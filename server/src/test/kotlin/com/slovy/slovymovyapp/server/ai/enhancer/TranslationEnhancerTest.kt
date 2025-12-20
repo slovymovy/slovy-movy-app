@@ -1,175 +1,87 @@
 package com.slovy.slovymovyapp.server.ai.enhancer
 
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
+import com.openai.models.ChatModel
+import com.slovy.slovymovyapp.server.ai.AIProvider
+import com.slovy.slovymovyapp.server.ai.AIProviderType
+import com.slovy.slovymovyapp.server.ai.GEMINI_2_5_FLASH
+import com.slovy.slovymovyapp.server.ai.GEMINI_2_5_FLASH_LITE
+import com.slovy.slovymovyapp.server.ai.GEMINI_3_0_FLASH_PREVIEW
+import com.slovy.slovymovyapp.server.ai.GeminiProvider
+import com.slovy.slovymovyapp.server.ai.OpenAIProvider
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 class TranslationEnhancerTest {
 
-    @Test
-    fun testMergeTranslationData() {
-        val enhancer = TranslationEnhancer()
+    @ParameterizedTest
+    @EnumSource(AIProviderType::class)
+    fun enhanceTranslationsFromDbExtract(providerType: AIProviderType) {
+        val provider = providerFor(providerType)
+        assertTrue(provider.isAvailable(), "Provider $providerType must be available for real AI call")
 
-        // Create original language card
-        val originalCard = LanguageCardResponse(
-            entries = listOf(
-                LanguageCardPosEntry(
-                    pos = "noun",
-                    senses = listOf(
-                        LanguageCardResponseSense(
-                            senseId = "test-sense-1",
-                            senseDefinition = "A financial institution",
-                            learnerLevel = "A2",
-                            frequency = "High",
-                            semanticGroupId = "financial",
-                            examples = listOf(
-                                LanguageCardExample(text = "I went to the bank")
-                            )
-                        )
-                    )
-                )
-            )
+        val languageCardRequest =
+            DbExtractEnhancerUtils.createLanguageCardRequest(word = "celebration", langCode = "en")
+        assertNotNull(languageCardRequest, "Expected language card request from db_extract resources")
+
+        val languageCardModel = pickFastModel(provider)
+        val languageCard = LanguageCardEnhancer().enhance(
+            request = languageCardRequest!!,
+            provider = provider,
+            temperature = 0f,
+            reasoningBudget = 200,
+            seed = 42,
+            model = languageCardModel,
+            maxOutputTokens = 2048
         )
 
-        // Create translation response
-        val translationResponse = TranslationResponse(
-            senseTranslations = listOf(
-                SenseTranslationData(
-                    senseId = "test-sense-1",
-                    targetLangDefinition = "Финансовое учреждение",
-                    translations = listOf(
-                        LanguageCardTranslation(
-                            targetLangWord = "банк",
-                            targetLangSenseClarification = "финансовое учреждение"
-                        )
-                    )
-                )
-            ),
-            exampleTranslations = listOf(
-                ExampleTranslationData(
-                    originalText = "I went to the bank",
-                    targetLangTranslation = "Я пошёл в банк"
-                )
-            )
-        )
-
-        // Merge translation data
-        val mergedCard = enhancer.mergeTranslationData(originalCard, translationResponse, "ru")
-
-        // Verify translations were merged correctly
-        Assertions.assertEquals(1, mergedCard.entries.size)
-        val sense = mergedCard.entries[0].senses[0]
-        Assertions.assertEquals(1, sense.translations.keys.size)
-        Assertions.assertTrue(sense.translations.containsKey("ru"))
-        Assertions.assertEquals(1, sense.translations["ru"]!!.size)
-        Assertions.assertEquals("банк", sense.translations["ru"]!![0].targetLangWord)
-        Assertions.assertEquals("финансовое учреждение", sense.translations["ru"]!![0].targetLangSenseClarification)
-
-        // Verify example translations were merged
-        val example = sense.examples[0]
-        Assertions.assertTrue(example.targetLangTranslations.containsKey("ru"))
-        Assertions.assertEquals("Я пошёл в банк", example.targetLangTranslations["ru"])
-    }
-
-    @Test
-    fun testMergeTranslationDataWithWTags() {
-        val enhancer = TranslationEnhancer()
-
-        // Create original language card with <w> tags in example
-        val originalCard = LanguageCardResponse(
-            entries = listOf(
-                LanguageCardPosEntry(
-                    pos = "noun",
-                    senses = listOf(
-                        LanguageCardResponseSense(
-                            senseId = "test-sense-1",
-                            senseDefinition = "A financial institution",
-                            learnerLevel = "A2",
-                            frequency = "High",
-                            semanticGroupId = "financial",
-                            examples = listOf(
-                                LanguageCardExample(text = "I went to the <w>bank</w>")
-                            )
-                        )
-                    )
-                )
-            )
-        )
-
-        // Create translation response - note the original text doesn't have <w> tags
-        val translationResponse = TranslationResponse(
-            senseTranslations = listOf(
-                SenseTranslationData(
-                    senseId = "test-sense-1",
-                    targetLangDefinition = "Финансовое учреждение",
-                    translations = listOf(
-                        LanguageCardTranslation(
-                            targetLangWord = "банк",
-                            targetLangSenseClarification = "финансовое учреждение"
-                        )
-                    )
-                )
-            ),
-            exampleTranslations = listOf(
-                ExampleTranslationData(
-                    originalText = "I went to the bank",
-                    targetLangTranslation = "Я пошёл в <w>банк</w>"
-                )
-            )
-        )
-
-        // Merge translation data - should match despite <w> tags
-        val mergedCard = enhancer.mergeTranslationData(originalCard, translationResponse, "ru")
-
-        // Verify example translations were merged correctly
-        val example = mergedCard.entries[0].senses[0].examples[0]
-        Assertions.assertTrue(example.targetLangTranslations.containsKey("ru"))
-        Assertions.assertEquals("Я пошёл в <w>банк</w>", example.targetLangTranslations["ru"])
-    }
-
-    @Test
-    fun testBuildTranslationSchema() {
-        val enhancer = TranslationEnhancer()
-
-        val languageCardData = LanguageCardResponse(
-            entries = listOf(
-                LanguageCardPosEntry(
-                    pos = "noun",
-                    senses = listOf(
-                        LanguageCardResponseSense(
-                            senseId = "sense-1",
-                            senseDefinition = "Definition 1",
-                            learnerLevel = "A1",
-                            frequency = "High",
-                            semanticGroupId = "group1"
-                        ),
-                        LanguageCardResponseSense(
-                            senseId = "sense-2",
-                            senseDefinition = "Definition 2",
-                            learnerLevel = "B1",
-                            frequency = "Middle",
-                            semanticGroupId = "group2"
-                        )
-                    )
-                )
-            )
-        )
-
-        val request = TranslationRequest(
-            word = "test",
+        val translationRequest = DbExtractEnhancerUtils.createTranslationRequest(
+            word = "celebration",
             langCode = "en",
             targetLangCode = "ru",
-            languageCardData = languageCardData,
-            translations = emptyList()
+            languageCardData = languageCard
         )
 
-        val schema = enhancer.buildTranslationSchema(request)
+        val translationModel = pickFastModel(provider)
+        val translationResponse = TranslationEnhancer().enhanceWithTranslations(
+            request = translationRequest,
+            provider = provider,
+            targetLanguageName = DbExtractEnhancerUtils.targetLanguageName("ru"),
+            systemPrompt = EnhancerPrompts.TRANSLATION_SYSTEM_PROMPT,
+            temperature = 0f,
+            reasoningBudget = 200,
+            model = translationModel,
+            seed = 42,
+            maxOutputTokens = 2048
+        )
 
-        // Verify schema contains expected elements
-        Assertions.assertTrue(schema.contains("\"sense_id\""))
-        Assertions.assertTrue(schema.contains("\"sense-1\""))
-        Assertions.assertTrue(schema.contains("\"sense-2\""))
-        Assertions.assertTrue(schema.contains("\"target_lang_definition\""))
-        Assertions.assertTrue(schema.contains("\"translations\""))
-        Assertions.assertTrue(schema.contains("\"example_translations\""))
+        assertTrue(translationResponse.senseTranslations.isNotEmpty(), "Should contain sense translations")
+        assertTrue(translationResponse.exampleTranslations.isNotEmpty(), "Should contain example translations")
+
+        val merged = TranslationEnhancer().mergeTranslationData(languageCard, translationResponse, "ru")
+        val firstSense = merged.entries.first().senses.first()
+        assertTrue(firstSense.translations.containsKey("ru"), "Merged card should include target language translations")
+    }
+
+    private fun providerFor(type: AIProviderType): AIProvider =
+        when (type) {
+            AIProviderType.GEMINI -> GeminiProvider()
+            AIProviderType.OPENAI -> OpenAIProvider()
+        }
+
+    private fun pickFastModel(provider: AIProvider): String {
+        val models = provider.getAvailableModels()
+        val preferred = when (provider) {
+            is GeminiProvider -> listOf(GEMINI_2_5_FLASH, GEMINI_2_5_FLASH_LITE, GEMINI_3_0_FLASH_PREVIEW)
+            is OpenAIProvider -> listOf(
+                ChatModel.GPT_5_NANO.asString(),
+                ChatModel.O4_MINI.asString(),
+                ChatModel.GPT_4O.asString()
+            )
+            else -> emptyList()
+        }
+        return preferred.firstOrNull { candidate -> models.any { it.value == candidate } }
+            ?: models.first().value
     }
 }

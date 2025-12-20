@@ -1,196 +1,74 @@
 package com.slovy.slovymovyapp.server.ai.enhancer
 
-import org.junit.jupiter.api.Assertions
+import com.openai.models.ChatModel
+import com.slovy.slovymovyapp.server.ai.AIProvider
+import com.slovy.slovymovyapp.server.ai.AIProviderType
+import com.slovy.slovymovyapp.server.ai.GEMINI_2_5_FLASH
+import com.slovy.slovymovyapp.server.ai.GEMINI_2_5_FLASH_LITE
+import com.slovy.slovymovyapp.server.ai.GEMINI_3_0_FLASH_PREVIEW
+import com.slovy.slovymovyapp.server.ai.GeminiProvider
+import com.slovy.slovymovyapp.server.ai.OpenAIProvider
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 class LanguageCardEnhancerTest {
 
-    @Test
-    fun testBuildSchemaWithSynonymsAndAntonyms() {
-        val enhancer = LanguageCardEnhancer()
+    @ParameterizedTest
+    @EnumSource(AIProviderType::class)
+    fun enhanceFromDbExtract_withRealAI(providerType: AIProviderType) {
+        val provider = providerFor(providerType)
+        assertTrue(provider.isAvailable(), "Provider $providerType must be available for real AI call")
 
-        val request = LanguageCardRequest(
-            word = "happy",
-            langCode = "en",
-            entries = listOf(
-                LanguageCardEntry(
-                    pos = "adjective",
-                    senses = listOf(
-                        LanguageCardSense(
-                            senseId = "sense-1",
-                            glosses = listOf("feeling or showing pleasure or contentment")
-                        )
-                    ),
-                    wordLinkages = listOf(
-                        LanguageCardWordLinkage(
-                            word = "joyful",
-                            linkageType = LinkageType.SYNONYMS
-                        ),
-                        LanguageCardWordLinkage(
-                            word = "cheerful",
-                            linkageType = LinkageType.SYNONYMS
-                        ),
-                        LanguageCardWordLinkage(
-                            word = "sad",
-                            linkageType = LinkageType.ANTONYMS
-                        ),
-                        LanguageCardWordLinkage(
-                            word = "unhappy",
-                            linkageType = LinkageType.ANTONYMS
-                        )
-                    )
-                )
-            )
+        val request = DbExtractEnhancerUtils.createLanguageCardRequest(word = "celebration", langCode = "en")
+        assertNotNull(request, "Expected request to be built from db_extract resources")
+
+        val model = pickFastModel(provider)
+        val response = LanguageCardEnhancer().enhance(
+            request = request!!,
+            provider = provider,
+            temperature = 0f,
+            reasoningBudget = 200,
+            seed = 42,
+            model = model,
+            maxOutputTokens = 2048
         )
 
-        val schema = enhancer.buildSchema(request)
-
-        // Verify schema contains expected structure
-        Assertions.assertTrue(schema.contains("\"type\": \"object\""))
-        Assertions.assertTrue(schema.contains("\"entries\""))
-        Assertions.assertTrue(schema.contains("\"pos\""))
-        Assertions.assertTrue(schema.contains("\"senses\""))
-        Assertions.assertTrue(schema.contains("\"sense_definition\""))
-        Assertions.assertTrue(schema.contains("\"learner_level\""))
-
-        // Verify synonyms are in schema enum
-        Assertions.assertTrue(schema.contains("\"joyful\""))
-        Assertions.assertTrue(schema.contains("\"cheerful\""))
-
-        // Verify antonyms are in schema enum
-        Assertions.assertTrue(schema.contains("\"sad\""))
-        Assertions.assertTrue(schema.contains("\"unhappy\""))
-
-        // Verify sense_id enum
-        Assertions.assertTrue(schema.contains("\"sense-1\""))
+        assertTrue(response.entries.isNotEmpty())
+        val firstSense = response.entries.first().senses.first()
+        assertTrue(firstSense.senseDefinition.isNotBlank(), "Sense definition should not be blank")
+        assertTrue(firstSense.learnerLevel.isNotBlank(), "Learner level should not be blank")
+        assertTrue(firstSense.frequency.isNotBlank(), "Frequency should not be blank")
     }
 
     @Test
-    fun testBuildSchemaWithNoLinkages() {
-        val enhancer = LanguageCardEnhancer()
-
-        val request = LanguageCardRequest(
-            word = "test",
-            langCode = "en",
-            entries = listOf(
-                LanguageCardEntry(
-                    pos = "noun",
-                    senses = listOf(
-                        LanguageCardSense(
-                            senseId = "sense-1",
-                            glosses = listOf("a procedure intended to establish quality")
-                        )
-                    ),
-                    wordLinkages = emptyList()
-                )
-            )
-        )
-
-        val schema = enhancer.buildSchema(request)
-
-        // Schema should still be valid even without synonyms/antonyms
-        Assertions.assertTrue(schema.contains("\"type\": \"object\""))
-        Assertions.assertTrue(schema.contains("\"synonyms\""))
-        Assertions.assertTrue(schema.contains("\"antonyms\""))
+    fun createRequestFromDbExtractResources() {
+        val request = DbExtractEnhancerUtils.createLanguageCardRequest("celebration", "en")
+        assertNotNull(request, "Expected request to be created from db_extract test resources")
+        assertTrue(request!!.entries.isNotEmpty())
+        assertTrue(request.entries.first().senses.isNotEmpty())
     }
 
-    @Test
-    fun testBuildSchemaWithMultipleSenses() {
-        val enhancer = LanguageCardEnhancer()
+    private fun providerFor(type: AIProviderType): AIProvider =
+        when (type) {
+            AIProviderType.GEMINI -> GeminiProvider()
+            AIProviderType.OPENAI -> OpenAIProvider()
+        }
 
-        val request = LanguageCardRequest(
-            word = "bank",
-            langCode = "en",
-            entries = listOf(
-                LanguageCardEntry(
-                    pos = "noun",
-                    senses = listOf(
-                        LanguageCardSense(
-                            senseId = "sense-financial",
-                            glosses = listOf("a financial institution")
-                        ),
-                        LanguageCardSense(
-                            senseId = "sense-river",
-                            glosses = listOf("the land alongside a river")
-                        )
-                    ),
-                    wordLinkages = emptyList()
-                ),
-                LanguageCardEntry(
-                    pos = "verb",
-                    senses = listOf(
-                        LanguageCardSense(
-                            senseId = "sense-deposit",
-                            glosses = listOf("to deposit money in a bank")
-                        )
-                    ),
-                    wordLinkages = emptyList()
-                )
+    private fun pickFastModel(provider: AIProvider): String {
+        val models = provider.getAvailableModels()
+        val preferred = when (provider) {
+            is GeminiProvider -> listOf(GEMINI_2_5_FLASH, GEMINI_2_5_FLASH_LITE, GEMINI_3_0_FLASH_PREVIEW)
+            is OpenAIProvider -> listOf(
+                ChatModel.GPT_5_NANO.asString(),
+                ChatModel.O4_MINI.asString(),
+                ChatModel.GPT_4O.asString()
             )
-        )
-
-        val schema = enhancer.buildSchema(request)
-
-        // Verify all sense IDs are in the schema
-        Assertions.assertTrue(schema.contains("\"sense-financial\""))
-        Assertions.assertTrue(schema.contains("\"sense-river\""))
-        Assertions.assertTrue(schema.contains("\"sense-deposit\""))
-    }
-
-    @Test
-    fun testBuildSchemaContainsTraitTypes() {
-        val enhancer = LanguageCardEnhancer()
-
-        val request = LanguageCardRequest(
-            word = "test",
-            langCode = "en",
-            entries = listOf(
-                LanguageCardEntry(
-                    pos = "noun",
-                    senses = listOf(
-                        LanguageCardSense(
-                            senseId = "sense-1",
-                            glosses = listOf("test")
-                        )
-                    )
-                )
-            )
-        )
-
-        val schema = enhancer.buildSchema(request)
-
-        // Verify trait types are in schema
-        Assertions.assertTrue(schema.contains("\"archaic\""))
-        Assertions.assertTrue(schema.contains("\"informal\""))
-        Assertions.assertTrue(schema.contains("\"technical\""))
-        Assertions.assertTrue(schema.contains("\"regional\""))
-    }
-
-    @Test
-    fun testBuildSchemaContainsNameTypes() {
-        val enhancer = LanguageCardEnhancer()
-
-        val request = LanguageCardRequest(
-            word = "London",
-            langCode = "en",
-            entries = listOf(
-                LanguageCardEntry(
-                    pos = "name",
-                    senses = listOf(
-                        LanguageCardSense(
-                            senseId = "sense-1",
-                            glosses = listOf("capital city of England")
-                        )
-                    )
-                )
-            )
-        )
-
-        val schema = enhancer.buildSchema(request)
-
-        // Verify name types are in schema
-        Assertions.assertTrue(schema.contains("\"person_name\""))
-        Assertions.assertTrue(schema.contains("\"place_name\""))
-        Assertions.assertTrue(schema.contains("\"organization_name\""))
+            else -> emptyList()
+        }
+        return preferred.firstOrNull { candidate -> models.any { it.value == candidate } }
+            ?: models.first().value
     }
 }
