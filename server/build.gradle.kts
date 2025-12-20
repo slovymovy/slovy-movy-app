@@ -24,16 +24,16 @@ dependencies {
     implementation(libs.commons.text)
 
     // AI providers
-    api("com.google.genai:google-genai:1.32.0") {
+    api(libs.google.genai) {
         exclude(group = "commons-logging", module = "commons-logging")
     }
-    api("com.openai:openai-java:4.11.0")
+    api(libs.openai.java)
 
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks.test {

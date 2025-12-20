@@ -3,7 +3,6 @@ package com.slovy.slovymovyapp.server.ai
 import com.google.genai.Client
 import com.google.genai.types.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 
@@ -182,7 +181,7 @@ class GeminiProvider : AIProvider {
         return try {
             System.getenv("AISTUDIO_KEY")?.takeIf { it.isNotBlank() } != null ||
                     File(".aistudio_key").exists()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

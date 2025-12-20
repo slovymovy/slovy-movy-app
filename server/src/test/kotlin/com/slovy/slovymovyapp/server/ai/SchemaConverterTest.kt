@@ -1,6 +1,5 @@
 package com.slovy.slovymovyapp.server.ai
 
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -10,8 +9,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class SchemaConverterTest {
-
-    private val json = Json { prettyPrint = true }
 
     @Test
     fun testBasicObjectConversion() {

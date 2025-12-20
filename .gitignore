@@ -20,6 +20,8 @@ captures
 /iosApp/Configuration/Config.local.xcconfig 
 .db-files
 /composeApp/release/*
+/.aistudio_key
+/.openai_api_key
 .aistudio_key*
 .openai_api_key
 /server/.aistudio_key*

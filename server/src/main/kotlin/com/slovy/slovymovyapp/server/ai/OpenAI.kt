@@ -13,7 +13,6 @@ import com.openai.models.chat.completions.ChatCompletionMessageParam
 import com.openai.models.chat.completions.ChatCompletionSystemMessageParam
 import com.openai.models.chat.completions.ChatCompletionUserMessageParam
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import java.io.File
 
@@ -282,7 +281,7 @@ class OpenAIProvider : AIProvider {
         return try {
             System.getenv("OPENAI_API_KEY")?.takeIf { it.isNotBlank() } != null ||
                     File(".openai_api_key").exists()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
