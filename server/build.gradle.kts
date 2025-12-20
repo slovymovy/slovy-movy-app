@@ -23,6 +23,12 @@ dependencies {
     implementation(libs.sqldelight.sqliteDriver)
     implementation(libs.commons.text)
 
+    // AI providers
+    api("com.google.genai:google-genai:1.32.0") {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
+    api("com.openai:openai-java:4.11.0")
+
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
 }
