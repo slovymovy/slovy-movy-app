@@ -26,3 +26,4 @@ captures
 .openai_api_key
 /server/.aistudio_key*
 /server/.openai_api_key
+/server/.github_key
