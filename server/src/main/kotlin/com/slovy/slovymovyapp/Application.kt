@@ -4,6 +4,12 @@ import com.slovy.slovymovyapp.builder.ServerDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
+import com.slovy.slovymovyapp.ingestion.ExtractedWordData
+import com.slovy.slovymovyapp.server.ai.GEMINI_3_0_FLASH_PREVIEW
+import com.slovy.slovymovyapp.server.ai.GeminiProvider
+import com.slovy.slovymovyapp.server.ai.enhancer.DbExtractEnhancerUtils
+import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardEnhancer
+import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardResponse
 import com.slovy.slovymovyapp.server.github.GitHubClient
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -11,6 +17,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import java.nio.file.Files
 
@@ -57,6 +64,56 @@ fun Application.module() {
                 call.respond(HttpStatusCode.NotFound, "Word '$word' not found for language '$lang'")
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Failed to fetch content: ${e.message}")
+            }
+        }
+
+        get("/word/{lang}/{word}") {
+            val lang = call.parameters["lang"]
+            val word = call.parameters["word"]
+
+            if (lang.isNullOrBlank() || word.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing lang or word parameter")
+                return@get
+            }
+
+            if (!GitHubClient.isAvailable()) {
+                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+                return@get
+            }
+
+            val geminiProvider = GeminiProvider()
+            if (!geminiProvider.isAvailable()) {
+                call.respond(HttpStatusCode.ServiceUnavailable, "Gemini API key not configured")
+                return@get
+            }
+
+            try {
+                val json = Json { ignoreUnknownKeys = true }
+                val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
+                val extractedData = json.decodeFromString(ExtractedWordData.serializer(), content)
+                val request = DbExtractEnhancerUtils.createLanguageCardRequest(extractedData)
+
+                if (request == null) {
+                    call.respond(HttpStatusCode.NotFound, "No entries found for word '$word' in language '$lang'")
+                    return@get
+                }
+
+                val enhancer = LanguageCardEnhancer()
+                val response = enhancer.enhance(
+                    request = request,
+                    provider = geminiProvider,
+                    model = GEMINI_3_0_FLASH_PREVIEW,
+                    reasoningBudget = 100 // LOW thinking level
+                )
+
+                call.respondText(
+                    json.encodeToString(LanguageCardResponse.serializer(), response),
+                    ContentType.Application.Json
+                )
+            } catch (_: org.kohsuke.github.GHFileNotFoundException) {
+                call.respond(HttpStatusCode.NotFound, "Word '$word' not found for language '$lang'")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Failed to process word: ${e.message}")
             }
         }
 
