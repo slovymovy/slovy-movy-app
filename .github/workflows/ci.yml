@@ -43,7 +43,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-key-${{ matrix.api-level }}
+          key: avd-key-${{ matrix.api-level }}-linux
 
       - name: check (all host-available targets)
         env:
@@ -84,7 +84,7 @@ jobs:
           disable-animations: true
           script: |
             ./gradlew connectedCheck; status=$?
-            killall -INT crashpad_handler || true # see https://github.com/ReactiveCircus/android-emulator-runner/issues/385
+            killall -INT crashpad_handler || true # seeache https://github.com/ReactiveCircus/android-emulator-runner/issues/385
             exit $status
 
       - name: Upload test results and reports (Linux)
