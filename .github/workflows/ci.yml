@@ -48,6 +48,8 @@ jobs:
       - name: check (all host-available targets)
         env:
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
         run: |
           chmod +x gradlew
           ./gradlew check
@@ -55,6 +57,8 @@ jobs:
       - name: run Android unit tests
         env:
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
         run: ./gradlew testDebugUnitTest
 
       - name: create AVD and generate snapshot for caching
@@ -71,6 +75,8 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         env:
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
         with:
           api-level: ${{ matrix.api-level }}
           force-avd-creation: false
@@ -117,6 +123,8 @@ jobs:
       - name: check (all host-available targets)
         env:
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
         run: |
           chmod +x gradlew
           ./gradlew check
@@ -125,6 +133,8 @@ jobs:
         env:
           SDK_NAME: iphonesimulator
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
         run: |
           ./gradlew iosSimulatorArm64Test
 
@@ -132,6 +142,8 @@ jobs:
         env:
           SDK_NAME: iphonesimulator
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
         run: |
           ./gradlew iosX64Test
 
