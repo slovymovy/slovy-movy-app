@@ -80,6 +80,15 @@ class TranslationEnhancer {
             posEntry.senses.map { it.senseId }
         }.distinct()
 
+        val senseIdsSchema = if (senseIds.isNotEmpty() && senseIds.size < 30) {
+            """,
+            "enum": [
+              ${senseIds.joinToString(",") { "\"$it\"" }}
+            ]"""
+        } else {
+            ""
+        }
+
         return """
 {
   "type": "object",
@@ -90,10 +99,7 @@ class TranslationEnhancer {
         "type": "object",
         "properties": {
           "sense_id": {
-            "type": "string",
-            "enum": [
-              ${senseIds.joinToString(",") { "\"$it\"" }}
-            ]
+            "type": "string"$senseIdsSchema
           },
           "target_lang_definition": {
             "type": "string"

@@ -65,6 +65,8 @@ class JsonIngestionBuilder(
         val zipfFrequency = frequencyMap[lemmaWord]
             ?: throw IllegalArgumentException("Lemma '$lemmaWord' not found in frequency map")
 
+        val lemmaNormalized = stripAccents(lemmaWord)
+
         val dictDb = dbManager.openDictionary(langCode)
         val dictQ = dictDb.dictionaryQueries
         dictDb.transaction {
@@ -106,13 +108,13 @@ class JsonIngestionBuilder(
             processed.entries.forEach { entry ->
                 val key = mapPos(entry.pos)
                 if (!posToEntryId.containsKey(key)) {
-                    posToEntryId[key!!] = Uuid.random() // TODO: make it consistent
+                    val hash = md5("${lemmaWord}_${lemmaNormalized}_${key!!.name}".encodeToByteArray())
+                    posToEntryId[key] = Uuid.fromByteArray(hash.sliceArray(0..15))
                 }
             }
 
             // Create single lemma entry (shared across all POS)
             // Deterministic lemma ID generation using MD5 hash
-            val lemmaNormalized = stripAccents(lemmaWord)
             val str = lemmaWord + "_" + lemmaNormalized
 
             val hash = md5(str.encodeToByteArray())
@@ -193,7 +195,7 @@ class JsonIngestionBuilder(
                 val pos = mapPos(posEntry.pos)
                 val lemmaPosIdForPos = posToEntryId[pos]!!
 
-                posEntry.senses.forEachIndexed { sIdx, sense ->
+                posEntry.senses.forEachIndexed { _, sense ->
                     val senseId = uuidParse(sense.senseId)
                     dictQ.insertSense(
                         sense_id = senseId,

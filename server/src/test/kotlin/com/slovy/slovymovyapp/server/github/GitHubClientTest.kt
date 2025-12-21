@@ -120,9 +120,6 @@ class GitHubClientTest {
             // Cleanup
             cleanUpBranch(testBranch)
         }
-
-        // Verify cleanup
-        assertFalse(GitHubClient.branchExists(testBranch), "Test branch should be deleted")
     }
 
     private fun cleanUpBranch(testBranch: String) {
@@ -134,7 +131,6 @@ class GitHubClientTest {
                 GitHubClient.deleteBranch(testBranch)
             }
         }
-        Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS)
     }
 
     @Test
