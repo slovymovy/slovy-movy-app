@@ -7,17 +7,16 @@ import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.ingestion.ExtractedWordData
 import com.slovy.slovymovyapp.server.ai.GEMINI_3_0_FLASH_PREVIEW
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
-import com.slovy.slovymovyapp.server.ai.enhancer.DbExtractEnhancerUtils
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardEnhancer
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardResponse
-import com.slovy.slovymovyapp.server.ai.enhancer.TranslationEnhancer
-import com.slovy.slovymovyapp.server.ai.enhancer.TranslationRequest
-import com.slovy.slovymovyapp.server.ai.enhancer.TranslationResponse
+import com.slovy.slovymovyapp.server.ai.enhancer.*
+import com.slovy.slovymovyapp.server.cloudrun.CloudTasksAuthVerifier
 import com.slovy.slovymovyapp.server.github.GitHubClient
+import com.slovy.slovymovyapp.server.tasks.RepoUpdateTaskClient
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.calllogging.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.async
@@ -26,7 +25,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.kohsuke.github.GHFileNotFoundException
+import org.slf4j.event.Level
 import java.nio.file.Files
+
+const val updateRepoPath = "/internal/update-repo/"
 
 fun main() {
     embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
@@ -37,6 +39,10 @@ fun Application.module() {
 
     val db: AppDatabase = ServerDbManager(Files.createTempDirectory("openwords").toFile()).openApp()
     val repo = SettingsRepository(db)
+
+    install(CallLogging) {
+        level = Level.INFO
+    }
 
     routing {
         get("/") {
@@ -77,6 +83,7 @@ fun Application.module() {
         get("/word/{lang}/{word}") {
             val lang = call.parameters["lang"]
             val word = call.parameters["word"]
+            val push = call.parameters["push"]
             val translationsParam = call.request.queryParameters["translations"]
 
             if (lang.isNullOrBlank() || word.isNullOrBlank()) {
@@ -105,10 +112,14 @@ fun Application.module() {
                     response = addMissingTranslations(response, lang, word, translationsParam, json)
                 }
 
-                call.respondText(
-                    json.encodeToString(LanguageCardResponse.serializer(), response),
-                    ContentType.Application.Json
-                )
+                val responseJson = json.encodeToString(LanguageCardResponse.serializer(), response)
+
+                // Step 3: Queue Cloud Tasks update if requested
+                if (!push.isNullOrBlank()) {
+                    RepoUpdateTaskClient.queueRepoUpdate(lang, word, responseJson)
+                }
+
+                call.respondText(responseJson, ContentType.Application.Json)
             } catch (_: GHFileNotFoundException) {
                 call.respond(HttpStatusCode.NotFound, "Word '$word' not found for language '$lang'")
             } catch (e: Exception) {
@@ -116,10 +127,37 @@ fun Application.module() {
             }
         }
 
+        // Internal endpoint for Cloud Tasks callbacks
+        post("$updateRepoPath{lang}/{word}") {
+            // Verify OIDC token from Cloud Tasks
+            if (!CloudTasksAuthVerifier.verify(call.request.headers["Authorization"])) {
+                call.respond(HttpStatusCode.Forbidden, "Not authorized")
+                return@post
+            }
+
+            val lang = call.parameters["lang"]
+            val word = call.parameters["word"]
+
+            if (lang.isNullOrBlank() || word.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing lang or word parameter")
+                return@post
+            }
+
+            try {
+                val responseJson = call.receiveText()
+                call.application.environment.log.info("Received response $responseJson")
+                // TODO: Update GitHub repository with processed data
+                // GitHubClient.updateWordsContent(lang, word, responseJson)
+
+                call.respond(HttpStatusCode.OK, "Updated $lang/$word")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Failed to update: ${e.message}")
+            }
+        }
     }
 }
 
-private suspend fun enhanceWithAI(lang: String, word: String, json: Json): LanguageCardResponse {
+private fun enhanceWithAI(lang: String, word: String, json: Json): LanguageCardResponse {
     val geminiProvider = GeminiProvider()
     if (!geminiProvider.isAvailable()) {
         throw IllegalStateException("Gemini API key not configured")
