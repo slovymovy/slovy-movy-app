@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.logback)
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)
+    implementation(libs.ktor.serverCallLogging)
     implementation(libs.kotlinx.serializationJson)
     implementation(libs.sqldelight.sqliteDriver)
     implementation(libs.commons.text)
@@ -31,6 +32,11 @@ dependencies {
 
     // GitHub client
     api(libs.github.api)
+
+    // Google Cloud
+    implementation(libs.google.cloud.tasks)
+    implementation(libs.google.cloud.core)
+    implementation(libs.google.auth.library)
 
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.test)
