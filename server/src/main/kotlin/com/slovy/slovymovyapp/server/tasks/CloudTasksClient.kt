@@ -30,7 +30,7 @@ object RepoUpdateTaskClient {
      */
     fun queueRepoUpdate(lang: String, word: String, responseJson: String) {
         val projectId = getProjectId()
-        val location = getZone()
+        val location = CloudRunMetadata.getRegion()
         val queue = getQueueName()
         val serviceUrl = CloudRunMetadata.getDeterministicServiceUrl()
         val serviceAccount = CloudRunMetadata.getServiceAccountEmail()
@@ -58,7 +58,11 @@ object RepoUpdateTaskClient {
             .setHttpRequest(httpRequestBuilder.build())
             .build()
 
-        client.createTask(queuePath, task)
+        try {
+            client.createTask(queuePath, task)
+        } catch (e: Exception) {
+            logger.error("Failed to queue task: ${e.message}")
+        }
     }
 
     private fun getQueueName(): String {

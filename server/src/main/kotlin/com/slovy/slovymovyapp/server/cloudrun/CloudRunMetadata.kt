@@ -33,4 +33,8 @@ object CloudRunMetadata {
         val serviceName = System.getenv(K_SERVICE)
         return "https://$serviceName-$projectNumber.$region.run.app"
     }
+
+    fun getRegion(): String {
+        return getZone().substringBefore("-")
+    }
 }
