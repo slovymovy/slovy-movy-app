@@ -136,9 +136,11 @@ fun Application.module() {
                 }
 
                 call.respondText(responseJson, ContentType.Application.Json)
-            } catch (_: GHFileNotFoundException) {
+            } catch (e: GHFileNotFoundException) {
+                call.application.environment.log.error("GitHub API error for $lang/$word: ${e.message}", e)
                 call.respond(HttpStatusCode.NotFound, "Word '$word' not found for language '$lang'")
             } catch (e: Exception) {
+                call.application.environment.log.error("Failed to process $lang/$word: ${e.message}", e)
                 call.respond(HttpStatusCode.InternalServerError, "Failed to process word: ${e.message}")
             }
         }
