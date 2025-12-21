@@ -40,6 +40,18 @@ class GitHubClientTest {
     }
 
     @Test
+    fun loadDbExtractContent_loadsEnFireJson() {
+        val content = GitHubClient.loadDbExtractContent("en", "fire.json")
+
+        assertNotNull(content)
+        assertTrue(content.isNotBlank(), "Content should not be blank")
+        assertTrue(
+            content.trimStart().startsWith("{") || content.trimStart().startsWith("["),
+            "Content should be valid JSON"
+        )
+    }
+
+    @Test
     fun loadFileContent_loadsSpecificFile() {
         val content = GitHubClient.loadFileContent(
             owner = "slovymovy",

@@ -1,10 +1,8 @@
 package com.slovy.slovymovyapp.server.github
 
-import org.kohsuke.github.GHFileNotFoundException
-import org.kohsuke.github.GHRef
-import org.kohsuke.github.GitHub
-import org.kohsuke.github.GitHubBuilder
+import org.kohsuke.github.*
 import java.io.File
+import java.net.URI
 
 /**
  * GitHub client provider for accessing private repository content.
@@ -99,7 +97,7 @@ object GitHubClient {
     ): String {
         val repository = client().getRepository("$owner/$repo")
         val content = repository.getFileContent(path, ref)
-        return content.read().bufferedReader().use { it.readText() }
+        return readContentText(content)
     }
 
     /**
@@ -195,7 +193,7 @@ object GitHubClient {
         val path = "$WORDS_PATH/$lang/$word.json"
         val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
         val content = repository.getFileContent(path, branchName)
-        val text = content.read().bufferedReader().use { it.readText() }
+        val text = readContentText(content)
         return text to content.sha
     }
 
@@ -297,5 +295,16 @@ object GitHubClient {
             }
             keyFile.readText().trim()
         }
+    }
+
+    private fun readContentText(content: GHContent): String {
+        val encoding = content.encoding
+        // GitHub returns encoding "none" (empty content) for larger files; use downloadUrl to fetch raw bytes.
+        if (encoding == null || encoding == "none") {
+            val downloadUrl = content.downloadUrl
+                ?: throw IllegalStateException("Missing download URL for content with encoding '$encoding'")
+            return URI.create(downloadUrl).toURL().openStream().bufferedReader().use { it.readText() }
+        }
+        return content.read().bufferedReader().use { it.readText() }
     }
 }
