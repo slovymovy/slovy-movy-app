@@ -21,6 +21,16 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 1
 
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          android: false  # Keep Android SDK
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+
       - name: enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
