@@ -101,12 +101,19 @@ fun Application.module() {
             val json = Json { ignoreUnknownKeys = true }
 
             try {
-                // Step 1: Get enhanced word (pre-processed or AI-enhanced)
+                // Step 1: Get enhanced word (check push branch first, then main, then AI-enhance)
                 var response = try {
-                    val content = GitHubClient.loadWordsContent(lang, word)
+                    // Try push branch first (contains latest updates)
+                    val (content, _) = GitHubClient.loadWordsContentFromPushBranch(lang, word)
                     json.decodeFromString(LanguageCardResponse.serializer(), content)
                 } catch (_: GHFileNotFoundException) {
-                    enhanceWithAI(lang, word, json)
+                    // Fall back to main branch
+                    try {
+                        val content = GitHubClient.loadWordsContent(lang, word)
+                        json.decodeFromString(LanguageCardResponse.serializer(), content)
+                    } catch (_: GHFileNotFoundException) {
+                        enhanceWithAI(lang, word, json)
+                    }
                 }
 
                 // Step 2: Add missing translations if requested
@@ -167,10 +174,17 @@ fun Application.module() {
                     val existing = jsonDecoder.decodeFromString(LanguageCardResponse.serializer(), existingContent)
                     val merged = WordDataMerger.merge(existing, incoming)
                     val mergedJson = jsonEncoder.encodeToString(LanguageCardResponse.serializer(), merged)
-                    GitHubClient.updateWordsContent(lang, word, mergedJson, sha, "Update $word ($lang)")
-                    call.application.environment.log.info("Merged and updated $lang/$word")
+
+                    // Skip commit if content is identical
+                    val existingPretty = jsonEncoder.encodeToString(LanguageCardResponse.serializer(), existing)
+                    if (mergedJson == existingPretty) {
+                        call.application.environment.log.info("No changes for $lang/$word, skipping commit")
+                    } else {
+                        GitHubClient.updateWordsContent(lang, word, mergedJson, sha, "Update $word ($lang)")
+                        call.application.environment.log.info("Merged and updated $lang/$word")
+                    }
                 } catch (_: GHFileNotFoundException) {
-                    // File doesn't exist - create it\
+                    // File doesn't exist - create it
                     val prettyJson = jsonEncoder.encodeToString(LanguageCardResponse.serializer(), incoming)
                     GitHubClient.createWordsContent(lang, word, prettyJson, "Add $word ($lang)")
                     call.application.environment.log.info("Created new file for $lang/$word")
