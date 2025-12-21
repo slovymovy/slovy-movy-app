@@ -69,7 +69,9 @@ class TranslationEnhancer {
             cache = cache,
             retryStrategy = retryStrategy
         )
-        return Json.decodeFromString(response)
+        val decodedResponse = Json.decodeFromString<TranslationResponse>(response)
+        validateSenseIds(request, decodedResponse)
+        return decodedResponse
     }
 
     /**
@@ -198,6 +200,22 @@ class TranslationEnhancer {
         }
 
         return originalCard.copy(entries = updatedPos)
+    }
+
+    private fun validateSenseIds(
+        request: TranslationRequest,
+        response: TranslationResponse
+    ) {
+        val sourceSenseIds = request.languageCardData.entries.flatMap { posEntry ->
+            posEntry.senses.map { it.senseId }
+        }.toSet()
+        val responseSenseIds = response.senseTranslations.map { it.senseId }.toSet()
+        val unknownSenseIds = responseSenseIds - sourceSenseIds
+        if (unknownSenseIds.isNotEmpty()) {
+            throw IllegalArgumentException(
+                "LLM returned unknown sense_id(s) in translation enhancement: ${unknownSenseIds.sorted()}"
+            )
+        }
     }
 
     /**
