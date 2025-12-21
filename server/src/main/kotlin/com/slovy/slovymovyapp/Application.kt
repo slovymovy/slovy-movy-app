@@ -8,6 +8,7 @@ import com.slovy.slovymovyapp.ingestion.ExtractedWordData
 import com.slovy.slovymovyapp.server.ai.GEMINI_3_0_FLASH_PREVIEW
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
 import com.slovy.slovymovyapp.server.ai.enhancer.*
+import com.slovy.slovymovyapp.server.ai.enhancer.DbExtractEnhancerUtils.targetLanguageName
 import com.slovy.slovymovyapp.server.cloudrun.CloudTasksAuthVerifier
 import com.slovy.slovymovyapp.server.github.GitHubClient
 import com.slovy.slovymovyapp.server.github.WordDataMerger
@@ -249,6 +250,8 @@ private suspend fun addMissingTranslations(
 ): LanguageCardResponse {
     val requestedLangCodes = translationsParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
     if (requestedLangCodes.isEmpty()) return response
+    // ensure all languages are valid - throws in case of invalid language code
+    requestedLangCodes.forEach { targetLanguageName(it) }
 
     val existingLanguages = getExistingTranslationLanguages(response)
     val missingLangCodes = requestedLangCodes.filter { it !in existingLanguages }
