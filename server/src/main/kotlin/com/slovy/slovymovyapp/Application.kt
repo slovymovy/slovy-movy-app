@@ -102,6 +102,7 @@ fun Application.module() {
 
             try {
                 // Step 1: Get enhanced word (check push branch first, then main, then AI-enhance)
+                var wasProcessed = false
                 var response = try {
                     // Try push branch first (contains latest updates)
                     val (content, _) = GitHubClient.loadWordsContentFromPushBranch(lang, word)
@@ -112,19 +113,24 @@ fun Application.module() {
                         val content = GitHubClient.loadWordsContent(lang, word)
                         json.decodeFromString(LanguageCardResponse.serializer(), content)
                     } catch (_: GHFileNotFoundException) {
+                        wasProcessed = true
                         enhanceWithAI(lang, word, json)
                     }
                 }
 
                 // Step 2: Add missing translations if requested
                 if (!translationsParam.isNullOrBlank()) {
+                    val before = response
                     response = addMissingTranslations(response, lang, word, translationsParam, json)
+                    if (response !== before) {
+                        wasProcessed = true
+                    }
                 }
 
                 val responseJson = json.encodeToString(LanguageCardResponse.serializer(), response)
 
-                // Step 3: Queue Cloud Tasks update if requested
-                if (!push.isNullOrBlank()) {
+                // Step 3: Queue Cloud Tasks update if requested (only if something was processed)
+                if (!push.isNullOrBlank() && wasProcessed) {
                     RepoUpdateTaskClient.queueRepoUpdate(lang, word, responseJson)
                 }
 
