@@ -36,6 +36,10 @@ jobs:
       - name: setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
+      - name: Get week number for cache key
+        id: week
+        run: echo "num=$(date +%Y-%V)" >> $GITHUB_OUTPUT
+
       - name: AVD cache
         uses: actions/cache@v5
         id: avd-cache
@@ -43,7 +47,16 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-key-${{ matrix.api-level }}-linux
+          key: avd-${{ matrix.api-level }}-linux-${{ steps.week.outputs.num }}
+          restore-keys: |
+            avd-${{ matrix.api-level }}-linux-
+
+      - name: Clean old AVD data on cache miss
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        run: |
+          echo "Cache miss - cleaning old AVD data"
+          rm -rf ~/.android/avd/* || true
+          rm -rf ~/.android/adb* || true
 
       - name: check (all host-available targets)
         env:
