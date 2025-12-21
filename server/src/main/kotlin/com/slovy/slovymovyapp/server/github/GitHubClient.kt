@@ -19,6 +19,7 @@ object GitHubClient {
     private const val REPO_OWNER = "slovymovy"
     private const val REPO_NAME = "kaikki-parser"
     private const val BASE_PATH = "output/db-extract"
+    private const val WORDS_PATH = "words"
     private const val DEFAULT_BRANCH = "main"
 
     private val clientInstance: GitHub by lazy {
@@ -60,6 +61,21 @@ object GitHubClient {
      */
     fun loadDbExtractContent(folder: String, file: String): String {
         val path = "$BASE_PATH/$folder/$file"
+        return loadFileContent(REPO_OWNER, REPO_NAME, path, DEFAULT_BRANCH)
+    }
+
+    /**
+     * Loads pre-processed word content from the kaikki-parser repository.
+     * Pre-processed files are already in LanguageCardResponse format.
+     *
+     * @param lang The language code (e.g., "en")
+     * @param word The word to load (e.g., "test")
+     * @return The raw file content as a String
+     * @throws IllegalStateException if token is not available
+     * @throws org.kohsuke.github.GHFileNotFoundException if file does not exist
+     */
+    fun loadWordsContent(lang: String, word: String): String {
+        val path = "$WORDS_PATH/$lang/$word.json"
         return loadFileContent(REPO_OWNER, REPO_NAME, path, DEFAULT_BRANCH)
     }
 

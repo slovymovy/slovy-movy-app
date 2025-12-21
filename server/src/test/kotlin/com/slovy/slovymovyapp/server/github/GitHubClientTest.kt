@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.server.github
 
+import org.kohsuke.github.GHFileNotFoundException
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -65,6 +66,34 @@ class GitHubClientTest {
 
         assertFailsWith<Exception> {
             GitHubClient.loadDbExtractContent("en", "nonexistent-file-12345.json")
+        }
+    }
+
+    @Test
+    fun loadWordsContent_loadsPreProcessedData() {
+        if (!GitHubClient.isAvailable()) return
+
+        // Test loading from words/ directory - file may or may not exist
+        try {
+            val content = GitHubClient.loadWordsContent("en", "test")
+
+            assertNotNull(content)
+            assertTrue(content.isNotBlank(), "Content should not be blank")
+            assertTrue(
+                content.trimStart().startsWith("{"),
+                "Content should be valid JSON object"
+            )
+        } catch (_: GHFileNotFoundException) {
+            // Expected if no pre-processed files exist yet
+        }
+    }
+
+    @Test
+    fun loadWordsContent_throwsForNonExistentFile() {
+        if (!GitHubClient.isAvailable()) return
+
+        assertFailsWith<GHFileNotFoundException> {
+            GitHubClient.loadWordsContent("en", "nonexistent-word-12345")
         }
     }
 }

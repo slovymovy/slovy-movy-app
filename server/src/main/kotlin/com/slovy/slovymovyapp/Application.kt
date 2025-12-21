@@ -25,6 +25,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
+import org.kohsuke.github.GHFileNotFoundException
 import java.nio.file.Files
 
 fun main() {
@@ -66,7 +67,7 @@ fun Application.module() {
             try {
                 val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
                 call.respondText(content, ContentType.Application.Json)
-            } catch (_: org.kohsuke.github.GHFileNotFoundException) {
+            } catch (_: GHFileNotFoundException) {
                 call.respond(HttpStatusCode.NotFound, "Word '$word' not found for language '$lang'")
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Failed to fetch content: ${e.message}")
@@ -88,85 +89,27 @@ fun Application.module() {
                 return@get
             }
 
-            val geminiProvider = GeminiProvider()
-            if (!geminiProvider.isAvailable()) {
-                call.respond(HttpStatusCode.ServiceUnavailable, "Gemini API key not configured")
-                return@get
-            }
+            val json = Json { ignoreUnknownKeys = true }
 
             try {
-                val json = Json { ignoreUnknownKeys = true }
-                val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
-                val extractedData = json.decodeFromString(ExtractedWordData.serializer(), content)
-                val request = DbExtractEnhancerUtils.createLanguageCardRequest(extractedData)
-
-                if (request == null) {
-                    call.respond(HttpStatusCode.NotFound, "No entries found for word '$word' in language '$lang'")
-                    return@get
+                // Step 1: Get enhanced word (pre-processed or AI-enhanced)
+                var response = try {
+                    val content = GitHubClient.loadWordsContent(lang, word)
+                    json.decodeFromString(LanguageCardResponse.serializer(), content)
+                } catch (_: GHFileNotFoundException) {
+                    enhanceWithAI(lang, word, json)
                 }
 
-                val enhancer = LanguageCardEnhancer()
-                var response = enhancer.enhance(
-                    request = request,
-                    provider = geminiProvider,
-                    model = GEMINI_3_0_FLASH_PREVIEW,
-                    reasoningBudget = 100 // LOW thinking level
-                )
-
-                // Process translations if requested
+                // Step 2: Add missing translations if requested
                 if (!translationsParam.isNullOrBlank()) {
-                    val targetLangCodes = translationsParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
-
-                    if (targetLangCodes.isNotEmpty()) {
-                        val translationEnhancer = TranslationEnhancer()
-
-                        // Run translations in parallel
-                        val translationResults: List<Pair<String, TranslationResponse>> = coroutineScope {
-                            targetLangCodes.map { targetLangCode ->
-                                async {
-                                    val targetTranslations = extractedData.sourceFileToEntries.values
-                                        .flatten()
-                                        .flatMap { it.translations }
-                                        .filter { it.targetLangCode == targetLangCode }
-
-                                    val translationRequest = TranslationRequest(
-                                        word = word,
-                                        langCode = lang,
-                                        targetLangCode = targetLangCode,
-                                        languageCardData = response,
-                                        translations = targetTranslations
-                                    )
-
-                                    val targetLanguageName = DbExtractEnhancerUtils.targetLanguageName(targetLangCode)
-                                    val translationResponse = translationEnhancer.enhanceWithTranslations(
-                                        request = translationRequest,
-                                        provider = geminiProvider,
-                                        targetLanguageName = targetLanguageName,
-                                        model = GEMINI_3_0_FLASH_PREVIEW,
-                                        reasoningBudget = 100 // LOW thinking level
-                                    )
-
-                                    targetLangCode to translationResponse
-                                }
-                            }.awaitAll()
-                        }
-
-                        // Merge all translation results into the response
-                        for ((targetLangCode, translationResponse) in translationResults) {
-                            response = translationEnhancer.mergeTranslationData(
-                                originalCard = response,
-                                translationResponse = translationResponse,
-                                targetLangCode = targetLangCode
-                            )
-                        }
-                    }
+                    response = addMissingTranslations(response, lang, word, translationsParam, json)
                 }
 
                 call.respondText(
                     json.encodeToString(LanguageCardResponse.serializer(), response),
                     ContentType.Application.Json
                 )
-            } catch (_: org.kohsuke.github.GHFileNotFoundException) {
+            } catch (_: GHFileNotFoundException) {
                 call.respond(HttpStatusCode.NotFound, "Word '$word' not found for language '$lang'")
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Failed to process word: ${e.message}")
@@ -174,4 +117,109 @@ fun Application.module() {
         }
 
     }
+}
+
+private suspend fun enhanceWithAI(lang: String, word: String, json: Json): LanguageCardResponse {
+    val geminiProvider = GeminiProvider()
+    if (!geminiProvider.isAvailable()) {
+        throw IllegalStateException("Gemini API key not configured")
+    }
+
+    val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
+    val extractedData = json.decodeFromString(ExtractedWordData.serializer(), content)
+    val request = DbExtractEnhancerUtils.createLanguageCardRequest(extractedData)
+        ?: throw IllegalArgumentException("No entries found for word '$word' in language '$lang'")
+
+    return LanguageCardEnhancer().enhance(
+        request = request,
+        provider = geminiProvider,
+        model = GEMINI_3_0_FLASH_PREVIEW,
+        reasoningBudget = 100
+    )
+}
+
+private fun getExistingTranslationLanguages(response: LanguageCardResponse): Set<String> {
+    return response.entries
+        .flatMap { it.senses }
+        .flatMap { sense -> sense.translations.keys + sense.targetLangDefinitions.keys }
+        .toSet()
+}
+
+private suspend fun addMissingTranslations(
+    response: LanguageCardResponse,
+    lang: String,
+    word: String,
+    translationsParam: String,
+    json: Json
+): LanguageCardResponse {
+    val requestedLangCodes = translationsParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
+    if (requestedLangCodes.isEmpty()) return response
+
+    val existingLanguages = getExistingTranslationLanguages(response)
+    val missingLangCodes = requestedLangCodes.filter { it !in existingLanguages }
+    if (missingLangCodes.isEmpty()) return response
+
+    val geminiProvider = GeminiProvider()
+    if (!geminiProvider.isAvailable()) return response
+
+    val extractedData = try {
+        val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
+        json.decodeFromString(ExtractedWordData.serializer(), content)
+    } catch (_: GHFileNotFoundException) {
+        return response
+    }
+
+    return enhanceWithTranslations(response, extractedData, word, lang, missingLangCodes, geminiProvider)
+}
+
+private suspend fun enhanceWithTranslations(
+    response: LanguageCardResponse,
+    extractedData: ExtractedWordData,
+    word: String,
+    lang: String,
+    targetLangCodes: List<String>,
+    geminiProvider: GeminiProvider
+): LanguageCardResponse {
+    val translationEnhancer = TranslationEnhancer()
+    var updatedResponse = response
+
+    val translationResults: List<Pair<String, TranslationResponse>> = coroutineScope {
+        targetLangCodes.map { targetLangCode ->
+            async {
+                val targetTranslations = extractedData.sourceFileToEntries.values
+                    .flatten()
+                    .flatMap { it.translations }
+                    .filter { it.targetLangCode == targetLangCode }
+
+                val translationRequest = TranslationRequest(
+                    word = word,
+                    langCode = lang,
+                    targetLangCode = targetLangCode,
+                    languageCardData = updatedResponse,
+                    translations = targetTranslations
+                )
+
+                val targetLanguageName = DbExtractEnhancerUtils.targetLanguageName(targetLangCode)
+                val translationResponse = translationEnhancer.enhanceWithTranslations(
+                    request = translationRequest,
+                    provider = geminiProvider,
+                    targetLanguageName = targetLanguageName,
+                    model = GEMINI_3_0_FLASH_PREVIEW,
+                    reasoningBudget = 100
+                )
+
+                targetLangCode to translationResponse
+            }
+        }.awaitAll()
+    }
+
+    for ((targetLangCode, translationResponse) in translationResults) {
+        updatedResponse = translationEnhancer.mergeTranslationData(
+            originalCard = updatedResponse,
+            translationResponse = translationResponse,
+            targetLangCode = targetLangCode
+        )
+    }
+
+    return updatedResponse
 }
