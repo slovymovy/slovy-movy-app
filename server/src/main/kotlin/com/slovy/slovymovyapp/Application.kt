@@ -134,7 +134,7 @@ private suspend fun enhanceWithAI(lang: String, word: String, json: Json): Langu
         request = request,
         provider = geminiProvider,
         model = GEMINI_3_0_FLASH_PREVIEW,
-        reasoningBudget = 100
+        reasoningBudget = 1
     )
 }
 
@@ -205,7 +205,7 @@ private suspend fun enhanceWithTranslations(
                     provider = geminiProvider,
                     targetLanguageName = targetLanguageName,
                     model = GEMINI_3_0_FLASH_PREVIEW,
-                    reasoningBudget = 100
+                    reasoningBudget = 1
                 )
 
                 targetLangCode to translationResponse
