@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.server.github
 
+import org.kohsuke.github.GHFileNotFoundException
+import org.kohsuke.github.GHRef
 import org.kohsuke.github.GitHub
 import org.kohsuke.github.GitHubBuilder
 import java.io.File
@@ -21,6 +23,7 @@ object GitHubClient {
     private const val BASE_PATH = "output/db-extract"
     private const val WORDS_PATH = "words"
     private const val DEFAULT_BRANCH = "main"
+    private const val PUSH_BRANCH = "push"
 
     private val clientInstance: GitHub by lazy {
         val token = loadToken()
@@ -36,7 +39,7 @@ object GitHubClient {
     fun isAvailable(): Boolean {
         return try {
             System.getenv(ENV_VAR_NAME)?.takeIf { it.isNotBlank() } != null ||
-                KEY_FILE_PATHS.any { File(it).exists() }
+                    KEY_FILE_PATHS.any { File(it).exists() }
         } catch (_: Exception) {
             false
         }
@@ -105,6 +108,186 @@ object GitHubClient {
      * @throws IllegalArgumentException if token is not available
      */
     fun getToken(): String = loadToken()
+
+    /**
+     * Checks if the push branch exists.
+     */
+    fun pushBranchExists(): Boolean {
+        return branchExists(PUSH_BRANCH)
+    }
+
+    /**
+     * Checks if a branch exists.
+     */
+    fun branchExists(branchName: String): Boolean {
+        return try {
+            val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+            repository.getRef("heads/$branchName")
+            true
+        } catch (_: GHFileNotFoundException) {
+            false
+        }
+    }
+
+    /**
+     * Deletes a branch. Used for test cleanup.
+     *
+     * @throws GHFileNotFoundException if branch does not exist
+     */
+    fun deleteBranch(branchName: String) {
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        val ref = repository.getRef("heads/$branchName")
+        ref.delete()
+    }
+
+    /**
+     * Ensures the push branch exists, creating it from main if necessary.
+     *
+     * @return The GHRef for the push branch
+     */
+    fun ensurePushBranch(): GHRef {
+        return ensureBranch(PUSH_BRANCH)
+    }
+
+    /**
+     * Ensures a branch exists, creating it from main if necessary.
+     *
+     * @param branchName The branch name to ensure exists
+     * @return The GHRef for the branch
+     */
+    fun ensureBranch(branchName: String): GHRef {
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        return try {
+            repository.getRef("heads/$branchName")
+        } catch (_: GHFileNotFoundException) {
+            val mainRef = repository.getRef("heads/$DEFAULT_BRANCH")
+            val mainSha = mainRef.`object`.sha
+            try {
+                repository.createRef("refs/heads/$branchName", mainSha)
+            } catch (_: Exception) {
+                repository.getRef("heads/$branchName")
+            }
+        }
+    }
+
+    /**
+     * Loads word content from the push branch.
+     *
+     * @param lang The language code (e.g., "en")
+     * @param word The word to load (e.g., "test")
+     * @return Pair of (content, sha) where sha is needed for updates
+     * @throws GHFileNotFoundException if file does not exist
+     */
+    fun loadWordsContentFromPushBranch(lang: String, word: String): Pair<String, String> {
+        return loadWordsContentFromBranch(lang, word, PUSH_BRANCH)
+    }
+
+    /**
+     * Loads word content from a specific branch.
+     *
+     * @param lang The language code (e.g., "en")
+     * @param word The word to load (e.g., "test")
+     * @param branchName The branch to load from
+     * @return Pair of (content, sha) where sha is needed for updates
+     * @throws GHFileNotFoundException if file does not exist
+     */
+    fun loadWordsContentFromBranch(lang: String, word: String, branchName: String): Pair<String, String> {
+        val path = "$WORDS_PATH/$lang/$word.json"
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        val content = repository.getFileContent(path, branchName)
+        val text = content.read().bufferedReader().use { it.readText() }
+        return text to content.sha
+    }
+
+    /**
+     * Creates a new word file on the push branch.
+     *
+     * @param lang Language code
+     * @param word Word identifier
+     * @param content JSON content to write
+     * @param commitMessage Commit message
+     */
+    fun createWordsContent(lang: String, word: String, content: String, commitMessage: String) {
+        createWordsContentOnBranch(lang, word, content, commitMessage, PUSH_BRANCH)
+    }
+
+    /**
+     * Creates a new word file on a specific branch.
+     *
+     * @param lang Language code
+     * @param word Word identifier
+     * @param content JSON content to write
+     * @param commitMessage Commit message
+     * @param branchName The branch to create the file on
+     */
+    fun createWordsContentOnBranch(
+        lang: String,
+        word: String,
+        content: String,
+        commitMessage: String,
+        branchName: String
+    ) {
+        val path = "$WORDS_PATH/$lang/$word.json"
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        repository.createContent()
+            .content(content.toByteArray())
+            .message(commitMessage)
+            .path(path)
+            .branch(branchName)
+            .commit()
+    }
+
+    /**
+     * Updates an existing word file on the push branch.
+     * Requires the current SHA of the file for optimistic locking.
+     *
+     * @param lang Language code
+     * @param word Word identifier
+     * @param content JSON content to write
+     * @param fileSha Current SHA of the file (for optimistic locking)
+     * @param commitMessage Commit message
+     * @throws org.kohsuke.github.HttpException with 409 status on conflict
+     */
+    fun updateWordsContent(
+        lang: String,
+        word: String,
+        content: String,
+        fileSha: String,
+        commitMessage: String
+    ) {
+        updateWordsContentOnBranch(lang, word, content, fileSha, commitMessage, PUSH_BRANCH)
+    }
+
+    /**
+     * Updates an existing word file on a specific branch.
+     * Requires the current SHA of the file for optimistic locking.
+     *
+     * @param lang Language code
+     * @param word Word identifier
+     * @param content JSON content to write
+     * @param fileSha Current SHA of the file (for optimistic locking)
+     * @param commitMessage Commit message
+     * @param branchName The branch to update the file on
+     * @throws org.kohsuke.github.HttpException with 409 status on conflict
+     */
+    fun updateWordsContentOnBranch(
+        lang: String,
+        word: String,
+        content: String,
+        fileSha: String,
+        commitMessage: String,
+        branchName: String
+    ) {
+        val path = "$WORDS_PATH/$lang/$word.json"
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        repository.createContent()
+            .content(content.toByteArray())
+            .message(commitMessage)
+            .path(path)
+            .branch(branchName)
+            .sha(fileSha)
+            .commit()
+    }
 
     private fun loadToken(): String {
         return System.getenv(ENV_VAR_NAME)?.takeIf { it.isNotBlank() } ?: run {

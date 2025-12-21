@@ -1,10 +1,10 @@
 package com.slovy.slovymovyapp.server.github
 
+import com.google.common.util.concurrent.Uninterruptibles
 import org.kohsuke.github.GHFileNotFoundException
-import kotlin.test.Test
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.test.*
 
 /**
  * Integration tests for GitHubClient.
@@ -16,15 +16,11 @@ class GitHubClientTest {
 
     @Test
     fun isAvailable_returnsTrueWhenTokenExists() {
-        if (!GitHubClient.isAvailable()) return
-
         assertTrue(GitHubClient.isAvailable())
     }
 
     @Test
     fun getToken_returnsNonBlankToken() {
-        if (!GitHubClient.isAvailable()) return
-
         val token = GitHubClient.getToken()
 
         assertNotNull(token)
@@ -33,8 +29,6 @@ class GitHubClientTest {
 
     @Test
     fun loadDbExtractContent_loadsEnTestJson() {
-        if (!GitHubClient.isAvailable()) return
-
         val content = GitHubClient.loadDbExtractContent("en", "test.json")
 
         assertNotNull(content)
@@ -47,8 +41,6 @@ class GitHubClientTest {
 
     @Test
     fun loadFileContent_loadsSpecificFile() {
-        if (!GitHubClient.isAvailable()) return
-
         val content = GitHubClient.loadFileContent(
             owner = "slovymovy",
             repo = "kaikki-parser",
@@ -62,8 +54,6 @@ class GitHubClientTest {
 
     @Test
     fun loadDbExtractContent_throwsForNonExistentFile() {
-        if (!GitHubClient.isAvailable()) return
-
         assertFailsWith<Exception> {
             GitHubClient.loadDbExtractContent("en", "nonexistent-file-12345.json")
         }
@@ -71,8 +61,6 @@ class GitHubClientTest {
 
     @Test
     fun loadWordsContent_loadsPreProcessedData() {
-        if (!GitHubClient.isAvailable()) return
-
         // Test loading from words/ directory - file may or may not exist
         try {
             val content = GitHubClient.loadWordsContent("en", "test")
@@ -90,10 +78,112 @@ class GitHubClientTest {
 
     @Test
     fun loadWordsContent_throwsForNonExistentFile() {
-        if (!GitHubClient.isAvailable()) return
-
         assertFailsWith<GHFileNotFoundException> {
             GitHubClient.loadWordsContent("en", "nonexistent-word-12345")
+        }
+    }
+
+    // --- Branch and File Operation Tests ---
+    // These tests use a random test branch that is cleaned up after each test
+
+    @Test
+    fun branchOperations_createCheckAndDeleteBranch() {
+        val testBranch = "test-${UUID.randomUUID()}"
+
+        try {
+            // Branch should not exist initially
+            assertFalse(GitHubClient.branchExists(testBranch), "Test branch should not exist initially")
+
+            // Create branch
+            val ref = GitHubClient.ensureBranch(testBranch)
+            assertNotNull(ref, "Created branch ref should not be null")
+
+            // Branch should now exist
+            assertTrue(GitHubClient.branchExists(testBranch), "Test branch should exist after creation")
+
+            // Calling ensureBranch again should return existing branch
+            val existingRef = GitHubClient.ensureBranch(testBranch)
+            assertNotNull(existingRef, "Existing branch ref should not be null")
+        } finally {
+            // Cleanup
+            cleanUpBranch(testBranch)
+        }
+
+        // Verify cleanup
+        assertFalse(GitHubClient.branchExists(testBranch), "Test branch should be deleted")
+    }
+
+    private fun cleanUpBranch(testBranch: String) {
+        if (GitHubClient.branchExists(testBranch)) {
+            try {
+                GitHubClient.deleteBranch(testBranch)
+            } catch (_: Exception) {
+                Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS)
+                GitHubClient.deleteBranch(testBranch)
+            }
+        }
+        Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS)
+    }
+
+    @Test
+    fun fileOperations_createReadAndUpdateFile() {
+        val testBranch = "test-${UUID.randomUUID()}"
+        val testWord = "test-word-${UUID.randomUUID()}"
+        val testLang = "test"
+
+        try {
+            // Create test branch
+            GitHubClient.ensureBranch(testBranch)
+
+            // Create initial content
+            val initialContent = """{"entries": [], "word_family": null}"""
+            GitHubClient.createWordsContentOnBranch(
+                lang = testLang,
+                word = testWord,
+                content = initialContent,
+                commitMessage = "Test: Create $testWord",
+                branchName = testBranch
+            )
+
+            // Read content back
+            val (readContent, sha) = GitHubClient.loadWordsContentFromBranch(testLang, testWord, testBranch)
+            assertEquals(initialContent, readContent, "Read content should match initial content")
+            assertNotNull(sha, "SHA should not be null")
+            assertTrue(sha.isNotBlank(), "SHA should not be blank")
+
+            // Update content
+            val updatedContent = """{"entries": [{"pos": "noun", "senses": []}], "word_family": ["test"]}"""
+            GitHubClient.updateWordsContentOnBranch(
+                lang = testLang,
+                word = testWord,
+                content = updatedContent,
+                fileSha = sha,
+                commitMessage = "Test: Update $testWord",
+                branchName = testBranch
+            )
+
+            // Read updated content
+            val (finalContent, _) = GitHubClient.loadWordsContentFromBranch(testLang, testWord, testBranch)
+            assertEquals(updatedContent, finalContent, "Read content should match updated content")
+        } finally {
+            cleanUpBranch(testBranch)
+        }
+    }
+
+    @Test
+    fun fileOperations_throwsForNonExistentFileOnBranch() {
+        val testBranch = "test-${UUID.randomUUID()}"
+
+        try {
+            // Create test branch
+            GitHubClient.ensureBranch(testBranch)
+
+            // Try to load non-existent file
+            assertFailsWith<GHFileNotFoundException> {
+                GitHubClient.loadWordsContentFromBranch("test", "nonexistent-word", testBranch)
+            }
+        } finally {
+            cleanUpBranch(testBranch)
         }
     }
 }

@@ -10,6 +10,7 @@ import com.slovy.slovymovyapp.server.ai.GeminiProvider
 import com.slovy.slovymovyapp.server.ai.enhancer.*
 import com.slovy.slovymovyapp.server.cloudrun.CloudTasksAuthVerifier
 import com.slovy.slovymovyapp.server.github.GitHubClient
+import com.slovy.slovymovyapp.server.github.WordDataMerger
 import com.slovy.slovymovyapp.server.tasks.RepoUpdateTaskClient
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -25,6 +26,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.kohsuke.github.GHFileNotFoundException
+import org.kohsuke.github.HttpException
 import org.slf4j.event.Level
 import java.nio.file.Files
 
@@ -143,14 +145,47 @@ fun Application.module() {
                 return@post
             }
 
+            if (!GitHubClient.isAvailable()) {
+                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+                return@post
+            }
+
+            val json = Json { ignoreUnknownKeys = true }
+
             try {
                 val responseJson = call.receiveText()
-                call.application.environment.log.info("Received response $responseJson")
-                // TODO: Update GitHub repository with processed data
-                // GitHubClient.updateWordsContent(lang, word, responseJson)
+                val incoming = json.decodeFromString(LanguageCardResponse.serializer(), responseJson)
+                call.application.environment.log.info("Received update for $lang/$word")
+
+                if (!GitHubClient.pushBranchExists())
+                    GitHubClient.ensurePushBranch()
+
+                // Check if file exists and handle accordingly
+                try {
+                    val (existingContent, sha) = GitHubClient.loadWordsContentFromPushBranch(lang, word)
+                    val existing = json.decodeFromString(LanguageCardResponse.serializer(), existingContent)
+                    val merged = WordDataMerger.merge(existing, incoming)
+                    val mergedJson = json.encodeToString(LanguageCardResponse.serializer(), merged)
+                    GitHubClient.updateWordsContent(lang, word, mergedJson, sha, "Update $word ($lang)")
+                    call.application.environment.log.info("Merged and updated $lang/$word")
+                } catch (_: GHFileNotFoundException) {
+                    // File doesn't exist - create it
+                    GitHubClient.createWordsContent(lang, word, responseJson, "Add $word ($lang)")
+                    call.application.environment.log.info("Created new file for $lang/$word")
+                }
 
                 call.respond(HttpStatusCode.OK, "Updated $lang/$word")
+            } catch (e: HttpException) {
+                if (e.responseCode == 409) {
+                    // Conflict - Cloud Tasks will retry
+                    call.application.environment.log.warn("Conflict detected for $lang/$word, will retry")
+                    call.respond(HttpStatusCode.Conflict, "Concurrent modification detected, please retry")
+                } else {
+                    call.application.environment.log.error("GitHub API error for $lang/$word: ${e.message}")
+                    call.respond(HttpStatusCode.InternalServerError, "GitHub API error: ${e.message}")
+                }
             } catch (e: Exception) {
+                call.application.environment.log.error("Failed to update $lang/$word: ${e.message}")
                 call.respond(HttpStatusCode.InternalServerError, "Failed to update: ${e.message}")
             }
         }
