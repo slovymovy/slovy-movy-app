@@ -36,10 +36,6 @@ jobs:
       - name: setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Get week number for cache key
-        id: week
-        run: echo "num=$(date +%Y-%V)" >> $GITHUB_OUTPUT
-
       - name: AVD cache
         uses: actions/cache@v5
         id: avd-cache
@@ -47,9 +43,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ matrix.api-level }}-linux-${{ steps.week.outputs.num }}
-          restore-keys: |
-            avd-${{ matrix.api-level }}-linux-
+          key: avd-${{ matrix.api-level }}-${{ hashFiles('.github/workflows/ci.yml') }}
 
       - name: Clean old AVD data on cache miss
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -80,7 +74,7 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           force-avd-creation: false
-          disk-size: 4096
+          disk-size: 2048
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
@@ -94,7 +88,7 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           force-avd-creation: false
-          disk-size: 4096
+          disk-size: 2048
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
