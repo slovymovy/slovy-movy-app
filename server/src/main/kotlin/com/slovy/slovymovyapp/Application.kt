@@ -150,11 +150,12 @@ fun Application.module() {
                 return@post
             }
 
-            val json = Json { ignoreUnknownKeys = true }
+            val jsonDecoder = Json { ignoreUnknownKeys = false }
+            val jsonEncoder = Json { prettyPrint = true }
 
             try {
                 val responseJson = call.receiveText()
-                val incoming = json.decodeFromString(LanguageCardResponse.serializer(), responseJson)
+                val incoming = jsonDecoder.decodeFromString(LanguageCardResponse.serializer(), responseJson)
                 call.application.environment.log.info("Received update for $lang/$word")
 
                 if (!GitHubClient.pushBranchExists())
@@ -163,14 +164,15 @@ fun Application.module() {
                 // Check if file exists and handle accordingly
                 try {
                     val (existingContent, sha) = GitHubClient.loadWordsContentFromPushBranch(lang, word)
-                    val existing = json.decodeFromString(LanguageCardResponse.serializer(), existingContent)
+                    val existing = jsonDecoder.decodeFromString(LanguageCardResponse.serializer(), existingContent)
                     val merged = WordDataMerger.merge(existing, incoming)
-                    val mergedJson = json.encodeToString(LanguageCardResponse.serializer(), merged)
+                    val mergedJson = jsonEncoder.encodeToString(LanguageCardResponse.serializer(), merged)
                     GitHubClient.updateWordsContent(lang, word, mergedJson, sha, "Update $word ($lang)")
                     call.application.environment.log.info("Merged and updated $lang/$word")
                 } catch (_: GHFileNotFoundException) {
-                    // File doesn't exist - create it
-                    GitHubClient.createWordsContent(lang, word, responseJson, "Add $word ($lang)")
+                    // File doesn't exist - create it\
+                    val prettyJson = jsonEncoder.encodeToString(LanguageCardResponse.serializer(), incoming)
+                    GitHubClient.createWordsContent(lang, word, prettyJson, "Add $word ($lang)")
                     call.application.environment.log.info("Created new file for $lang/$word")
                 }
 
