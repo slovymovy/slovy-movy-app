@@ -76,9 +76,9 @@ class DataDbManagerTest : BaseTest() {
             val loveId = Uuid.random()
             val cafeId = Uuid.random()
 
-            q.insertLemma(beId, "Be", "be", 0.0)
-            q.insertLemma(loveId, "Love", "love", 5.0)
-            q.insertLemma(cafeId, "Café", "cafe", 10.0)
+            q.insertLemma(beId, "Be", "be", 0.0, false)
+            q.insertLemma(loveId, "Love", "love", 5.0, false)
+            q.insertLemma(cafeId, "Café", "cafe", 10.0, false)
 
             val beIdPos = Uuid.random()
             val loveIdPos = Uuid.random()

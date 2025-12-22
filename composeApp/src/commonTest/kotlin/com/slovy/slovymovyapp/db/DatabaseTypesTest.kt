@@ -49,6 +49,7 @@ class DatabaseTypesTest : BaseTest() {
                     lemma = lemma,
                     lemma_normalized = lemmaNormalized,
                     zipf_frequency = 0.2,
+                    online_only = false,
                 )
                 q.insertLemmaPos(
                     id = lemmaPosId,
