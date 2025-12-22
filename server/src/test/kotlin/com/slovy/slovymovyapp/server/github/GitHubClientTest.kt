@@ -56,7 +56,7 @@ class GitHubClientTest {
         val content = GitHubClient.loadFileContent(
             owner = "slovymovy",
             repo = "kaikki-parser",
-            path = "output/db-extract/en/test.json",
+            path = "db-extract/en/test.json",
             ref = "main"
         )
 

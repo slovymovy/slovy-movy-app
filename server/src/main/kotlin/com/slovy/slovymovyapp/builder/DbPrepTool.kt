@@ -13,9 +13,9 @@ import java.security.MessageDigest
 //   Run with args:
 //     --db-extract <path> --processed <path> --out <path> --freq <path>
 //  Example:
-//     -d "\\wsl.localhost\Ubuntu-24.04\home\nkey\kaikki-parser\output\db-extract" -p "C:\Dev\kaikki-parser\words" -o "C:\Dev\slovy-movy-app\.db-files" -f "\\wsl.localhost\Ubuntu-24.04\home\nkey\wordfreq-extract\output"
+//     -d "\\wsl.localhost\Ubuntu-24.04\home\nkey\words\output\db-extract" -p "C:\Dev\words\words" -o "C:\Dev\slovy-movy-app\.db-files" -f "\\wsl.localhost\Ubuntu-24.04\home\nkey\wordfreq-extract\output"
 // For test files:
-//     -t -d "\\wsl.localhost\Ubuntu-24.04\home\nkey\kaikki-parser\output\db-extract" -p "C:\Dev\kaikki-parser\words" -o "C:\Dev\slovy-movy-app\.test-db-files" -f "\\wsl.localhost\Ubuntu-24.04\home\nkey\wordfreq-extract\output"
+//     -t -d "\\wsl.localhost\Ubuntu-24.04\home\nkey\words\output\db-extract" -p "C:\Dev\words\words" -o "C:\Dev\slovy-movy-app\.test-db-files" -f "\\wsl.localhost\Ubuntu-24.04\home\nkey\wordfreq-extract\output"
 //
 // It matches files by name within the same language subfolder and ingests
 // pairs using JsonIngestionBuilder into output DB files under --out.

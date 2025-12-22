@@ -216,11 +216,11 @@ object MyProvider {
 Located in `server/src/main/kotlin/com/slovy/slovymovyapp/server/github/GitHubClient.kt`:
 
 - Uses `org.kohsuke:github-api` SDK
-- Pre-configured to access `slovymovy/kaikki-parser` repository
+- Pre-configured to access `slovymovy/words` repository
 - Main methods:
     - `isAvailable()`: Check if token is configured
     - `getToken()`: Get the configured token
-    - `loadDbExtractContent(folder, file)`: Load from `output/db-extract/{folder}/{file}`
+    - `loadDbExtractContent(folder, file)`: Load from `db-extract/{folder}/{file}`
     - `loadFileContent(owner, repo, path, ref)`: Generic file loading
 
 Usage:

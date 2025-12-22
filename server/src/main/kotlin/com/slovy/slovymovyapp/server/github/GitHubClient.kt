@@ -17,8 +17,8 @@ object GitHubClient {
     private val KEY_FILE_PATHS = listOf("server/.github_key", ".github_key")
 
     private const val REPO_OWNER = "slovymovy"
-    private const val REPO_NAME = "kaikki-parser"
-    private const val BASE_PATH = "output/db-extract"
+    private const val REPO_NAME = "words"
+    private const val BASE_PATH = "db-extract"
     private const val WORDS_PATH = "words"
     private const val DEFAULT_BRANCH = "main"
     private const val PUSH_BRANCH = "push"
@@ -52,9 +52,9 @@ object GitHubClient {
     fun client(): GitHub = clientInstance
 
     /**
-     * Loads file content from the kaikki-parser repository.
+     * Loads file content from the words repository.
      *
-     * @param folder The folder within output/db-extract (e.g., "en")
+     * @param folder The folder within db-extract (e.g., "en")
      * @param file The filename (e.g., "test.json")
      * @return The raw file content as a String
      * @throws IllegalStateException if token is not available
@@ -66,7 +66,7 @@ object GitHubClient {
     }
 
     /**
-     * Loads pre-processed word content from the kaikki-parser repository.
+     * Loads pre-processed word content from the words repository.
      * Pre-processed files are already in LanguageCardResponse format.
      *
      * @param lang The language code (e.g., "en")

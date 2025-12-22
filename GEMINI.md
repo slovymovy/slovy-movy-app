@@ -60,6 +60,7 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **JVM target**: 11 for Android/Shared
 - **iOS**: Disabled on non-macOS (expected behavior)
 - **Android SDK**: compileSdk=36, minSdk=24, targetSdk=36
+- **Java version**: Use Java 21 (via sdkman: `sdk use java 21.0.9-amzn`). Java 25+ may cause Kotlin compatibility issues.
 
 ## Code Structure
 
@@ -169,6 +170,72 @@ private fun MyScreenPreview(
       [SqlDelight issue #5312](https://github.com/sqldelight/sqldelight/issues/5312)
     - Configured in `shared/build.gradle.kts` with `verifyMigrations.set(!OperatingSystem.current().isWindows)`
     - On non-Windows platforms, the verification task confirms migrations produce the expected schema
+
+## External API Clients (Server Module)
+
+### API Key/Token Management
+
+All external API clients follow a consistent pattern for credentials:
+
+1. **Environment variable** (checked first, preferred for CI)
+2. **Local file** (fallback for local development)
+
+| Service | Environment Variable | File Location |
+|---------|---------------------|---------------|
+| OpenAI | `OPENAI_API_KEY` | `.openai_api_key` |
+| Gemini | `AISTUDIO_KEY` | `.aistudio_key` |
+| GitHub | `ACCESS_TO_GH_TOKEN` | `server/.github_key` or `.github_key` |
+
+All key files are in `.gitignore`. For CI, secrets are configured in GitHub Actions.
+
+### AI Providers
+
+Located in `server/src/main/kotlin/com/slovy/slovymovyapp/server/ai/`:
+
+- **AIProvider interface**: Common interface for AI completions with caching and retry support
+- **OpenAIProvider**: OpenAI API integration (`OpenAI.kt`)
+- **GeminiProvider**: Google AI Studio integration (`Gemini.kt`)
+- **Enhancers**: `enhancer/` subdirectory contains domain-specific AI enhancement logic
+
+Pattern for new providers:
+```kotlin
+object MyProvider {
+    fun clientProvider(): () -> Client = {
+        val apiKey = System.getenv("MY_API_KEY")?.takeIf { it.isNotBlank() } ?: run {
+            val keyFile = File(".my_api_key")
+            require(keyFile.exists()) { "Missing .my_api_key file and MY_API_KEY env var" }
+            keyFile.readText().trim()
+        }
+        // Create and return client
+    }
+}
+```
+
+### GitHub Client
+
+Located in `server/src/main/kotlin/com/slovy/slovymovyapp/server/github/GitHubClient.kt`:
+
+- Uses `org.kohsuke:github-api` SDK
+- Pre-configured to access `slovymovy/words` repository
+- Main methods:
+    - `isAvailable()`: Check if token is configured
+    - `getToken()`: Get the configured token
+    - `loadDbExtractContent(folder, file)`: Load from `db-extract/{folder}/{file}`
+    - `loadFileContent(owner, repo, path, ref)`: Generic file loading
+
+Usage:
+```kotlin
+if (GitHubClient.isAvailable()) {
+    val content = GitHubClient.loadDbExtractContent("en", "test.json")
+}
+```
+
+### Server Test Patterns
+
+- Tests use real integrations (no mocking) with `assumeTrue()` for graceful skipping
+- Test resources in `server/src/test/resources/`
+- Use `@EnabledIf` or `assumeTrue(Client.isAvailable())` for tests requiring credentials
+- JUnit 5 with `@ParameterizedTest` for testing multiple providers
 
 ## Testing Guidelines
 
