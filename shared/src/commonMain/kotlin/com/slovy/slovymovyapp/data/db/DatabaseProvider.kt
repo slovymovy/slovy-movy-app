@@ -164,4 +164,3 @@ class TraitTypeIntColumnAdapter : ColumnAdapter<TraitType, Long> {
         return value.i.toLong()
     }
 }
-

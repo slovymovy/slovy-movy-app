@@ -518,7 +518,8 @@ private fun SearchScreenPreviewWithResults(
                         display = "celebration",
                         zipfFrequency = 4.5f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -526,7 +527,8 @@ private fun SearchScreenPreviewWithResults(
                         lemma = "celebrity",
                         display = "celebrity",
                         zipfFrequency = 4.3f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -534,7 +536,8 @@ private fun SearchScreenPreviewWithResults(
                         lemma = "celestial",
                         display = "celestial",
                         zipfFrequency = 3.8f,
-                        pos = listOf(PartOfSpeech.ADJECTIVE)
+                        pos = listOf(PartOfSpeech.ADJECTIVE),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -543,7 +546,8 @@ private fun SearchScreenPreviewWithResults(
                         display = "cell",
                         zipfFrequency = 5.2f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,
@@ -571,7 +575,8 @@ private fun SearchScreenPreviewMultilingualResults(
                         display = "program",
                         zipfFrequency = 5.5f,
                         pos = listOf(PartOfSpeech.NOUN, PartOfSpeech.VERB),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -579,7 +584,8 @@ private fun SearchScreenPreviewMultilingualResults(
                         lemma = "programmatically",
                         display = "programmatically",
                         zipfFrequency = 3.2f,
-                        pos = listOf(PartOfSpeech.ADVERB)
+                        pos = listOf(PartOfSpeech.ADVERB),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.RUSSIAN,
@@ -588,7 +594,8 @@ private fun SearchScreenPreviewMultilingualResults(
                         display = "программа",
                         zipfFrequency = 5.8f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.POLISH,
@@ -596,7 +603,8 @@ private fun SearchScreenPreviewMultilingualResults(
                         lemma = "program",
                         display = "program",
                         zipfFrequency = 5.4f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,
@@ -641,7 +649,8 @@ private fun SearchScreenPreviewInfoDialog(
                         display = "world",
                         zipfFrequency = 6.2f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,
@@ -667,7 +676,8 @@ private fun SearchScreenPreviewSingleLanguage(
                         lemma = "bibliotheek",
                         display = "bibliotheek",
                         zipfFrequency = 4.1f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.DUTCH,
@@ -675,7 +685,8 @@ private fun SearchScreenPreviewSingleLanguage(
                         lemma = "bijbel",
                         display = "bijbel",
                         zipfFrequency = 4.8f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,
@@ -703,7 +714,8 @@ private fun SearchScreenPreviewMultilingualWithoutPOS(
                         display = "word",
                         zipfFrequency = 6.1f,
                         pos = emptyList(),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.RUSSIAN,
@@ -711,7 +723,8 @@ private fun SearchScreenPreviewMultilingualWithoutPOS(
                         lemma = "ворд",
                         display = "ворд",
                         zipfFrequency = 3.5f,
-                        pos = emptyList()
+                        pos = emptyList(),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.POLISH,
@@ -719,7 +732,8 @@ private fun SearchScreenPreviewMultilingualWithoutPOS(
                         lemma = "wyraz",
                         display = "wyraz",
                         zipfFrequency = 4.2f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,
@@ -747,7 +761,8 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                         display = "run",
                         zipfFrequency = 6.3f,
                         pos = listOf(PartOfSpeech.VERB, PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -755,7 +770,8 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                         lemma = "run",
                         display = "\"running\" form of \"run\"",
                         zipfFrequency = 5.8f,
-                        pos = emptyList()
+                        pos = emptyList(),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.DUTCH,
@@ -763,7 +779,8 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                         lemma = "rennen",
                         display = "rennen",
                         zipfFrequency = 4.9f,
-                        pos = listOf(PartOfSpeech.VERB)
+                        pos = listOf(PartOfSpeech.VERB),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.DUTCH,
@@ -772,7 +789,8 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                         display = "rund",
                         zipfFrequency = 3.7f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,

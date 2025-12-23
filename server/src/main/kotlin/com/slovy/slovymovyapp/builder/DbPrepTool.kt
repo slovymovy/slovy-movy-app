@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.builder
 
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
+import kotlinx.serialization.SerializationException
 import java.io.File
 import java.security.MessageDigest
 
@@ -13,9 +14,9 @@ import java.security.MessageDigest
 //   Run with args:
 //     --db-extract <path> --processed <path> --out <path> --freq <path>
 //  Example:
-//     -d "\\wsl.localhost\Ubuntu-24.04\home\nkey\words\output\db-extract" -p "C:\Dev\words\words" -o "C:\Dev\slovy-movy-app\.db-files" -f "\\wsl.localhost\Ubuntu-24.04\home\nkey\wordfreq-extract\output"
+//     -d "C:\Dev\words\db-extract" -p "C:\Dev\words\words" -o "C:\Dev\slovy-movy-app\.db-files" -f "C:\Dev\words\freqs"
 // For test files:
-//     -t -d "\\wsl.localhost\Ubuntu-24.04\home\nkey\words\output\db-extract" -p "C:\Dev\words\words" -o "C:\Dev\slovy-movy-app\.test-db-files" -f "\\wsl.localhost\Ubuntu-24.04\home\nkey\wordfreq-extract\output"
+//     -t -d "C:\Dev\words\db-extract" -p "C:\Dev\words\words" -o "C:\Dev\slovy-movy-app\.test-db-files" -f "C:\Dev\words\freqs"
 //
 // It matches files by name within the same language subfolder and ingests
 // pairs using JsonIngestionBuilder into output DB files under --out.

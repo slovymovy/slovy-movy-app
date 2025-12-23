@@ -129,7 +129,8 @@ class JsonIngestionBuilder(
                 id = baseLemmaId,
                 lemma = lemmaWord,
                 lemma_normalized = lemmaNormalized,
-                zipf_frequency = zipfFrequency
+                zipf_frequency = zipfFrequency,
+                online_only = false
             )
 
             // Insert word family
