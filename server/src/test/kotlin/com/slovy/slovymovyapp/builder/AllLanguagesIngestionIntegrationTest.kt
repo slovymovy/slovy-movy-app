@@ -31,21 +31,25 @@ class AllLanguagesIngestionIntegrationTest {
         langs.forEach { lang ->
             // Build frequency map from test resources
             val frequencyMap = buildTestFrequencyMap(lang)
-            val builder = JsonIngestionBuilder(serverDbManager, frequencyMap)
+            val builder = JsonIngestionBuilder({ from, to -> serverDbManager.openTranslation(from, to) }, frequencyMap)
             val processedFiles = listResourceJsonFiles("processed_json_files/$lang")
             assertTrue(processedFiles.isNotEmpty(), "No processed files found for $lang")
+            val dictDb = serverDbManager.openDictionary(lang)
+            val dictQ = dictDb.dictionaryQueries
             processedFiles.forEach { pFile ->
                 val rawFile = resourceFile("db_extract/$lang/${pFile.name}")
                 // run ingestion
-                builder.ingest(pFile.readText(), rawFile.readText())
+                builder.ingest(
+                    pFile.readText(),
+                    rawFile.readText(),
+                    dictDb,
+                )
 
                 // Validate dictionary DB: lemma existence and forms from raw
-                val dictDb = serverDbManager.openDictionary(lang)
-                val dq = dictDb.dictionaryQueries
                 val raw = json.decodeFromString(ExtractedWordData.serializer(), rawFile.readText())
                 val processed = json.decodeFromString(LanguageCardResponse.serializer(), pFile.readText())
                 val word = raw.word
-                val lemmas = dq.selectLemmasByWord(word.lowercase()).executeAsList()
+                val lemmas = dictQ.selectLemmasByWord(word.lowercase()).executeAsList()
                 assertTrue(lemmas.isNotEmpty(), "Lemma should exist for '$word' in $lang from ${pFile.name}")
 
                 // Determine native entries and forms to check
@@ -69,7 +73,7 @@ class AllLanguagesIngestionIntegrationTest {
                 if (allExpectedFormKeys.isNotEmpty()) {
                     // Verify each unique form exists in the database
                     allExpectedFormKeys.forEach { expectedFormKey ->
-                        val formsInDb = dq.selectFormsByNormalized(expectedFormKey.formNormalized).executeAsList()
+                        val formsInDb = dictQ.selectFormsByNormalized(expectedFormKey.formNormalized).executeAsList()
                         assertTrue(
                             formsInDb.isNotEmpty(),
                             "Form '${expectedFormKey.form}' should exist for '$word' in $lang from ${pFile.name}. " +
@@ -84,10 +88,10 @@ class AllLanguagesIngestionIntegrationTest {
                     // Additionally verify the total count of forms for this lemma matches unique forms
                     val lemmaIds = lemmas.map { it.id }
                     val lemmaPosIds = lemmaIds.flatMap { lemmaId ->
-                        dq.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
+                        dictQ.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
                     }
                     val allFormsForLemma = lemmaPosIds.flatMap { lemmaPosId ->
-                        dq.selectFormsByLemmaPosId(lemmaPosId).executeAsList()
+                        dictQ.selectFormsByLemmaPosId(lemmaPosId).executeAsList()
                     }
                     assertEquals(
                         allExpectedFormKeys.size,
@@ -103,7 +107,7 @@ class AllLanguagesIngestionIntegrationTest {
                 if (expectedWordFamily != null && expectedWordFamily.isNotEmpty()) {
                     val lemmaIds = lemmas.map { it.id }
                     val actualWordFamily = lemmaIds.flatMap { lemmaId ->
-                        dq.selectWordFamilyByLemmaId(lemmaId).executeAsList()
+                        dictQ.selectWordFamilyByLemmaId(lemmaId).executeAsList()
                     }
                     assertEquals(
                         expectedWordFamily.sorted(),

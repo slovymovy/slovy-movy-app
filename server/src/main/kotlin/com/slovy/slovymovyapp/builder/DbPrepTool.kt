@@ -1,7 +1,7 @@
 package com.slovy.slovymovyapp.builder
 
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
-import kotlinx.serialization.SerializationException
+import com.slovy.slovymovyapp.translation.TranslationDatabase
 import java.io.File
 import java.security.MessageDigest
 
@@ -40,18 +40,25 @@ fun main(args: Array<String>) {
     require(frequencyDir.exists() && frequencyDir.isDirectory) { "Frequency directory not found: ${params.frequencyDir}" }
 
     if (params.testMode) {
-        println("[TEST MODE] Enabled. Will ingest at most 50 words per language in a deterministic order (by hash).")
+        println("[TEST MODE] Enabled. Will ingest at most 500 words per language in a deterministic order (by hash).")
     }
 
     // languages are subdirectories inside processed_root
-    val languages = processedRoot.listFiles()?.filter { it.isDirectory }?.map { it.name }?.sorted().orEmpty()
+    val processedLanguages = processedRoot.listFiles()?.filter { it.isDirectory }?.map { it.name }.orEmpty()
+    val rawLanguages = dbExtractRoot.listFiles()?.filter { it.isDirectory }?.map { it.name }.orEmpty()
+    val languages = (processedLanguages + rawLanguages).toSet().sorted()
     if (languages.isEmpty()) {
-        error("No language folders in processed path: ${processedRoot.absolutePath}")
+        error(
+            "No language folders found. processed=${processedRoot.absolutePath}, db_extract=${dbExtractRoot.absolutePath}"
+        )
     }
-
 
     languages.forEach { lang ->
         var words = 0
+        var processedWords = 0
+        var rawOnlyWords = 0
+
+        val dictDb = serverDbManager.openDictionary(lang)
 
         // Load frequency map for this language
         val frequencyFile = File(frequencyDir, "${lang}_kaikki_words.txt")
@@ -62,29 +69,56 @@ fun main(args: Array<String>) {
         val frequencyMap = loadFrequencyMap(frequencyFile)
         println("Loaded ${frequencyMap.size} frequency entries for $lang")
 
-        val builder = JsonIngestionBuilder(serverDbManager, frequencyMap)
+        val translationDatabases = mutableMapOf<String, TranslationDatabase>()
+        val translationDbProvider: (String, String) -> TranslationDatabase =
+            { from, to ->
+                if (to in translationDatabases) translationDatabases[to]!! else {
+                    translationDatabases[to] = serverDbManager.openTranslation(from, to)
+                    translationDatabases[to]!!
+                }
+            }
+        val builder = JsonIngestionBuilder(translationDbProvider, frequencyMap)
 
         val procDir = File(processedRoot, lang)
         val rawDir = File(dbExtractRoot, lang)
         if (!rawDir.exists()) {
             error("Raw DB folder not found for language $lang: ${rawDir.absolutePath}")
         }
-        procDir.listFiles()
-            .orEmpty()
-            .filter { it.isFile && it.extension.equals("json", ignoreCase = true) }
-            .sortedBy { sha256HexLower(it.name) }
-            .let { files -> if (params.testMode) files.take(50) else files }
-            .forEach { pFile ->
-                val rawFile = File(rawDir, pFile.name)
-                if (!rawFile.exists()) {
-                    error("Raw DB file not found for language $lang: ${rawFile.absolutePath}")
-                }
-                builder.ingest(pFile.readText(), rawFile.readText())
-                words++
-                if (words % 100 == 0) println("Ingested $words words to $lang")
-            }
 
-        println("lang: $lang; ingested words: $words")
+        val processedFiles = procDir.listFiles()
+            ?.filter { it.isFile && it.extension.equals("json", ignoreCase = true) }
+            ?.sortedBy { sha256HexLower(it.name) }
+            .orEmpty()
+        val processedByName = processedFiles.associateBy { it.name }
+
+        val rawFiles = rawDir.listFiles()
+            ?.filter { it.isFile && it.extension.equals("json", ignoreCase = true) }
+            ?.sortedBy { sha256HexLower(it.name) }
+            .orEmpty()
+            .let { files -> if (params.testMode) files.take(500) else files }
+
+        rawFiles.forEach { rawFile ->
+            val processedFile = processedByName[rawFile.name]
+
+            if (processedFile != null) {
+                builder.ingest(
+                    processedFile.readText(),
+                    rawFile.readText(),
+                    dictDb
+                )
+                processedWords++
+            } else {
+                builder.ingestRawOnly(
+                    rawFile.readText(),
+                    dictDb
+                )
+                rawOnlyWords++
+            }
+            words++
+            if (words % 100 == 0) println("Ingested $words ($processedWords processed) words to $lang")
+        }
+
+        println("lang: $lang; ingested words: $words (processed: $processedWords, raw-only: $rawOnlyWords)")
     }
 }
 
@@ -94,7 +128,7 @@ private fun printUsageAndExit(): Nothing {
         appendLine("  db_extract folder layout: <root>/<lang>/*.json")
         appendLine("  processed folder layout:  <root>/<lang>/*.json")
         appendLine("  freq folder layout:       <root>/<lang>_kaikki_words.txt")
-        appendLine("  --test (-t): enable test mode to ingest only 50 words per language (deterministic by file hash)")
+        appendLine("  --test (-t): enable test mode to ingest only 500 words per language (deterministic by file hash)")
     }
     throw IllegalArgumentException(msg)
 }

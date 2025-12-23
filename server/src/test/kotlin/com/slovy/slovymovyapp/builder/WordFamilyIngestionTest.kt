@@ -31,14 +31,18 @@ class WordFamilyIngestionTest {
 
         // Build frequency map
         val frequencyMap = mapOf(word to 5.2)
-        val builder = JsonIngestionBuilder(serverDbManager, frequencyMap)
+        val builder = JsonIngestionBuilder({ from, to -> serverDbManager.openTranslation(from, to) }, frequencyMap)
 
         // Load the double.json file
         val processedFile = resourceFile("processed_json_files/$lang/$word.json")
         val rawFile = resourceFile("db_extract/$lang/$word.json")
 
         // Run ingestion
-        builder.ingest(processedFile.readText(), rawFile.readText())
+        builder.ingest(
+            processedFile.readText(),
+            rawFile.readText(),
+            serverDbManager.openDictionary(lang)
+        )
 
         // Validate dictionary DB
         val dictDb = serverDbManager.openDictionary(lang)
@@ -81,30 +85,33 @@ class WordFamilyIngestionTest {
         val word = "double"
 
         val frequencyMap = mapOf(word to 5.2)
-        val builder = JsonIngestionBuilder(serverDbManager, frequencyMap)
+        val builder = JsonIngestionBuilder({ from, to -> serverDbManager.openTranslation(from, to) }, frequencyMap)
 
         val processedFile = resourceFile("processed_json_files/$lang/$word.json")
         val rawFile = resourceFile("db_extract/$lang/$word.json")
 
         // Ingest twice
-        builder.ingest(processedFile.readText(), rawFile.readText())
+        val dictDb = serverDbManager.openDictionary(lang)
+        val dictQ = dictDb.dictionaryQueries
+        builder.ingest(
+            processedFile.readText(),
+            rawFile.readText(),
+            dictDb
+        )
 
         // Second ingestion should not duplicate word_family entries (INSERT OR IGNORE)
         // This will throw an exception because lemma already exists, but we can test the query directly
-        val dictDb = serverDbManager.openDictionary(lang)
-        val dq = dictDb.dictionaryQueries
-
-        val lemmas = dq.selectLemmasByWord(word).executeAsList()
+        val lemmas = dictQ.selectLemmasByWord(word).executeAsList()
         assertTrue(lemmas.isNotEmpty(), "Lemma '$word' should exist")
 
         val lemmaId = lemmas.first().id
 
         // Insert duplicate word_family members
-        dq.insertLemmaWordFamily(lemmaId, "doubling")
-        dq.insertLemmaWordFamily(lemmaId, "doubling") // Duplicate should be ignored
+        dictQ.insertLemmaWordFamily(lemmaId, "doubling")
+        dictQ.insertLemmaWordFamily(lemmaId, "doubling") // Duplicate should be ignored
 
         // Verify no duplicates
-        val wordFamily = dq.selectWordFamilyByLemmaId(lemmaId).executeAsList()
+        val wordFamily = dictQ.selectWordFamilyByLemmaId(lemmaId).executeAsList()
         val doublingCount = wordFamily.count { it == "doubling" }
         assertEquals(1, doublingCount, "Should have exactly one 'doubling' entry (duplicates should be ignored)")
     }
@@ -118,23 +125,26 @@ class WordFamilyIngestionTest {
         val word = "testing"
 
         val frequencyMap = mapOf(word to 4.6)
-        val builder = JsonIngestionBuilder(serverDbManager, frequencyMap)
+        val builder = JsonIngestionBuilder({ from, to -> serverDbManager.openTranslation(from, to) }, frequencyMap)
 
         val processedFile = resourceFile("processed_json_files/$lang/$word.json")
         val rawFile = resourceFile("db_extract/$lang/$word.json")
 
-        builder.ingest(processedFile.readText(), rawFile.readText())
-
         val dictDb = serverDbManager.openDictionary(lang)
-        val dq = dictDb.dictionaryQueries
+        val dictQ = dictDb.dictionaryQueries
+        builder.ingest(
+            processedFile.readText(),
+            rawFile.readText(),
+            dictDb
+        )
 
-        val lemmas = dq.selectLemmasByWord(word).executeAsList()
+        val lemmas = dictQ.selectLemmasByWord(word).executeAsList()
         assertTrue(lemmas.isNotEmpty(), "Lemma '$word' should exist")
 
         val lemmaId = lemmas.first().id
 
         // Verify word_family is empty (testing.json doesn't have word_family)
-        val wordFamily = dq.selectWordFamilyByLemmaId(lemmaId).executeAsList()
+        val wordFamily = dictQ.selectWordFamilyByLemmaId(lemmaId).executeAsList()
         assertTrue(wordFamily.isEmpty(), "Word family should be empty for 'testing' (no word_family in JSON)")
     }
 

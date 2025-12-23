@@ -41,7 +41,7 @@ class FormDeduplicationTest {
 
         // Build frequency map
         val frequencyMap = mapOf(word to 3.0)
-        val builder = JsonIngestionBuilder(serverDbManager, frequencyMap)
+        val builder = JsonIngestionBuilder({ from, to -> serverDbManager.openTranslation(from, to) }, frequencyMap)
 
         // Load test data files
         val processedFile = resourceFile("processed_json_files/$lang/$word.json")
@@ -69,23 +69,26 @@ class FormDeduplicationTest {
         )
 
         // Ingest the data
-        builder.ingest(processedFile.readText(), rawFile.readText())
+        val dictDb = serverDbManager.openDictionary(lang)
+
+        val dictQ = dictDb.dictionaryQueries
+        builder.ingest(
+            processedFile.readText(),
+            rawFile.readText(),
+            dictDb)
 
         // Verify forms are deduplicated in database
-        val dictDb = serverDbManager.openDictionary(lang)
-        val dq = dictDb.dictionaryQueries
-
         // Get the lemma
-        val lemmas = dq.selectLemmasByWord(word.lowercase()).executeAsList()
+        val lemmas = dictQ.selectLemmasByWord(word.lowercase()).executeAsList()
         assertEquals(1, lemmas.size, "Should have exactly one lemma for '$word'")
         val lemmaId = lemmas.first().id
 
         // Get all lemma_pos entries (should be just NOUN)
-        val lemmaPosIds = dq.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
+        val lemmaPosIds = dictQ.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
         assertEquals(1, lemmaPosIds.size, "Should have exactly one POS entry for '$word'")
 
         // Get all forms for this lemma_pos (with IDs for tag lookup)
-        val formsInDb = dq.selectFormsWithIdByLemmaPosId(lemmaPosIds.first()).executeAsList()
+        val formsInDb = dictQ.selectFormsWithIdByLemmaPosId(lemmaPosIds.first()).executeAsList()
 
         // Verify we have exactly 3 forms (deduplicated)
         assertEquals(
@@ -104,7 +107,7 @@ class FormDeduplicationTest {
 
         // Verify each form has the correct tags
         formsInDb.forEach { form ->
-            val tags = dq.selectFormTagsByFormId(form.form_id).executeAsList().map { it.tag }
+            val tags = dictQ.selectFormTagsByFormId(form.form_id).executeAsList().map { it.tag }
             when (form.form) {
                 "stempels" -> assertTrue(
                     tags.contains("plural"),

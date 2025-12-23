@@ -6,6 +6,9 @@ import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
 import com.slovy.slovymovyapp.data.dictionary.NameType
 import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
+import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
+import com.slovy.slovymovyapp.dictionary.DictionaryQueries
+import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.util.md5
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -34,11 +37,11 @@ val LANG_TO_SOURCE_FILE: Map<String, String> = mapOf(
  * - All other IDs come from the input JSON
  * - Iteration order is preserved for consistent database insertion
  *
- * @param dbManager The database manager for opening dictionary and translation databases
+ * @param translationDbProvider The database provider for opening translation databases
  * @param frequencyMap Map of lemma words to their Zipf frequency values
  */
 class JsonIngestionBuilder(
-    private val dbManager: IngestionDbManager,
+    private val translationDbProvider: (from: String, to: String) -> TranslationDatabase,
     private val frequencyMap: Map<String, Double>
 ) {
 
@@ -50,25 +53,117 @@ class JsonIngestionBuilder(
     }
 
     /**
-     * Ingests processed and raw JSON data into the dictionary and translation databases.
+     * Ingests only the raw JSON data for a word.
      *
-     * @param processedJson JSON string containing the processed LanguageCardResponse
+     * Used for words that do not yet have processed LanguageCardResponse content.
+     * Inserts the lemma, lemma_pos and forms, and marks the lemma as `online_only = true`
+     * so the app knows to fetch details remotely.
+     *
      * @param rawJson JSON string containing the raw ExtractedWordData
-     * @throws IllegalArgumentException if lemma not found in frequency map, duplicate IDs, or lemma already exists
+     * @throws IllegalArgumentException if lemma not found in frequency map or already exists
      */
-    fun ingest(processedJson: String, rawJson: String) {
-        val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedJson)
+    fun ingestRawOnly(
+        rawJson: String, dictDb: DictionaryDatabase
+    ) {
         val raw = json.decodeFromString(ExtractedWordData.serializer(), rawJson)
         val langCode = raw.langCode
         val lemmaWord = raw.word
+        val dictQ: DictionaryQueries = dictDb.dictionaryQueries
 
         val zipfFrequency = frequencyMap[lemmaWord]
             ?: throw IllegalArgumentException("Lemma '$lemmaWord' not found in frequency map")
 
         val lemmaNormalized = stripAccents(lemmaWord)
 
-        val dictDb = dbManager.openDictionary(langCode)
-        val dictQ = dictDb.dictionaryQueries
+        dictDb.transaction {
+            val nativeKey = LANG_TO_SOURCE_FILE[langCode]
+            val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+            val allEntries = raw.sourceFileToEntries.values.flatten()
+            val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
+
+            val baseLemmaId = generateLemmaId(lemmaWord, lemmaNormalized)
+
+            val selectLemmasById = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
+            if (selectLemmasById != null) {
+                throw IllegalArgumentException("Lemma '$lemmaWord' already exists in database")
+            }
+
+            dictQ.insertLemma(
+                id = baseLemmaId,
+                lemma = lemmaWord,
+                lemma_normalized = lemmaNormalized,
+                zipf_frequency = zipfFrequency,
+                online_only = true
+            )
+
+            val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
+            entriesForForms.forEach { entry ->
+                val pos = mapPos(entry.pos) ?: return@forEach
+                if (!posToEntryId.containsKey(pos))
+                    posToEntryId[pos] = uuidParse(entry.entryId.toString())
+            }
+
+            posToEntryId.forEach { (pos, entryId) ->
+                dictQ.insertLemmaPos(
+                    id = entryId,
+                    lemma_id = baseLemmaId,
+                    pos = pos
+                )
+            }
+
+            data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+
+            val lemmaPosIdToForms = mutableMapOf<Uuid, MutableMap<FormKey, ExtractedWordForm>>()
+            entriesForForms.forEach { entry ->
+                val pos = mapPos(entry.pos) ?: return@forEach
+                val lemmaPosId = posToEntryId[pos] ?: return@forEach
+
+                val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
+                entry.forms.forEach { f ->
+                    val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet())
+                    if (!formsMap.containsKey(key)) {
+                        formsMap[key] = f
+                    }
+                }
+            }
+
+            lemmaPosIdToForms.forEach { (lemmaPosId, formsMap) ->
+                formsMap.values.forEach { f ->
+                    val formId = uuidParse(f.formId.toString())
+                    dictQ.insertForm(
+                        form_id = formId,
+                        lemma_pos_id = lemmaPosId,
+                        form = f.form,
+                        form_normalized = stripAccents(f.form),
+                    )
+                    f.tags.forEach { tag ->
+                        dictQ.insertFormTag(form_id = formId, tag = tag)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Ingests processed and raw JSON data into the dictionary and translation databases.
+     *
+     * @param processedJson JSON string containing the processed LanguageCardResponse
+     * @param rawJson JSON string containing the raw ExtractedWordData
+     * @throws IllegalArgumentException if lemma not found in frequency map, duplicate IDs, or lemma already exists
+     */
+    fun ingest(
+        processedJson: String, rawJson: String, dictDb: DictionaryDatabase
+    ) {
+        val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedJson)
+        val raw = json.decodeFromString(ExtractedWordData.serializer(), rawJson)
+        val langCode = raw.langCode
+        val lemmaWord = raw.word
+        val dictQ: DictionaryQueries = dictDb.dictionaryQueries
+
+        val zipfFrequency = frequencyMap[lemmaWord]
+            ?: throw IllegalArgumentException("Lemma '$lemmaWord' not found in frequency map")
+
+        val lemmaNormalized = stripAccents(lemmaWord)
         dictDb.transaction {
 
             // Select native source entries; fallback to any when missing
@@ -115,10 +210,7 @@ class JsonIngestionBuilder(
 
             // Create single lemma entry (shared across all POS)
             // Deterministic lemma ID generation using MD5 hash
-            val str = lemmaWord + "_" + lemmaNormalized
-
-            val hash = md5(str.encodeToByteArray())
-            val baseLemmaId = Uuid.fromByteArray(hash.sliceArray(0..15))
+            val baseLemmaId = generateLemmaId(lemmaWord, lemmaNormalized)
 
             val selectLemmasById = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
             if (selectLemmasById != null) {
@@ -237,7 +329,7 @@ class JsonIngestionBuilder(
             // Build translation DBs per target language encountered
             val targetLangs = collectTargetLanguages(processed)
             targetLangs.forEach { trg ->
-                val trDb = dbManager.openTranslation(raw.langCode, trg)
+                val trDb = translationDbProvider(raw.langCode, trg)
                 val trQ = trDb.translationQueries
                 trDb.transaction {
                     processed.entries.forEach { posEntry ->
@@ -279,6 +371,11 @@ class JsonIngestionBuilder(
                 }
             }
         }
+    }
+
+    private fun generateLemmaId(lemma: String, lemmaNormalized: String): Uuid {
+        val hash = md5("${lemma}_${lemmaNormalized}".encodeToByteArray())
+        return Uuid.fromByteArray(hash.sliceArray(0..15))
     }
 
     private fun mapPos(pos: String): DictionaryPos? {
