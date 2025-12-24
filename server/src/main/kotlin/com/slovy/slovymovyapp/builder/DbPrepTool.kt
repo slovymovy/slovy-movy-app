@@ -58,7 +58,7 @@ fun main(args: Array<String>) {
         var processedWords = 0
         var rawOnlyWords = 0
 
-        val dictDb = serverDbManager.openDictionary(lang)
+        val dictDb = serverDbManager.openDictionaryForBulkInsert(lang)
 
         // Load frequency map for this language
         val frequencyFile = File(frequencyDir, "${lang}_kaikki_words.txt")
@@ -70,11 +70,12 @@ fun main(args: Array<String>) {
         println("Loaded ${frequencyMap.size} frequency entries for $lang")
 
         val translationDatabases = mutableMapOf<String, TranslationDatabase>()
+        val translationSourceByTarget = mutableMapOf<String, String>()
         val translationDbProvider: (String, String) -> TranslationDatabase =
             { from, to ->
-                if (to in translationDatabases) translationDatabases[to]!! else {
-                    translationDatabases[to] = serverDbManager.openTranslation(from, to)
-                    translationDatabases[to]!!
+                translationDatabases.getOrPut(to) {
+                    translationSourceByTarget[to] = from
+                    serverDbManager.openTranslationForBulkInsert(from, to)
                 }
             }
         val builder = JsonIngestionBuilder(translationDbProvider, frequencyMap)
@@ -97,28 +98,35 @@ fun main(args: Array<String>) {
             .orEmpty()
             .let { files -> if (params.testMode) files.take(500) else files }
 
-        rawFiles.chunked(1000).forEach { batch ->
-            val inputs = mutableListOf<JsonIngestionBuilder.IngestionInput>()
-            batch.forEach { rawFile ->
-                val processedFile = processedByName[rawFile.name]
+        try {
+            rawFiles.chunked(5000).forEach { batch ->
+                val inputs = mutableListOf<JsonIngestionBuilder.IngestionInput>()
+                batch.forEach { rawFile ->
+                    val processedFile = processedByName[rawFile.name]
 
-                if (processedFile != null) {
-                    inputs += JsonIngestionBuilder.IngestionInput(
-                        rawJson = rawFile.readText(),
-                        processedJson = processedFile.readText()
-                    )
-                    processedWords++
-                } else {
-                    inputs += JsonIngestionBuilder.IngestionInput(
-                        rawJson = rawFile.readText(),
-                        processedJson = null
-                    )
-                    rawOnlyWords++
+                    if (processedFile != null) {
+                        inputs += JsonIngestionBuilder.IngestionInput(
+                            rawJson = rawFile.readText(),
+                            processedJson = processedFile.readText()
+                        )
+                        processedWords++
+                    } else {
+                        inputs += JsonIngestionBuilder.IngestionInput(
+                            rawJson = rawFile.readText(),
+                            processedJson = null
+                        )
+                        rawOnlyWords++
+                    }
+                    words++
+                    if (words % 1000 == 0) println("Ingested $words ($processedWords processed) words to $lang")
                 }
-                words++
-                if (words % 100 == 0) println("Ingested $words ($processedWords processed) words to $lang")
+                builder.ingestBatch(inputs, dictDb)
             }
-            builder.ingestBatch(inputs, dictDb)
+        } finally {
+            serverDbManager.finishDictionaryBulkInsert(lang)
+            translationSourceByTarget.forEach { (to, from) ->
+                serverDbManager.finishTranslationBulkInsert(from, to)
+            }
         }
 
         println("lang: $lang; ingested words: $words (processed: $processedWords, raw-only: $rawOnlyWords)")

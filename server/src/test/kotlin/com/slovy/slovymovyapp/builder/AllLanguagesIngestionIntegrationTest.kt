@@ -8,6 +8,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.nio.file.Files
+import java.sql.DriverManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -207,5 +208,93 @@ class AllLanguagesIngestionIntegrationTest {
             map[raw.word] = 3.0
         }
         return map
+    }
+
+    @Test
+    fun bulk_insert_recreates_dictionary_indexes() {
+        val outDir = Files.createTempDirectory("index_test").toFile()
+        val serverDbManager = ServerDbManager(outDir)
+        val lang = "en"
+
+        // Create dictionary DB with schema (indexes are created by schema)
+        serverDbManager.openDictionary(lang).also { /* just to create the db */ }
+
+        val dbFile = serverDbManager.dictionaryDbFile(lang)
+        val expectedTables = listOf("lemma", "lemma_pos", "form")
+
+        // Get initial indexes
+        val initialIndexes = getIndexesFromDb(dbFile, expectedTables)
+        assertTrue(initialIndexes.isNotEmpty(), "Dictionary schema should have indexes on $expectedTables")
+
+        // Open for bulk insert - this should drop indexes
+        serverDbManager.openDictionaryForBulkInsert(lang)
+        val indexesAfterPrepare = getIndexesFromDb(dbFile, expectedTables)
+        assertTrue(
+            indexesAfterPrepare.isEmpty(),
+            "Indexes should be dropped after openDictionaryForBulkInsert, but found: $indexesAfterPrepare"
+        )
+
+        // Finish bulk insert - this should recreate indexes
+        serverDbManager.finishDictionaryBulkInsert(lang)
+        val indexesAfterFinish = getIndexesFromDb(dbFile, expectedTables)
+        assertEquals(
+            initialIndexes.sorted(),
+            indexesAfterFinish.sorted(),
+            "Indexes should be recreated after finishDictionaryBulkInsert"
+        )
+    }
+
+    @Test
+    fun bulk_insert_recreates_translation_indexes() {
+        val outDir = Files.createTempDirectory("index_test").toFile()
+        val serverDbManager = ServerDbManager(outDir)
+        val sourceLang = "en"
+        val targetLang = "ru"
+
+        // Create translation DB with schema
+        serverDbManager.openTranslation(sourceLang, targetLang).also { /* just to create the db */ }
+
+        val dbFile = serverDbManager.translationDbFile(sourceLang, targetLang)
+        val expectedTables = listOf("sense_translation")
+
+        // Get initial indexes
+        val initialIndexes = getIndexesFromDb(dbFile, expectedTables)
+        assertTrue(initialIndexes.isNotEmpty(), "Translation schema should have indexes on $expectedTables")
+
+        // Open for bulk insert - this should drop indexes
+        serverDbManager.openTranslationForBulkInsert(sourceLang, targetLang)
+        val indexesAfterPrepare = getIndexesFromDb(dbFile, expectedTables)
+        assertTrue(
+            indexesAfterPrepare.isEmpty(),
+            "Indexes should be dropped after openTranslationForBulkInsert, but found: $indexesAfterPrepare"
+        )
+
+        // Finish bulk insert - this should recreate indexes
+        serverDbManager.finishTranslationBulkInsert(sourceLang, targetLang)
+        val indexesAfterFinish = getIndexesFromDb(dbFile, expectedTables)
+        assertEquals(
+            initialIndexes.sorted(),
+            indexesAfterFinish.sorted(),
+            "Indexes should be recreated after finishTranslationBulkInsert"
+        )
+    }
+
+    private fun getIndexesFromDb(dbFile: File, tableNames: List<String>): List<String> {
+        val indexes = mutableListOf<String>()
+        DriverManager.getConnection("jdbc:sqlite:${dbFile.absolutePath}").use { conn ->
+            val placeholders = tableNames.joinToString(",") { "?" }
+            val sql = "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name IN ($placeholders) AND sql IS NOT NULL"
+            conn.prepareStatement(sql).use { stmt ->
+                tableNames.forEachIndexed { index, tableName ->
+                    stmt.setString(index + 1, tableName)
+                }
+                stmt.executeQuery().use { rs ->
+                    while (rs.next()) {
+                        indexes.add(rs.getString("name"))
+                    }
+                }
+            }
+        }
+        return indexes
     }
 }
