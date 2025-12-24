@@ -20,6 +20,7 @@ class ServerDbManager(private val outputDir: File) : IngestionDbManager {
     // Cache index SQL for recreation after bulk insert
     private val dictionaryIndexCache = mutableMapOf<String, List<String>>()
     private val translationIndexCache = mutableMapOf<String, List<String>>()
+
     init {
         if (!outputDir.exists()) outputDir.mkdirs()
     }
@@ -81,6 +82,13 @@ class ServerDbManager(private val outputDir: File) : IngestionDbManager {
         driver.execute(null, "PRAGMA synchronous=OFF", 0)
         driver.execute(null, "PRAGMA temp_store=MEMORY", 0)
         driver.execute(null, "PRAGMA cache_size=120000", 0)
+        driver.execute(null, "PRAGMA wal_autocheckpoint=0", 0)
+    }
+
+    private fun finishBulkInsertPragmas(driver: JdbcSqliteDriver) {
+        driver.execute(null, "PRAGMA wal_checkpoint(TRUNCATE)", 0)
+        driver.execute(null, "PRAGMA wal_autocheckpoint=1000", 0)
+        driver.execute(null, "PRAGMA synchronous=FULL", 0)
     }
 
     fun openDictionaryForBulkInsert(langCode: String): DictionaryDatabase {
@@ -92,7 +100,9 @@ class ServerDbManager(private val outputDir: File) : IngestionDbManager {
     }
 
     fun finishDictionaryBulkInsert(langCode: String) {
-        finishDictionaryBulkInsert(dictionaryDriver(langCode), langCode)
+        val driver = dictionaryDriver(langCode)
+        finishDictionaryBulkInsert(driver, langCode)
+        finishBulkInsertPragmas(driver)
     }
 
     fun openTranslationForBulkInsert(sourceLang: String, targetLang: String): TranslationDatabase {
@@ -106,50 +116,41 @@ class ServerDbManager(private val outputDir: File) : IngestionDbManager {
 
     fun finishTranslationBulkInsert(sourceLang: String, targetLang: String) {
         val pairKey = "${sourceLang}_${targetLang}"
-        finishTranslationBulkInsert(translationDriver(sourceLang, targetLang), pairKey)
+        val driver = translationDriver(sourceLang, targetLang)
+        finishTranslationBulkInsert(driver, pairKey)
+        finishBulkInsertPragmas(driver)
     }
 
-    private fun getIndexesForTables(driver: JdbcSqliteDriver, tableNames: List<String>): List<String> {
+    private fun getIndexesForTables(driver: JdbcSqliteDriver): List<String> {
         val indexes = mutableListOf<String>()
-        val placeholders = tableNames.joinToString(",") { "?" }
-        val sql = "SELECT sql FROM sqlite_master WHERE type='index' AND tbl_name IN ($placeholders) AND sql IS NOT NULL"
+        val sql = "SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL"
         driver.executeQuery(null, sql, { cursor ->
             while (cursor.next().value) {
                 cursor.getString(0)?.let { indexes.add(it) }
             }
             QueryResult.Value(indexes)
-        }, tableNames.size) {
-            tableNames.forEachIndexed { index, tableName ->
-                bindString(index, tableName)
-            }
-        }
+        }, 0)
         return indexes
     }
 
-    private fun dropIndexesForTables(driver: JdbcSqliteDriver, tableNames: List<String>) {
-        val placeholders = tableNames.joinToString(",") { "?" }
-        val sql = "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name IN ($placeholders) AND sql IS NOT NULL"
+    private fun dropIndexesForTables(driver: JdbcSqliteDriver) {
+        val sql = "SELECT name FROM sqlite_master WHERE type='index' AND sql IS NOT NULL"
         val indexNames = mutableListOf<String>()
         driver.executeQuery(null, sql, { cursor ->
             while (cursor.next().value) {
                 cursor.getString(0)?.let { indexNames.add(it) }
             }
             QueryResult.Value(indexNames)
-        }, tableNames.size) {
-            tableNames.forEachIndexed { index, tableName ->
-                bindString(index, tableName)
-            }
-        }
+        }, 0)
         for (indexName in indexNames) {
-            driver.execute(null, "DROP INDEX IF EXISTS \"$indexName\"", 0)
+            driver.execute(null, "DROP INDEX \"$indexName\"", 0)
         }
     }
 
     private fun prepareDictionaryForBulkInsert(driver: JdbcSqliteDriver, langCode: String) {
         driver.execute(null, "PRAGMA foreign_keys=OFF", 0)
-        val tables = listOf("lemma", "lemma_pos", "form")
-        dictionaryIndexCache[langCode] = getIndexesForTables(driver, tables)
-        dropIndexesForTables(driver, tables)
+        dictionaryIndexCache[langCode] = getIndexesForTables(driver)
+        dropIndexesForTables(driver)
     }
 
     private fun finishDictionaryBulkInsert(driver: JdbcSqliteDriver, langCode: String) {
@@ -162,9 +163,8 @@ class ServerDbManager(private val outputDir: File) : IngestionDbManager {
 
     private fun prepareTranslationForBulkInsert(driver: JdbcSqliteDriver, pairKey: String) {
         driver.execute(null, "PRAGMA foreign_keys=OFF", 0)
-        val tables = listOf("sense_translation")
-        translationIndexCache[pairKey] = getIndexesForTables(driver, tables)
-        dropIndexesForTables(driver, tables)
+        translationIndexCache[pairKey] = getIndexesForTables(driver)
+        dropIndexesForTables(driver)
     }
 
     private fun finishTranslationBulkInsert(driver: JdbcSqliteDriver, pairKey: String) {
