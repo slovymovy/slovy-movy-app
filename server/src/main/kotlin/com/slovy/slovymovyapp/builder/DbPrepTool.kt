@@ -97,25 +97,28 @@ fun main(args: Array<String>) {
             .orEmpty()
             .let { files -> if (params.testMode) files.take(500) else files }
 
-        rawFiles.forEach { rawFile ->
-            val processedFile = processedByName[rawFile.name]
+        rawFiles.chunked(1000).forEach { batch ->
+            val inputs = mutableListOf<JsonIngestionBuilder.IngestionInput>()
+            batch.forEach { rawFile ->
+                val processedFile = processedByName[rawFile.name]
 
-            if (processedFile != null) {
-                builder.ingest(
-                    processedFile.readText(),
-                    rawFile.readText(),
-                    dictDb
-                )
-                processedWords++
-            } else {
-                builder.ingestRawOnly(
-                    rawFile.readText(),
-                    dictDb
-                )
-                rawOnlyWords++
+                if (processedFile != null) {
+                    inputs += JsonIngestionBuilder.IngestionInput(
+                        rawJson = rawFile.readText(),
+                        processedJson = processedFile.readText()
+                    )
+                    processedWords++
+                } else {
+                    inputs += JsonIngestionBuilder.IngestionInput(
+                        rawJson = rawFile.readText(),
+                        processedJson = null
+                    )
+                    rawOnlyWords++
+                }
+                words++
+                if (words % 100 == 0) println("Ingested $words ($processedWords processed) words to $lang")
             }
-            words++
-            if (words % 100 == 0) println("Ingested $words ($processedWords processed) words to $lang")
+            builder.ingestBatch(inputs, dictDb)
         }
 
         println("lang: $lang; ingested words: $words (processed: $processedWords, raw-only: $rawOnlyWords)")
