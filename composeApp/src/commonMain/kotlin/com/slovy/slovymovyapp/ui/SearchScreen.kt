@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -403,6 +404,14 @@ private fun SearchResultCard(
                             modifier = Modifier.size(20.dp)
                         )
                     }
+                    if (item.onlineOnly) {
+                        Icon(
+                            imageVector = Icons.Filled.DownloadForOffline,
+                            contentDescription = "Online",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
 
                 // Frequency badge - fixed width for alignment
@@ -537,7 +546,7 @@ private fun SearchScreenPreviewWithResults(
                         display = "celestial",
                         zipfFrequency = 3.8f,
                         pos = listOf(PartOfSpeech.ADJECTIVE),
-                        onlineOnly = false
+                        onlineOnly = true
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -604,7 +613,7 @@ private fun SearchScreenPreviewMultilingualResults(
                         display = "program",
                         zipfFrequency = 5.4f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        onlineOnly = false
+                        onlineOnly = true
                     )
                 ),
                 showNoResults = false,
