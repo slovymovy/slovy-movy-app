@@ -86,7 +86,7 @@ internal fun EntryCard(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 val summaryParts = buildList {
-                    if (entry.forms.isNotEmpty()) {
+                    if (entry.forms.isNotEmpty() && !cardLoading) {
                         add("${entry.forms.size} form${pluralEnding(entry.forms)}")
                     }
                 }.joinToString(" ${Typography.bullet} ")
