@@ -679,7 +679,7 @@ private fun WordDetailContent(
                                     )
                                     if (isClickable) {
                                         Text(
-                                            text = "→",
+                                            text = if (card.relatedWords[familyWord]?.online == false) "➤" else "➼",
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                                         )

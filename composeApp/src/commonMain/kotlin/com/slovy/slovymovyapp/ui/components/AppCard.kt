@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
@@ -41,26 +42,17 @@ fun AppCard(
     border: BorderStroke? = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     content: @Composable ColumnScope.() -> Unit
 ) {
-    if (onClick != null) {
-        Card(
-            onClick = onClick,
-            modifier = modifier,
-            elevation = elevation,
-            shape = shape,
-            colors = colors,
-            border = border,
-            content = content
-        )
-    } else {
-        Card(
-            modifier = modifier,
-            elevation = elevation,
-            shape = shape,
-            colors = colors,
-            border = border,
-            content = content
-        )
-    }
+    // Always use non-clickable Card variant for consistent layout,
+    // apply clickability via modifier to avoid alignment differences
+    // between Card(onClick) and Card() overloads
+    Card(
+        modifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier,
+        elevation = elevation,
+        shape = shape,
+        colors = colors,
+        border = border,
+        content = content
+    )
 }
 
 /**

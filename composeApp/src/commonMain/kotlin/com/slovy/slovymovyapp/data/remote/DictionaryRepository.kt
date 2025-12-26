@@ -247,7 +247,7 @@ class DictionaryRepository(
     }
 
     suspend fun getLanguageCard(language: Language, lemma: String): LanguageCard? {
-        val db =  dataDbManager.openDictionaryReadOnly(language)
+        val db = dataDbManager.openDictionaryReadOnly(language)
         val q = db.dictionaryQueries
 
         // Collect all base lemma IDs for the given lemma text (case-insensitive), including normalized matches
@@ -389,7 +389,8 @@ class DictionaryRepository(
                 .associate { row ->
                     row.lemma to RelatedWord(
                         lemma = row.lemma,
-                        zipfFrequency = row.zipf_frequency.toFloat()
+                        zipfFrequency = row.zipf_frequency.toFloat(),
+                        online = row.online_only
                     )
                 }
         }
