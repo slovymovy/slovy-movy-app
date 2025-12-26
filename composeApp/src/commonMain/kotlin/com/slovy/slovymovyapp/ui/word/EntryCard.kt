@@ -41,6 +41,10 @@ private fun FormsList(forms: List<LanguageCardForm>) {
 internal fun EntryCard(
     entry: LanguageCardPosEntry,
     entryState: EntryUiState,
+    cardLoading: Boolean = false,
+    cardError: String? = null,
+    translationLoading: Boolean = false,
+    translationError: String? = null,
     onEntryToggle: () -> Unit,
     onFormsToggle: () -> Unit,
     onSenseToggle: (String) -> Unit,
@@ -49,7 +53,7 @@ internal fun EntryCard(
     relatedWords: Set<String> = emptySet(),
     onWordClick: (String) -> Unit = {}
 ) {
-    val expanded = entryState.expanded
+    val expanded = entryState.expanded || cardLoading || cardError != null
     AppCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -70,12 +74,14 @@ internal fun EntryCard(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Text(
-                    text = "(${entry.senses.size} meaning${pluralEnding(entry.senses)})",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                if (!cardLoading) {
+                    Text(
+                        text = "(${entry.senses.size} meaning${pluralEnding(entry.senses)})",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
-                )
+                }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
@@ -125,50 +131,68 @@ internal fun EntryCard(
                         .padding(bottom = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    if (entry.forms.isNotEmpty()) {
-                        ExpandableSection(
-                            title = "Grammar",
-                            expanded = entryState.formsExpanded,
-                            onToggle = onFormsToggle,
-                            supportingText = null,
-                            headlineStyle = MaterialTheme.typography.titleSmall
+                    if (cardError != null) {
+                        Column(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            SectionLabel("Grammar")
-                            FormsList(entry.forms)
+                            ErrorPlaceholder(cardError)
                         }
-                    }
-
-                    val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
-                    groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
-                        val showGroup = groupEntries.size > 1 && groupIndex > 0 && senseList.size > 1
-                        if (showGroup) {
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                            )
+                    } else if (cardLoading) {
+                        Column(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            LoadingPlaceholder("Preparing card, AI is working...")
+                        }
+                    } else {
+                        if (entry.forms.isNotEmpty()) {
+                            ExpandableSection(
+                                title = "Grammar",
+                                expanded = entryState.formsExpanded,
+                                onToggle = onFormsToggle,
+                                supportingText = null,
+                                headlineStyle = MaterialTheme.typography.titleSmall
+                            ) {
+                                SectionLabel("Grammar")
+                                FormsList(entry.forms)
+                            }
                         }
 
-                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
+                        groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
+                            val showGroup = groupEntries.size > 1 && groupIndex > 0 && senseList.size > 1
                             if (showGroup) {
-                                SectionLabel("Group: $groupId")
+                                HorizontalDivider(
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
                             }
 
-                            senseList.forEachIndexed { senseIndex, sense ->
-                                val senseState = entryState.senses.find { it.senseId == sense.senseId }
-                                    ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
-                                SenseCard(
-                                    lemma = null,
-                                    sense = sense,
-                                    state = senseState,
-                                    onToggle = { onSenseToggle(sense.senseId) },
-                                    onPositioned = onSensePositioned,
-                                    onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
-                                    relatedWords = relatedWords,
-                                    onWordClick = onWordClick
-                                )
-                                if (senseIndex < senseList.lastIndex) {
-                                    HorizontalDivider(
-                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                if (showGroup) {
+                                    SectionLabel("Group: $groupId")
+                                }
+
+                                senseList.forEachIndexed { senseIndex, sense ->
+                                    val senseState = entryState.senses.find { it.senseId == sense.senseId }
+                                        ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
+                                    SenseCard(
+                                        lemma = null,
+                                        sense = sense,
+                                        state = senseState,
+                                        translationLoading = translationLoading || senseState.translationLoading,
+                                        translationError = translationError ?: senseState.translationError,
+                                        onToggle = { onSenseToggle(sense.senseId) },
+                                        onPositioned = onSensePositioned,
+                                        onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
+                                        relatedWords = relatedWords,
+                                        onWordClick = onWordClick
                                     )
+                                    if (senseIndex < senseList.lastIndex) {
+                                        HorizontalDivider(
+                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                                        )
+                                    }
                                 }
                             }
                         }
