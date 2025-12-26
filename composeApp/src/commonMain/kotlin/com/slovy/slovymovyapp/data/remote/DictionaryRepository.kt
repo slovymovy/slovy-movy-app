@@ -169,18 +169,18 @@ class DictionaryRepository(
 
             // search exact lemma matches first
             val byWord: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByWord> =
-                q.selectLemmasByWord(trimmed).executeAsList()
+                q.selectLemmasByWord(lang.code, trimmed).executeAsList()
             val byNorm: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByNormalized> =
-                q.selectLemmasByNormalized(trimmed).executeAsList()
+                q.selectLemmasByNormalized(lang.code, trimmed).executeAsList()
             byWord.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
             byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
 
             // search exact form equals (including normalized)
             val formEq: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByFormEquals> =
-                q.selectLemmasByFormEquals(trimmed, maxItems.toLong()).executeAsList()
+                q.selectLemmasByFormEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
             val formEqNorm: List<com.slovy.slovymovyapp.dictionary.SelectLemmasByFormNormalizedEquals> =
-                q.selectLemmasByFormNormalizedEquals(trimmed, maxItems.toLong()).executeAsList()
+                q.selectLemmasByFormNormalizedEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
             formEq.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
             formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
@@ -188,17 +188,17 @@ class DictionaryRepository(
             // and by prefix later (lemma and forms)
             val pattern = "$trimmed%"
             val lemmaLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasLike> =
-                q.selectLemmasLike(pattern, maxItems.toLong()).executeAsList()
+                q.selectLemmasLike(lang.code, pattern, maxItems.toLong()).executeAsList()
             val lemmaNormLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasNormalizedLike> =
-                q.selectLemmasNormalizedLike(pattern, maxItems.toLong()).executeAsList()
+                q.selectLemmasNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
             lemmaLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
             lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
 
             val formLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasFromFormsLike> =
-                q.selectLemmasFromFormsLike(pattern, maxItems.toLong()).executeAsList()
+                q.selectLemmasFromFormsLike(lang.code, pattern, maxItems.toLong()).executeAsList()
             val formNormLike: List<com.slovy.slovymovyapp.dictionary.SelectLemmasFromFormsNormalizedLike> =
-                q.selectLemmasFromFormsNormalizedLike(pattern, maxItems.toLong()).executeAsList()
+                q.selectLemmasFromFormsNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
             formLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
             formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
@@ -208,7 +208,7 @@ class DictionaryRepository(
             for (tgt in targets) {
                 val tdb = dataDbManager.openTranslationReadOnly(lang, tgt)
                 val tq = tdb.translationQueries
-                val trRows = tq.selectSenseTranslationsByNormalizedSingleWord(pattern).executeAsList()
+                val trRows = tq.selectSenseTranslationsByNormalizedSingleWord(lang.code, tgt.code, pattern).executeAsList()
                 val lemmaRows = q.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
                 val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
                 for (row in trRowsSorted) {
@@ -252,7 +252,7 @@ class DictionaryRepository(
 
         // Collect all base lemma IDs for the given lemma text (case-insensitive), including normalized matches
         // Use firstOrNull to avoid exception if multiple rows exist; query orders by frequency DESC
-        val lemmaId = q.selectLemmasByWord(lemma).executeAsList().firstOrNull()?.id ?: return null
+        val lemmaId = q.selectLemmasByWord(language.code, lemma).executeAsList().firstOrNull()?.id ?: return null
 
         // Get all lemma_pos IDs for these lemmas
         val lemmaPosIds = LinkedHashSet<Uuid>()
@@ -294,11 +294,11 @@ class DictionaryRepository(
                 val tgtTranslations = LinkedHashMap<Language, List<LanguageCardTranslation>>()
                 for ((tgt, tdb) in openTdbs) {
                     val tq = tdb.translationQueries
-                    val def: String? = tq.selectDefinitionsBySense(s.sense_id).executeAsList().firstOrNull()
+                    val def: String? = tq.selectDefinitionsBySense(s.sense_id, language.code, tgt.code).executeAsList().firstOrNull()
                     if (def != null) {
                         tgtDefinitions[tgt] = def
                     }
-                    val trs = tq.selectSenseTranslationsBySense(s.sense_id).executeAsList()
+                    val trs = tq.selectSenseTranslationsBySense(s.sense_id, language.code, tgt.code).executeAsList()
                     if (trs.isNotEmpty()) {
                         tgtTranslations[tgt] = trs.map {
                             LanguageCardTranslation(
@@ -313,7 +313,7 @@ class DictionaryRepository(
                     val trMap = LinkedHashMap<Language, String>()
                     for ((tgt, tdb) in openTdbs) {
                         val translation: String? =
-                            tdb.translationQueries.selectExampleTranslations(s.sense_id, ex.example_id).executeAsList()
+                            tdb.translationQueries.selectExampleTranslations(s.sense_id, language.code, tgt.code, ex.example_id).executeAsList()
                                 .firstOrNull()
                         if (translation != null) trMap[tgt] = translation
                     }
@@ -384,7 +384,7 @@ class DictionaryRepository(
         val relatedWordsMap = if (allRelatedWords.isEmpty()) {
             emptyMap()
         } else {
-            q.selectLemmasByWords(allRelatedWords.map { it.lowercase() })
+            q.selectLemmasByWords(language.code, allRelatedWords.map { it.lowercase() })
                 .executeAsList()
                 .associate { row ->
                     row.lemma to RelatedWord(

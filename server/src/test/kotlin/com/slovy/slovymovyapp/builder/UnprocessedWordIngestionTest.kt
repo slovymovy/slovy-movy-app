@@ -32,7 +32,7 @@ class UnprocessedWordIngestionTest {
         val dictDb = serverDbManager.openDictionary(lang)
         val dq = dictDb.dictionaryQueries
 
-        val lemmas = dq.selectLemmasByWord(word).executeAsList()
+        val lemmas = dq.selectLemmasByWord(lang, word).executeAsList()
         assertEquals(1, lemmas.size, "Should ingest lemma for raw-only word")
         val lemmaRow = lemmas.first()
         assertTrue(lemmaRow.online_only, "Raw-only lemma must be marked online_only")

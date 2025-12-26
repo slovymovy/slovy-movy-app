@@ -50,7 +50,7 @@ class AllLanguagesIngestionIntegrationTest {
                 val raw = json.decodeFromString(ExtractedWordData.serializer(), rawFile.readText())
                 val processed = json.decodeFromString(LanguageCardResponse.serializer(), pFile.readText())
                 val word = raw.word
-                val lemmas = dictQ.selectLemmasByWord(word.lowercase()).executeAsList()
+                val lemmas = dictQ.selectLemmasByWord(lang, word.lowercase()).executeAsList()
                 assertTrue(lemmas.isNotEmpty(), "Lemma should exist for '$word' in $lang from ${pFile.name}")
 
                 // Determine native entries and forms to check
@@ -128,7 +128,7 @@ class AllLanguagesIngestionIntegrationTest {
                             val tq = trDb.translationQueries
                             val defExpected = sense.targetLangDefinitions[trg]
                             if (defExpected != null) {
-                                val defActual = tq.selectDefinitionsBySense(senseId).executeAsList().singleOrNull()
+                                val defActual = tq.selectDefinitionsBySense(senseId, lang, trg).executeAsList().singleOrNull()
                                 assertEquals(
                                     defExpected,
                                     defActual,
@@ -137,7 +137,7 @@ class AllLanguagesIngestionIntegrationTest {
                             }
                             val expectedTranslations = sense.translations[trg]
                             if (!expectedTranslations.isNullOrEmpty()) {
-                                val rows = tq.selectSenseTranslationsBySenseWithNormalized(senseId).executeAsList()
+                                val rows = tq.selectSenseTranslationsBySenseWithNormalized(senseId, lang, trg).executeAsList()
                                 val words = rows.map { it.target_lang_word }
                                 val expectedWords = expectedTranslations.map { it.targetLangWord }
                                 assertEquals(
@@ -157,7 +157,7 @@ class AllLanguagesIngestionIntegrationTest {
                             // Example index 0 if exists
                             val ex0 = sense.examples.firstOrNull()?.targetLangTranslations?.get(trg)
                             if (ex0 != null) {
-                                val exActual = tq.selectExampleTranslations(senseId, 0).executeAsOneOrNull()
+                                val exActual = tq.selectExampleTranslations(senseId, lang, trg, 0).executeAsOneOrNull()
                                 assertEquals(
                                     ex0,
                                     exActual,

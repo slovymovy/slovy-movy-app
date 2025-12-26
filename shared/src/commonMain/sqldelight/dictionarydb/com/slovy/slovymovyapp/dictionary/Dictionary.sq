@@ -10,6 +10,7 @@ import kotlin.uuid.Uuid;
 -- Dictionary database schema
 CREATE TABLE lemma (
   id BLOB AS Uuid NOT NULL PRIMARY KEY, -- UUID
+  lang_code TEXT NOT NULL,
   lemma TEXT NOT NULL,
   lemma_normalized TEXT NOT NULL,
   zipf_frequency REAL NOT NULL,
@@ -96,9 +97,9 @@ CREATE TABLE sense_trait (
 );
 
 
--- Indexes to speed up searches by lemma
-CREATE INDEX IF NOT EXISTS idx_lemma_lemma ON lemma(lemma COLLATE NOCASE, zipf_frequency DESC);
-CREATE INDEX IF NOT EXISTS idx_lemma_lemma_normalized ON lemma(lemma_normalized COLLATE NOCASE, zipf_frequency DESC);
+-- Indexes to speed up searches by lemma (lang_code as leading column for multi-language queries)
+CREATE INDEX IF NOT EXISTS idx_lemma_lang_lemma ON lemma(lang_code, lemma COLLATE NOCASE, zipf_frequency DESC);
+CREATE INDEX IF NOT EXISTS idx_lemma_lang_lemma_normalized ON lemma(lang_code, lemma_normalized COLLATE NOCASE, zipf_frequency DESC);
 
 -- Index for POS lookups
 CREATE INDEX IF NOT EXISTS idx_lemma_pos_lemma_id ON lemma_pos(lemma_id);
@@ -109,8 +110,8 @@ CREATE INDEX IF NOT EXISTS idx_form_form_normalized ON form(form_normalized COLL
 
 -- Queries
 insertLemma:
-INSERT OR IGNORE INTO lemma(id, lemma, lemma_normalized, zipf_frequency, online_only)
-VALUES (?, ?, ?, ?, ?);
+INSERT OR IGNORE INTO lemma(id, lang_code, lemma, lemma_normalized, zipf_frequency, online_only)
+VALUES (?, ?, ?, ?, ?, ?);
 
 insertLemmaPos:
 INSERT INTO lemma_pos(id, lemma_id, pos)
@@ -196,20 +197,20 @@ ORDER BY zipf_frequency DESC;
 selectLemmasByWord:
 SELECT l.id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE l.lemma = ? COLLATE NOCASE
+WHERE l.lang_code = ? AND l.lemma = ? COLLATE NOCASE
 ORDER BY l.zipf_frequency DESC;
 
 selectLemmasByWords:
 SELECT l.id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE LOWER(l.lemma) IN ?
+WHERE l.lang_code = ? AND LOWER(l.lemma) IN ?
 ORDER BY l.zipf_frequency DESC;
 
 -- Queries returning explicit lemma_pos_id to avoid ambiguity in generated code
 selectLemmaPosIdAndLemmaByWord:
 SELECT l.id AS lemma_pos_id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE l.lemma = ? COLLATE NOCASE;
+WHERE l.lang_code = ? AND l.lemma = ? COLLATE NOCASE;
 
 selectLemmaPosIdByLemmaId:
 SELECT lp.id
@@ -258,29 +259,29 @@ WHERE st.sense_id = ?;
 selectLemmasByNormalized:
 SELECT l.id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE l.lemma_normalized = ? COLLATE NOCASE;
+WHERE l.lang_code = ? AND l.lemma_normalized = ? COLLATE NOCASE;
 
 selectLemmasLike:
 SELECT l.id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE l.lemma LIKE ? COLLATE NOCASE
+WHERE l.lang_code = ? AND l.lemma LIKE ? COLLATE NOCASE
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 selectLemmasNormalizedLike:
 SELECT l.id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE l.lemma_normalized LIKE ? COLLATE NOCASE
+WHERE l.lang_code = ? AND l.lemma_normalized LIKE ? COLLATE NOCASE
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
 -- Form -> Lemma JOIN queries to avoid client-side lookups
 selectLemmasByFormEquals:
-SELECT l.id, l.lemma, l.zipf_frequency, l.online_only,  f.form
+SELECT l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 FROM form f
 JOIN lemma_pos lp ON lp.id = f.lemma_pos_id
 JOIN lemma l ON l.id = lp.lemma_id
-WHERE f.form = ? COLLATE NOCASE
+WHERE l.lang_code = ? AND f.form = ? COLLATE NOCASE
 GROUP BY l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
@@ -290,7 +291,7 @@ SELECT l.id AS lemma_pos_id, l.lemma, l.zipf_frequency, l.online_only, f.form
 FROM form f
 JOIN lemma_pos lp ON lp.id = f.lemma_pos_id
 JOIN lemma l ON l.id = lp.lemma_id
-WHERE f.form = ? COLLATE NOCASE
+WHERE l.lang_code = ? AND f.form = ? COLLATE NOCASE
 GROUP BY l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
@@ -300,7 +301,7 @@ SELECT l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 FROM form f
 JOIN lemma_pos lp ON lp.id = f.lemma_pos_id
 JOIN lemma l ON l.id = lp.lemma_id
-WHERE f.form_normalized = ? COLLATE NOCASE
+WHERE l.lang_code = ? AND f.form_normalized = ? COLLATE NOCASE
 GROUP BY l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
@@ -310,7 +311,7 @@ SELECT l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 FROM form f
 JOIN lemma_pos lp ON lp.id = f.lemma_pos_id
 JOIN lemma l ON l.id = lp.lemma_id
-WHERE f.form LIKE ? COLLATE NOCASE
+WHERE l.lang_code = ? AND f.form LIKE ? COLLATE NOCASE
 GROUP BY l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
@@ -320,7 +321,7 @@ SELECT l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 FROM form f
 JOIN lemma_pos lp ON lp.id = f.lemma_pos_id
 JOIN lemma l ON l.id = lp.lemma_id
-WHERE f.form_normalized LIKE ? COLLATE NOCASE
+WHERE l.lang_code = ? AND f.form_normalized LIKE ? COLLATE NOCASE
 GROUP BY l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;

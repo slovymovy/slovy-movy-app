@@ -164,6 +164,7 @@ class JsonIngestionBuilder(
 
         dictQ.insertLemma(
             id = baseLemmaId,
+            lang_code = langCode,
             lemma = lemmaWord,
             lemma_normalized = lemmaNormalized,
             zipf_frequency = zipfFrequency,
@@ -282,6 +283,7 @@ class JsonIngestionBuilder(
 
         dictQ.insertLemma(
             id = baseLemmaId,
+            lang_code = langCode,
             lemma = lemmaWord,
             lemma_normalized = lemmaNormalized,
             zipf_frequency = zipfFrequency,
@@ -389,13 +391,14 @@ class JsonIngestionBuilder(
             }
         }
 
-        return buildTranslationOperations(processed, posToEntryId, baseLemmaId)
+        return buildTranslationOperations(processed, posToEntryId, baseLemmaId, langCode)
     }
 
     private fun buildTranslationOperations(
         processed: LanguageCardResponse,
         posToEntryId: Map<DictionaryPos, Uuid>,
-        baseLemmaId: Uuid
+        baseLemmaId: Uuid,
+        sourceLangCode: String
     ): Map<String, List<TranslationQueries.() -> Unit>> {
         val operations = mutableMapOf<String, MutableList<TranslationQueries.() -> Unit>>()
         val targetLangs = collectTargetLanguages(processed)
@@ -409,7 +412,7 @@ class JsonIngestionBuilder(
                     val def = sense.targetLangDefinitions[trg]
                     if (def != null) {
                         opsForTarget += {
-                            insertSenseTargetDefinition(sense_id = senseId, definition = def)
+                            insertSenseTargetDefinition(sense_id = senseId, from_lang_code = sourceLangCode, target_lang_code = trg, definition = def)
                         }
                     }
                     val translations = sense.translations[trg] ?: emptyList()
@@ -417,6 +420,8 @@ class JsonIngestionBuilder(
                         opsForTarget += {
                             insertSenseTranslation(
                                 senseId,
+                                sourceLangCode,
+                                trg,
                                 idx.toLong(),
                                 t.targetLangWord,
                                 stripAccents(t.targetLangWord),
@@ -432,6 +437,8 @@ class JsonIngestionBuilder(
                             opsForTarget += {
                                 insertExampleTranslation(
                                     sense_id = senseId,
+                                    from_lang_code = sourceLangCode,
+                                    target_lang_code = trg,
                                     example_id = exIdx.toLong(),
                                     translation = exTr
                                 )

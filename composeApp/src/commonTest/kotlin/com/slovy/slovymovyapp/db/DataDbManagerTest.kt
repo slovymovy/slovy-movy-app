@@ -76,9 +76,9 @@ class DataDbManagerTest : BaseTest() {
             val loveId = Uuid.random()
             val cafeId = Uuid.random()
 
-            q.insertLemma(beId, "Be", "be", 0.0, false)
-            q.insertLemma(loveId, "Love", "love", 5.0, false)
-            q.insertLemma(cafeId, "Café", "cafe", 10.0, false)
+            q.insertLemma(beId, "en", "Be", "be", 0.0, false)
+            q.insertLemma(loveId, "en", "Love", "love", 5.0, false)
+            q.insertLemma(cafeId, "en", "Café", "cafe", 10.0, false)
 
             val beIdPos = Uuid.random()
             val loveIdPos = Uuid.random()
@@ -97,37 +97,37 @@ class DataDbManagerTest : BaseTest() {
             q.insertForm(Uuid.random(), cafeIdPost, "CAFÉS", "cafes")
 
             // lemma LIKE
-            val lemmasLo = q.selectLemmasLike("lo%", 20).executeAsList().map { it.lemma }
+            val lemmasLo = q.selectLemmasLike("en", "lo%", 20).executeAsList().map { it.lemma }
             assertEquals(listOf("Love"), lemmasLo, "lemma LIKE lo% should match 'Love'")
 
-            val lemmasBe = q.selectLemmasLike("be%", 20).executeAsList().map { it.lemma }
+            val lemmasBe = q.selectLemmasLike("en", "be%", 20).executeAsList().map { it.lemma }
             assertTrue(lemmasBe.contains("Be"), "lemma LIKE be% should contain 'Be'")
 
             // normalized LIKE
-            val lemmasCaf = q.selectLemmasNormalizedLike("caf%", 20).executeAsList().map { it.lemma }
+            val lemmasCaf = q.selectLemmasNormalizedLike("en", "caf%", 20).executeAsList().map { it.lemma }
             assertEquals(listOf("Café"), lemmasCaf, "normalized LIKE caf% should match 'Café'")
 
             // JOIN equals (form -> lemma)
-            val areEq = q.selectLemmasByFormEquals("are", 20).executeAsList()
+            val areEq = q.selectLemmasByFormEquals("en", "are", 20).executeAsList()
             assertEquals(1, areEq.size, "form equals 'are' should match exactly one entry")
             assertEquals("Be", areEq[0].lemma, "'are' should belong to lemma 'Be'")
             assertEquals("ARE", areEq[0].form, "Stored form should be returned as inserted (case preserved)")
 
             // JOIN equals on normalized
-            val cafesEq = q.selectLemmasByFormNormalizedEquals("cafes", 20).executeAsList()
+            val cafesEq = q.selectLemmasByFormNormalizedEquals("en", "cafes", 20).executeAsList()
             assertEquals(1, cafesEq.size, "normalized form equals 'cafes' should match one entry")
             assertEquals("Café", cafesEq[0].lemma, "'cafes' should map to lemma 'Café'")
             assertEquals("CAFÉS", cafesEq[0].form, "Original stored form should be returned")
 
             // JOIN LIKE (forms prefix)
-            val lovLike = q.selectLemmasFromFormsLike("lov%", 20).executeAsList()
+            val lovLike = q.selectLemmasFromFormsLike("en", "lov%", 20).executeAsList()
             assertEquals(2, lovLike.size, "lov% should match two forms of 'Love'")
             assertTrue(lovLike.all { it.lemma == "Love" }, "Both matches should belong to 'Love'")
             val lovForms = lovLike.map { it.form }.toSet()
             assertEquals(setOf("loved", "loving"), lovForms, "Matched forms should be 'loved' and 'loving'")
 
             // LIMIT parameter behavior (request only 1 row)
-            val limited = q.selectLemmasFromFormsLike("l%", 1).executeAsList()
+            val limited = q.selectLemmasFromFormsLike("en", "l%", 1).executeAsList()
             assertEquals(1, limited.size, "LIMIT should restrict result count to 1")
         } finally {
             driver.close()
@@ -152,10 +152,10 @@ class DataDbManagerTest : BaseTest() {
             val db = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
             val q = db.dictionaryQueries
 
-            val lemmaLike = q.selectLemmasLike("bu%", 20).executeAsList().map { it.lemma }
+            val lemmaLike = q.selectLemmasLike("en", "bu%", 20).executeAsList().map { it.lemma }
             assertTrue(lemmaLike.isNotEmpty(), "English dictionary should contain lemmas starting with 'bu'")
 
-            val formLike = q.selectLemmasFromFormsLike("bu%", 20).executeAsList().map { it.form }
+            val formLike = q.selectLemmasFromFormsLike("en", "bu%", 20).executeAsList().map { it.form }
             assertTrue(formLike.isNotEmpty(), "Form LIKE 'bu%' should return at least one match")
         } finally {
             // Clean up to keep environment tidy
