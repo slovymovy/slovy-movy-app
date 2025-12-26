@@ -49,7 +49,7 @@ class WordFamilyIngestionTest {
         val dq = dictDb.dictionaryQueries
 
         // Verify the lemma exists
-        val lemmas = dq.selectLemmasByWord(word).executeAsList()
+        val lemmas = dq.selectLemmasByWord(lang, word).executeAsList()
         assertTrue(lemmas.isNotEmpty(), "Lemma '$word' should exist in database")
 
         // Parse the processed JSON to get expected word_family
@@ -101,7 +101,7 @@ class WordFamilyIngestionTest {
 
         // Second ingestion should not duplicate word_family entries (INSERT OR IGNORE)
         // This will throw an exception because lemma already exists, but we can test the query directly
-        val lemmas = dictQ.selectLemmasByWord(word).executeAsList()
+        val lemmas = dictQ.selectLemmasByWord(lang, word).executeAsList()
         assertTrue(lemmas.isNotEmpty(), "Lemma '$word' should exist")
 
         val lemmaId = lemmas.first().id
@@ -138,7 +138,7 @@ class WordFamilyIngestionTest {
             dictDb
         )
 
-        val lemmas = dictQ.selectLemmasByWord(word).executeAsList()
+        val lemmas = dictQ.selectLemmasByWord(lang, word).executeAsList()
         assertTrue(lemmas.isNotEmpty(), "Lemma '$word' should exist")
 
         val lemmaId = lemmas.first().id

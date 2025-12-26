@@ -79,7 +79,7 @@ class FormDeduplicationTest {
 
         // Verify forms are deduplicated in database
         // Get the lemma
-        val lemmas = dictQ.selectLemmasByWord(word.lowercase()).executeAsList()
+        val lemmas = dictQ.selectLemmasByWord(lang, word.lowercase()).executeAsList()
         assertEquals(1, lemmas.size, "Should have exactly one lemma for '$word'")
         val lemmaId = lemmas.first().id
 
