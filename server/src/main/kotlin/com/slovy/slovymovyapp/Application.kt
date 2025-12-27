@@ -109,18 +109,15 @@ fun Application.module() {
                 // Step 2: Stream results as NDJSON (base, then translated if available)
                 call.respondTextWriter(contentType = ContentType.parse("application/x-ndjson")) {
                     // Parse requested language codes for filtering
+                    // If no translations parameter provided, return empty list (no translations in response)
                     val requestedLangCodes = if (!translationsParam.isNullOrBlank()) {
                         translationsParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
                     } else {
                         emptyList()
                     }
 
-                    // Send filtered base response to client
-                    val baseResponseToClient = if (requestedLangCodes.isNotEmpty()) {
-                        filterTranslations(baseResult.response, requestedLangCodes)
-                    } else {
-                        baseResult.response
-                    }
+                    // Send filtered base response to client (always filter based on requested codes)
+                    val baseResponseToClient = filterTranslations(baseResult.response, requestedLangCodes)
                     val baseChunk = WordStreamChunk(WordStreamStage.base, baseResponseToClient)
                     write(json.encodeToString(WordStreamChunk.serializer(), baseChunk))
                     flush()
