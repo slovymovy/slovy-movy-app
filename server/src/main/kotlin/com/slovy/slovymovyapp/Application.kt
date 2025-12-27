@@ -108,16 +108,30 @@ fun Application.module() {
 
                 // Step 2: Stream results as NDJSON (base, then translated if available)
                 call.respondTextWriter(contentType = ContentType.parse("application/x-ndjson")) {
-                    val baseChunk = WordStreamChunk(WordStreamStage.base, baseResult.response)
+                    // Parse requested language codes for filtering
+                    val requestedLangCodes = if (!translationsParam.isNullOrBlank()) {
+                        translationsParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
+                    } else {
+                        emptyList()
+                    }
+
+                    // Send filtered base response to client
+                    val baseResponseToClient = if (requestedLangCodes.isNotEmpty()) {
+                        filterTranslations(baseResult.response, requestedLangCodes)
+                    } else {
+                        baseResult.response
+                    }
+                    val baseChunk = WordStreamChunk(WordStreamStage.base, baseResponseToClient)
                     write(json.encodeToString(WordStreamChunk.serializer(), baseChunk))
                     flush()
 
-                    var finalResponse = baseResult.response
+                    // Track full response for repo updates (unfiltered)
+                    var fullResponse = baseResult.response
                     var wasProcessed = baseResult.wasProcessed
 
                     if (!translationsParam.isNullOrBlank()) {
                         val translationResult = addMissingTranslations(
-                            response = finalResponse,
+                            response = fullResponse,
                             lang = lang,
                             word = word,
                             translationsParam = translationsParam,
@@ -125,18 +139,21 @@ fun Application.module() {
                         )
 
                         if (translationResult.updated) {
-                            finalResponse = translationResult.response
+                            fullResponse = translationResult.response
                             wasProcessed = true
                             write("\n")
-                            val translatedChunk = WordStreamChunk(WordStreamStage.translated, finalResponse)
+                            // Send filtered translated response to client
+                            val translatedResponseToClient = filterTranslations(fullResponse, requestedLangCodes)
+                            val translatedChunk = WordStreamChunk(WordStreamStage.translated, translatedResponseToClient)
                             write(json.encodeToString(WordStreamChunk.serializer(), translatedChunk))
                             flush()
                         }
                     }
 
                     // Step 3: Queue Cloud Tasks update if requested (only if something was processed)
+                    // IMPORTANT: Use fullResponse (unfiltered) to ensure nothing is lost in repo
                     if (!push.isNullOrBlank() && wasProcessed) {
-                        val responseJson = json.encodeToString(LanguageCardResponse.serializer(), finalResponse)
+                        val responseJson = json.encodeToString(LanguageCardResponse.serializer(), fullResponse)
                         RepoUpdateTaskClient.queueRepoUpdate(lang, word, responseJson)
                     }
                 }
@@ -283,6 +300,24 @@ private fun getExistingTranslationLanguages(response: LanguageCardResponse): Set
         .flatMap { it.senses }
         .flatMap { sense -> sense.translations.keys + sense.targetLangDefinitions.keys }
         .toSet()
+}
+
+private fun filterTranslations(
+    response: LanguageCardResponse,
+    requestedLangCodes: List<String>
+): LanguageCardResponse {
+    return response.copy(
+        entries = response.entries.map { entry ->
+            entry.copy(
+                senses = entry.senses.map { sense ->
+                    sense.copy(
+                        translations = sense.translations.filterKeys { it in requestedLangCodes },
+                        targetLangDefinitions = sense.targetLangDefinitions.filterKeys { it in requestedLangCodes }
+                    )
+                }
+            )
+        }
+    )
 }
 
 private suspend fun addMissingTranslations(
