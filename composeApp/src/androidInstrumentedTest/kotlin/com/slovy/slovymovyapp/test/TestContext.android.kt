@@ -21,3 +21,6 @@ actual abstract class BaseTest actual constructor() : BaseTestImpl()
 
 @Target(allowedTargets = [AnnotationTarget.CLASS, AnnotationTarget.FUNCTION])
 actual annotation class IgnoreIos actual constructor()
+
+@Target(allowedTargets = [AnnotationTarget.CLASS, AnnotationTarget.FUNCTION])
+actual annotation class IgnoreRobolectric actual constructor()

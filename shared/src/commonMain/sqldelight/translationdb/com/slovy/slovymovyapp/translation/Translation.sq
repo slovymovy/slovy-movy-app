@@ -79,7 +79,7 @@ WHERE sense_id = ? AND from_lang_code = ? AND target_lang_code = ? AND example_i
 -- Lookup by normalized target word (excludes multi-word translations)
 selectSenseTranslationsByNormalizedSingleWord:
 SELECT sense_id, idx, target_lang_word, target_lang_word_normalized, target_lang_sense_clarification, lemma_id, lemma_pos_id
-FROM sense_translation
-WHERE from_lang_code = ? AND target_lang_code = ? AND target_lang_word_normalized LIKE ?
-  AND target_lang_word NOT LIKE '% %'
+FROM sense_translation INDEXED BY sense_translation_lang_word_normalized_idx
+WHERE from_lang_code = ? AND target_lang_code = ? AND target_lang_word_normalized GLOB ?
+  AND target_lang_word_normalized NOT GLOB '* *'
 ORDER BY idx;

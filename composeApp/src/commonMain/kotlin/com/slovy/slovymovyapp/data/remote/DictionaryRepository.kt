@@ -6,6 +6,7 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.translation.TranslationDatabase
+import com.slovy.slovymovyapp.util.stripAccents
 import kotlin.uuid.Uuid
 
 internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
@@ -186,21 +187,15 @@ class DictionaryRepository(
             formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
 
-            // and by prefix later (lemma and forms)
-            val pattern = "$trimmed%"
-            val lemmaLike: List<SelectLemmasLike> =
-                q.selectLemmasLike(lang.code, pattern, maxItems.toLong()).executeAsList()
+            // and by prefix later (lemma and forms) - use normalized pattern for GLOB on normalized columns
+            val pattern = "${stripAccents(trimmed)}*"
             val lemmaNormLike: List<SelectLemmasNormalizedLike> =
                 q.selectLemmasNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
-            lemmaLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
             lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
 
-            val formLike: List<SelectLemmasFromFormsLike> =
-                q.selectLemmasFromFormsLike(lang.code, pattern, maxItems.toLong()).executeAsList()
             val formNormLike: List<SelectLemmasFromFormsNormalizedLike> =
                 q.selectLemmasFromFormsNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
-            formLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
             formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
 

@@ -59,6 +59,9 @@ fun testPlatformDbSupport(): PlatformDbSupport = PlatformDbSupport(TestContext.a
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 expect annotation class IgnoreIos()
 
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+expect annotation class IgnoreRobolectric()
+
 /**
  * Holder for test DataDbManager that allows proper cleanup.
  * Call [close] to release all database connections.
