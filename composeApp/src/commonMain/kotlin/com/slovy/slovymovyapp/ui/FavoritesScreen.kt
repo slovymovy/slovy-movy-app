@@ -59,10 +59,6 @@ class FavoritesViewModel(
 
     val scrollState = LazyListState()
 
-    init {
-        loadFavorites()
-    }
-
     fun updateQuery(newQuery: String) {
         state = state.copy(query = newQuery)
         loadFavorites()
