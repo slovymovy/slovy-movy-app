@@ -108,6 +108,9 @@ CREATE INDEX IF NOT EXISTS idx_lemma_pos_lemma_id ON lemma_pos(lemma_id);
 CREATE INDEX IF NOT EXISTS idx_form_form ON form(form COLLATE NOCASE);
 CREATE INDEX IF NOT EXISTS idx_form_form_normalized ON form(form_normalized COLLATE NOCASE);
 
+CREATE INDEX idx_form_lemma_pos_id ON form(lemma_pos_id);
+CREATE INDEX idx_sense_lemma_pos_id ON sense(lemma_pos_id);
+
 -- Queries
 insertLemma:
 INSERT OR IGNORE INTO lemma(id, lang_code, lemma, lemma_normalized, zipf_frequency, online_only)
