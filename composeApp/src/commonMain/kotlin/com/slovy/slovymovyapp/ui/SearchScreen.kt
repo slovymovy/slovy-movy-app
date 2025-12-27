@@ -52,7 +52,12 @@ class SearchViewModel(
     private val repository: DictionaryRepository
 ) : ViewModel() {
 
-    data class Search(val query: String, val language: Language? = null, val force: Uuid)
+    data class Search(
+        val query: String,
+        val language: Language? = null,
+        val force: Uuid,
+        val resetFocus: Boolean = false
+    )
 
     var state by mutableStateOf(
         SearchUiState(
@@ -89,7 +94,7 @@ class SearchViewModel(
                         showNoResults = results.isEmpty() && query.isNotEmpty()
                     )
                     // Reset scroll to top when results change
-                    if (results.isNotEmpty() || query.isEmpty()) {
+                    if ((results.isNotEmpty() || query.isEmpty()) && queryFlow.value.resetFocus) {
                         state.scrollState.scrollToItem(0)
                     }
                 }
@@ -102,13 +107,18 @@ class SearchViewModel(
         state = state.copy(query = trimmed)
         // Trigger debounced search
         queryFlow.value =
-            queryFlow.value.copy(query = trimmed, language = state.selectedLanguage, force = Uuid.random())
+            queryFlow.value.copy(
+                query = trimmed,
+                language = state.selectedLanguage,
+                force = Uuid.random(),
+                resetFocus = true
+            )
     }
 
     fun refreshResults() {
         // Re-trigger search to update favorite status
         if (state.query.isNotEmpty()) {
-            queryFlow.value = queryFlow.value.copy(force = Uuid.random())
+            queryFlow.value = queryFlow.value.copy(force = Uuid.random(), resetFocus = false)
         }
     }
 
@@ -122,10 +132,11 @@ class SearchViewModel(
     }
 
     fun setSelectedLanguage(language: Language?) {
+        val resetFocus = state.selectedLanguage != language
         state = state.copy(selectedLanguage = language)
         // Re-trigger search with new language filter
         if (state.query.isNotEmpty()) {
-            queryFlow.value = queryFlow.value.copy(language = language, force = Uuid.random())
+            queryFlow.value = queryFlow.value.copy(language = language, force = Uuid.random(), resetFocus = resetFocus)
         }
     }
 
