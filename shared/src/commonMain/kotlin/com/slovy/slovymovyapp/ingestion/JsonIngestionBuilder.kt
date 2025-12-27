@@ -135,6 +135,77 @@ class JsonIngestionBuilder(
         }
     }
 
+    /**
+     * Adds processed JSON data to an already-ingested raw-only word.
+     *
+     * This method is used when a word was previously ingested with [ingestRawOnly] (with online_only=true)
+     * and now needs to have processed data added to it.
+     *
+     * @param processedJson JSON string containing the processed LanguageCardResponse
+     * @param word The lemma word (used to generate deterministic ID)
+     * @param langCode The source language code
+     * @param dictDb The dictionary database
+     * @return List of POS entries that were skipped because they weren't in the raw ingestion
+     * @throws IllegalArgumentException if lemma doesn't exist or already has processed data (online_only=false)
+     */
+    fun ingestProcessedOverRaw(
+        processedJson: String,
+        word: String,
+        langCode: String,
+        dictDb: DictionaryDatabase
+    ): List<String> {
+        val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedJson)
+
+        // Use transactionWithResult to get the return value
+        val result = dictDb.transactionWithResult {
+            ingestProcessedOverRawInternal(processed, word, langCode, dictDb.dictionaryQueries)
+        }
+
+        result.second.forEach { (target, actions) ->
+            val trDb = translationDbProvider(langCode, target)
+            val trQ = trDb.translationQueries
+            trDb.transaction {
+                actions.forEach { op -> trQ.op() }
+            }
+        }
+
+        return result.first
+    }
+
+    /**
+     * Adds translations to an already processed word (with senses).
+     *
+     * This method is used when a word already has full processed data (online_only=false)
+     * and needs additional translations for new target languages.
+     *
+     * @param processedJson JSON string containing the processed LanguageCardResponse with translations
+     * @param word The lemma word (used to generate deterministic ID)
+     * @param langCode The source language code
+     * @param dictDb The dictionary database
+     * @throws IllegalArgumentException if lemma doesn't exist or is online_only (needs senses first)
+     */
+    fun ingestTranslationsOnly(
+        processedJson: String,
+        word: String,
+        langCode: String,
+        dictDb: DictionaryDatabase
+    ) {
+        val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedJson)
+
+        // Use transactionWithResult to get the return value
+        val translationOpsByTarget = dictDb.transactionWithResult {
+            ingestTranslationsOnlyInternal(processed, word, langCode, dictDb.dictionaryQueries)
+        }
+
+        translationOpsByTarget.forEach { (target, actions) ->
+            val trDb = translationDbProvider(langCode, target)
+            val trQ = trDb.translationQueries
+            trDb.transaction {
+                actions.forEach { op -> trQ.op() }
+            }
+        }
+    }
+
     private data class ParsedIngestionInput(
         val raw: ExtractedWordData,
         val processed: LanguageCardResponse?
@@ -348,57 +419,86 @@ class JsonIngestionBuilder(
             }
         }
 
-        // Insert senses and related data from processed JSON, mapped to POS lemma
-        processed.entries.forEach { posEntry ->
-            val pos = mapPos(posEntry.pos)
-            val lemmaPosIdForPos = posToEntryId[pos]!!
-
-            posEntry.senses.forEachIndexed { _, sense ->
-                val senseId = uuidParse(sense.senseId)
-                dictQ.insertSense(
-                    sense_id = senseId,
-                    lemma_pos_id = lemmaPosIdForPos,
-                    sense_definition = sense.senseDefinition,
-                    learner_level = mapLevel(sense.learnerLevel),
-                    frequency = mapFrequency(sense.frequency),
-                    semantic_group_id = sense.semanticGroupId,
-                    name_type = mapNameType(sense.nameType)
-                )
-                // traits
-                sense.traits.forEach { t ->
-                    dictQ.insertSenseTrait(
-                        sense_id = senseId,
-                        trait_type = mapTraitType(t.traitType),
-                        comment = t.comment
-                    )
-                }
-                // synonyms
-                sense.synonyms.forEach { syn ->
-                    dictQ.insertSenseSynonym(sense_id = senseId, synonym = syn)
-                }
-                // antonyms
-                sense.antonyms.forEach { ant ->
-                    dictQ.insertSenseAntonym(sense_id = senseId, antonym = ant)
-                }
-                // common phrases
-                sense.commonPhrases.forEach { phrase ->
-                    dictQ.insertSenseCommonPhrase(sense_id = senseId, phrase = phrase)
-                }
-                // examples (store index-based id)
-                sense.examples.forEachIndexed { exIdx, ex ->
-                    dictQ.insertSenseExample(sense_id = senseId, example_id = exIdx.toLong(), text = ex.text)
-                }
-            }
-        }
+        insertSensesAndRelatedData(processed, posToEntryId, dictQ)
 
         return buildTranslationOperations(processed, posToEntryId, baseLemmaId, langCode)
+    }
+
+    private fun ingestProcessedOverRawInternal(
+        processed: LanguageCardResponse,
+        word: String,
+        langCode: String,
+        dictQ: DictionaryQueries
+    ): Pair<List<String>, Map<String, List<TranslationQueries.() -> Unit>>> {
+        val lemmaNormalized = stripAccents(word)
+        val baseLemmaId = generateLemmaId(word, lemmaNormalized)
+
+        // Verify lemma exists and is online_only
+        val existingLemma = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
+            ?: throw IllegalArgumentException("Lemma '$word' not found in database")
+
+        if (!existingLemma.online_only) {
+            throw IllegalArgumentException("Lemma '$word' already has processed data (online_only=false)")
+        }
+
+        // Get existing lemma_pos entries to build posToEntryId map
+        val existingLemmaPos = dictQ.selectLemmaPosByLemmaId(baseLemmaId).executeAsList()
+        val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
+        existingLemmaPos.forEach { lp ->
+            posToEntryId[lp.pos] = lp.id
+        }
+
+        // Update online_only to false
+        dictQ.updateLemmaOnlineOnly(online_only = false, id = baseLemmaId)
+
+        // Insert word family (if present)
+        processed.wordFamily?.forEach { familyWord ->
+            dictQ.insertLemmaWordFamily(lemma_id = baseLemmaId, word = familyWord)
+        }
+
+        // Insert senses and related data, skipping missing POS
+        val skippedPos = insertSensesAndRelatedData(processed, posToEntryId, dictQ, skipMissingPos = true)
+        if (skippedPos.isNotEmpty()) {
+            println("Warning: Skipped POS entries for lemma '$word': ${skippedPos.joinToString()}")
+        }
+
+        val translationOps = buildTranslationOperations(processed, posToEntryId, baseLemmaId, langCode, skipMissingPos = true)
+        return Pair(skippedPos, translationOps)
+    }
+
+    private fun ingestTranslationsOnlyInternal(
+        processed: LanguageCardResponse,
+        word: String,
+        langCode: String,
+        dictQ: DictionaryQueries
+    ): Map<String, List<TranslationQueries.() -> Unit>> {
+        val lemmaNormalized = stripAccents(word)
+        val baseLemmaId = generateLemmaId(word, lemmaNormalized)
+
+        // Verify lemma exists and has processed data
+        val existingLemma = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
+            ?: throw IllegalArgumentException("Lemma '$word' not found in database")
+
+        if (existingLemma.online_only) {
+            throw IllegalArgumentException("Lemma '$word' is online_only - needs senses before adding translations")
+        }
+
+        // Get existing lemma_pos entries to build posToEntryId map
+        val existingLemmaPos = dictQ.selectLemmaPosByLemmaId(baseLemmaId).executeAsList()
+        val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
+        existingLemmaPos.forEach { lp ->
+            posToEntryId[lp.pos] = lp.id
+        }
+
+        return buildTranslationOperations(processed, posToEntryId, baseLemmaId, langCode, skipMissingPos = true)
     }
 
     private fun buildTranslationOperations(
         processed: LanguageCardResponse,
         posToEntryId: Map<DictionaryPos, Uuid>,
         baseLemmaId: Uuid,
-        sourceLangCode: String
+        sourceLangCode: String,
+        skipMissingPos: Boolean = false
     ): Map<String, List<TranslationQueries.() -> Unit>> {
         val operations = mutableMapOf<String, MutableList<TranslationQueries.() -> Unit>>()
         val targetLangs = collectTargetLanguages(processed)
@@ -406,7 +506,14 @@ class JsonIngestionBuilder(
             val opsForTarget = operations.getOrPut(trg) { mutableListOf() }
             processed.entries.forEach { posEntry ->
                 val pos = mapPos(posEntry.pos)
-                val lemmaPosIdForPos = posToEntryId[pos]!!
+                val lemmaPosIdForPos = posToEntryId[pos]
+                if (lemmaPosIdForPos == null) {
+                    if (skipMissingPos) {
+                        return@forEach
+                    } else {
+                        error("POS ${posEntry.pos} not found in posToEntryId map")
+                    }
+                }
                 posEntry.senses.forEach { sense ->
                     val senseId = uuidParse(sense.senseId)
                     val def = sense.targetLangDefinitions[trg]
@@ -449,6 +556,76 @@ class JsonIngestionBuilder(
             }
         }
         return operations
+    }
+
+    /**
+     * Inserts senses and all related data (traits, synonyms, antonyms, phrases, examples).
+     *
+     * @param processed The processed JSON data
+     * @param posToEntryId Map of POS to lemma_pos ID
+     * @param dictQ Dictionary queries
+     * @param skipMissingPos If true, skip entries where POS is not in posToEntryId; if false, throw
+     * @return List of POS entries that were skipped (only when skipMissingPos is true)
+     */
+    private fun insertSensesAndRelatedData(
+        processed: LanguageCardResponse,
+        posToEntryId: Map<DictionaryPos, Uuid>,
+        dictQ: DictionaryQueries,
+        skipMissingPos: Boolean = false
+    ): List<String> {
+        val skippedPos = mutableListOf<String>()
+
+        processed.entries.forEach { posEntry ->
+            val pos = mapPos(posEntry.pos)
+            val lemmaPosIdForPos = posToEntryId[pos]
+            if (lemmaPosIdForPos == null) {
+                if (skipMissingPos) {
+                    skippedPos.add(posEntry.pos)
+                    return@forEach
+                } else {
+                    error("POS ${posEntry.pos} not found in posToEntryId map")
+                }
+            }
+
+            posEntry.senses.forEach { sense ->
+                val senseId = uuidParse(sense.senseId)
+                dictQ.insertSense(
+                    sense_id = senseId,
+                    lemma_pos_id = lemmaPosIdForPos,
+                    sense_definition = sense.senseDefinition,
+                    learner_level = mapLevel(sense.learnerLevel),
+                    frequency = mapFrequency(sense.frequency),
+                    semantic_group_id = sense.semanticGroupId,
+                    name_type = mapNameType(sense.nameType)
+                )
+                // traits
+                sense.traits.forEach { t ->
+                    dictQ.insertSenseTrait(
+                        sense_id = senseId,
+                        trait_type = mapTraitType(t.traitType),
+                        comment = t.comment
+                    )
+                }
+                // synonyms
+                sense.synonyms.forEach { syn ->
+                    dictQ.insertSenseSynonym(sense_id = senseId, synonym = syn)
+                }
+                // antonyms
+                sense.antonyms.forEach { ant ->
+                    dictQ.insertSenseAntonym(sense_id = senseId, antonym = ant)
+                }
+                // common phrases
+                sense.commonPhrases.forEach { phrase ->
+                    dictQ.insertSenseCommonPhrase(sense_id = senseId, phrase = phrase)
+                }
+                // examples (store index-based id)
+                sense.examples.forEachIndexed { exIdx, ex ->
+                    dictQ.insertSenseExample(sense_id = senseId, example_id = exIdx.toLong(), text = ex.text)
+                }
+            }
+        }
+
+        return skippedPos
     }
 
     private fun generateLemmaId(lemma: String, lemmaNormalized: String): Uuid {

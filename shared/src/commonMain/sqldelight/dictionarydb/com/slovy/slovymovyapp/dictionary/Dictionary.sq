@@ -335,3 +335,10 @@ selectWordFamilyByLemmaId:
 SELECT word
 FROM lemma_word_family
 WHERE lemma_id = ?;
+
+-- Update queries for incremental ingestion
+updateLemmaOnlineOnly:
+UPDATE lemma SET online_only = ? WHERE id = ?;
+
+selectLemmaPosByLemmaId:
+SELECT id, pos FROM lemma_pos WHERE lemma_id = ?;
