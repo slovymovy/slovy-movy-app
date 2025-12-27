@@ -7,7 +7,10 @@ import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.util.stripAccents
+import kotlinx.coroutines.currentCoroutineContext
+import kotlin.coroutines.coroutineContext
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.ensureActive
 
 internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
     return PartOfSpeech.valueOf(this.name)
@@ -178,6 +181,9 @@ class DictionaryRepository(
             byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
 
+            // Check for cancellation before next stage
+            currentCoroutineContext().ensureActive()
+
             // search exact form equals (including normalized)
             val formEq: List<SelectLemmasByFormEquals> =
                 q.selectLemmasByFormEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
@@ -187,6 +193,9 @@ class DictionaryRepository(
             formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
 
+            // Check for cancellation before next stage
+            currentCoroutineContext().ensureActive()
+
             // and by prefix later (lemma and forms) - use normalized pattern for GLOB on normalized columns
             val pattern = "${stripAccents(trimmed)}*"
             val lemmaNormLike: List<SelectLemmasNormalizedLike> =
@@ -194,10 +203,16 @@ class DictionaryRepository(
             lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
 
+            // Check for cancellation before next stage
+            currentCoroutineContext().ensureActive()
+
             val formNormLike: List<SelectLemmasFromFormsNormalizedLike> =
                 q.selectLemmasFromFormsNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
             formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
             if (shouldEarlyReturn()) return out.take(maxItems)
+
+            // Check for cancellation before translation search
+            currentCoroutineContext().ensureActive()
 
             // search by translation (target language words)
             val targets = installedTranslationTargets(lang)
@@ -226,7 +241,13 @@ class DictionaryRepository(
 
             // Enrich POS for this language before moving to the next
             enrichPosForLang()
+
+            // Check for cancellation before next language
+            currentCoroutineContext().ensureActive()
         }
+
+        // Check for cancellation before final processing
+        currentCoroutineContext().ensureActive()
 
         // Check favorite status for all items (single query instead of N queries)
         val result = out.take(maxItems)

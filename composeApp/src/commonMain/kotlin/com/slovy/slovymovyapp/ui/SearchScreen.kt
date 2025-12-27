@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
@@ -29,6 +30,8 @@ import com.slovy.slovymovyapp.ui.components.AppCard
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.CompactFrequencyBadge
 import com.slovy.slovymovyapp.ui.word.Badge
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
@@ -49,6 +52,8 @@ class SearchViewModel(
     private val repository: DictionaryRepository
 ) : ViewModel() {
 
+    data class Search(val query: String, val language: Language? = null, val force: Uuid)
+
     var state by mutableStateOf(
         SearchUiState(
             query = "",
@@ -59,30 +64,51 @@ class SearchViewModel(
     )
         private set
 
-    suspend fun updateQuery(newQuery: String) {
-        val trimmed = newQuery.trim()
-        val newResults = if (trimmed.isEmpty()) {
-            emptyList()
-        } else {
-            repository.search(trimmed, state.selectedLanguage)
+    private val queryFlow = MutableStateFlow(Search("", state.selectedLanguage, Uuid.random()))
+
+    init {
+        viewModelScope.launch {
+            @OptIn(kotlinx.coroutines.FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+            queryFlow
+                .debounce(200) // Wait ms after last keystroke
+                .flatMapLatest { queryState ->
+                    flow {
+                        val query = queryState.query
+                        val results = if (query.isEmpty()) {
+                            emptyList()
+                        } else {
+                            repository.search(query, queryState.language)
+                        }
+                        emit(results)
+                    }.flowOn(Dispatchers.Default) // Run search on background thread
+                }
+                .collect { results ->
+                    val query = queryFlow.value.query
+                    state = state.copy(
+                        results = results,
+                        showNoResults = results.isEmpty() && query.isNotEmpty()
+                    )
+                    // Reset scroll to top when results change
+                    if (results.isNotEmpty() || query.isEmpty()) {
+                        state.scrollState.scrollToItem(0)
+                    }
+                }
         }
-        state = state.copy(
-            query = trimmed,
-            results = newResults,
-            showNoResults = newResults.isEmpty() && trimmed.isNotEmpty()
-        )
-        // Reset scroll to top when query changes
-        state.scrollState.scrollToItem(0)
     }
 
-    suspend fun refreshFavorites() {
-        // Refresh search results to update favorite status without resetting scroll
+    fun updateQuery(newQuery: String) {
+        val trimmed = newQuery.trim()
+        // Update UI state immediately for responsive typing
+        state = state.copy(query = trimmed)
+        // Trigger debounced search
+        queryFlow.value =
+            queryFlow.value.copy(query = trimmed, language = state.selectedLanguage, force = Uuid.random())
+    }
+
+    fun refreshResults() {
+        // Re-trigger search to update favorite status
         if (state.query.isNotEmpty()) {
-            val newResults = repository.search(state.query, state.selectedLanguage)
-            state = state.copy(
-                results = newResults,
-                showNoResults = newResults.isEmpty() && state.query.isNotEmpty()
-            )
+            queryFlow.value = queryFlow.value.copy(force = Uuid.random())
         }
     }
 
@@ -97,6 +123,10 @@ class SearchViewModel(
 
     fun setSelectedLanguage(language: Language?) {
         state = state.copy(selectedLanguage = language)
+        // Re-trigger search with new language filter
+        if (state.query.isNotEmpty()) {
+            queryFlow.value = queryFlow.value.copy(language = language, force = Uuid.random())
+        }
     }
 
     fun toggleLanguageDropdown() {
@@ -123,14 +153,13 @@ fun SearchScreen(
     onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
-    val coroutineScope = rememberCoroutineScope()
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
 
     // Refresh language indicators and search results when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
-        viewModel.refreshFavorites()
+        viewModel.refreshResults()
     }
 
     LaunchedEffect(savedQuery) {
@@ -148,7 +177,7 @@ fun SearchScreen(
 
     SearchScreenContent(
         state = viewModel.state,
-        onQueryChange = { coroutineScope.launch { viewModel.updateQuery(it) } },
+        onQueryChange = { viewModel.updateQuery(it) },
         onResultSelected = { item ->
             focusManager.clearFocus()
             onWordSelected(item)
@@ -156,7 +185,7 @@ fun SearchScreen(
         onLanguageSelected = { language ->
             viewModel.setShowLanguageIndicators(language == null && viewModel.state.availableLanguages.size > 1)
             viewModel.setSelectedLanguage(language)
-            coroutineScope.launch { viewModel.updateQuery(viewModel.state.query) }
+            // TODO: search is not relaunched or query
         },
         onToggleLanguageDropdown = { viewModel.toggleLanguageDropdown() },
         onDismissLanguageDropdown = { viewModel.dismissLanguageDropdown() },
