@@ -379,7 +379,7 @@ private fun SearchResultCard(
                 // Meaning count could be shown here if available
                 if (item.pos.isNotEmpty()) {
                     Text(
-                        text = "${item.pos.size} ${if (item.pos.size == 1) "meaning" else "meanings"}",
+                        text = "${item.pos.size} ${if (item.pos.size == 1) "part of speech" else "parts of speech"}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
