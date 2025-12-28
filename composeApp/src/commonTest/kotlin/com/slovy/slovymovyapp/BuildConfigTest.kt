@@ -26,12 +26,4 @@ class BuildConfigTest {
         val config = getAppBuildConfig()
         assertTrue(config.applicationId.isNotBlank(), "applicationId should not be blank")
     }
-
-    @Test
-    fun buildConfig_isDebugIsBoolean() {
-        val config = getAppBuildConfig()
-        // This test just verifies isDebug is accessible and is a boolean (true or false)
-        val isDebug = config.isDebug
-        assertTrue(isDebug || !isDebug, "isDebug should be a valid boolean")
-    }
 }
