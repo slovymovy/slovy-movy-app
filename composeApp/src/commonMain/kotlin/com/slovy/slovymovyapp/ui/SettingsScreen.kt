@@ -20,8 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.AppBuildConfig
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.AvailableLanguageInfo
+import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
 import com.slovy.slovymovyapp.speech.*
 import kotlinx.coroutines.launch
@@ -51,7 +53,8 @@ data class SettingsUiState(
     val errorMessage: String? = null,
     val testingVoice: Text2SpeechVoice? = null,
     val ttsStatus: TTSStatus = TTSStatus.IDLE,
-    val deleteConfirmation: DeleteConfirmationState? = null
+    val deleteConfirmation: DeleteConfirmationState? = null,
+    val buildConfig: AppBuildConfig = AppBuildConfig("compile", 42, true, "com.slovy.slovymovyapp")
 )
 
 data class DeleteConfirmationState(
@@ -71,10 +74,11 @@ private val TEST_PHRASES = mapOf(
 class SettingsViewModel(
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
-    private val dataDbManager: com.slovy.slovymovyapp.data.remote.DataDbManager
+    private val dataDbManager: DataDbManager,
+    buildConfig: AppBuildConfig
 ) : ViewModel() {
 
-    var state by mutableStateOf(SettingsUiState())
+    var state by mutableStateOf(SettingsUiState(buildConfig = buildConfig))
         private set
 
     val scrollState = LazyListState()
@@ -627,6 +631,22 @@ fun SettingsScreenContent(
                                     )
                                 }
                             }
+
+                            // About section
+                            state.buildConfig?.let { buildConfig ->
+                                item {
+                                    Text(
+                                        text = "About",
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
+                                    )
+                                }
+
+                                item {
+                                    AboutCard(buildConfig = buildConfig)
+                                }
+                            }
                         }
                     }
                 }
@@ -1160,6 +1180,99 @@ private fun formatFileSize(bytes: Long): String {
         else -> {
             val gb = (bytes * 100 / (1024 * 1024 * 1024)).toDouble() / 100.0
             "$gb GB"
+        }
+    }
+}
+
+@Composable
+private fun AboutCard(
+    buildConfig: AppBuildConfig
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 1.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Version",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = buildConfig.versionName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Build",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = buildConfig.versionCode.toString(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = if (buildConfig.isDebug)
+                            MaterialTheme.colorScheme.tertiaryContainer
+                        else
+                            MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Text(
+                            text = if (buildConfig.isDebug) "Debug" else "Release",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = if (buildConfig.isDebug)
+                                MaterialTheme.colorScheme.onTertiaryContainer
+                            else
+                                MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Package",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = buildConfig.applicationId,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }
