@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
-    <!-- Only include the application database; downloaded DB files in the databases/ dir are excluded by omission -->
+    <!-- Include application database and local cache databases; downloaded DB files are excluded by omission -->
     <include domain="database" path="app.db"/>
+    <include domain="database" path="local_dictionary.db"/>
+    <include domain="database" path="local_translation.db"/>
 </full-backup-content>
