@@ -128,6 +128,6 @@ if (OperatingSystem.current().isWindows) {
             translationDatabaseName
         ).any { task.name.contains(it) }
     }.configureEach {
-        //enabled = false
+        enabled = false
     }
 }
