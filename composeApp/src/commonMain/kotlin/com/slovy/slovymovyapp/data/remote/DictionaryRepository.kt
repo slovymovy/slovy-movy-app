@@ -264,7 +264,11 @@ class DictionaryRepository(
         }
     }
 
-    suspend fun getLanguageCard(language: Language, lemma: String): LanguageCard? {
+    suspend fun getLanguageCard(
+        language: Language,
+        lemma: String,
+        translationTargets: List<Language>? = null
+    ): LanguageCard? {
         val db = dataDbManager.openDictionaryReadOnly(language)
         val q = db.dictionaryQueries
 
@@ -302,7 +306,7 @@ class DictionaryRepository(
                 }
 
                 // Aggregate per-target language translations/definitions
-                val targetLangs = installedTranslationTargets(language)
+                val targetLangs = translationTargets ?: installedTranslationTargets(language)
                 val openTdbs: Map<Language, TranslationDatabase> = targetLangs.associateWith { tgt ->
                     val tdb = dataDbManager.openTranslationReadOnly(language, tgt)
                     tdb
