@@ -19,3 +19,6 @@ actual object TestContext {
 actual abstract class BaseTest actual constructor() : BaseTestImpl()
 
 actual typealias IgnoreIos = kotlin.test.Ignore
+
+@Target(allowedTargets = [AnnotationTarget.CLASS, AnnotationTarget.FUNCTION])
+actual annotation class IgnoreRobolectric actual constructor()

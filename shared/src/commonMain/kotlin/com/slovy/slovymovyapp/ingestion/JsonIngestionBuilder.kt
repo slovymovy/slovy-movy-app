@@ -6,6 +6,10 @@ import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
 import com.slovy.slovymovyapp.data.dictionary.NameType
 import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
+import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
+import com.slovy.slovymovyapp.dictionary.DictionaryQueries
+import com.slovy.slovymovyapp.translation.TranslationDatabase
+import com.slovy.slovymovyapp.translation.TranslationQueries
 import com.slovy.slovymovyapp.util.md5
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -34,11 +38,11 @@ val LANG_TO_SOURCE_FILE: Map<String, String> = mapOf(
  * - All other IDs come from the input JSON
  * - Iteration order is preserved for consistent database insertion
  *
- * @param dbManager The database manager for opening dictionary and translation databases
+ * @param translationDbProvider The database provider for opening translation databases
  * @param frequencyMap Map of lemma words to their Zipf frequency values
  */
 class JsonIngestionBuilder(
-    private val dbManager: IngestionDbManager,
+    private val translationDbProvider: (from: String, to: String) -> TranslationDatabase,
     private val frequencyMap: Map<String, Double>
 ) {
 
@@ -50,234 +54,583 @@ class JsonIngestionBuilder(
     }
 
     /**
+     * Input payload for ingestion. When [processedJson] is null, only raw ingestion is performed.
+     */
+    data class IngestionInput(
+        val rawJson: String,
+        val processedJson: String? = null
+    )
+
+    /**
+     * Ingests only the raw JSON data for a word.
+     *
+     * Used for words that do not yet have processed LanguageCardResponse content.
+     * Inserts the lemma, lemma_pos and forms, and marks the lemma as `online_only = true`
+     * so the app knows to fetch details remotely.
+     *
+     * @param rawJson JSON string containing the raw ExtractedWordData
+     * @throws IllegalArgumentException if lemma not found in frequency map or already exists
+     */
+    fun ingestRawOnly(
+        rawJson: String, dictDb: DictionaryDatabase
+    ) {
+        ingestBatch(listOf(IngestionInput(rawJson = rawJson)), dictDb)
+    }
+
+    /**
      * Ingests processed and raw JSON data into the dictionary and translation databases.
      *
      * @param processedJson JSON string containing the processed LanguageCardResponse
      * @param rawJson JSON string containing the raw ExtractedWordData
      * @throws IllegalArgumentException if lemma not found in frequency map, duplicate IDs, or lemma already exists
      */
-    fun ingest(processedJson: String, rawJson: String) {
+    fun ingest(
+        processedJson: String, rawJson: String, dictDb: DictionaryDatabase
+    ) {
+        ingestBatch(
+            inputs = listOf(IngestionInput(rawJson = rawJson, processedJson = processedJson)),
+            dictDb = dictDb
+        )
+    }
+
+    /**
+     * Ingests a batch of words inside a single dictionary transaction and per-target translation transactions.
+     * Translation operations are grouped by target language to reduce commit overhead.
+     */
+    fun ingestBatch(inputs: List<IngestionInput>, dictDb: DictionaryDatabase) {
+        if (inputs.isEmpty()) return
+        val parsedInputs = inputs.map { input ->
+            ParsedIngestionInput(
+                raw = json.decodeFromString(ExtractedWordData.serializer(), input.rawJson),
+                processed = input.processedJson?.let {
+                    json.decodeFromString(LanguageCardResponse.serializer(), it)
+                }
+            )
+        }
+        val sourceLang = parsedInputs.first().raw.langCode
+        require(parsedInputs.all { it.raw.langCode == sourceLang }) {
+            "Ingestion batch must contain words for a single language"
+        }
+        val translationOpsByTarget = mutableMapOf<String, MutableList<TranslationQueries.() -> Unit>>()
+
+        dictDb.transaction {
+            parsedInputs.forEach { payload ->
+                if (payload.processed != null) {
+                    val ops = ingestProcessedInternal(payload.processed, payload.raw, dictDb.dictionaryQueries)
+                    ops.forEach { (target, actions) ->
+                        translationOpsByTarget.getOrPut(target) { mutableListOf() }.addAll(actions)
+                    }
+                } else {
+                    ingestRawOnlyInternal(payload.raw, dictDb.dictionaryQueries)
+                }
+            }
+        }
+
+        translationOpsByTarget.forEach { (target, actions) ->
+            val trDb = translationDbProvider(sourceLang, target)
+            val trQ = trDb.translationQueries
+            trDb.transaction {
+                actions.forEach { op -> trQ.op() }
+            }
+        }
+    }
+
+    /**
+     * Adds processed JSON data to an already-ingested raw-only word.
+     *
+     * This method is used when a word was previously ingested with [ingestRawOnly] (with online_only=true)
+     * and now needs to have processed data added to it.
+     *
+     * @param processedJson JSON string containing the processed LanguageCardResponse
+     * @param word The lemma word (used to generate deterministic ID)
+     * @param langCode The source language code
+     * @param dictDb The dictionary database
+     * @return List of POS entries that were skipped because they weren't in the raw ingestion
+     * @throws IllegalArgumentException if lemma doesn't exist or already has processed data (online_only=false)
+     */
+    fun ingestProcessedOverRaw(
+        processedJson: String,
+        word: String,
+        langCode: String,
+        dictDb: DictionaryDatabase
+    ): List<String> {
         val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedJson)
-        val raw = json.decodeFromString(ExtractedWordData.serializer(), rawJson)
+
+        // Use transactionWithResult to get the return value
+        val result = dictDb.transactionWithResult {
+            ingestProcessedOverRawInternal(processed, word, langCode, dictDb.dictionaryQueries)
+        }
+
+        result.second.forEach { (target, actions) ->
+            val trDb = translationDbProvider(langCode, target)
+            val trQ = trDb.translationQueries
+            trDb.transaction {
+                actions.forEach { op -> trQ.op() }
+            }
+        }
+
+        return result.first
+    }
+
+    /**
+     * Adds translations to an already processed word (with senses).
+     *
+     * This method is used when a word already has full processed data (online_only=false)
+     * and needs additional translations for new target languages.
+     *
+     * @param processedJson JSON string containing the processed LanguageCardResponse with translations
+     * @param word The lemma word (used to generate deterministic ID)
+     * @param langCode The source language code
+     * @param dictDb The dictionary database
+     * @throws IllegalArgumentException if lemma doesn't exist or is online_only (needs senses first)
+     */
+    fun ingestTranslationsOnly(
+        processedJson: String,
+        word: String,
+        langCode: String,
+        dictDb: DictionaryDatabase
+    ) {
+        val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedJson)
+
+        // Use transactionWithResult to get the return value
+        val translationOpsByTarget = dictDb.transactionWithResult {
+            ingestTranslationsOnlyInternal(processed, word, langCode, dictDb.dictionaryQueries)
+        }
+
+        translationOpsByTarget.forEach { (target, actions) ->
+            val trDb = translationDbProvider(langCode, target)
+            val trQ = trDb.translationQueries
+            trDb.transaction {
+                actions.forEach { op -> trQ.op() }
+            }
+        }
+    }
+
+    private data class ParsedIngestionInput(
+        val raw: ExtractedWordData,
+        val processed: LanguageCardResponse?
+    )
+
+    private fun ingestRawOnlyInternal(
+        raw: ExtractedWordData,
+        dictQ: DictionaryQueries
+    ) {
         val langCode = raw.langCode
         val lemmaWord = raw.word
+        val zipfFrequency = frequencyMap[lemmaWord]
+            ?: throw IllegalArgumentException("Lemma '$lemmaWord' not found in frequency map")
 
+        val lemmaNormalized = stripAccents(lemmaWord)
+        val nativeKey = LANG_TO_SOURCE_FILE[langCode]
+        val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+        val allEntries = raw.sourceFileToEntries.values.flatten()
+        val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
+
+        val baseLemmaId = generateLemmaId(lemmaWord, lemmaNormalized)
+
+        val selectLemmasById = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
+        if (selectLemmasById != null) {
+            throw IllegalArgumentException("Lemma '$lemmaWord' already exists in database")
+        }
+
+        dictQ.insertLemma(
+            id = baseLemmaId,
+            lang_code = langCode,
+            lemma = lemmaWord,
+            lemma_normalized = lemmaNormalized,
+            zipf_frequency = zipfFrequency,
+            online_only = true
+        )
+
+        val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
+        entriesForForms.forEach { entry ->
+            val pos = mapPos(entry.pos) ?: return@forEach
+            if (!posToEntryId.containsKey(pos))
+                posToEntryId[pos] = uuidParse(entry.entryId.toString())
+        }
+
+        posToEntryId.forEach { (pos, entryId) ->
+            dictQ.insertLemmaPos(
+                id = entryId,
+                lemma_id = baseLemmaId,
+                pos = pos
+            )
+        }
+
+        data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+
+        val lemmaPosIdToForms = mutableMapOf<Uuid, MutableMap<FormKey, ExtractedWordForm>>()
+        entriesForForms.forEach { entry ->
+            val pos = mapPos(entry.pos) ?: return@forEach
+            val lemmaPosId = posToEntryId[pos] ?: return@forEach
+
+            val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
+            entry.forms.forEach { f ->
+                val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet())
+                if (!formsMap.containsKey(key)) {
+                    formsMap[key] = f
+                }
+            }
+        }
+
+        lemmaPosIdToForms.forEach { (lemmaPosId, formsMap) ->
+            formsMap.values.forEach { f ->
+                val formId = uuidParse(f.formId.toString())
+                dictQ.insertForm(
+                    form_id = formId,
+                    lemma_pos_id = lemmaPosId,
+                    form = f.form,
+                    form_normalized = stripAccents(f.form),
+                )
+                f.tags.forEach { tag ->
+                    dictQ.insertFormTag(form_id = formId, tag = tag)
+                }
+            }
+        }
+    }
+
+    private fun ingestProcessedInternal(
+        processed: LanguageCardResponse,
+        raw: ExtractedWordData,
+        dictQ: DictionaryQueries
+    ): Map<String, List<TranslationQueries.() -> Unit>> {
+        val langCode = raw.langCode
+        val lemmaWord = raw.word
         val zipfFrequency = frequencyMap[lemmaWord]
             ?: throw IllegalArgumentException("Lemma '$lemmaWord' not found in frequency map")
 
         val lemmaNormalized = stripAccents(lemmaWord)
 
-        val dictDb = dbManager.openDictionary(langCode)
-        val dictQ = dictDb.dictionaryQueries
-        dictDb.transaction {
+        // Select native source entries; fallback to any when missing
+        val nativeKey = LANG_TO_SOURCE_FILE[langCode]
+        val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+        val allEntries = raw.sourceFileToEntries.values.flatten()
 
-            // Select native source entries; fallback to any when missing
-            val nativeKey = LANG_TO_SOURCE_FILE[langCode]
-            val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
-            val allEntries = raw.sourceFileToEntries.values.flatten()
+        // Build mapping from sense_id -> raw entry
+        val senseIdToRawEntry = mutableMapOf<Uuid, ExtractedWordEntry>()
+        allEntries.forEach { entry ->
+            entry.senses.forEach { s ->
+                val sid = uuidParse(s.senseId.toString())
+                if (senseIdToRawEntry.contains(sid)) {
+                    throw IllegalArgumentException("Duplicate sense_id: $sid")
+                }
+                senseIdToRawEntry[sid] = entry
+            }
+        }
 
-            // Build mapping from sense_id -> raw entry
-            val senseIdToRawEntry = mutableMapOf<Uuid, ExtractedWordEntry>()
-            allEntries.forEach { entry ->
-                entry.senses.forEach { s ->
-                    val sid = uuidParse(s.senseId.toString())
-                    if (senseIdToRawEntry.contains(sid)) {
-                        throw IllegalArgumentException("Duplicate sense_id: $sid")
+        val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
+        val entryIdToPos = mutableMapOf<Uuid, DictionaryPos>()
+        processed.entries.forEach { pEntry ->
+            val pPos = mapPos(pEntry.pos)!!
+            pEntry.senses.forEach { s ->
+                val sid = uuidParse(s.senseId)
+                val rawEntry = senseIdToRawEntry[sid]
+                if (rawEntry != null && mapPos(rawEntry.pos) == pPos) {
+                    if (!posToEntryId.containsKey(pPos)) {
+                        posToEntryId[pPos] = uuidParse(rawEntry.entryId.toString())
                     }
-                    senseIdToRawEntry[sid] = entry
+                    entryIdToPos[uuidParse(rawEntry.entryId.toString())] = pPos
+                    return@forEach
                 }
             }
+        }
 
-            val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
-            val entryIdToPos = mutableMapOf<Uuid, DictionaryPos>()
-            processed.entries.forEach { pEntry ->
-                val pPos = mapPos(pEntry.pos)!!
-                pEntry.senses.forEach { s ->
-                    val sid = uuidParse(s.senseId)
-                    val rawEntry = senseIdToRawEntry[sid]
-                    if (rawEntry != null && mapPos(rawEntry.pos) == pPos) {
-                        if (!posToEntryId.containsKey(pPos)) {
-                            posToEntryId[pPos] = uuidParse(rawEntry.entryId.toString())
-                        }
-                        entryIdToPos[uuidParse(rawEntry.entryId.toString())] = pPos
-                        return@forEach
-                    }
+        processed.entries.forEach { entry ->
+            val key = mapPos(entry.pos)
+            if (!posToEntryId.containsKey(key)) {
+                val hash = md5("${lemmaWord}_${lemmaNormalized}_${key!!.name}".encodeToByteArray())
+                posToEntryId[key] = Uuid.fromByteArray(hash.sliceArray(0..15))
+            }
+        }
+
+        // Create single lemma entry (shared across all POS)
+        // Deterministic lemma ID generation using MD5 hash
+        val baseLemmaId = generateLemmaId(lemmaWord, lemmaNormalized)
+
+        val selectLemmasById = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
+        if (selectLemmasById != null) {
+            throw IllegalArgumentException("Lemma '$lemmaWord' already exists in database")
+        }
+
+        dictQ.insertLemma(
+            id = baseLemmaId,
+            lang_code = langCode,
+            lemma = lemmaWord,
+            lemma_normalized = lemmaNormalized,
+            zipf_frequency = zipfFrequency,
+            online_only = false
+        )
+
+        // Insert word family
+        processed.wordFamily?.forEach { familyWord ->
+            dictQ.insertLemmaWordFamily(lemma_id = baseLemmaId, word = familyWord)
+        }
+
+        // Insert lemma_pos entries for all POSes
+        posToEntryId.forEach { (pos, entryId) ->
+            try {
+                dictQ.insertLemmaPos(
+                    id = entryId,
+                    lemma_id = baseLemmaId,
+                    pos = pos
+                )
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Duplicate lemma_pos entry for lemma '$lemmaWord' and POS '$pos'", e)
+            }
+        }
+
+        // Insert forms (prefer native source; fallback to others when no forms in native)
+        val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
+
+        // Group forms by lemma_pos_id and deduplicate
+        data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+
+        val lemmaPosIdToForms = mutableMapOf<Uuid, MutableMap<FormKey, ExtractedWordForm>>()
+
+        entriesForForms.forEach { entry ->
+            val pos = entryIdToPos[uuidParse(entry.entryId.toString())]
+            pos ?: return@forEach
+            val lemmaPosId = posToEntryId[pos] ?: return@forEach
+
+            val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
+            entry.forms.forEach { f ->
+                val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet())
+                // Keep first occurrence of each unique form
+                if (!formsMap.containsKey(key)) {
+                    formsMap[key] = f
                 }
             }
+        }
 
-            processed.entries.forEach { entry ->
-                val key = mapPos(entry.pos)
-                if (!posToEntryId.containsKey(key)) {
-                    val hash = md5("${lemmaWord}_${lemmaNormalized}_${key!!.name}".encodeToByteArray())
-                    posToEntryId[key] = Uuid.fromByteArray(hash.sliceArray(0..15))
+        // Insert deduplicated forms
+        lemmaPosIdToForms.forEach { (lemmaPosId, formsMap) ->
+            formsMap.values.forEach { f ->
+                val formId = uuidParse(f.formId.toString())
+                dictQ.insertForm(
+                    form_id = formId,
+                    lemma_pos_id = lemmaPosId,
+                    form = f.form,
+                    form_normalized = stripAccents(f.form),
+                )
+                // tags
+                f.tags.forEach { tag ->
+                    dictQ.insertFormTag(form_id = formId, tag = tag)
                 }
             }
+        }
 
-            // Create single lemma entry (shared across all POS)
-            // Deterministic lemma ID generation using MD5 hash
-            val str = lemmaWord + "_" + lemmaNormalized
+        insertSensesAndRelatedData(processed, posToEntryId, dictQ)
 
-            val hash = md5(str.encodeToByteArray())
-            val baseLemmaId = Uuid.fromByteArray(hash.sliceArray(0..15))
+        return buildTranslationOperations(processed, posToEntryId, baseLemmaId, langCode)
+    }
 
-            val selectLemmasById = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
-            if (selectLemmasById != null) {
-                throw IllegalArgumentException("Lemma '$lemmaWord' already exists in database")
-            }
+    private fun ingestProcessedOverRawInternal(
+        processed: LanguageCardResponse,
+        word: String,
+        langCode: String,
+        dictQ: DictionaryQueries
+    ): Pair<List<String>, Map<String, List<TranslationQueries.() -> Unit>>> {
+        val lemmaNormalized = stripAccents(word)
+        val baseLemmaId = generateLemmaId(word, lemmaNormalized)
 
-            dictQ.insertLemma(
-                id = baseLemmaId,
-                lemma = lemmaWord,
-                lemma_normalized = lemmaNormalized,
-                zipf_frequency = zipfFrequency
-            )
+        // Verify lemma exists and is online_only
+        val existingLemma = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
+            ?: throw IllegalArgumentException("Lemma '$word' not found in database")
 
-            // Insert word family
-            processed.wordFamily?.forEach { familyWord ->
-                dictQ.insertLemmaWordFamily(lemma_id = baseLemmaId, word = familyWord)
-            }
+        if (!existingLemma.online_only) {
+            throw IllegalArgumentException("Lemma '$word' already has processed data (online_only=false)")
+        }
 
-            // Insert lemma_pos entries for all POSes
-            posToEntryId.forEach { (pos, entryId) ->
-                try {
-                    dictQ.insertLemmaPos(
-                        id = entryId,
-                        lemma_id = baseLemmaId,
-                        pos = pos
-                    )
-                } catch (e: Exception) {
-                    throw IllegalArgumentException("Duplicate lemma_pos entry for lemma '$lemmaWord' and POS '$pos'", e)
-                }
-            }
+        // Get existing lemma_pos entries to build posToEntryId map
+        val existingLemmaPos = dictQ.selectLemmaPosByLemmaId(baseLemmaId).executeAsList()
+        val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
+        existingLemmaPos.forEach { lp ->
+            posToEntryId[lp.pos] = lp.id
+        }
 
-            // Insert forms (prefer native source; fallback to others when no forms in native)
-            val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
+        // Update online_only to false
+        dictQ.updateLemmaOnlineOnly(online_only = false, id = baseLemmaId)
 
-            // Group forms by lemma_pos_id and deduplicate
-            data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+        // Insert word family (if present)
+        processed.wordFamily?.forEach { familyWord ->
+            dictQ.insertLemmaWordFamily(lemma_id = baseLemmaId, word = familyWord)
+        }
 
-            val lemmaPosIdToForms = mutableMapOf<Uuid, MutableMap<FormKey, ExtractedWordForm>>()
+        // Insert senses and related data, skipping missing POS
+        val skippedPos = insertSensesAndRelatedData(processed, posToEntryId, dictQ, skipMissingPos = true)
+        if (skippedPos.isNotEmpty()) {
+            println("Warning: Skipped POS entries for lemma '$word': ${skippedPos.joinToString()}")
+        }
 
-            entriesForForms.forEach { entry ->
-                val pos = entryIdToPos[uuidParse(entry.entryId.toString())]
-                pos ?: return@forEach
-                val lemmaPosId = posToEntryId[pos] ?: return@forEach
+        val translationOps = buildTranslationOperations(processed, posToEntryId, baseLemmaId, langCode, skipMissingPos = true)
+        return Pair(skippedPos, translationOps)
+    }
 
-                val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
-                entry.forms.forEach { f ->
-                    val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet())
-                    // Keep first occurrence of each unique form
-                    if (!formsMap.containsKey(key)) {
-                        formsMap[key] = f
-                    }
-                }
-            }
+    private fun ingestTranslationsOnlyInternal(
+        processed: LanguageCardResponse,
+        word: String,
+        langCode: String,
+        dictQ: DictionaryQueries
+    ): Map<String, List<TranslationQueries.() -> Unit>> {
+        val lemmaNormalized = stripAccents(word)
+        val baseLemmaId = generateLemmaId(word, lemmaNormalized)
 
-            // Insert deduplicated forms
-            lemmaPosIdToForms.forEach { (lemmaPosId, formsMap) ->
-                formsMap.values.forEach { f ->
-                    val formId = uuidParse(f.formId.toString())
-                    dictQ.insertForm(
-                        form_id = formId,
-                        lemma_pos_id = lemmaPosId,
-                        form = f.form,
-                        form_normalized = stripAccents(f.form),
-                    )
-                    // tags
-                    f.tags.forEach { tag ->
-                        dictQ.insertFormTag(form_id = formId, tag = tag)
-                    }
-                }
-            }
+        // Verify lemma exists and has processed data
+        val existingLemma = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
+            ?: throw IllegalArgumentException("Lemma '$word' not found in database")
 
-            // Insert senses and related data from processed JSON, mapped to POS lemma
+        if (existingLemma.online_only) {
+            throw IllegalArgumentException("Lemma '$word' is online_only - needs senses before adding translations")
+        }
+
+        // Get existing lemma_pos entries to build posToEntryId map
+        val existingLemmaPos = dictQ.selectLemmaPosByLemmaId(baseLemmaId).executeAsList()
+        val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
+        existingLemmaPos.forEach { lp ->
+            posToEntryId[lp.pos] = lp.id
+        }
+
+        return buildTranslationOperations(processed, posToEntryId, baseLemmaId, langCode, skipMissingPos = true)
+    }
+
+    private fun buildTranslationOperations(
+        processed: LanguageCardResponse,
+        posToEntryId: Map<DictionaryPos, Uuid>,
+        baseLemmaId: Uuid,
+        sourceLangCode: String,
+        skipMissingPos: Boolean = false
+    ): Map<String, List<TranslationQueries.() -> Unit>> {
+        val operations = mutableMapOf<String, MutableList<TranslationQueries.() -> Unit>>()
+        val targetLangs = collectTargetLanguages(processed)
+        targetLangs.forEach { trg ->
+            val opsForTarget = operations.getOrPut(trg) { mutableListOf() }
             processed.entries.forEach { posEntry ->
                 val pos = mapPos(posEntry.pos)
-                val lemmaPosIdForPos = posToEntryId[pos]!!
-
-                posEntry.senses.forEachIndexed { _, sense ->
-                    val senseId = uuidParse(sense.senseId)
-                    dictQ.insertSense(
-                        sense_id = senseId,
-                        lemma_pos_id = lemmaPosIdForPos,
-                        sense_definition = sense.senseDefinition,
-                        learner_level = mapLevel(sense.learnerLevel),
-                        frequency = mapFrequency(sense.frequency),
-                        semantic_group_id = sense.semanticGroupId,
-                        name_type = mapNameType(sense.nameType)
-                    )
-                    // traits
-                    sense.traits.forEach { t ->
-                        dictQ.insertSenseTrait(
-                            sense_id = senseId,
-                            trait_type = mapTraitType(t.traitType),
-                            comment = t.comment
-                        )
-                    }
-                    // synonyms
-                    sense.synonyms.forEach { syn ->
-                        dictQ.insertSenseSynonym(sense_id = senseId, synonym = syn)
-                    }
-                    // antonyms
-                    sense.antonyms.forEach { ant ->
-                        dictQ.insertSenseAntonym(sense_id = senseId, antonym = ant)
-                    }
-                    // common phrases
-                    sense.commonPhrases.forEach { phrase ->
-                        dictQ.insertSenseCommonPhrase(sense_id = senseId, phrase = phrase)
-                    }
-                    // examples (store index-based id)
-                    sense.examples.forEachIndexed { exIdx, ex ->
-                        dictQ.insertSenseExample(sense_id = senseId, example_id = exIdx.toLong(), text = ex.text)
+                val lemmaPosIdForPos = posToEntryId[pos]
+                if (lemmaPosIdForPos == null) {
+                    if (skipMissingPos) {
+                        return@forEach
+                    } else {
+                        error("POS ${posEntry.pos} not found in posToEntryId map")
                     }
                 }
-            }
-
-            // Build translation DBs per target language encountered
-            val targetLangs = collectTargetLanguages(processed)
-            targetLangs.forEach { trg ->
-                val trDb = dbManager.openTranslation(raw.langCode, trg)
-                val trQ = trDb.translationQueries
-                trDb.transaction {
-                    processed.entries.forEach { posEntry ->
-                        val pos = mapPos(posEntry.pos)
-                        val lemmaPosIdForPos = posToEntryId[pos]!!
-                        posEntry.senses.forEach { sense ->
-                            val senseId = uuidParse(sense.senseId)
-                            // definitions
-                            val def = sense.targetLangDefinitions[trg]
-                            if (def != null) {
-                                trQ.insertSenseTargetDefinition(sense_id = senseId, definition = def)
-                            }
-                            // translations list preserving order
-                            val translations = sense.translations[trg] ?: emptyList()
-                            translations.forEachIndexed { idx, t ->
-                                trQ.insertSenseTranslation(
-                                    senseId,
-                                    idx.toLong(),
-                                    t.targetLangWord,
-                                    stripAccents(t.targetLangWord),
-                                    t.targetLangSenseClarification,
-                                    baseLemmaId,
-                                    lemmaPosIdForPos
+                posEntry.senses.forEach { sense ->
+                    val senseId = uuidParse(sense.senseId)
+                    val def = sense.targetLangDefinitions[trg]
+                    if (def != null) {
+                        opsForTarget += {
+                            insertSenseTargetDefinition(sense_id = senseId, from_lang_code = sourceLangCode, target_lang_code = trg, definition = def)
+                        }
+                    }
+                    val translations = sense.translations[trg] ?: emptyList()
+                    translations.forEachIndexed { idx, t ->
+                        opsForTarget += {
+                            insertSenseTranslation(
+                                senseId,
+                                sourceLangCode,
+                                trg,
+                                idx.toLong(),
+                                t.targetLangWord,
+                                stripAccents(t.targetLangWord),
+                                t.targetLangSenseClarification,
+                                baseLemmaId,
+                                lemmaPosIdForPos
+                            )
+                        }
+                    }
+                    sense.examples.forEachIndexed { exIdx, ex ->
+                        val exTr = ex.targetLangTranslations[trg]
+                        if (exTr != null) {
+                            opsForTarget += {
+                                insertExampleTranslation(
+                                    sense_id = senseId,
+                                    from_lang_code = sourceLangCode,
+                                    target_lang_code = trg,
+                                    example_id = exIdx.toLong(),
+                                    translation = exTr
                                 )
-                            }
-                            // example translations by index
-                            sense.examples.forEachIndexed { exIdx, ex ->
-                                val exTr = ex.targetLangTranslations[trg]
-                                if (exTr != null) {
-                                    trQ.insertExampleTranslation(
-                                        sense_id = senseId,
-                                        example_id = exIdx.toLong(),
-                                        translation = exTr
-                                    )
-                                }
                             }
                         }
                     }
                 }
             }
         }
+        return operations
+    }
+
+    /**
+     * Inserts senses and all related data (traits, synonyms, antonyms, phrases, examples).
+     *
+     * @param processed The processed JSON data
+     * @param posToEntryId Map of POS to lemma_pos ID
+     * @param dictQ Dictionary queries
+     * @param skipMissingPos If true, skip entries where POS is not in posToEntryId; if false, throw
+     * @return List of POS entries that were skipped (only when skipMissingPos is true)
+     */
+    private fun insertSensesAndRelatedData(
+        processed: LanguageCardResponse,
+        posToEntryId: Map<DictionaryPos, Uuid>,
+        dictQ: DictionaryQueries,
+        skipMissingPos: Boolean = false
+    ): List<String> {
+        val skippedPos = mutableListOf<String>()
+
+        processed.entries.forEach { posEntry ->
+            val pos = mapPos(posEntry.pos)
+            val lemmaPosIdForPos = posToEntryId[pos]
+            if (lemmaPosIdForPos == null) {
+                if (skipMissingPos) {
+                    skippedPos.add(posEntry.pos)
+                    return@forEach
+                } else {
+                    error("POS ${posEntry.pos} not found in posToEntryId map")
+                }
+            }
+
+            posEntry.senses.forEach { sense ->
+                val senseId = uuidParse(sense.senseId)
+                dictQ.insertSense(
+                    sense_id = senseId,
+                    lemma_pos_id = lemmaPosIdForPos,
+                    sense_definition = sense.senseDefinition,
+                    learner_level = mapLevel(sense.learnerLevel),
+                    frequency = mapFrequency(sense.frequency),
+                    semantic_group_id = sense.semanticGroupId,
+                    name_type = mapNameType(sense.nameType)
+                )
+                // traits
+                sense.traits.forEach { t ->
+                    dictQ.insertSenseTrait(
+                        sense_id = senseId,
+                        trait_type = mapTraitType(t.traitType),
+                        comment = t.comment
+                    )
+                }
+                // synonyms
+                sense.synonyms.forEach { syn ->
+                    dictQ.insertSenseSynonym(sense_id = senseId, synonym = syn)
+                }
+                // antonyms
+                sense.antonyms.forEach { ant ->
+                    dictQ.insertSenseAntonym(sense_id = senseId, antonym = ant)
+                }
+                // common phrases
+                sense.commonPhrases.forEach { phrase ->
+                    dictQ.insertSenseCommonPhrase(sense_id = senseId, phrase = phrase)
+                }
+                // examples (store index-based id)
+                sense.examples.forEachIndexed { exIdx, ex ->
+                    dictQ.insertSenseExample(sense_id = senseId, example_id = exIdx.toLong(), text = ex.text)
+                }
+            }
+        }
+
+        return skippedPos
+    }
+
+    private fun generateLemmaId(lemma: String, lemmaNormalized: String): Uuid {
+        val hash = md5("${lemma}_${lemmaNormalized}".encodeToByteArray())
+        return Uuid.fromByteArray(hash.sliceArray(0..15))
     }
 
     private fun mapPos(pos: String): DictionaryPos? {

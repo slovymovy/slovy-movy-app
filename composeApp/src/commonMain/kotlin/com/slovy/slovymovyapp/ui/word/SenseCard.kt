@@ -26,6 +26,8 @@ internal fun SenseCard(
     lemma: String?,
     sense: LanguageCardResponseSense,
     state: SenseUiState,
+    translationLoading: Boolean = false,
+    translationError: String? = null,
     onToggle: () -> Unit,
     onPositioned: (String, Float) -> Unit = { _, _ -> },
     onFavoriteToggle: () -> Unit = {},
@@ -79,11 +81,16 @@ internal fun SenseCard(
                         )
                     }
 
-                    LevelAndFrequencyRow(
-                        level = sense.learnerLevel,
-                        frequency = sense.frequency,
-                        nameType = sense.nameType,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        LevelAndFrequencyRow(
+                            level = sense.learnerLevel,
+                            frequency = sense.frequency,
+                            nameType = sense.nameType,
+                        )
+                    }
                 }
 
                 Row(
@@ -148,6 +155,10 @@ internal fun SenseCard(
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(vertical = 2.dp)
                         )
+                    } else if (translationError != null) {
+                        ErrorPlaceholder(translationError)
+                    } else if (translationLoading) {
+                        LoadingPlaceholder("AI is translating...")
                     }
 
                     if (sense.traits.isNotEmpty()) {

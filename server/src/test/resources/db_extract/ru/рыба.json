@@ -1,0 +1,2980 @@
+{
+    "word": "рыба",
+    "lang_code": "ru",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "d7208076-cf50-4fd2-b417-88880b5509d6",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "animate",
+                            "canonical",
+                            "feminine",
+                            "inanimate"
+                        ],
+                        "form": "ры́ба"
+                    },
+                    {
+                        "form_id": "bd00f117-ae8f-4ac6-8bab-ed503643b67b",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "genitive"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "a23219bc-cd78-445c-b8e9-248fb8d22b02",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "e65a6aaf-a8ac-491e-b1ac-4c883619d0b9",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "рыб"
+                    },
+                    {
+                        "form_id": "f5b25671-8972-4ad8-b8c5-e1a30e0712c6",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "adjective",
+                            "relational"
+                        ],
+                        "form": "ры́бный"
+                    },
+                    {
+                        "form_id": "8915ef58-dbe1-4fbf-b21d-e63c9e5f1f56",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "adjective",
+                            "relational"
+                        ],
+                        "form": "ры́бий"
+                    },
+                    {
+                        "form_id": "aa9ed2de-d40b-45fb-9daf-c91ba80a7191",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "adjective",
+                            "possessive"
+                        ],
+                        "form": "ры́бий"
+                    },
+                    {
+                        "form_id": "ba6dec9a-a435-4432-ae52-8be6c3209a5e",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "diminutive"
+                        ],
+                        "form": "ры́бка"
+                    },
+                    {
+                        "form_id": "cdb1ad17-b136-4d89-8f32-d6197cc20d0b",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "diminutive"
+                        ],
+                        "form": "рыбёшка"
+                    },
+                    {
+                        "form_id": "01e3e1c4-a57e-407f-877b-34f02262684c",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "diminutive"
+                        ],
+                        "form": "ры́бонька"
+                    },
+                    {
+                        "form_id": "a59c502c-542f-4ff3-b61a-584dbb8d2935",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "diminutive"
+                        ],
+                        "form": "ры́бочка"
+                    },
+                    {
+                        "form_id": "3265d031-0bb9-4bc4-8b88-8403a90adf08",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "diminutive"
+                        ],
+                        "form": "ры́бица"
+                    },
+                    {
+                        "form_id": "43a8ef90-3997-4f51-acaa-dca0f858b3f2",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "augmentative"
+                        ],
+                        "form": "ры́бища"
+                    },
+                    {
+                        "form_id": "3112a6c8-0c44-4745-a665-b651bc281e7c",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "augmentative"
+                        ],
+                        "form": "ры́бина"
+                    },
+                    {
+                        "form_id": "8c64ddb5-d8d3-4428-8db6-7bf0edfdbcb0",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "pejorative"
+                        ],
+                        "form": "рыбёха"
+                    },
+                    {
+                        "form_id": "93d4aaec-3182-417e-99d6-c05260f79ac6",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "pejorative"
+                        ],
+                        "form": "рыбчо́нка"
+                    },
+                    {
+                        "form_id": "8c7dc91d-acfb-4d68-bc76-1dff5d1660d5",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "nominative",
+                            "singular"
+                        ],
+                        "form": "ры́ба"
+                    },
+                    {
+                        "form_id": "90e6357c-07f7-4bad-844d-93e056b6f5f6",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "7ae62c6b-9d45-40b1-86b4-a833252b8c61",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "7e964b67-d98e-4cb9-a74c-31f80d4b5b34",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "ры́б"
+                    },
+                    {
+                        "form_id": "b830f55a-421a-41db-b4ec-ca321410e924",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "c63090a8-0d76-4f0f-a342-b969850ad6cf",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "dative",
+                            "plural"
+                        ],
+                        "form": "ры́бам"
+                    },
+                    {
+                        "form_id": "a90c42c7-8f22-4bab-b47c-a9b8a61e7437",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "accusative",
+                            "animate",
+                            "singular"
+                        ],
+                        "form": "ры́бу"
+                    },
+                    {
+                        "form_id": "b5bc2c6c-3038-4c1c-bbfc-e54d8eb2f395",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "accusative",
+                            "animate",
+                            "plural"
+                        ],
+                        "form": "ры́б"
+                    },
+                    {
+                        "form_id": "a695b205-2be5-4bf2-8588-ff4734f2b489",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "accusative",
+                            "inanimate",
+                            "singular"
+                        ],
+                        "form": "ры́бу"
+                    },
+                    {
+                        "form_id": "26fcc062-789f-4d75-926d-39e8a9f75b39",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "accusative",
+                            "inanimate",
+                            "plural"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "133d2afc-607d-45c7-bd56-45ae4ad540d7",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "ры́бой"
+                    },
+                    {
+                        "form_id": "e4da3ad1-9f98-41d2-9853-8b4f862fc1a3",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "ры́бою"
+                    },
+                    {
+                        "form_id": "84730b6a-1d8d-4e8d-904c-426014770fcd",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "instrumental",
+                            "plural"
+                        ],
+                        "form": "ры́бами"
+                    },
+                    {
+                        "form_id": "4fbead31-7a85-4fd8-b5b9-c6833bc9e3df",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "prepositional",
+                            "singular"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "438eb868-5b3d-4c83-8c29-65178e3a174c",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "tags": [
+                            "plural",
+                            "prepositional"
+                        ],
+                        "form": "ры́бах"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "8758910c-5548-39a0-9dce-f8674b69670e",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "glosses": [
+                            "fish (as a living animal)"
+                        ],
+                        "tags": [
+                            "animate"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "c636f86c-c023-40fe-8018-3faafb9a817a",
+                                "sense_id": "8758910c-5548-39a0-9dce-f8674b69670e",
+                                "text": "Meronyms: жа́бры f pl (žábry), плавни́к m (plavník), чешуя́ f (češujá)"
+                            },
+                            {
+                                "example_id": "2610af07-836c-4266-9330-2bbe906c43ab",
+                                "sense_id": "8758910c-5548-39a0-9dce-f8674b69670e",
+                                "text": "Подбира́я на берегу́ большу́ю ры́бу, Ихтиа́ндр нёс её́ к воде́; ры́ба трепета́ла в его́ рука́х, а он смея́лся и угова́ривал её́ не боя́ться и потерпе́ть ещё́ немно́го.",
+                                "translation": "Alexander Belyaev",
+                                "english": "Alexander Belyaev"
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "7431c06d-9160-3769-8775-0cce821384ae",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "glosses": [
+                            "fish (as food)"
+                        ],
+                        "tags": [
+                            "inanimate"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "970decec-3b7f-4913-91a3-7f3df26f21c4",
+                                "sense_id": "7431c06d-9160-3769-8775-0cce821384ae",
+                                "text": "сушёная ры́ба",
+                                "translation": "dried fish",
+                                "english": "dried fish"
+                            },
+                            {
+                                "example_id": "873a1387-bc59-4616-b647-7fd88b998de1",
+                                "sense_id": "7431c06d-9160-3769-8775-0cce821384ae",
+                                "text": "— А ры́ба солё́ная у вас есть?\n— Как, су́дарь, ры́бы не быть! осетри́на есть, севрю́жина… Найдё́тся ры́бы — дово́льно!",
+                                "translation": "‘And do you have a bit of pickled fish?’\n‘That we do, sir! There’s sturgeon, sevryuga... We’ll find you some fish, as much as you please.’",
+                                "english": "‘And do you have a bit of pickled fish?’\n‘That we do, sir! There’s sturgeon, sevryuga... We’ll find you some fish, as much as you please.’"
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "f8c51c4c-7140-306f-b617-1b7bb834c6d6",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "glosses": [
+                            "blocked game; block"
+                        ],
+                        "tags": [
+                            "inanimate"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "1b06d407-40ab-330c-a879-fadbdd29ec61",
+                        "entry_id": "940874df-cb6f-34d0-b0ac-0771d830a1aa",
+                        "glosses": [
+                            "placeholder, lorem ipsum"
+                        ],
+                        "tags": [
+                            "inanimate"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [
+            {
+                "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "8648b1af-8d84-4178-8955-279f81a6bef1",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "singular",
+                            "nominative"
+                        ],
+                        "form": "ры́ба"
+                    },
+                    {
+                        "form_id": "b16d2190-d278-4ef4-a1f6-6e12d82dce87",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "plural",
+                            "nominative"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "6a262e03-0d5a-4a11-af95-72f1d2b766d6",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "singular",
+                            "genitive"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "8b32864c-5954-415d-bcac-eea9316fa7cd",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "plural",
+                            "genitive"
+                        ],
+                        "form": "рыб"
+                    },
+                    {
+                        "form_id": "e7a1916e-5f6b-41a1-8883-54494d0a7a50",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "singular",
+                            "dative"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "09aa0eec-aade-4034-9dcf-9b90cf8c8a60",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "plural",
+                            "dative"
+                        ],
+                        "form": "ры́бам"
+                    },
+                    {
+                        "form_id": "32eca314-aaca-438a-9589-5d09a49b08f6",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "singular",
+                            "accusative"
+                        ],
+                        "form": "ры́бу"
+                    },
+                    {
+                        "form_id": "deeb9523-67f5-4542-b299-2aab74742bf1",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "plural",
+                            "accusative"
+                        ],
+                        "form": "рыб"
+                    },
+                    {
+                        "form_id": "45d80010-5ee8-4b83-894b-08542d4a2c6d",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "singular",
+                            "instrumental"
+                        ],
+                        "form": "ры́бой"
+                    },
+                    {
+                        "form_id": "0d741e10-68d6-49e8-8eaa-b9626f95737e",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "singular",
+                            "instrumental"
+                        ],
+                        "form": "ры́бою"
+                    },
+                    {
+                        "form_id": "0d701018-84c2-4180-9126-24935bf1f8be",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "plural",
+                            "instrumental"
+                        ],
+                        "form": "ры́бами"
+                    },
+                    {
+                        "form_id": "ba2afacd-b9b6-4826-9a3c-61a43d69eb3a",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "singular",
+                            "prepositional"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "f92eacae-8cef-4f97-ab1e-7ad4a999f915",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "tags": [
+                            "plural",
+                            "prepositional"
+                        ],
+                        "form": "ры́бах"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "023d4ed8-9fbd-3b70-bcd3-9e39298068ae",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "glosses": [
+                            "зоол., ихтиол., в т. ч. собир. холоднокровное позвоночное животное, дышащее жабрами, с конечностями в виде плавников и с кожей, обычно покрытой чешуёй и обитающее в пресной или солёной воде (в ручьях, реках, озёрах, морях, океанах)"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "db841549-9d16-4cfa-bf0d-d71c89bdaf9e",
+                                "sense_id": "023d4ed8-9fbd-3b70-bcd3-9e39298068ae",
+                                "text": "Старик ловил неводом рыбу .."
+                            },
+                            {
+                                "example_id": "40caf0a9-0296-4eba-ad58-233fc242b06b",
+                                "sense_id": "023d4ed8-9fbd-3b70-bcd3-9e39298068ae",
+                                "text": "Крупная хищная рыба: щуки, большие окуни, головли … хватают [приманку] беспрестанно."
+                            },
+                            {
+                                "example_id": "1b1553ef-399b-45c5-b290-98942021ddec",
+                                "sense_id": "023d4ed8-9fbd-3b70-bcd3-9e39298068ae",
+                                "text": "У берегов запруды плавали в ряске ленивые рыбы."
+                            },
+                            {
+                                "example_id": "691b8517-bf66-45f9-b871-7b951eb4ead0",
+                                "sense_id": "023d4ed8-9fbd-3b70-bcd3-9e39298068ae",
+                                "text": "Вот промысловые породы рыб: сельдь, треска, палтус, навага, камбала, сёмга и т. д."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "535fb203-7672-3687-9c56-485862de65c3",
+                        "entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "glosses": [
+                            "собир. добытая, выловленная или выращенная рыба [I.1.], сохраняемая живой и предназначенная для продажи"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "207158f9-779f-4764-8ca1-8f15bf6631e9",
+                                "sense_id": "535fb203-7672-3687-9c56-485862de65c3",
+                                "text": "На полу в больших чанах плавала живая рыба — стерляди, налимы, окуни, язи."
+                            },
+                            {
+                                "example_id": "54defa90-a7c5-4c9a-80bb-d519c1c7f4e4",
+                                "sense_id": "535fb203-7672-3687-9c56-485862de65c3",
+                                "text": "Запрещается продажа продовольственных и непродовольственных товаров с автомашин, кроме специализированных автолавок, автомагазинов, изотермических ёмкостей, автоаквариумов для продажи живой рыбы и т. п."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "08c684c8-d918-4f3f-a6a8-00a1997ab73c",
+                        "source_entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "source_sense_description": "обитающее в воде холоднокровное позвоночное животное",
+                        "target_lang_word": "fish",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "fish",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "ba807b3a-60a6-343e-9300-205ac1f8ea07",
+                                        "entry_id": "c20143b3-3f27-3677-87ee-5b6c90e585b8",
+                                        "glosses": [
+                                            "A period of time spent fishing."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "0352eaba-e91e-43c4-a985-4eb405357c35",
+                                                "sense_id": "ba807b3a-60a6-343e-9300-205ac1f8ea07",
+                                                "text": "The fish at the lake didn't prove successful."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "42d3f68a-459c-35d0-87ef-1f4fdc01d61c",
+                                        "entry_id": "c20143b3-3f27-3677-87ee-5b6c90e585b8",
+                                        "glosses": [
+                                            "An instance of seeking something."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "60b87b12-0f38-452b-a544-6f8a8064cee2",
+                                                "sense_id": "42d3f68a-459c-35d0-87ef-1f4fdc01d61c",
+                                                "text": "Merely two fishes for information told the whole story."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "fish",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "698916c5-ffcd-3081-b87c-5eabfad7d829",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A typically cold-blooded vertebrate animal that lives in water, moving with the help of fins and breathing with gills."
+                                        ],
+                                        "tags": [
+                                            "countable"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "23e1bf5f-efaf-44dd-9956-a20e982c23ac",
+                                                "sense_id": "698916c5-ffcd-3081-b87c-5eabfad7d829",
+                                                "text": "Salmon is a fish."
+                                            },
+                                            {
+                                                "example_id": "0a3ea015-c423-4049-9969-be41483997f0",
+                                                "sense_id": "698916c5-ffcd-3081-b87c-5eabfad7d829",
+                                                "text": "The fishmonger sells fishes from all over the world."
+                                            },
+                                            {
+                                                "example_id": "a627f99e-f62e-4ee4-8e26-27affd0b5630",
+                                                "sense_id": "698916c5-ffcd-3081-b87c-5eabfad7d829",
+                                                "text": "Ichthyologists study the fish of the world."
+                                            },
+                                            {
+                                                "example_id": "d1911e3e-cb42-4d32-bbf3-3766ad8cab4f",
+                                                "sense_id": "698916c5-ffcd-3081-b87c-5eabfad7d829",
+                                                "text": "We have many fish in our aquarium."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "b5949093-5a11-3b4a-a606-bdb24446a515",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A paraphyletic grouping of the following taxonomic groups:",
+                                            "A jawless fish (paraphyletic infraphylum Agnatha)."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "4dd59f0a-2a0f-3c6c-8520-f52a7e5a215d",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A paraphyletic grouping of the following taxonomic groups:",
+                                            "In infraphylum Gnathostomata:",
+                                            "A cartilaginous fish (class Chondrichthyes)."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "05fd1314-d2ec-3bd3-96eb-0f53f97fccff",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A paraphyletic grouping of the following taxonomic groups:",
+                                            "In infraphylum Gnathostomata:",
+                                            "A bony fish (clade Osteichthyes), including tetrapods."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "30491dc7-957b-3ef2-b2aa-490773c24d94",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A paraphyletic grouping of the following taxonomic groups:",
+                                            "In infraphylum Gnathostomata:",
+                                            "A placoderm (paraphyletic class †Placodermi)."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "db72f703-4b41-3a7b-ac0f-af0634b629de",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A paraphyletic grouping of the following taxonomic groups:",
+                                            "In infraphylum Gnathostomata:",
+                                            "A spiny shark (paraphyletic class †Acanthodii)"
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "6fec550a-2688-33db-9f8b-48571ef9991d",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "Any animal (or any vertebrate) that lives exclusively in water."
+                                        ],
+                                        "tags": [
+                                            "archaic",
+                                            "broadly",
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c8b01333-e30e-4514-9d4b-fa58013aaf11",
+                                                "sense_id": "6fec550a-2688-33db-9f8b-48571ef9991d",
+                                                "text": "The whale, the limpet, the tortoise and the oyster… as men have been willing to give them all the name of fishes, it is wisest for us to conform."
+                                            },
+                                            {
+                                                "example_id": "95ef68de-3ee7-4772-93db-25d46233a5c2",
+                                                "sense_id": "6fec550a-2688-33db-9f8b-48571ef9991d",
+                                                "text": "Be it known that, waiving all argument, I take the good old fashioned ground that the whale is a fish, and call upon holy Jonah to back me."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "5fab3e31-d2c3-3c66-b84b-34d3058c6aa0",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "Any animal (or any vertebrate) that lives exclusively in water.",
+                                            "Now used in combination: (e.g., starfish, cuttlefish, jellyfish, etc)."
+                                        ],
+                                        "tags": [
+                                            "archaic",
+                                            "broadly",
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "e5fb6cd3-05ab-3fe4-93eb-dacb9bd219d0",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "Cod; codfish."
+                                        ],
+                                        "tags": [
+                                            "Newfoundland",
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "19a09165-b71e-37a4-a396-608264d43f3e",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "The flesh of the fish used as food."
+                                        ],
+                                        "tags": [
+                                            "uncountable"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "a880073d-7dbb-4a7a-bf26-c38c3991cd78",
+                                                "sense_id": "19a09165-b71e-37a4-a396-608264d43f3e",
+                                                "text": "The seafood pasta had lots of fish but not enough pasta."
+                                            },
+                                            {
+                                                "example_id": "fa4742ad-7f61-4946-900b-349b078d8720",
+                                                "sense_id": "19a09165-b71e-37a4-a396-608264d43f3e",
+                                                "text": "Though Lena is a vegetarian, she doesn't have any problem with eating fish."
+                                            },
+                                            {
+                                                "example_id": "b6f2798a-a947-4be9-9872-da9d84d7b42f",
+                                                "sense_id": "19a09165-b71e-37a4-a396-608264d43f3e",
+                                                "text": "Include low-mercury fish in your diet (such as salmon) and eat at least five servings a day of fruit and vegetables, especially dark leafy greens, broccoli, and cauliflower. Avoid saturated and trans fats, which may hasten brain aging."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "66ec3f31-47a6-3930-90cc-199199bcb775",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "An aquatic or semiaquatic animal suitable for consumption during fasting on Fridays during Lent."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "b952d4bf-f1e1-4ad2-8030-c4da87bc394b",
+                                                "sense_id": "66ec3f31-47a6-3930-90cc-199199bcb775",
+                                                "text": "Since the semi-aquatic beaver was a skilled swimmer, the Church declared it to be a fish for dietary purposes."
+                                            },
+                                            {
+                                                "example_id": "64ccfa20-7e77-436e-9a77-3507d0661bf3",
+                                                "sense_id": "66ec3f31-47a6-3930-90cc-199199bcb775",
+                                                "text": "Throughout the Catholic Church's long history, archbishops and other prominent church leaders have made numerous declarations about which animals can be considered \"fish for the purposes of Lent, even if those animals have virtually no similarities to fish in a scientific sense."
+                                            },
+                                            {
+                                                "example_id": "8fb1ce49-bcec-463c-968d-ce0161c03c96",
+                                                "sense_id": "66ec3f31-47a6-3930-90cc-199199bcb775",
+                                                "text": "During the 17th and 18th centuries, Catholics around the world began to liberally interpret \"fish\" as any aquatic-based creature, despite blood temperature, and created local meat exceptions that remain in place today."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "06a57fda-c54e-3964-b544-2901c3654006",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A card game in which the object is to obtain cards in pairs or sets of four (depending on the variation), by asking the other players for cards of a particular rank."
+                                        ],
+                                        "tags": [
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "1a6a859f-532c-3db3-bf98-b7a3e10b495e",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "An easy victim for swindling."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "slang"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "8b688a6a-fbc3-36a4-bfdb-1420f87b23ca",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A bad poker player. Compare shark (a good poker player)."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "slang"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "07c32434-d6bf-365d-adbd-6c6e3464592a",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A makeshift overlapping longitudinal brace, originally shaped roughly like a fish, used to temporarily repair or extend a spar or mast of a ship."
+                                        ],
+                                        "tags": [
+                                            "countable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "6fafa290-fcc4-3895-9768-8e7a434c7088",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A purchase used to fish the anchor."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "73a26a55-b9da-3ccb-96e6-7bccb1b8249b",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A torpedo (self-propelled explosive device)."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "slang"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "3b32650d-72a7-4807-a036-85c1329582e1",
+                                                "sense_id": "73a26a55-b9da-3ccb-96e6-7bccb1b8249b",
+                                                "text": "The second and third fish went to the middle of her long superstructure and under her forward deck."
+                                            },
+                                            {
+                                                "example_id": "f2d09e3f-910a-47f0-95c5-3b1250743e55",
+                                                "sense_id": "73a26a55-b9da-3ccb-96e6-7bccb1b8249b",
+                                                "text": "As we came off patrol we had some torpedoes fired at us by an enemy submarine but we dived out of the way. About April 10 we fired our fish in two salvoes at a convoy."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f5dfd8c0-3f7f-3637-bd58-0c783228f8f0",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "The thirty-fourth Lenormand card."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "cee0dfa3-5d1a-3840-ae88-c38d2831408b",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A (feminine) woman. (See also fishy.)"
+                                        ],
+                                        "tags": [
+                                            "derogatory",
+                                            "positive",
+                                            "slang",
+                                            "sometimes",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "dbc3da95-f15b-3dc4-a6df-001887b749c0",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A new (usually vulnerable) prisoner."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "slang",
+                                            "uncountable"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "43ef2d3d-4361-4913-813c-5c21764df843",
+                                                "sense_id": "dbc3da95-f15b-3dc4-a6df-001887b749c0",
+                                                "text": "When a young male enters the prison system he is looked over and is labeled a FISH."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "2613f107-922a-3c9b-bd48-dc8916592dcb",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A male homosexual; a gay man."
+                                        ],
+                                        "tags": [
+                                            "Jamaica",
+                                            "countable",
+                                            "derogatory",
+                                            "offensive",
+                                            "uncountable"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "cd4d3014-e08d-4139-ba60-bb7b36c99ac3",
+                                                "sense_id": "2613f107-922a-3c9b-bd48-dc8916592dcb",
+                                                "text": "Him father is a fish so mi know say it's sprat dat",
+                                                "translation": "His father is a homosexual, so I know that he is too.",
+                                                "english": "His father is a homosexual, so I know that he is too."
+                                            },
+                                            {
+                                                "example_id": "ab32c3bd-6462-4c3d-9ef8-2b2e8b112573",
+                                                "sense_id": "2613f107-922a-3c9b-bd48-dc8916592dcb",
+                                                "text": "Bere gunman deh ya we nuh fren fish (hey bwoy)",
+                                                "translation": "Lots of gunmen are here, we don't befriend gay men (hey boy)",
+                                                "english": "Lots of gunmen are here, we don't befriend gay men (hey boy)"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "d1cafc92-4e76-35ef-a857-806dea7cff0b",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A drag queen or transgender woman who looks like a cisgender woman."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "a8c57d53-d494-36d0-b592-9bdf47ad6b0a",
+                                        "entry_id": "7f9c5af7-0f5a-3505-a8ed-1794c7e2e373",
+                                        "glosses": [
+                                            "A spaceship."
+                                        ],
+                                        "tags": [
+                                            "countable",
+                                            "rare",
+                                            "uncountable"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "fish",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f4be4803-988d-3aac-ae95-85ec52c84ae1",
+                                        "entry_id": "77d3de8b-9444-32d8-8c03-702ffbd0413f",
+                                        "glosses": [
+                                            "To hunt fish or other aquatic animals in a body of water, or to collect coral or pearls from the bottom of the sea."
+                                        ],
+                                        "tags": [
+                                            "intransitive",
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "bfa48046-2897-4cc8-b2cf-7e713f72ceb3",
+                                                "sense_id": "f4be4803-988d-3aac-ae95-85ec52c84ae1",
+                                                "text": "We went fishing for crabs by the pier."
+                                            },
+                                            {
+                                                "example_id": "97a0aff9-d038-463e-b9c8-edeb387d3409",
+                                                "sense_id": "f4be4803-988d-3aac-ae95-85ec52c84ae1",
+                                                "text": "She went to the river to fish for trout."
+                                            },
+                                            {
+                                                "example_id": "2a20c54f-2f9a-4dd4-99ba-750f6f7268f0",
+                                                "sense_id": "f4be4803-988d-3aac-ae95-85ec52c84ae1",
+                                                "text": "19th c., anonymous, \"The Bonny Ship the 'Diamond'\"\nIt's cheer up, my lads, let your hearts never fail,\nFor the bonny ship the Diamond goes a-fishing for the whale."
+                                            },
+                                            {
+                                                "example_id": "c01d76d2-f6c0-4431-9794-6d5c01096b1a",
+                                                "sense_id": "f4be4803-988d-3aac-ae95-85ec52c84ae1",
+                                                "text": "Thou hast fished salmon a thousand times, and mightst have taken a lesson."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "55086ec6-d144-3a96-be51-380033d2b67c",
+                                        "entry_id": "77d3de8b-9444-32d8-8c03-702ffbd0413f",
+                                        "glosses": [
+                                            "To search (a body of water) for something other than fish."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "a8b60f3b-6104-43b6-ab05-ddb12d33f1dd",
+                                                "sense_id": "55086ec6-d144-3a96-be51-380033d2b67c",
+                                                "text": "They fished the surrounding lakes for the dead body."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "7ffe8314-a5cb-35c0-a8f2-e5ebc53b9a0a",
+                                        "entry_id": "77d3de8b-9444-32d8-8c03-702ffbd0413f",
+                                        "glosses": [
+                                            "To use as bait when fishing."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "2237e009-4f45-43c1-9053-fb086670ab2e",
+                                                "sense_id": "7ffe8314-a5cb-35c0-a8f2-e5ebc53b9a0a",
+                                                "text": "`What you need are frogs,' said the veteran. `Fish them at night. There's nothing like them on big cork floats.'"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "bb9c43bb-80e8-3d12-97e6-1f5dd93dfb26",
+                                        "entry_id": "77d3de8b-9444-32d8-8c03-702ffbd0413f",
+                                        "glosses": [
+                                            "To (attempt to) find or get hold of an object by searching among other objects."
+                                        ],
+                                        "tags": [
+                                            "intransitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "67d570bc-ef7b-49b3-a160-631e40e32693",
+                                                "sense_id": "bb9c43bb-80e8-3d12-97e6-1f5dd93dfb26",
+                                                "text": "Why are you fishing through my things?"
+                                            },
+                                            {
+                                                "example_id": "a04f641e-d773-4c10-a7bd-aa0d0e170b95",
+                                                "sense_id": "bb9c43bb-80e8-3d12-97e6-1f5dd93dfb26",
+                                                "text": "He was fishing for the keys in his pocket."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "369490ff-fa68-36e6-94eb-e675db8edac2",
+                                        "entry_id": "77d3de8b-9444-32d8-8c03-702ffbd0413f",
+                                        "glosses": [
+                                            "To talk to people in an attempt to get them to say something, or seek to obtain something by artifice."
+                                        ],
+                                        "tags": [
+                                            "intransitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "b3924f83-607b-4c12-a1bd-62926cce55f7",
+                                                "sense_id": "369490ff-fa68-36e6-94eb-e675db8edac2",
+                                                "text": "The actors loitered at the door, fishing for compliments."
+                                            },
+                                            {
+                                                "example_id": "8b8b82bb-489c-48e6-8242-fea5ea1c709d",
+                                                "sense_id": "369490ff-fa68-36e6-94eb-e675db8edac2",
+                                                "text": "Laoctonos is fishing for a compliment,\nBut ’tis his due. Yes, you have drunk more wine,\nAnd shed more blood, than any man in Thebes."
+                                            },
+                                            {
+                                                "example_id": "71361eee-473f-41df-b827-caf24aff44a0",
+                                                "sense_id": "369490ff-fa68-36e6-94eb-e675db8edac2",
+                                                "text": "The detective visited the local pubs fishing around for more information."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a91c3a55-d627-39a9-87e4-130e434fd50f",
+                                        "entry_id": "77d3de8b-9444-32d8-8c03-702ffbd0413f",
+                                        "glosses": [
+                                            "Of a batsman, to attempt to hit a ball outside off stump and miss it."
+                                        ],
+                                        "tags": [
+                                            "intransitive"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "7247466c-e3e2-3610-aa78-cd52fc501029",
+                                        "entry_id": "77d3de8b-9444-32d8-8c03-702ffbd0413f",
+                                        "glosses": [
+                                            "To repair (a spar or mast) by fastening a beam or other long object (often called a fish) over the damaged part (see Noun above)."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "6b403bcf-d736-47ba-828d-d5691c7ddb29",
+                                                "sense_id": "7247466c-e3e2-3610-aa78-cd52fc501029",
+                                                "text": "[…] the crew were set to replacing and splicing the rigging and fishing the spars."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "7e5e04af-f593-387f-9c09-18e0b41954c6",
+                                        "entry_id": "77d3de8b-9444-32d8-8c03-702ffbd0413f",
+                                        "glosses": [
+                                            "To hoist the flukes of."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c942d881-3068-4e80-8015-b6c67c963485",
+                                                "sense_id": "7e5e04af-f593-387f-9c09-18e0b41954c6",
+                                                "text": "Found that the cause of the ship's having drifted on the night of the 19th, was from the bight of the chain span (used to fish the anchor,) having slipped between the shank and upper fluke, thereby preventing the lower fluke from opening […]"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "aa433d55-6689-3503-8ee3-6be747ae3cd0",
+                                        "entry_id": "77d3de8b-9444-32d8-8c03-702ffbd0413f",
+                                        "glosses": [
+                                            "To draw or guide (a wire or cable) by means of fish tape."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "fish",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "1f1e8193-fa1e-3ebb-a591-665518301479",
+                                        "entry_id": "ffe8103c-2ff7-370b-a31f-9617943d4f0f",
+                                        "glosses": [
+                                            "A counter, used in various games."
+                                        ],
+                                        "tags": [
+                                            "obsolete"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "9b0d859b-3338-4f18-b660-3e887f79dfc7",
+                        "source_entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "source_sense_description": "обитающее в воде холоднокровное позвоночное животное",
+                        "target_lang_word": "pez",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "pez",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "959e1002-867a-31d4-bec0-d6ca72177702",
+                                        "entry_id": "23d8f1a1-732c-386a-973e-62955692587e",
+                                        "glosses": [
+                                            "Cualquiera de unas 30 000 especies de animales vertebrados, caracterizados por ser los únicos adaptados a respirar agua durante todo su ciclo vital. Forman un grupo sin rigor taxonómico que comprende varios grupos evolutivos diferentes, que sólo tienen en común su adaptación al medio acuático.",
+                                            "La respiración se produce por branquias, situadas en hendiduras de la faringe. La locomoción requiere formas hidrodinámicas, muchas veces ahusadas, que se desarrollan mediante movimientos laterales del cuerpo, auxiliados por extremidades en forma de aleta. Una vez extraídos del agua para su consumo en alimentación se les denomina pescados."
+                                        ],
+                                        "tags": [
+                                            "epicene"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "ed7e5d3c-3403-4e3a-8d46-601b7c93f65b",
+                                                "sense_id": "959e1002-867a-31d4-bec0-d6ca72177702",
+                                                "text": "No he pescado un solo pez en dos días."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "pez",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "298b0d74-cf7b-31f5-a8e2-09a53dca7a9a",
+                                        "entry_id": "ee4bdf17-b59e-35b1-b2d6-e14c119ab474",
+                                        "glosses": [
+                                            "Sustancia resinosa pegajosa que antes se obtenía de pinos y abetos. Actualmente se obtiene del alquitrán o de la trementina. Se usa para impermeabilizar."
+                                        ],
+                                        "tags": [
+                                            "Industria"
+                                        ],
+                                        "examples": [],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "0c0f2d8f-944c-304a-afe1-358007dc7489",
+                                        "entry_id": "ee4bdf17-b59e-35b1-b2d6-e14c119ab474",
+                                        "glosses": [
+                                            "Masa viscosa del recubrimiento intestinal que expele a modo de excremento el recién nacido."
+                                        ],
+                                        "tags": [
+                                            "formal"
+                                        ],
+                                        "examples": [],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "4982d6af-57bc-43e0-91ef-f2e3ad07f34f",
+                        "source_entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "source_sense_description": "обитающее в воде холоднокровное позвоночное животное",
+                        "target_lang_word": "pesce",
+                        "target_lang_code": "it",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "pesce",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "700fdd22-d3ad-33da-8029-1e3dbf702508",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "animale vertebrato che vive sott'acqua, con il corpo ricoperto di squame, dotato di pinne e coda"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "759e51b9-8a2e-3b61-950a-a268b6c289b0",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "animale acquatico appartenente alla superclasse dei Pesci, con circolazione sanguigna a sangue freddo e respirazione che avviene attraverso le branchie"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "c448fdd7-bb78-3637-b776-02211bc757f0",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "sing la carne dell'animale cruda o cotta"
+                                        ],
+                                        "tags": [
+                                            "broadly"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "641234ad-47df-369c-a2fa-f3936011bfe4",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "utilizzato per indicare buona salute, silenzio, attitudine al nuoto"
+                                        ],
+                                        "tags": [
+                                            "familiare"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "b718fea6-6607-37e7-b200-cbfc6b3b628c",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "simbolo del Salvatore nel linguaggio dei primi cristiani, derivato dalla parola greca ichthús, \\\"pesce\\\", che indica la sigla \\\"iesûs christòs theû huiòs soter\\\", ossia \\\"Gesù Cristo, figlio di Dio, Salvatore\\"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "c81aa421-d056-30f5-9368-d031f9e7e863",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "chi è un credulone"
+                                        ],
+                                        "tags": [
+                                            "figuratively"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "bceac353-5be3-353f-b925-54411c4df852",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "persona nata sotto il segno zodiacale dei Pesci"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "e0377fee-bd63-3649-993e-9756e94b1bf7",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "definizione mancante; se vuoi, aggiungila tu"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "f5e29ee0-fd8c-39aa-b6d1-2ad38b5700cd",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "parte di carne coincidente con un muscolo"
+                                        ],
+                                        "tags": [
+                                            "regional"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "8dab0b44-6634-3e62-bb97-a8508500e88a",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "in toscano: bicipite"
+                                        ],
+                                        "tags": [
+                                            "regional"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "37d6c51b-7449-361c-8da0-6ae2a43b6d42",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "pene"
+                                        ],
+                                        "tags": [
+                                            "vulgar"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "46114d3a-7a47-3ebf-b732-00739722c006",
+                                        "entry_id": "a09f9177-dedc-3264-9891-bfe904faf459",
+                                        "glosses": [
+                                            "figura araldica che comprende, oltre ai pesci veri e propri, anche le balene e i delfini"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "829ac8d5-c342-4b10-b93b-b342b3e3dd0e",
+                        "source_entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "source_sense_description": "обитающее в воде холоднокровное позвоночное животное",
+                        "target_lang_word": "Fisch",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "Fisch",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "1e6fb593-d790-3608-aa00-148a3ad978fd",
+                                        "entry_id": "3b4849c1-eb10-3ca0-8495-abc31050413a",
+                                        "glosses": [
+                                            "Tier, das unter Wasser lebt und durch Kiemen atmet"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "5ca69fd7-ba12-41e1-a4ec-82d1ac7c12a6",
+                                                "sense_id": "1e6fb593-d790-3608-aa00-148a3ad978fd",
+                                                "text": "Der Wal ist kein Fisch."
+                                            },
+                                            {
+                                                "example_id": "a068d960-8227-4389-9ce3-25adbc3268b0",
+                                                "sense_id": "1e6fb593-d790-3608-aa00-148a3ad978fd",
+                                                "text": "„Es ist verboten, Fische, Krusten- und Weichtiere (Tintenfische, Muscheln und Schnecken) sowie Erzeugnisse aus oder Gerichte mit diesen in Verkehr zu bringen, die in dem zum Genuß bestimmten Tierteil oder Tieranteil den in der Anlage festgesetzten Höchstwert an Quecksilber überschreiten.“"
+                                            },
+                                            {
+                                                "example_id": "7239a393-aa68-437e-9b99-40d99f774555",
+                                                "sense_id": "1e6fb593-d790-3608-aa00-148a3ad978fd",
+                                                "text": "„Oberhalb des Wasserfalls schoss ein schlanker Fisch mit goldenem Bauch aus der Strömung, zweifellos auf der Jagd nach einem Insekt.“"
+                                            },
+                                            {
+                                                "example_id": "0077f74a-0ada-4aa1-8771-c4593d966c4a",
+                                                "sense_id": "1e6fb593-d790-3608-aa00-148a3ad978fd",
+                                                "text": "„Sie glotzten herüber wie Fische, die plötzlich überrascht entdecken, daß sie den Angelhaken schon lange verschluckt haben.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "1b171661-1f3b-3413-be6c-fc5fa1b7ecd3",
+                                        "entry_id": "3b4849c1-eb10-3ca0-8495-abc31050413a",
+                                        "glosses": [
+                                            "Fleisch von [1] als Lebensmittel"
+                                        ],
+                                        "tags": [
+                                            "no-plural"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "a8ac6b90-d766-46d7-bda2-418bb2424441",
+                                                "sense_id": "1b171661-1f3b-3413-be6c-fc5fa1b7ecd3",
+                                                "text": "Fisch auf jeden Tisch. (Werbespruch aus der DDR)"
+                                            },
+                                            {
+                                                "example_id": "c337f769-bebe-4418-90f2-bed481f871a2",
+                                                "sense_id": "1b171661-1f3b-3413-be6c-fc5fa1b7ecd3",
+                                                "text": "„In den alten Zeiten war der Nil voller Fische, und getrockneter Fisch gehörte zu den Grundnahrungsmitteln der Ägypter.“"
+                                            },
+                                            {
+                                                "example_id": "5889e5b4-9581-493f-877f-87c0e2a8a799",
+                                                "sense_id": "1b171661-1f3b-3413-be6c-fc5fa1b7ecd3",
+                                                "text": "„Zwei große Schaufenster waren ausgelegt mit Fischen und Seetieren.“"
+                                            },
+                                            {
+                                                "example_id": "0a924c5f-8da1-4dd6-a4be-127e545b334e",
+                                                "sense_id": "1b171661-1f3b-3413-be6c-fc5fa1b7ecd3",
+                                                "text": "„Dann wandte ich mich wieder an Claudine, die ihren Fisch in ein Tuch schlug.“"
+                                            },
+                                            {
+                                                "example_id": "2b7c7950-571a-4937-941c-6379b9896ab3",
+                                                "sense_id": "1b171661-1f3b-3413-be6c-fc5fa1b7ecd3",
+                                                "text": "„Für den Fisch brauchte man Fässer, für die Fässer Dauben, für die Dauben Holz und gegen die Luft dazwischen Pech.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    },
+                                    {
+                                        "sense_id": "88cf63a0-de00-3ca3-b4ed-873ac5c00380",
+                                        "entry_id": "3b4849c1-eb10-3ca0-8495-abc31050413a",
+                                        "glosses": [
+                                            "zwölftes Sternbild auf der Ekliptik (Tierkreiszeichen) – üblich ist hier der Gebrauch des Plurals die Fische – oder ein in diesem Sternbild Geborener (hier auch Singular)"
+                                        ],
+                                        "tags": [
+                                            "Astrologie"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "e2d6dd82-29ce-45d1-b605-3cc828549df4",
+                                                "sense_id": "88cf63a0-de00-3ca3-b4ed-873ac5c00380",
+                                                "text": "Fische sind meist rätselhafte Menschen."
+                                            },
+                                            {
+                                                "example_id": "59109470-ddd4-4969-8d01-daaf0706871a",
+                                                "sense_id": "88cf63a0-de00-3ca3-b4ed-873ac5c00380",
+                                                "text": "Er ist Wassermann und ich bin Fisch / darum bleibt bei uns die Liebe immer frisch – (Schlager)"
+                                            },
+                                            {
+                                                "example_id": "59f77049-14dd-43b2-953d-80f83c7cc2b9",
+                                                "sense_id": "88cf63a0-de00-3ca3-b4ed-873ac5c00380",
+                                                "text": "„Nach und nach erschien auch Formalhaut im Sternbild der Fische über dem Kraterrand, das Dreieck, des Südens und schließlich auch das Kreuz des Südens, der Polarstern der Südhemisphäre.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"3\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "Fisch",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "26c29a69-df3b-3c47-841d-206e062e9fcc",
+                                        "entry_id": "0bb89d14-2ff2-3c78-a4ee-e3666e796a06",
+                                        "glosses": [
+                                            "deutscher Familienname"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "3ee78d50-1e2e-4ea1-9c76-da052ca3e706",
+                                                "sense_id": "26c29a69-df3b-3c47-841d-206e062e9fcc",
+                                                "text": "„Bernhard Fisch (* 1926 in Willenberg, Ostpreußen) ist ein deutscher Buchautor.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "Fisch",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "38810a99-35f6-3a91-83fd-41d465b28fba",
+                                        "entry_id": "e0f09475-1d1a-3295-89e1-1f44daac2f83",
+                                        "glosses": [
+                                            "Ortsgemeinde in Rheinland-Pfalz, Deutschland"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "182edac4-f18b-4d52-85cb-7eca47e23964",
+                                                "sense_id": "38810a99-35f6-3a91-83fd-41d465b28fba",
+                                                "text": "Fisch liegt in Deutschlands Südwesten."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "61c0e3cf-8084-4f49-8f5c-d6eddcb73363",
+                        "source_entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "source_sense_description": "обитающее в воде холоднокровное позвоночное животное",
+                        "target_lang_word": "vis",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "vis",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "11847915-9538-3d35-a6b5-a85d0d116b04",
+                                        "entry_id": "e6ba166b-8e0e-30ec-9086-ec36e6f99430",
+                                        "glosses": [
+                                            "benaming voor dieren uit de groep Pisces: gewerveld dier met kieuwen, levend in water"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "8a1cd0c9-25d5-428f-8799-615794b2ea5f",
+                                                "sense_id": "11847915-9538-3d35-a6b5-a85d0d116b04",
+                                                "text": "Door de overvloedige visvangst worden sommige vissen steeds schaarser."
+                                            },
+                                            {
+                                                "example_id": "48a2c843-4c0f-499c-b406-d15393890583",
+                                                "sense_id": "11847915-9538-3d35-a6b5-a85d0d116b04",
+                                                "text": "Ik wilde dolgraag een keer verse vis vangen en op een kampvuurtje grillen."
+                                            },
+                                            {
+                                                "example_id": "65038ddf-dc83-4380-b959-9b860f8b09c2",
+                                                "sense_id": "11847915-9538-3d35-a6b5-a85d0d116b04",
+                                                "text": "Daar zat ik dan, starend naar de vissen die hopelijk mijn avondeten zouden vormen."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "739faf1d-1033-39d4-9660-e9ef2dea40e0",
+                                        "entry_id": "e6ba166b-8e0e-30ec-9086-ec36e6f99430",
+                                        "glosses": [
+                                            "het vlees van een vis (1)"
+                                        ],
+                                        "tags": [
+                                            "metonymisch"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "8d25a041-36b8-465f-8fa5-ba383127278e",
+                                                "sense_id": "739faf1d-1033-39d4-9660-e9ef2dea40e0",
+                                                "text": "Vis wordt beschouwd als hersenvoer."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "vis",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "db7387ec-e62e-3cf5-a334-fbdeb6a98723",
+                                        "entry_id": "64504d02-79b3-345d-acf0-e4903144169b",
+                                        "glosses": [
+                                            "eerste persoon enkelvoud tegenwoordige tijd van vissen"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "1645265c-5c03-4061-8b3c-8be9af58cebb",
+                                                "sense_id": "db7387ec-e62e-3cf5-a334-fbdeb6a98723",
+                                                "text": "Ik vis."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "3d6f8566-d1f7-3727-a456-8103c7dc08e1",
+                                        "entry_id": "64504d02-79b3-345d-acf0-e4903144169b",
+                                        "glosses": [
+                                            "gebiedende wijs van vissen"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "aa3b0df0-ab27-4a51-bb2d-2122de413e35",
+                                                "sense_id": "3d6f8566-d1f7-3727-a456-8103c7dc08e1",
+                                                "text": "Vis!"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "108cd9c9-6308-34f7-ad17-826c5a9f6dcb",
+                                        "entry_id": "64504d02-79b3-345d-acf0-e4903144169b",
+                                        "glosses": [
+                                            "tweede persoon enkelvoud tegenwoordige tijd van vissen"
+                                        ],
+                                        "tags": [
+                                            "form-of",
+                                            "inversion"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "3d5a4b12-8c08-4089-b9ba-12dc7dd5e684",
+                                                "sense_id": "108cd9c9-6308-34f7-ad17-826c5a9f6dcb",
+                                                "text": "Vis je?"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "a7fd476a-79aa-4d7b-9d2a-b281361c0d47",
+                        "source_entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "source_sense_description": "обитающее в воде холоднокровное позвоночное животное",
+                        "target_lang_word": "ryba",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "ryba",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "d433364a-1b73-3bf4-98b7-49039f6a2b08",
+                                        "entry_id": "fd686686-44b4-3921-b6d4-fd66be2ae755",
+                                        "glosses": [
+                                            "zwierzę z gromady kręgowców, żyjące w wodzie"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "43ebf995-c240-4f1e-a2fa-1d1772bd3a65",
+                                                "sense_id": "d433364a-1b73-3bf4-98b7-49039f6a2b08",
+                                                "text": "Ryby oddychają w wodzie skrzelami."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    },
+                                    {
+                                        "sense_id": "a73c1b1f-73f2-379a-8197-180b99dd6d39",
+                                        "entry_id": "fd686686-44b4-3921-b6d4-fd66be2ae755",
+                                        "glosses": [
+                                            "mięso ryb (1.1) będące surowcem spożywczym i daniem"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "404ffeb5-c082-4f47-801a-bd573c884aba",
+                                                "sense_id": "a73c1b1f-73f2-379a-8197-180b99dd6d39",
+                                                "text": "Zawsze w soboty jadamy smażoną rybę."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "363af2a9-df84-4420-a227-cdf83421b0be",
+                        "source_entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "source_sense_description": "обитающее в воде холоднокровное позвоночное животное",
+                        "target_lang_word": "balık",
+                        "target_lang_code": "tr",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "balık",
+                                "target_lang_code": "tr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "8a5d4cd7-295e-30c5-be29-56a47456c2e1",
+                                        "entry_id": "13e001aa-2ed9-3df5-ac7b-de5e5e9de14b",
+                                        "glosses": [
+                                            "Omurgalılardan, suda yaşayan, solungaçla nefes alan ve yumurtadan üreyen hayvanların genel adı"
+                                        ],
+                                        "tags": [
+                                            "omurgalılar"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "78118d64-f316-4024-a20a-b2599962d0f0",
+                                                "sense_id": "8a5d4cd7-295e-30c5-be29-56a47456c2e1",
+                                                "text": "Balıklara yem attık, suyun içi birbirine karıştı."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "3d7d2c04-c0da-427f-ab4f-554d6c065d2f",
+                        "source_entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "source_sense_description": "обитающее в воде холоднокровное позвоночное животное",
+                        "target_lang_word": "poisson",
+                        "target_lang_code": "fr",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "poisson",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "425cf4d4-96ca-3ead-95c0-7598a602a8d9",
+                                        "entry_id": "c4a0b5df-23d7-3474-8350-b49ee00d383f",
+                                        "glosses": [
+                                            "Animal possédant un squelette, généralement ovipare (mais parfois ovovivipare ou vivipare), vivant dans l’eau, et respirant généralement par des branchies (bien que certaines espèces aient des systèmes de respiration aérienne complémentaire, comme les poumons des dipneustes ou le labyrinthe des anabantidés)."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "c0e5a78d-80cc-4271-87e8-e22523b3f948",
+                                                "sense_id": "425cf4d4-96ca-3ead-95c0-7598a602a8d9",
+                                                "text": "C’est chez la veuve Thorsdal que j’appris à savourer les délices de la cuisine islandaise. Le dîner se composait invariablement de poisson bouilli."
+                                            },
+                                            {
+                                                "example_id": "667e123e-084d-450f-85ca-1be4fdc99aeb",
+                                                "sense_id": "425cf4d4-96ca-3ead-95c0-7598a602a8d9",
+                                                "text": "Par contraste, le côté du lagon était étrangement calme, une eau merveilleusement tranquille, à peine ridée par les alizés, où passaient des poissons aux couleurs éblouissantes."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "d6430fc1-ab5a-35f9-bac0-cf87ff3d1f9d",
+                                        "entry_id": "c4a0b5df-23d7-3474-8350-b49ee00d383f",
+                                        "glosses": [
+                                            "Tout animal aquatique."
+                                        ],
+                                        "tags": [
+                                            "obsolete"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "8d519571-a50f-4d35-8253-dfebe6c6e952",
+                                                "sense_id": "d6430fc1-ab5a-35f9-bac0-cf87ff3d1f9d",
+                                                "text": "Or, voici maintenant les moyens personnels que la nature vous a mis entre les mains, pour vous défendre ; car la Providence n’a oublié personne : si elle a donné à la sépia (poisson de l’Adriatique) cette couleur noire qui lui sert à produire un nuage au sein duquel elle se dérobe à son ennemi, vous devez bien penser qu’elle n’a pas laissé un mari sans épée : or le moment est venu de tirer la vôtre."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "30c156ec-5146-3385-8f17-339a7f744f59",
+                                        "entry_id": "c4a0b5df-23d7-3474-8350-b49ee00d383f",
+                                        "glosses": [
+                                            "Posture du yoga où le corps repose sur les fesses et le sommet de la tête, le tronc étant relevé."
+                                        ],
+                                        "tags": [
+                                            "Yoga"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "f524e6d2-5227-3bf9-9a71-72b1b82d2374",
+                                        "entry_id": "c4a0b5df-23d7-3474-8350-b49ee00d383f",
+                                        "glosses": [
+                                            "Meuble représentant un animal marin dont l’espèce n’est pas clairement identifiable dans les armoiries. Il est représenté en fasce, la tête à dextre, la gueule fermée. Toutefois certains poissons ont des dispositions différentes. Voir baleine, bar, chabot et dauphin."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "2c353d7b-93f9-4245-8510-6915c18b07d3",
+                                                "sense_id": "f524e6d2-5227-3bf9-9a71-72b1b82d2374",
+                                                "text": "D’azur au poisson d’argent posé en fasce, accompagné de deux fleurs de lys d’or, l’une en chef et l’autre en pointe, et adextré d’une autre fleur de lys du même mouvant du flanc, qui est de Poissy → voir illustration « armoiries avec un poisson »"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "68fa92ee-7c34-30cb-b5cb-6eed7b98ce80",
+                                        "entry_id": "c4a0b5df-23d7-3474-8350-b49ee00d383f",
+                                        "glosses": [
+                                            "Ellipse de poisson d’avril."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "2a79f726-fe11-4bc5-b0a3-3e04ffd07d94",
+                                                "sense_id": "68fa92ee-7c34-30cb-b5cb-6eed7b98ce80",
+                                                "text": "— Mesdames, c’est aujourd’hui le 1ᵉʳ avril ! s’écria Marie de Boussac. Nous vous avons servi le poisson de rigueur. C’était notre devoir… et notre droit !"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "poisson",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "208a1b16-ae10-31d7-b8aa-fdafd8567b43",
+                                        "entry_id": "9e25aed2-3bcc-3230-a827-6491a4b30e12",
+                                        "glosses": [
+                                            "Ancienne mesure utilisée pour les liquides et valant la moitié d’un demi-setier, soit environ 11,9 centilitres."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "d271d4ff-0a67-4ee6-8f72-0961e480c079",
+                                                "sense_id": "208a1b16-ae10-31d7-b8aa-fdafd8567b43",
+                                                "text": "… ensuite vous broyerez la civette & la gomme ensemble, y ajoutant de l’eau peu à peu jusqu’à la quantité d’un poisson, & vous en chargerez vos peaux ou gants avec une éponge & vous les mettrez sécher, & étant secs vous les frotterez & les ouvrirez, puis vous ferez ce qui suit."
+                                            },
+                                            {
+                                                "example_id": "2031fe79-618f-4880-ac2c-8a5ac65121ae",
+                                                "sense_id": "208a1b16-ae10-31d7-b8aa-fdafd8567b43",
+                                                "text": "Ce qui fait voir clairement nᵒ 1 Que la Roquille étoit la moitié du demi-Poisson, le quart du Poisson, le huitième du demi-Setier, le seizième de la Chopine. le trente-deuxième de l'ancienne Pinte de Paris et la deux-cents-cinquantesixième partie de l'ancienne Velte de Paris."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "a20048ba-34c5-4106-bb00-49c5bbf92523",
+                        "source_entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "source_sense_description": "обитающее в воде холоднокровное позвоночное животное",
+                        "target_lang_word": "ryba",
+                        "target_lang_code": "cs",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "ryba",
+                                "target_lang_code": "cs",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "d8b1594d-0ba6-3f3c-8955-cbb82bab6e65",
+                                        "entry_id": "dbaf4e22-f849-3ed8-80ca-6ded1540bb40",
+                                        "glosses": [
+                                            "studenokrevný obratlovec žijící ve vodě, pohybující se pomocí ploutví a dýchající žábrami"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "90eb1326-027f-410b-b116-efbf08acd36f",
+                                                "sense_id": "d8b1594d-0ba6-3f3c-8955-cbb82bab6e65",
+                                                "text": "Ryba vyplavala na hladinu."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "ryba",
+                                "target_lang_code": "cs",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "183c5ded-d360-36eb-bf9c-994a5eaeec98",
+                                        "entry_id": "8681442c-81ee-3980-b44d-5c47754a0980",
+                                        "glosses": [
+                                            "malá ryba"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "9eb6e98d-8c23-32d3-a209-8625196d8159",
+                                        "entry_id": "8681442c-81ee-3980-b44d-5c47754a0980",
+                                        "glosses": [
+                                            "velká ryba"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "3833b837-9e72-345a-91a2-b41483e3b457",
+                                        "entry_id": "8681442c-81ee-3980-b44d-5c47754a0980",
+                                        "glosses": [
+                                            "leklá ryba"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "6a2b7b50-9550-3bef-8b52-cea9daba6aee",
+                                        "entry_id": "8681442c-81ee-3980-b44d-5c47754a0980",
+                                        "glosses": [
+                                            "Létající ryba"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "4712f94a-5ca1-4a87-99f0-743651dc7fb3",
+                        "source_entry_id": "aa594686-498a-3dc0-bff5-ee8979e4e38a",
+                        "source_sense_description": "добытая, выловленная или выращенная рыба [I.1.], сохраняемая живой и предназначенная для продажи",
+                        "target_lang_word": "pescado",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "pescado",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "60037cc0-ac08-33f8-8e6e-7543ad22f998",
+                                        "entry_id": "540a9a11-8913-3f05-931e-f122ca5f0f6c",
+                                        "glosses": [
+                                            "Pez extraído de su medio para su consumo."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "dfa97da8-9ff9-37ff-baf9-a859c82a4aeb",
+                                        "entry_id": "540a9a11-8913-3f05-931e-f122ca5f0f6c",
+                                        "glosses": [
+                                            "Carne de éste, empleada como alimento."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"2\""
+                                    },
+                                    {
+                                        "sense_id": "fa3f6d65-dc1a-3a45-b783-9846c9dbf2d1",
+                                        "entry_id": "540a9a11-8913-3f05-931e-f122ca5f0f6c",
+                                        "glosses": [
+                                            "Pez en general"
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [],
+                                        "sense_index_json": "\"3\""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "d73326dc-3e46-402f-84bf-e1cb56639304",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "singular",
+                            "nominative"
+                        ],
+                        "form": "ры́ба"
+                    },
+                    {
+                        "form_id": "8c3f7dde-2b95-454d-96c9-300442594901",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "plural",
+                            "nominative"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "0c64a6ab-620a-4210-b88a-28cdc02b1a60",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "singular",
+                            "genitive"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "6bc08290-51ec-40cb-b6b3-c5e9398ece59",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "plural",
+                            "genitive"
+                        ],
+                        "form": "рыб"
+                    },
+                    {
+                        "form_id": "bf83dffb-fcb6-45c8-b0a1-e4dda34c3e0f",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "singular",
+                            "dative"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "918b4c36-6492-4ca1-81ee-70f9d64fa192",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "plural",
+                            "dative"
+                        ],
+                        "form": "ры́бам"
+                    },
+                    {
+                        "form_id": "8957ed7c-3b20-4e7b-afab-61a42833fd17",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "singular",
+                            "accusative"
+                        ],
+                        "form": "ры́бу"
+                    },
+                    {
+                        "form_id": "16ff147e-2144-48db-bc7a-eb9742b7cb41",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "plural",
+                            "accusative"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "320d7d76-cb2c-492a-a5b2-8c68c0d9a81d",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "singular",
+                            "instrumental"
+                        ],
+                        "form": "ры́бой"
+                    },
+                    {
+                        "form_id": "cb9039f6-87a1-4f52-b6a8-7f3152536d79",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "singular",
+                            "instrumental"
+                        ],
+                        "form": "ры́бою"
+                    },
+                    {
+                        "form_id": "c16c0872-d731-4de1-8904-29c7461d41fc",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "plural",
+                            "instrumental"
+                        ],
+                        "form": "ры́бами"
+                    },
+                    {
+                        "form_id": "dbe49300-bb31-466f-8835-e0871b49f3e7",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "singular",
+                            "prepositional"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "df5af583-eac4-41d8-8cd9-bbaac031a41b",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "tags": [
+                            "plural",
+                            "prepositional"
+                        ],
+                        "form": "ры́бах"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "6399e9de-35f7-35bc-9c95-ad97fd78e31c",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "glosses": [
+                            "ед. ч. добытая, выловленная рыба [I.1., I.2.] в качестве промысла, улова"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "9d60ac0b-9727-4ae9-9c7e-53babc786e6f",
+                                "sense_id": "6399e9de-35f7-35bc-9c95-ad97fd78e31c",
+                                "text": "Хищнический улов рыбы в низовьях Амура скупщиками, отправляющими рыбу в Европу, лишил 5 000 местных рыбаков пропитания."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "692f2f69-35eb-3d00-af07-e592c092d272",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "glosses": [
+                            "кулин., ед. ч. употребляемое в пищу мясо рыбы [I.1., I.2.]"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "96fe8282-2706-45d6-beb5-818fa7270394",
+                                "sense_id": "692f2f69-35eb-3d00-af07-e592c092d272",
+                                "text": "На столе стоял .. пирог с рыбой, пирог с малиной и ещё что-то лежало, что я не мог различить сыздали."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "89c2e5ff-1105-34e1-aee0-01dd21b0f2f2",
+                        "entry_id": "35bf4a18-6933-3490-8ed0-53fcca2ab453",
+                        "glosses": [
+                            "кулин. кушанье, блюдо приготовленное из мяса рыбы [I.1., I.2.]"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "9441019e-7167-4abb-be89-bf067242d812",
+                                "sense_id": "89c2e5ff-1105-34e1-aee0-01dd21b0f2f2",
+                                "text": "Обед весь состоял из рыбы: уха, жареная рыба и гомар чудовищных размеров и блестящих красок."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "aec14573-5d32-4fc8-b3d3-7c82323376e9",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "singular",
+                            "nominative"
+                        ],
+                        "form": "ры́ба"
+                    },
+                    {
+                        "form_id": "c15d690c-0bc9-42a3-bfa3-fb7495ede07d",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "plural",
+                            "nominative"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "9cc44579-6469-4872-bf99-0f457fdc40e4",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "singular",
+                            "genitive"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "57565c2c-c850-4841-9c92-500bd2f6f2f3",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "plural",
+                            "genitive"
+                        ],
+                        "form": "рыб"
+                    },
+                    {
+                        "form_id": "4128407b-53c5-45f0-9aad-0008ad90f965",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "singular",
+                            "dative"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "2a864344-f07f-4e55-886c-a0f401bd9c10",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "plural",
+                            "dative"
+                        ],
+                        "form": "ры́бам"
+                    },
+                    {
+                        "form_id": "c131f546-4355-45df-9084-a540bcef13b7",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "singular",
+                            "accusative"
+                        ],
+                        "form": "ры́бу"
+                    },
+                    {
+                        "form_id": "9c71a5d4-cb70-485a-9312-d308c060c8b3",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "plural",
+                            "accusative"
+                        ],
+                        "form": "рыб"
+                    },
+                    {
+                        "form_id": "0a77715f-e65c-4a11-adbf-4e11ee78bdc5",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "singular",
+                            "instrumental"
+                        ],
+                        "form": "ры́бой"
+                    },
+                    {
+                        "form_id": "fd4cb40e-6459-4b71-b439-f2eb1e600dac",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "singular",
+                            "instrumental"
+                        ],
+                        "form": "ры́бою"
+                    },
+                    {
+                        "form_id": "04d9e5dd-062c-4be1-8605-bf56845d3231",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "plural",
+                            "instrumental"
+                        ],
+                        "form": "ры́бами"
+                    },
+                    {
+                        "form_id": "15a33e60-97c2-4de6-8067-513169c431e7",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "singular",
+                            "prepositional"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "11095134-4fb4-4a31-ab9e-284419208844",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "tags": [
+                            "plural",
+                            "prepositional"
+                        ],
+                        "form": "ры́бах"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "50bfd206-638e-32fa-bd2e-a4088737b1aa",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "glosses": [
+                            "разг., пренебр. вялый, неэнергичный или бесстрастный, равнодушный ко всему человек"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "f93ce0a7-f455-4162-b0d2-efc40cb5b54f",
+                                "sense_id": "50bfd206-638e-32fa-bd2e-a4088737b1aa",
+                                "text": "[Мать] под венец пошла с самым спокойным видом …, так что сама уж Татьяна Павловна назвала её тогда рыбой."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "a47ab631-3fd6-3eb8-8ec1-acae2bba5908",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "glosses": [
+                            "жарг. : молодой матрос"
+                        ],
+                        "tags": [
+                            "на флоте"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "b7bd9049-19c1-3782-802f-68d2daee0ada",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "glosses": [
+                            "крим. жарг. хитрый человек"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "a2ad9e56-ef35-35f7-930d-f031ba1b3e04",
+                        "entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "glosses": [
+                            "крим. жарг. девушка"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "43f634c0-2ba7-494e-98f8-46625b31f4ac",
+                        "source_entry_id": "0295b8ed-b2e6-3479-aa84-a80740cc558e",
+                        "source_sense_ids": [
+                            "a47ab631-3fd6-3eb8-8ec1-acae2bba5908"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "юнга"
+                    }
+                ]
+            },
+            {
+                "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "0e187478-4c9b-4f12-bef8-555c8ac3a0d5",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "singular",
+                            "nominative"
+                        ],
+                        "form": "ры́ба"
+                    },
+                    {
+                        "form_id": "5a29f7b4-4656-45be-a267-297d18519317",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "plural",
+                            "nominative"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "adf2037a-1772-4ad2-96d8-bc0a4907c956",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "singular",
+                            "genitive"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "64b4886b-d25d-48ef-b435-1ac9373333f7",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "plural",
+                            "genitive"
+                        ],
+                        "form": "рыб"
+                    },
+                    {
+                        "form_id": "b74894fe-c5c0-4da8-8814-556cd64100ae",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "singular",
+                            "dative"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "f24aaa02-63ed-4242-8db7-de60888c8c45",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "plural",
+                            "dative"
+                        ],
+                        "form": "ры́бам"
+                    },
+                    {
+                        "form_id": "f4583abb-5412-43b9-8905-b35de4e35c4d",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "singular",
+                            "accusative"
+                        ],
+                        "form": "ры́бу"
+                    },
+                    {
+                        "form_id": "ad18ad35-5899-4331-b36e-db0fcefc7ff5",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "plural",
+                            "accusative"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "1c69f203-37b5-457e-8498-c3488aca7183",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "singular",
+                            "instrumental"
+                        ],
+                        "form": "ры́бой"
+                    },
+                    {
+                        "form_id": "339cd72e-0292-4c18-a7e2-bf64d6e7005f",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "singular",
+                            "instrumental"
+                        ],
+                        "form": "ры́бою"
+                    },
+                    {
+                        "form_id": "15058679-e419-499f-aeb5-73a2a3085c58",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "plural",
+                            "instrumental"
+                        ],
+                        "form": "ры́бами"
+                    },
+                    {
+                        "form_id": "b5063511-5e59-4cec-9612-7f4e0c8997d5",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "singular",
+                            "prepositional"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "45a36f1f-f332-47a8-9419-1386cdef1141",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "tags": [
+                            "plural",
+                            "prepositional"
+                        ],
+                        "form": "ры́бах"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "1890f03f-ff18-34eb-ad99-ce4b964dbd08",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "glosses": [
+                            "разг. предварительно отобранный материал для какой-либо творческой, интеллектуальной деятельности; заготовка"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "30f1bd04-05da-4fa7-b4a0-3ece067a8389",
+                                "sense_id": "1890f03f-ff18-34eb-ad99-ce4b964dbd08",
+                                "text": "Розов по болванке дорабатывал пьесу: из «рыбы» возникали новые реплики."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "9b4c9804-cedf-3ad1-8a60-ad3423dfd1c7",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "glosses": [
+                            "разг. : комбинация костей в змейке; позиция, при которой с обоих концов выложенного ряда костяшек оказываются одинаковые по числу очков костяшки, после чего игра считается законченной и каждый игрок подсчитывает количество очков на оставшихся у него костяшках"
+                        ],
+                        "tags": [
+                            "в игре в домино"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "40a87683-bfa0-3f4b-9228-1d0ae7c14b2d",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "glosses": [
+                            "суррогат, имитация, бессмысленный материал, используемый как заполнитель"
+                        ],
+                        "tags": [
+                            "в издательском деле, медиа-индустрии и т. п."
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "9355f8be-6662-4052-bbb9-36b03937facb",
+                                "sense_id": "40a87683-bfa0-3f4b-9228-1d0ae7c14b2d",
+                                "text": "Композитор при написании песни взял вместо стихов рыбу."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "94a4f849-af90-34bd-90a4-c820ce216402",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "glosses": [
+                            "прост. то, что сделано (собрано, соединено) для обмана"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "b79dfb32-428e-4981-b8ab-8b85640e330c",
+                                "sense_id": "94a4f849-af90-34bd-90a4-c820ce216402",
+                                "text": "— Вместо машинописи подсунули рыбу."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "5304a1c5-4e76-31bd-9124-afbea2f66587",
+                        "entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "glosses": [
+                            "крим. жарг. патруль"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "099d9214-764d-4e58-8224-5be62e266590",
+                        "source_entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "source_sense_ids": [
+                            "1890f03f-ff18-34eb-ad99-ce4b964dbd08"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "набросок"
+                    },
+                    {
+                        "linkage_id": "631c323d-f441-4ccc-b0cd-433e4cff8199",
+                        "source_entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "source_sense_ids": [
+                            "1890f03f-ff18-34eb-ad99-ce4b964dbd08"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "черновик"
+                    },
+                    {
+                        "linkage_id": "63847938-8f60-489f-9997-9ef8e0b98498",
+                        "source_entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "source_sense_ids": [
+                            "40a87683-bfa0-3f4b-9228-1d0ae7c14b2d"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "бессмыслица"
+                    },
+                    {
+                        "linkage_id": "7391502e-72c5-4c84-a049-6449c6941cc7",
+                        "source_entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "source_sense_ids": [
+                            "40a87683-bfa0-3f4b-9228-1d0ae7c14b2d"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "пустышка"
+                    },
+                    {
+                        "linkage_id": "142aece9-6b50-4f95-aec9-944de522f3ca",
+                        "source_entry_id": "5442c810-cf09-3f23-9f51-117549140f14",
+                        "source_sense_ids": [
+                            "94a4f849-af90-34bd-90a4-c820ce216402"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "фальшивка"
+                    }
+                ]
+            }
+        ],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "0b1bd38e-0d36-3576-8ab4-bf6d81316792",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "192c9f66-6937-3fed-8e9c-b1933d3ac5e9",
+                        "entry_id": "0b1bd38e-0d36-3576-8ab4-bf6d81316792",
+                        "glosses": [
+                            "vis"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "a88db732-d47b-349b-a6be-c483067873b0",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "00da55a2-027b-3688-9b0d-187114a4725d",
+                        "entry_id": "a88db732-d47b-349b-a6be-c483067873b0",
+                        "glosses": [
+                            "ryba"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "fr-extract.jsonl": [
+            {
+                "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "a87791bc-7d90-4aa9-998f-ce734dfb89a1",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "singular",
+                            "nominative"
+                        ],
+                        "form": "ры́ба"
+                    },
+                    {
+                        "form_id": "a3c2675a-487b-4d26-8ecf-eead0a33b206",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "plural",
+                            "nominative"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "bf8a7ed8-ca1c-451b-affe-ad83814ff6ee",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "singular",
+                            "genitive"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "b8022fac-5d8d-4796-b253-b5ee4ee14500",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "plural",
+                            "genitive"
+                        ],
+                        "form": "рыб"
+                    },
+                    {
+                        "form_id": "202172eb-c2b4-4c50-ac1c-63cae9b4ca1f",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "singular",
+                            "dative"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "2fe3136b-cfef-4126-8d92-e822330c72f3",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "plural",
+                            "dative"
+                        ],
+                        "form": "ры́бам"
+                    },
+                    {
+                        "form_id": "0185740a-d06e-4a99-8480-490001f434b2",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "singular",
+                            "accusative"
+                        ],
+                        "form": "ры́бу"
+                    },
+                    {
+                        "form_id": "48723292-f4c6-4813-a066-ae07736781f0",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "plural",
+                            "accusative"
+                        ],
+                        "form": "рыб"
+                    },
+                    {
+                        "form_id": "8131ea83-ab07-4179-8a79-3a085e560e19",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "singular",
+                            "instrumental"
+                        ],
+                        "form": "ры́бой"
+                    },
+                    {
+                        "form_id": "56ae17f7-5ff3-4f22-876a-32ae2bfb5ccf",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "singular",
+                            "instrumental"
+                        ],
+                        "form": "ры́бою"
+                    },
+                    {
+                        "form_id": "247fe6b7-4b3a-4a2d-b81b-0e0a154b6557",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "plural",
+                            "instrumental"
+                        ],
+                        "form": "ры́бами"
+                    },
+                    {
+                        "form_id": "4f8b2e7c-dd54-44f0-af83-b99f44d4d827",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "singular",
+                            "prepositional"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "f194095b-88dc-44d6-90ed-8d6682aad40c",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "plural",
+                            "prepositional"
+                        ],
+                        "form": "ры́бах"
+                    },
+                    {
+                        "form_id": "47608c70-cf8d-495a-81b0-6ad0c4ec8749",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "singular",
+                            "plural"
+                        ],
+                        "form": "Nom de type 1a selon Zaliznyak"
+                    },
+                    {
+                        "form_id": "c2c687ce-e6c2-4f7b-ae6d-76693bcf0cc4",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "ры́ба"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "8e6eb267-0445-3ddc-92e7-e18e9a82c8ed",
+                        "entry_id": "3a142801-416e-3596-b4af-a565bcc97b05",
+                        "glosses": [
+                            "Poisson."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "it-extract.jsonl": [
+            {
+                "entry_id": "b67b544b-7c33-356c-ac0c-c75595e5407e",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "a35e9cab-e91c-3d44-a062-d679bf36da32",
+                        "entry_id": "b67b544b-7c33-356c-ac0c-c75595e5407e",
+                        "glosses": [
+                            "pesce"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [
+            {
+                "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "7db75460-10ac-434d-a96a-765654f13660",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "nominative",
+                            "singular"
+                        ],
+                        "form": "ры́ба"
+                    },
+                    {
+                        "form_id": "e8f1154f-638a-449e-9a74-7dc0e4cdff99",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "fe05529a-4456-4099-90f0-737004828c30",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "6ed779ef-2c91-4a3d-a079-d79c04ddceea",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "ры́б"
+                    },
+                    {
+                        "form_id": "1480b54e-10fe-4102-a268-8040b20a48a6",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "50da8800-297a-450b-be22-78f0ebd23c69",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "dative",
+                            "plural"
+                        ],
+                        "form": "ры́бам"
+                    },
+                    {
+                        "form_id": "03d74416-0b8c-4409-9722-8c50a552c7b1",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "accusative",
+                            "singular"
+                        ],
+                        "form": "ры́бу"
+                    },
+                    {
+                        "form_id": "9b248ccf-834d-4ab9-8b22-a338cfdcdd85",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "accusative",
+                            "plural"
+                        ],
+                        "form": "ры́бы"
+                    },
+                    {
+                        "form_id": "24f33ac3-2d35-4d48-95fd-88136a9e43c8",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "ры́бой, ры́бою"
+                    },
+                    {
+                        "form_id": "a4790de7-1135-42f5-8412-44ae1fcbd35a",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "instrumental",
+                            "plural"
+                        ],
+                        "form": "ры́бами"
+                    },
+                    {
+                        "form_id": "fba7a61f-7a04-4786-ba35-852427fea17b",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "locative",
+                            "singular"
+                        ],
+                        "form": "ры́бе"
+                    },
+                    {
+                        "form_id": "ba2aa43f-ce34-4b18-99af-ed4a4647daa1",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "tags": [
+                            "locative",
+                            "plural"
+                        ],
+                        "form": "ры́бах"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "01fdd91c-6a09-390c-853f-8f2d7638ebe3",
+                        "entry_id": "ff1ffd06-32f8-374a-ab07-12ddf497fbbe",
+                        "glosses": [
+                            "ryba"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": [
+            {
+                "entry_id": "e34a7074-75ba-3ab6-8ffd-479b908080c7",
+                "word": "рыба",
+                "pos": "noun",
+                "lang_code": "ru",
+                "forms": [
+                    {
+                        "form_id": "c11f5afd-7b21-497d-aeaf-cbb3856c65b0",
+                        "entry_id": "e34a7074-75ba-3ab6-8ffd-479b908080c7",
+                        "tags": [
+                            "transliteration"
+                        ],
+                        "form": "rıba"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "5305ffc3-4641-38db-a4a5-e2388b9de2d5",
+                        "entry_id": "e34a7074-75ba-3ab6-8ffd-479b908080c7",
+                        "glosses": [
+                            "balık"
+                        ],
+                        "tags": [
+                            "omurgalılar"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ]
+    }
+}

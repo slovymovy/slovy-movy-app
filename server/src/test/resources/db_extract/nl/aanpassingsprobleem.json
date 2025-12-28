@@ -1,0 +1,116 @@
+{
+    "word": "aanpassingsprobleem",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "22565f9d-90a1-3c85-8c63-8068c711a7bf",
+                "word": "aanpassingsprobleem",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "eda283ea-417b-44bc-bdb9-1b844f5fb362",
+                        "entry_id": "22565f9d-90a1-3c85-8c63-8068c711a7bf",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "aanpassingsproblemen"
+                    },
+                    {
+                        "form_id": "b44b3411-ab53-4718-98d0-4c96d20d672c",
+                        "entry_id": "22565f9d-90a1-3c85-8c63-8068c711a7bf",
+                        "tags": [
+                            "diminutive",
+                            "singular"
+                        ],
+                        "form": "aanpassingsprobleempje"
+                    },
+                    {
+                        "form_id": "4dbc11ec-42cf-4365-9422-cafacf74d481",
+                        "entry_id": "22565f9d-90a1-3c85-8c63-8068c711a7bf",
+                        "tags": [
+                            "diminutive",
+                            "plural"
+                        ],
+                        "form": "aanpassingsprobleempjes"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "57a0cfd9-a8ad-3118-81a5-c82c299b01ac",
+                        "entry_id": "22565f9d-90a1-3c85-8c63-8068c711a7bf",
+                        "glosses": [
+                            "een moeilijkheid of probleem dat zich voordoet bij het zich moeten aanpassen aan nieuwe omstandigheden"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "62da9493-5875-4b7c-8164-68467fdbe36a",
+                                "sense_id": "57a0cfd9-a8ad-3118-81a5-c82c299b01ac",
+                                "text": "Aanpassingsproblemen bij echtscheiding spelen bij sommige mensen een grote rol."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "d3452bf3-05bd-43d8-8a30-4c6ffa3356b2",
+                        "source_entry_id": "22565f9d-90a1-3c85-8c63-8068c711a7bf",
+                        "source_sense_ids": [
+                            "57a0cfd9-a8ad-3118-81a5-c82c299b01ac"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "aanpassingsmoeilijkheden"
+                    },
+                    {
+                        "linkage_id": "afa83e70-fdc0-499f-9d72-765637fc7a97",
+                        "source_entry_id": "22565f9d-90a1-3c85-8c63-8068c711a7bf",
+                        "source_sense_ids": [
+                            "57a0cfd9-a8ad-3118-81a5-c82c299b01ac"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "aanpassingsstoornis"
+                    },
+                    {
+                        "linkage_id": "1cc2059f-12b6-4447-9fa7-cb3c4ce9a7a7",
+                        "source_entry_id": "22565f9d-90a1-3c85-8c63-8068c711a7bf",
+                        "source_sense_ids": [
+                            "57a0cfd9-a8ad-3118-81a5-c82c299b01ac"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "adaptatieprobleem"
+                    },
+                    {
+                        "linkage_id": "2746378f-9193-48fb-85a2-0dba202955d8",
+                        "source_entry_id": "22565f9d-90a1-3c85-8c63-8068c711a7bf",
+                        "source_sense_ids": [
+                            "57a0cfd9-a8ad-3118-81a5-c82c299b01ac"
+                        ],
+                        "linkage_type": "antonyms",
+                        "word": "aanpassingsvermogen"
+                    },
+                    {
+                        "linkage_id": "6b1d8605-a9ff-459d-9c82-b05269ebdc7a",
+                        "source_entry_id": "22565f9d-90a1-3c85-8c63-8068c711a7bf",
+                        "source_sense_ids": [
+                            "57a0cfd9-a8ad-3118-81a5-c82c299b01ac"
+                        ],
+                        "linkage_type": "antonyms",
+                        "word": "adaptatievermogen"
+                    }
+                ]
+            }
+        ],
+        "pl-extract.jsonl": [],
+        "fr-extract.jsonl": [],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": []
+    }
+}
