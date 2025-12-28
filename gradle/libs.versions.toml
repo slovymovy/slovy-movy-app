@@ -27,7 +27,7 @@ ktor = "3.3.3"
 logback = "1.5.22"
 openaiJava = "4.11.0"
 sqldelight = "2.2.1"
-material3 = '1.10.0-alpha05'
+material3 = '1.11.0-alpha01'
 
 [libraries]
 github-api = { module = "org.kohsuke:github-api", version.ref = "githubApi" }
