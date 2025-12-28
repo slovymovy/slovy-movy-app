@@ -52,9 +52,13 @@ private sealed interface AppDestination {
         val dictionaryLanguageCode: String,
         val lemma: String,
         val targetSenseId: String? = null,
+        val translationLanguageCodes: List<String>? = null,
     ) : AppDestination {
         val dictionaryLanguage: Language
             get() = Language.fromCode(dictionaryLanguageCode)
+
+        val translationLanguages: List<Language>?
+            get() = translationLanguageCodes?.mapNotNull { Language.fromCodeOrNull(it) }
     }
 
     @Serializable
@@ -280,9 +284,12 @@ fun App(
                 SearchScreen(
                     viewModel = viewModel,
                     onWordSelected = { item ->
+                        val translationCodes = dictionaryRepository.installedTranslationTargets(item.language)
+                            .map { it.code }
                         val destination = AppDestination.WordDetail(
                             dictionaryLanguageCode = item.language.code,
                             lemma = item.lemma,
+                            translationLanguageCodes = translationCodes
                         )
                         navController.navigate(destination)
                     },
@@ -359,7 +366,8 @@ fun App(
                         voiceFilterHelper,
                         args.dictionaryLanguage,
                         args.lemma,
-                        args.targetSenseId
+                        args.targetSenseId,
+                        args.translationLanguages
                     )
                 }.also {
                     // Enforce max N cached ViewModels (remove oldest if at capacity)
@@ -390,9 +398,12 @@ fun App(
                             navController.navigate(AppDestination.Settings)
                     },
                     onNavigateToWordDetail = { language, lemma ->
+                        val translationCodes = dictionaryRepository.installedTranslationTargets(language)
+                            .map { it.code }
                         val destination = AppDestination.WordDetail(
                             dictionaryLanguageCode = language.code,
-                            lemma = lemma
+                            lemma = lemma,
+                            translationLanguageCodes = translationCodes
                         )
                         navController.navigate(destination)
                     }

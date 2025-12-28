@@ -46,16 +46,18 @@ class DatabaseTypesTest : BaseTest() {
                 val lemmaNormalized = "test"
                 q.insertLemma(
                     id = baseLemmaId,
+                    lang_code = "en",
                     lemma = lemma,
                     lemma_normalized = lemmaNormalized,
                     zipf_frequency = 0.2,
+                    online_only = false,
                 )
                 q.insertLemmaPos(
                     id = lemmaPosId,
                     lemma_id = baseLemmaId,
                     pos = DictionaryPos.VERB
                 )
-                val lemmasByWord = q.selectLemmasByWord(lemma.lowercase()).executeAsList()
+                val lemmasByWord = q.selectLemmasByWord("en", lemma.lowercase()).executeAsList()
                 val formText = "Testing"
                 val formNormalized = "testing"
                 q.insertForm(
@@ -80,7 +82,7 @@ class DatabaseTypesTest : BaseTest() {
                 q.insertSenseAntonym(sense_id = senseId, antonym = "ignore")
                 q.insertSenseExample(sense_id = senseId, example_id = 1, text = "Ми тестуємо систему.")
                 q.insertSenseCommonPhrase(sense_id = senseId, phrase = "тестувати воду")
-                val lemmasByNorm = q.selectLemmasByNormalized(lemmaNormalized).executeAsList()
+                val lemmasByNorm = q.selectLemmasByNormalized("en", lemmaNormalized).executeAsList()
                 val lemmaFoundByNormalized = lemmasByNorm.any { it.id == baseLemmaId }
                 val out = DictionaryOutcome(
                     lemmaPosId = lemmaPosId,
@@ -116,11 +118,13 @@ class DatabaseTypesTest : BaseTest() {
                 val db: TranslationDatabase = DatabaseProvider.createTranslationDatabase(driver)
                 val q = db.translationQueries
                 val senseId = Uuid.random()
-                q.insertSenseTargetDefinition(sense_id = senseId, definition = "target definition")
+                q.insertSenseTargetDefinition(sense_id = senseId, from_lang_code = "en", target_lang_code = "ru", definition = "target definition")
                 val lemmaId = Uuid.random()
                 val lemmaPosId = Uuid.random()
                 q.insertSenseTranslation(
                     sense_id = senseId,
+                    from_lang_code = "en",
+                    target_lang_code = "ru",
                     idx = 0,
                     target_lang_word = "test",
                     target_lang_word_normalized = "test",
@@ -130,6 +134,8 @@ class DatabaseTypesTest : BaseTest() {
                 )
                 q.insertSenseTranslation(
                     sense_id = senseId,
+                    from_lang_code = "en",
+                    target_lang_code = "ru",
                     idx = 1,
                     target_lang_word = "trial",
                     target_lang_word_normalized = "trial",
@@ -137,12 +143,12 @@ class DatabaseTypesTest : BaseTest() {
                     lemma_id = lemmaId,
                     lemma_pos_id = lemmaPosId,
                 )
-                q.insertExampleTranslation(sense_id = senseId, example_id = 42, translation = "Мы тестируем.")
-                val defs = q.selectDefinitionsBySense(senseId).executeAsList()
-                val translations = q.selectSenseTranslationsBySense(senseId).executeAsList()
+                q.insertExampleTranslation(sense_id = senseId, from_lang_code = "en", target_lang_code = "ru", example_id = 42, translation = "Мы тестируем.")
+                val defs = q.selectDefinitionsBySense(senseId, "en", "ru").executeAsList()
+                val translations = q.selectSenseTranslationsBySense(senseId, "en", "ru").executeAsList()
                 val words = translations.map { it.target_lang_word }
                 val clar = translations.map { it.target_lang_sense_clarification }
-                val example = q.selectExampleTranslations(senseId, 42).executeAsOneOrNull()
+                val example = q.selectExampleTranslations(senseId, "en", "ru", 42).executeAsOneOrNull()
                 val out = TranslationOutcome(
                     definitions = defs,
                     translationWordsInOrder = words,

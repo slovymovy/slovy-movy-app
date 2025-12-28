@@ -5,75 +5,81 @@ import kotlin.uuid.Uuid;
 -- Per-sense target language definitions
 CREATE TABLE sense_target_definition (
   sense_id BLOB AS Uuid NOT NULL,
+  from_lang_code TEXT NOT NULL,
+  target_lang_code TEXT NOT NULL,
   definition TEXT NOT NULL,
-  PRIMARY KEY(sense_id)
+  PRIMARY KEY(sense_id, from_lang_code, target_lang_code)
 );
 
 -- Per-sense translations: ordered list of target words per target language
 CREATE TABLE sense_translation (
   sense_id BLOB AS Uuid NOT NULL,
+  from_lang_code TEXT NOT NULL,
+  target_lang_code TEXT NOT NULL,
   idx INTEGER NOT NULL, -- position within the list to preserve order
   target_lang_word TEXT NOT NULL,
   target_lang_word_normalized TEXT NOT NULL,
   target_lang_sense_clarification TEXT,
   lemma_id BLOB AS Uuid NOT NULL,
   lemma_pos_id BLOB AS Uuid NOT NULL,
-  PRIMARY KEY(sense_id, idx)
+  PRIMARY KEY(sense_id, from_lang_code, target_lang_code, idx)
 );
 
--- Index to speed up lookups by normalized target word
-CREATE INDEX sense_translation_target_lang_word_normalized_idx
-ON sense_translation(target_lang_word_normalized);
+-- Index to speed up lookups by normalized target word (with from/target lang codes for multi-language queries)
+CREATE INDEX sense_translation_lang_word_normalized_idx
+ON sense_translation(from_lang_code, target_lang_code, target_lang_word_normalized);
 
--- Per-example target translations (scoped by sense_id and example_id)
+-- Per-example target translations (scoped by sense_id, from/target lang codes, and example_id)
 CREATE TABLE example_translation (
   sense_id BLOB AS Uuid NOT NULL,
+  from_lang_code TEXT NOT NULL,
+  target_lang_code TEXT NOT NULL,
   example_id INTEGER NOT NULL,
   translation TEXT NOT NULL,
-  PRIMARY KEY(sense_id, example_id)
+  PRIMARY KEY(sense_id, from_lang_code, target_lang_code, example_id)
 );
 
 -- Inserts/Upserts
 insertSenseTargetDefinition:
-INSERT OR REPLACE INTO sense_target_definition(sense_id, definition)
-VALUES (?, ?);
+INSERT OR REPLACE INTO sense_target_definition(sense_id, from_lang_code, target_lang_code, definition)
+VALUES (?, ?, ?, ?);
 
 insertSenseTranslation:
-INSERT OR REPLACE INTO sense_translation(sense_id, idx, target_lang_word, target_lang_word_normalized, target_lang_sense_clarification, lemma_id, lemma_pos_id)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO sense_translation(sense_id, from_lang_code, target_lang_code, idx, target_lang_word, target_lang_word_normalized, target_lang_sense_clarification, lemma_id, lemma_pos_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 insertExampleTranslation:
-INSERT OR REPLACE INTO example_translation(sense_id, example_id, translation)
-VALUES (?, ?, ?);
+INSERT OR REPLACE INTO example_translation(sense_id, from_lang_code, target_lang_code, example_id, translation)
+VALUES (?, ?, ?, ?, ?);
 
 -- Selectors
 selectDefinitionsBySense:
 SELECT definition
 FROM sense_target_definition
-WHERE sense_id = ?;
+WHERE sense_id = ? AND from_lang_code = ? AND target_lang_code = ?;
 
 selectSenseTranslationsBySense:
 SELECT idx, target_lang_word, target_lang_sense_clarification, lemma_id, lemma_pos_id
 FROM sense_translation
-WHERE sense_id = ?
+WHERE sense_id = ? AND from_lang_code = ? AND target_lang_code = ?
 ORDER BY idx;
 
 -- Selector including normalized word for testing and lookup
 selectSenseTranslationsBySenseWithNormalized:
 SELECT idx, target_lang_word, target_lang_word_normalized, target_lang_sense_clarification, lemma_id, lemma_pos_id
 FROM sense_translation
-WHERE sense_id = ?
+WHERE sense_id = ? AND from_lang_code = ? AND target_lang_code = ?
 ORDER BY idx;
 
 selectExampleTranslations:
 SELECT translation
 FROM example_translation
-WHERE sense_id = ? AND example_id = ?;
+WHERE sense_id = ? AND from_lang_code = ? AND target_lang_code = ? AND example_id = ?;
 
 -- Lookup by normalized target word (excludes multi-word translations)
 selectSenseTranslationsByNormalizedSingleWord:
 SELECT sense_id, idx, target_lang_word, target_lang_word_normalized, target_lang_sense_clarification, lemma_id, lemma_pos_id
-FROM sense_translation
-WHERE target_lang_word_normalized LIKE ?
-  AND target_lang_word NOT LIKE '% %'
+FROM sense_translation INDEXED BY sense_translation_lang_word_normalized_idx
+WHERE from_lang_code = ? AND target_lang_code = ? AND target_lang_word_normalized GLOB ?
+  AND target_lang_word_normalized NOT GLOB '* *'
 ORDER BY idx;

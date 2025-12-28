@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
@@ -28,6 +30,8 @@ import com.slovy.slovymovyapp.ui.components.AppCard
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.CompactFrequencyBadge
 import com.slovy.slovymovyapp.ui.word.Badge
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
@@ -48,6 +52,13 @@ class SearchViewModel(
     private val repository: DictionaryRepository
 ) : ViewModel() {
 
+    data class Search(
+        val query: String,
+        val language: Language? = null,
+        val force: Uuid,
+        val resetFocus: Boolean = false
+    )
+
     var state by mutableStateOf(
         SearchUiState(
             query = "",
@@ -58,30 +69,56 @@ class SearchViewModel(
     )
         private set
 
-    suspend fun updateQuery(newQuery: String) {
-        val trimmed = newQuery.trim()
-        val newResults = if (trimmed.isEmpty()) {
-            emptyList()
-        } else {
-            repository.search(trimmed, state.selectedLanguage)
+    private val queryFlow = MutableStateFlow(Search("", state.selectedLanguage, Uuid.random()))
+
+    init {
+        viewModelScope.launch {
+            @OptIn(kotlinx.coroutines.FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+            queryFlow
+                .debounce(200) // Wait ms after last keystroke
+                .flatMapLatest { queryState ->
+                    flow {
+                        val query = queryState.query
+                        val results = if (query.isEmpty()) {
+                            emptyList()
+                        } else {
+                            repository.search(query, queryState.language)
+                        }
+                        emit(results)
+                    }.flowOn(Dispatchers.Default) // Run search on background thread
+                }
+                .collect { results ->
+                    val query = queryFlow.value.query
+                    state = state.copy(
+                        results = results,
+                        showNoResults = results.isEmpty() && query.isNotEmpty()
+                    )
+                    // Reset scroll to top when results change
+                    if ((results.isNotEmpty() || query.isEmpty()) && queryFlow.value.resetFocus) {
+                        state.scrollState.scrollToItem(0)
+                    }
+                }
         }
-        state = state.copy(
-            query = trimmed,
-            results = newResults,
-            showNoResults = newResults.isEmpty() && trimmed.isNotEmpty()
-        )
-        // Reset scroll to top when query changes
-        state.scrollState.scrollToItem(0)
     }
 
-    suspend fun refreshFavorites() {
-        // Refresh search results to update favorite status without resetting scroll
-        if (state.query.isNotEmpty()) {
-            val newResults = repository.search(state.query, state.selectedLanguage)
-            state = state.copy(
-                results = newResults,
-                showNoResults = newResults.isEmpty() && state.query.isNotEmpty()
+    fun updateQuery(newQuery: String) {
+        val trimmed = newQuery.trim()
+        // Update UI state immediately for responsive typing
+        state = state.copy(query = trimmed)
+        // Trigger debounced search
+        queryFlow.value =
+            queryFlow.value.copy(
+                query = trimmed,
+                language = state.selectedLanguage,
+                force = Uuid.random(),
+                resetFocus = true
             )
+    }
+
+    fun refreshResults() {
+        // Re-trigger search to update favorite status
+        if (state.query.isNotEmpty()) {
+            queryFlow.value = queryFlow.value.copy(force = Uuid.random(), resetFocus = false)
         }
     }
 
@@ -95,7 +132,12 @@ class SearchViewModel(
     }
 
     fun setSelectedLanguage(language: Language?) {
+        val resetFocus = state.selectedLanguage != language
         state = state.copy(selectedLanguage = language)
+        // Re-trigger search with new language filter
+        if (state.query.isNotEmpty()) {
+            queryFlow.value = queryFlow.value.copy(language = language, force = Uuid.random(), resetFocus = resetFocus)
+        }
     }
 
     fun toggleLanguageDropdown() {
@@ -122,14 +164,13 @@ fun SearchScreen(
     onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
-    val coroutineScope = rememberCoroutineScope()
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
 
     // Refresh language indicators and search results when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
-        viewModel.refreshFavorites()
+        viewModel.refreshResults()
     }
 
     LaunchedEffect(savedQuery) {
@@ -147,7 +188,7 @@ fun SearchScreen(
 
     SearchScreenContent(
         state = viewModel.state,
-        onQueryChange = { coroutineScope.launch { viewModel.updateQuery(it) } },
+        onQueryChange = { viewModel.updateQuery(it) },
         onResultSelected = { item ->
             focusManager.clearFocus()
             onWordSelected(item)
@@ -155,7 +196,7 @@ fun SearchScreen(
         onLanguageSelected = { language ->
             viewModel.setShowLanguageIndicators(language == null && viewModel.state.availableLanguages.size > 1)
             viewModel.setSelectedLanguage(language)
-            coroutineScope.launch { viewModel.updateQuery(viewModel.state.query) }
+            // TODO: search is not relaunched or query
         },
         onToggleLanguageDropdown = { viewModel.toggleLanguageDropdown() },
         onDismissLanguageDropdown = { viewModel.dismissLanguageDropdown() },
@@ -378,7 +419,7 @@ private fun SearchResultCard(
                 // Meaning count could be shown here if available
                 if (item.pos.isNotEmpty()) {
                     Text(
-                        text = "${item.pos.size} ${if (item.pos.size == 1) "meaning" else "meanings"}",
+                        text = "${item.pos.size} ${if (item.pos.size == 1) "part of speech" else "parts of speech"}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -400,6 +441,14 @@ private fun SearchResultCard(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = "Favorite",
                             tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    if (item.onlineOnly) {
+                        Icon(
+                            imageVector = Icons.Filled.DownloadForOffline,
+                            contentDescription = "Online",
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -518,7 +567,8 @@ private fun SearchScreenPreviewWithResults(
                         display = "celebration",
                         zipfFrequency = 4.5f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -526,7 +576,8 @@ private fun SearchScreenPreviewWithResults(
                         lemma = "celebrity",
                         display = "celebrity",
                         zipfFrequency = 4.3f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -534,7 +585,8 @@ private fun SearchScreenPreviewWithResults(
                         lemma = "celestial",
                         display = "celestial",
                         zipfFrequency = 3.8f,
-                        pos = listOf(PartOfSpeech.ADJECTIVE)
+                        pos = listOf(PartOfSpeech.ADJECTIVE),
+                        onlineOnly = true
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -543,7 +595,8 @@ private fun SearchScreenPreviewWithResults(
                         display = "cell",
                         zipfFrequency = 5.2f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,
@@ -571,7 +624,8 @@ private fun SearchScreenPreviewMultilingualResults(
                         display = "program",
                         zipfFrequency = 5.5f,
                         pos = listOf(PartOfSpeech.NOUN, PartOfSpeech.VERB),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -579,7 +633,8 @@ private fun SearchScreenPreviewMultilingualResults(
                         lemma = "programmatically",
                         display = "programmatically",
                         zipfFrequency = 3.2f,
-                        pos = listOf(PartOfSpeech.ADVERB)
+                        pos = listOf(PartOfSpeech.ADVERB),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.RUSSIAN,
@@ -588,7 +643,8 @@ private fun SearchScreenPreviewMultilingualResults(
                         display = "программа",
                         zipfFrequency = 5.8f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.POLISH,
@@ -596,7 +652,8 @@ private fun SearchScreenPreviewMultilingualResults(
                         lemma = "program",
                         display = "program",
                         zipfFrequency = 5.4f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        onlineOnly = true
                     )
                 ),
                 showNoResults = false,
@@ -641,7 +698,8 @@ private fun SearchScreenPreviewInfoDialog(
                         display = "world",
                         zipfFrequency = 6.2f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,
@@ -667,7 +725,8 @@ private fun SearchScreenPreviewSingleLanguage(
                         lemma = "bibliotheek",
                         display = "bibliotheek",
                         zipfFrequency = 4.1f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.DUTCH,
@@ -675,7 +734,8 @@ private fun SearchScreenPreviewSingleLanguage(
                         lemma = "bijbel",
                         display = "bijbel",
                         zipfFrequency = 4.8f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,
@@ -703,7 +763,8 @@ private fun SearchScreenPreviewMultilingualWithoutPOS(
                         display = "word",
                         zipfFrequency = 6.1f,
                         pos = emptyList(),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.RUSSIAN,
@@ -711,7 +772,8 @@ private fun SearchScreenPreviewMultilingualWithoutPOS(
                         lemma = "ворд",
                         display = "ворд",
                         zipfFrequency = 3.5f,
-                        pos = emptyList()
+                        pos = emptyList(),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.POLISH,
@@ -719,7 +781,8 @@ private fun SearchScreenPreviewMultilingualWithoutPOS(
                         lemma = "wyraz",
                         display = "wyraz",
                         zipfFrequency = 4.2f,
-                        pos = listOf(PartOfSpeech.NOUN)
+                        pos = listOf(PartOfSpeech.NOUN),
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,
@@ -747,7 +810,8 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                         display = "run",
                         zipfFrequency = 6.3f,
                         pos = listOf(PartOfSpeech.VERB, PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.ENGLISH,
@@ -755,7 +819,8 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                         lemma = "run",
                         display = "\"running\" form of \"run\"",
                         zipfFrequency = 5.8f,
-                        pos = emptyList()
+                        pos = emptyList(),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.DUTCH,
@@ -763,7 +828,8 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                         lemma = "rennen",
                         display = "rennen",
                         zipfFrequency = 4.9f,
-                        pos = listOf(PartOfSpeech.VERB)
+                        pos = listOf(PartOfSpeech.VERB),
+                        onlineOnly = false
                     ),
                     DictionaryRepository.SearchItem(
                         language = Language.DUTCH,
@@ -772,7 +838,8 @@ private fun SearchScreenPreviewMixedLanguagesAndForms(
                         display = "rund",
                         zipfFrequency = 3.7f,
                         pos = listOf(PartOfSpeech.NOUN),
-                        isFavorite = true
+                        isFavorite = true,
+                        onlineOnly = false
                     )
                 ),
                 showNoResults = false,
