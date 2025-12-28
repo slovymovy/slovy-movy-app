@@ -7,6 +7,8 @@ import kotlin.test.assertTrue
 /**
  * Cross-platform tests for AppBuildConfig.
  * These tests verify that build configuration values are available on all platforms.
+ * Ignored for IOs because in a bundle (with CFBundleShortVersionString and CFBundleVersion)
+ * it is not available in tests.
  */
 class BuildConfigTest {
 
