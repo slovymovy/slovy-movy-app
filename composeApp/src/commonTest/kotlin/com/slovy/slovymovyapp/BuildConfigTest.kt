@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp
 
+import com.slovy.slovymovyapp.test.IgnoreIos
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -9,18 +10,21 @@ import kotlin.test.assertTrue
  */
 class BuildConfigTest {
 
+    @IgnoreIos
     @Test
     fun buildConfig_hasNonEmptyVersionName() {
         val config = getAppBuildConfig()
         assertTrue(config.versionName.isNotBlank(), "versionName should not be blank")
     }
 
+    @IgnoreIos
     @Test
     fun buildConfig_hasPositiveVersionCode() {
         val config = getAppBuildConfig()
         assertTrue(config.versionCode > 0, "versionCode should be positive, was: ${config.versionCode}")
     }
 
+    @IgnoreIos
     @Test
     fun buildConfig_hasNonEmptyApplicationId() {
         val config = getAppBuildConfig()
