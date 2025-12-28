@@ -23,6 +23,7 @@ import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.AppBuildConfig
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.AvailableLanguageInfo
+import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
 import com.slovy.slovymovyapp.speech.*
 import kotlinx.coroutines.launch
@@ -53,7 +54,7 @@ data class SettingsUiState(
     val testingVoice: Text2SpeechVoice? = null,
     val ttsStatus: TTSStatus = TTSStatus.IDLE,
     val deleteConfirmation: DeleteConfirmationState? = null,
-    val buildConfig: AppBuildConfig? = null
+    val buildConfig: AppBuildConfig = AppBuildConfig("compile", 42, true, "com.slovy.slovymovyapp")
 )
 
 data class DeleteConfirmationState(
@@ -73,7 +74,7 @@ private val TEST_PHRASES = mapOf(
 class SettingsViewModel(
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
-    private val dataDbManager: com.slovy.slovymovyapp.data.remote.DataDbManager,
+    private val dataDbManager: DataDbManager,
     buildConfig: AppBuildConfig
 ) : ViewModel() {
 

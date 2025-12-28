@@ -10,9 +10,9 @@ actual fun getAppBuildConfig(): AppBuildConfig {
     val versionCode = (infoDictionary?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: 1
     val bundleId = bundle.bundleIdentifier ?: ""
 
-    // Check if display name contains "debug" - we set this in Xcode for debug builds
+    // Check if the display name contains "debug" - we set this in Xcode for debug builds
     val displayName = infoDictionary?.get("CFBundleDisplayName") as? String ?: "?"
-    val isDebug = displayName.lowercase().contains("debug", ignoreCase = true)
+    val isDebug = displayName.contains("debug", ignoreCase = true)
 
     return AppBuildConfig(
         versionName = versionName,
