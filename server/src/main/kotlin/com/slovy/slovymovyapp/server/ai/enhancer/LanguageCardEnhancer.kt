@@ -245,7 +245,7 @@ class LanguageCardEnhancer {
                       "trait_type": {
                         "type": "string",
                         "enum": [
-                          ${TraitType.entries.joinToString(", ") { "\"${it.name.lowercase()}\"" }}
+                          ${com.slovy.slovymovyapp.ingestion.TraitType.entries.joinToString(", ") { "\"${it.name.lowercase()}\"" }}
                         ]
                       },
                       "comment": {

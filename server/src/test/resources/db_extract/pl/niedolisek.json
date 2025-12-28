@@ -1,0 +1,156 @@
+{
+    "word": "niedolisek",
+    "lang_code": "pl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                "word": "niedolisek",
+                "pos": "noun",
+                "lang_code": "pl",
+                "forms": [
+                    {
+                        "form_id": "0b539735-7584-4391-b2cb-e946abab229e",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "niedoliska"
+                    },
+                    {
+                        "form_id": "a8ae0173-a89f-42f7-9d10-3c94e30ce8d7",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "niedoliskowi"
+                    },
+                    {
+                        "form_id": "99c502f1-783a-4633-bbe8-dda3258f32ad",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "accusative",
+                            "singular"
+                        ],
+                        "form": "niedoliska"
+                    },
+                    {
+                        "form_id": "7ade4b6d-b3e1-4f42-94c3-a84043becbcc",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "niedoliskiem"
+                    },
+                    {
+                        "form_id": "4c0ba2a9-db59-4516-a44d-7178fabb8e6a",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "locative",
+                            "singular"
+                        ],
+                        "form": "niedolisku"
+                    },
+                    {
+                        "form_id": "86d9c888-f045-4504-bb6d-2bf6ebb9a76f",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "vocative",
+                            "singular"
+                        ],
+                        "form": "niedolisku"
+                    },
+                    {
+                        "form_id": "a32f9313-e0da-47c1-9106-9b4181ebbc32",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "niedoliski"
+                    },
+                    {
+                        "form_id": "561e3b2b-b72b-4ee5-b7d9-999f3e89e8d2",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "niedolisków"
+                    },
+                    {
+                        "form_id": "2391e406-a370-4714-95db-a232bad56b2e",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "dative",
+                            "plural"
+                        ],
+                        "form": "niedoliskom"
+                    },
+                    {
+                        "form_id": "558b70b9-fd9d-43a9-89d1-09a180d78089",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "accusative",
+                            "plural"
+                        ],
+                        "form": "niedoliski"
+                    },
+                    {
+                        "form_id": "f2a77a10-a391-453b-863e-fd6daf141ee7",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "instrumental",
+                            "plural"
+                        ],
+                        "form": "niedoliskami"
+                    },
+                    {
+                        "form_id": "13fadb19-0650-4419-856a-663e6c9591ab",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "locative",
+                            "plural"
+                        ],
+                        "form": "niedoliskach"
+                    },
+                    {
+                        "form_id": "fe006314-a87a-4788-98f7-974ba0e5ed9e",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "tags": [
+                            "vocative",
+                            "plural"
+                        ],
+                        "form": "niedoliski"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "206c7d9d-84e1-3437-b0a8-fce961e96ad0",
+                        "entry_id": "a4d4ae89-19b7-3832-ab07-3a5e26a39252",
+                        "glosses": [
+                            "niedorosły lis, do wieku sześciu, dziewięciu miesięcy"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "fr-extract.jsonl": [],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": []
+    }
+}

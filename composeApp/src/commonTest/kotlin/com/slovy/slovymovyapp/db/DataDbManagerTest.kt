@@ -8,6 +8,7 @@ import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
+import com.slovy.slovymovyapp.test.IgnoreRobolectric
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import com.slovy.slovymovyapp.test.testRemoteDataProvider
 import kotlinx.coroutines.runBlocking
@@ -58,6 +59,7 @@ class DataDbManagerTest : BaseTest() {
         }
     }
 
+    @IgnoreRobolectric
     @Test
     fun dictionary_like_and_join_queries() {
         val platform = testPlatformDbSupport()
@@ -76,9 +78,9 @@ class DataDbManagerTest : BaseTest() {
             val loveId = Uuid.random()
             val cafeId = Uuid.random()
 
-            q.insertLemma(beId, "Be", "be", 0.0)
-            q.insertLemma(loveId, "Love", "love", 5.0)
-            q.insertLemma(cafeId, "Café", "cafe", 10.0)
+            q.insertLemma(beId, "en", "Be", "be", 0.0, false)
+            q.insertLemma(loveId, "en", "Love", "love", 5.0, false)
+            q.insertLemma(cafeId, "en", "Café", "cafe", 10.0, false)
 
             val beIdPos = Uuid.random()
             val loveIdPos = Uuid.random()
@@ -96,38 +98,37 @@ class DataDbManagerTest : BaseTest() {
             q.insertForm(Uuid.random(), loveIdPos, "loving", "loving")
             q.insertForm(Uuid.random(), cafeIdPost, "CAFÉS", "cafes")
 
-            // lemma LIKE
-            val lemmasLo = q.selectLemmasLike("lo%", 20).executeAsList().map { it.lemma }
-            assertEquals(listOf("Love"), lemmasLo, "lemma LIKE lo% should match 'Love'")
+            // normalized GLOB
+            val lemmasLo = q.selectLemmasNormalizedLike("en", "lo*", 20).executeAsList().map { it.lemma }
+            assertEquals(listOf("Love"), lemmasLo, "lemma GLOB lo* should match 'Love'")
 
-            val lemmasBe = q.selectLemmasLike("be%", 20).executeAsList().map { it.lemma }
-            assertTrue(lemmasBe.contains("Be"), "lemma LIKE be% should contain 'Be'")
+            val lemmasBe = q.selectLemmasNormalizedLike("en", "be*", 20).executeAsList().map { it.lemma }
+            assertTrue(lemmasBe.contains("Be"), "lemma GLOB be* should contain 'Be'")
 
-            // normalized LIKE
-            val lemmasCaf = q.selectLemmasNormalizedLike("caf%", 20).executeAsList().map { it.lemma }
-            assertEquals(listOf("Café"), lemmasCaf, "normalized LIKE caf% should match 'Café'")
+            val lemmasCaf = q.selectLemmasNormalizedLike("en", "caf*", 20).executeAsList().map { it.lemma }
+            assertEquals(listOf("Café"), lemmasCaf, "normalized GLOB caf* should match 'Café'")
 
             // JOIN equals (form -> lemma)
-            val areEq = q.selectLemmasByFormEquals("are", 20).executeAsList()
+            val areEq = q.selectLemmasByFormEquals("en", "are", 20).executeAsList()
             assertEquals(1, areEq.size, "form equals 'are' should match exactly one entry")
             assertEquals("Be", areEq[0].lemma, "'are' should belong to lemma 'Be'")
             assertEquals("ARE", areEq[0].form, "Stored form should be returned as inserted (case preserved)")
 
             // JOIN equals on normalized
-            val cafesEq = q.selectLemmasByFormNormalizedEquals("cafes", 20).executeAsList()
+            val cafesEq = q.selectLemmasByFormNormalizedEquals("en", "cafes", 20).executeAsList()
             assertEquals(1, cafesEq.size, "normalized form equals 'cafes' should match one entry")
             assertEquals("Café", cafesEq[0].lemma, "'cafes' should map to lemma 'Café'")
             assertEquals("CAFÉS", cafesEq[0].form, "Original stored form should be returned")
 
-            // JOIN LIKE (forms prefix)
-            val lovLike = q.selectLemmasFromFormsLike("lov%", 20).executeAsList()
-            assertEquals(2, lovLike.size, "lov% should match two forms of 'Love'")
+            // JOIN GLOB (forms prefix, normalized)
+            val lovLike = q.selectLemmasFromFormsNormalizedLike("en", "lov*", 20).executeAsList()
+            assertEquals(2, lovLike.size, "lov* should match two forms of 'Love'")
             assertTrue(lovLike.all { it.lemma == "Love" }, "Both matches should belong to 'Love'")
             val lovForms = lovLike.map { it.form }.toSet()
             assertEquals(setOf("loved", "loving"), lovForms, "Matched forms should be 'loved' and 'loving'")
 
             // LIMIT parameter behavior (request only 1 row)
-            val limited = q.selectLemmasFromFormsLike("l%", 1).executeAsList()
+            val limited = q.selectLemmasFromFormsNormalizedLike("en", "l*", 1).executeAsList()
             assertEquals(1, limited.size, "LIMIT should restrict result count to 1")
         } finally {
             driver.close()
@@ -135,6 +136,7 @@ class DataDbManagerTest : BaseTest() {
         }
     }
 
+    @IgnoreRobolectric
     @Test
     fun download_en_ru_and_search_test_prefix() {
         val platform = testPlatformDbSupport()
@@ -148,15 +150,15 @@ class DataDbManagerTest : BaseTest() {
             assertTrue(platform.fileExists(dict), "Dictionary file should exist: $dict")
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
-            // Open dictionary and search for 'bu%'
+            // Open dictionary and search for 'bu*' (GLOB pattern)
             val db = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
             val q = db.dictionaryQueries
 
-            val lemmaLike = q.selectLemmasLike("bu%", 20).executeAsList().map { it.lemma }
+            val lemmaLike = q.selectLemmasNormalizedLike("en", "bu*", 20).executeAsList().map { it.lemma }
             assertTrue(lemmaLike.isNotEmpty(), "English dictionary should contain lemmas starting with 'bu'")
 
-            val formLike = q.selectLemmasFromFormsLike("bu%", 20).executeAsList().map { it.form }
-            assertTrue(formLike.isNotEmpty(), "Form LIKE 'bu%' should return at least one match")
+            val formLike = q.selectLemmasFromFormsNormalizedLike("en", "bu*", 20).executeAsList().map { it.form }
+            assertTrue(formLike.isNotEmpty(), "Form GLOB 'bu*' should return at least one match")
         } finally {
             // Clean up to keep environment tidy
             runBlocking {

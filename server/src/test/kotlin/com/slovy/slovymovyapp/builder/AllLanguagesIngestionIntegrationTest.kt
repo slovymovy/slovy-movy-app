@@ -8,6 +8,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.nio.file.Files
+import java.sql.DriverManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -31,21 +32,25 @@ class AllLanguagesIngestionIntegrationTest {
         langs.forEach { lang ->
             // Build frequency map from test resources
             val frequencyMap = buildTestFrequencyMap(lang)
-            val builder = JsonIngestionBuilder(serverDbManager, frequencyMap)
+            val builder = JsonIngestionBuilder({ from, to -> serverDbManager.openTranslation(from, to) }, frequencyMap)
             val processedFiles = listResourceJsonFiles("processed_json_files/$lang")
             assertTrue(processedFiles.isNotEmpty(), "No processed files found for $lang")
+            val dictDb = serverDbManager.openDictionary(lang)
+            val dictQ = dictDb.dictionaryQueries
             processedFiles.forEach { pFile ->
                 val rawFile = resourceFile("db_extract/$lang/${pFile.name}")
                 // run ingestion
-                builder.ingest(pFile.readText(), rawFile.readText())
+                builder.ingest(
+                    pFile.readText(),
+                    rawFile.readText(),
+                    dictDb,
+                )
 
                 // Validate dictionary DB: lemma existence and forms from raw
-                val dictDb = serverDbManager.openDictionary(lang)
-                val dq = dictDb.dictionaryQueries
                 val raw = json.decodeFromString(ExtractedWordData.serializer(), rawFile.readText())
                 val processed = json.decodeFromString(LanguageCardResponse.serializer(), pFile.readText())
                 val word = raw.word
-                val lemmas = dq.selectLemmasByWord(word.lowercase()).executeAsList()
+                val lemmas = dictQ.selectLemmasByWord(lang, word.lowercase()).executeAsList()
                 assertTrue(lemmas.isNotEmpty(), "Lemma should exist for '$word' in $lang from ${pFile.name}")
 
                 // Determine native entries and forms to check
@@ -69,7 +74,7 @@ class AllLanguagesIngestionIntegrationTest {
                 if (allExpectedFormKeys.isNotEmpty()) {
                     // Verify each unique form exists in the database
                     allExpectedFormKeys.forEach { expectedFormKey ->
-                        val formsInDb = dq.selectFormsByNormalized(expectedFormKey.formNormalized).executeAsList()
+                        val formsInDb = dictQ.selectFormsByNormalized(expectedFormKey.formNormalized).executeAsList()
                         assertTrue(
                             formsInDb.isNotEmpty(),
                             "Form '${expectedFormKey.form}' should exist for '$word' in $lang from ${pFile.name}. " +
@@ -84,10 +89,10 @@ class AllLanguagesIngestionIntegrationTest {
                     // Additionally verify the total count of forms for this lemma matches unique forms
                     val lemmaIds = lemmas.map { it.id }
                     val lemmaPosIds = lemmaIds.flatMap { lemmaId ->
-                        dq.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
+                        dictQ.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
                     }
                     val allFormsForLemma = lemmaPosIds.flatMap { lemmaPosId ->
-                        dq.selectFormsByLemmaPosId(lemmaPosId).executeAsList()
+                        dictQ.selectFormsByLemmaPosId(lemmaPosId).executeAsList()
                     }
                     assertEquals(
                         allExpectedFormKeys.size,
@@ -103,7 +108,7 @@ class AllLanguagesIngestionIntegrationTest {
                 if (expectedWordFamily != null && expectedWordFamily.isNotEmpty()) {
                     val lemmaIds = lemmas.map { it.id }
                     val actualWordFamily = lemmaIds.flatMap { lemmaId ->
-                        dq.selectWordFamilyByLemmaId(lemmaId).executeAsList()
+                        dictQ.selectWordFamilyByLemmaId(lemmaId).executeAsList()
                     }
                     assertEquals(
                         expectedWordFamily.sorted(),
@@ -123,7 +128,7 @@ class AllLanguagesIngestionIntegrationTest {
                             val tq = trDb.translationQueries
                             val defExpected = sense.targetLangDefinitions[trg]
                             if (defExpected != null) {
-                                val defActual = tq.selectDefinitionsBySense(senseId).executeAsList().singleOrNull()
+                                val defActual = tq.selectDefinitionsBySense(senseId, lang, trg).executeAsList().singleOrNull()
                                 assertEquals(
                                     defExpected,
                                     defActual,
@@ -132,7 +137,7 @@ class AllLanguagesIngestionIntegrationTest {
                             }
                             val expectedTranslations = sense.translations[trg]
                             if (!expectedTranslations.isNullOrEmpty()) {
-                                val rows = tq.selectSenseTranslationsBySenseWithNormalized(senseId).executeAsList()
+                                val rows = tq.selectSenseTranslationsBySenseWithNormalized(senseId, lang, trg).executeAsList()
                                 val words = rows.map { it.target_lang_word }
                                 val expectedWords = expectedTranslations.map { it.targetLangWord }
                                 assertEquals(
@@ -152,7 +157,7 @@ class AllLanguagesIngestionIntegrationTest {
                             // Example index 0 if exists
                             val ex0 = sense.examples.firstOrNull()?.targetLangTranslations?.get(trg)
                             if (ex0 != null) {
-                                val exActual = tq.selectExampleTranslations(senseId, 0).executeAsOneOrNull()
+                                val exActual = tq.selectExampleTranslations(senseId, lang, trg, 0).executeAsOneOrNull()
                                 assertEquals(
                                     ex0,
                                     exActual,
@@ -203,5 +208,93 @@ class AllLanguagesIngestionIntegrationTest {
             map[raw.word] = 3.0
         }
         return map
+    }
+
+    @Test
+    fun bulk_insert_recreates_dictionary_indexes() {
+        val outDir = Files.createTempDirectory("index_test").toFile()
+        val serverDbManager = ServerDbManager(outDir)
+        val lang = "en"
+
+        // Create dictionary DB with schema (indexes are created by schema)
+        serverDbManager.openDictionary(lang).also { /* just to create the db */ }
+
+        val dbFile = serverDbManager.dictionaryDbFile(lang)
+        val expectedTables = listOf("lemma", "lemma_pos", "form")
+
+        // Get initial indexes
+        val initialIndexes = getIndexesFromDb(dbFile, expectedTables)
+        assertTrue(initialIndexes.isNotEmpty(), "Dictionary schema should have indexes on $expectedTables")
+
+        // Open for bulk insert - this should drop indexes
+        serverDbManager.openDictionaryForBulkInsert(lang)
+        val indexesAfterPrepare = getIndexesFromDb(dbFile, expectedTables)
+        assertTrue(
+            indexesAfterPrepare.isEmpty(),
+            "Indexes should be dropped after openDictionaryForBulkInsert, but found: $indexesAfterPrepare"
+        )
+
+        // Finish bulk insert - this should recreate indexes
+        serverDbManager.finishDictionaryBulkInsert(lang)
+        val indexesAfterFinish = getIndexesFromDb(dbFile, expectedTables)
+        assertEquals(
+            initialIndexes.sorted(),
+            indexesAfterFinish.sorted(),
+            "Indexes should be recreated after finishDictionaryBulkInsert"
+        )
+    }
+
+    @Test
+    fun bulk_insert_recreates_translation_indexes() {
+        val outDir = Files.createTempDirectory("index_test").toFile()
+        val serverDbManager = ServerDbManager(outDir)
+        val sourceLang = "en"
+        val targetLang = "ru"
+
+        // Create translation DB with schema
+        serverDbManager.openTranslation(sourceLang, targetLang).also { /* just to create the db */ }
+
+        val dbFile = serverDbManager.translationDbFile(sourceLang, targetLang)
+        val expectedTables = listOf("sense_translation")
+
+        // Get initial indexes
+        val initialIndexes = getIndexesFromDb(dbFile, expectedTables)
+        assertTrue(initialIndexes.isNotEmpty(), "Translation schema should have indexes on $expectedTables")
+
+        // Open for bulk insert - this should drop indexes
+        serverDbManager.openTranslationForBulkInsert(sourceLang, targetLang)
+        val indexesAfterPrepare = getIndexesFromDb(dbFile, expectedTables)
+        assertTrue(
+            indexesAfterPrepare.isEmpty(),
+            "Indexes should be dropped after openTranslationForBulkInsert, but found: $indexesAfterPrepare"
+        )
+
+        // Finish bulk insert - this should recreate indexes
+        serverDbManager.finishTranslationBulkInsert(sourceLang, targetLang)
+        val indexesAfterFinish = getIndexesFromDb(dbFile, expectedTables)
+        assertEquals(
+            initialIndexes.sorted(),
+            indexesAfterFinish.sorted(),
+            "Indexes should be recreated after finishTranslationBulkInsert"
+        )
+    }
+
+    private fun getIndexesFromDb(dbFile: File, tableNames: List<String>): List<String> {
+        val indexes = mutableListOf<String>()
+        DriverManager.getConnection("jdbc:sqlite:${dbFile.absolutePath}").use { conn ->
+            val placeholders = tableNames.joinToString(",") { "?" }
+            val sql = "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name IN ($placeholders) AND sql IS NOT NULL"
+            conn.prepareStatement(sql).use { stmt ->
+                tableNames.forEachIndexed { index, tableName ->
+                    stmt.setString(index + 1, tableName)
+                }
+                stmt.executeQuery().use { rs ->
+                    while (rs.next()) {
+                        indexes.add(rs.getString("name"))
+                    }
+                }
+            }
+        }
+        return indexes
     }
 }

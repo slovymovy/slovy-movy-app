@@ -15,6 +15,7 @@ composeHotReload = "1.0.0"
 composeMultiplatform = "1.9.3"
 githubApi = "1.330"
 googleAuthLibrary = "1.41.0"
+googleCloudLoggingLogback = "0.133.0-alpha-rc1"
 googleCloudTasks = "2.81.0"
 googleCloudCore = "2.62.2"
 googleGenai = "1.32.0"
@@ -31,6 +32,7 @@ material3 = '1.10.0-alpha05'
 [libraries]
 github-api = { module = "org.kohsuke:github-api", version.ref = "githubApi" }
 google-auth-library = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuthLibrary" }
+google-cloud-logging-logback = { module = "com.google.cloud:google-cloud-logging-logback", version.ref = "googleCloudLoggingLogback" }
 google-cloud-tasks = { module = "com.google.cloud:google-cloud-tasks", version.ref = "googleCloudTasks" }
 google-cloud-core = { module = "com.google.cloud:google-cloud-core", version.ref = "googleCloudCore" }
 google-genai = { module = "com.google.genai:google-genai", version.ref = "googleGenai" }

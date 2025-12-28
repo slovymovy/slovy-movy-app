@@ -24,6 +24,7 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.kohsuke.github.GHFileNotFoundException
@@ -102,40 +103,57 @@ fun Application.module() {
             val json = Json { ignoreUnknownKeys = true }
 
             try {
-                // Step 1: Get enhanced word (check push branch first, then main, then AI-enhance)
-                var wasProcessed = false
-                var response = try {
-                    // Try push branch first (contains latest updates)
-                    val (content, _) = GitHubClient.loadWordsContentFromPushBranch(lang, word)
-                    json.decodeFromString(LanguageCardResponse.serializer(), content)
-                } catch (_: GHFileNotFoundException) {
-                    // Fall back to main branch
-                    try {
-                        val content = GitHubClient.loadWordsContent(lang, word)
-                        json.decodeFromString(LanguageCardResponse.serializer(), content)
-                    } catch (_: GHFileNotFoundException) {
-                        wasProcessed = true
-                        enhanceWithAI(lang, word, json)
+                // Step 1: Prepare base data before starting the stream so we can still return errors
+                val baseResult = loadBaseWordData(lang, word, json)
+
+                // Step 2: Stream results as NDJSON (base, then translated if available)
+                call.respondTextWriter(contentType = ContentType.parse("application/x-ndjson")) {
+                    // Parse requested language codes for filtering
+                    // If no translations parameter provided, return empty list (no translations in response)
+                    val requestedLangCodes = if (!translationsParam.isNullOrBlank()) {
+                        translationsParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
+                    } else {
+                        emptyList()
+                    }
+
+                    // Send filtered base response to client (always filter based on requested codes)
+                    val baseResponseToClient = filterTranslations(baseResult.response, requestedLangCodes)
+                    val baseChunk = WordStreamChunk(WordStreamStage.base, baseResponseToClient)
+                    write(json.encodeToString(WordStreamChunk.serializer(), baseChunk))
+                    flush()
+
+                    // Track full response for repo updates (unfiltered)
+                    var fullResponse = baseResult.response
+                    var wasProcessed = baseResult.wasProcessed
+
+                    if (!translationsParam.isNullOrBlank()) {
+                        val translationResult = addMissingTranslations(
+                            response = fullResponse,
+                            lang = lang,
+                            word = word,
+                            translationsParam = translationsParam,
+                            json = json
+                        )
+
+                        if (translationResult.updated) {
+                            fullResponse = translationResult.response
+                            wasProcessed = true
+                            write("\n")
+                            // Send filtered translated response to client
+                            val translatedResponseToClient = filterTranslations(fullResponse, requestedLangCodes)
+                            val translatedChunk = WordStreamChunk(WordStreamStage.translated, translatedResponseToClient)
+                            write(json.encodeToString(WordStreamChunk.serializer(), translatedChunk))
+                            flush()
+                        }
+                    }
+
+                    // Step 3: Queue Cloud Tasks update if requested (only if something was processed)
+                    // IMPORTANT: Use fullResponse (unfiltered) to ensure nothing is lost in repo
+                    if (!push.isNullOrBlank() && wasProcessed) {
+                        val responseJson = json.encodeToString(LanguageCardResponse.serializer(), fullResponse)
+                        RepoUpdateTaskClient.queueRepoUpdate(lang, word, responseJson)
                     }
                 }
-
-                // Step 2: Add missing translations if requested
-                if (!translationsParam.isNullOrBlank()) {
-                    val before = response
-                    response = addMissingTranslations(response, lang, word, translationsParam, json)
-                    if (response !== before) {
-                        wasProcessed = true
-                    }
-                }
-
-                val responseJson = json.encodeToString(LanguageCardResponse.serializer(), response)
-
-                // Step 3: Queue Cloud Tasks update if requested (only if something was processed)
-                if (!push.isNullOrBlank() && wasProcessed) {
-                    RepoUpdateTaskClient.queueRepoUpdate(lang, word, responseJson)
-                }
-
-                call.respondText(responseJson, ContentType.Application.Json)
             } catch (e: GHFileNotFoundException) {
                 call.application.environment.log.error("GitHub API error for $lang/$word: ${e.message}", e)
                 call.respond(HttpStatusCode.NotFound, "Word '$word' not found for language '$lang'")
@@ -236,11 +254,67 @@ private fun enhanceWithAI(lang: String, word: String, json: Json): LanguageCardR
     )
 }
 
+@Serializable
+private enum class WordStreamStage { base, translated }
+
+@Serializable
+private data class WordStreamChunk(
+    val stage: WordStreamStage,
+    val payload: LanguageCardResponse
+)
+
+private data class WordProcessResult(
+    val response: LanguageCardResponse,
+    val wasProcessed: Boolean
+)
+
+private data class TranslationResult(
+    val response: LanguageCardResponse,
+    val updated: Boolean
+)
+
+private fun loadBaseWordData(lang: String, word: String, json: Json): WordProcessResult {
+    var wasProcessed = false
+    val response = try {
+        // Try push branch first (contains latest updates)
+        val (content, _) = GitHubClient.loadWordsContentFromPushBranch(lang, word)
+        json.decodeFromString(LanguageCardResponse.serializer(), content)
+    } catch (_: GHFileNotFoundException) {
+        // Fall back to main branch
+        try {
+            val content = GitHubClient.loadWordsContent(lang, word)
+            json.decodeFromString(LanguageCardResponse.serializer(), content)
+        } catch (_: GHFileNotFoundException) {
+            wasProcessed = true
+            enhanceWithAI(lang, word, json)
+        }
+    }
+    return WordProcessResult(response = response, wasProcessed = wasProcessed)
+}
+
 private fun getExistingTranslationLanguages(response: LanguageCardResponse): Set<String> {
     return response.entries
         .flatMap { it.senses }
         .flatMap { sense -> sense.translations.keys + sense.targetLangDefinitions.keys }
         .toSet()
+}
+
+private fun filterTranslations(
+    response: LanguageCardResponse,
+    requestedLangCodes: List<String>
+): LanguageCardResponse {
+    return response.copy(
+        entries = response.entries.map { entry ->
+            entry.copy(
+                senses = entry.senses.map { sense ->
+                    sense.copy(
+                        translations = sense.translations.filterKeys { it in requestedLangCodes },
+                        targetLangDefinitions = sense.targetLangDefinitions.filterKeys { it in requestedLangCodes }
+                    )
+                }
+            )
+        }
+    )
 }
 
 private suspend fun addMissingTranslations(
@@ -249,27 +323,35 @@ private suspend fun addMissingTranslations(
     word: String,
     translationsParam: String,
     json: Json
-): LanguageCardResponse {
+): TranslationResult {
     val requestedLangCodes = translationsParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
-    if (requestedLangCodes.isEmpty()) return response
+    if (requestedLangCodes.isEmpty()) return TranslationResult(response, updated = false)
     // ensure all languages are valid - throws in case of invalid language code
     requestedLangCodes.forEach { targetLanguageName(it) }
 
     val existingLanguages = getExistingTranslationLanguages(response)
     val missingLangCodes = requestedLangCodes.filter { it !in existingLanguages }
-    if (missingLangCodes.isEmpty()) return response
+    if (missingLangCodes.isEmpty()) return TranslationResult(response, updated = false)
 
     val geminiProvider = GeminiProvider()
-    if (!geminiProvider.isAvailable()) return response
+    if (!geminiProvider.isAvailable()) return TranslationResult(response, updated = false)
 
     val extractedData = try {
         val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
         json.decodeFromString(ExtractedWordData.serializer(), content)
     } catch (_: GHFileNotFoundException) {
-        return response
+        return TranslationResult(response, updated = false)
     }
 
-    return enhanceWithTranslations(response, extractedData, word, lang, missingLangCodes, geminiProvider)
+    val updatedResponse = enhanceWithTranslations(
+        response,
+        extractedData,
+        word,
+        lang,
+        missingLangCodes,
+        geminiProvider
+    )
+    return TranslationResult(updatedResponse, updated = true)
 }
 
 private suspend fun enhanceWithTranslations(

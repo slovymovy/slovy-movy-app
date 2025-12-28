@@ -1,0 +1,37 @@
+{
+    "word": "softwarekosten",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "08ed39b0-00f4-3a4a-989b-caaacd0edf4b",
+                "word": "softwarekosten",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "14a299cf-0fa7-32ec-bad2-e097383a0794",
+                        "entry_id": "08ed39b0-00f4-3a4a-989b-caaacd0edf4b",
+                        "glosses": [
+                            "geld dat men uitgeeft voor de aanschaf en het onderhoud van computerprogramma's"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": [],
+        "fr-extract.jsonl": [],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": []
+    }
+}

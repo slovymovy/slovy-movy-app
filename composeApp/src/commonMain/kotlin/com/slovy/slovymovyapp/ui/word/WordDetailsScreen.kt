@@ -42,7 +42,11 @@ sealed interface WordDetailUiState {
     data class Content(
         val card: LanguageCard,
         val entries: List<EntryUiState>,
-        val wordFamilyExpanded: Boolean = false
+        val wordFamilyExpanded: Boolean = false,
+        val cardLoading: Boolean = false,
+        val cardError: String? = null,
+        val translationLoading: Boolean = false,
+        val translationError: String? = null
     ) : WordDetailUiState
 }
 
@@ -60,7 +64,9 @@ data class SenseUiState(
     val languageExpanded: Map<Language, Boolean> = emptyMap(),
     val favorite: Boolean,
     val pos: PartOfSpeech? = null,
-    val showFavoriteToggle: Boolean = expanded
+    val showFavoriteToggle: Boolean = expanded,
+    val translationLoading: Boolean = false,
+    val translationError: String? = null
 )
 
 internal fun LanguageCard.toContentUiState(
@@ -166,7 +172,8 @@ class WordDetailViewModel(
     private val voiceFilterHelper: VoiceFilterHelper,
     val dictionaryLanguage: Language,
     private val lemma: String = "",
-    val targetSenseId: String? = null
+    val targetSenseId: String? = null,
+    private val translationLanguages: List<Language>? = null
 ) : ViewModel() {
     var state by mutableStateOf<WordDetailUiState>(WordDetailUiState.Empty())
         private set
@@ -192,7 +199,7 @@ class WordDetailViewModel(
 
     init {
         viewModelScope.launch {
-            val card = dictionaryLanguage.let { repository.getLanguageCard(it, lemma) }
+            val card = repository.getLanguageCard(dictionaryLanguage, lemma, translationLanguages)
             state =
                 card?.toContentUiState(targetSenseId, isSenseFavorite = ::isSenseFavorite) ?: WordDetailUiState.Empty(
                     lemma = lemma,
@@ -223,7 +230,7 @@ class WordDetailViewModel(
 
     private fun loadFavorites() {
         viewModelScope.launch {
-            val card = dictionaryLanguage.let { repository.getLanguageCard(it, lemma) }
+            val card = repository.getLanguageCard(dictionaryLanguage, lemma, translationLanguages)
             val allSenseIds = card?.entries?.flatMap { entry ->
                 entry.senses.map { it.senseId }
             } ?: emptyList()
@@ -587,6 +594,10 @@ fun WordDetailScreenContent(
                         .verticalScroll(scrollState)
                         .padding(innerPadding)
                         .padding(horizontal = 16.dp, vertical = 24.dp),
+                    cardLoading = state.cardLoading,
+                    cardError = state.cardError,
+                    translationLoading = state.translationLoading,
+                    translationError = state.translationError,
                     onEntryToggle = onEntryToggle,
                     onFormsToggle = onFormsToggle,
                     onSenseToggle = onSenseToggle,
@@ -622,6 +633,10 @@ private fun WordDetailContent(
     card: LanguageCard,
     entryStates: List<EntryUiState>,
     modifier: Modifier = Modifier,
+    cardLoading: Boolean = false,
+    cardError: String? = null,
+    translationLoading: Boolean = false,
+    translationError: String? = null,
     onEntryToggle: (Int) -> Unit,
     onFormsToggle: (Int) -> Unit,
     onSenseToggle: (Int, String) -> Unit,
@@ -679,7 +694,7 @@ private fun WordDetailContent(
                                     )
                                     if (isClickable) {
                                         Text(
-                                            text = "→",
+                                            text = if (card.relatedWords[familyWord]?.online == false) "➤" else "➼",
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                                         )
@@ -708,6 +723,10 @@ private fun WordDetailContent(
                 EntryCard(
                     entry = entry,
                     entryState = entryState,
+                    cardLoading = cardLoading,
+                    cardError = cardError,
+                    translationLoading = translationLoading,
+                    translationError = translationError,
                     onEntryToggle = { onEntryToggle(index) },
                     onFormsToggle = { onFormsToggle(index) },
                     onSenseToggle = { senseId -> onSenseToggle(index, senseId) },

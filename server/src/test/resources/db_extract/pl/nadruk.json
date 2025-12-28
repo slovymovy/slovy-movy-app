@@ -1,0 +1,189 @@
+{
+    "word": "nadruk",
+    "lang_code": "pl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                "word": "nadruk",
+                "pos": "noun",
+                "lang_code": "pl",
+                "forms": [
+                    {
+                        "form_id": "987e617f-cc22-4eb3-ac37-acb07acbae97",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "nominative",
+                            "singular"
+                        ],
+                        "form": "nadruk"
+                    },
+                    {
+                        "form_id": "1dc50741-6bdf-47b7-b5c6-483190d21569",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "nominative",
+                            "plural"
+                        ],
+                        "form": "nadruki"
+                    },
+                    {
+                        "form_id": "fb9a261b-2d76-4c06-a0e4-bd8e4d357c3c",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "genitive",
+                            "singular"
+                        ],
+                        "form": "nadruku"
+                    },
+                    {
+                        "form_id": "6809e332-7304-42d6-a581-92314651f18c",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "genitive",
+                            "plural"
+                        ],
+                        "form": "nadruków"
+                    },
+                    {
+                        "form_id": "d49b4cb0-56e3-4f7a-95ef-f791ac8f8303",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "dative",
+                            "singular"
+                        ],
+                        "form": "nadrukowi"
+                    },
+                    {
+                        "form_id": "8c4d7ce7-18a5-411d-8c7c-9284cb83254c",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "dative",
+                            "plural"
+                        ],
+                        "form": "nadrukom"
+                    },
+                    {
+                        "form_id": "127cb0aa-034f-4284-a3cc-957fd7e40e53",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "accusative",
+                            "singular"
+                        ],
+                        "form": "nadruk"
+                    },
+                    {
+                        "form_id": "972bf108-8114-4266-b81f-2112f1825031",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "accusative",
+                            "plural"
+                        ],
+                        "form": "nadruki"
+                    },
+                    {
+                        "form_id": "5a04ebe4-81a6-4ebe-b5ca-459c812dac93",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "instrumental",
+                            "singular"
+                        ],
+                        "form": "nadrukiem"
+                    },
+                    {
+                        "form_id": "d3beb01b-7452-4c7d-b0a6-a68a49510441",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "instrumental",
+                            "plural"
+                        ],
+                        "form": "nadrukami"
+                    },
+                    {
+                        "form_id": "ac58e53f-596c-416c-9f95-b41f41b731db",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "locative",
+                            "singular"
+                        ],
+                        "form": "nadruku"
+                    },
+                    {
+                        "form_id": "f3f955a3-1cf7-4774-bbf1-8b694adfbde6",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "locative",
+                            "plural"
+                        ],
+                        "form": "nadrukach"
+                    },
+                    {
+                        "form_id": "96b3970f-bb94-412d-8fab-cb39b4269bfa",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "singular",
+                            "vocative"
+                        ],
+                        "form": "nadruku"
+                    },
+                    {
+                        "form_id": "91f02d12-c634-4e52-a2ab-a0a9bfb27b9a",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "tags": [
+                            "plural",
+                            "vocative"
+                        ],
+                        "form": "nadruki"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "8072e909-1475-363b-b3a7-f01be41e714a",
+                        "entry_id": "091bb49e-b840-3e94-aa49-9e710f2daa93",
+                        "glosses": [
+                            "imprint, overprint, surcharge"
+                        ],
+                        "tags": [
+                            "inanimate",
+                            "masculine"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "60a2136e-b210-3902-8953-b95fc168ef30",
+                "word": "nadruk",
+                "pos": "noun",
+                "lang_code": "pl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "c8a04edc-d90a-36df-9d6d-b6ef5a00a0d1",
+                        "entry_id": "60a2136e-b210-3902-8953-b95fc168ef30",
+                        "glosses": [
+                            "element wydrukowany na czymś"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "fr-extract.jsonl": [],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": []
+    }
+}

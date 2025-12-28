@@ -9,6 +9,7 @@ import io.ktor.server.testing.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -60,14 +61,19 @@ class ApplicationTest {
         }
         val response = client.get("/word/en/test")
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
+        assertEquals(ContentType.parse("application/x-ndjson"), response.contentType()?.withoutParameters())
 
         val body = response.bodyAsText()
         assertTrue(body.isNotBlank(), "Response body should not be blank")
 
         val json = Json { ignoreUnknownKeys = true }
-        val jsonElement = json.parseToJsonElement(body)
-        assertTrue(jsonElement.jsonObject.containsKey("entries"), "Response should contain 'entries' field")
+        val chunks = parseNdjson(body, json)
+        assertTrue(chunks.isNotEmpty(), "NDJSON stream should contain at least one chunk")
+        val baseChunk = chunks.first()
+        assertEquals("base", baseChunk["stage"]?.jsonPrimitive?.content)
+        val payload = baseChunk["payload"]?.jsonObject
+        assertNotNull(payload, "Chunk should contain 'payload' field")
+        assertTrue(payload.containsKey("entries"), "Payload should contain 'entries' field")
     }
 
     @Test
@@ -101,12 +107,14 @@ class ApplicationTest {
         }
         val response = client.get("/word/en/test?translations=ru")
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
+        assertEquals(ContentType.parse("application/x-ndjson"), response.contentType()?.withoutParameters())
 
         val body = response.bodyAsText()
         val json = Json { ignoreUnknownKeys = true }
-        val jsonElement = json.parseToJsonElement(body)
-        val entries = jsonElement.jsonObject["entries"]?.jsonArray
+        val chunks = parseNdjson(body, json)
+        assertTrue(chunks.isNotEmpty(), "NDJSON stream should contain at least one chunk")
+        val lastPayload = chunks.last()["payload"]?.jsonObject
+        val entries = lastPayload?.get("entries")?.jsonArray
         assertNotNull(entries, "Response should contain 'entries' field")
         assertTrue(entries.isNotEmpty(), "Entries should not be empty")
 
@@ -132,12 +140,13 @@ class ApplicationTest {
         }
         val response = client.get("/word/en/test?translations=ru,pl")
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
+        assertEquals(ContentType.parse("application/x-ndjson"), response.contentType()?.withoutParameters())
 
         val body = response.bodyAsText()
         val json = Json { ignoreUnknownKeys = true }
-        val jsonElement = json.parseToJsonElement(body)
-        val entries = jsonElement.jsonObject["entries"]?.jsonArray
+        val chunks = parseNdjson(body, json)
+        assertTrue(chunks.isNotEmpty(), "NDJSON stream should contain at least one chunk")
+        val entries = chunks.last()["payload"]?.jsonObject?.get("entries")?.jsonArray
         assertNotNull(entries, "Response should contain 'entries' field")
 
         val firstEntry = entries[0].jsonObject
@@ -150,4 +159,11 @@ class ApplicationTest {
         assertTrue(translations.containsKey("ru"), "Translations should contain 'ru' key")
         assertTrue(translations.containsKey("pl"), "Translations should contain 'pl' key")
     }
+
+    private fun parseNdjson(body: String, json: Json) =
+        body
+            .lineSequence()
+            .filter { it.isNotBlank() }
+            .map { json.parseToJsonElement(it).jsonObject }
+            .toList()
 }
