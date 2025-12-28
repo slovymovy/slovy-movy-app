@@ -79,6 +79,7 @@ sqldelight {
             // https://github.com/sqldelight/sqldelight/issues/5312
             verifyDefinitions.set(!OperatingSystem.current().isWindows)
             srcDirs.setFrom("src/commonMain/sqldelight/appdb")
+            schemaOutputDirectory.set(file("src/commonMain/sqldelight/appdb"))
         }
         create(dictionaryDatabaseName) {
             packageName.set("com.slovy.slovymovyapp.dictionary")
@@ -88,6 +89,7 @@ sqldelight {
             // https://github.com/sqldelight/sqldelight/issues/5312
             verifyDefinitions.set(!OperatingSystem.current().isWindows)
             srcDirs.setFrom("src/commonMain/sqldelight/dictionarydb")
+            schemaOutputDirectory.set(file("src/commonMain/sqldelight/dictionarydb"))
         }
         create(translationDatabaseName) {
             packageName.set("com.slovy.slovymovyapp.translation")
@@ -97,6 +99,7 @@ sqldelight {
             // https://github.com/sqldelight/sqldelight/issues/5312
             verifyDefinitions.set(!OperatingSystem.current().isWindows)
             srcDirs.setFrom("src/commonMain/sqldelight/translationdb")
+            schemaOutputDirectory.set(file("src/commonMain/sqldelight/translationdb"))
         }
     }
 }
@@ -125,6 +128,6 @@ if (OperatingSystem.current().isWindows) {
             translationDatabaseName
         ).any { task.name.contains(it) }
     }.configureEach {
-        enabled = false
+        //enabled = false
     }
 }
