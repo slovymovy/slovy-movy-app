@@ -172,7 +172,8 @@ class WordDetailViewModel(
     private val voiceFilterHelper: VoiceFilterHelper,
     val dictionaryLanguage: Language,
     private val lemma: String = "",
-    val targetSenseId: String? = null
+    val targetSenseId: String? = null,
+    private val translationLanguages: List<Language>? = null
 ) : ViewModel() {
     var state by mutableStateOf<WordDetailUiState>(WordDetailUiState.Empty())
         private set
@@ -198,7 +199,7 @@ class WordDetailViewModel(
 
     init {
         viewModelScope.launch {
-            val card = dictionaryLanguage.let { repository.getLanguageCard(it, lemma) }
+            val card = repository.getLanguageCard(dictionaryLanguage, lemma, translationLanguages)
             state =
                 card?.toContentUiState(targetSenseId, isSenseFavorite = ::isSenseFavorite) ?: WordDetailUiState.Empty(
                     lemma = lemma,
@@ -229,7 +230,7 @@ class WordDetailViewModel(
 
     private fun loadFavorites() {
         viewModelScope.launch {
-            val card = dictionaryLanguage.let { repository.getLanguageCard(it, lemma) }
+            val card = repository.getLanguageCard(dictionaryLanguage, lemma, translationLanguages)
             val allSenseIds = card?.entries?.flatMap { entry ->
                 entry.senses.map { it.senseId }
             } ?: emptyList()
