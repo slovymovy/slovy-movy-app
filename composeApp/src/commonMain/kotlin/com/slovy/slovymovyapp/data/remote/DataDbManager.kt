@@ -37,7 +37,7 @@ class DataDbManager(
     internal val databaseCache = ReadOnlyDatabaseCache(platform)
 
     companion object {
-        const val VERSION = "v5"
+        const val VERSION = "v6"
 
         private const val DICTIONARY_PREFIX = "dictionary_"
         private const val TRANSLATION_PREFIX = "translation_"

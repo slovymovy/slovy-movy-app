@@ -55,8 +55,8 @@ class GitHubClientTest {
     fun loadFileContent_loadsSpecificFile() {
         val content = GitHubClient.loadFileContent(
             owner = "slovymovy",
-            repo = "kaikki-parser",
-            path = "output/db-extract/en/test.json",
+            repo = "words",
+            path = "db-extract/en/test.json",
             ref = "main"
         )
 

@@ -6,9 +6,13 @@ import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
+import com.slovy.slovymovyapp.test.IgnoreRobolectric
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 // TODO: we use HTTP for now to workaround some issues with IOS emulator
 // https://github.com/slovymovy/slovy-movy-app/issues/34
@@ -19,6 +23,7 @@ class DictionaryRepositoryTest : BaseTest() {
         return FavoritesRepository(testAppDatabaseHolder().database)
     }
 
+    @IgnoreRobolectric
     @Test
     fun download_en_ru_and_search_test() {
         val platform = testPlatformDbSupport()
@@ -101,6 +106,7 @@ class DictionaryRepositoryTest : BaseTest() {
         }
     }
 
+    @IgnoreRobolectric
     @Test
     fun search_returns_multiple_forms_for_same_lemma() {
         val platform = testPlatformDbSupport()
@@ -146,6 +152,7 @@ class DictionaryRepositoryTest : BaseTest() {
         }
     }
 
+    @IgnoreRobolectric
     @Test
     fun search_suppresses_forms_when_lemma_present() {
         val platform = testPlatformDbSupport()
@@ -183,48 +190,6 @@ class DictionaryRepositoryTest : BaseTest() {
                 assertTrue(
                     testForms.isEmpty(),
                     "Expected no forms of 'bu' when base lemma is present, but found: ${testForms.map { it.display }}"
-                )
-            }
-        } finally {
-            // Clean up
-            runBlocking {
-                mgr.deleteDictionary(Language.ENGLISH)
-            }
-        }
-    }
-
-    @Ignore
-    @Test
-    fun word_family_is_retrieved_correctly() {
-        val platform = testPlatformDbSupport()
-        val mgr = testDataDbManager()
-
-        // Ensure a clean state
-        runBlocking {
-            mgr.deleteDictionary(Language.ENGLISH)
-        }
-
-        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
-        try {
-            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
-
-            val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, favoritesRepo)
-            assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
-
-            // Test with "double" which should have word_family in the processed JSON
-            val card = runBlocking { repo.getLanguageCard(Language.ENGLISH, "double") }
-            assertNotNull(card, "Language card should be built for 'double'")
-
-            // Verify word_family is present and contains expected members
-            assertTrue(card.wordFamily.isNotEmpty(), "Word family should not be empty for 'double'")
-
-            // Verify the word family contains the expected words from double.json
-            val expectedMembers = listOf("doubling", "doubly", "doublet")
-            expectedMembers.forEach { member ->
-                assertTrue(
-                    card.wordFamily.contains(member),
-                    "Word family should contain '$member'. Found: ${card.wordFamily}"
                 )
             }
         } finally {

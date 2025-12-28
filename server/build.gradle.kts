@@ -23,6 +23,7 @@ dependencies {
     implementation(libs.kotlinx.serializationJson)
     implementation(libs.sqldelight.sqliteDriver)
     implementation(libs.commons.text)
+    implementation(libs.google.cloud.logging.logback)
 
     // AI providers
     api(libs.google.genai) {
