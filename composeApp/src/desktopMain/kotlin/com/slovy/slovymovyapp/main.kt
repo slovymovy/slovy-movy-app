@@ -8,10 +8,12 @@ import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvid
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 
 fun main() = application {
+    val buildConfig = getAppBuildConfig()
+    val windowTitle = if (buildConfig.isDebug) "Open words Debug" else "Open words"
 
     Window(
         onCloseRequest = ::exitApplication,
-        title = "Open words"
+        title = windowTitle
     ) {
         val platform = PlatformDbSupport()
         val db = DataDbManager.openAppDatabase(platform)

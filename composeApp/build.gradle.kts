@@ -125,6 +125,10 @@ android {
     namespace = "com.slovy.slovymovyapp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.slovy.slovymovyapp"
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -149,6 +153,11 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+        }
+    }
+    sourceSets {
+        getByName("debug") {
+            res.srcDirs("src/androidDebug/res")
         }
     }
     compileOptions {
