@@ -633,7 +633,7 @@ fun SettingsScreenContent(
                             }
 
                             // About section
-                            state.buildConfig?.let { buildConfig ->
+                            state.buildConfig.let { buildConfig ->
                                 item {
                                     Text(
                                         text = "About",

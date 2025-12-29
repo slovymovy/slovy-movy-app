@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
@@ -83,8 +84,11 @@ fun App(
     val favoritesRepository = remember(dataManager) {
         FavoritesRepository(DataDbManager.openAppDatabase(platform))
     }
+    val localDbManager = remember(platform) { LocalDbManager(platform) }
     val dictionaryRepository =
-        remember(dataManager, favoritesRepository) { DictionaryRepository(dataManager, favoritesRepository) }
+        remember(dataManager, localDbManager, favoritesRepository) {
+            DictionaryRepository(dataManager, localDbManager, favoritesRepository)
+        }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
     val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
 

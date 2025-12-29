@@ -92,9 +92,16 @@ fun main(args: Array<String>) {
             .orEmpty()
         val processedByName = processedFiles.associateBy { it.name }
 
-        val rawFiles = rawDir.listFiles()
+        var rawFiles = rawDir.listFiles()
             ?.filter { it.isFile && it.extension.equals("json", ignoreCase = true) }
-            ?.sortedBy { sha256HexLower(it.name) }
+            ?.sortedBy { it ->
+                if (params.testMode && (it.name.startsWith("simul") || it.name.startsWith("concur"))) {
+                    "0"
+                } else {
+                    sha256HexLower(it.name)
+                }
+
+            }
             .orEmpty()
             .let { files -> if (params.testMode) files.take(500) else files }
 

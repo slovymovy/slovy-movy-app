@@ -179,7 +179,7 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
             Path(pathStr).parent?.toString() ?: pathStr
         }
 
-        val contents = fm.contentsOfDirectoryAtPath(dir, error = null) as? List<*>
+        val contents = fm.contentsOfDirectoryAtPath(dir, error = null)
         return contents?.mapNotNull { filename ->
             (filename as? String)?.let { Path("$dir/$it") }
         } ?: emptyList()
