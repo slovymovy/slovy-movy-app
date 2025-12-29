@@ -96,7 +96,13 @@ class DictionaryRepository(
     }
 
     // Search within all installed dictionaries by default; if dictionaryLanguage provided, restrict to it.
-    suspend fun search(query: String, dictionaryLanguage: Language? = null, maxItems: Int = 200): List<SearchItem> {
+    // translationTargets: if null, uses installedTranslationTargets for each source language; if empty, skips translation search.
+    suspend fun search(
+        query: String,
+        dictionaryLanguage: Language? = null,
+        translationTargets: List<Language>? = null,
+        maxItems: Int = 200
+    ): List<SearchItem> {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
 
@@ -113,6 +119,11 @@ class DictionaryRepository(
         val seenLemmas = HashSet<String>()
 
         for (lang in languages) {
+            // search by translation (target language words)
+            val targets = translationTargets
+                ?.filter { it != lang && dataDbManager.hasTranslation(lang, it) }
+                ?: installedTranslationTargets(lang)
+
             val db = dataDbManager.openDictionaryReadOnly(lang)
             val q = db.dictionaryQueries
 
@@ -262,8 +273,6 @@ class DictionaryRepository(
             // Check for cancellation before translation search
             currentCoroutineContext().ensureActive()
 
-            // search by translation (target language words)
-            val targets = installedTranslationTargets(lang)
             for (tgt in targets) {
                 val tdb = dataDbManager.openTranslationReadOnly(lang, tgt)
                 val tq = tdb.translationQueries
