@@ -360,8 +360,7 @@ class DictionaryRepository(
             val forms = formsWithId.map { formRow ->
                 val tags = q.selectFormTagsByFormId(formRow.form_id).executeAsList().map { it.tag }
                 LanguageCardForm(tags = tags, form = formRow.form)
-            }.toList()
-
+            }
 
             // Load senses from the determined database
             val sensesRows = q.selectSensesByLemmaPosId(lemmaPosId).executeAsList()
