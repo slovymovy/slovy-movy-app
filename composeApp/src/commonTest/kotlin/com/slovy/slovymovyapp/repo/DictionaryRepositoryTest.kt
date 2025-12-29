@@ -345,9 +345,17 @@ class DictionaryRepositoryTest : BaseTest() {
 
             val senseId = senses.first().sense_id
 
-            // Insert local translation for this sense
+            // Insert local definition and translation for this sense
             val localTransDb = localMgr.openLocalTranslation()
             val tq = localTransDb.translationQueries
+
+            // Must insert definition first - code requires definition to load translations
+            tq.insertSenseTargetDefinition(
+                sense_id = senseId,
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                definition = "Локальное определение"
+            )
 
             tq.insertSenseTranslation(
                 sense_id = senseId,
