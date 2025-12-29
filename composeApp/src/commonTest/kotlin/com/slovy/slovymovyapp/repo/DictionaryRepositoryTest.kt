@@ -1,7 +1,11 @@
 package com.slovy.slovymovyapp.repo
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
+import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.test.BaseTest
@@ -9,10 +13,8 @@ import com.slovy.slovymovyapp.test.IgnoreIos
 import com.slovy.slovymovyapp.test.IgnoreRobolectric
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
+import kotlin.uuid.Uuid
 
 // TODO: we use HTTP for now to workaround some issues with IOS emulator
 // https://github.com/slovymovy/slovy-movy-app/issues/34
@@ -44,7 +46,8 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(trPath), "Translation file should exist: $trPath")
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, favoritesRepo)
+            val localMgr = testLocalDbManager()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
 
             // Verify installed sets reflect downloads
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
@@ -89,7 +92,8 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, favoritesRepo)
+            val localMgr = testLocalDbManager()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.DUTCH), "'nl' dictionary should be installed")
 
             val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "tegengesteld") }
@@ -122,7 +126,8 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, favoritesRepo)
+            val localMgr = testLocalDbManager()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "bu" which should match "bu" and its forms
@@ -168,7 +173,8 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, favoritesRepo)
+            val localMgr = testLocalDbManager()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "test" - should match the base lemma "test"
@@ -219,10 +225,12 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(trPath), "Translation file should exist: $trPath")
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, favoritesRepo)
+            val localMgr = testLocalDbManager()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
-            runBlocking { repo.getLanguageCard(Language.ENGLISH, "simultaneously") }?.let { card ->
+            runBlocking {
+                val card = repo.getLanguageCard(Language.ENGLISH, "simultaneously")!!
                 assertTrue(card.relatedWords.isNotEmpty(), "Related words should not be empty for 'simultaneously'")
                 assertTrue { card.relatedWords.contains("concurrently") }
             }
@@ -231,6 +239,150 @@ class DictionaryRepositoryTest : BaseTest() {
             runBlocking {
                 mgr.deleteDictionary(Language.ENGLISH)
                 mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+            }
+        }
+    }
+
+    @IgnoreRobolectric
+    @Test
+    fun getLanguageCard_from_local_when_ro_missing() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        // Ensure RO dictionary does NOT exist
+        runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+
+        // Clean local DB files first
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+
+        try {
+            // Insert test data into local DB
+            val localDb = localMgr.openLocalDictionary()
+            val q = localDb.dictionaryQueries
+
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
+
+            q.insertLemma(lemmaId, "en", "localword", "localword", 5.0, false)
+            q.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.NOUN)
+            q.insertSense(
+                sense_id = senseId,
+                lemma_pos_id = lemmaPosId,
+                sense_definition = "A test definition from local DB",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "group1",
+                name_type = null
+            )
+
+            val favoritesRepo = favoritesRepository()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+
+            // Verify RO dictionary doesn't exist
+            assertFalse(mgr.hasDictionary(Language.ENGLISH), "RO dictionary should not exist")
+
+            // Should load from local since RO doesn't exist
+            val card = runBlocking { repo.getLanguageCard(Language.ENGLISH, "localword") }
+            assertNotNull(card, "Should load card from local DB when RO missing")
+            assertEquals("localword", card.lemma, "Card lemma should match")
+            assertTrue(card.entries.any { it.pos == PartOfSpeech.NOUN }, "Should have NOUN entry")
+            assertTrue(
+                card.entries.flatMap { it.senses }.any { it.senseDefinition.contains("local DB") },
+                "Should have sense definition from local DB"
+            )
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
+        }
+    }
+
+    @IgnoreRobolectric
+    @Test
+    fun getLanguageCard_loads_translations_from_local_when_ro_translation_missing() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        // Ensure a clean state
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
+
+        // Clean local translation DB
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(localTransPath)) {
+            platform.deleteFile(localTransPath)
+        }
+
+        // Download RO dictionary but NOT translation
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+
+        try {
+            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
+
+            // Verify RO translation doesn't exist
+            assertFalse(mgr.hasTranslation(Language.ENGLISH, Language.RUSSIAN), "RO translation should not exist")
+
+            // Get a real sense ID from the RO dictionary
+            val roDb = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
+            val lemmaRow = roDb.dictionaryQueries.selectLemmasByWord("en", "simultaneously")
+                .executeAsList().firstOrNull()
+            assertNotNull(lemmaRow, "Should find 'simultaneously' in RO dictionary")
+
+            val lemmaPosIds = roDb.dictionaryQueries.selectLemmaPosIdByLemmaId(lemmaRow.id).executeAsList()
+            assertTrue(lemmaPosIds.isNotEmpty(), "Should have lemma_pos entries")
+
+            val senses = roDb.dictionaryQueries.selectSensesByLemmaPosId(lemmaPosIds.first()).executeAsList()
+            assertTrue(senses.isNotEmpty(), "Should have senses")
+
+            val senseId = senses.first().sense_id
+
+            // Insert local translation for this sense
+            val localTransDb = localMgr.openLocalTranslation()
+            val tq = localTransDb.translationQueries
+
+            tq.insertSenseTranslation(
+                sense_id = senseId,
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                idx = 0,
+                target_lang_word = "ТестЛокал",
+                target_lang_word_normalized = "тестлокал",
+                target_lang_sense_clarification = null,
+                lemma_id = lemmaRow.id,
+                lemma_pos_id = lemmaPosIds.first()
+            )
+
+            val favoritesRepo = favoritesRepository()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+
+            val card = runBlocking {
+                repo.getLanguageCard(Language.ENGLISH, "simultaneously", listOf(Language.RUSSIAN))
+            }
+            assertNotNull(card, "Should load card")
+
+            // Find sense with Russian translation from local
+            val senseWithTranslation = card.entries.flatMap { it.senses }
+                .find { it.translations[Language.RUSSIAN]?.isNotEmpty() == true }
+            assertNotNull(senseWithTranslation, "Should have Russian translation from local DB")
+            assertEquals(
+                "ТестЛокал",
+                senseWithTranslation.translations[Language.RUSSIAN]?.first()?.targetLangWord,
+                "Translation should come from local DB"
+            )
+        } finally {
+            runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+            localMgr.closeAll()
+            if (platform.fileExists(localTransPath)) {
+                platform.deleteFile(localTransPath)
             }
         }
     }

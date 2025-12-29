@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.test
 
+import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.AppDatabaseHolder
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
@@ -39,6 +40,15 @@ abstract class BaseTestImpl {
     }
 
     /**
+     * Returns a lazily-initialized [LocalDbManager] for tests.
+     * The underlying holder is automatically cleaned up after test completion.
+     */
+    fun testLocalDbManager(): LocalDbManager {
+        val holder = mgrHolder ?: testDataDbManagerHolder().also { mgrHolder = it }
+        return holder.localDbManager
+    }
+
+    /**
      * Returns a lazily-initialized [AppDatabaseHolder] for tests.
      * The holder is automatically cleaned up after test completion.
      */
@@ -68,10 +78,12 @@ expect annotation class IgnoreRobolectric()
  */
 class TestDataDbManagerHolder(
     val manager: DataDbManager,
+    val localDbManager: LocalDbManager,
     private val appDbHolder: AppDatabaseHolder
 ) {
     fun close() {
         manager.closeAllReadOnlyDatabases()
+        localDbManager.closeAll()
         appDbHolder.close()
     }
 }
@@ -81,7 +93,8 @@ fun testDataDbManagerHolder(): TestDataDbManagerHolder {
     val holder = DataDbManager.openAppDatabaseHolder(platform)
     val settingRepo = SettingsRepository(holder.database)
     val mgr = DataDbManager(platform, settingRepo, testRemoteDataProvider())
-    return TestDataDbManagerHolder(mgr, holder)
+    val localMgr = LocalDbManager(platform)
+    return TestDataDbManagerHolder(mgr, localMgr, holder)
 }
 
 const val gitBranchRefEnv = "GIT_BRANCH_REF"

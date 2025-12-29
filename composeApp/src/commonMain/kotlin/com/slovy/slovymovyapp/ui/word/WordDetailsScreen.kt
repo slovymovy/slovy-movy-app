@@ -199,7 +199,11 @@ class WordDetailViewModel(
 
     init {
         viewModelScope.launch {
-            val card = repository.getLanguageCard(dictionaryLanguage, lemma, translationLanguages)
+            val card = repository.getLanguageCard(
+                dictionaryLanguage,
+                lemma,
+                translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage)
+            )
             state =
                 card?.toContentUiState(targetSenseId, isSenseFavorite = ::isSenseFavorite) ?: WordDetailUiState.Empty(
                     lemma = lemma,
@@ -230,7 +234,11 @@ class WordDetailViewModel(
 
     private fun loadFavorites() {
         viewModelScope.launch {
-            val card = repository.getLanguageCard(dictionaryLanguage, lemma, translationLanguages)
+            val card = repository.getLanguageCard(
+                dictionaryLanguage,
+                lemma,
+                translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage)
+            )
             val allSenseIds = card?.entries?.flatMap { entry ->
                 entry.senses.map { it.senseId }
             } ?: emptyList()

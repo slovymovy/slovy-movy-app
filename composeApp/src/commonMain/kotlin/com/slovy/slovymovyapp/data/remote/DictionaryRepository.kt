@@ -3,14 +3,14 @@ package com.slovy.slovymovyapp.data.remote
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.currentCoroutineContext
-import kotlin.coroutines.coroutineContext
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.ensureActive
+import kotlin.uuid.Uuid
 
 internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
     return PartOfSpeech.valueOf(this.name)
@@ -20,6 +20,7 @@ internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
 // aggregating translations from all available target languages.
 class DictionaryRepository(
     private val dataDbManager: DataDbManager,
+    private val localDbManager: LocalDbManager,
     private val favoritesRepository: FavoritesRepository,
     private val languages: List<Language> = Language.entries,
 ) {
@@ -34,6 +35,53 @@ class DictionaryRepository(
         val isFavorite: Boolean = false,
         val onlineOnly: Boolean,
     )
+
+    // Opens dictionary databases in priority order (RO first, then local)
+    private suspend fun openDictionaryDatabases(language: Language): List<DictionaryDatabase> {
+        return buildList {
+            if (dataDbManager.hasDictionary(language)) {
+                add(dataDbManager.openDictionaryReadOnly(language))
+            }
+            add(localDbManager.openLocalDictionary())
+        }
+    }
+
+    // Opens translation databases in priority order (RO first, then local)
+    private suspend fun openTranslationDatabases(src: Language, tgt: Language): List<TranslationDatabase> {
+        return buildList {
+            if (dataDbManager.hasTranslation(src, tgt)) {
+                add(dataDbManager.openTranslationReadOnly(src, tgt))
+            }
+            add(localDbManager.openLocalTranslation())
+        }
+    }
+
+    // Loads related words from all databases, later databases take precedence
+    private fun loadRelatedWords(
+        databases: List<DictionaryDatabase>,
+        language: Language,
+        relatedWords: Set<String>
+    ): Map<String, RelatedWord> {
+        if (relatedWords.isEmpty()) return emptyMap()
+
+        val lowercaseWords = relatedWords.map { it.lowercase() }
+        val result = mutableMapOf<String, RelatedWord>()
+
+        for (db in databases) {
+            db.dictionaryQueries.selectLemmasByWords(language.code, lowercaseWords)
+                .executeAsList()
+                .forEach { row ->
+                    if (row.lemma !in result || result[row.lemma]!!.online) {
+                        result[row.lemma] = RelatedWord(
+                            lemma = row.lemma,
+                            zipfFrequency = row.zipf_frequency.toFloat(),
+                            online = row.online_only
+                        )
+                    }
+                }
+        }
+        return result
+    }
 
     fun installedDictionaries(): List<Language> = languages.filter { lang ->
         try {
@@ -267,23 +315,44 @@ class DictionaryRepository(
     suspend fun getLanguageCard(
         language: Language,
         lemma: String,
-        translationTargets: List<Language>? = null
+        translationTargets: List<Language> = installedTranslationTargets(language)
     ): LanguageCard? {
-        val db = dataDbManager.openDictionaryReadOnly(language)
-        val q = db.dictionaryQueries
+        // Open dictionary databases in priority order
+        val dictDatabases = openDictionaryDatabases(language)
 
-        // Collect all base lemma IDs for the given lemma text (case-insensitive), including normalized matches
-        // Use firstOrNull to avoid exception if multiple rows exist; query orders by frequency DESC
-        val lemmaId = q.selectLemmasByWord(language.code, lemma).executeAsList().firstOrNull()?.id ?: return null
+        // Lookup lemma, trying databases in order
+        var lemmaId: Uuid? = null
+        var onlineOnly: Boolean
+        var zipfFrequency = 0f
+        var sourceDb: DictionaryDatabase? = null
 
-        // Get all lemma_pos IDs for these lemmas
-        val lemmaPosIds = LinkedHashSet<Uuid>()
+        for (db in dictDatabases) {
+            val result = db.dictionaryQueries
+                .selectLemmasByWord(language.code, lemma)
+                .executeAsList()
+                .firstOrNull()
+            if (result != null) {
+                lemmaId = result.id
+                onlineOnly = result.online_only
+                zipfFrequency = result.zipf_frequency.toFloat()
+                sourceDb = db
+                if (!onlineOnly) break // if online only - try to find in local db
+            }
+        }
 
-        val posIds = q.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
-        posIds.forEach { lemmaPosIds.add(it) }
+        if (lemmaId == null || sourceDb == null) return null
+
+        val q = sourceDb.dictionaryQueries
+
+        // Get all lemma_pos IDs for this lemma
+        val lemmaPosIds = q.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
+
+        // Open translation databases for all target languages
+        val translationDbsMap = translationTargets.associateWith { tgt ->
+            openTranslationDatabases(language, tgt)
+        }
 
         val entries = mutableListOf<LanguageCardPosEntry>()
-        var zipfFrequency = 0.0f
         for (lemmaPosId in lemmaPosIds) {
             val lemmaPosRow = q.selectLemmaPosFullById(lemmaPosId).executeAsList().firstOrNull() ?: continue
             zipfFrequency = lemmaPosRow.zipf_frequency.toFloat()
@@ -291,8 +360,10 @@ class DictionaryRepository(
             val forms = formsWithId.map { formRow ->
                 val tags = q.selectFormTagsByFormId(formRow.form_id).executeAsList().map { it.tag }
                 LanguageCardForm(tags = tags, form = formRow.form)
-            }.toMutableList()
+            }.toList()
 
+
+            // Load senses from the determined database
             val sensesRows = q.selectSensesByLemmaPosId(lemmaPosId).executeAsList()
             val senses = sensesRows.map { s ->
                 val synonyms = q.selectSenseSynonyms(s.sense_id).executeAsList().map { it.synonym }
@@ -304,48 +375,61 @@ class DictionaryRepository(
                         comment = tr.comment
                     )
                 }
+                val senseExamples = q.selectSenseExamples(s.sense_id).executeAsList()
+                val senseExampleTTranslation = senseExamples.associateBy(
+                    { it.example_id },
+                    { mutableMapOf<Language, String>() })
 
-                // Aggregate per-target language translations/definitions
-                val targetLangs = translationTargets ?: installedTranslationTargets(language)
-                val openTdbs: Map<Language, TranslationDatabase> = targetLangs.associateWith { tgt ->
-                    val tdb = dataDbManager.openTranslationReadOnly(language, tgt)
-                    tdb
-                }
-
+                // Load translations/definitions from databases in order
                 val tgtDefinitions = LinkedHashMap<Language, String>()
                 val tgtTranslations = LinkedHashMap<Language, List<LanguageCardTranslation>>()
-                for ((tgt, tdb) in openTdbs) {
-                    val tq = tdb.translationQueries
-                    val def: String? =
-                        tq.selectDefinitionsBySense(s.sense_id, language.code, tgt.code).executeAsList().firstOrNull()
-                    if (def != null) {
-                        tgtDefinitions[tgt] = def
+                for ((tgt, transDbs) in translationDbsMap) {
+                    // Try databases in order for definition
+                    var transDbToUse: TranslationDatabase? = null
+                    for (transDb in transDbs) {
+                        val def = transDb.translationQueries
+                            .selectDefinitionsBySense(s.sense_id, language.code, tgt.code)
+                            .executeAsList()
+                            .firstOrNull()
+                        if (def != null) {
+                            tgtDefinitions[tgt] = def
+                            transDbToUse = transDb
+                            break
+                        }
                     }
-                    val trs = tq.selectSenseTranslationsBySense(s.sense_id, language.code, tgt.code).executeAsList()
-                    if (trs.isNotEmpty()) {
-                        tgtTranslations[tgt] = trs.map {
+
+                    if (transDbToUse == null) continue
+
+                    val translations = transDbToUse.translationQueries
+                        .selectSenseTranslationsBySense(s.sense_id, language.code, tgt.code)
+                        .executeAsList().map {
                             LanguageCardTranslation(
                                 targetLangWord = it.target_lang_word,
                                 targetLangSenseClarification = it.target_lang_sense_clarification
                             )
+                        }.toList()
+                    if (translations.isNotEmpty()) {
+                        tgtTranslations[tgt] = translations
+                    }
+
+                    senseExamples.forEach {
+                        val tr = transDbToUse.translationQueries
+                            .selectExampleTranslations(
+                                s.sense_id, language.code, tgt.code, it.example_id
+                            )
+                            .executeAsList()
+                            .firstOrNull()
+
+                        if (tr != null) {
+                            val exampleTranslations = senseExampleTTranslation[it.example_id]!!
+                            exampleTranslations[tgt] = tr
                         }
                     }
                 }
 
-                val examples = q.selectSenseExamples(s.sense_id).executeAsList().map { ex ->
-                    val trMap = LinkedHashMap<Language, String>()
-                    for ((tgt, tdb) in openTdbs) {
-                        val translation: String? =
-                            tdb.translationQueries.selectExampleTranslations(
-                                s.sense_id,
-                                language.code,
-                                tgt.code,
-                                ex.example_id
-                            ).executeAsList()
-                                .firstOrNull()
-                        if (translation != null) trMap[tgt] = translation
-                    }
-                    LanguageCardExample(text = ex.text, targetLangTranslations = trMap)
+                // examples with translations
+                val examples = senseExamples.map {
+                    LanguageCardExample(it.text, senseExampleTTranslation[it.example_id]!!)
                 }
 
                 LanguageCardResponseSense(
@@ -373,10 +457,29 @@ class DictionaryRepository(
             entries.add(entry)
         }
 
-        // Fetch word family for all collected lemma IDs
-        val wordFamily =
-            q.selectWordFamilyByLemmaId(lemmaId).executeAsList()
+        // Fetch word family from all databases (union)
+        val wordFamily = q.selectWordFamilyByLemmaId(lemmaId).executeAsList().toSet()
+        // Load related words from all databases (later databases take precedence)
+        val relatedWordsMap = loadRelatedWords(
+            dictDatabases, language,
+            collectAllRelatedWords(entries, wordFamily, lemma)
+        )
 
+        if (entries.isEmpty()) return null
+        return LanguageCard(
+            entries = entries,
+            lemma = lemma,
+            zipfFrequency = zipfFrequency,
+            wordFamily = wordFamily.toList(),
+            relatedWords = relatedWordsMap
+        )
+    }
+
+    private fun collectAllRelatedWords(
+        entries: List<LanguageCardPosEntry>,
+        wordFamily: Set<String>,
+        lemma: String
+    ): Set<String> {
         // Collect all unique related words (synonyms, antonyms, family, highlighted words)
         val allRelatedWords = mutableSetOf<String>()
 
@@ -401,35 +504,11 @@ class DictionaryRepository(
             }
         }
 
-        // Add word family
+        // Add the word family
         allRelatedWords.addAll(wordFamily)
 
         // Remove the main lemma itself (case-insensitive)
         allRelatedWords.removeAll { it.equals(lemma, ignoreCase = true) }
-
-        // Query DB for zipf frequencies
-        // Lowercase words for case-insensitive matching
-        val relatedWordsMap = if (allRelatedWords.isEmpty()) {
-            emptyMap()
-        } else {
-            q.selectLemmasByWords(language.code, allRelatedWords.map { it.lowercase() })
-                .executeAsList()
-                .associate { row ->
-                    row.lemma to RelatedWord(
-                        lemma = row.lemma,
-                        zipfFrequency = row.zipf_frequency.toFloat(),
-                        online = row.online_only
-                    )
-                }
-        }
-
-        if (entries.isEmpty()) return null
-        return LanguageCard(
-            entries = entries,
-            lemma = lemma,
-            zipfFrequency = zipfFrequency,
-            wordFamily = wordFamily,
-            relatedWords = relatedWordsMap
-        )
+        return allRelatedWords
     }
 }

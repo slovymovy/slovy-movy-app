@@ -14,7 +14,7 @@ data class RelatedWord(val lemma: String, val zipfFrequency: Float, val online: 
 
 data class LanguageCardPosEntry(
     val pos: PartOfSpeech,
-    val forms: MutableList<LanguageCardForm>,
+    val forms: List<LanguageCardForm>,
     val senses: List<LanguageCardResponseSense>,
 )
 
