@@ -394,4 +394,133 @@ class DictionaryRepositoryTest : BaseTest() {
             }
         }
     }
+
+    @IgnoreRobolectric
+    @Test
+    fun search_finds_local_lemmas_first() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        // Ensure RO dictionary does NOT exist
+        runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+
+        // Clean local DB files first
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+
+        try {
+            // Insert test data into local DB
+            val localDb = localMgr.openLocalDictionary()
+            val q = localDb.dictionaryQueries
+
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
+
+            q.insertLemma(lemmaId, "en", "localsearchword", "localsearchword", 5.0, false)
+            q.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.NOUN)
+            q.insertSense(
+                sense_id = senseId,
+                lemma_pos_id = lemmaPosId,
+                sense_definition = "A test definition from local DB",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "group1",
+                name_type = null
+            )
+
+            val favoritesRepo = favoritesRepository()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+
+            // Verify RO dictionary doesn't exist
+            assertFalse(mgr.hasDictionary(Language.ENGLISH), "RO dictionary should not exist")
+
+            // Search should find the local lemma
+            val results = runBlocking { repo.search("localsearch", dictionaryLanguage = Language.ENGLISH) }
+            assertTrue(results.isNotEmpty(), "Should find local lemma in search")
+
+            val found = results.first()
+            assertEquals("localsearchword", found.lemma, "Should find the correct lemma")
+            assertFalse(found.onlineOnly, "Local lemma should not be marked as online only")
+            assertEquals(Language.ENGLISH, found.language, "Should be English language")
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
+        }
+    }
+
+    @IgnoreRobolectric
+    @Test
+    fun search_deduplicates_local_and_ro_results() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        // Ensure a clean state
+        runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+
+        // Clean local DB files first
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+
+        // Download RO dictionary
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+
+        try {
+            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
+
+            // Get a real lemma from RO dictionary
+            val roDb = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
+            val roLemma = roDb.dictionaryQueries.selectLemmasByWord("en", "simultaneously")
+                .executeAsList().firstOrNull()
+            assertNotNull(roLemma, "Should find 'simultaneously' in RO dictionary")
+
+            // Insert the SAME lemma into local DB (simulating cached/offline data)
+            val localDb = localMgr.openLocalDictionary()
+            val q = localDb.dictionaryQueries
+            val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
+
+            // Use the same lemma ID to simulate the same word cached locally
+            q.insertLemma(roLemma.id, "en", "simultaneously", "simultaneously", 6.0, false)
+            q.insertLemmaPos(lemmaPosId, roLemma.id, DictionaryPos.ADVERB)
+            q.insertSense(
+                sense_id = senseId,
+                lemma_pos_id = lemmaPosId,
+                sense_definition = "Local definition",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "group1",
+                name_type = null
+            )
+
+            val favoritesRepo = favoritesRepository()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+
+            // Search for "simultaneously"
+            val results = runBlocking { repo.search("simultaneously", dictionaryLanguage = Language.ENGLISH) }
+            assertTrue(results.isNotEmpty(), "Should find results for 'simultaneously'")
+
+            // Count how many results have display="simultaneously" (exact lemma match)
+            val exactMatches = results.filter { it.display == "simultaneously" }
+            assertEquals(1, exactMatches.size, "Should have exactly one 'simultaneously' result (deduplicated)")
+
+            // The result should be from local (not online only) since local is searched first
+            val testResult = exactMatches.first()
+            assertFalse(testResult.onlineOnly, "Result should come from local DB (not online only)")
+        } finally {
+            runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+            localMgr.closeAll()
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
+        }
+    }
 }

@@ -124,8 +124,13 @@ class DictionaryRepository(
                 ?.filter { it != lang && dataDbManager.hasTranslation(lang, it) }
                 ?: installedTranslationTargets(lang)
 
-            val db = dataDbManager.openDictionaryReadOnly(lang)
-            val q = db.dictionaryQueries
+            // Build database list: local first, then RO
+            val databases = buildList {
+                add(localDbManager.openLocalDictionary())
+                if (dataDbManager.hasDictionary(lang)) {
+                    add(dataDbManager.openDictionaryReadOnly(lang))
+                }
+            }
 
             fun addLemma(lemmaId: Uuid, lemma: String, zipfFrequency: Float, onlineOnly: Boolean) {
                 val key = "${lang.code}::$lemma"
@@ -208,96 +213,121 @@ class DictionaryRepository(
                 }
             }
 
-            fun enrichPosForLang() {
-                // Fetch POS values for all collected lemma IDs for this language
-                val lemmaIds = out.filter { it.language == lang }.map { it.lemmaId }.toSet().toList()
+            // Enriches POS for items that don't have it yet (pos.isEmpty())
+            fun enrichPosForLang(q: DictionaryQueries) {
+                // Only enrich items without POS to avoid overwriting results from previous databases
+                val lemmaIds = out.filter { it.language == lang && it.pos.isEmpty() }
+                    .map { it.lemmaId }.toSet().toList()
                 if (lemmaIds.isNotEmpty()) {
                     val posResults = q.selectLemmaIdAndPosByLemmaIds(lemmaIds).executeAsList()
                     val lemmaIdToPosMap = posResults.groupBy({ it.id }, { it.pos.toPartOfSpeech() })
                     for (i in out.indices) {
-                        if (out[i].language == lang) {
+                        if (out[i].language == lang && out[i].pos.isEmpty()) {
                             val posList = lemmaIdToPosMap[out[i].lemmaId] ?: emptyList()
-                            out[i] = out[i].copy(pos = posList)
+                            if (posList.isNotEmpty()) {
+                                out[i] = out[i].copy(pos = posList)
+                            }
                         }
                     }
                 }
             }
 
-            fun shouldEarlyReturn(): Boolean {
+            fun shouldEarlyReturn(q: DictionaryQueries): Boolean {
                 if (out.size >= maxItems) {
-                    enrichPosForLang()
+                    enrichPosForLang(q)
                     return true
                 }
                 return false
             }
 
-            // search exact lemma matches first
-            val byWord: List<SelectLemmasByWord> =
-                q.selectLemmasByWord(lang.code, trimmed).executeAsList()
-            val byNorm: List<SelectLemmasByNormalized> =
-                q.selectLemmasByNormalized(lang.code, trimmed).executeAsList()
-            byWord.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
-            byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
-            if (shouldEarlyReturn()) return out.take(maxItems)
-
-            // Check for cancellation before next stage
-            currentCoroutineContext().ensureActive()
-
-            // search exact form equals (including normalized)
-            val formEq: List<SelectLemmasByFormEquals> =
-                q.selectLemmasByFormEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
-            val formEqNorm: List<SelectLemmasByFormNormalizedEquals> =
-                q.selectLemmasByFormNormalizedEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
-            formEq.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
-            formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
-            if (shouldEarlyReturn()) return out.take(maxItems)
-
-            // Check for cancellation before next stage
-            currentCoroutineContext().ensureActive()
-
-            // and by prefix later (lemma and forms) - use normalized pattern for GLOB on normalized columns
             val pattern = "${stripAccents(trimmed)}*"
-            val lemmaNormLike: List<SelectLemmasNormalizedLike> =
-                q.selectLemmasNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
-            lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
-            if (shouldEarlyReturn()) return out.take(maxItems)
 
-            // Check for cancellation before next stage
-            currentCoroutineContext().ensureActive()
+            // Search each database (local first, then RO)
+            for (db in databases) {
+                val q = db.dictionaryQueries
 
-            val formNormLike: List<SelectLemmasFromFormsNormalizedLike> =
-                q.selectLemmasFromFormsNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
-            formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
-            if (shouldEarlyReturn()) return out.take(maxItems)
+                // search exact lemma matches first
+                val byWord: List<SelectLemmasByWord> =
+                    q.selectLemmasByWord(lang.code, trimmed).executeAsList()
+                val byNorm: List<SelectLemmasByNormalized> =
+                    q.selectLemmasByNormalized(lang.code, trimmed).executeAsList()
+                byWord.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
+                byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
+                if (shouldEarlyReturn(q)) return out.take(maxItems)
 
-            // Check for cancellation before translation search
-            currentCoroutineContext().ensureActive()
+                // Check for cancellation before next stage
+                currentCoroutineContext().ensureActive()
 
-            for (tgt in targets) {
-                val tdb = dataDbManager.openTranslationReadOnly(lang, tgt)
-                val tq = tdb.translationQueries
-                val trRows =
-                    tq.selectSenseTranslationsByNormalizedSingleWord(lang.code, tgt.code, pattern).executeAsList()
-                val lemmaRows = q.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
-                val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
-                for (row in trRowsSorted) {
-                    // Map translation hit back to a base lemma
-                    val lemmaRow = lemmaRows[row.lemma_id]
-                    if (lemmaRow != null) {
-                        addTranslation(
-                            lemmaRow.id,
-                            lemmaRow.lemma,
-                            row.target_lang_word,
-                            lemmaRow.zipf_frequency.toFloat(),
-                            lemmaRow.online_only
-                        )
-                        if (shouldEarlyReturn()) return out.take(maxItems)
-                    }
-                }
+                // search exact form equals (including normalized)
+                val formEq: List<SelectLemmasByFormEquals> =
+                    q.selectLemmasByFormEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
+                val formEqNorm: List<SelectLemmasByFormNormalizedEquals> =
+                    q.selectLemmasByFormNormalizedEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
+                formEq.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
+                formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
+                if (shouldEarlyReturn(q)) return out.take(maxItems)
+
+                // Check for cancellation before next stage
+                currentCoroutineContext().ensureActive()
+
+                // and by prefix later (lemma and forms) - use normalized pattern for GLOB on normalized columns
+                val lemmaNormLike: List<SelectLemmasNormalizedLike> =
+                    q.selectLemmasNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
+                lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
+                if (shouldEarlyReturn(q)) return out.take(maxItems)
+
+                // Check for cancellation before next stage
+                currentCoroutineContext().ensureActive()
+
+                val formNormLike: List<SelectLemmasFromFormsNormalizedLike> =
+                    q.selectLemmasFromFormsNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
+                formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
+                if (shouldEarlyReturn(q)) return out.take(maxItems)
+
+                // Enrich POS for items found in this database
+                enrichPosForLang(q)
+
+                // Check for cancellation before next database
+                currentCoroutineContext().ensureActive()
             }
 
-            // Enrich POS for this language before moving to the next
-            enrichPosForLang()
+            // Translation search: local first, then RO
+            for (tgt in targets) {
+                // Build translation database pairs: (translation DB, dictionary DB for lemma lookup)
+                val transDatabasePairs = buildList {
+                    add(localDbManager.openLocalTranslation() to localDbManager.openLocalDictionary())
+                    if (dataDbManager.hasTranslation(lang, tgt)) {
+                        add(dataDbManager.openTranslationReadOnly(lang, tgt) to
+                            dataDbManager.openDictionaryReadOnly(lang))
+                    }
+                }
+
+                for ((tdb, dictDb) in transDatabasePairs) {
+                    val tq = tdb.translationQueries
+                    val dq = dictDb.dictionaryQueries
+                    val trRows =
+                        tq.selectSenseTranslationsByNormalizedSingleWord(lang.code, tgt.code, pattern).executeAsList()
+                    val lemmaRows = dq.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
+                    val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
+                    for (row in trRowsSorted) {
+                        // Map translation hit back to a base lemma
+                        val lemmaRow = lemmaRows[row.lemma_id]
+                        if (lemmaRow != null) {
+                            addTranslation(
+                                lemmaRow.id,
+                                lemmaRow.lemma,
+                                row.target_lang_word,
+                                lemmaRow.zipf_frequency.toFloat(),
+                                lemmaRow.online_only
+                            )
+                            if (shouldEarlyReturn(dq)) return out.take(maxItems)
+                        }
+                    }
+
+                    // Enrich POS for items found via this translation database
+                    enrichPosForLang(dq)
+                }
+            }
 
             // Check for cancellation before next language
             currentCoroutineContext().ensureActive()
@@ -306,8 +336,28 @@ class DictionaryRepository(
         // Check for cancellation before final processing
         currentCoroutineContext().ensureActive()
 
+        // Recheck online_only items against local database
+        // Items marked online_only might exist in local DB (added after initial RO search)
+        var result = out.take(maxItems)
+        val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
+        if (onlineOnlyIds.isNotEmpty()) {
+            val localDb = localDbManager.openLocalDictionary()
+            val localLemmaIds = localDb.dictionaryQueries
+                .selectLemmasByIds(onlineOnlyIds)
+                .executeAsList()
+                .map { it.id }
+                .toSet()
+
+            result = result.map { item ->
+                if (item.onlineOnly && item.lemmaId in localLemmaIds) {
+                    item.copy(onlineOnly = false)
+                } else {
+                    item
+                }
+            }
+        }
+
         // Check favorite status for all items (single query instead of N queries)
-        val result = out.take(maxItems)
         val allFavorites = favoritesRepository.getAll()
         val favoriteItems = allFavorites.map { "${it.targetLang.code}::${it.lemma.lowercase()}" }.toSet()
 
