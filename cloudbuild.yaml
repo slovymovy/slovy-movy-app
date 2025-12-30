@@ -6,15 +6,15 @@ steps:
       - '-c'
       - |
         apt-get update -qq && apt-get install -y -qq git
-        ./gradlew :server:installDist -PexcludeMobile=true -x test --build-cache --no-daemon
+        ./gradlew :server:installDist -x test --build-cache --no-daemon
 
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/open-words-backend:$BRANCH_NAME-$SHORT_SHA', './server']
+    args: [ 'build', '-t', 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/open-words-backend:$BRANCH_NAME-$SHORT_SHA', './server' ]
 
   # Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/open-words-backend:$BRANCH_NAME-$SHORT_SHA']
+    args: [ 'push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/open-words-backend:$BRANCH_NAME-$SHORT_SHA' ]
 
   # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
