@@ -101,10 +101,7 @@ jobs:
           disk-size: 2048
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            ./gradlew :composeApp:connectedAndroidDeviceTest :androidApp:connectedDebugAndroidTest; status=$?
-            killall -INT crashpad_handler || true # see https://github.com/ReactiveCircus/android-emulator-runner/issues/385
-            exit $status
+          script: ./gradlew :composeApp:connectedAndroidDeviceTest :androidApp:connectedDebugAndroidTest; status=$?; killall -INT crashpad_handler 2>/dev/null || true; exit $status
 
       - name: Upload test results and reports (Linux)
         if: always()

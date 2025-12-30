@@ -42,7 +42,7 @@ android {
             isMinifyEnabled = false
         }
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false // XXX: implement later?
         }
     }
 
