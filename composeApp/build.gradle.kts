@@ -2,7 +2,6 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
-import java.io.ByteArrayOutputStream
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -13,6 +12,8 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.sqldelight)
 }
+
+val gitBranchProvider: Provider<String> = providers.of(GitBranchValueSource::class.java) {}
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
@@ -34,6 +35,11 @@ kotlin {
 
         withDeviceTestBuilder {
             sourceSetTreeName = "test"
+        }.configure {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            instrumentationRunnerArguments[TestEnvironment.GITHUB_TOKEN] = System.getenv(TestEnvironment.GITHUB_TOKEN) ?: ""
+            instrumentationRunnerArguments[TestEnvironment.IS_TEST] = "true"
+            instrumentationRunnerArguments[TestEnvironment.GIT_BRANCH] =  gitBranchProvider.get()
         }
     }
 
@@ -105,39 +111,6 @@ kotlin {
     }
 }
 
-val githubTokenEnvName = "ACCESS_TO_GH_TOKEN"
-val isTest = "IS_TEST"
-val gitBranchEnvName = "GIT_BRANCH_REF"
-
-abstract class GitBranchValueSource : ValueSource<String, ValueSourceParameters.None> {
-    @get:Inject
-    abstract val execOperations: ExecOperations
-
-    override fun obtain(): String {
-        val branchNameFromEnv = System.getenv("BRANCH_NAME")
-        if (branchNameFromEnv != null) {
-            return branchNameFromEnv
-        }
-
-        val branchOutput = ByteArrayOutputStream()
-        execOperations.exec {
-            commandLine = listOf("git", "rev-parse", "--abbrev-ref", "HEAD")
-            standardOutput = branchOutput
-        }
-        val branchName = branchOutput.toString().trim()
-
-        // Check if branch exists on remote
-        val remoteCheckResult = execOperations.exec {
-            commandLine = listOf("git", "rev-parse", "--verify", "refs/remotes/origin/$branchName")
-            isIgnoreExitValue = true
-        }
-
-        return if (remoteCheckResult.exitValue == 0) branchName else "main"
-    }
-}
-
-val gitBranchProvider = providers.of(GitBranchValueSource::class.java) {}
-
 sqldelight {
     linkSqlite = true
 }
@@ -155,18 +128,19 @@ compose.desktop {
 }
 
 tasks.withType<Test> {
-    environment(githubTokenEnvName, System.getenv(githubTokenEnvName) ?: "")
-    environment(isTest, "true")
-    environment(gitBranchEnvName, provider { gitBranchProvider.get() }.get())
+    environment(TestEnvironment.GITHUB_TOKEN, System.getenv(TestEnvironment.GITHUB_TOKEN) ?: "")
+    environment(TestEnvironment.IS_TEST, "true")
+    environment(TestEnvironment.GIT_BRANCH, provider { gitBranchProvider.get() }.get())
 }
 
 tasks.withType<KotlinNativeTest> {
-    environment(githubTokenEnvName, System.getenv(githubTokenEnvName) ?: "")
-    environment(isTest, "true")
-    environment(gitBranchEnvName, provider { gitBranchProvider.get() }.get())
+    environment(TestEnvironment.GITHUB_TOKEN, System.getenv(TestEnvironment.GITHUB_TOKEN) ?: "")
+    environment(TestEnvironment.IS_TEST, "true")
+    environment(TestEnvironment.GIT_BRANCH, provider { gitBranchProvider.get() }.get())
     // iOS simulator needs SIMCTL_CHILD_ prefix to propagate environment variables
     val prefix = "SIMCTL_CHILD_"
-    environment("$prefix$githubTokenEnvName", System.getenv(githubTokenEnvName) ?: "")
-    environment("$prefix$isTest", "true")
-    environment("$prefix$gitBranchEnvName", provider { gitBranchProvider.get() }.get())
+    environment("$prefix${TestEnvironment.GITHUB_TOKEN}", System.getenv(TestEnvironment.GITHUB_TOKEN) ?: "")
+    environment("$prefix${TestEnvironment.IS_TEST}", "true")
+    environment("$prefix${TestEnvironment.GIT_BRANCH}", provider { gitBranchProvider.get() }.get())
 }
+

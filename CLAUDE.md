@@ -8,6 +8,7 @@ Kotlin Multiplatform (KMP) workspace with 4 modules:
 - **androidApp**: Android application entry point (depends on composeApp)
 - **shared**: KMP shared library
 - **server**: JVM Ktor server
+- **buildSrc**: Shared Gradle build logic (GitBranchValueSource, TestEnvironment constants)
 
 **Stack**: Gradle, Kotlin, Compose Multiplatform, AGP, Ktor, SqlDelight
 
@@ -276,5 +277,5 @@ if (GitHubClient.isAvailable()) {
 
 ## Key Notes
 
-- Module accessors: :composeApp, :androidApp, :shared, :server
+- Module accessors: :composeApp, :androidApp, :shared, :server (buildSrc is automatically included)
 - iOS warnings on non-macOS are expected and harmless

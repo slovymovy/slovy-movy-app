@@ -12,6 +12,8 @@ kotlin {
     }
 }
 
+val gitBranchProvider: Provider<String> = providers.of(GitBranchValueSource::class.java) {}
+
 android {
     namespace = "com.slovy.slovymovyapp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -27,15 +29,20 @@ android {
         versionCode = 3
         versionName = "Alpha"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        testInstrumentationRunnerArguments[TestEnvironment.GITHUB_TOKEN] = System.getenv(TestEnvironment.GITHUB_TOKEN) ?: ""
+        testInstrumentationRunnerArguments[TestEnvironment.IS_TEST] = "true"
+        testInstrumentationRunnerArguments[TestEnvironment.GIT_BRANCH] = provider { gitBranchProvider.get() }.get()
     }
 
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+            isMinifyEnabled = false
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
         }
     }
 
@@ -61,4 +68,10 @@ dependencies {
     implementation(projects.composeApp)
     implementation(projects.shared)
     implementation(libs.androidx.activity.compose)
+
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.testExt.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.junit)
 }
