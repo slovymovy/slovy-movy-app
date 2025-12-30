@@ -77,6 +77,7 @@ fun App(
     settingsRepository: SettingsRepository,
     dataManager: DataDbManager,
     platform: PlatformDbSupport,
+    appBuildConfig: AppBuildConfig,
     androidContext: Any? = null,
 ) {
     var nativeLanguage by remember { mutableStateOf<Language?>(null) }
@@ -97,7 +98,7 @@ fun App(
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember { FavoritesViewModel(favoritesRepository, dictionaryRepository) }
-    val buildConfig = remember { getAppBuildConfig() }
+    val buildConfig = remember { appBuildConfig }
     val settingsViewModel = remember { SettingsViewModel(ttsManager, voiceFilterHelper, dataManager, buildConfig) }
 
     suspend fun selectInitialDestination(): AppDestination {

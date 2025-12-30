@@ -19,7 +19,13 @@ class MainActivity : ComponentActivity() {
             val db = DataDbManager.openAppDatabase(platform)
             val settingRepo = SettingsRepository(db)
             val dataDbManager = DataDbManager(platform, settingRepo, GoogleStorageBucketDataProvider())
-            App(settingRepo, dataDbManager, platform, this)
+            val buildConfig = AppBuildConfig(
+                versionName = BuildConfig.VERSION_NAME,
+                versionCode = BuildConfig.VERSION_CODE,
+                isDebug = BuildConfig.DEBUG,
+                applicationId = BuildConfig.APPLICATION_ID
+            )
+            App(settingRepo, dataDbManager, platform, buildConfig, this)
         }
     }
 }

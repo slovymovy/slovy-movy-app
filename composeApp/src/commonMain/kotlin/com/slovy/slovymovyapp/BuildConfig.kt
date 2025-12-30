@@ -6,5 +6,3 @@ data class AppBuildConfig(
     val isDebug: Boolean,
     val applicationId: String
 )
-
-expect fun getAppBuildConfig(): AppBuildConfig

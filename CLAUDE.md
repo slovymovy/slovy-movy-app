@@ -2,9 +2,10 @@ Project development guidelines
 
 ## Overview
 
-Kotlin Multiplatform (KMP) workspace with 3 modules:
+Kotlin Multiplatform (KMP) workspace with 4 modules:
 
-- **composeApp**: Compose Multiplatform UI (Android, Desktop, iOS)
+- **composeApp**: Compose Multiplatform UI library (Android, Desktop, iOS)
+- **androidApp**: Android application entry point (depends on composeApp)
 - **shared**: KMP shared library
 - **server**: JVM Ktor server
 
@@ -27,9 +28,9 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 
 - **Shared tests**: `gradlew :shared:allTests`
 - **ComposeApp tests**: `gradlew :composeApp:allTests`
-- **Android instrumented tests**: `gradlew :composeApp:connectedAndroidTest`
+- **Android instrumented tests**: `gradlew :androidApp:connectedAndroidTest`
 - **Server tests**: `gradlew :server:test`
-- **Android APK**: `gradlew :composeApp:assembleDebug`
+- **Android APK**: `gradlew :androidApp:assembleDebug`
 - **Desktop distribution**: `gradlew :composeApp:packageDistributionForCurrentOS`
 
 ## Test Structure
@@ -38,8 +39,8 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **composeApp**: Shared tests live in `composeApp/src/commonTest`. The expect/actual `BaseTest` + `TestContext` wiring
   lets the same tests run on every target:
     - Android JVM (`gradlew :composeApp:androidUnitTest`) uses Robolectric to provide an Android context.
-    - Android instrumented (`gradlew :composeApp:connectedAndroidTest`) reuses the same `commonTest` sources; requires
-      an emulator/device and network access for DB download tests.
+    - Android instrumented (`gradlew :androidApp:connectedAndroidTest`) requires an emulator/device and network access
+      for DB download tests.
     - Desktop JVM (`gradlew :composeApp:desktopTest`) exercises the same tests against the JDBC driver.
     - iOS simulator (`gradlew :composeApp:iosSimulatorArm64Test`) runs the tests on macOS; native targets are skipped
       elsewhere.
@@ -275,5 +276,5 @@ if (GitHubClient.isAvailable()) {
 
 ## Key Notes
 
-- Module accessors: :composeApp, :shared, :server
+- Module accessors: :composeApp, :androidApp, :shared, :server
 - iOS warnings on non-macOS are expected and harmless

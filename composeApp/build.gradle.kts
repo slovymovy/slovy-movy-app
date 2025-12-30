@@ -1,13 +1,12 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 import java.io.ByteArrayOutputStream
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
@@ -21,14 +20,23 @@ kotlin {
         freeCompilerArgs.add("-Xexpect-actual-classes")
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
-    androidTarget {
+
+    androidLibrary {
+        namespace = "com.slovy.slovymovyapp"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
-        instrumentedTestVariant {
-            sourceSetTree.set(KotlinSourceSetTree.test)
+
+        withHostTestBuilder {}
+
+        withDeviceTestBuilder {
+            sourceSetTreeName = "test"
         }
     }
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -46,6 +54,7 @@ kotlin {
         val desktopMain by getting
         androidMain.dependencies {
             implementation(compose.preview)
+            implementation(compose.uiTooling)
             implementation(libs.androidx.activity.compose)
             implementation(libs.sqldelight.androidDriver)
             implementation(libs.ktor.client.okhttp)
@@ -81,9 +90,17 @@ kotlin {
             implementation(libs.sqldelight.sqliteDriver)
             implementation(libs.ktor.client.cio)
         }
-        androidUnitTest.dependencies {
+        getByName("androidHostTest").dependencies {
             implementation(libs.androidx.test.core)
             implementation(libs.robolectric)
+        }
+        getByName("androidDeviceTest").dependencies {
+            implementation(libs.androidx.test.runner)
+            implementation(libs.androidx.test.core)
+            implementation(libs.androidx.testExt.junit)
+            implementation(libs.androidx.espresso.core)
+            implementation(libs.junit)
+            implementation(libs.sqldelight.androidDriver)
         }
     }
 }
@@ -120,62 +137,6 @@ abstract class GitBranchValueSource : ValueSource<String, ValueSourceParameters.
 }
 
 val gitBranchProvider = providers.of(GitBranchValueSource::class.java) {}
-
-android {
-    namespace = "com.slovy.slovymovyapp"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-
-    buildFeatures {
-        buildConfig = true
-    }
-
-    defaultConfig {
-        applicationId = "com.slovy.slovymovyapp"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 3
-        versionName = "Alpha"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArguments[githubTokenEnvName] =
-            System.getenv(githubTokenEnvName) ?: ""
-        testInstrumentationRunnerArguments[isTest] = "true"
-        testInstrumentationRunnerArguments[gitBranchEnvName] = provider { gitBranchProvider.get() }.get()
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-        debug {
-            applicationIdSuffix = ".debug"
-            versionNameSuffix = "-debug"
-        }
-    }
-    sourceSets {
-        getByName("debug") {
-            res.srcDirs("src/androidDebug/res")
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-}
-
-dependencies {
-    debugImplementation(compose.uiTooling)
-
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.core)
-    androidTestImplementation(libs.androidx.testExt.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.junit)
-    androidTestImplementation(libs.sqldelight.androidDriver)
-}
 
 sqldelight {
     linkSqlite = true
