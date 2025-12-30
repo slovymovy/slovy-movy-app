@@ -28,7 +28,7 @@ Kotlin Multiplatform (KMP) workspace with 4 modules:
 
 - **Shared tests**: `gradlew :shared:allTests`
 - **ComposeApp tests**: `gradlew :composeApp:allTests`
-- **Android instrumented tests**: `gradlew :androidApp:connectedAndroidTest`
+- **Android instrumented tests**: `gradlew :composeApp:connectedAndroidDeviceTest`
 - **Server tests**: `gradlew :server:test`
 - **Android APK**: `gradlew :androidApp:assembleDebug`
 - **Desktop distribution**: `gradlew :composeApp:packageDistributionForCurrentOS`
@@ -38,9 +38,9 @@ Kotlin Multiplatform (KMP) workspace with 4 modules:
 - **shared**: Core logic lives in `shared/src/commonMain`; use the composeApp tests to cover DB behaviour.
 - **composeApp**: Shared tests live in `composeApp/src/commonTest`. The expect/actual `BaseTest` + `TestContext` wiring
   lets the same tests run on every target:
-    - Android JVM (`gradlew :composeApp:androidUnitTest`) uses Robolectric to provide an Android context.
-    - Android instrumented (`gradlew :androidApp:connectedAndroidTest`) requires an emulator/device and network access
-      for DB download tests.
+    - Android JVM (`gradlew :composeApp:testAndroidHostTest`) uses Robolectric to provide an Android context.
+    - Android instrumented (`gradlew :composeApp:connectedAndroidDeviceTest`) requires an emulator/device and network
+      access for DB download tests.
     - Desktop JVM (`gradlew :composeApp:desktopTest`) exercises the same tests against the JDBC driver.
     - iOS simulator (`gradlew :composeApp:iosSimulatorArm64Test`) runs the tests on macOS; native targets are skipped
       elsewhere.
