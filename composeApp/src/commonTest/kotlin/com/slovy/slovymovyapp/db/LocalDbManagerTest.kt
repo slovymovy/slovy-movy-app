@@ -3,13 +3,11 @@ package com.slovy.slovymovyapp.db
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.test.BaseTest
-import com.slovy.slovymovyapp.test.IgnoreRobolectric
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.uuid.Uuid
 
-@IgnoreRobolectric
 class LocalDbManagerTest : BaseTest() {
 
     @Test
