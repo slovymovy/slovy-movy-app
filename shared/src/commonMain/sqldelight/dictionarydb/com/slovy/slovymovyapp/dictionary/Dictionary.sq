@@ -98,15 +98,15 @@ CREATE TABLE sense_trait (
 
 
 -- Indexes to speed up searches by lemma (lang_code as leading column for multi-language queries)
-CREATE INDEX IF NOT EXISTS idx_lemma_lang_lemma ON lemma(lang_code, lemma COLLATE NOCASE);
-CREATE INDEX IF NOT EXISTS idx_lemma_lang_lemma_normalized ON lemma(lang_code, lemma_normalized COLLATE NOCASE);
+CREATE INDEX IF NOT EXISTS idx_lemma_lang_lemma ON lemma(lang_code, lemma);
+CREATE INDEX IF NOT EXISTS idx_lemma_lang_lemma_normalized ON lemma(lang_code, lemma_normalized);
 
 -- Index for POS lookups
 CREATE INDEX IF NOT EXISTS idx_lemma_pos_lemma_id ON lemma_pos(lemma_id);
 
 -- Indexes to speed up searches by form
-CREATE INDEX IF NOT EXISTS idx_form_form ON form(form COLLATE NOCASE);
-CREATE INDEX IF NOT EXISTS idx_form_form_normalized ON form(form_normalized COLLATE NOCASE);
+CREATE INDEX IF NOT EXISTS idx_form_form ON form(form);
+CREATE INDEX IF NOT EXISTS idx_form_form_normalized ON form(form_normalized);
 
 CREATE INDEX idx_form_lemma_pos_id ON form(lemma_pos_id);
 CREATE INDEX idx_sense_lemma_pos_id ON sense(lemma_pos_id);
@@ -163,12 +163,12 @@ VALUES (?, ?, ?);
 selectFormsByForm:
 SELECT f.lemma_pos_id, f.lemma_pos_id, f.form
 FROM form f
-WHERE f.form = ? COLLATE NOCASE;
+WHERE f.form = ?;
 
 selectFormsByNormalized:
 SELECT f.lemma_pos_id, f.lemma_pos_id, f.form
 FROM form f
-WHERE f.form_normalized = ? COLLATE NOCASE;
+WHERE f.form_normalized = ?;
 
 selectFormsByLemmaPosId:
 SELECT f.lemma_pos_id, f.lemma_pos_id, f.form
@@ -189,7 +189,7 @@ WHERE ft.form_id = ?;
 selectLemmasById:
 SELECT l.id, l.lemma, l.lemma_normalized, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE l.id = ? COLLATE NOCASE;
+WHERE l.id = ?;
 
 selectLemmasByIds:
 SELECT l.id, l.lemma, l.lemma_normalized, l.zipf_frequency, l.online_only
@@ -200,7 +200,7 @@ ORDER BY zipf_frequency DESC;
 selectLemmasByWord:
 SELECT l.id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE l.lang_code = ? AND l.lemma = ? COLLATE NOCASE
+WHERE l.lang_code = ? AND l.lemma = ?
 ORDER BY l.zipf_frequency DESC;
 
 selectLemmasByWords:
@@ -213,13 +213,13 @@ ORDER BY l.zipf_frequency DESC;
 selectLemmaPosIdAndLemmaByWord:
 SELECT l.id AS lemma_pos_id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE l.lang_code = ? AND l.lemma = ? COLLATE NOCASE;
+WHERE l.lang_code = ? AND l.lemma = ?;
 
 selectLemmaPosIdByLemmaId:
 SELECT lp.id
 FROM lemma l
 JOIN lemma_pos lp ON lp.lemma_id = l.id
-WHERE l.id = ? COLLATE NOCASE;
+WHERE l.id = ?;
 
 -- Select lemma IDs with their POS values for a list of lemma IDs
 selectLemmaIdAndPosByLemmaIds:
@@ -262,14 +262,14 @@ WHERE st.sense_id = ?;
 selectLemmasByNormalized:
 SELECT l.id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE l.lang_code = ? AND l.lemma_normalized = ? COLLATE NOCASE;
+WHERE l.lang_code = ? AND l.lemma_normalized = ?;
 
 selectLemmasNormalizedLike:
 SELECT l.id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l INDEXED BY idx_lemma_lang_lemma_normalized
 WHERE l.lang_code = ?
-  AND l.lemma_normalized >= ? COLLATE NOCASE
-  AND l.lemma_normalized < ? COLLATE NOCASE
+  AND l.lemma_normalized >= ?
+  AND l.lemma_normalized < ?
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
 
@@ -279,7 +279,7 @@ SELECT l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 FROM form f
 JOIN lemma_pos lp ON lp.id = f.lemma_pos_id
 JOIN lemma l ON l.id = lp.lemma_id
-WHERE l.lang_code = ? AND f.form = ? COLLATE NOCASE
+WHERE l.lang_code = ? AND f.form = ?
 GROUP BY l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
@@ -289,7 +289,7 @@ SELECT l.id AS lemma_pos_id, l.lemma, l.zipf_frequency, l.online_only, f.form
 FROM form f
 JOIN lemma_pos lp ON lp.id = f.lemma_pos_id
 JOIN lemma l ON l.id = lp.lemma_id
-WHERE l.lang_code = ? AND f.form = ? COLLATE NOCASE
+WHERE l.lang_code = ? AND f.form = ?
 GROUP BY l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
@@ -299,7 +299,7 @@ SELECT l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 FROM form f
 JOIN lemma_pos lp ON lp.id = f.lemma_pos_id
 JOIN lemma l ON l.id = lp.lemma_id
-WHERE l.lang_code = ? AND f.form_normalized = ? COLLATE NOCASE
+WHERE l.lang_code = ? AND f.form_normalized = ?
 GROUP BY l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
@@ -310,8 +310,8 @@ FROM form f INDEXED BY idx_form_form_normalized
 JOIN lemma_pos lp ON lp.id = f.lemma_pos_id
 JOIN lemma l ON l.id = lp.lemma_id
 WHERE l.lang_code = ?
-  AND f.form_normalized >= ? COLLATE NOCASE
-  AND f.form_normalized < ? COLLATE NOCASE
+  AND f.form_normalized >= ?
+  AND f.form_normalized < ?
 GROUP BY l.id, l.lemma, l.zipf_frequency, l.online_only, f.form
 ORDER BY l.zipf_frequency DESC
 LIMIT ?;
