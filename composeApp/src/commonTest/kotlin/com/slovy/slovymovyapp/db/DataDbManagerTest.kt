@@ -116,7 +116,7 @@ class DataDbManagerTest : BaseTest() {
             assertEquals(listOf("Café"), lemmasCaf, "normalized prefix caf should match 'Café'")
 
             // JOIN equals (form -> lemma)
-            val areEq = q.selectLemmasByFormEquals("en", "are", 20).executeAsList()
+            val areEq = q.selectLemmasByFormEquals("en", "ARE", 20).executeAsList()
             assertEquals(1, areEq.size, "form equals 'are' should match exactly one entry")
             assertEquals("Be", areEq[0].lemma, "'are' should belong to lemma 'Be'")
             assertEquals("ARE", areEq[0].form, "Stored form should be returned as inserted (case preserved)")

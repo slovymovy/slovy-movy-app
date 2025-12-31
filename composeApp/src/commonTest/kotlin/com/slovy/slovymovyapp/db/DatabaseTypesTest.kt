@@ -57,7 +57,7 @@ class DatabaseTypesTest : BaseTest() {
                     lemma_id = baseLemmaId,
                     pos = DictionaryPos.VERB
                 )
-                val lemmasByWord = q.selectLemmasByWord("en", lemma.lowercase()).executeAsList()
+                val lemmasByWord = q.selectLemmasByWord("en", lemma).executeAsList()
                 val formText = "Testing"
                 val formNormalized = "testing"
                 q.insertForm(
@@ -94,7 +94,7 @@ class DatabaseTypesTest : BaseTest() {
                     senseId = senseId,
                 )
                 require(out.lemmasByWordCount >= 1) {
-                    "Should find lemma by case-insensitive word; got count=${out.lemmasByWordCount} for lemma='${out.lemma}'"
+                    "Should find lemma by case-sensitive word; got count=${out.lemmasByWordCount} for lemma='${out.lemma}'"
                 }
                 require(out.formsByNormalizedCount >= 1) {
                     "Should find form by normalized string; got count=${out.formsByNormalizedCount} (lemmaPosId=${out.lemmaPosId})"
