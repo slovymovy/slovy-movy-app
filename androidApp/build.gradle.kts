@@ -12,8 +12,6 @@ kotlin {
     }
 }
 
-val gitBranchProvider: Provider<String> = providers.of(GitBranchValueSource::class.java) {}
-
 android {
     namespace = "com.slovy.slovymovyapp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -30,9 +28,8 @@ android {
         versionName = "Alpha"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        testInstrumentationRunnerArguments[TestEnvironment.GITHUB_TOKEN] = System.getenv(TestEnvironment.GITHUB_TOKEN) ?: ""
         testInstrumentationRunnerArguments[TestEnvironment.IS_TEST] = "true"
-        testInstrumentationRunnerArguments[TestEnvironment.GIT_BRANCH] = provider { gitBranchProvider.get() }.get()
+        testInstrumentationRunnerArguments[TestEnvironment.TEST_SERVER_PORT] = "8081"
     }
 
     buildTypes {

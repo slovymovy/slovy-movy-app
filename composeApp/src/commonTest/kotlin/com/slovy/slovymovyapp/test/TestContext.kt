@@ -4,13 +4,14 @@ import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.AppDatabaseHolder
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
-import com.slovy.slovymovyapp.data.remote.provider.GithubRepoDataProvider
+import com.slovy.slovymovyapp.data.remote.RemoteDataProvider
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import kotlin.test.AfterTest
 
 expect object TestContext {
     fun androidContext(): Any?
     fun getCiEnv(name: String): String?
+    fun testServerHost(): String
 }
 
 /**
@@ -62,8 +63,6 @@ abstract class BaseTestImpl {
 expect abstract class BaseTest() : BaseTestImpl
 
 
-
-
 fun testPlatformDbSupport(): PlatformDbSupport = PlatformDbSupport(TestContext.androidContext())
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
@@ -97,11 +96,8 @@ fun testDataDbManagerHolder(): TestDataDbManagerHolder {
     return TestDataDbManagerHolder(mgr, localMgr, holder)
 }
 
-const val gitBranchRefEnv = "GIT_BRANCH_REF"
-
-fun testRemoteDataProvider(): GithubRepoDataProvider {
-    return GithubRepoDataProvider(
-        ref = TestContext.getCiEnv(gitBranchRefEnv) ?: "main",
-        authToken = TestContext.getCiEnv("ACCESS_TO_GH_TOKEN")
-    )
+fun testRemoteDataProvider(): RemoteDataProvider {
+    val port = TestContext.getCiEnv("TEST_SERVER_PORT") ?: 8081
+    val host = TestContext.testServerHost()
+    return TestServerDataProvider(baseUrl = "http://$host:$port")
 }

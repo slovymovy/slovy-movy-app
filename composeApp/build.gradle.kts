@@ -13,7 +13,7 @@ plugins {
     alias(libs.plugins.sqldelight)
 }
 
-val gitBranchProvider: Provider<String> = providers.of(GitBranchValueSource::class.java) {}
+val testServerPort = 8081
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
@@ -35,11 +35,14 @@ kotlin {
 
         withDeviceTestBuilder {
             sourceSetTreeName = "test"
+            @Suppress("UnstableApiUsage")
+            androidResources {
+                enable = true
+            }
         }.configure {
             instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-            instrumentationRunnerArguments[TestEnvironment.GITHUB_TOKEN] = System.getenv(TestEnvironment.GITHUB_TOKEN) ?: ""
             instrumentationRunnerArguments[TestEnvironment.IS_TEST] = "true"
-            instrumentationRunnerArguments[TestEnvironment.GIT_BRANCH] =  gitBranchProvider.get()
+            instrumentationRunnerArguments[TestEnvironment.TEST_SERVER_PORT] = testServerPort.toString()
         }
     }
 
@@ -128,19 +131,55 @@ compose.desktop {
 }
 
 tasks.withType<Test> {
-    environment(TestEnvironment.GITHUB_TOKEN, System.getenv(TestEnvironment.GITHUB_TOKEN) ?: "")
     environment(TestEnvironment.IS_TEST, "true")
-    environment(TestEnvironment.GIT_BRANCH, provider { gitBranchProvider.get() }.get())
+    environment(TestEnvironment.TEST_SERVER_PORT, testServerPort.toString())
 }
 
 tasks.withType<KotlinNativeTest> {
-    environment(TestEnvironment.GITHUB_TOKEN, System.getenv(TestEnvironment.GITHUB_TOKEN) ?: "")
     environment(TestEnvironment.IS_TEST, "true")
-    environment(TestEnvironment.GIT_BRANCH, provider { gitBranchProvider.get() }.get())
+    environment(TestEnvironment.TEST_SERVER_PORT, testServerPort.toString())
     // iOS simulator needs SIMCTL_CHILD_ prefix to propagate environment variables
     val prefix = "SIMCTL_CHILD_"
-    environment("$prefix${TestEnvironment.GITHUB_TOKEN}", System.getenv(TestEnvironment.GITHUB_TOKEN) ?: "")
     environment("$prefix${TestEnvironment.IS_TEST}", "true")
-    environment("$prefix${TestEnvironment.GIT_BRANCH}", provider { gitBranchProvider.get() }.get())
+    environment("$prefix${TestEnvironment.TEST_SERVER_PORT}", testServerPort.toString())
 }
 
+
+val testServerService: Provider<TestServerService> = gradle.sharedServices.registerIfAbsent(
+    "testServerService",
+    TestServerService::class.java
+) {
+    val serverProject = project(":server")
+    parameters.classpath.set(
+        serverProject.provider {
+            val config = serverProject.configurations.getByName("runtimeClasspath")
+            val classesDir = serverProject.layout.buildDirectory.dir("classes/kotlin/main").get().asFile.absolutePath
+            val resourcesDir = serverProject.layout.buildDirectory.dir("resources/main").get().asFile.absolutePath
+            (listOf(classesDir, resourcesDir) + config.files.map { it.absolutePath }).distinct()
+        }
+    )
+    parameters.workingDir.set(rootProject.projectDir.absolutePath)
+    parameters.port.set(testServerPort)
+    parameters.dbDir.set(File(rootProject.projectDir, ".test-db-files").absolutePath)
+    maxParallelUsages.set(1)
+}
+
+val startTestServer = tasks.register<StartTestServerTask>("startTestServer")
+
+tasks.withType<Test>().configureEach {
+    dependsOn(":server:classes")
+    dependsOn(startTestServer)
+    usesService(testServerService)
+}
+
+tasks.withType<KotlinNativeTest>().configureEach {
+    dependsOn(":server:classes")
+    dependsOn(startTestServer)
+    usesService(testServerService)
+}
+
+tasks.matching { it.name == "connectedAndroidTest" || it.name == "connectedAndroidDeviceTest" }.configureEach {
+    dependsOn(":server:classes")
+    dependsOn(startTestServer)
+    usesService(testServerService)
+}

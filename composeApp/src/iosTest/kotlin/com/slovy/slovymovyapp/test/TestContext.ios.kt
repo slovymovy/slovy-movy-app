@@ -14,6 +14,8 @@ actual object TestContext {
         val env = getenv(name)?.toKString()
         return if (env.isNullOrEmpty()) null else env
     }
+
+    actual fun testServerHost(): String = "127.0.0.1"
 }
 
 actual abstract class BaseTest actual constructor() : BaseTestImpl()
