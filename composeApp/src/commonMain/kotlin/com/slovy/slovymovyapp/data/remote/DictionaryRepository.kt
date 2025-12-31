@@ -105,6 +105,8 @@ class DictionaryRepository(
     ): List<SearchItem> {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
+        val normalizedPrefix = stripAccents(trimmed)
+        val (prefixStart, prefixEnd) = prefixRange(normalizedPrefix)
 
         val languages = if (dictionaryLanguage != null) listOf(dictionaryLanguage) else installedDictionaries()
         if (languages.isEmpty()) {
@@ -240,8 +242,6 @@ class DictionaryRepository(
                 return false
             }
 
-            val pattern = "${stripAccents(trimmed)}*"
-
             // Search each database (local first, then RO)
             for (db in databases) {
                 val q = db.dictionaryQueries
@@ -270,9 +270,9 @@ class DictionaryRepository(
                 // Check for cancellation before next stage
                 currentCoroutineContext().ensureActive()
 
-                // and by prefix later (lemma and forms) - use normalized pattern for GLOB on normalized columns
+                // and by prefix later (lemma and forms) - use normalized prefix range to stay index-friendly
                 val lemmaNormLike: List<SelectLemmasNormalizedLike> =
-                    q.selectLemmasNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
+                    q.selectLemmasNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong()).executeAsList()
                 lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
                 if (shouldEarlyReturn(q)) return out.take(maxItems)
 
@@ -280,7 +280,8 @@ class DictionaryRepository(
                 currentCoroutineContext().ensureActive()
 
                 val formNormLike: List<SelectLemmasFromFormsNormalizedLike> =
-                    q.selectLemmasFromFormsNormalizedLike(lang.code, pattern, maxItems.toLong()).executeAsList()
+                    q.selectLemmasFromFormsNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong())
+                        .executeAsList()
                 formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
                 if (shouldEarlyReturn(q)) return out.take(maxItems)
 
@@ -306,7 +307,8 @@ class DictionaryRepository(
                     val tq = tdb.translationQueries
                     val dq = dictDb.dictionaryQueries
                     val trRows =
-                        tq.selectSenseTranslationsByNormalizedSingleWord(lang.code, tgt.code, pattern).executeAsList()
+                        tq.selectSenseTranslationsByNormalizedSingleWord(lang.code, tgt.code, prefixStart, prefixEnd)
+                            .executeAsList()
                     val lemmaRows = dq.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
                     val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
                     for (row in trRowsSorted) {
@@ -531,6 +533,11 @@ class DictionaryRepository(
             wordFamily = wordFamily.toList(),
             relatedWords = relatedWordsMap
         )
+    }
+
+    private fun prefixRange(prefix: String): Pair<String, String> {
+        if (prefix.isEmpty()) return "" to "\uFFFF"
+        return prefix to prefix + '\uFFFF'
     }
 
     private fun collectAllRelatedWords(

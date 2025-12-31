@@ -18,6 +18,12 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
+private fun prefixRange(pattern: String): Pair<String, String> {
+    val prefix = pattern.removeSuffix("*")
+    if (prefix.isEmpty()) return "" to "\uFFFF"
+    return prefix to prefix + '\uFFFF'
+}
+
 
 // TODO: we use HTTP for now to workaround some issues with IOS emulator
 // https://github.com/slovymovy/slovy-movy-app/issues/34
@@ -96,15 +102,18 @@ class DataDbManagerTest : BaseTest() {
             q.insertForm(Uuid.random(), loveIdPos, "loving", "loving")
             q.insertForm(Uuid.random(), cafeIdPost, "CAFÉS", "cafes")
 
-            // normalized GLOB
-            val lemmasLo = q.selectLemmasNormalizedLike("en", "lo*", 20).executeAsList().map { it.lemma }
-            assertEquals(listOf("Love"), lemmasLo, "lemma GLOB lo* should match 'Love'")
+            // normalized prefix range
+            val (loStart, loEnd) = prefixRange("lo*")
+            val lemmasLo = q.selectLemmasNormalizedLike("en", loStart, loEnd, 20).executeAsList().map { it.lemma }
+            assertEquals(listOf("Love"), lemmasLo, "lemma prefix lo should match 'Love'")
 
-            val lemmasBe = q.selectLemmasNormalizedLike("en", "be*", 20).executeAsList().map { it.lemma }
-            assertTrue(lemmasBe.contains("Be"), "lemma GLOB be* should contain 'Be'")
+            val (beStart, beEnd) = prefixRange("be*")
+            val lemmasBe = q.selectLemmasNormalizedLike("en", beStart, beEnd, 20).executeAsList().map { it.lemma }
+            assertTrue(lemmasBe.contains("Be"), "lemma prefix be should contain 'Be'")
 
-            val lemmasCaf = q.selectLemmasNormalizedLike("en", "caf*", 20).executeAsList().map { it.lemma }
-            assertEquals(listOf("Café"), lemmasCaf, "normalized GLOB caf* should match 'Café'")
+            val (cafStart, cafEnd) = prefixRange("caf*")
+            val lemmasCaf = q.selectLemmasNormalizedLike("en", cafStart, cafEnd, 20).executeAsList().map { it.lemma }
+            assertEquals(listOf("Café"), lemmasCaf, "normalized prefix caf should match 'Café'")
 
             // JOIN equals (form -> lemma)
             val areEq = q.selectLemmasByFormEquals("en", "are", 20).executeAsList()
@@ -118,15 +127,17 @@ class DataDbManagerTest : BaseTest() {
             assertEquals("Café", cafesEq[0].lemma, "'cafes' should map to lemma 'Café'")
             assertEquals("CAFÉS", cafesEq[0].form, "Original stored form should be returned")
 
-            // JOIN GLOB (forms prefix, normalized)
-            val lovLike = q.selectLemmasFromFormsNormalizedLike("en", "lov*", 20).executeAsList()
+            // JOIN prefix (forms prefix, normalized)
+            val (lovStart, lovEnd) = prefixRange("lov*")
+            val lovLike = q.selectLemmasFromFormsNormalizedLike("en", lovStart, lovEnd, 20).executeAsList()
             assertEquals(2, lovLike.size, "lov* should match two forms of 'Love'")
             assertTrue(lovLike.all { it.lemma == "Love" }, "Both matches should belong to 'Love'")
             val lovForms = lovLike.map { it.form }.toSet()
             assertEquals(setOf("loved", "loving"), lovForms, "Matched forms should be 'loved' and 'loving'")
 
             // LIMIT parameter behavior (request only 1 row)
-            val limited = q.selectLemmasFromFormsNormalizedLike("en", "l*", 1).executeAsList()
+            val (lStart, lEnd) = prefixRange("l*")
+            val limited = q.selectLemmasFromFormsNormalizedLike("en", lStart, lEnd, 1).executeAsList()
             assertEquals(1, limited.size, "LIMIT should restrict result count to 1")
         } finally {
             driver.close()
@@ -147,15 +158,16 @@ class DataDbManagerTest : BaseTest() {
             assertTrue(platform.fileExists(dict), "Dictionary file should exist: $dict")
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
-            // Open dictionary and search for 'bu*' (GLOB pattern)
+            // Open dictionary and search for 'bu' prefix
             val db = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
             val q = db.dictionaryQueries
 
-            val lemmaLike = q.selectLemmasNormalizedLike("en", "bu*", 20).executeAsList().map { it.lemma }
+            val (buStart, buEnd) = prefixRange("bu*")
+            val lemmaLike = q.selectLemmasNormalizedLike("en", buStart, buEnd, 20).executeAsList().map { it.lemma }
             assertTrue(lemmaLike.isNotEmpty(), "English dictionary should contain lemmas starting with 'bu'")
 
-            val formLike = q.selectLemmasFromFormsNormalizedLike("en", "bu*", 20).executeAsList().map { it.form }
-            assertTrue(formLike.isNotEmpty(), "Form GLOB 'bu*' should return at least one match")
+            val formLike = q.selectLemmasFromFormsNormalizedLike("en", buStart, buEnd, 20).executeAsList().map { it.form }
+            assertTrue(formLike.isNotEmpty(), "Form prefix 'bu' should return at least one match")
         } finally {
             // Clean up to keep environment tidy
             runBlocking {
