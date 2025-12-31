@@ -55,6 +55,7 @@ private sealed interface AppDestination {
         val targetSenseId: String? = null,
         val translationLanguageCodes: List<String>? = null,
     ) : AppDestination {
+        @Suppress("DEPRECATION")
         val dictionaryLanguage: Language
             get() = Language.fromCode(dictionaryLanguageCode)
 
