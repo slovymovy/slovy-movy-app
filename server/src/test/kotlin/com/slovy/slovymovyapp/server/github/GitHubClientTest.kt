@@ -5,6 +5,9 @@ import org.kohsuke.github.GHFileNotFoundException
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.test.*
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Integration tests for GitHubClient.
@@ -13,6 +16,45 @@ import kotlin.test.*
  * Tests are skipped if the token is not available.
  */
 class GitHubClientTest {
+
+    /**
+     * Retries the given block until it succeeds or the timeout is reached.
+     * This is necessary due to GitHub's eventual consistency and caching behavior.
+     *
+     * @param timeout Maximum time to wait for the assertion to pass
+     * @param pollInterval Time to wait between retry attempts
+     * @param block The assertion block to retry
+     * @throws AssertionError if the block doesn't succeed within the timeout
+     */
+    private fun eventually(
+        timeout: Duration = 15.seconds,
+        pollInterval: Duration = 500.milliseconds,
+        block: () -> Unit
+    ) {
+        val startTime = System.currentTimeMillis()
+        val timeoutMillis = timeout.inWholeMilliseconds
+        var lastError: Throwable? = null
+
+        while (System.currentTimeMillis() - startTime < timeoutMillis) {
+            try {
+                block()
+                return // Success
+            } catch (e: AssertionError) {
+                lastError = e
+                Thread.sleep(pollInterval.inWholeMilliseconds)
+            } catch (e: Exception) {
+                // For non-assertion exceptions (like GHFileNotFoundException),
+                // we don't retry - rethrow immediately
+                throw e
+            }
+        }
+
+        // Timeout reached - throw the last error
+        throw AssertionError(
+            "Assertion failed after ${timeout.inWholeSeconds}s timeout. Last error: ${lastError?.message}",
+            lastError
+        )
+    }
 
     @Test
     fun isAvailable_returnsTrueWhenTokenExists() {
@@ -110,8 +152,10 @@ class GitHubClientTest {
             val ref = GitHubClient.ensureBranch(testBranch)
             assertNotNull(ref, "Created branch ref should not be null")
 
-            // Branch should now exist
-            assertTrue(GitHubClient.branchExists(testBranch), "Test branch should exist after creation")
+            // Branch should now exist (retry due to GitHub caching)
+            eventually {
+                assertTrue(GitHubClient.branchExists(testBranch), "Test branch should exist after creation")
+            }
 
             // Calling ensureBranch again should return existing branch
             val existingRef = GitHubClient.ensureBranch(testBranch)
@@ -123,10 +167,23 @@ class GitHubClientTest {
     }
 
     private fun cleanUpBranch(testBranch: String) {
-        if (GitHubClient.branchExists(testBranch)) {
+        // Use retry logic to check if branch exists before deletion (handles caching)
+        var branchExists = false
+        try {
+            eventually(timeout = 10.seconds) {
+                branchExists = GitHubClient.branchExists(testBranch)
+                assertTrue(branchExists, "Branch should be visible for cleanup")
+            }
+        } catch (_: AssertionError) {
+            // Branch doesn't exist, nothing to clean up
+            return
+        }
+
+        if (branchExists) {
             try {
                 GitHubClient.deleteBranch(testBranch)
             } catch (_: Exception) {
+                // Retry deletion after delay if it fails
                 Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS)
                 GitHubClient.deleteBranch(testBranch)
             }
@@ -143,6 +200,11 @@ class GitHubClientTest {
             // Create test branch
             GitHubClient.ensureBranch(testBranch)
 
+            // Wait for branch to exist (retry due to GitHub caching)
+            eventually {
+                assertTrue(GitHubClient.branchExists(testBranch), "Test branch should exist after creation")
+            }
+
             // Create initial content
             val initialContent = """{"entries": [], "word_family": null}"""
             GitHubClient.createWordsContentOnBranch(
@@ -153,11 +215,17 @@ class GitHubClientTest {
                 branchName = testBranch
             )
 
-            // Read content back
-            val (readContent, sha) = GitHubClient.loadWordsContentFromBranch(testLang, testWord, testBranch)
-            assertEquals(initialContent, readContent, "Read content should match initial content")
-            assertNotNull(sha, "SHA should not be null")
-            assertTrue(sha.isNotBlank(), "SHA should not be blank")
+            // Read content back (retry due to GitHub caching)
+            var readContent: String = ""
+            var sha: String = ""
+            eventually {
+                val (content, fileSha) = GitHubClient.loadWordsContentFromBranch(testLang, testWord, testBranch)
+                readContent = content
+                sha = fileSha
+                assertEquals(initialContent, readContent, "Read content should match initial content")
+                assertNotNull(sha, "SHA should not be null")
+                assertTrue(sha.isNotBlank(), "SHA should not be blank")
+            }
 
             // Update content
             val updatedContent = """{"entries": [{"pos": "noun", "senses": []}], "word_family": ["test"]}"""
@@ -170,9 +238,11 @@ class GitHubClientTest {
                 branchName = testBranch
             )
 
-            // Read updated content
-            val (finalContent, _) = GitHubClient.loadWordsContentFromBranch(testLang, testWord, testBranch)
-            assertEquals(updatedContent, finalContent, "Read content should match updated content")
+            // Read updated content (retry due to GitHub caching)
+            eventually {
+                val (finalContent, _) = GitHubClient.loadWordsContentFromBranch(testLang, testWord, testBranch)
+                assertEquals(updatedContent, finalContent, "Read content should match updated content")
+            }
         } finally {
             cleanUpBranch(testBranch)
         }
@@ -185,6 +255,11 @@ class GitHubClientTest {
         try {
             // Create test branch
             GitHubClient.ensureBranch(testBranch)
+
+            // Wait for branch to exist (retry due to GitHub caching)
+            eventually {
+                assertTrue(GitHubClient.branchExists(testBranch), "Test branch should exist after creation")
+            }
 
             // Try to load non-existent file
             assertFailsWith<GHFileNotFoundException> {
