@@ -8,7 +8,6 @@ import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
-import com.slovy.slovymovyapp.test.IgnoreRobolectric
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import com.slovy.slovymovyapp.test.testRemoteDataProvider
 import kotlinx.coroutines.runBlocking
@@ -59,7 +58,6 @@ class DataDbManagerTest : BaseTest() {
         }
     }
 
-    @IgnoreRobolectric
     @Test
     fun dictionary_like_and_join_queries() {
         val platform = testPlatformDbSupport()
@@ -136,7 +134,6 @@ class DataDbManagerTest : BaseTest() {
         }
     }
 
-    @IgnoreRobolectric
     @Test
     fun download_en_ru_and_search_test_prefix() {
         val platform = testPlatformDbSupport()

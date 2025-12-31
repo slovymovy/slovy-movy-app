@@ -10,7 +10,6 @@ import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
-import com.slovy.slovymovyapp.test.IgnoreRobolectric
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
 import kotlin.test.*
@@ -25,7 +24,6 @@ class DictionaryRepositoryTest : BaseTest() {
         return FavoritesRepository(testAppDatabaseHolder().database)
     }
 
-    @IgnoreRobolectric
     @Test
     fun download_en_ru_and_search_test() {
         val platform = testPlatformDbSupport()
@@ -110,7 +108,6 @@ class DictionaryRepositoryTest : BaseTest() {
         }
     }
 
-    @IgnoreRobolectric
     @Test
     fun search_returns_multiple_forms_for_same_lemma() {
         val platform = testPlatformDbSupport()
@@ -157,7 +154,6 @@ class DictionaryRepositoryTest : BaseTest() {
         }
     }
 
-    @IgnoreRobolectric
     @Test
     fun search_suppresses_forms_when_lemma_present() {
         val platform = testPlatformDbSupport()
@@ -243,7 +239,6 @@ class DictionaryRepositoryTest : BaseTest() {
         }
     }
 
-    @IgnoreRobolectric
     @Test
     fun getLanguageCard_from_local_when_ro_missing() {
         val platform = testPlatformDbSupport()
@@ -303,7 +298,6 @@ class DictionaryRepositoryTest : BaseTest() {
         }
     }
 
-    @IgnoreRobolectric
     @Test
     fun getLanguageCard_loads_translations_from_local_when_ro_translation_missing() {
         val platform = testPlatformDbSupport()
@@ -395,7 +389,6 @@ class DictionaryRepositoryTest : BaseTest() {
         }
     }
 
-    @IgnoreRobolectric
     @Test
     fun search_finds_local_lemmas_first() {
         val platform = testPlatformDbSupport()
@@ -454,7 +447,6 @@ class DictionaryRepositoryTest : BaseTest() {
         }
     }
 
-    @IgnoreRobolectric
     @Test
     fun search_deduplicates_local_and_ro_results() {
         val platform = testPlatformDbSupport()

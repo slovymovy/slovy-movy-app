@@ -55,6 +55,7 @@ private sealed interface AppDestination {
         val targetSenseId: String? = null,
         val translationLanguageCodes: List<String>? = null,
     ) : AppDestination {
+        @Suppress("DEPRECATION")
         val dictionaryLanguage: Language
             get() = Language.fromCode(dictionaryLanguageCode)
 
@@ -77,6 +78,7 @@ fun App(
     settingsRepository: SettingsRepository,
     dataManager: DataDbManager,
     platform: PlatformDbSupport,
+    appBuildConfig: AppBuildConfig,
     androidContext: Any? = null,
 ) {
     var nativeLanguage by remember { mutableStateOf<Language?>(null) }
@@ -97,7 +99,7 @@ fun App(
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember { FavoritesViewModel(favoritesRepository, dictionaryRepository) }
-    val buildConfig = remember { getAppBuildConfig() }
+    val buildConfig = remember { appBuildConfig }
     val settingsViewModel = remember { SettingsViewModel(ttsManager, voiceFilterHelper, dataManager, buildConfig) }
 
     suspend fun selectInitialDestination(): AppDestination {

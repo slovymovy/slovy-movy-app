@@ -14,6 +14,8 @@ actual object TestContext {
         val env = InstrumentationRegistry.getArguments().getCharSequence(name) as String?
         return if (env.isNullOrEmpty()) null else env
     }
+
+    actual fun testServerHost(): String = "10.0.2.2"
 }
 
 @RunWith(AndroidJUnit4::class)

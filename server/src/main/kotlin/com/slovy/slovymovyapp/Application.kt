@@ -33,9 +33,12 @@ import org.slf4j.event.Level
 import java.nio.file.Files
 
 const val updateRepoPath = "/internal/update-repo/"
+const val SERVER_PORT_ENV = "SERVER_PORT"
+const val SERVER_PORT = 8080
 
 fun main() {
-    embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
+    val port = System.getenv(SERVER_PORT_ENV)?.toIntOrNull() ?: SERVER_PORT
+    embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 
@@ -58,6 +61,10 @@ fun Application.module() {
             call.respondText(repo.run {
                 "ok"
             })
+        }
+
+        if (isTestMode()) {
+            testDataEndpoints()
         }
 
         get("/extract/{lang}/{word}") {
@@ -141,7 +148,8 @@ fun Application.module() {
                             write("\n")
                             // Send filtered translated response to client
                             val translatedResponseToClient = filterTranslations(fullResponse, requestedLangCodes)
-                            val translatedChunk = WordStreamChunk(WordStreamStage.translated, translatedResponseToClient)
+                            val translatedChunk =
+                                WordStreamChunk(WordStreamStage.translated, translatedResponseToClient)
                             write(json.encodeToString(WordStreamChunk.serializer(), translatedChunk))
                             flush()
                         }

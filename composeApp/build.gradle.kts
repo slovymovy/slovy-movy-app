@@ -1,13 +1,11 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
-import java.io.ByteArrayOutputStream
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
@@ -15,20 +13,39 @@ plugins {
     alias(libs.plugins.sqldelight)
 }
 
+val testServerPort = 8081
+
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
-    androidTarget {
+
+    androidLibrary {
+        namespace = "com.slovy.slovymovyapp"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
-        instrumentedTestVariant {
-            sourceSetTree.set(KotlinSourceSetTree.test)
+
+        withHostTestBuilder {}
+
+        withDeviceTestBuilder {
+            sourceSetTreeName = "test"
+            @Suppress("UnstableApiUsage")
+            androidResources {
+                enable = true
+            }
+        }.configure {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            instrumentationRunnerArguments[TestEnvironment.IS_TEST] = "true"
+            instrumentationRunnerArguments[TestEnvironment.TEST_SERVER_PORT] = testServerPort.toString()
         }
     }
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -46,6 +63,7 @@ kotlin {
         val desktopMain by getting
         androidMain.dependencies {
             implementation(compose.preview)
+            implementation(compose.uiTooling)
             implementation(libs.androidx.activity.compose)
             implementation(libs.sqldelight.androidDriver)
             implementation(libs.ktor.client.okhttp)
@@ -81,100 +99,19 @@ kotlin {
             implementation(libs.sqldelight.sqliteDriver)
             implementation(libs.ktor.client.cio)
         }
-        androidUnitTest.dependencies {
+        getByName("androidHostTest").dependencies {
             implementation(libs.androidx.test.core)
             implementation(libs.robolectric)
         }
-    }
-}
-
-val githubTokenEnvName = "ACCESS_TO_GH_TOKEN"
-val isTest = "IS_TEST"
-val gitBranchEnvName = "GIT_BRANCH_REF"
-
-abstract class GitBranchValueSource : ValueSource<String, ValueSourceParameters.None> {
-    @get:Inject
-    abstract val execOperations: ExecOperations
-
-    override fun obtain(): String {
-        val branchNameFromEnv = System.getenv("BRANCH_NAME")
-        if (branchNameFromEnv != null) {
-            return branchNameFromEnv
-        }
-
-        val branchOutput = ByteArrayOutputStream()
-        execOperations.exec {
-            commandLine = listOf("git", "rev-parse", "--abbrev-ref", "HEAD")
-            standardOutput = branchOutput
-        }
-        val branchName = branchOutput.toString().trim()
-
-        // Check if branch exists on remote
-        val remoteCheckResult = execOperations.exec {
-            commandLine = listOf("git", "rev-parse", "--verify", "refs/remotes/origin/$branchName")
-            isIgnoreExitValue = true
-        }
-
-        return if (remoteCheckResult.exitValue == 0) branchName else "main"
-    }
-}
-
-val gitBranchProvider = providers.of(GitBranchValueSource::class.java) {}
-
-android {
-    namespace = "com.slovy.slovymovyapp"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-
-    buildFeatures {
-        buildConfig = true
-    }
-
-    defaultConfig {
-        applicationId = "com.slovy.slovymovyapp"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 3
-        versionName = "Alpha"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArguments[githubTokenEnvName] =
-            System.getenv(githubTokenEnvName) ?: ""
-        testInstrumentationRunnerArguments[isTest] = "true"
-        testInstrumentationRunnerArguments[gitBranchEnvName] = provider { gitBranchProvider.get() }.get()
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        getByName("androidDeviceTest").dependencies {
+            implementation(libs.androidx.test.runner)
+            implementation(libs.androidx.test.core)
+            implementation(libs.androidx.testExt.junit)
+            implementation(libs.androidx.espresso.core)
+            implementation(libs.junit)
+            implementation(libs.sqldelight.androidDriver)
         }
     }
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-        debug {
-            applicationIdSuffix = ".debug"
-            versionNameSuffix = "-debug"
-        }
-    }
-    sourceSets {
-        getByName("debug") {
-            res.srcDirs("src/androidDebug/res")
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-}
-
-dependencies {
-    debugImplementation(compose.uiTooling)
-
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.core)
-    androidTestImplementation(libs.androidx.testExt.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.junit)
-    androidTestImplementation(libs.sqldelight.androidDriver)
 }
 
 sqldelight {
@@ -194,18 +131,57 @@ compose.desktop {
 }
 
 tasks.withType<Test> {
-    environment(githubTokenEnvName, System.getenv(githubTokenEnvName) ?: "")
-    environment(isTest, "true")
-    environment(gitBranchEnvName, provider { gitBranchProvider.get() }.get())
+    environment(TestEnvironment.IS_TEST, "true")
+    environment(TestEnvironment.TEST_SERVER_PORT, testServerPort.toString())
 }
 
 tasks.withType<KotlinNativeTest> {
-    environment(githubTokenEnvName, System.getenv(githubTokenEnvName) ?: "")
-    environment(isTest, "true")
-    environment(gitBranchEnvName, provider { gitBranchProvider.get() }.get())
+    environment(TestEnvironment.IS_TEST, "true")
+    environment(TestEnvironment.TEST_SERVER_PORT, testServerPort.toString())
     // iOS simulator needs SIMCTL_CHILD_ prefix to propagate environment variables
     val prefix = "SIMCTL_CHILD_"
-    environment("$prefix$githubTokenEnvName", System.getenv(githubTokenEnvName) ?: "")
-    environment("$prefix$isTest", "true")
-    environment("$prefix$gitBranchEnvName", provider { gitBranchProvider.get() }.get())
+    environment("$prefix${TestEnvironment.IS_TEST}", "true")
+    environment("$prefix${TestEnvironment.TEST_SERVER_PORT}", testServerPort.toString())
+}
+
+
+val testServerService: Provider<TestServerService> = gradle.sharedServices.registerIfAbsent(
+    "testServerService",
+    TestServerService::class.java
+) {
+    val serverProject = project(":server")
+    parameters.classpath.set(
+        serverProject.provider {
+            val config = serverProject.configurations.getByName("runtimeClasspath")
+            val classesDir = serverProject.layout.buildDirectory.dir("classes/kotlin/main").get().asFile.absolutePath
+            val resourcesDir = serverProject.layout.buildDirectory.dir("resources/main").get().asFile.absolutePath
+            (listOf(classesDir, resourcesDir) + config.files.map { it.absolutePath }).distinct()
+        }
+    )
+    parameters.workingDir.set(rootProject.projectDir.absolutePath)
+    parameters.port.set(testServerPort)
+    parameters.dbDir.set(File(rootProject.projectDir, ".test-db-files").absolutePath)
+    maxParallelUsages.set(1)
+}
+
+val startTestServer = tasks.register<StartTestServerTask>("startTestServer") {
+    dependsOn(":server:classes")
+}
+
+tasks.withType<Test>().configureEach {
+    dependsOn(":server:classes")
+    dependsOn(startTestServer)
+    usesService(testServerService)
+}
+
+tasks.withType<KotlinNativeTest>().configureEach {
+    dependsOn(":server:classes")
+    dependsOn(startTestServer)
+    usesService(testServerService)
+}
+
+tasks.matching { it.name == "connectedAndroidTest" || it.name == "connectedAndroidDeviceTest" }.configureEach {
+    dependsOn(":server:classes")
+    dependsOn(startTestServer)
+    usesService(testServerService)
 }
