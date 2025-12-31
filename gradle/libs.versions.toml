@@ -19,6 +19,7 @@ googleCloudLoggingLogback = "0.133.0-alpha-rc1"
 googleCloudTasks = "2.81.0"
 googleCloudCore = "2.62.2"
 googleGenai = "1.32.0"
+janino = "3.1.12"
 junit = "4.13.2"
 kotlin = "2.3.0"
 kotlinx-coroutines = "1.10.2"
@@ -36,6 +37,7 @@ google-cloud-logging-logback = { module = "com.google.cloud:google-cloud-logging
 google-cloud-tasks = { module = "com.google.cloud:google-cloud-tasks", version.ref = "googleCloudTasks" }
 google-cloud-core = { module = "com.google.cloud:google-cloud-core", version.ref = "googleCloudCore" }
 google-genai = { module = "com.google.genai:google-genai", version.ref = "googleGenai" }
+janino = { module = "org.codehaus.janino:janino", version.ref = "janino" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 openai-java = { module = "com.openai:openai-java", version.ref = "openaiJava" }

@@ -1,12 +1,27 @@
 <configuration>
-    <appender name="CLOUD" class="com.google.cloud.logging.logback.LoggingAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
-        </filter>
-        <redirectToStdout>true</redirectToStdout>
-    </appender>
+    <if condition='System.getenv("GCLOUD") != null'>
+        <then>
+            <appender name="CLOUD" class="com.google.cloud.logging.logback.LoggingAppender">
+                <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                    <level>INFO</level>
+                </filter>
+                <redirectToStdout>true</redirectToStdout>
+            </appender>
 
-    <root level="info">
-        <appender-ref ref="CLOUD" />
-    </root>
+            <root level="info">
+                <appender-ref ref="CLOUD"/>
+            </root>
+        </then>
+        <else>
+            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+                </encoder>
+            </appender>
+
+            <root level="INFO">
+                <appender-ref ref="CONSOLE"/>
+            </root>
+        </else>
+    </if>
 </configuration>
