@@ -8,6 +8,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.uuid.Uuid
 
+private fun prefixRange(prefix: String): Pair<String, String> {
+    if (prefix.isEmpty()) return "" to "\uFFFF"
+    return prefix to prefix + '\uFFFF'
+}
+
 class LocalDbManagerTest : BaseTest() {
 
     @Test
@@ -33,7 +38,8 @@ class LocalDbManagerTest : BaseTest() {
             q.insertLemmaPos(lemmaPos, lemmaId, DictionaryPos.NOUN)
 
             // Read back and verify
-            val results = q.selectLemmasNormalizedLike("en", "testword", 10).executeAsList()
+            val (start, end) = prefixRange("testword")
+            val results = q.selectLemmasNormalizedLike("en", start, end, 10).executeAsList()
             assertEquals(1, results.size, "Should find inserted lemma")
             assertEquals("TestWord", results[0].lemma)
         } finally {
@@ -103,7 +109,8 @@ class LocalDbManagerTest : BaseTest() {
             // Second open - read data
             val mgr2 = LocalDbManager(platform)
             val db2 = mgr2.openLocalDictionary()
-            val results = db2.dictionaryQueries.selectLemmasNormalizedLike("en", "persistent", 10).executeAsList()
+            val (start, end) = prefixRange("persistent")
+            val results = db2.dictionaryQueries.selectLemmasNormalizedLike("en", start, end, 10).executeAsList()
             assertEquals(1, results.size, "Data should persist after reopen")
             assertEquals("Persistent", results[0].lemma)
             mgr2.closeAll()
