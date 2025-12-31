@@ -164,7 +164,9 @@ val testServerService: Provider<TestServerService> = gradle.sharedServices.regis
     maxParallelUsages.set(1)
 }
 
-val startTestServer = tasks.register<StartTestServerTask>("startTestServer")
+val startTestServer = tasks.register<StartTestServerTask>("startTestServer") {
+    dependsOn(":server:classes")
+}
 
 tasks.withType<Test>().configureEach {
     dependsOn(":server:classes")

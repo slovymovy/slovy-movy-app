@@ -38,6 +38,7 @@ abstract class TestServerService : BuildService<TestServerService.Parameters>, A
         killProcessOnPort(port)
 
         logger.lifecycle("Starting test server on port $port...")
+        logger.lifecycle("Classpath is: $classpath")
         val command = listOf(javaExec, "-cp", classpath, "com.slovy.slovymovyapp.ApplicationKt")
         val builder = ProcessBuilder(command)
             .directory(File(parameters.workingDir.get()))
