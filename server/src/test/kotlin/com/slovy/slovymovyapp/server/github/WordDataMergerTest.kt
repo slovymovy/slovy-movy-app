@@ -1,10 +1,6 @@
 package com.slovy.slovymovyapp.server.github
 
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardExample
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardPosEntry
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardResponse
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardResponseSense
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardTranslation
+import com.slovy.slovymovyapp.ingestion.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -27,8 +23,16 @@ class WordDataMergerTest {
 
         val resultTranslations = result.entries.first().senses.first().translations
         assertEquals(2, resultTranslations.size, "Should have 2 language codes")
-        assertEquals("тест", resultTranslations["ru"]?.first()?.targetLangWord, "ru translation should be from existing")
-        assertEquals("test", resultTranslations["pl"]?.first()?.targetLangWord, "pl translation should be from incoming")
+        assertEquals(
+            "тест",
+            resultTranslations["ru"]?.first()?.targetLangWord,
+            "ru translation should be from existing"
+        )
+        assertEquals(
+            "test",
+            resultTranslations["pl"]?.first()?.targetLangWord,
+            "pl translation should be from incoming"
+        )
     }
 
     @Test

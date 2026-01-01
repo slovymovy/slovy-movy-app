@@ -1,6 +1,8 @@
 package com.slovy.slovymovyapp.server.ai.enhancer
 
 import com.slovy.slovymovyapp.ingestion.ExtractedTranslation
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
+import com.slovy.slovymovyapp.ingestion.LanguageCardTranslation
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

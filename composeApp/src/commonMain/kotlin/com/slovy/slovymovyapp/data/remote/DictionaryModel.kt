@@ -7,7 +7,8 @@ data class LanguageCard(
     val entries: List<LanguageCardPosEntry>,
     val zipfFrequency: Float,
     val wordFamily: List<String> = emptyList(),
-    val relatedWords: Map<String, RelatedWord> = emptyMap()
+    val relatedWords: Map<String, RelatedWord> = emptyMap(),
+    val online: Boolean = false
 )
 
 data class RelatedWord(val lemma: String, val zipfFrequency: Float, val online: Boolean)

@@ -192,10 +192,8 @@ class JsonIngestionBuilder(
     ) {
         val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedJson)
 
-        // Use transactionWithResult to get the return value
-        val translationOpsByTarget = dictDb.transactionWithResult {
+        val translationOpsByTarget =
             ingestTranslationsOnlyInternal(processed, word, langCode, dictDb.dictionaryQueries)
-        }
 
         translationOpsByTarget.forEach { (target, actions) ->
             val trDb = translationDbProvider(langCode, target)
@@ -462,7 +460,8 @@ class JsonIngestionBuilder(
             println("Warning: Skipped POS entries for lemma '$word': ${skippedPos.joinToString()}")
         }
 
-        val translationOps = buildTranslationOperations(processed, posToEntryId, baseLemmaId, langCode, skipMissingPos = true)
+        val translationOps =
+            buildTranslationOperations(processed, posToEntryId, baseLemmaId, langCode, skipMissingPos = true)
         return Pair(skippedPos, translationOps)
     }
 
@@ -506,20 +505,22 @@ class JsonIngestionBuilder(
             val opsForTarget = operations.getOrPut(trg) { mutableListOf() }
             processed.entries.forEach { posEntry ->
                 val pos = mapPos(posEntry.pos)
-                val lemmaPosIdForPos = posToEntryId[pos]
-                if (lemmaPosIdForPos == null) {
-                    if (skipMissingPos) {
-                        return@forEach
-                    } else {
-                        error("POS ${posEntry.pos} not found in posToEntryId map")
-                    }
+                val lemmaPosIdForPos = posToEntryId[pos] ?: if (skipMissingPos) {
+                    return@forEach
+                } else {
+                    error("POS ${posEntry.pos} not found in posToEntryId map")
                 }
                 posEntry.senses.forEach { sense ->
                     val senseId = uuidParse(sense.senseId)
                     val def = sense.targetLangDefinitions[trg]
                     if (def != null) {
                         opsForTarget += {
-                            insertSenseTargetDefinition(sense_id = senseId, from_lang_code = sourceLangCode, target_lang_code = trg, definition = def)
+                            insertSenseTargetDefinition(
+                                sense_id = senseId,
+                                from_lang_code = sourceLangCode,
+                                target_lang_code = trg,
+                                definition = def
+                            )
                         }
                     }
                     val translations = sense.translations[trg] ?: emptyList()
@@ -577,14 +578,11 @@ class JsonIngestionBuilder(
 
         processed.entries.forEach { posEntry ->
             val pos = mapPos(posEntry.pos)
-            val lemmaPosIdForPos = posToEntryId[pos]
-            if (lemmaPosIdForPos == null) {
-                if (skipMissingPos) {
-                    skippedPos.add(posEntry.pos)
-                    return@forEach
-                } else {
-                    error("POS ${posEntry.pos} not found in posToEntryId map")
-                }
+            val lemmaPosIdForPos = posToEntryId[pos] ?: if (skipMissingPos) {
+                skippedPos.add(posEntry.pos)
+                return@forEach
+            } else {
+                error("POS ${posEntry.pos} not found in posToEntryId map")
             }
 
             posEntry.senses.forEach { sense ->
@@ -628,9 +626,78 @@ class JsonIngestionBuilder(
         return skippedPos
     }
 
-    private fun generateLemmaId(lemma: String, lemmaNormalized: String): Uuid {
-        val hash = md5("${lemma}_${lemmaNormalized}".encodeToByteArray())
-        return Uuid.fromByteArray(hash.sliceArray(0..15))
+    /**
+     * Copies raw data (lemma, lemma_pos, forms) from source database to target database.
+     * Used to replicate downloaded DB data into local DB before ingesting processed data.
+     *
+     * This method is idempotent - if the lemma already exists in the target DB, it does nothing.
+     *
+     * @param word The lemma word
+     * @param langCode The language code
+     * @param sourceDb The source database (e.g., downloaded read-only DB)
+     * @param targetDb The target database (e.g., local writable DB)
+     * @param frequency The Zipf frequency for the lemma
+     */
+    fun copyRawDataToLocal(
+        word: String,
+        langCode: String,
+        sourceDb: DictionaryDatabase,
+        targetDb: DictionaryDatabase,
+        frequency: Double
+    ) {
+        val lemmaNormalized = stripAccents(word)
+        val lemmaId = generateLemmaId(word, lemmaNormalized)
+
+        val sourceQ = sourceDb.dictionaryQueries
+        val targetQ = targetDb.dictionaryQueries
+
+        // Check if already in target DB - skip if exists (idempotent)
+        if (targetQ.selectLemmasById(lemmaId).executeAsOneOrNull() != null) {
+            return
+        }
+
+        // Look up lemma in source DB
+        val sourceLemma = sourceQ.selectLemmasById(lemmaId).executeAsOneOrNull()
+            ?: throw IllegalArgumentException("Lemma '$word' not found in source database")
+
+        targetDb.transaction {
+            // Copy lemma entry (preserve online_only status from source)
+            targetQ.insertLemma(
+                id = lemmaId,
+                lang_code = langCode,
+                lemma = word,
+                lemma_normalized = lemmaNormalized,
+                zipf_frequency = frequency,
+                online_only = sourceLemma.online_only
+            )
+
+            // Copy lemma_pos entries
+            val lemmaPosEntries = sourceQ.selectLemmaPosByLemmaId(lemmaId).executeAsList()
+            lemmaPosEntries.forEach { lp ->
+                targetQ.insertLemmaPos(
+                    id = lp.id,
+                    lemma_id = lemmaId,
+                    pos = lp.pos
+                )
+
+                // Copy forms for this lemma_pos
+                val forms = sourceQ.selectFormsWithIdByLemmaPosId(lp.id).executeAsList()
+                forms.forEach { form ->
+                    targetQ.insertForm(
+                        form_id = form.form_id,
+                        lemma_pos_id = lp.id,
+                        form = form.form,
+                        form_normalized = stripAccents(form.form)
+                    )
+
+                    // Copy form tags
+                    val tags = sourceQ.selectFormTagsByFormId(form.form_id).executeAsList()
+                    tags.forEach { tagRow ->
+                        targetQ.insertFormTag(form_id = form.form_id, tag = tagRow.tag)
+                    }
+                }
+            }
+        }
     }
 
     private fun mapPos(pos: String): DictionaryPos? {
@@ -677,6 +744,24 @@ class JsonIngestionBuilder(
             }
         }
         return set
+    }
+
+    companion object {
+        /**
+         * Generates a deterministic lemma ID from the lemma and its normalized form.
+         * Uses MD5 hash to ensure consistent IDs across platforms.
+         */
+        fun generateLemmaId(lemma: String, lemmaNormalized: String): Uuid {
+            val hash = md5("${lemma}_${lemmaNormalized}".encodeToByteArray())
+            return Uuid.fromByteArray(hash.sliceArray(0..15))
+        }
+
+        /**
+         * Generates a deterministic lemma ID from just the lemma.
+         * Automatically normalizes using stripAccents.
+         */
+        fun generateLemmaId(lemma: String): Uuid =
+            generateLemmaId(lemma, stripAccents(lemma))
     }
 }
 

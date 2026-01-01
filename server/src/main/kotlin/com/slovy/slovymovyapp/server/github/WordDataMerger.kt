@@ -1,9 +1,9 @@
 package com.slovy.slovymovyapp.server.github
 
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardExample
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardResponse
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardResponseSense
-import com.slovy.slovymovyapp.server.ai.enhancer.LanguageCardTranslation
+import com.slovy.slovymovyapp.ingestion.LanguageCardExample
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponseSense
+import com.slovy.slovymovyapp.ingestion.LanguageCardTranslation
 
 /**
  * Utility for merging LanguageCardResponse data.

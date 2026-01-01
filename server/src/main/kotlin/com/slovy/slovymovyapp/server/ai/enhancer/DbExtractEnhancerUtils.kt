@@ -1,11 +1,6 @@
 package com.slovy.slovymovyapp.server.ai.enhancer
 
-import com.slovy.slovymovyapp.ingestion.ExtractedWordData
-import com.slovy.slovymovyapp.ingestion.ExtractedWordEntry
-import com.slovy.slovymovyapp.ingestion.ExtractedWordForm
-import com.slovy.slovymovyapp.ingestion.ExtractedWordLinkage
-import com.slovy.slovymovyapp.ingestion.ExtractedWordSense
-import com.slovy.slovymovyapp.ingestion.LANG_TO_SOURCE_FILE
+import com.slovy.slovymovyapp.ingestion.*
 import kotlinx.serialization.json.Json
 import java.io.File
 import kotlin.uuid.ExperimentalUuidApi
