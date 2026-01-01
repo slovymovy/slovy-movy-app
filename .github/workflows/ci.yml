@@ -236,7 +236,7 @@ jobs:
 
   tests-macos-arm64:
     timeout-minutes: 30
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
@@ -275,7 +275,7 @@ jobs:
 
   tests-macos-x64:
     timeout-minutes: 30
-    runs-on: macos-13
+    runs-on: macos-15-intel
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
