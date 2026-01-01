@@ -27,6 +27,8 @@ import kotlinx.serialization.json.Json
 data class WordResult(
     /** The current LanguageCard data, null if no data available (error-only emission) */
     val card: LanguageCard? = null,
+    /** True if base word content is still being fetched (for online-only words) */
+    val isWordLoading: Boolean = false,
     /** True if translations are still being fetched */
     val isTranslationLoading: Boolean = false,
     /** Error (fatal if card=null, non-fatal if card present) */
@@ -122,10 +124,14 @@ class DictionaryClient(
             return@flow
         }
 
-        // 2. Emit local if available (with loading indicator if translations pending)
-        if (!localCard.online) {
-            emit(WordResult(card = localCard, isTranslationLoading = needsTranslations))
-        }
+        // 2. Always emit local first with loading indicator (shows POS structure while fetching)
+        emit(
+            WordResult(
+                card = localCard,
+                isWordLoading = localCard.online,
+                isTranslationLoading = needsTranslations
+            )
+        )
 
         // 3. Stream from server - emits WordResult after EACH stage
         try {
