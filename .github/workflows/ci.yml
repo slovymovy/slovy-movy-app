@@ -7,13 +7,146 @@ on:
     branches: [ main ]
 
 jobs:
-  tests-linux:
+  tests-linux-host:
     timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          android: false  # Keep Android SDK
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+
+      - name: setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: run shared tests
+        env:
+          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
+        run: ./gradlew :shared:allTests
+
+      - name: run Android unit tests
+        env:
+          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
+        run: ./gradlew :composeApp:testAndroidHostTest :androidApp:testDebugUnitTest
+
+      - name: Upload test results and reports (Linux host)
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-reports-linux-host
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            **/build/reports/problems/**
+            **/build/reports/tests/**
+            **/build/test-results/**
+            **/build/reports/androidTests/**
+            **/build/outputs/androidTest-results/**
+
+  tests-desktop-jvm:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: run compose desktop JVM tests
+        env:
+          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
+        run: ./gradlew :composeApp:desktopTest
+
+      - name: Upload test results and reports (desktop JVM)
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-reports-desktop-jvm
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            **/build/reports/problems/**
+            **/build/reports/tests/**
+            **/build/test-results/**
+
+  tests-server:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: run server tests
+        env:
+          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
+        run: ./gradlew :server:test
+
+      - name: Upload test results and reports (server)
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-reports-server
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            **/build/reports/problems/**
+            **/build/reports/tests/**
+            **/build/test-results/**
+
+  tests-android-connected:
+    timeout-minutes: 45
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        api-level: [ 24, 29 ]
+        api-level: [ 24, 29, 34 ]
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
@@ -62,22 +195,6 @@ jobs:
           rm -rf ~/.android/avd/* || true
           rm -rf ~/.android/adb* || true
 
-      - name: check (all host-available targets)
-        env:
-          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
-        run: |
-          chmod +x gradlew
-          ./gradlew check
-
-      - name: run Android unit tests
-        env:
-          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
-        run: ./gradlew :composeApp:testAndroidHostTest :androidApp:testDebugUnitTest
-
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
@@ -89,7 +206,7 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
 
-      - name: run tests
+      - name: run connected Android tests
         uses: reactivecircus/android-emulator-runner@v2
         env:
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
@@ -103,11 +220,11 @@ jobs:
           disable-animations: true
           script: ./gradlew :composeApp:connectedAndroidDeviceTest :androidApp:connectedDebugAndroidTest; status=$?; killall -INT crashpad_handler 2>/dev/null || true; exit $status
 
-      - name: Upload test results and reports (Linux)
+      - name: Upload test results and reports (Android connected)
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: test-reports-linux-api-${{ matrix.api-level }}
+          name: test-reports-android-connected-api-${{ matrix.api-level }}
           if-no-files-found: ignore
           retention-days: 14
           path: |
@@ -117,9 +234,9 @@ jobs:
             **/build/reports/androidTests/**
             **/build/outputs/androidTest-results/**
 
-  tests-macos:
+  tests-macos-arm64:
     timeout-minutes: 30
-    runs-on: macos-latest
+    runs-on: macos-14
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
@@ -136,23 +253,44 @@ jobs:
       - name: setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: check (all host-available targets)
-        env:
-          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
-        run: |
-          chmod +x gradlew
-          ./gradlew check
-
-      - name: run iOS simulator tests
+      - name: run iOS simulator arm64 tests
         env:
           SDK_NAME: iphonesimulator
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
-        run: |
-          ./gradlew iosSimulatorArm64Test
+        run: ./gradlew iosSimulatorArm64Test
+
+      - name: Upload test results and reports (macOS arm64)
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-reports-macos-arm64
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            **/build/reports/problems/**
+            **/build/reports/tests/**
+            **/build/test-results/**
+
+  tests-macos-x64:
+    timeout-minutes: 30
+    runs-on: macos-13
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: setup Gradle
+        uses: gradle/actions/setup-gradle@v5
 
       - name: run iOS x64 tests
         env:
@@ -160,14 +298,13 @@ jobs:
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
-        run: |
-          ./gradlew iosX64Test
+        run: ./gradlew iosX64Test
 
-      - name: Upload test results and reports (macOS)
+      - name: Upload test results and reports (macOS x64)
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: test-reports-macos
+          name: test-reports-macos-x64
           if-no-files-found: ignore
           retention-days: 14
           path: |
