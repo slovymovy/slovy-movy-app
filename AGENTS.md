@@ -61,6 +61,7 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **iOS**: Disabled on non-macOS (expected behavior)
 - **Android SDK**: compileSdk=36, minSdk=24, targetSdk=36
 - **Java version**: Use Java 21 (via sdkman: `sdk use java 21.0.9-amzn`). Java 25+ may cause Kotlin compatibility issues.
+- **Data version**: `DataDbManager.VERSION = "v7"`; when bumping, upload DBs under the new prefix in the GCS bucket and keep the version in sync.
 
 ## Code Structure
 
@@ -145,6 +146,12 @@ private fun MyScreenPreview(
   ) { ... }
   ```
 
+### Speech / TTS
+
+- `TextToSpeechManager` has platform actuals (Android, iOS, desktop no-op) and emits word-boundary + status callbacks.
+- Voice filtering is stored in settings under `Setting.Name.ENABLED_VOICES` (JSON per language). `VoiceFilterHelper` loads/saves the enabled IDs and defaults to local (offline) voices when first seen.
+- Allow users to open system TTS settings via `openSettings()`; Android uses install/check intents, iOS opens Accessibility Speech if allowed.
+
 ## Database (SqlDelight)
 
 ### Schema Locations
@@ -158,6 +165,9 @@ private fun MyScreenPreview(
 - Database bootstrap: `DatabaseProvider` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/db/`
 - Platform DB support: expect/actual `PlatformDbSupport` + helpers in
   `composeApp/src/*/kotlin/com/slovy/slovymovyapp/data/remote/`
+- Local writable DBs: `local_dictionary.db` and `local_translation.db` via `LocalDbManager`.
+- Downloaded read-only DBs live in the platform database dir and are cached via `ReadOnlyDatabaseCache`; use the cache helpers so drivers get closed when deleting files.
+- `DataDbManager` enforces query-only mode for read-only drivers, checks available disk before downloads, and writes to a `.part` temp file before renaming.
 
 ### Migrations
 
@@ -177,6 +187,8 @@ private fun MyScreenPreview(
 - Requires Zipf frequency for every lemma; ingestion fails if the lemma is missing from the frequency map.
 - Prefers native raw entries per `LANG_TO_SOURCE_FILE` for forms/POS mapping; forms deduplicated by form + normalized form + tags (first occurrence wins).
 - `sense_id` duplicates across raw entries are errors; UUID parsing pads incomplete IDs to keep ingestion resilient.
+- Online-only lemmas are ingested from raw data first; processed data can be added later via `ingestProcessedOverRaw`, and translations-only ingestion is supported once senses exist.
+- When streaming words from the server, `DictionaryClient` ingests base → translated stages into local DBs, copying raw rows from downloaded DBs first if needed.
 
 ## External API Clients (Server Module)
 
@@ -244,6 +256,7 @@ if (GitHubClient.isAvailable()) {
 - `/word/{lang}/{word}` streams NDJSON (`application/x-ndjson`): base chunk comes from `words` on the `push` branch (fallback to `main`, otherwise AI-enhanced from db-extract), optional translated chunk is added when `translations` query includes missing target language codes.
 - `translations` codes are validated; only languages absent from the current card are processed, and Gemini + db-extract data must be available.
 - `push` query enqueues Cloud Tasks updates **only when something was processed** (new base card or new translations); no-op when nothing changed.
+- Client-side `DictionaryClient` filters server responses to requested translation languages, handles online-only lemmas by copying raw data before ingesting processed content, and wraps errors in `DictionaryClientException`.
 - `/internal/update-repo/{lang}/{word}` pretty-prints JSON, ensures `push` exists, merges with existing via `WordDataMerger`, and skips commits when content is identical.
 - `WordDataMerger` merges by `sense_id`; existing translations/definitions/examples win, only new language codes/example translations (matched by normalized text without `<w>` tags) are appended.
 
@@ -277,3 +290,6 @@ if (GitHubClient.isAvailable()) {
 
 - Module accessors: :composeApp, :shared, :server
 - iOS warnings on non-macOS are expected and harmless
+- Downloads are served from the `slovymovy` GCS bucket under the version prefix; `GoogleStorageBucketDataProvider` builds URLs and list calls.
+- App startup checks `Setting.DATA_VERSION`; when versions diverge it routes to a mismatch screen that deletes all downloaded DBs before re-downloading.
+- Gradle test service `TestServerService` starts the Ktor server for tests with `IS_TEST`, `SERVER_PORT`, and `TEST_DB_DIR`; it kills any existing listener on the port and tails logs at `build/test-server.log`.
