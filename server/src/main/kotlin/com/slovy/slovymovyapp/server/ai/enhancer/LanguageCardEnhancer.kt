@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.server.ai.enhancer
 
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
 import com.slovy.slovymovyapp.server.ai.*
 import kotlinx.serialization.json.Json
 

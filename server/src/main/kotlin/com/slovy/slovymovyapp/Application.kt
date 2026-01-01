@@ -1,10 +1,13 @@
 package com.slovy.slovymovyapp
 
+import com.slovy.slovymovyapp.api.WordStreamChunk
+import com.slovy.slovymovyapp.api.WordStreamStage
 import com.slovy.slovymovyapp.builder.ServerDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.ingestion.ExtractedWordData
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
 import com.slovy.slovymovyapp.server.ai.GEMINI_3_0_FLASH_PREVIEW
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
 import com.slovy.slovymovyapp.server.ai.enhancer.*
@@ -24,7 +27,6 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.kohsuke.github.GHFileNotFoundException
@@ -125,8 +127,9 @@ fun Application.module() {
 
                     // Send filtered base response to client (always filter based on requested codes)
                     val baseResponseToClient = filterTranslations(baseResult.response, requestedLangCodes)
-                    val baseChunk = WordStreamChunk(WordStreamStage.base, baseResponseToClient)
+                    val baseChunk = WordStreamChunk(WordStreamStage.BASE, baseResponseToClient)
                     write(json.encodeToString(WordStreamChunk.serializer(), baseChunk))
+                    write("\n")
                     flush()
 
                     // Track full response for repo updates (unfiltered)
@@ -145,12 +148,12 @@ fun Application.module() {
                         if (translationResult.updated) {
                             fullResponse = translationResult.response
                             wasProcessed = true
-                            write("\n")
                             // Send filtered translated response to client
                             val translatedResponseToClient = filterTranslations(fullResponse, requestedLangCodes)
                             val translatedChunk =
-                                WordStreamChunk(WordStreamStage.translated, translatedResponseToClient)
+                                WordStreamChunk(WordStreamStage.TRANSLATED, translatedResponseToClient)
                             write(json.encodeToString(WordStreamChunk.serializer(), translatedChunk))
+                            write("\n")
                             flush()
                         }
                     }
@@ -158,7 +161,10 @@ fun Application.module() {
                     // Step 3: Queue Cloud Tasks update if requested (only if something was processed)
                     // IMPORTANT: Use fullResponse (unfiltered) to ensure nothing is lost in repo
                     if (!push.isNullOrBlank() && wasProcessed) {
-                        val responseJson = json.encodeToString(LanguageCardResponse.serializer(), fullResponse)
+                        val responseJson = json.encodeToString(
+                            LanguageCardResponse.serializer(),
+                            fullResponse
+                        )
                         RepoUpdateTaskClient.queueRepoUpdate(lang, word, responseJson)
                     }
                 }
@@ -197,7 +203,10 @@ fun Application.module() {
 
             try {
                 val responseJson = call.receiveText()
-                val incoming = jsonDecoder.decodeFromString(LanguageCardResponse.serializer(), responseJson)
+                val incoming = jsonDecoder.decodeFromString(
+                    LanguageCardResponse.serializer(),
+                    responseJson
+                )
                 call.application.environment.log.info("Received update for $lang/$word")
 
                 if (!GitHubClient.pushBranchExists())
@@ -206,12 +215,21 @@ fun Application.module() {
                 // Check if file exists and handle accordingly
                 try {
                     val (existingContent, sha) = GitHubClient.loadWordsContentFromPushBranch(lang, word)
-                    val existing = jsonDecoder.decodeFromString(LanguageCardResponse.serializer(), existingContent)
+                    val existing = jsonDecoder.decodeFromString(
+                        LanguageCardResponse.serializer(),
+                        existingContent
+                    )
                     val merged = WordDataMerger.merge(existing, incoming)
-                    val mergedJson = jsonEncoder.encodeToString(LanguageCardResponse.serializer(), merged)
+                    val mergedJson = jsonEncoder.encodeToString(
+                        LanguageCardResponse.serializer(),
+                        merged
+                    )
 
                     // Skip commit if content is identical
-                    val existingPretty = jsonEncoder.encodeToString(LanguageCardResponse.serializer(), existing)
+                    val existingPretty = jsonEncoder.encodeToString(
+                        LanguageCardResponse.serializer(),
+                        existing
+                    )
                     if (mergedJson == existingPretty) {
                         call.application.environment.log.info("No changes for $lang/$word, skipping commit")
                     } else {
@@ -220,7 +238,10 @@ fun Application.module() {
                     }
                 } catch (_: GHFileNotFoundException) {
                     // File doesn't exist - create it
-                    val prettyJson = jsonEncoder.encodeToString(LanguageCardResponse.serializer(), incoming)
+                    val prettyJson = jsonEncoder.encodeToString(
+                        LanguageCardResponse.serializer(),
+                        incoming
+                    )
                     GitHubClient.createWordsContent(lang, word, prettyJson, "Add $word ($lang)")
                     call.application.environment.log.info("Created new file for $lang/$word")
                 }
@@ -243,7 +264,11 @@ fun Application.module() {
     }
 }
 
-private fun enhanceWithAI(lang: String, word: String, json: Json): LanguageCardResponse {
+private fun enhanceWithAI(
+    lang: String,
+    word: String,
+    json: Json
+): LanguageCardResponse {
     val geminiProvider = GeminiProvider()
     if (!geminiProvider.isAvailable()) {
         throw IllegalStateException("Gemini API key not configured")
@@ -261,15 +286,6 @@ private fun enhanceWithAI(lang: String, word: String, json: Json): LanguageCardR
         reasoningBudget = 1
     )
 }
-
-@Serializable
-private enum class WordStreamStage { base, translated }
-
-@Serializable
-private data class WordStreamChunk(
-    val stage: WordStreamStage,
-    val payload: LanguageCardResponse
-)
 
 private data class WordProcessResult(
     val response: LanguageCardResponse,
@@ -389,7 +405,7 @@ private suspend fun enhanceWithTranslations(
                     translations = targetTranslations
                 )
 
-                val targetLanguageName = DbExtractEnhancerUtils.targetLanguageName(targetLangCode)
+                val targetLanguageName = targetLanguageName(targetLangCode)
                 val translationResponse = translationEnhancer.enhanceWithTranslations(
                     request = translationRequest,
                     provider = geminiProvider,

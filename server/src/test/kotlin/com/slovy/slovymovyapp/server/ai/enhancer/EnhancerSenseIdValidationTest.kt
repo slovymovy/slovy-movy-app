@@ -1,7 +1,10 @@
 package com.slovy.slovymovyapp.server.ai.enhancer
 
-import com.slovy.slovymovyapp.server.ai.AIProvider
+import com.slovy.slovymovyapp.ingestion.LanguageCardPosEntry
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponseSense
 import com.slovy.slovymovyapp.server.ai.AIParameters
+import com.slovy.slovymovyapp.server.ai.AIProvider
 import com.slovy.slovymovyapp.server.ai.ModelInfo
 import kotlinx.serialization.json.Json
 import kotlin.test.Test

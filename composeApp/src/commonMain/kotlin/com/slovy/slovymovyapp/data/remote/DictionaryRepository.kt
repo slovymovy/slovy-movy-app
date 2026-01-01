@@ -298,8 +298,10 @@ class DictionaryRepository(
                 val transDatabasePairs = buildList {
                     add(localDbManager.openLocalTranslation() to localDbManager.openLocalDictionary())
                     if (dataDbManager.hasTranslation(lang, tgt)) {
-                        add(dataDbManager.openTranslationReadOnly(lang, tgt) to
-                            dataDbManager.openDictionaryReadOnly(lang))
+                        add(
+                            dataDbManager.openTranslationReadOnly(lang, tgt) to
+                                    dataDbManager.openDictionaryReadOnly(lang)
+                        )
                     }
                 }
 
@@ -309,7 +311,8 @@ class DictionaryRepository(
                     val trRows =
                         tq.selectSenseTranslationsByNormalizedSingleWord(lang.code, tgt.code, prefixStart, prefixEnd)
                             .executeAsList()
-                    val lemmaRows = dq.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
+                    val lemmaRows =
+                        dq.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
                     val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
                     for (row in trRowsSorted) {
                         // Map translation hit back to a base lemma
@@ -383,7 +386,7 @@ class DictionaryRepository(
 
         // Lookup lemma, trying databases in order
         var lemmaId: Uuid? = null
-        var onlineOnly: Boolean
+        var onlineOnly = false
         var zipfFrequency = 0f
         var sourceDb: DictionaryDatabase? = null
 
@@ -531,7 +534,8 @@ class DictionaryRepository(
             lemma = lemma,
             zipfFrequency = zipfFrequency,
             wordFamily = wordFamily.toList(),
-            relatedWords = relatedWordsMap
+            relatedWords = relatedWordsMap,
+            online = onlineOnly
         )
     }
 
