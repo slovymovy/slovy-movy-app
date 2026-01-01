@@ -146,7 +146,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [ 24, 29, 34 ]
+        include:
+          - api-level: 24
+            target: default
+            arch: x86
+          - api-level: 29
+            target: default
+            arch: x86
+          - api-level: 34
+            target: google_apis
+            arch: x86_64
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
@@ -186,7 +195,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ matrix.api-level }}-${{ hashFiles('.github/workflows/ci.yml') }}
+          key: avd-${{ matrix.api-level }}-${{ matrix.target }}-${{ matrix.arch }}-${{ hashFiles('.github/workflows/ci.yml') }}
 
       - name: Clean old AVD data on cache miss
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -200,6 +209,8 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
           force-avd-creation: false
           disk-size: 2048
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
@@ -214,6 +225,8 @@ jobs:
           AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
         with:
           api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
           force-avd-creation: false
           disk-size: 2048
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
