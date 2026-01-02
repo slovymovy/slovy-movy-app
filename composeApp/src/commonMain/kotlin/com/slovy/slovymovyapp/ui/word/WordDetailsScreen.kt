@@ -203,7 +203,8 @@ class WordDetailViewModel(
             dictionaryClient.getWord(
                 dictionaryLanguage,
                 lemma,
-                translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage)
+                translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage),
+                pushToRepo = true
             ).collect { result ->
                 updateStateFromResult(result)
             }
