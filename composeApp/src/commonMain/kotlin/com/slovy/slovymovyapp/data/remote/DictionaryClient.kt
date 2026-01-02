@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Result wrapper for progressive word loading.
@@ -59,6 +60,10 @@ sealed class DictionaryClientException(message: String, cause: Throwable? = null
     /** Server returned an error response */
     class ServerException(val statusCode: Int, val body: String) :
         DictionaryClientException("Server error $statusCode: ${body.take(200)}")
+
+    /** Operation was cancelled */
+    class CancelledException(message: String = "Operation cancelled") :
+        DictionaryClientException(message)
 }
 
 /**
@@ -152,6 +157,17 @@ class DictionaryClient(
                 localCard.zipfFrequency.toDouble(),
                 localCard.online
             )
+        } catch (e: CancellationException) {
+            // Emit error for cancellation, then re-throw to propagate
+            emit(
+                WordResult(
+                    card = localCard,
+                    isWordLoading = false,
+                    isTranslationLoading = false,
+                    error = DictionaryClientException.CancelledException()
+                )
+            )
+            throw e
         } catch (e: Exception) {
             // Emit error result - preserve loading context so UI knows where error occurred
             emit(
@@ -195,36 +211,33 @@ class DictionaryClient(
 
     /**
      * Copies raw data from downloaded DB to local DB for online_only words.
-     * This is needed before ingesting processed data because the raw data
-     * (lemma, lemma_pos, forms) must exist in the target DB first.
+     * This version takes the localDb and downloadedDb as parameters for use within an existing transaction.
      *
      * Idempotent - skips if lemma already exists in local DB.
      */
-    private suspend fun copyRawDataIfNeeded(
+    private fun copyRawDataIfNeeded(
         ingestionBuilder: JsonIngestionBuilder,
         language: Language,
         lemma: String,
-        frequency: Double
+        frequency: Double,
+        targetDb: DictionaryDatabase,
+        sourceDb: DictionaryDatabase
     ) {
-        val localDb = localDbManager.openLocalDictionary()
         val lemmaId = JsonIngestionBuilder.generateLemmaId(lemma)
 
         // Skip if already in local DB
-        if (localDb.dictionaryQueries.selectLemmasById(lemmaId).executeAsOneOrNull() != null) {
+        if (targetDb.dictionaryQueries.selectLemmasById(lemmaId).executeAsOneOrNull() != null) {
             return
         }
 
         // Copy from downloaded DB
-        if (dataDbManager.hasDictionary(language)) {
-            val downloadedDb = dataDbManager.openDictionaryReadOnly(language)
-            ingestionBuilder.copyRawDataToLocal(
-                word = lemma,
-                langCode = language.code,
-                sourceDb = downloadedDb,
-                targetDb = localDb,
-                frequency = frequency
-            )
-        }
+        ingestionBuilder.copyRawDataToLocal(
+            word = lemma,
+            langCode = language.code,
+            sourceDb = sourceDb,
+            targetDb = targetDb,
+            frequency = frequency
+        )
     }
 
     /**
@@ -328,11 +341,23 @@ class DictionaryClient(
             WordStreamStage.BASE -> {
                 if (localIsOnlineOnly) {
                     // Online-only word - copy raw data to local DB first,
-                    // then ingest processed data over it
-                    copyRawDataIfNeeded(ingestionBuilder, language, lemma, frequency)
-                    ingestionBuilder.ingestProcessedOverRaw(
-                        responseJson, lemma, language.code, localDictDb
-                    )
+                    // then ingest processed data over it.
+                    // Open downloaded DB before transaction (suspend call).
+                    val downloadedDb = if (dataDbManager.hasDictionary(language)) {
+                        dataDbManager.openDictionaryReadOnly(language)
+                    } else null
+
+                    // Wrap in transaction to avoid partial state if interrupted.
+                    localDictDb.transaction {
+                        if (downloadedDb != null) {
+                            copyRawDataIfNeeded(
+                                ingestionBuilder, language, lemma, frequency, localDictDb, downloadedDb
+                            )
+                        }
+                        ingestionBuilder.ingestProcessedOverRaw(
+                            responseJson, lemma, language.code, localDictDb
+                        )
+                    }
                 } else {
                     // Offline word - find dictionary DB with the processed word,
                     // add translations only (translations go to local translation DB)

@@ -35,10 +35,17 @@ import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
 import com.slovy.slovymovyapp.ui.components.AppCard
 import com.slovy.slovymovyapp.ui.components.CompactCard
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 sealed interface WordDetailUiState {
-    data class Empty(val lemma: String? = null, val message: String = "No entries available.") : WordDetailUiState
+    data class Empty(
+        val lemma: String? = null,
+        val message: String = "No entries available.",
+        val isError: Boolean = false
+    ) : WordDetailUiState
+
     data class Content(
         val card: LanguageCard,
         val entries: List<EntryUiState>,
@@ -205,7 +212,12 @@ class WordDetailViewModel(
                 lemma,
                 translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage),
                 pushToRepo = true
-            ).collect { result ->
+            ).onCompletion { cause ->
+                if (cause is CancellationException) {
+                    // Flow was cancelled - mark as error so hasErrorOrLoading() triggers recreation
+                    markCancelled()
+                }
+            }.collect { result ->
                 updateStateFromResult(result)
             }
         }
@@ -246,7 +258,8 @@ class WordDetailViewModel(
         } else if (result.error != null) {
             state = WordDetailUiState.Empty(
                 lemma = lemma,
-                message = result.error.message ?: "Failed to load word"
+                message = result.error.message ?: "Failed to load word",
+                isError = true
             )
         }
     }
@@ -254,6 +267,26 @@ class WordDetailViewModel(
     fun reload() {
         loadFavorites()
         loadVoices()
+    }
+
+    fun hasError(): Boolean {
+        return when (val s = state) {
+            is WordDetailUiState.Empty -> s.isError
+            is WordDetailUiState.Content ->
+                s.cardError != null || s.translationError != null
+        }
+    }
+
+    private fun markCancelled() {
+        state = when (val s = state) {
+            is WordDetailUiState.Empty -> s.copy(isError = true)
+            is WordDetailUiState.Content -> s.copy(
+                cardLoading = false,
+                translationLoading = false,
+                cardError = s.cardError ?: if (s.cardLoading) "Cancelled" else null,
+                translationError = s.translationError ?: if (s.translationLoading) "Cancelled" else null
+            )
+        }
     }
 
     private fun loadFavorites() {
