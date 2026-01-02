@@ -167,6 +167,7 @@ private inline fun EntryUiState.updateSense(
 
 class WordDetailViewModel(
     private val repository: DictionaryRepository,
+    private val dictionaryClient: DictionaryClient,
     private val favoritesRepository: FavoritesRepository,
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
@@ -175,7 +176,7 @@ class WordDetailViewModel(
     val targetSenseId: String? = null,
     private val translationLanguages: List<Language>? = null
 ) : ViewModel() {
-    var state by mutableStateOf<WordDetailUiState>(WordDetailUiState.Empty())
+    var state by mutableStateOf<WordDetailUiState>(WordDetailUiState.Empty(lemma = lemma, message = "Loading..."))
         private set
 
     val scrollState = ScrollState(0)
@@ -199,16 +200,13 @@ class WordDetailViewModel(
 
     init {
         viewModelScope.launch {
-            val card = repository.getLanguageCard(
+            dictionaryClient.getWord(
                 dictionaryLanguage,
                 lemma,
                 translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage)
-            )
-            state =
-                card?.toContentUiState(targetSenseId, isSenseFavorite = ::isSenseFavorite) ?: WordDetailUiState.Empty(
-                    lemma = lemma,
-                    message = "Word not found"
-                )
+            ).collect { result ->
+                updateStateFromResult(result)
+            }
         }
 
         // Setup TTS status listener
@@ -224,6 +222,31 @@ class WordDetailViewModel(
                     isPlaying = false
                 }
             }
+        }
+    }
+
+    private fun updateStateFromResult(result: WordResult) {
+        val card = result.card
+        if (card != null) {
+            val current = state as? WordDetailUiState.Content
+            val wordFamilyExpanded = current?.wordFamilyExpanded ?: false
+
+            // Determine where error occurred based on what was loading before
+            val wasWordLoading = current?.cardLoading == true
+            val wasTranslationLoading = current?.translationLoading == true
+            val errorMessage = result.error?.message
+
+            state = card.toContentUiState(targetSenseId, wordFamilyExpanded, ::isSenseFavorite).copy(
+                cardLoading = result.isWordLoading,
+                cardError = if (wasWordLoading && errorMessage != null) errorMessage else null,
+                translationLoading = result.isTranslationLoading,
+                translationError = if (wasTranslationLoading && errorMessage != null) errorMessage else null
+            )
+        } else if (result.error != null) {
+            state = WordDetailUiState.Empty(
+                lemma = lemma,
+                message = result.error.message ?: "Failed to load word"
+            )
         }
     }
 

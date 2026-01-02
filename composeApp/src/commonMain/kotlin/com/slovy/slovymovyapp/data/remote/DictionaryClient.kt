@@ -8,6 +8,7 @@ import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
 import io.ktor.client.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -27,6 +28,8 @@ import kotlinx.serialization.json.Json
 data class WordResult(
     /** The current LanguageCard data, null if no data available (error-only emission) */
     val card: LanguageCard? = null,
+    /** True if base word content is still being fetched (for online-only words) */
+    val isWordLoading: Boolean = false,
     /** True if translations are still being fetched */
     val isTranslationLoading: Boolean = false,
     /** Error (fatal if card=null, non-fatal if card present) */
@@ -80,7 +83,14 @@ class DictionaryClient(
 
     private val serverBaseUrl: String = baseUrl.trimEnd('/')
 
-    private val httpClient: HttpClient by lazy { platform.createHttpClient() }
+    private val httpClient: HttpClient by lazy {
+        platform.createHttpClient().config {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 120_000
+                socketTimeoutMillis = 120_000
+            }
+        }
+    }
 
     // Server may have newer trait types, so ignore unknown keys
     private val json = Json { ignoreUnknownKeys = true }
@@ -122,10 +132,14 @@ class DictionaryClient(
             return@flow
         }
 
-        // 2. Emit local if available (with loading indicator if translations pending)
-        if (!localCard.online) {
-            emit(WordResult(card = localCard, isTranslationLoading = needsTranslations))
-        }
+        // 2. Always emit local first with loading indicator (shows POS structure while fetching)
+        emit(
+            WordResult(
+                card = localCard,
+                isWordLoading = localCard.online,
+                isTranslationLoading = needsTranslations
+            )
+        )
 
         // 3. Stream from server - emits WordResult after EACH stage
         try {
@@ -139,10 +153,11 @@ class DictionaryClient(
                 localCard.online
             )
         } catch (e: Exception) {
-            // Emit error result (with card if we have local data)
+            // Emit error result - preserve loading context so UI knows where error occurred
             emit(
                 WordResult(
                     card = localCard,
+                    isWordLoading = false,
                     isTranslationLoading = false,
                     error = wrapException(e)
                 )

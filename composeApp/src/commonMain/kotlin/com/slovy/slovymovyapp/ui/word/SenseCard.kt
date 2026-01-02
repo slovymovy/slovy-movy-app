@@ -34,7 +34,7 @@ internal fun SenseCard(
     relatedWords: Set<String> = emptySet(),
     onWordClick: (String) -> Unit = {}
 ) {
-    val translationBasedHeader = remember(sense.senseId) { sense.translationsHeader() }
+    val translationBasedHeader = remember(sense.senseId, sense.translations) { sense.translationsHeader() }
 
     val expanded = state.expanded
     OutlinedCard(
