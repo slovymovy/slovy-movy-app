@@ -345,7 +345,7 @@ class DictionaryClient(
                 // Validate that server returned at least some POS entries
                 if (chunk.payload.entries.isEmpty()) {
                     throw DictionaryClientException.ServerException(
-                        statusCode = 200,
+                        statusCode = 500,
                         body = "Server returned no POS entries for '$lemma'"
                     )
                 }
