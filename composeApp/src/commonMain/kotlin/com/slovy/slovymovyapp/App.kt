@@ -366,6 +366,13 @@ fun App(
             composable<AppDestination.WordDetail> { backStackEntry ->
                 val args = backStackEntry.toRoute<AppDestination.WordDetail>()
 
+                // Remove cached ViewModel if it has error or loading (will be recreated fresh)
+                wordDetailViewModels[args]?.let { cached ->
+                    if (cached.hasError()) {
+                        wordDetailViewModels.remove(args)
+                    }
+                }
+
                 // Try to retrieve cached ViewModel, otherwise create new one with proper lifecycle
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
