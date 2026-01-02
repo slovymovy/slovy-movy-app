@@ -8,6 +8,7 @@ import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
 import io.ktor.client.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -82,7 +83,14 @@ class DictionaryClient(
 
     private val serverBaseUrl: String = baseUrl.trimEnd('/')
 
-    private val httpClient: HttpClient by lazy { platform.createHttpClient() }
+    private val httpClient: HttpClient by lazy {
+        platform.createHttpClient().config {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 120_000
+                socketTimeoutMillis = 120_000
+            }
+        }
+    }
 
     // Server may have newer trait types, so ignore unknown keys
     private val json = Json { ignoreUnknownKeys = true }
@@ -145,10 +153,11 @@ class DictionaryClient(
                 localCard.online
             )
         } catch (e: Exception) {
-            // Emit error result (with card if we have local data)
+            // Emit error result - preserve loading context so UI knows where error occurred
             emit(
                 WordResult(
                     card = localCard,
+                    isWordLoading = false,
                     isTranslationLoading = false,
                     error = wrapException(e)
                 )

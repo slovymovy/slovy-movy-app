@@ -228,12 +228,19 @@ class WordDetailViewModel(
     private fun updateStateFromResult(result: WordResult) {
         val card = result.card
         if (card != null) {
-            val current = state
-            val wordFamilyExpanded = (current as? WordDetailUiState.Content)?.wordFamilyExpanded ?: false
+            val current = state as? WordDetailUiState.Content
+            val wordFamilyExpanded = current?.wordFamilyExpanded ?: false
+
+            // Determine where error occurred based on what was loading before
+            val wasWordLoading = current?.cardLoading == true
+            val wasTranslationLoading = current?.translationLoading == true
+            val errorMessage = result.error?.message
+
             state = card.toContentUiState(targetSenseId, wordFamilyExpanded, ::isSenseFavorite).copy(
                 cardLoading = result.isWordLoading,
+                cardError = if (wasWordLoading && errorMessage != null) errorMessage else null,
                 translationLoading = result.isTranslationLoading,
-                translationError = result.error?.message
+                translationError = if (wasTranslationLoading && errorMessage != null) errorMessage else null
             )
         } else if (result.error != null) {
             state = WordDetailUiState.Empty(
