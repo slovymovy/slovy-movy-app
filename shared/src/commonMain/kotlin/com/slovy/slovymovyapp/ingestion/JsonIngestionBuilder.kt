@@ -643,7 +643,8 @@ class JsonIngestionBuilder(
         langCode: String,
         sourceDb: DictionaryDatabase,
         targetDb: DictionaryDatabase,
-        frequency: Double
+        frequency: Double,
+        posFilter: Set<String>? = null
     ) {
         val lemmaNormalized = stripAccents(word)
         val lemmaId = generateLemmaId(word, lemmaNormalized)
@@ -671,8 +672,15 @@ class JsonIngestionBuilder(
                 online_only = sourceLemma.online_only
             )
 
-            // Copy lemma_pos entries
-            val lemmaPosEntries = sourceQ.selectLemmaPosByLemmaId(lemmaId).executeAsList()
+            // Copy lemma_pos entries (filter by posFilter if provided)
+            val allLemmaPosEntries = sourceQ.selectLemmaPosByLemmaId(lemmaId).executeAsList()
+            val lemmaPosEntries = if (posFilter != null) {
+                // Convert posFilter strings to DictionaryPos for comparison
+                val posEnumFilter = posFilter.mapNotNull { mapPos(it) }.toSet()
+                allLemmaPosEntries.filter { lp -> posEnumFilter.contains(lp.pos) }
+            } else {
+                allLemmaPosEntries
+            }
             lemmaPosEntries.forEach { lp ->
                 targetQ.insertLemmaPos(
                     id = lp.id,

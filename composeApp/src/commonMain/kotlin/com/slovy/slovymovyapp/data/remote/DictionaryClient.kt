@@ -213,6 +213,7 @@ class DictionaryClient(
      * Copies raw data from downloaded DB to local DB for online_only words.
      * This version takes the localDb and downloadedDb as parameters for use within an existing transaction.
      *
+     * @param posFilter If provided, only copies raw data for these POS (to avoid empty entries)
      * Idempotent - skips if lemma already exists in local DB.
      */
     private fun copyRawDataIfNeeded(
@@ -221,7 +222,8 @@ class DictionaryClient(
         lemma: String,
         frequency: Double,
         targetDb: DictionaryDatabase,
-        sourceDb: DictionaryDatabase
+        sourceDb: DictionaryDatabase,
+        posFilter: Set<String>? = null
     ) {
         val lemmaId = JsonIngestionBuilder.generateLemmaId(lemma)
 
@@ -236,7 +238,8 @@ class DictionaryClient(
             langCode = language.code,
             sourceDb = sourceDb,
             targetDb = targetDb,
-            frequency = frequency
+            frequency = frequency,
+            posFilter = posFilter
         )
     }
 
@@ -339,6 +342,14 @@ class DictionaryClient(
 
         when (chunk.stage) {
             WordStreamStage.BASE -> {
+                // Validate that server returned at least some POS entries
+                if (chunk.payload.entries.isEmpty()) {
+                    throw DictionaryClientException.ServerException(
+                        statusCode = 200,
+                        body = "Server returned no POS entries for '$lemma'"
+                    )
+                }
+
                 if (localIsOnlineOnly) {
                     // Online-only word - copy raw data to local DB first,
                     // then ingest processed data over it.
@@ -350,8 +361,15 @@ class DictionaryClient(
                     // Wrap in transaction to avoid partial state if interrupted.
                     localDictDb.transaction {
                         if (downloadedDb != null) {
+                            val posFilter = chunk.payload.entries.map { it.pos }.toSet()
                             copyRawDataIfNeeded(
-                                ingestionBuilder, language, lemma, frequency, localDictDb, downloadedDb
+                                ingestionBuilder = ingestionBuilder,
+                                language = language,
+                                lemma = lemma,
+                                frequency = frequency,
+                                targetDb = localDictDb,
+                                sourceDb = downloadedDb,
+                                posFilter = posFilter
                             )
                         }
                         ingestionBuilder.ingestProcessedOverRaw(
