@@ -67,6 +67,11 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.sqldelight.androidDriver)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.androidx.emoji2)
+
+            implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+            implementation(libs.androidx.lifecycle.runtime)
+            implementation(libs.androidx.customview.poolingcontainer)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

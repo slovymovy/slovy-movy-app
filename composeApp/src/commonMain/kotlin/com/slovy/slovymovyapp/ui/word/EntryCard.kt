@@ -53,7 +53,7 @@ internal fun EntryCard(
     relatedWords: Set<String> = emptySet(),
     onWordClick: (String) -> Unit = {}
 ) {
-    val expanded = entryState.expanded || cardLoading || cardError != null
+    val expanded = entryState.expanded && !cardLoading && cardError == null
     AppCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -67,56 +67,58 @@ internal fun EntryCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Use new PartOfSpeechIndicator
                 PartOfSpeechIndicator(
-                    partOfSpeech = entry.pos.name
+                    partOfSpeech = entry.pos.name,
+                    cardLoading = cardLoading,
+                    cardError = cardError
                 )
+                if (!cardLoading && cardError == null) {
 
-                Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
-                if (!cardLoading) {
                     Text(
                         text = "(${entry.senses.size} meaning${pluralEnding(entry.senses)})",
                         style = MaterialTheme.typography.labelLarge.copy(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
-                }
 
-                Spacer(modifier = Modifier.width(16.dp))
 
-                val summaryParts = buildList {
-                    if (entry.forms.isNotEmpty() && !cardLoading) {
-                        add("${entry.forms.size} form${pluralEnding(entry.forms)}")
-                    }
-                }.joinToString(" ${Typography.bullet} ")
+                    Spacer(modifier = Modifier.width(16.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
-                    AnimatedVisibility(
-                        visible = !expanded && summaryParts.isNotBlank(),
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            HighlightedText(
-                                text = summaryParts,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = MaterialTheme.colorScheme.onSurface
+                    val summaryParts = buildList {
+                        if (entry.forms.isNotEmpty() && !cardLoading) {
+                            add("${entry.forms.size} form${pluralEnding(entry.forms)}")
+                        }
+                    }.joinToString(" ${Typography.bullet} ")
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        AnimatedVisibility(
+                            visible = !expanded && summaryParts.isNotBlank(),
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                HighlightedText(
+                                    text = summaryParts,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
-                }
 
-                Icon(
-                    imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
-                    contentDescription = if (expanded) {
-                        "Collapse ${entry.pos} entry"
-                    } else {
-                        "Expand ${entry.pos} entry"
-                    },
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                    Icon(
+                        imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
+                        contentDescription = if (expanded) {
+                            "Collapse ${entry.pos} entry"
+                        } else {
+                            "Expand ${entry.pos} entry"
+                        },
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             AnimatedVisibility(
@@ -131,68 +133,53 @@ internal fun EntryCard(
                         .padding(bottom = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    if (cardError != null) {
-                        Column(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+
+                    if (entry.forms.isNotEmpty()) {
+                        ExpandableSection(
+                            title = "Grammar",
+                            expanded = entryState.formsExpanded,
+                            onToggle = onFormsToggle,
+                            supportingText = null,
+                            headlineStyle = MaterialTheme.typography.titleSmall
                         ) {
-                            ErrorPlaceholder(cardError)
+                            SectionLabel("Grammar")
+                            FormsList(entry.forms)
                         }
-                    } else if (cardLoading) {
-                        Column(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            LoadingPlaceholder("Preparing card, AI is working...")
-                        }
-                    } else {
-                        if (entry.forms.isNotEmpty()) {
-                            ExpandableSection(
-                                title = "Grammar",
-                                expanded = entryState.formsExpanded,
-                                onToggle = onFormsToggle,
-                                supportingText = null,
-                                headlineStyle = MaterialTheme.typography.titleSmall
-                            ) {
-                                SectionLabel("Grammar")
-                                FormsList(entry.forms)
-                            }
+                    }
+
+                    val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
+                    groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
+                        val showGroup = groupEntries.size > 1 && groupIndex > 0 && senseList.size > 1
+                        if (showGroup) {
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                            )
                         }
 
-                        val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
-                        groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
-                            val showGroup = groupEntries.size > 1 && groupIndex > 0 && senseList.size > 1
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                             if (showGroup) {
-                                HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                                )
+                                SectionLabel("Group: $groupId")
                             }
 
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                if (showGroup) {
-                                    SectionLabel("Group: $groupId")
-                                }
-
-                                senseList.forEachIndexed { senseIndex, sense ->
-                                    val senseState = entryState.senses.find { it.senseId == sense.senseId }
-                                        ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
-                                    SenseCard(
-                                        lemma = null,
-                                        sense = sense,
-                                        state = senseState,
-                                        translationLoading = translationLoading || senseState.translationLoading,
-                                        translationError = translationError ?: senseState.translationError,
-                                        onToggle = { onSenseToggle(sense.senseId) },
-                                        onPositioned = onSensePositioned,
-                                        onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
-                                        relatedWords = relatedWords,
-                                        onWordClick = onWordClick
+                            senseList.forEachIndexed { senseIndex, sense ->
+                                val senseState = entryState.senses.find { it.senseId == sense.senseId }
+                                    ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
+                                SenseCard(
+                                    lemma = null,
+                                    sense = sense,
+                                    state = senseState,
+                                    translationLoading = translationLoading || senseState.translationLoading,
+                                    translationError = translationError ?: senseState.translationError,
+                                    onToggle = { onSenseToggle(sense.senseId) },
+                                    onPositioned = onSensePositioned,
+                                    onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
+                                    relatedWords = relatedWords,
+                                    onWordClick = onWordClick
+                                )
+                                if (senseIndex < senseList.lastIndex) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
                                     )
-                                    if (senseIndex < senseList.lastIndex) {
-                                        HorizontalDivider(
-                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-                                        )
-                                    }
                                 }
                             }
                         }

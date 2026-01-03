@@ -293,7 +293,6 @@ class DictionaryClient(
             }
 
             val channel = response.bodyAsChannel()
-            val hasTranslationTargets = targets.isNotEmpty()
 
             // Read line-by-line, parse each as WordStreamChunk
             var receivedBase = false
@@ -305,8 +304,13 @@ class DictionaryClient(
                 val isBaseStage = chunk.stage == WordStreamStage.BASE
                 receivedBase = receivedBase || isBaseStage
 
+                val haveRequiredTranslations = chunk.payload.entries.any {
+                    it.senses.any { s ->
+                        s.translations.keys.containsAll(targets.map { k -> k.code })
+                    }
+                }
                 // After base, we expect translated if translations were requested
-                val hasMoreChunks = isBaseStage && hasTranslationTargets
+                val hasMoreChunks = isBaseStage && !haveRequiredTranslations
 
                 processChunk(
                     collector = collector,

@@ -24,7 +24,7 @@ android {
         applicationId = "com.slovy.slovymovyapp"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 3
+        versionCode = 4
         versionName = "Alpha"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -65,6 +65,10 @@ dependencies {
     implementation(projects.composeApp)
     implementation(projects.shared)
     implementation(libs.androidx.activity.compose)
+
+    debugImplementation(libs.androidx.lifecycle.viewmodel.savedstate)
+    debugImplementation(libs.androidx.lifecycle.runtime)
+    debugImplementation(libs.androidx.customview.poolingcontainer)
 
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)

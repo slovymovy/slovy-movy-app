@@ -97,7 +97,7 @@ fun DownloadScreenContent(
             when (state) {
                 is DownloadUiState.Idle -> Text("Preparing download…")
                 is DownloadUiState.Running -> {
-                    LoadingIndicator()
+                    LinearWavyProgressIndicator(progress = { state.percent / 100f })
                     Spacer(Modifier.height(16.dp))
                     val pct = if (state.percent >= 0) "${state.percent}%" else "…"
                     Text("$description $pct", style = MaterialTheme.typography.bodyMedium)

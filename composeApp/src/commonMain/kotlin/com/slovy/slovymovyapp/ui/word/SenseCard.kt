@@ -59,6 +59,11 @@ internal fun SenseCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    if (translationError != null) {
+                        ErrorPlaceholder(translationError)
+                    } else if (translationLoading) {
+                        LoadingPlaceholder("AI is translating...")
+                    }
                     lemma?.let {
                         HighlightedText(
                             text = it,
@@ -155,10 +160,6 @@ internal fun SenseCard(
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(vertical = 2.dp)
                         )
-                    } else if (translationError != null) {
-                        ErrorPlaceholder(translationError)
-                    } else if (translationLoading) {
-                        LoadingPlaceholder("AI is translating...")
                     }
 
                     if (sense.traits.isNotEmpty()) {
