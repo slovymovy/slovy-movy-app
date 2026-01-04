@@ -133,14 +133,6 @@ private fun LanguageCardResponseSense.toSenseUiState(
     )
 }
 
-private fun LanguageCardResponseSense.collectLanguages(): List<Language> {
-    val ordered = linkedSetOf<Language>()
-    ordered += targetLangDefinitions.keys
-    ordered += translations.keys
-    examples.forEach { ex -> ordered += ex.targetLangTranslations.keys }
-    return ordered.toList()
-}
-
 private fun WordDetailUiState.Content.toggleEntry(entryIndex: Int): WordDetailUiState.Content =
     updateEntry(entryIndex) { entry -> entry.copy(expanded = !entry.expanded) }
 
@@ -823,4 +815,3 @@ private fun WordDetailContent(
         }
     }
 }
-

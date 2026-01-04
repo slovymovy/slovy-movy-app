@@ -21,33 +21,38 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.word.LoadingPlaceholder
 import com.slovy.slovymovyapp.ui.word.SenseCard
+import com.slovy.slovymovyapp.ui.word.SenseCardData
 import com.slovy.slovymovyapp.ui.word.SenseUiState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
+import kotlin.uuid.Uuid
 
-data class FavoriteGroupUiState(
+data class FavoriteSenseItem(
+    val senseId: String,
     val targetLang: Language,
     val lemma: String,
-    val senses: List<FavoriteSenseUiState>?,
-    val expanded: Boolean = false
-)
-
-data class FavoriteSenseUiState(
-    val favorite: Favorite,
-    val sense: LanguageCardResponseSense,
-    val state: SenseUiState
+    val sense: LanguageCardResponseSense? = null,
+    val pos: PartOfSpeech? = null,
+    val expanded: Boolean = false,
+    val loading: Boolean = false,
+    val error: String? = null
 )
 
 sealed interface FavoritesUiState {
     data object Loading : FavoritesUiState
 
     data class Content(
-        val groups: List<FavoriteGroupUiState>,
+        val senses: List<FavoriteSenseItem>,
         val query: String = "",
-        val showNoResults: Boolean = false,
-        val hasAnyFavorites: Boolean = false,
-    ) : FavoritesUiState
+        val hasAnyFavorites: Boolean = false
+    ) : FavoritesUiState {
+        val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
+    }
 }
 
 class FavoritesViewModel(
@@ -60,148 +65,154 @@ class FavoritesViewModel(
 
     val scrollState = LazyListState()
 
-    fun updateQuery(newQuery: String) {
-        val currentState = state
-        if (currentState is FavoritesUiState.Content) {
-            state = currentState.copy(query = newQuery)
+    private val queryFlow = MutableStateFlow(QueryState("", Uuid.random()))
+
+    private data class QueryState(val query: String, val force: Uuid)
+
+    companion object {
+        private const val QUERY_DEBOUNCE_MS = 200L
+        private const val PREFETCH_LIMIT = 16
+    }
+
+    init {
+        viewModelScope.launch {
+            @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+            queryFlow
+                .debounce(QUERY_DEBOUNCE_MS)
+                .flatMapLatest { queryState ->
+                    flow { emit(loadFavoritesInternal(queryState.query)) }
+                        .flowOn(Dispatchers.Default)
+                }
+                .collect { }
         }
-        loadFavorites()
+    }
+
+    fun updateQuery(newQuery: String) {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.copy(query = newQuery)
+        queryFlow.value = QueryState(newQuery, Uuid.random())
     }
 
     fun loadFavorites() {
-        viewModelScope.launch {
-            loadFavoritesInternal()
-        }
+        val currentQuery = (state as? FavoritesUiState.Content)?.query ?: ""
+        queryFlow.value = QueryState(currentQuery, Uuid.random())
     }
 
-    private suspend fun loadFavoritesInternal() {
-        val currentState = state
-        val currentQuery = (currentState as? FavoritesUiState.Content)?.query ?: ""
-        val currentGroups = (currentState as? FavoritesUiState.Content)?.groups ?: emptyList()
+    private suspend fun loadFavoritesInternal(query: String) {
+        val currentSenses = (state as? FavoritesUiState.Content)?.senses.orEmpty()
+        val currentById = currentSenses.associateBy { it.senseId }
 
         val allFavorites = favoritesRepository.getAllGroupedByLangAndLemma()
         val hasAnyFavorites = allFavorites.isNotEmpty()
 
-        val trimmedQuery = currentQuery.trim()
+        val trimmedQuery = query.trim()
         val favorites = if (trimmedQuery.isEmpty()) {
             allFavorites
         } else {
             favoritesRepository.searchByLemma(trimmedQuery)
         }
 
-        // Group by (targetLang, lemma)
-        val grouped = favorites.groupBy { it.targetLang to it.lemma }
-
-        val groups = grouped.map { (langLemma, _) ->
-            val (targetLang, lemma) = langLemma
-
-            // Find existing group to preserve state
-            val existingGroup = currentGroups.find { it.targetLang == targetLang && it.lemma == lemma }
-
-            // Load senses immediately for collapsed view preview
-            val senses = if (existingGroup?.senses != null) {
-                existingGroup.senses
-            } else {
-                loadGroupSensesData(targetLang, lemma, currentGroups)
-            }
-
-            FavoriteGroupUiState(
-                targetLang = targetLang,
-                lemma = lemma,
-                senses = senses,
-                expanded = existingGroup?.expanded ?: false
-            )
+        val senses = favorites.map { favorite ->
+            val existing = currentById[favorite.senseId]
+            val cached = dictionaryRepository.getCachedSense(favorite.senseId)
+            buildSenseItem(favorite, cached, existing)
         }
 
         state = FavoritesUiState.Content(
-            groups = groups,
-            query = currentQuery,
-            showNoResults = groups.isEmpty() && trimmedQuery.isNotEmpty(),
+            senses = senses,
+            query = query,
             hasAnyFavorites = hasAnyFavorites
+        )
+
+        prefetchSenses(senses.take(PREFETCH_LIMIT))
+    }
+
+    private fun buildSenseItem(
+        favorite: Favorite,
+        cached: DictionaryRepository.SenseWithPos?,
+        existing: FavoriteSenseItem?
+    ): FavoriteSenseItem {
+        return FavoriteSenseItem(
+            senseId = favorite.senseId,
+            targetLang = favorite.targetLang,
+            lemma = favorite.lemma,
+            sense = cached?.sense ?: existing?.sense,
+            pos = cached?.pos ?: existing?.pos,
+            expanded = existing?.expanded ?: false,
+            loading = existing?.loading == true && cached == null,
+            error = if (cached != null) null else existing?.error
         )
     }
 
-    private suspend fun loadGroupSensesData(
-        targetLang: Language,
-        lemma: String,
-        currentGroups: List<FavoriteGroupUiState>
-    ): List<FavoriteSenseUiState> {
-        val favorites = favoritesRepository.getByLangAndLemma(targetLang, lemma)
-        val allFavSenses = favorites.map { it.senseId }
-
-        val card = dictionaryRepository.getLanguageCard(targetLang, lemma)
-
-        return favorites.mapNotNull { favorite ->
-            // Find the entry and sense
-            val entryAndSense = card?.entries?.firstNotNullOfOrNull { entry ->
-                entry.senses.find { it.senseId == favorite.senseId }?.let { sense ->
-                    entry to sense
-                }
-            }
-
-            if (entryAndSense != null) {
-                val (entry, sense) = entryAndSense
-                // Find existing sense state to preserve
-                val existingGroup = currentGroups.find { it.targetLang == targetLang && it.lemma == lemma }
-                val existingSenseState =
-                    existingGroup?.senses?.find { it.sense.senseId == sense.senseId }
-                        ?.state?.copy(favorite = allFavSenses.contains(sense.senseId))
-
-                FavoriteSenseUiState(
-                    favorite = favorite,
-                    sense = sense,
-                    state = existingSenseState ?: SenseUiState(
-                        senseId = sense.senseId,
-                        expanded = false,
-                        examplesExpanded = false,
-                        languageExpanded = emptyMap(),
-                        favorite = true,
-                        showFavoriteToggle = false,
-                        pos = entry.pos
-                    )
-                )
-            } else {
-                null
-            }
-        }
+    private fun updateSense(senseId: String, transform: (FavoriteSenseItem) -> FavoriteSenseItem) {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.copy(
+            senses = content.senses.map { if (it.senseId == senseId) transform(it) else it }
+        )
     }
 
-    private fun updateSenseState(senseId: String, updateFn: (SenseUiState) -> SenseUiState) {
-        val currentState = state
-        if (currentState is FavoritesUiState.Content) {
-            state = currentState.copy(
-                groups = currentState.groups.map { group ->
-                    group.copy(
-                        senses = group.senses?.map { favSense ->
-                            if (favSense.sense.senseId == senseId) {
-                                favSense.copy(state = updateFn(favSense.state))
-                            } else {
-                                favSense
-                            }
-                        }
-                    )
-                }
-            )
-        }
+    private fun findSense(senseId: String): FavoriteSenseItem? {
+        val content = state as? FavoritesUiState.Content ?: return null
+        return content.senses.find { it.senseId == senseId }
     }
 
     fun toggleSense(senseId: String) {
-        updateSenseState(senseId) { it.copy(expanded = !it.expanded, showFavoriteToggle = !it.showFavoriteToggle) }
-    }
+        val item = findSense(senseId) ?: return
+        val wasExpanded = item.expanded
+        val shouldLoad = !wasExpanded && item.sense == null && !item.loading && item.error == null
 
-    fun toggleFavorite(senseId: String, targetLang: Language, lemma: String) {
-        viewModelScope.launch {
-            val isFavorite = if (favoritesRepository.exists(senseId, targetLang)) {
-                favoritesRepository.remove(senseId, targetLang)
-                false
-            } else {
-                favoritesRepository.add(senseId, targetLang, lemma)
-                true
-            }
-            updateSenseState(senseId) { it.copy(favorite = isFavorite) }
+        updateSense(senseId) { it.copy(expanded = !wasExpanded, error = null) }
+
+        if (shouldLoad) {
+            viewModelScope.launch { loadSense(item) }
         }
     }
 
+    fun toggleFavorite(senseId: String) {
+        val item = findSense(senseId) ?: return
+        viewModelScope.launch {
+            if (favoritesRepository.exists(senseId, item.targetLang)) {
+                favoritesRepository.remove(senseId, item.targetLang)
+                // Remove from list since it's no longer a favorite
+                val content = state as? FavoritesUiState.Content ?: return@launch
+                state = content.copy(senses = content.senses.filter { it.senseId != senseId })
+            }
+        }
+    }
+
+    private suspend fun loadSense(item: FavoriteSenseItem) {
+        updateSense(item.senseId) { it.copy(loading = true, error = null) }
+        try {
+            val loaded = dictionaryRepository.getSenses(item.targetLang, item.lemma, setOf(item.senseId))
+            val result = loaded[item.senseId]
+            updateSense(item.senseId) {
+                it.copy(
+                    sense = result?.sense,
+                    pos = result?.pos,
+                    loading = false,
+                    error = if (result == null) "Meaning not found" else null
+                )
+            }
+        } catch (e: Throwable) {
+            updateSense(item.senseId) {
+                it.copy(loading = false, error = e.message ?: "Failed to load meaning")
+            }
+        }
+    }
+
+    private fun prefetchSenses(items: List<FavoriteSenseItem>) {
+        val toLoad = items.filter { it.sense == null && !it.loading && it.error == null }
+        toLoad.forEach { item ->
+            viewModelScope.launch { loadSense(item) }
+        }
+    }
+
+    fun prefetchVisibleRange(senses: List<FavoriteSenseItem>, range: IntRange) {
+        if (senses.isEmpty() || range.isEmpty()) return
+        val safeRange = range.first.coerceAtLeast(0)..minOf(range.last, senses.lastIndex)
+        if (safeRange.isEmpty()) return
+        prefetchSenses(senses.slice(safeRange).take(PREFETCH_LIMIT))
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -215,7 +226,6 @@ fun FavoritesScreen(
 ) {
     val focusManager = LocalFocusManager.current
 
-    // Clear focus when scrolling starts
     LaunchedEffect(viewModel.scrollState.isScrollInProgress) {
         if (viewModel.scrollState.isScrollInProgress) {
             focusManager.clearFocus()
@@ -227,11 +237,12 @@ fun FavoritesScreen(
         scrollState = viewModel.scrollState,
         onNavigateToSearch = onNavigateToSearch,
         onQueryChange = { viewModel.updateQuery(it) },
-        onSenseToggle = { senseId -> viewModel.toggleSense(senseId) },
-        onFavoriteToggle = { senseId, targetLang, lemma -> viewModel.toggleFavorite(senseId, targetLang, lemma) },
+        onSenseToggle = { viewModel.toggleSense(it) },
+        onFavoriteToggle = { viewModel.toggleFavorite(it) },
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
-        onNavigateToSettings = onNavigateToSettings
+        onNavigateToSettings = onNavigateToSettings,
+        onPrefetchVisible = { senses, range -> viewModel.prefetchVisibleRange(senses, range) }
     )
 }
 
@@ -243,10 +254,11 @@ fun FavoritesScreenContent(
     onNavigateToSearch: () -> Unit = {},
     onQueryChange: (String) -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
-    onFavoriteToggle: (String, Language, String) -> Unit = { _, _, _ -> },
+    onFavoriteToggle: (String) -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    onPrefetchVisible: (List<FavoriteSenseItem>, IntRange) -> Unit = { _, _ -> }
 ) {
     Scaffold(
         topBar = {
@@ -287,12 +299,23 @@ fun FavoritesScreenContent(
             }
 
             is FavoritesUiState.Content -> {
+                LaunchedEffect(state.senses, scrollState) {
+                    snapshotFlow { scrollState.layoutInfo.visibleItemsInfo.map { it.index } }
+                        .distinctUntilChanged()
+                        .collectLatest { indices ->
+                            if (indices.isEmpty()) return@collectLatest
+                            val first = indices.minOrNull() ?: return@collectLatest
+                            val last = indices.maxOrNull() ?: return@collectLatest
+                            val lookahead = 5
+                            val end = minOf(last + lookahead, state.senses.lastIndex)
+                            onPrefetchVisible(state.senses, first..end)
+                        }
+                }
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
-                    // Search field - only show if there are any favorites
                     if (state.hasAnyFavorites) {
                         com.slovy.slovymovyapp.ui.components.AppSearchBar(
                             query = state.query,
@@ -301,15 +324,13 @@ fun FavoritesScreenContent(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                                 .padding(top = 16.dp),
-                            placeholder = "Search my word..."
+                            placeholder = "Search my words..."
                         )
-
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    // Content
                     when {
-                        state.groups.isEmpty() && state.query.isEmpty() -> {
+                        state.senses.isEmpty() && state.query.isEmpty() -> {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -322,9 +343,7 @@ fun FavoritesScreenContent(
                                     shape = MaterialTheme.shapes.extraLarge,
                                     color = MaterialTheme.colorScheme.primaryContainer
                                 ) {
-                                    Box(
-                                        contentAlignment = Alignment.Center
-                                    ) {
+                                    Box(contentAlignment = Alignment.Center) {
                                         Icon(
                                             imageVector = Icons.Outlined.FavoriteBorder,
                                             contentDescription = null,
@@ -366,10 +385,9 @@ fun FavoritesScreenContent(
 
                         else -> {
                             Column(modifier = Modifier.fillMaxSize()) {
-                                // Meaning count
-                                val meaningCount = state.groups.sumOf { it.senses?.size ?: 0 }
+                                val count = state.senses.size
                                 Text(
-                                    text = if (meaningCount == 1) "1 meaning" else "$meaningCount meanings",
+                                    text = if (count == 1) "1 meaning" else "$count meanings",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
@@ -383,11 +401,11 @@ fun FavoritesScreenContent(
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
                                     contentPadding = PaddingValues(bottom = 16.dp)
                                 ) {
-                                    items(state.groups, key = { "${it.targetLang.code}_${it.lemma}" }) { group ->
-                                        FavoriteGroupCard(
-                                            group = group,
-                                            onSenseToggle = onSenseToggle,
-                                            onFavoriteToggle = onFavoriteToggle
+                                    items(state.senses, key = { it.senseId }, contentType = { "sense_card" }) { item ->
+                                        FavoriteSenseCard(
+                                            item = item,
+                                            onToggle = { onSenseToggle(item.senseId) },
+                                            onFavoriteToggle = { onFavoriteToggle(item.senseId) }
                                         )
                                     }
                                 }
@@ -401,25 +419,33 @@ fun FavoritesScreenContent(
 }
 
 @Composable
-private fun FavoriteGroupCard(
-    group: FavoriteGroupUiState,
-    onSenseToggle: (String) -> Unit,
-    onFavoriteToggle: (String, Language, String) -> Unit
+private fun FavoriteSenseCard(
+    item: FavoriteSenseItem,
+    onToggle: () -> Unit,
+    onFavoriteToggle: () -> Unit
 ) {
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        group.senses?.forEach { favSense ->
-            val sense = favSense.sense
-            SenseCard(
-                lemma = group.lemma,
-                sense = sense,
-                state = favSense.state,
-                onToggle = { onSenseToggle(sense.senseId) },
-                onFavoriteToggle = { onFavoriteToggle(sense.senseId, group.targetLang, group.lemma) })
-        }
-    }
+    val senseState = SenseUiState(
+        senseId = item.senseId,
+        expanded = item.expanded,
+        examplesExpanded = false,
+        languageExpanded = emptyMap(),
+        favorite = true,
+        showFavoriteToggle = item.expanded,
+        pos = item.pos
+    )
+    SenseCard(
+        data = SenseCardData(
+            senseId = item.senseId,
+            lemma = item.lemma,
+            sense = item.sense,
+            pos = item.pos,
+            loading = item.loading,
+            error = item.error
+        ),
+        state = senseState,
+        onToggle = onToggle,
+        onFavoriteToggle = onFavoriteToggle
+    )
 }
 
 // Preview helpers
@@ -448,19 +474,25 @@ private fun createMockSense(
     )
 }
 
-private fun createMockFavorite(
+private fun createSenseItem(
     senseId: String,
-    targetLang: Language,
     lemma: String,
-    createdAt: Long = 1700000000L
-): Favorite {
-    return Favorite(
-        senseId = senseId,
-        targetLang = targetLang,
-        lemma = lemma,
-        createdAt = createdAt
-    )
-}
+    targetLang: Language = Language.ENGLISH,
+    sense: LanguageCardResponseSense? = null,
+    pos: PartOfSpeech? = null,
+    expanded: Boolean = false,
+    loading: Boolean = false,
+    error: String? = null
+) = FavoriteSenseItem(
+    senseId = senseId,
+    targetLang = targetLang,
+    lemma = lemma,
+    sense = sense,
+    pos = pos,
+    expanded = expanded,
+    loading = loading,
+    error = error
+)
 
 @Preview
 @Composable
@@ -468,9 +500,7 @@ fun PreviewFavoritesScreenLoading(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        FavoritesScreenContent(
-            state = FavoritesUiState.Loading
-        )
+        FavoritesScreenContent(state = FavoritesUiState.Loading)
     }
 }
 
@@ -481,286 +511,62 @@ fun PreviewFavoritesScreenEmpty(
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(
-            state = FavoritesUiState.Content(
-                groups = emptyList(),
-                hasAnyFavorites = false
-            )
+            state = FavoritesUiState.Content(senses = emptyList(), hasAnyFavorites = false)
         )
     }
 }
 
 @Preview
 @Composable
-fun PreviewFavoritesScreenSingleGroupCollapsed(
+fun PreviewFavoritesScreenCollapsed(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        val sense1 = createMockSense(
-            id = "run-1",
-            definition = "to move swiftly on foot",
-            level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH,
-            examples = listOf(
-                LanguageCardExample("She runs every morning", mapOf(Language.POLISH to "Ona biegnie każdego ranka"))
-            ),
-            synonyms = listOf("walk", "stride"),
-            antonyms = listOf("hitchhike", "stop")
-        )
-
         val state = FavoritesUiState.Content(
-            groups = listOf(
-                FavoriteGroupUiState(
-                    targetLang = Language.ENGLISH,
+            senses = listOf(
+                createSenseItem(
+                    senseId = "run-1",
                     lemma = "run",
-                    senses = listOf(
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("run-1", Language.ENGLISH, "run"),
-                            sense = sense1,
-                            state = SenseUiState(
-                                senseId = "run-1",
-                                expanded = false,
-                                examplesExpanded = false,
-                                languageExpanded = emptyMap(),
-                                favorite = true,
-                                pos = PartOfSpeech.VERB,
-                                showFavoriteToggle = false
-                            )
-                        )
-                    ),
-                    expanded = false
-                )
-            ),
-            hasAnyFavorites = true
-        )
-
-        FavoritesScreenContent(state = state)
-    }
-}
-
-@Preview
-@Composable
-fun PreviewFavoritesScreenMultipleGroupsCollapsed(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        val runSense1 = createMockSense(
-            id = "run-1",
-            definition = "to move swiftly on foot",
-            level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH
-        )
-
-        val runSense2 = createMockSense(
-            id = "run-2",
-            definition = "to operate or control",
-            level = LearnerLevel.B1,
-            frequency = SenseFrequency.MIDDLE
-        )
-
-        val bookSense1 = createMockSense(
-            id = "book-1",
-            definition = "a written or printed work",
-            level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH
-        )
-
-        val state = FavoritesUiState.Content(
-            groups = listOf(
-                FavoriteGroupUiState(
-                    targetLang = Language.ENGLISH,
-                    lemma = "run",
-                    senses = listOf(
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("run-1", Language.ENGLISH, "run", 1000000),
-                            sense = runSense1,
-                            state = SenseUiState(
-                                senseId = "run-1",
-                                expanded = false,
-                                examplesExpanded = false,
-                                languageExpanded = emptyMap(),
-                                favorite = true,
-                                pos = PartOfSpeech.VERB,
-                                showFavoriteToggle = false
-                            )
-                        ),
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("run-2", Language.ENGLISH, "run", 900000),
-                            sense = runSense2,
-                            state = SenseUiState(
-                                senseId = "run-2",
-                                expanded = false,
-                                examplesExpanded = false,
-                                languageExpanded = emptyMap(),
-                                favorite = true,
-                                pos = PartOfSpeech.VERB,
-                                showFavoriteToggle = false
-                            )
-                        )
-                    ),
-                    expanded = false
+                    sense = createMockSense("run-1", "to move swiftly on foot", LearnerLevel.A1, SenseFrequency.HIGH),
+                    pos = PartOfSpeech.VERB
                 ),
-                FavoriteGroupUiState(
-                    targetLang = Language.ENGLISH,
+                createSenseItem(
+                    senseId = "book-1",
                     lemma = "book",
-                    senses = listOf(
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("book-1", Language.ENGLISH, "book", 800000),
-                            sense = bookSense1,
-                            state = SenseUiState(
-                                senseId = "book-1",
-                                expanded = false,
-                                examplesExpanded = false,
-                                languageExpanded = emptyMap(),
-                                favorite = false,
-                                pos = PartOfSpeech.NOUN,
-                                showFavoriteToggle = false
-                            )
-                        )
-                    ),
-                    expanded = false,
+                    sense = createMockSense("book-1", "a written or printed work", LearnerLevel.A1, SenseFrequency.HIGH),
+                    pos = PartOfSpeech.NOUN
                 )
             ),
             hasAnyFavorites = true
         )
-
         FavoritesScreenContent(state = state)
     }
 }
 
 @Preview
 @Composable
-fun PreviewFavoritesScreenGroupExpanded(
+fun PreviewFavoritesScreenExpanded(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        val sense1 = createMockSense(
-            id = "happy-1",
-            definition = "feeling or showing pleasure or contentment",
-            level = LearnerLevel.A2,
-            frequency = SenseFrequency.HIGH,
-            examples = listOf(
-                LanguageCardExample("I'm so happy today!", mapOf(Language.POLISH to "Jestem dzisiaj taki szczęśliwy!")),
-                LanguageCardExample("She looks happy", mapOf(Language.POLISH to "Ona wygląda na szczęśliwą"))
-            )
-        )
-
         val state = FavoritesUiState.Content(
-            groups = listOf(
-                FavoriteGroupUiState(
-                    targetLang = Language.ENGLISH,
+            senses = listOf(
+                createSenseItem(
+                    senseId = "happy-1",
                     lemma = "happy",
-                    senses = listOf(
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("happy-1", Language.ENGLISH, "happy"),
-                            sense = sense1,
-                            state = SenseUiState(
-                                senseId = "happy-1",
-                                expanded = true,
-                                examplesExpanded = true,
-                                languageExpanded = mapOf(Language.POLISH to true),
-                                favorite = true,
-                                pos = PartOfSpeech.ADJECTIVE,
-                                showFavoriteToggle = true
-                            )
-                        )
+                    sense = createMockSense(
+                        "happy-1",
+                        "feeling or showing pleasure",
+                        LearnerLevel.A2,
+                        SenseFrequency.HIGH,
+                        examples = listOf(LanguageCardExample("I'm happy", mapOf(Language.POLISH to "Jestem szczęśliwy")))
                     ),
+                    pos = PartOfSpeech.ADJECTIVE,
                     expanded = true
                 )
             ),
             hasAnyFavorites = true
         )
-
-        FavoritesScreenContent(state = state)
-    }
-}
-
-@Preview
-@Composable
-fun PreviewFavoritesScreenMixedStates(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        val sense1 = createMockSense(
-            id = "love-1",
-            definition = "an intense feeling of deep affection",
-            level = LearnerLevel.A2,
-            frequency = SenseFrequency.HIGH
-        )
-
-        val sense2 = createMockSense(
-            id = "love-2",
-            definition = "to feel deep affection for someone",
-            level = LearnerLevel.A2,
-            frequency = SenseFrequency.HIGH,
-            examples = listOf(LanguageCardExample("I love you", mapOf(Language.POLISH to "Kocham cię")))
-        )
-
-        val runSense = createMockSense(
-            id = "run-1",
-            definition = "to move swiftly on foot",
-            level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH
-        )
-
-        val state = FavoritesUiState.Content(
-            groups = listOf(
-                FavoriteGroupUiState(
-                    targetLang = Language.ENGLISH,
-                    lemma = "love",
-                    senses = listOf(
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("love-1", Language.ENGLISH, "love", 2000000),
-                            sense = sense1,
-                            state = SenseUiState(
-                                senseId = "love-1",
-                                expanded = true,
-                                examplesExpanded = false,
-                                languageExpanded = emptyMap(),
-                                favorite = true,
-                                pos = PartOfSpeech.NOUN,
-                                showFavoriteToggle = true
-                            )
-                        ),
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("love-2", Language.ENGLISH, "love", 1000000),
-                            sense = sense2,
-                            state = SenseUiState(
-                                senseId = "love-2",
-                                expanded = false,
-                                examplesExpanded = false,
-                                languageExpanded = emptyMap(),
-                                favorite = false,
-                                pos = PartOfSpeech.VERB,
-                                showFavoriteToggle = false
-                            )
-                        )
-                    ),
-                    expanded = true
-                ),
-                FavoriteGroupUiState(
-                    targetLang = Language.ENGLISH,
-                    lemma = "run",
-                    senses = listOf(
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("run-1", Language.ENGLISH, "run", 1500000),
-                            sense = runSense,
-                            state = SenseUiState(
-                                senseId = "run-1",
-                                expanded = false,
-                                examplesExpanded = false,
-                                languageExpanded = emptyMap(),
-                                favorite = true,
-                                pos = PartOfSpeech.VERB,
-                                showFavoriteToggle = false
-                            )
-                        )
-                    ),
-                    expanded = false
-                )
-            ),
-            hasAnyFavorites = true
-        )
-
         FavoritesScreenContent(state = state)
     }
 }
@@ -771,40 +577,18 @@ fun PreviewFavoritesScreenWithSearch(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        val runSense = createMockSense(
-            id = "run-1",
-            definition = "to move swiftly on foot",
-            level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH
-        )
-
         val state = FavoritesUiState.Content(
-            groups = listOf(
-                FavoriteGroupUiState(
-                    targetLang = Language.ENGLISH,
+            senses = listOf(
+                createSenseItem(
+                    senseId = "run-1",
                     lemma = "run",
-                    senses = listOf(
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("run-1", Language.ENGLISH, "run"),
-                            sense = runSense,
-                            state = SenseUiState(
-                                senseId = "run-1",
-                                expanded = false,
-                                examplesExpanded = false,
-                                languageExpanded = emptyMap(),
-                                favorite = true,
-                                pos = PartOfSpeech.VERB,
-                                showFavoriteToggle = false
-                            )
-                        )
-                    ),
-                    expanded = false
+                    sense = createMockSense("run-1", "to move swiftly on foot"),
+                    pos = PartOfSpeech.VERB
                 )
             ),
             query = "run",
             hasAnyFavorites = true
         )
-
         FavoritesScreenContent(state = state)
     }
 }
@@ -815,83 +599,39 @@ fun PreviewFavoritesScreenNoResults(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        val state = FavoritesUiState.Content(
-            groups = emptyList(),
-            query = "xyz",
-            showNoResults = true,
-            hasAnyFavorites = true
+        FavoritesScreenContent(
+            state = FavoritesUiState.Content(senses = emptyList(), query = "xyz", hasAnyFavorites = true)
         )
-
-        FavoritesScreenContent(state = state)
     }
 }
 
 @Preview
 @Composable
-fun PreviewFavoritesScreenSearchWithMultipleResults(
+fun PreviewFavoritesScreenLoadingAndError(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        val bookSense1 = createMockSense(
-            id = "book-1",
-            definition = "a written or printed work",
-            level = LearnerLevel.A1,
-            frequency = SenseFrequency.HIGH
-        )
-
-        val bookmarkSense1 = createMockSense(
-            id = "bookmark-1",
-            definition = "a strip of material used to mark one's place in a book",
-            level = LearnerLevel.B1,
-            frequency = SenseFrequency.MIDDLE
-        )
-
         val state = FavoritesUiState.Content(
-            groups = listOf(
-                FavoriteGroupUiState(
-                    targetLang = Language.ENGLISH,
-                    lemma = "book",
-                    senses = listOf(
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("book-1", Language.ENGLISH, "book"),
-                            sense = bookSense1,
-                            state = SenseUiState(
-                                senseId = "book-1",
-                                expanded = false,
-                                examplesExpanded = false,
-                                languageExpanded = emptyMap(),
-                                favorite = true,
-                                pos = PartOfSpeech.NOUN,
-                                showFavoriteToggle = false
-                            )
-                        )
-                    ),
-                    expanded = false
+            senses = listOf(
+                createSenseItem(
+                    senseId = "ready-1",
+                    lemma = "ready",
+                    sense = createMockSense("ready-1", "completely prepared"),
+                    pos = PartOfSpeech.ADJECTIVE
                 ),
-                FavoriteGroupUiState(
-                    targetLang = Language.RUSSIAN,
-                    lemma = "книга",
-                    senses = listOf(
-                        FavoriteSenseUiState(
-                            favorite = createMockFavorite("bookmark-1", Language.ENGLISH, "bookmark"),
-                            sense = bookmarkSense1,
-                            state = SenseUiState(
-                                senseId = "bookmark-1",
-                                expanded = false,
-                                examplesExpanded = false,
-                                languageExpanded = emptyMap(),
-                                favorite = true,
-                                pos = PartOfSpeech.NOUN
-                            )
-                        )
-                    ),
-                    expanded = false
+                createSenseItem(
+                    senseId = "ready-2",
+                    lemma = "ready",
+                    loading = true
+                ),
+                createSenseItem(
+                    senseId = "ready-3",
+                    lemma = "ready",
+                    error = "Failed to load meaning"
                 )
             ),
-            query = "book",
             hasAnyFavorites = true
         )
-
         FavoritesScreenContent(state = state)
     }
 }
