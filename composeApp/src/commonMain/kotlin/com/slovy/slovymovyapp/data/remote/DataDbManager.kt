@@ -118,9 +118,9 @@ class DataDbManager(
      * Also clears the stored version setting.
      * Used when data version changes.
      */
-    fun deleteAllDownloadedData() {
+    suspend fun deleteAllDownloadedData() {
         // Close all cached connections before deleting files
-        runBlocking { databaseCache.closeAll() }
+        databaseCache.closeAll()
 
         val databasesDir = platform.getDatabasePath("")
         val files = platform.listFiles(databasesDir)
@@ -136,7 +136,7 @@ class DataDbManager(
     /**
      * Clears the stored data version from settings.
      */
-    fun clearVersion() {
+    suspend fun clearVersion() {
         settingsRepository.deleteById(Setting.Name.DATA_VERSION)
     }
 
@@ -169,7 +169,7 @@ class DataDbManager(
         saved == VERSION
     }
 
-    fun setDownloadedVersion() {
+    suspend fun setDownloadedVersion() {
         settingsRepository.insert(
             Setting(
                 id = Setting.Name.DATA_VERSION,

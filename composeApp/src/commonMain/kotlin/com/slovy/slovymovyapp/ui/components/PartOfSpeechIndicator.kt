@@ -3,9 +3,10 @@ package com.slovy.slovymovyapp.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material3.*
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import com.slovy.slovymovyapp.ui.word.ErrorIcon
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
@@ -61,12 +63,7 @@ fun PartOfSpeechIndicator(
         } else if (cardLoading) {
             ContainedLoadingIndicator(indicatorColor = color)
         } else if (cardError != null) {
-            Icon(
-                imageVector = Icons.Filled.ErrorOutline,
-                contentDescription = "Error",
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.error
-            )
+            ErrorIcon(Modifier.size(30.dp))
         }
 
         if (!cardLoading && cardError == null) {
@@ -78,13 +75,13 @@ fun PartOfSpeechIndicator(
             )
         } else if (cardLoading) {
             Text(
-                text = "AI is working...",
+                text = "Generating definitions and examples…",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
         } else if (cardError != null) {
             Text(
-                text = "Error: ${cardError}",
+                text = cardError,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.error
             )

@@ -2,13 +2,16 @@ package com.slovy.slovymovyapp.data.favorites
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.db.AppDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 class FavoritesRepository(private val db: AppDatabase) {
 
     @OptIn(ExperimentalTime::class)
-    fun add(senseId: String, targetLang: Language, lemma: String) {
+    suspend fun add(senseId: String, targetLang: Language, lemma: String) = withContext(Dispatchers.IO) {
         db.favoritesQueries.insertFavorite(
             sense_id = senseId,
             target_lang = targetLang.code,
@@ -17,35 +20,39 @@ class FavoritesRepository(private val db: AppDatabase) {
         )
     }
 
-    fun remove(senseId: String, targetLang: Language) {
+    suspend fun remove(senseId: String, targetLang: Language) = withContext(Dispatchers.IO) {
         db.favoritesQueries.deleteFavorite(
             sense_id = senseId,
             target_lang = targetLang.code
         )
     }
 
-    fun getAll(): List<Favorite> = db.favoritesQueries.selectAll().executeAsList().map { row ->
-        Favorite(
-            senseId = row.sense_id,
-            targetLang = Language.fromCode(row.target_lang),
-            lemma = row.lemma,
-            createdAt = row.created_at
-        )
+    suspend fun getAll(): List<Favorite> = withContext(Dispatchers.IO) {
+        db.favoritesQueries.selectAll().executeAsList().map { row ->
+            Favorite(
+                senseId = row.sense_id,
+                targetLang = Language.fromCode(row.target_lang),
+                lemma = row.lemma,
+                createdAt = row.created_at
+            )
+        }
     }
 
-    fun getByLangAndLemma(targetLang: Language, lemma: String): List<Favorite> =
-        db.favoritesQueries.selectByLangAndLemma(target_lang = targetLang.code, lemma = lemma)
-            .executeAsList()
-            .map { row ->
-                Favorite(
-                    senseId = row.sense_id,
-                    targetLang = Language.fromCode(row.target_lang),
-                    lemma = row.lemma,
-                    createdAt = row.created_at
-                )
-            }
+    suspend fun getByLangAndLemma(targetLang: Language, lemma: String): List<Favorite> =
+        withContext(Dispatchers.IO) {
+            db.favoritesQueries.selectByLangAndLemma(target_lang = targetLang.code, lemma = lemma)
+                .executeAsList()
+                .map { row ->
+                    Favorite(
+                        senseId = row.sense_id,
+                        targetLang = Language.fromCode(row.target_lang),
+                        lemma = row.lemma,
+                        createdAt = row.created_at
+                    )
+                }
+        }
 
-    fun getAllGroupedByLangAndLemma(): List<Favorite> =
+    suspend fun getAllGroupedByLangAndLemma(): List<Favorite> = withContext(Dispatchers.IO) {
         db.favoritesQueries.selectAllOrderedByLangAndLemma().executeAsList().map { row ->
             Favorite(
                 senseId = row.sense_id,
@@ -54,10 +61,11 @@ class FavoritesRepository(private val db: AppDatabase) {
                 createdAt = row.created_at
             )
         }
+    }
 
-    fun searchByLemma(query: String): List<Favorite> {
+    suspend fun searchByLemma(query: String): List<Favorite> = withContext(Dispatchers.IO) {
         val pattern = "%$query%"
-        return db.favoritesQueries.selectByLemmaSearch(pattern).executeAsList().map { row ->
+        db.favoritesQueries.selectByLemmaSearch(pattern).executeAsList().map { row ->
             Favorite(
                 senseId = row.sense_id,
                 targetLang = Language.fromCode(row.target_lang),
@@ -67,11 +75,12 @@ class FavoritesRepository(private val db: AppDatabase) {
         }
     }
 
-    fun exists(senseId: String, targetLang: Language): Boolean =
+    suspend fun exists(senseId: String, targetLang: Language): Boolean = withContext(Dispatchers.IO) {
         db.favoritesQueries.countBySenseIdAndLang(sense_id = senseId, target_lang = targetLang.code)
             .executeAsOne() > 0
+    }
 
-    fun deleteAll() {
+    suspend fun deleteAll() = withContext(Dispatchers.IO) {
         db.favoritesQueries.deleteAll()
     }
 }

@@ -62,7 +62,7 @@ internal fun SenseCard(
                     if (translationError != null) {
                         ErrorPlaceholder(translationError)
                     } else if (translationLoading) {
-                        LoadingPlaceholder("AI is translating...")
+                        LoadingPlaceholder("Preparing translation…")
                     }
                     lemma?.let {
                         HighlightedText(

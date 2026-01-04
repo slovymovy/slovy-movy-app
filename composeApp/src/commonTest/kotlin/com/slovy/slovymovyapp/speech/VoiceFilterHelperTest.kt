@@ -45,7 +45,9 @@ open class VoiceFilterHelperTest : BaseTest() {
 
     @BeforeTest
     fun before() {
-        settingsRepository().deleteById(Setting.Name.ENABLED_VOICES)
+        runBlocking {
+            settingsRepository().deleteById(Setting.Name.ENABLED_VOICES)
+        }
     }
 
     @Test

@@ -43,7 +43,8 @@ sealed interface WordDetailUiState {
     data class Empty(
         val lemma: String? = null,
         val message: String = "No entries available.",
-        val isError: Boolean = false
+        val isError: Boolean = false,
+        val isLoading: Boolean = false
     ) : WordDetailUiState
 
     data class Content(
@@ -183,7 +184,13 @@ class WordDetailViewModel(
     val targetSenseId: String? = null,
     private val translationLanguages: List<Language>? = null
 ) : ViewModel() {
-    var state by mutableStateOf<WordDetailUiState>(WordDetailUiState.Empty(lemma = lemma, message = "Loading..."))
+    var state by mutableStateOf<WordDetailUiState>(
+        WordDetailUiState.Empty(
+            lemma = lemma,
+            message = "Loading...",
+            isLoading = true
+        )
+    )
         private set
 
     val scrollState = ScrollState(0)
@@ -346,13 +353,15 @@ class WordDetailViewModel(
     }
 
     fun toggleFavorite(senseId: String) {
-        dictionaryLanguage.let { lang ->
-            if (senseId in favoriteSenses) {
-                favoritesRepository.remove(senseId, lang)
-            } else {
-                favoritesRepository.add(senseId, lang, lemma)
+        viewModelScope.launch {
+            dictionaryLanguage.let { lang ->
+                if (senseId in favoriteSenses) {
+                    favoritesRepository.remove(senseId, lang)
+                } else {
+                    favoritesRepository.add(senseId, lang, lemma)
+                }
+                loadFavorites()
             }
-            loadFavorites()
         }
     }
 
@@ -548,7 +557,7 @@ fun WordDetailScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun WordDetailScreenContent(
     state: WordDetailUiState,
@@ -674,19 +683,25 @@ fun WordDetailScreenContent(
             }
 
             is WordDetailUiState.Empty -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = 24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = state.message,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
+                Surface(Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        if (state.isLoading) {
+                            LoadingIndicator()
+                        } else if (state.isError) {
+                            ErrorIcon(Modifier.size(30.dp))
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = state.message,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }

@@ -69,18 +69,23 @@ internal fun ErrorPlaceholder(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Filled.ErrorOutline,
-            contentDescription = "Error",
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.error
-        )
+        ErrorIcon(Modifier.size(20.dp))
         Text(
             text = message,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.error
         )
     }
+}
+
+@Composable
+fun ErrorIcon(modifier: Modifier) {
+    Icon(
+        imageVector = Icons.Filled.ErrorOutline,
+        contentDescription = "Error",
+        modifier = modifier,
+        tint = MaterialTheme.colorScheme.error
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
