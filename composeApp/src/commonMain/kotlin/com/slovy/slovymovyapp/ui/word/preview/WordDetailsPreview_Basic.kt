@@ -47,10 +47,32 @@ private fun WordDetailScreenPreviewCollapsed(
 
 @Preview
 @Composable
-private fun WordDetailScreenPreviewEmpty(
+private fun WordDetailScreenPreviewLoading(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        WordDetailScreenContent(state = WordDetailUiState.Empty(lemma = "testing"))
+        WordDetailScreenContent(
+            state = WordDetailUiState.Empty(
+                lemma = "Word",
+                isLoading = true,
+                message = "Loading..."
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun WordDetailScreenPreviewError(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        WordDetailScreenContent(
+            state = WordDetailUiState.Empty(
+                lemma = "Word",
+                isError = true,
+                message = "No such word found"
+            )
+        )
     }
 }
