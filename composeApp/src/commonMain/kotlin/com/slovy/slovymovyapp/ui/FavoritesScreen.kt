@@ -19,6 +19,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.word.LoadingPlaceholder
 import com.slovy.slovymovyapp.ui.word.SenseCard
 import com.slovy.slovymovyapp.ui.word.SenseUiState
 import kotlinx.coroutines.launch
@@ -38,29 +39,32 @@ data class FavoriteSenseUiState(
     val state: SenseUiState
 )
 
-data class FavoritesUiState(
-    val groups: List<FavoriteGroupUiState>,
-    val query: String = "",
-    val showNoResults: Boolean = false,
-    val hasAnyFavorites: Boolean = false,
-)
+sealed interface FavoritesUiState {
+    data object Loading : FavoritesUiState
+
+    data class Content(
+        val groups: List<FavoriteGroupUiState>,
+        val query: String = "",
+        val showNoResults: Boolean = false,
+        val hasAnyFavorites: Boolean = false,
+    ) : FavoritesUiState
+}
 
 class FavoritesViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val dictionaryRepository: DictionaryRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(
-        FavoritesUiState(
-            groups = emptyList()
-        )
-    )
+    var state by mutableStateOf<FavoritesUiState>(FavoritesUiState.Loading)
         private set
 
     val scrollState = LazyListState()
 
     fun updateQuery(newQuery: String) {
-        state = state.copy(query = newQuery)
+        val currentState = state
+        if (currentState is FavoritesUiState.Content) {
+            state = currentState.copy(query = newQuery)
+        }
         loadFavorites()
     }
 
@@ -71,10 +75,14 @@ class FavoritesViewModel(
     }
 
     private suspend fun loadFavoritesInternal() {
+        val currentState = state
+        val currentQuery = (currentState as? FavoritesUiState.Content)?.query ?: ""
+        val currentGroups = (currentState as? FavoritesUiState.Content)?.groups ?: emptyList()
+
         val allFavorites = favoritesRepository.getAllGroupedByLangAndLemma()
         val hasAnyFavorites = allFavorites.isNotEmpty()
 
-        val trimmedQuery = state.query.trim()
+        val trimmedQuery = currentQuery.trim()
         val favorites = if (trimmedQuery.isEmpty()) {
             allFavorites
         } else {
@@ -88,13 +96,13 @@ class FavoritesViewModel(
             val (targetLang, lemma) = langLemma
 
             // Find existing group to preserve state
-            val existingGroup = state.groups.find { it.targetLang == targetLang && it.lemma == lemma }
+            val existingGroup = currentGroups.find { it.targetLang == targetLang && it.lemma == lemma }
 
             // Load senses immediately for collapsed view preview
             val senses = if (existingGroup?.senses != null) {
                 existingGroup.senses
             } else {
-                loadGroupSensesData(targetLang, lemma)
+                loadGroupSensesData(targetLang, lemma, currentGroups)
             }
 
             FavoriteGroupUiState(
@@ -105,14 +113,19 @@ class FavoritesViewModel(
             )
         }
 
-        state = state.copy(
+        state = FavoritesUiState.Content(
             groups = groups,
+            query = currentQuery,
             showNoResults = groups.isEmpty() && trimmedQuery.isNotEmpty(),
             hasAnyFavorites = hasAnyFavorites
         )
     }
 
-    private suspend fun loadGroupSensesData(targetLang: Language, lemma: String): List<FavoriteSenseUiState> {
+    private suspend fun loadGroupSensesData(
+        targetLang: Language,
+        lemma: String,
+        currentGroups: List<FavoriteGroupUiState>
+    ): List<FavoriteSenseUiState> {
         val favorites = favoritesRepository.getByLangAndLemma(targetLang, lemma)
         val allFavSenses = favorites.map { it.senseId }
 
@@ -129,7 +142,7 @@ class FavoritesViewModel(
             if (entryAndSense != null) {
                 val (entry, sense) = entryAndSense
                 // Find existing sense state to preserve
-                val existingGroup = state.groups.find { it.targetLang == targetLang && it.lemma == lemma }
+                val existingGroup = currentGroups.find { it.targetLang == targetLang && it.lemma == lemma }
                 val existingSenseState =
                     existingGroup?.senses?.find { it.sense.senseId == sense.senseId }
                         ?.state?.copy(favorite = allFavSenses.contains(sense.senseId))
@@ -154,19 +167,22 @@ class FavoritesViewModel(
     }
 
     private fun updateSenseState(senseId: String, updateFn: (SenseUiState) -> SenseUiState) {
-        state = state.copy(
-            groups = state.groups.map { group ->
-                group.copy(
-                    senses = group.senses?.map { favSense ->
-                        if (favSense.sense.senseId == senseId) {
-                            favSense.copy(state = updateFn(favSense.state))
-                        } else {
-                            favSense
+        val currentState = state
+        if (currentState is FavoritesUiState.Content) {
+            state = currentState.copy(
+                groups = currentState.groups.map { group ->
+                    group.copy(
+                        senses = group.senses?.map { favSense ->
+                            if (favSense.sense.senseId == senseId) {
+                                favSense.copy(state = updateFn(favSense.state))
+                            } else {
+                                favSense
+                            }
                         }
-                    }
-                )
-            }
-        )
+                    )
+                }
+            )
+        }
     }
 
     fun toggleSense(senseId: String) {
@@ -258,108 +274,123 @@ fun FavoritesScreenContent(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            // Search field - only show if there are any favorites
-            if (state.hasAnyFavorites) {
-                com.slovy.slovymovyapp.ui.components.AppSearchBar(
-                    query = state.query,
-                    onQueryChange = onQueryChange,
+        when (state) {
+            is FavoritesUiState.Loading -> {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp),
-                    placeholder = "Search my word..."
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingPlaceholder(label = "Loading favorites...")
+                }
             }
 
-            // Content
-            when {
-                state.groups.isEmpty() && state.query.isEmpty() -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Surface(
-                            modifier = Modifier.size(96.dp),
-                            shape = MaterialTheme.shapes.extraLarge,
-                            color = MaterialTheme.colorScheme.primaryContainer
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center
+            is FavoritesUiState.Content -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) {
+                    // Search field - only show if there are any favorites
+                    if (state.hasAnyFavorites) {
+                        com.slovy.slovymovyapp.ui.components.AppSearchBar(
+                            query = state.query,
+                            onQueryChange = onQueryChange,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 16.dp),
+                            placeholder = "Search my word..."
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    // Content
+                    when {
+                        state.groups.isEmpty() && state.query.isEmpty() -> {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.FavoriteBorder,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(48.dp),
-                                    tint = MaterialTheme.colorScheme.primary
+                                Surface(
+                                    modifier = Modifier.size(96.dp),
+                                    shape = MaterialTheme.shapes.extraLarge,
+                                    color = MaterialTheme.colorScheme.primaryContainer
+                                ) {
+                                    Box(
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.FavoriteBorder,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(48.dp),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "No Favorites Yet",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Start adding meanings to your favorites by tapping the heart icon",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(horizontal = 32.dp)
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "No Favorites Yet",
-                            style = MaterialTheme.typography.titleMedium,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Start adding meanings to your favorites by tapping the heart icon",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 32.dp)
-                        )
-                    }
-                }
 
-                state.showNoResults -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No favorites match your search",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-
-                else -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        // Meaning count
-                        val meaningCount = state.groups.sumOf { it.senses?.size ?: 0 }
-                        Text(
-                            text = if (meaningCount == 1) "1 meaning" else "$meaningCount meanings",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
-                        )
-
-                        LazyColumn(
-                            state = scrollState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(bottom = 16.dp)
-                        ) {
-                            items(state.groups, key = { "${it.targetLang.code}_${it.lemma}" }) { group ->
-                                FavoriteGroupCard(
-                                    group = group,
-                                    onSenseToggle = onSenseToggle,
-                                    onFavoriteToggle = onFavoriteToggle
+                        state.showNoResults -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No favorites match your search",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
                                 )
+                            }
+                        }
+
+                        else -> {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                // Meaning count
+                                val meaningCount = state.groups.sumOf { it.senses?.size ?: 0 }
+                                Text(
+                                    text = if (meaningCount == 1) "1 meaning" else "$meaningCount meanings",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                                )
+
+                                LazyColumn(
+                                    state = scrollState,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    contentPadding = PaddingValues(bottom = 16.dp)
+                                ) {
+                                    items(state.groups, key = { "${it.targetLang.code}_${it.lemma}" }) { group ->
+                                        FavoriteGroupCard(
+                                            group = group,
+                                            onSenseToggle = onSenseToggle,
+                                            onFavoriteToggle = onFavoriteToggle
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -433,12 +464,24 @@ private fun createMockFavorite(
 
 @Preview
 @Composable
+fun PreviewFavoritesScreenLoading(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        FavoritesScreenContent(
+            state = FavoritesUiState.Loading
+        )
+    }
+}
+
+@Preview
+@Composable
 fun PreviewFavoritesScreenEmpty(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(
-            state = FavoritesUiState(
+            state = FavoritesUiState.Content(
                 groups = emptyList(),
                 hasAnyFavorites = false
             )
@@ -464,7 +507,7 @@ fun PreviewFavoritesScreenSingleGroupCollapsed(
             antonyms = listOf("hitchhike", "stop")
         )
 
-        val state = FavoritesUiState(
+        val state = FavoritesUiState.Content(
             groups = listOf(
                 FavoriteGroupUiState(
                     targetLang = Language.ENGLISH,
@@ -521,7 +564,7 @@ fun PreviewFavoritesScreenMultipleGroupsCollapsed(
             frequency = SenseFrequency.HIGH
         )
 
-        val state = FavoritesUiState(
+        val state = FavoritesUiState.Content(
             groups = listOf(
                 FavoriteGroupUiState(
                     targetLang = Language.ENGLISH,
@@ -601,7 +644,7 @@ fun PreviewFavoritesScreenGroupExpanded(
             )
         )
 
-        val state = FavoritesUiState(
+        val state = FavoritesUiState.Content(
             groups = listOf(
                 FavoriteGroupUiState(
                     targetLang = Language.ENGLISH,
@@ -659,7 +702,7 @@ fun PreviewFavoritesScreenMixedStates(
             frequency = SenseFrequency.HIGH
         )
 
-        val state = FavoritesUiState(
+        val state = FavoritesUiState.Content(
             groups = listOf(
                 FavoriteGroupUiState(
                     targetLang = Language.ENGLISH,
@@ -735,7 +778,7 @@ fun PreviewFavoritesScreenWithSearch(
             frequency = SenseFrequency.HIGH
         )
 
-        val state = FavoritesUiState(
+        val state = FavoritesUiState.Content(
             groups = listOf(
                 FavoriteGroupUiState(
                     targetLang = Language.ENGLISH,
@@ -772,7 +815,7 @@ fun PreviewFavoritesScreenNoResults(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        val state = FavoritesUiState(
+        val state = FavoritesUiState.Content(
             groups = emptyList(),
             query = "xyz",
             showNoResults = true,
@@ -803,7 +846,7 @@ fun PreviewFavoritesScreenSearchWithMultipleResults(
             frequency = SenseFrequency.MIDDLE
         )
 
-        val state = FavoritesUiState(
+        val state = FavoritesUiState.Content(
             groups = listOf(
                 FavoriteGroupUiState(
                     targetLang = Language.ENGLISH,
