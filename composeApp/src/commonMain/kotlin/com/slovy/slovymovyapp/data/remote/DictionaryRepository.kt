@@ -35,6 +35,41 @@ class DictionaryRepository(
         val onlineOnly: Boolean,
     )
 
+    data class SenseWithPos(
+        val sense: LanguageCardResponseSense,
+        val pos: PartOfSpeech
+    )
+
+    // Cache for loaded senses - reusable across the app
+    private val senseCache = linkedMapOf<String, SenseWithPos>()
+
+    companion object {
+        private const val SENSE_CACHE_MAX_SIZE = 500
+    }
+
+    /**
+     * Adds sense to cache, evicting oldest entries if over limit.
+     */
+    private fun cacheSense(senseId: String, value: SenseWithPos) {
+        senseCache[senseId] = value
+        // Evict oldest entries if over limit
+        while (senseCache.size > SENSE_CACHE_MAX_SIZE) {
+            val oldest = senseCache.keys.firstOrNull() ?: break
+            senseCache.remove(oldest)
+        }
+    }
+
+    /**
+     * Gets a cached sense if available.
+     */
+    fun getCachedSense(senseId: String): SenseWithPos? = senseCache[senseId]
+
+    /**
+     * Gets all cached senses for the given IDs.
+     */
+    fun getCachedSenses(senseIds: Set<String>): Map<String, SenseWithPos> =
+        senseIds.mapNotNull { id -> senseCache[id]?.let { id to it } }.toMap()
+
     // Opens dictionary databases in priority order (RO first, then local)
     private suspend fun openDictionaryDatabases(language: Language): List<DictionaryDatabase> {
         return buildList {
@@ -378,10 +413,12 @@ class DictionaryRepository(
     suspend fun getLanguageCard(
         language: Language,
         lemma: String,
-        translationTargets: List<Language> = installedTranslationTargets(language)
+        translationTargets: List<Language> = installedTranslationTargets(language),
+        senseIds: Set<String>? = null
     ): LanguageCard? = withContext(Dispatchers.IO) {
         // Open dictionary databases in priority order
         val dictDatabases = openDictionaryDatabases(language)
+        val senseIdFilter = senseIds?.takeIf { it.isNotEmpty() }
 
         // Lookup lemma, trying databases in order
         var lemmaId: Uuid? = null
@@ -427,7 +464,18 @@ class DictionaryRepository(
 
             // Load senses from the determined database
             val sensesRows = q.selectSensesByLemmaPosId(lemmaPosId).executeAsList()
-            val senses = sensesRows.map { s ->
+            val filteredSenses = senseIdFilter?.let { filter ->
+                sensesRows.filter { filter.contains(it.sense_id.toString()) }
+            } ?: sensesRows
+            val pos = PartOfSpeech.valueOf(lemmaPosRow.pos.name)
+            val senses = filteredSenses.map { s ->
+                // Check cache first
+                val cached = getCachedSense(s.sense_id.toString())
+                if (cached != null) {
+                    return@map cached.sense
+                }
+
+                // Build from DB if not cached
                 val synonyms = q.selectSenseSynonyms(s.sense_id).executeAsList().map { it.synonym }
                 val antonyms = q.selectSenseAntonyms(s.sense_id).executeAsList().map { it.antonym }
                 val phrases = q.selectSenseCommonPhrases(s.sense_id).executeAsList().map { it.phrase }
@@ -494,7 +542,7 @@ class DictionaryRepository(
                     LanguageCardExample(it.text, senseExampleTTranslation[it.example_id]!!)
                 }
 
-                LanguageCardResponseSense(
+                val result = LanguageCardResponseSense(
                     senseId = s.sense_id.toString(),
                     senseDefinition = s.sense_definition,
                     learnerLevel = LearnerLevel.valueOf(s.learner_level.name),
@@ -509,15 +557,19 @@ class DictionaryRepository(
                     targetLangDefinitions = tgtDefinitions,
                     translations = tgtTranslations,
                 )
+                cacheSense(s.sense_id.toString(), SenseWithPos(result, pos))
+                result
             }
 
             val entry = LanguageCardPosEntry(
-                pos = PartOfSpeech.valueOf(lemmaPosRow.pos.name),
+                pos = pos,
                 forms = forms,
                 senses = senses
             )
             entries.add(entry)
         }
+
+        if (entries.isEmpty()) return@withContext null
 
         // Fetch word family from all databases (union)
         val wordFamily = q.selectWordFamilyByLemmaId(lemmaId).executeAsList().toSet()
@@ -527,7 +579,6 @@ class DictionaryRepository(
             collectAllRelatedWords(entries, wordFamily, lemma)
         )
 
-        if (entries.isEmpty()) return@withContext null
         LanguageCard(
             entries = entries,
             lemma = lemma,
@@ -536,6 +587,32 @@ class DictionaryRepository(
             relatedWords = relatedWordsMap,
             online = onlineOnly
         )
+    }
+
+    /**
+     * Gets senses by IDs, using cache when available.
+     * Results are automatically cached for future use.
+     */
+    suspend fun getSenses(
+        language: Language,
+        lemma: String,
+        senseIds: Set<String>,
+        translationTargets: List<Language> = installedTranslationTargets(language)
+    ): Map<String, SenseWithPos> {
+        if (senseIds.isEmpty()) return emptyMap()
+
+        // Check cache first
+        val cached = getCachedSenses(senseIds)
+        val missingIds = senseIds - cached.keys
+        if (missingIds.isEmpty()) return cached
+
+        // Load missing senses (getLanguageCard will cache them automatically)
+        val card = getLanguageCard(language, lemma, translationTargets, missingIds) ?: return cached
+        val loaded = card.entries.flatMap { entry ->
+            entry.senses.map { sense -> sense.senseId to SenseWithPos(sense, entry.pos) }
+        }.toMap()
+
+        return cached + loaded
     }
 
     private fun prefixRange(prefix: String): Pair<String, String> {

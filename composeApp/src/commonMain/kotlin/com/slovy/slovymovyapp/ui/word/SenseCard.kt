@@ -18,30 +18,40 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
 import kotlin.text.Typography.bullet
 
+data class SenseCardData(
+    val senseId: String,
+    val lemma: String? = null,
+    val sense: LanguageCardResponseSense? = null,
+    val pos: PartOfSpeech? = null,
+    val loading: Boolean = false,
+    val error: String? = null,
+    val translationLoading: Boolean = false,
+    val translationError: String? = null
+)
+
 @Composable
 internal fun SenseCard(
-    lemma: String?,
-    sense: LanguageCardResponseSense,
+    data: SenseCardData,
     state: SenseUiState,
-    translationLoading: Boolean = false,
-    translationError: String? = null,
     onToggle: () -> Unit,
     onPositioned: (String, Float) -> Unit = { _, _ -> },
     onFavoriteToggle: () -> Unit = {},
     relatedWords: Set<String> = emptySet(),
     onWordClick: (String) -> Unit = {}
 ) {
-    val translationBasedHeader = remember(sense.senseId, sense.translations) { sense.translationsHeader() }
+    val sense = data.sense
+    val translationBasedHeader = remember(data.senseId, sense?.translations) { sense?.translationsHeader() }
 
     val expanded = state.expanded
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .onGloballyPositioned { coordinates ->
-                onPositioned(sense.senseId, coordinates.positionInWindow().y)
+                onPositioned(data.senseId, coordinates.positionInWindow().y)
             },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -59,41 +69,51 @@ internal fun SenseCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (translationError != null) {
-                        ErrorPlaceholder(translationError)
-                    } else if (translationLoading) {
-                        LoadingPlaceholder("Preparing translation…")
+                    when {
+                        data.error != null -> ErrorPlaceholder(data.error)
+                        data.loading -> LoadingPlaceholder("Loading meaning…")
+                        data.translationError != null -> ErrorPlaceholder(data.translationError)
+                        data.translationLoading -> LoadingPlaceholder("Preparing translation…")
                     }
-                    lemma?.let {
+                    data.lemma?.let {
                         HighlightedText(
                             text = it,
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
-                    if (translationBasedHeader == null) {
-                        HighlightedText(
-                            text = sense.senseDefinition,
-                            style = MaterialTheme.typography.titleMedium,
-                            clickableWords = relatedWords,
-                            onWordClick = onWordClick
-                        )
-                    } else {
-                        HighlightedText(
-                            text = translationBasedHeader,
-                            style = MaterialTheme.typography.titleMedium,
-                            clickableWords = relatedWords,
-                            onWordClick = onWordClick
-                        )
-                    }
+                    if (sense != null) {
+                        if (translationBasedHeader == null) {
+                            HighlightedText(
+                                text = sense.senseDefinition,
+                                style = MaterialTheme.typography.titleMedium,
+                                clickableWords = relatedWords,
+                                onWordClick = onWordClick
+                            )
+                        } else {
+                            HighlightedText(
+                                text = translationBasedHeader,
+                                style = MaterialTheme.typography.titleMedium,
+                                clickableWords = relatedWords,
+                                onWordClick = onWordClick
+                            )
+                        }
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        LevelAndFrequencyRow(
-                            level = sense.learnerLevel,
-                            frequency = sense.frequency,
-                            nameType = sense.nameType,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            LevelAndFrequencyRow(
+                                level = sense.learnerLevel,
+                                frequency = sense.frequency,
+                                nameType = sense.nameType,
+                            )
+                        }
+                    } else if (data.error == null && !data.loading) {
+                        HighlightedText(
+                            text = "Meaning will load when expanded",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         )
                     }
                 }
@@ -135,93 +155,95 @@ internal fun SenseCard(
             }
 
             AnimatedVisibility(
-                visible = expanded,
+                visible = expanded && sense != null,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    if (sense.targetLangDefinitions.isNotEmpty()) {
-                        SectionLabel("Definition")
-                        if (translationBasedHeader != null) {
+                sense?.let {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        if (sense.targetLangDefinitions.isNotEmpty()) {
+                            SectionLabel("Definition")
+                            if (translationBasedHeader != null) {
+                                HighlightedText(
+                                    text = sense.senseDefinition,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(vertical = 2.dp)
+                                )
+                            }
                             HighlightedText(
-                                text = sense.senseDefinition,
-                                style = MaterialTheme.typography.bodyLarge,
+                                text = sense.targetLangDefinitions.map { definition -> definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() } }
+                                    .joinToString("\n"),
+                                style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(vertical = 2.dp)
                             )
                         }
-                        HighlightedText(
-                            text = sense.targetLangDefinitions.map { definition -> definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() } }
-                                .joinToString("\n"),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(vertical = 2.dp)
-                        )
-                    }
 
-                    if (sense.traits.isNotEmpty()) {
-                        TraitsList(traits = sense.traits)
-                    }
+                        if (sense.traits.isNotEmpty()) {
+                            TraitsList(traits = sense.traits)
+                        }
 
-                    if (sense.examples.isNotEmpty()) {
-                        SectionLabel(text = "Examples")
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            sense.examples.forEach { ex ->
-                                OutlinedCard(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(16.dp),
-                                    colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                                ) {
-                                    HighlightedText(
-                                        text = ex.text,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        clickableWords = relatedWords,
-                                        onWordClick = onWordClick,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                    )
-                                    if (ex.targetLangTranslations.isNotEmpty()) {
-                                        ex.targetLangTranslations.forEach { (_, translation) ->
-                                            HighlightedText(
-                                                text = translation,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                                clickableWords = relatedWords,
-                                                onWordClick = onWordClick
-                                            )
+                        if (sense.examples.isNotEmpty()) {
+                            SectionLabel(text = "Examples")
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                sense.examples.forEach { ex ->
+                                    OutlinedCard(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(16.dp),
+                                        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                    ) {
+                                        HighlightedText(
+                                            text = ex.text,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            clickableWords = relatedWords,
+                                            onWordClick = onWordClick,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                        if (ex.targetLangTranslations.isNotEmpty()) {
+                                            ex.targetLangTranslations.forEach { (_, translation) ->
+                                                HighlightedText(
+                                                    text = translation,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                                    clickableWords = relatedWords,
+                                                    onWordClick = onWordClick
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    EntryList(
-                        "Common phrases",
-                        sense.commonPhrases,
-                        MaterialTheme.colorScheme.tertiaryContainer,
-                        MaterialTheme.colorScheme.onTertiaryContainer,
-                        clickableWords = relatedWords,
-                        onWordClick = onWordClick
-                    )
-                    EntryList(
-                        "Synonyms",
-                        sense.synonyms,
-                        MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        clickableWords = relatedWords,
-                        onWordClick = onWordClick
-                    )
-                    EntryList(
-                        "Antonyms",
-                        sense.antonyms,
-                        MaterialTheme.colorScheme.errorContainer,
-                        MaterialTheme.colorScheme.onErrorContainer,
-                        clickableWords = relatedWords,
-                        onWordClick = onWordClick
-                    )
+                        EntryList(
+                            "Common phrases",
+                            sense.commonPhrases,
+                            MaterialTheme.colorScheme.tertiaryContainer,
+                            MaterialTheme.colorScheme.onTertiaryContainer,
+                            clickableWords = relatedWords,
+                            onWordClick = onWordClick
+                        )
+                        EntryList(
+                            "Synonyms",
+                            sense.synonyms,
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.onPrimaryContainer,
+                            clickableWords = relatedWords,
+                            onWordClick = onWordClick
+                        )
+                        EntryList(
+                            "Antonyms",
+                            sense.antonyms,
+                            MaterialTheme.colorScheme.errorContainer,
+                            MaterialTheme.colorScheme.onErrorContainer,
+                            clickableWords = relatedWords,
+                            onWordClick = onWordClick
+                        )
+                    }
                 }
             }
         }
@@ -295,6 +317,14 @@ internal fun LevelAndFrequencyRow(
             Badge(text = nameType.displayName, containerColor = nc, contentColor = ncc)
         }
     }
+}
+
+internal fun LanguageCardResponseSense.collectLanguages(): List<Language> {
+    val ordered = linkedSetOf<Language>()
+    ordered += targetLangDefinitions.keys
+    ordered += translations.keys
+    examples.forEach { ex -> ordered += ex.targetLangTranslations.keys }
+    return ordered.toList()
 }
 
 private fun LanguageCardResponseSense.translationsHeader(): String? {
