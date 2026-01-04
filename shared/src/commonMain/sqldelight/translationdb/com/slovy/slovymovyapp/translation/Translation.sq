@@ -85,3 +85,17 @@ WHERE from_lang_code = ? AND target_lang_code = ?
   AND target_lang_word_normalized < ?
   AND instr(target_lang_word_normalized, ' ') = 0
 ORDER BY idx;
+
+selectDefinitionsBySenseIds:
+SELECT sense_id, definition FROM sense_target_definition
+WHERE sense_id IN ? AND from_lang_code = ? AND target_lang_code = ?;
+
+selectSenseTranslationsBySenseIds:
+SELECT sense_id, idx, target_lang_word, target_lang_sense_clarification, lemma_id, lemma_pos_id
+FROM sense_translation
+WHERE sense_id IN ? AND from_lang_code = ? AND target_lang_code = ?
+ORDER BY idx;
+
+selectExampleTranslationsBySenseIds:
+SELECT sense_id, example_id, translation FROM example_translation
+WHERE sense_id IN ? AND from_lang_code = ? AND target_lang_code = ?;

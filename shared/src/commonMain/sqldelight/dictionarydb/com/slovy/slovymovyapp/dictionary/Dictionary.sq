@@ -206,7 +206,7 @@ ORDER BY l.zipf_frequency DESC;
 selectLemmasByWords:
 SELECT l.id, l.lemma, l.zipf_frequency, l.online_only
 FROM lemma l
-WHERE l.lang_code = ? AND LOWER(l.lemma) IN ?
+WHERE l.lang_code = ? AND l.lemma IN ?
 ORDER BY l.zipf_frequency DESC;
 
 -- Queries returning explicit lemma_pos_id to avoid ambiguity in generated code
@@ -332,3 +332,21 @@ UPDATE lemma SET online_only = ? WHERE id = ?;
 
 selectLemmaPosByLemmaId:
 SELECT id, pos FROM lemma_pos WHERE lemma_id = ?;
+
+selectFormTagsByFormIds:
+SELECT form_id, tag FROM form_tag WHERE form_id IN ?;
+
+selectSenseSynonymsBySenseIds:
+SELECT sense_id, synonym FROM sense_synonym WHERE sense_id IN ?;
+
+selectSenseAntonymsBySenseIds:
+SELECT sense_id, antonym FROM sense_antonym WHERE sense_id IN ?;
+
+selectSenseCommonPhrasesBySenseIds:
+SELECT sense_id, phrase FROM sense_common_phrase WHERE sense_id IN ?;
+
+selectSenseTraitsBySenseIds:
+SELECT sense_id, trait_type, comment FROM sense_trait WHERE sense_id IN ?;
+
+selectSenseExamplesBySenseIds:
+SELECT sense_id, example_id, text FROM sense_example WHERE sense_id IN ?;

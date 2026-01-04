@@ -98,11 +98,10 @@ class DictionaryRepository(
     ): Map<String, RelatedWord> {
         if (relatedWords.isEmpty()) return emptyMap()
 
-        val lowercaseWords = relatedWords.map { it.lowercase() }
         val result = mutableMapOf<String, RelatedWord>()
 
         for (db in databases) {
-            db.dictionaryQueries.selectLemmasByWords(language.code, lowercaseWords)
+            db.dictionaryQueries.selectLemmasByWords(language.code, relatedWords.toList())
                 .executeAsList()
                 .forEach { row ->
                     if (row.lemma !in result || result[row.lemma]!!.online) {
@@ -452,121 +451,220 @@ class DictionaryRepository(
             openTranslationDatabases(language, tgt)
         }
 
-        val entries = mutableListOf<LanguageCardPosEntry>()
+        // Data class for sense row data we need to carry forward
+        data class SenseRowData(
+            val senseId: Uuid,
+            val senseDefinition: String,
+            val learnerLevel: LearnerLevel,
+            val frequency: SenseFrequency,
+            val semanticGroupId: String,
+            val nameType: NameType?
+        )
+
+        // Data class for form data we need
+        data class FormData(val formId: Uuid, val form: String)
+
+        // Per-POS collected data
+        data class PosData(
+            val pos: PartOfSpeech,
+            val forms: List<FormData>,
+            val senseRows: List<SenseRowData>,
+            val cachedSenses: Map<String, LanguageCardResponseSense>
+        )
+
+        val posDataList = mutableListOf<PosData>()
+        val allFormIds = mutableListOf<Uuid>()
+        val allUncachedSenseIds = mutableListOf<Uuid>()
+
         for (lemmaPosId in lemmaPosIds) {
             val lemmaPosRow = q.selectLemmaPosFullById(lemmaPosId).executeAsList().firstOrNull() ?: continue
             zipfFrequency = lemmaPosRow.zipf_frequency.toFloat()
             val formsWithId = q.selectFormsWithIdByLemmaPosId(lemmaPosId).executeAsList()
-            val forms = formsWithId.map { formRow ->
-                val tags = q.selectFormTagsByFormId(formRow.form_id).executeAsList().map { it.tag }
-                LanguageCardForm(tags = tags, form = formRow.form)
-            }
+            val forms = formsWithId.map { FormData(it.form_id, it.form) }
+            allFormIds.addAll(forms.map { it.formId })
 
-            // Load senses from the determined database
             val sensesRows = q.selectSensesByLemmaPosId(lemmaPosId).executeAsList()
             val filteredSenses = senseIdFilter?.let { filter ->
                 sensesRows.filter { filter.contains(it.sense_id.toString()) }
             } ?: sensesRows
+
             val pos = PartOfSpeech.valueOf(lemmaPosRow.pos.name)
-            val senses = filteredSenses.map { s ->
-                // Check cache first
+
+            // Separate cached from uncached senses, convert to our data class
+            val cachedSenses = mutableMapOf<String, LanguageCardResponseSense>()
+            val senseRows = filteredSenses.map { s ->
                 val cached = getCachedSense(s.sense_id.toString())
                 if (cached != null) {
-                    return@map cached.sense
+                    cachedSenses[s.sense_id.toString()] = cached.sense
+                } else {
+                    allUncachedSenseIds.add(s.sense_id)
                 }
-
-                // Build from DB if not cached
-                val synonyms = q.selectSenseSynonyms(s.sense_id).executeAsList().map { it.synonym }
-                val antonyms = q.selectSenseAntonyms(s.sense_id).executeAsList().map { it.antonym }
-                val phrases = q.selectSenseCommonPhrases(s.sense_id).executeAsList().map { it.phrase }
-                val traits = q.selectSenseTraits(s.sense_id).executeAsList().map { tr ->
-                    LanguageCardTrait(
-                        traitType = TraitType.valueOf(tr.trait_type.name),
-                        comment = tr.comment
-                    )
-                }
-                val senseExamples = q.selectSenseExamples(s.sense_id).executeAsList()
-                val senseExampleTTranslation = senseExamples.associateBy(
-                    { it.example_id },
-                    { mutableMapOf<Language, String>() })
-
-                // Load translations/definitions from databases in order
-                val tgtDefinitions = LinkedHashMap<Language, String>()
-                val tgtTranslations = LinkedHashMap<Language, List<LanguageCardTranslation>>()
-                for ((tgt, transDbs) in translationDbsMap) {
-                    // Try databases in order for definition
-                    var transDbToUse: TranslationDatabase? = null
-                    for (transDb in transDbs) {
-                        val def = transDb.translationQueries
-                            .selectDefinitionsBySense(s.sense_id, language.code, tgt.code)
-                            .executeAsList()
-                            .firstOrNull()
-                        if (def != null) {
-                            tgtDefinitions[tgt] = def
-                            transDbToUse = transDb
-                            break
-                        }
-                    }
-
-                    if (transDbToUse == null) continue
-
-                    val translations = transDbToUse.translationQueries
-                        .selectSenseTranslationsBySense(s.sense_id, language.code, tgt.code)
-                        .executeAsList().map {
-                            LanguageCardTranslation(
-                                targetLangWord = it.target_lang_word,
-                                targetLangSenseClarification = it.target_lang_sense_clarification
-                            )
-                        }.toList()
-                    if (translations.isNotEmpty()) {
-                        tgtTranslations[tgt] = translations
-                    }
-
-                    senseExamples.forEach {
-                        val tr = transDbToUse.translationQueries
-                            .selectExampleTranslations(
-                                s.sense_id, language.code, tgt.code, it.example_id
-                            )
-                            .executeAsList()
-                            .firstOrNull()
-
-                        if (tr != null) {
-                            val exampleTranslations = senseExampleTTranslation[it.example_id]!!
-                            exampleTranslations[tgt] = tr
-                        }
-                    }
-                }
-
-                // examples with translations
-                val examples = senseExamples.map {
-                    LanguageCardExample(it.text, senseExampleTTranslation[it.example_id]!!)
-                }
-
-                val result = LanguageCardResponseSense(
-                    senseId = s.sense_id.toString(),
+                SenseRowData(
+                    senseId = s.sense_id,
                     senseDefinition = s.sense_definition,
                     learnerLevel = LearnerLevel.valueOf(s.learner_level.name),
                     frequency = SenseFrequency.valueOf(s.frequency.name),
                     semanticGroupId = s.semantic_group_id,
-                    nameType = s.name_type?.let { NameType.valueOf(it.name) },
+                    nameType = s.name_type?.let { NameType.valueOf(it.name) }
+                )
+            }
+
+            posDataList.add(PosData(pos, forms, senseRows, cachedSenses))
+        }
+
+        if (posDataList.isEmpty()) return@withContext null
+
+        // Batch load form tags
+        val formTagsMap: Map<Uuid, List<String>> = if (allFormIds.isNotEmpty()) {
+            q.selectFormTagsByFormIds(allFormIds)
+                .executeAsList()
+                .groupBy({ it.form_id }, { it.tag })
+        } else emptyMap()
+
+        // Data class for example data
+        data class ExampleData(val exampleId: Long, val text: String)
+
+        // Batch load sense data for uncached senses
+        val synonymsMap: Map<Uuid, List<String>>
+        val antonymsMap: Map<Uuid, List<String>>
+        val phrasesMap: Map<Uuid, List<String>>
+        val traitsMap: Map<Uuid, List<LanguageCardTrait>>
+        val examplesMap: Map<Uuid, List<ExampleData>>
+
+        if (allUncachedSenseIds.isNotEmpty()) {
+            synonymsMap = q.selectSenseSynonymsBySenseIds(allUncachedSenseIds)
+                .executeAsList()
+                .groupBy({ it.sense_id }, { it.synonym })
+
+            antonymsMap = q.selectSenseAntonymsBySenseIds(allUncachedSenseIds)
+                .executeAsList()
+                .groupBy({ it.sense_id }, { it.antonym })
+
+            phrasesMap = q.selectSenseCommonPhrasesBySenseIds(allUncachedSenseIds)
+                .executeAsList()
+                .groupBy({ it.sense_id }, { it.phrase })
+
+            traitsMap = q.selectSenseTraitsBySenseIds(allUncachedSenseIds)
+                .executeAsList()
+                .groupBy({ it.sense_id }) { row ->
+                    LanguageCardTrait(
+                        traitType = TraitType.valueOf(row.trait_type.name),
+                        comment = row.comment
+                    )
+                }
+
+            examplesMap = q.selectSenseExamplesBySenseIds(allUncachedSenseIds)
+                .executeAsList()
+                .groupBy({ it.sense_id }) { ExampleData(it.example_id, it.text) }
+        } else {
+            synonymsMap = emptyMap()
+            antonymsMap = emptyMap()
+            phrasesMap = emptyMap()
+            traitsMap = emptyMap()
+            examplesMap = emptyMap()
+        }
+
+        // Batch load translation data per target language
+        data class TranslationData(
+            val definitions: Map<Uuid, String>,
+            val translations: Map<Uuid, List<LanguageCardTranslation>>,
+            val exampleTranslations: Map<Uuid, Map<Long, String>>
+        )
+
+        val translationDataMap: Map<Language, TranslationData> = if (allUncachedSenseIds.isNotEmpty()) {
+            translationDbsMap.mapNotNull { (tgt, transDbs) ->
+                // Try databases in order, use the first one that has definitions
+                for (transDb in transDbs) {
+                    val defs = transDb.translationQueries
+                        .selectDefinitionsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
+                        .executeAsList()
+                    if (defs.isNotEmpty()) {
+                        val definitions = defs.associate { it.sense_id to it.definition }
+
+                        val translations = transDb.translationQueries
+                            .selectSenseTranslationsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
+                            .executeAsList()
+                            .groupBy({ it.sense_id }) { row ->
+                                LanguageCardTranslation(
+                                    targetLangWord = row.target_lang_word,
+                                    targetLangSenseClarification = row.target_lang_sense_clarification
+                                )
+                            }
+
+                        val exampleTrans = transDb.translationQueries
+                            .selectExampleTranslationsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
+                            .executeAsList()
+                            .groupBy({ it.sense_id }) { it }
+                            .mapValues { (_, rows) -> rows.associate { it.example_id to it.translation } }
+
+                        return@mapNotNull tgt to TranslationData(definitions, translations, exampleTrans)
+                    }
+                }
+                null
+            }.toMap()
+        } else emptyMap()
+
+        // Build entries
+        val entries = posDataList.map { posData ->
+            val forms = posData.forms.map { formData ->
+                LanguageCardForm(
+                    tags = formTagsMap[formData.formId] ?: emptyList(),
+                    form = formData.form
+                )
+            }
+
+            val senses = posData.senseRows.map { s ->
+                // Return cached sense if available
+                posData.cachedSenses[s.senseId.toString()]?.let { return@map it }
+
+                // Build from batch-loaded data
+                val senseExamples = examplesMap[s.senseId] ?: emptyList()
+                val senseExampleTranslations = senseExamples.associateBy(
+                    { it.exampleId },
+                    { mutableMapOf<Language, String>() }
+                )
+
+                // Populate example translations from batch data
+                val tgtDefinitions = LinkedHashMap<Language, String>()
+                val tgtTranslations = LinkedHashMap<Language, List<LanguageCardTranslation>>()
+                for ((tgt, transData) in translationDataMap) {
+                    transData.definitions[s.senseId]?.let { tgtDefinitions[tgt] = it }
+                    transData.translations[s.senseId]?.takeIf { it.isNotEmpty() }?.let {
+                        tgtTranslations[tgt] = it
+                    }
+                    transData.exampleTranslations[s.senseId]?.forEach { (exampleId, translation) ->
+                        senseExampleTranslations[exampleId]?.put(tgt, translation)
+                    }
+                }
+
+                val examples = senseExamples.map { ex ->
+                    LanguageCardExample(ex.text, senseExampleTranslations[ex.exampleId] ?: emptyMap())
+                }
+
+                val result = LanguageCardResponseSense(
+                    senseId = s.senseId.toString(),
+                    senseDefinition = s.senseDefinition,
+                    learnerLevel = s.learnerLevel,
+                    frequency = s.frequency,
+                    semanticGroupId = s.semanticGroupId,
+                    nameType = s.nameType,
                     examples = examples,
-                    synonyms = synonyms,
-                    antonyms = antonyms,
-                    commonPhrases = phrases,
-                    traits = traits,
+                    synonyms = synonymsMap[s.senseId] ?: emptyList(),
+                    antonyms = antonymsMap[s.senseId] ?: emptyList(),
+                    commonPhrases = phrasesMap[s.senseId] ?: emptyList(),
+                    traits = traitsMap[s.senseId] ?: emptyList(),
                     targetLangDefinitions = tgtDefinitions,
                     translations = tgtTranslations,
                 )
-                cacheSense(s.sense_id.toString(), SenseWithPos(result, pos))
+                cacheSense(s.senseId.toString(), SenseWithPos(result, posData.pos))
                 result
             }
 
-            val entry = LanguageCardPosEntry(
-                pos = pos,
+            LanguageCardPosEntry(
+                pos = posData.pos,
                 forms = forms,
                 senses = senses
             )
-            entries.add(entry)
         }
 
         if (entries.isEmpty()) return@withContext null
