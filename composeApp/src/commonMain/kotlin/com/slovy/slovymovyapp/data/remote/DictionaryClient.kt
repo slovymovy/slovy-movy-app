@@ -400,6 +400,14 @@ class DictionaryClient(
         }
 
         // Re-read and emit updated card with loading state
+        val senseIdsToInvalidate = chunk.payload.entries
+            .flatMap { it.senses }
+            .map { it.senseId }
+            .toSet()
+        if (senseIdsToInvalidate.isNotEmpty()) {
+            dictionaryRepository.invalidateSenses(senseIdsToInvalidate)
+        }
+
         val updated = dictionaryRepository.getLanguageCard(language, lemma, translationTargets)
         updated?.let {
             collector.emit(

@@ -24,7 +24,7 @@ android {
         applicationId = "com.slovy.slovymovyapp"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 5 // version
+        versionCode = 7 // version
         versionName = "Alpha"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

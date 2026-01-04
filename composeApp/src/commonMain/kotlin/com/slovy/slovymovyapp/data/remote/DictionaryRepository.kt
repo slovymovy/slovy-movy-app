@@ -65,6 +65,14 @@ class DictionaryRepository(
     fun getCachedSense(senseId: String): SenseWithPos? = senseCache[senseId]
 
     /**
+     * Removes cached senses to force reloading updated data (e.g., new translations).
+     */
+    fun invalidateSenses(senseIds: Set<String>) {
+        if (senseIds.isEmpty()) return
+        senseIds.forEach { senseCache.remove(it) }
+    }
+
+    /**
      * Gets all cached senses for the given IDs.
      */
     fun getCachedSenses(senseIds: Set<String>): Map<String, SenseWithPos> =

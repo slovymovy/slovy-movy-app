@@ -21,7 +21,7 @@ private fun createBuildConfig(): AppBuildConfig {
     val infoDictionary = bundle.infoDictionary
 
     val versionName = infoDictionary?.get("CFBundleShortVersionString") as? String ?: "?"
-    val versionCode = (infoDictionary?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: 5 // version
+    val versionCode = (infoDictionary?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: 7 // version
     val bundleId = bundle.bundleIdentifier ?: ""
     val displayName = infoDictionary?.get("CFBundleDisplayName") as? String ?: "?"
     val isDebug = displayName.contains("debug", ignoreCase = true)
