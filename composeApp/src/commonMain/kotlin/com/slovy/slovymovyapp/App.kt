@@ -105,6 +105,7 @@ fun App(
     val favoritesViewModel = remember { FavoritesViewModel(favoritesRepository, dictionaryRepository) }
     val buildConfig = remember { appBuildConfig }
     val settingsViewModel = remember { SettingsViewModel(ttsManager, voiceFilterHelper, dataManager, buildConfig) }
+    val coroutineScope = rememberCoroutineScope()
 
     suspend fun selectInitialDestination(): AppDestination {
         // Check if data version is current
@@ -162,14 +163,16 @@ fun App(
                 LanguageSelectionScreen(
                     viewModel = viewModel,
                     onLanguageChosen = { lang ->
-                        settingsRepository.insert(
-                            Setting(
-                                id = Setting.Name.LANGUAGE,
-                                value = Json.parseToJsonElement("\"${lang.code}\"")
+                        coroutineScope.launch {
+                            settingsRepository.insert(
+                                Setting(
+                                    id = Setting.Name.LANGUAGE,
+                                    value = Json.parseToJsonElement("\"${lang.code}\"")
+                                )
                             )
-                        )
-                        nativeLanguage = lang
-                        navController.navigate(AppDestination.SelectDictionary)
+                            nativeLanguage = lang
+                            navController.navigate(AppDestination.SelectDictionary)
+                        }
                     }
                 )
             }
@@ -183,14 +186,16 @@ fun App(
                 DictionarySelectionScreen(
                     viewModel = viewModel,
                     onDictionaryChosen = { lang ->
-                        settingsRepository.insert(
-                            Setting(
-                                id = Setting.Name.DICTIONARY,
-                                value = Json.parseToJsonElement("\"${lang.code}\"")
+                        coroutineScope.launch {
+                            settingsRepository.insert(
+                                Setting(
+                                    id = Setting.Name.DICTIONARY,
+                                    value = Json.parseToJsonElement("\"${lang.code}\"")
+                                )
                             )
-                        )
-                        dictionaryLanguage = lang
-                        navController.navigate(AppDestination.DownloadDictionary)
+                            dictionaryLanguage = lang
+                            navController.navigate(AppDestination.DownloadDictionary)
+                        }
                     }
                 )
             }
@@ -269,10 +274,12 @@ fun App(
                                 }
                             },
                             onError = { t ->
-                                settingsRepository.deleteById(Setting.Name.LANGUAGE)
-                                settingsRepository.deleteById(Setting.Name.DICTIONARY)
-                                navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
-                                    popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
+                                coroutineScope.launch {
+                                    settingsRepository.deleteById(Setting.Name.LANGUAGE)
+                                    settingsRepository.deleteById(Setting.Name.DICTIONARY)
+                                    navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
+                                        popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
+                                    }
                                 }
                             }
                         )

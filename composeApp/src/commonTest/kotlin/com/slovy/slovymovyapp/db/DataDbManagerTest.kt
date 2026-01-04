@@ -166,7 +166,8 @@ class DataDbManagerTest : BaseTest() {
             val lemmaLike = q.selectLemmasNormalizedLike("en", buStart, buEnd, 20).executeAsList().map { it.lemma }
             assertTrue(lemmaLike.isNotEmpty(), "English dictionary should contain lemmas starting with 'bu'")
 
-            val formLike = q.selectLemmasFromFormsNormalizedLike("en", buStart, buEnd, 20).executeAsList().map { it.form }
+            val formLike =
+                q.selectLemmasFromFormsNormalizedLike("en", buStart, buEnd, 20).executeAsList().map { it.form }
             assertTrue(formLike.isNotEmpty(), "Form prefix 'bu' should return at least one match")
         } finally {
             // Clean up to keep environment tidy
@@ -214,12 +215,14 @@ class DataDbManagerTest : BaseTest() {
         try {
             val mgr = DataDbManager(platform, settingsRepo, testRemoteDataProvider())
 
-            settingsRepo.insert(
-                Setting(
-                    id = Setting.Name.DATA_VERSION,
-                    value = Json.parseToJsonElement("\"${DataDbManager.VERSION}\"")
+            runBlocking {
+                settingsRepo.insert(
+                    Setting(
+                        id = Setting.Name.DATA_VERSION,
+                        value = Json.parseToJsonElement("\"${DataDbManager.VERSION}\"")
+                    )
                 )
-            )
+            }
 
             val hasRequired = runBlocking { mgr.hasRequiredVersion() }
             assertTrue(hasRequired, "hasRequiredVersion should return true when version matches")
@@ -244,12 +247,14 @@ class DataDbManagerTest : BaseTest() {
         try {
             val mgr = DataDbManager(platform, settingsRepo, testRemoteDataProvider())
 
-            settingsRepo.insert(
-                Setting(
-                    id = Setting.Name.DATA_VERSION,
-                    value = Json.parseToJsonElement("\"v0\"")
+            runBlocking {
+                settingsRepo.insert(
+                    Setting(
+                        id = Setting.Name.DATA_VERSION,
+                        value = Json.parseToJsonElement("\"v0\"")
+                    )
                 )
-            )
+            }
 
             val hasRequired = runBlocking { mgr.hasRequiredVersion() }
             assertFalse(hasRequired, "hasRequiredVersion should return false when version is outdated")
@@ -285,7 +290,7 @@ class DataDbManagerTest : BaseTest() {
         assertTrue(platform.fileExists(dictPath), "Dictionary file should exist before deletion")
         assertTrue(platform.fileExists(transPath), "Translation file should exist before deletion")
 
-        mgr.deleteAllDownloadedData()
+        runBlocking { mgr.deleteAllDownloadedData() }
 
         assertFalse(platform.fileExists(dictPath), "Dictionary file should be deleted")
         assertFalse(platform.fileExists(transPath), "Translation file should be deleted")
@@ -306,20 +311,22 @@ class DataDbManagerTest : BaseTest() {
         try {
             val mgr = DataDbManager(platform, settingsRepo, testRemoteDataProvider())
 
-            settingsRepo.insert(
-                Setting(
-                    id = Setting.Name.DATA_VERSION,
-                    value = Json.parseToJsonElement("\"v0\"")
+            runBlocking {
+                settingsRepo.insert(
+                    Setting(
+                        id = Setting.Name.DATA_VERSION,
+                        value = Json.parseToJsonElement("\"v0\"")
+                    )
                 )
-            )
 
-            val versionBefore = settingsRepo.getById(Setting.Name.DATA_VERSION)
-            assertTrue(versionBefore != null, "Version should exist before deletion")
+                val versionBefore = settingsRepo.getById(Setting.Name.DATA_VERSION)
+                assertTrue(versionBefore != null, "Version should exist before deletion")
 
-            mgr.deleteAllDownloadedData()
+                mgr.deleteAllDownloadedData()
 
-            val versionAfter = settingsRepo.getById(Setting.Name.DATA_VERSION)
-            assertTrue(versionAfter == null, "Version should be cleared after deleteAllDownloadedData")
+                val versionAfter = settingsRepo.getById(Setting.Name.DATA_VERSION)
+                assertTrue(versionAfter == null, "Version should be cleared after deleteAllDownloadedData")
+            }
         } finally {
             appDriver.close()
             platform.deleteFile(appDbPath)

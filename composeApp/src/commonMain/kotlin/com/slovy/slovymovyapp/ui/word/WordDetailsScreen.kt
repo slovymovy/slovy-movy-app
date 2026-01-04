@@ -353,13 +353,15 @@ class WordDetailViewModel(
     }
 
     fun toggleFavorite(senseId: String) {
-        dictionaryLanguage.let { lang ->
-            if (senseId in favoriteSenses) {
-                favoritesRepository.remove(senseId, lang)
-            } else {
-                favoritesRepository.add(senseId, lang, lemma)
+        viewModelScope.launch {
+            dictionaryLanguage.let { lang ->
+                if (senseId in favoriteSenses) {
+                    favoritesRepository.remove(senseId, lang)
+                } else {
+                    favoritesRepository.add(senseId, lang, lemma)
+                }
+                loadFavorites()
             }
-            loadFavorites()
         }
     }
 

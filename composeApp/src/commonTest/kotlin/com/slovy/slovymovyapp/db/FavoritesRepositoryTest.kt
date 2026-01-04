@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.db
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.test.BaseTest
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -15,7 +16,7 @@ open class FavoritesRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun add_and_remove_favorite() {
+    fun add_and_remove_favorite() = runBlocking {
         val repo = favoritesRepository()
         repo.deleteAll()
 
@@ -37,7 +38,7 @@ open class FavoritesRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun getAll_returns_all_favorites() {
+    fun getAll_returns_all_favorites() = runBlocking {
         val repo = favoritesRepository()
         repo.deleteAll()
 
@@ -55,7 +56,7 @@ open class FavoritesRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun getByLangAndLemma_filters_correctly() {
+    fun getByLangAndLemma_filters_correctly() = runBlocking {
         val repo = favoritesRepository()
         repo.deleteAll()
 
@@ -74,7 +75,7 @@ open class FavoritesRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun add_replaces_existing_favorite() {
+    fun add_replaces_existing_favorite() = runBlocking {
         val repo = favoritesRepository()
         repo.deleteAll()
 
@@ -89,7 +90,7 @@ open class FavoritesRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun exists_returns_false_for_nonexistent_favorite() {
+    fun exists_returns_false_for_nonexistent_favorite() = runBlocking {
         val repo = favoritesRepository()
         repo.deleteAll()
 
@@ -97,7 +98,7 @@ open class FavoritesRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun getAllGroupedByLangAndLemma_returns_ordered_list() {
+    fun getAllGroupedByLangAndLemma_returns_ordered_list() = runBlocking {
         val db = testAppDatabaseHolder().database
         val repo = FavoritesRepository(db)
         repo.deleteAll()

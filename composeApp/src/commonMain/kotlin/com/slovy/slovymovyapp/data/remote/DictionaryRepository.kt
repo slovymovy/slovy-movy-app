@@ -8,8 +8,7 @@ import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.util.stripAccents
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.*
 import kotlin.uuid.Uuid
 
 internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
@@ -380,7 +379,7 @@ class DictionaryRepository(
         language: Language,
         lemma: String,
         translationTargets: List<Language> = installedTranslationTargets(language)
-    ): LanguageCard? {
+    ): LanguageCard? = withContext(Dispatchers.IO) {
         // Open dictionary databases in priority order
         val dictDatabases = openDictionaryDatabases(language)
 
@@ -404,7 +403,7 @@ class DictionaryRepository(
             }
         }
 
-        if (lemmaId == null || sourceDb == null) return null
+        if (lemmaId == null || sourceDb == null) return@withContext null
 
         val q = sourceDb.dictionaryQueries
 
@@ -528,8 +527,8 @@ class DictionaryRepository(
             collectAllRelatedWords(entries, wordFamily, lemma)
         )
 
-        if (entries.isEmpty()) return null
-        return LanguageCard(
+        if (entries.isEmpty()) return@withContext null
+        LanguageCard(
             entries = entries,
             lemma = lemma,
             zipfFrequency = zipfFrequency,

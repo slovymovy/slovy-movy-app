@@ -174,14 +174,16 @@ class FavoritesViewModel(
     }
 
     fun toggleFavorite(senseId: String, targetLang: Language, lemma: String) {
-        val isFavorite = if (favoritesRepository.exists(senseId, targetLang)) {
-            favoritesRepository.remove(senseId, targetLang)
-            false
-        } else {
-            favoritesRepository.add(senseId, targetLang, lemma)
-            true
+        viewModelScope.launch {
+            val isFavorite = if (favoritesRepository.exists(senseId, targetLang)) {
+                favoritesRepository.remove(senseId, targetLang)
+                false
+            } else {
+                favoritesRepository.add(senseId, targetLang, lemma)
+                true
+            }
+            updateSenseState(senseId) { it.copy(favorite = isFavorite) }
         }
-        updateSenseState(senseId) { it.copy(favorite = isFavorite) }
     }
 
 }
