@@ -104,7 +104,8 @@ fun App(
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember { FavoritesViewModel(favoritesRepository, dictionaryRepository) }
     val buildConfig = remember { appBuildConfig }
-    val settingsViewModel = remember { SettingsViewModel(ttsManager, voiceFilterHelper, dataManager, buildConfig) }
+    val settingsViewModel =
+        remember { SettingsViewModel(ttsManager, voiceFilterHelper, dataManager, dictionaryRepository, buildConfig) }
     val coroutineScope = rememberCoroutineScope()
 
     suspend fun selectInitialDestination(): AppDestination {
@@ -448,6 +449,7 @@ fun App(
                     onOkay = {
                         coroutineScope.launch {
                             dataManager.deleteAllDownloadedData()
+                            dictionaryRepository.clearSenseCache()
                             val target = selectInitialDestination()
                             navController.navigate(target) {
                                 popUpTo<AppDestination.DataVersionMismatch> { inclusive = true }

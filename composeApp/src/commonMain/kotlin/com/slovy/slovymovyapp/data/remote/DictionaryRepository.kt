@@ -78,6 +78,14 @@ class DictionaryRepository(
     fun getCachedSenses(senseIds: Set<String>): Map<String, SenseWithPos> =
         senseIds.mapNotNull { id -> senseCache[id]?.let { id to it } }.toMap()
 
+    /**
+     * Clears all cached senses. Call when dictionaries or translations are
+     * added/removed to ensure stale data isn't served.
+     */
+    fun clearSenseCache() {
+        senseCache.clear()
+    }
+
     // Opens dictionary databases in priority order (RO first, then local)
     private suspend fun openDictionaryDatabases(language: Language): List<DictionaryDatabase> {
         return buildList {

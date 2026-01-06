@@ -24,6 +24,7 @@ import com.slovy.slovymovyapp.AppBuildConfig
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.AvailableLanguageInfo
 import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
 import com.slovy.slovymovyapp.speech.*
 import kotlinx.coroutines.launch
@@ -75,6 +76,7 @@ class SettingsViewModel(
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
     private val dataDbManager: DataDbManager,
+    private val dictionaryRepository: DictionaryRepository,
     buildConfig: AppBuildConfig
 ) : ViewModel() {
 
@@ -200,6 +202,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             try {
                 dataDbManager.deleteDictionary(language)
+                dictionaryRepository.clearSenseCache()
                 loadDatabases()
                 snackbarHostState.showSnackbar("Database deleted successfully")
             } catch (e: Exception) {
@@ -212,6 +215,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             try {
                 dataDbManager.deleteTranslation(src, tgt)
+                dictionaryRepository.clearSenseCache()
                 loadDatabases()
                 snackbarHostState.showSnackbar("Database deleted successfully")
             } catch (e: Exception) {
@@ -236,6 +240,7 @@ class SettingsViewModel(
                 state = state.copy(
                     downloadingItems = state.downloadingItems - downloadKey
                 )
+                dictionaryRepository.clearSenseCache()
                 loadDatabases()
                 snackbarHostState.showSnackbar("Dictionary downloaded successfully")
             } catch (e: Exception) {
@@ -264,6 +269,7 @@ class SettingsViewModel(
                 state = state.copy(
                     downloadingItems = state.downloadingItems - downloadKey
                 )
+                dictionaryRepository.clearSenseCache()
                 loadDatabases()
                 snackbarHostState.showSnackbar("Translation downloaded successfully")
             } catch (e: Exception) {
