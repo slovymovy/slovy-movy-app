@@ -11,10 +11,7 @@ import androidx.navigation.toRoute
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.local.LocalDbManager
-import com.slovy.slovymovyapp.data.remote.DataDbManager
-import com.slovy.slovymovyapp.data.remote.DictionaryClient
-import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
+import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
@@ -94,6 +91,9 @@ fun App(
         }
     val dictionaryClient = remember(platform, dictionaryRepository, localDbManager, dataManager) {
         DictionaryClient(platform, dictionaryRepository, localDbManager, dataManager)
+    }
+    val wordFetchManager = remember(dictionaryClient) {
+        WordFetchManager(dictionaryClient)
     }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
     val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
@@ -387,7 +387,7 @@ fun App(
                 ) {
                     wordDetailViewModels[args] ?: WordDetailViewModel(
                         dictionaryRepository,
-                        dictionaryClient,
+                        wordFetchManager,
                         favoritesRepository,
                         ttsManager,
                         voiceFilterHelper,

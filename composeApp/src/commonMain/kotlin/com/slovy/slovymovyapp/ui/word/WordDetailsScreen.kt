@@ -165,7 +165,7 @@ private inline fun EntryUiState.updateSense(
 
 class WordDetailViewModel(
     private val repository: DictionaryRepository,
-    private val dictionaryClient: DictionaryClient,
+    private val wordFetchManager: WordFetchManager,
     private val favoritesRepository: FavoritesRepository,
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
@@ -204,7 +204,7 @@ class WordDetailViewModel(
 
     init {
         viewModelScope.launch {
-            dictionaryClient.getWord(
+            wordFetchManager.getWord(
                 dictionaryLanguage,
                 lemma,
                 translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage),
