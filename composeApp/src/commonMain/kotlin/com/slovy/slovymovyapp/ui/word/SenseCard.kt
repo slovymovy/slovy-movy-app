@@ -40,7 +40,7 @@ internal fun SenseCard(
     onToggle: () -> Unit,
     onPositioned: (String, Float) -> Unit = { _, _ -> },
     onFavoriteToggle: () -> Unit = {},
-    relatedWords: Set<String> = emptySet(),
+    relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {}
 ) {
     val sense = data.sense
@@ -86,14 +86,14 @@ internal fun SenseCard(
                             HighlightedText(
                                 text = sense.senseDefinition,
                                 style = MaterialTheme.typography.titleMedium,
-                                clickableWords = relatedWords,
+                                clickableWords = relatedWords.keys,
                                 onWordClick = onWordClick
                             )
                         } else {
                             HighlightedText(
                                 text = translationBasedHeader,
                                 style = MaterialTheme.typography.titleMedium,
-                                clickableWords = relatedWords,
+                                clickableWords = relatedWords.keys,
                                 onWordClick = onWordClick
                             )
                         }
@@ -199,7 +199,7 @@ internal fun SenseCard(
                                         HighlightedText(
                                             text = ex.text,
                                             style = MaterialTheme.typography.bodyLarge,
-                                            clickableWords = relatedWords,
+                                            clickableWords = relatedWords.keys,
                                             onWordClick = onWordClick,
                                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                         )
@@ -209,7 +209,7 @@ internal fun SenseCard(
                                                     text = translation,
                                                     style = MaterialTheme.typography.bodySmall,
                                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                                    clickableWords = relatedWords,
+                                                    clickableWords = relatedWords.keys,
                                                     onWordClick = onWordClick
                                                 )
                                             }
@@ -224,7 +224,7 @@ internal fun SenseCard(
                             sense.commonPhrases,
                             MaterialTheme.colorScheme.tertiaryContainer,
                             MaterialTheme.colorScheme.onTertiaryContainer,
-                            clickableWords = relatedWords,
+                            relatedWords = relatedWords,
                             onWordClick = onWordClick
                         )
                         EntryList(
@@ -232,7 +232,7 @@ internal fun SenseCard(
                             sense.synonyms,
                             MaterialTheme.colorScheme.primaryContainer,
                             MaterialTheme.colorScheme.onPrimaryContainer,
-                            clickableWords = relatedWords,
+                            relatedWords = relatedWords,
                             onWordClick = onWordClick
                         )
                         EntryList(
@@ -240,7 +240,7 @@ internal fun SenseCard(
                             sense.antonyms,
                             MaterialTheme.colorScheme.errorContainer,
                             MaterialTheme.colorScheme.onErrorContainer,
-                            clickableWords = relatedWords,
+                            relatedWords = relatedWords,
                             onWordClick = onWordClick
                         )
                     }
