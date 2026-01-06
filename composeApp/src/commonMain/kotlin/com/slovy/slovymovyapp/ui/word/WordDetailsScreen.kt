@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -34,7 +33,6 @@ import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
 import com.slovy.slovymovyapp.ui.components.AppCard
-import com.slovy.slovymovyapp.ui.components.CompactCard
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
@@ -736,45 +734,14 @@ private fun WordDetailContent(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "Word Family",
-                        style = MaterialTheme.typography.titleMedium
+                    EntryList(
+                        label = "Word Family",
+                        values = card.wordFamily,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        relatedWords = card.relatedWords,
+                        onWordClick = onWordClick
                     )
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        card.wordFamily.forEach { familyWord ->
-                            val isClickable = card.relatedWords.containsKey(familyWord)
-                            CompactCard(
-                                onClick = if (isClickable) {
-                                    { onWordClick(familyWord) }
-                                } else null
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                                ) {
-                                    Text(
-                                        text = familyWord,
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            fontWeight = if (isClickable) FontWeight.Medium else FontWeight.Normal
-                                        )
-                                    )
-                                    if (isClickable) {
-                                        Text(
-                                            text = if (card.relatedWords[familyWord]?.online == false) "➤" else "➼",
-                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -808,7 +775,7 @@ private fun WordDetailContent(
                         onSensePositioned(senseId, relativeY)
                     },
                     onSenseFavoriteToggle = onSenseFavoriteToggle,
-                    relatedWords = card.relatedWords.keys,
+                    relatedWords = card.relatedWords,
                     onWordClick = onWordClick
                 )
             }

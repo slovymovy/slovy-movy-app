@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.LanguageCardForm
 import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
+import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.ui.components.AppCard
 import com.slovy.slovymovyapp.ui.components.PartOfSpeechIndicator
 
@@ -50,7 +51,7 @@ internal fun EntryCard(
     onSenseToggle: (String) -> Unit,
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     onSenseFavoriteToggle: (String) -> Unit = {},
-    relatedWords: Set<String> = emptySet(),
+    relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {}
 ) {
     val expanded = entryState.expanded && !cardLoading && cardError == null

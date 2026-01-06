@@ -22,8 +22,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import kotlin.text.Typography
+
+/**
+ * Returns the appropriate navigation arrow based on word availability.
+ * @param isOnline true if word is online-only, false if available offline, null if unknown
+ */
+internal fun navigationArrow(isOnline: Boolean?): String =
+    if (isOnline == false) "➤" else "➼"
 
 @Composable
 internal fun SectionLabel(text: String) {
@@ -95,7 +103,7 @@ internal fun EntryList(
     values: List<String>,
     containerColor: Color,
     contentColor: Color,
-    clickableWords: Set<String> = emptySet(),
+    relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {}
 ) {
     if (values.isEmpty()) return
@@ -106,12 +114,14 @@ internal fun EntryList(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         values.forEach { word ->
-            val isClickable = clickableWords.any { it.equals(word, ignoreCase = true) }
+            val matchingKey = relatedWords.keys.firstOrNull { it.equals(word, ignoreCase = true) }
+            val isClickable = matchingKey != null
             Badge(
                 text = word,
                 containerColor = containerColor,
                 contentColor = contentColor,
                 isClickable = isClickable,
+                isOnline = matchingKey?.let { relatedWords[it]?.online },
                 onClick = if (isClickable) {
                     { onWordClick(word) }
                 } else null
@@ -260,6 +270,7 @@ internal fun Badge(
     style: TextStyle = MaterialTheme.typography.labelMedium,
     shape: Shape = RoundedCornerShape(12.dp),
     isClickable: Boolean = false,
+    isOnline: Boolean? = null,
     onClick: (() -> Unit)? = null
 ) {
     Surface(
@@ -288,7 +299,7 @@ internal fun Badge(
             )
             if (isClickable) {
                 Text(
-                    text = "→",
+                    text = navigationArrow(isOnline),
                     style = style.copy(fontWeight = FontWeight.Bold),
                     color = contentColor.copy(alpha = 0.7f)
                 )
