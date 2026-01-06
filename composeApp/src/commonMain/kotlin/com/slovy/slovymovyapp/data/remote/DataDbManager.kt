@@ -377,8 +377,8 @@ class CancelToken {
 }
 
 // Progress model
-class DownloadProgress(bytesDownloaded: Long, val totalBytes: Long?) {
-    val percent: Int = if (totalBytes != null && totalBytes > 0) {
+open class DownloadProgress(val bytesDownloaded: Long, val totalBytes: Long?) {
+    open val percent: Int = if (totalBytes != null && totalBytes > 0) {
         ((bytesDownloaded * 100L) / max(totalBytes, 1)).toInt()
     } else -1
 }
