@@ -185,7 +185,8 @@ fun LanguageSetupScreenContent(
                     ) {
                         OutlinedCard(
                             onClick = { expanded = true },
-                            modifier = Modifier.fillMaxWidth().menuAnchor(),
+                            modifier = Modifier.fillMaxWidth()
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                             shape = RoundedCornerShape(16.dp),
                             border = BorderStroke(1.dp, Color.LightGray)
                         ) {
@@ -257,7 +258,10 @@ fun LanguageSetupScreenContent(
                                         alpha = 0.5f
                                     )
                                 ),
-                                border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else BorderStroke(1.dp, Color.LightGray),
+                                border = if (isSelected) BorderStroke(
+                                    2.dp,
+                                    MaterialTheme.colorScheme.primary
+                                ) else BorderStroke(1.dp, Color.LightGray),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                             ) {
                                 Row(
