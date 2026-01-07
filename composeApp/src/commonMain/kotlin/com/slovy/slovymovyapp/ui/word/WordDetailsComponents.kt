@@ -107,25 +107,27 @@ internal fun EntryList(
     onWordClick: (String) -> Unit = {}
 ) {
     if (values.isEmpty()) return
-    SectionLabel(label)
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        values.forEach { word ->
-            val matchingKey = relatedWords.keys.firstOrNull { it.equals(word, ignoreCase = true) }
-            val isClickable = matchingKey != null
-            Badge(
-                text = word,
-                containerColor = containerColor,
-                contentColor = contentColor,
-                isClickable = isClickable,
-                isOnline = matchingKey?.let { relatedWords[it]?.online },
-                onClick = if (isClickable) {
-                    { onWordClick(word) }
-                } else null
-            )
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SectionLabel(label)
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            values.forEach { word ->
+                val matchingKey = relatedWords.keys.firstOrNull { it.equals(word, ignoreCase = true) }
+                val isClickable = matchingKey != null
+                Badge(
+                    text = word,
+                    containerColor = containerColor,
+                    contentColor = contentColor,
+                    isClickable = isClickable,
+                    isOnline = matchingKey?.let { relatedWords[it]?.online },
+                    onClick = if (isClickable) {
+                        { onWordClick(word) }
+                    } else null
+                )
+            }
         }
     }
 }

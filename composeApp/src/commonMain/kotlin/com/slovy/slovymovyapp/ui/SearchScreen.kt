@@ -272,7 +272,7 @@ fun SearchScreenContent(
                         query = state.query,
                         onQueryChange = onQueryChange,
                         modifier = Modifier.weight(1f),
-                        placeholder = "Search in ${state.selectedLanguage?.selfName ?: "all languages"}..."
+                        placeholder = "Type a word..."
                     )
 
                     // Language filter dropdown
