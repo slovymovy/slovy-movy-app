@@ -1,22 +1,37 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Error
+import androidx.compose.material.icons.outlined.Feedback
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
@@ -179,7 +194,7 @@ class SettingsViewModel(
         }
     }
 
-    private fun showDeleteConfirmation(displayName: String, additionalInfo: String? = null, onConfirm: () -> Unit) {
+    fun showDeleteConfirmation(displayName: String, additionalInfo: String? = null, onConfirm: () -> Unit) {
         state = state.copy(
             deleteConfirmation = DeleteConfirmationState(
                 displayName = displayName,
@@ -428,6 +443,15 @@ fun SettingsScreen(
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
         onDownloadDictionary = { language -> viewModel.downloadDictionary(language) },
         onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
+        onResetOnboarding = {
+            viewModel.showDeleteConfirmation(
+                displayName = "Onboarding Data",
+                additionalInfo = "This will reset your onboarding progress.",
+                onConfirm = {
+                    // Logic to reset onboarding if needed
+                }
+            )
+        },
         wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -450,6 +474,7 @@ fun SettingsScreenContent(
     onDismissDeleteConfirmation: () -> Unit = {},
     onDownloadDictionary: (Language) -> Unit = {},
     onDownloadTranslation: (Language, Language) -> Unit = { _, _ -> },
+    onResetOnboarding: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -467,10 +492,12 @@ fun SettingsScreenContent(
         }
     }
 
+    var expandedDictionaries by rememberSaveable { mutableStateOf(setOf<String>()) }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     title = { Text("Settings") }
                 )
             },
@@ -505,93 +532,15 @@ fun SettingsScreenContent(
                             modifier = Modifier.fillMaxSize(),
                             state = scrollState,
                             contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            // Voices section header
+                            // Languages and Dictionaries
                             item {
                                 Text(
-                                    text = "Text-to-Speech Voices",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(bottom = 4.dp)
-                                )
-                            }
-
-                            item {
-                                ElevatedCard(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = CardDefaults.elevatedCardColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                                    ),
-                                    elevation = CardDefaults.elevatedCardElevation(
-                                        defaultElevation = 2.dp
-                                    )
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(20.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = "System TTS Settings",
-                                                style = MaterialTheme.typography.titleLarge,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(
-                                                text = "Manage voices and download languages",
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        FilledTonalButton(
-                                            onClick = onOpenSettings,
-                                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Outlined.Settings,
-                                                contentDescription = "Open Settings",
-                                                modifier = Modifier.size(30.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text("Open", style = MaterialTheme.typography.labelLarge)
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (state.languages.isEmpty()) {
-                                item {
-                                    Text(
-                                        text = "No voices available. Download language data from system settings to enable text-to-speech.",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            } else {
-                                items(state.languages.entries.toList()) { e ->
-                                    LanguageCard(
-                                        language = e.key,
-                                        languageState = e.value,
-                                        onExpand = { onLanguageExpand(e.key) },
-                                        onTestVoice = { voice -> onTestVoice(voice) },
-                                        onToggleVoiceEnabled = { voiceId -> onToggleVoiceEnabled(e.key, voiceId) },
-                                        testingVoice = state.testingVoice
-                                    )
-                                }
-                            }
-
-                            // Databases section
-                            item {
-                                Text(
-                                    text = "Databases",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
+                                    text = "Languages and Dictionaries",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    modifier = Modifier.padding(bottom = 8.dp)
                                 )
                             }
 
@@ -613,13 +562,60 @@ fun SettingsScreenContent(
                                     )
                                 }
                             } else {
-                                items(state.availableLanguages) { langInfo ->
+                                // Group into Downloaded and Available
+                                val (downloaded, available) = state.availableLanguages.partition { langInfo ->
+                                    state.databases.any { it.displayName == "Dictionary: ${langInfo.language.selfName}" }
+                                }
+
+                                items(downloaded) { langInfo ->
                                     val dictDb = state.databases.find {
                                         it.displayName == "Dictionary: ${langInfo.language.selfName}"
                                     }
-                                    DatabaseLanguageCard(
+                                    DictionaryCard(
                                         languageInfo = langInfo,
                                         dictionaryDb = dictDb,
+                                        isDownloaded = true,
+                                        isExpanded = expandedDictionaries.contains(langInfo.language.code),
+                                        onExpand = {
+                                            expandedDictionaries = if (expandedDictionaries.contains(langInfo.language.code)) {
+                                                expandedDictionaries - langInfo.language.code
+                                            } else {
+                                                expandedDictionaries + langInfo.language.code
+                                            }
+                                        },
+                                        onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
+                                        onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
+                                        onDownloadTranslation = { tgtLang ->
+                                            onDownloadTranslation(langInfo.language, tgtLang)
+                                        },
+                                        onDeleteTranslation = { tgtLang ->
+                                            state.databases.find {
+                                                it.displayName == "Translation: ${langInfo.language.selfName} → ${tgtLang.selfName}"
+                                            }?.deleteAction?.invoke()
+                                        },
+                                        downloadedTranslations = state.databases.filter {
+                                            it.displayName.startsWith("Translation: ${langInfo.language.selfName} →")
+                                        },
+                                        downloadingItems = state.downloadingItems
+                                    )
+                                }
+
+                                items(available) { langInfo ->
+                                    val dictDb = state.databases.find {
+                                        it.displayName == "Dictionary: ${langInfo.language.selfName}"
+                                    }
+                                    DictionaryCard(
+                                        languageInfo = langInfo,
+                                        dictionaryDb = dictDb,
+                                        isDownloaded = false,
+                                        isExpanded = expandedDictionaries.contains(langInfo.language.code),
+                                        onExpand = {
+                                            expandedDictionaries = if (expandedDictionaries.contains(langInfo.language.code)) {
+                                                expandedDictionaries - langInfo.language.code
+                                            } else {
+                                                expandedDictionaries + langInfo.language.code
+                                            }
+                                        },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
                                         onDownloadTranslation = { tgtLang ->
@@ -638,19 +634,55 @@ fun SettingsScreenContent(
                                 }
                             }
 
+                            // Voice section header
+                            item {
+                                Text(
+                                    text = "Voice",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                                )
+                            }
+
+                            if (state.languages.isEmpty()) {
+                                item {
+                                    Text(
+                                        text = "No voices available. Download language data from system settings to enable text-to-speech.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            } else {
+                                // Find Dutch voice for the preview style if it exists, otherwise just list them
+                                // In reality we just want to follow the list
+                                items(state.languages.entries.toList()) { e ->
+                                    VoiceSectionItem(
+                                        language = e.key,
+                                        languageState = e.value,
+                                        onExpand = { onLanguageExpand(e.key) },
+                                        onTestVoice = onTestVoice,
+                                        onToggleVoiceEnabled = { voiceId -> onToggleVoiceEnabled(e.key, voiceId) },
+                                        testingVoice = state.testingVoice
+                                    )
+                                }
+                            }
+
                             // About section
                             state.buildConfig.let { buildConfig ->
                                 item {
                                     Text(
                                         text = "About",
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                                     )
                                 }
 
                                 item {
-                                    AboutCard(buildConfig = buildConfig)
+                                    AboutSection(
+                                        buildConfig = buildConfig,
+                                        onResetOnboarding = onResetOnboarding
+                                    )
                                 }
                             }
                         }
@@ -671,9 +703,391 @@ fun SettingsScreenContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DeleteConfirmationDialog(
+private fun DictionaryCard(
+    languageInfo: AvailableLanguageInfo,
+    dictionaryDb: DatabaseItemUiState?,
+    isDownloaded: Boolean,
+    isExpanded: Boolean,
+    onExpand: () -> Unit,
+    onDownloadDictionary: () -> Unit,
+    onDeleteDictionary: () -> Unit,
+    onDownloadTranslation: (Language) -> Unit,
+    onDeleteTranslation: (Language) -> Unit,
+    downloadedTranslations: List<DatabaseItemUiState>,
+    downloadingItems: Map<String, DownloadProgress>
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onExpand() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = if (isDownloaded) "I'm learning" else "Available",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "${languageInfo.language.flag} ${languageInfo.language.selfName}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    val sizeBytes = dictionaryDb?.sizeBytes ?: languageInfo.dictionarySizeBytes
+                    if (sizeBytes != null) {
+                        Text(
+                            text = "${if (isDownloaded) "Downloaded dictionary" else "Dictionary"} ${formatFileSize(sizeBytes)}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
+                val dictDownloadKey = "dict_${languageInfo.language.code}"
+                val dictDownloading = downloadingItems.containsKey(dictDownloadKey)
+                val dictProgress = downloadingItems[dictDownloadKey]
+
+                if (dictDownloading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        progress = { dictProgress?.percent?.toFloat()?.div(100f) ?: 0f }
+                    )
+                } else if (isDownloaded) {
+                    IconButton(onClick = onDeleteDictionary) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    IconButton(onClick = onDownloadDictionary) {
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = "Download",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (isExpanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val (downloadedTrans, availableTrans) = languageInfo.availableTranslations.partition { translation ->
+                        downloadedTranslations.any {
+                            it.displayName == "Translation: ${languageInfo.language.selfName} → ${translation.targetLanguage.selfName}"
+                        }
+                    }
+
+                    (downloadedTrans + availableTrans).forEach { translation ->
+                        val transDownloadKey = "trans_${languageInfo.language.code}_${translation.targetLanguage.code}"
+                        val transDownloading = downloadingItems.containsKey(transDownloadKey)
+                        val transProgress = downloadingItems[transDownloadKey]
+                        val transDb = downloadedTranslations.find {
+                            it.displayName == "Translation: ${languageInfo.language.selfName} → ${translation.targetLanguage.selfName}"
+                        }
+
+                        TranslationItem(
+                            targetLanguage = translation.targetLanguage,
+                            sizeBytes = translation.sizeBytes,
+                            isDownloaded = transDb != null,
+                            isDownloading = transDownloading,
+                            downloadProgress = transProgress,
+                            onDownload = { onDownloadTranslation(translation.targetLanguage) },
+                            onDelete = { onDeleteTranslation(translation.targetLanguage) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TranslationItem(
+    targetLanguage: Language,
+    sizeBytes: Long,
+    isDownloaded: Boolean,
+    isDownloading: Boolean,
+    downloadProgress: DownloadProgress?,
+    onDownload: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "${targetLanguage.flag} ${targetLanguage.selfName}",
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = formatFileSize(sizeBytes),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        if (isDownloading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 2.dp,
+                progress = { downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f }
+            )
+        } else if (isDownloaded) {
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        } else {
+            IconButton(
+                onClick = onDownload,
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Download,
+                    contentDescription = "Download",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VoiceSectionItem(
+    language: Text2SpeechLanguage,
+    languageState: LanguageUiState,
+    onExpand: () -> Unit,
+    onTestVoice: (Text2SpeechVoice) -> Unit,
+    onToggleVoiceEnabled: (String) -> Unit,
+    testingVoice: Text2SpeechVoice? = null
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onExpand() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.VolumeUp,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "${language.language.selfName} voice",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    val enabledVoices = languageState.voices.filter { it.id in languageState.enabledVoiceIds }
+                    val voiceText = when {
+                        enabledVoices.isEmpty() -> "No voices enabled"
+                        enabledVoices.size == 1 -> enabledVoices.first().name ?: "Default voice"
+                        else -> "${enabledVoices.size} voices enabled"
+                    }
+                    Text(
+                        text = voiceText,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Icon(
+                    imageVector = if (languageState.isExpanded) Icons.Default.KeyboardArrowUp else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = if (languageState.isExpanded) "Collapse" else "Expand",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (languageState.isExpanded) {
+                if (languageState.isLoadingVoices) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    }
+                } else if (languageState.voices.isEmpty()) {
+                    Text(
+                        text = "No voices available",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        languageState.voices.forEach { voice ->
+                            VoiceItem(
+                                voice = voice,
+                                onTest = { onTestVoice(voice) },
+                                isTesting = (testingVoice == voice),
+                                isEnabled = voice.id in languageState.enabledVoiceIds,
+                                onToggleEnabled = { onToggleVoiceEnabled(voice.id) }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun AboutSection(
+    buildConfig: AppBuildConfig,
+    onResetOnboarding: () -> Unit
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            AboutItem(
+                icon = Icons.Outlined.Feedback,
+                title = "Send us feedback",
+                subtitle = "We'd love to hear from you",
+                onClick = {},
+                iconBackground = MaterialTheme.colorScheme.primary,
+                iconTint = MaterialTheme.colorScheme.onPrimary
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                thickness = 0.5.dp
+            )
+            AboutItem(
+                icon = Icons.Outlined.Info,
+                title = "Version",
+                subtitle = buildConfig.versionName,
+                onClick = {},
+                iconBackground = MaterialTheme.colorScheme.primary,
+                iconTint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+    }
+}
+
+@Composable
+private fun AboutItem(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    iconTint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary,
+    iconBackground: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(iconBackground),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingIndicator(modifier: Modifier = Modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun DeleteConfirmationDialog(
     displayName: String,
     additionalInfo: String? = null,
     onConfirm: () -> Unit,
@@ -682,7 +1096,7 @@ private fun DeleteConfirmationDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Delete Database?")
+            Text("Delete Data?")
         },
         text = {
             Column {
@@ -713,172 +1127,6 @@ private fun DeleteConfirmationDialog(
             }
         }
     )
-}
-
-@Composable
-private fun EmptySettingsState(
-    onOpenSettings: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.Settings,
-            contentDescription = "No languages",
-            modifier = Modifier.size(72.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "No languages available",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Download language data from system settings to enable text-to-speech",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onOpenSettings) {
-            Text("Open System Settings")
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun LanguageCard(
-    language: Text2SpeechLanguage,
-    languageState: LanguageUiState,
-    onExpand: () -> Unit,
-    onTestVoice: (Text2SpeechVoice) -> Unit,
-    onToggleVoiceEnabled: (String) -> Unit,
-    testingVoice: Text2SpeechVoice? = null
-) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 1.dp,
-            pressedElevation = 3.dp
-        )
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Language header
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onExpand)
-                    .padding(18.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = language.language.selfName,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        if (language.isAvailable) {
-                            Icon(
-                                imageVector = Icons.Outlined.CheckCircle,
-                                contentDescription = "Available",
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Outlined.Error,
-                                contentDescription = "Not available",
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = language.language.selfName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    if (language.missingData) {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Download,
-                                contentDescription = "Needs download",
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Text(
-                                text = "Needs download",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Expanded voices section
-            if (languageState.isExpanded) {
-                HorizontalDivider(thickness = 1.dp)
-                if (languageState.isLoadingVoices) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(28.dp))
-                    }
-                } else if (languageState.voices.isEmpty()) {
-                    Text(
-                        text = "No voices available for this language",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(20.dp)
-                    )
-                } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = "Available voices",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        languageState.voices.forEach { voice ->
-                            VoiceItem(
-                                voice = voice,
-                                onTest = { onTestVoice(voice) },
-                                isTesting = (testingVoice == voice),
-                                isEnabled = voice.id in languageState.enabledVoiceIds,
-                                onToggleEnabled = { onToggleVoiceEnabled(voice.id) }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

@@ -257,6 +257,7 @@ fun App(
                         viewModelStoreOwner = backStackEntry
                     ) {
                         DownloadViewModel(
+                            //TODO if one of multiple translations fails we show error, but other langs downloaded.
                             download = { onProgress, cancel ->
                                 missingTranslations.forEachIndexed { index, target ->
                                     dataManager.ensureTranslation(

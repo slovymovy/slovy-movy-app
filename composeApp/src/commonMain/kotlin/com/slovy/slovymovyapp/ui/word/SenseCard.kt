@@ -169,20 +169,23 @@ internal fun SenseCard(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         if (sense.targetLangDefinitions.isNotEmpty()) {
-                            SectionLabel("Definition")
-                            if (translationBasedHeader != null) {
-                                HighlightedText(
-                                    text = sense.senseDefinition,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(vertical = 2.dp)
-                                )
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                SectionLabel("Definition")
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    if (translationBasedHeader != null) {
+                                        HighlightedText(
+                                            text = sense.senseDefinition,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                        )
+                                    }
+                                    HighlightedText(
+                                        text = sense.targetLangDefinitions.map { definition ->
+                                            definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
+                                        }.joinToString("\n"),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
                             }
-                            HighlightedText(
-                                text = sense.targetLangDefinitions.map { definition -> definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() } }
-                                    .joinToString("\n"),
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(vertical = 2.dp)
-                            )
                         }
 
                         if (sense.traits.isNotEmpty()) {
@@ -190,30 +193,35 @@ internal fun SenseCard(
                         }
 
                         if (sense.examples.isNotEmpty()) {
-                            SectionLabel(text = "Examples")
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                sense.examples.forEach { ex ->
-                                    OutlinedCard(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        shape = RoundedCornerShape(16.dp),
-                                        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                                    ) {
-                                        HighlightedText(
-                                            text = ex.text,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            clickableWords = relatedWords.keys,
-                                            onWordClick = onWordClick,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                        )
-                                        if (ex.targetLangTranslations.isNotEmpty()) {
-                                            ex.targetLangTranslations.forEach { (_, translation) ->
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                SectionLabel(text = "Examples")
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    sense.examples.forEach { ex ->
+                                        OutlinedCard(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(16.dp),
+                                            colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
                                                 HighlightedText(
-                                                    text = translation,
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                                    text = ex.text,
+                                                    style = MaterialTheme.typography.bodyLarge,
                                                     clickableWords = relatedWords.keys,
                                                     onWordClick = onWordClick
                                                 )
+                                                if (ex.targetLangTranslations.isNotEmpty()) {
+                                                    ex.targetLangTranslations.forEach { (_, translation) ->
+                                                        HighlightedText(
+                                                            text = translation,
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            clickableWords = relatedWords.keys,
+                                                            onWordClick = onWordClick
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
