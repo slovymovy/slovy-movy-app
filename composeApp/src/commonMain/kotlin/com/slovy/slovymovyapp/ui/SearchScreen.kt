@@ -30,6 +30,7 @@ import com.slovy.slovymovyapp.ui.components.AppCard
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.CompactFrequencyBadge
 import com.slovy.slovymovyapp.ui.word.Badge
+import com.slovy.slovymovyapp.ui.word.colorForLemma
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -394,8 +395,10 @@ private fun SearchResultCard(
     showLanguageIndicator: Boolean = false,
     onClick: () -> Unit
 ) {
+    val containerColor = colorForLemma(item.lemma, MaterialTheme.colorScheme.surface)
     AppCard(
         modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
         onClick = onClick
     ) {
         Row(

@@ -767,6 +767,7 @@ private fun WordDetailContent(
                 )
                 EntryCard(
                     entry = entry,
+                    lemma = card.lemma,
                     entryState = entryState,
                     cardLoading = cardLoading,
                     cardError = cardError,

@@ -52,7 +52,8 @@ internal fun EntryCard(
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     onSenseFavoriteToggle: (String) -> Unit = {},
     relatedWords: Map<String, RelatedWord> = emptyMap(),
-    onWordClick: (String) -> Unit = {}
+    onWordClick: (String) -> Unit = {},
+    lemma: String
 ) {
     val expanded = entryState.expanded && !cardLoading && cardError == null
     AppCard(
@@ -167,6 +168,7 @@ internal fun EntryCard(
                                     ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
                                 SenseCard(
                                     data = SenseCardData(
+                                        lemma = lemma,
                                         senseId = sense.senseId,
                                         sense = sense,
                                         pos = entry.pos,
