@@ -19,10 +19,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
-import com.slovy.slovymovyapp.ui.word.LoadingPlaceholder
-import com.slovy.slovymovyapp.ui.word.SenseCard
-import com.slovy.slovymovyapp.ui.word.SenseCardData
-import com.slovy.slovymovyapp.ui.word.SenseUiState
+import com.slovy.slovymovyapp.ui.word.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -385,9 +382,13 @@ fun FavoritesScreenContent(
 
                         else -> {
                             Column(modifier = Modifier.fillMaxSize()) {
-                                val count = state.senses.size
+                                val words = state.senses.distinctBy { it.lemma }
                                 Text(
-                                    text = if (count == 1) "1 meaning" else "$count meanings",
+                                    text = "${state.senses.size} meaning${pluralEnding(state.senses)} (${words.size} word${
+                                        pluralEnding(
+                                            words
+                                        )
+                                    })",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
@@ -533,7 +534,12 @@ fun PreviewFavoritesScreenCollapsed(
                 createSenseItem(
                     senseId = "book-1",
                     lemma = "book",
-                    sense = createMockSense("book-1", "a written or printed work", LearnerLevel.A1, SenseFrequency.HIGH),
+                    sense = createMockSense(
+                        "book-1",
+                        "a written or printed work",
+                        LearnerLevel.A1,
+                        SenseFrequency.HIGH
+                    ),
                     pos = PartOfSpeech.NOUN
                 )
             ),
@@ -559,7 +565,12 @@ fun PreviewFavoritesScreenExpanded(
                         "feeling or showing pleasure",
                         LearnerLevel.A2,
                         SenseFrequency.HIGH,
-                        examples = listOf(LanguageCardExample("I'm happy", mapOf(Language.POLISH to "Jestem szczęśliwy")))
+                        examples = listOf(
+                            LanguageCardExample(
+                                "I'm happy",
+                                mapOf(Language.POLISH to "Jestem szczęśliwy")
+                            )
+                        )
                     ),
                     pos = PartOfSpeech.ADJECTIVE,
                     expanded = true
