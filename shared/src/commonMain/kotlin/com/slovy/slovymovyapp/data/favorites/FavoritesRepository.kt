@@ -20,6 +20,16 @@ class FavoritesRepository(private val db: AppDatabase) {
         )
     }
 
+    suspend fun add(senseId: String, targetLang: Language, lemma: String, createdAt: Long) =
+        withContext(Dispatchers.IO) {
+            db.favoritesQueries.insertFavorite(
+                sense_id = senseId,
+                target_lang = targetLang.code,
+                lemma = lemma,
+                created_at = createdAt
+            )
+        }
+
     suspend fun remove(senseId: String, targetLang: Language) = withContext(Dispatchers.IO) {
         db.favoritesQueries.deleteFavorite(
             sense_id = senseId,
@@ -78,6 +88,19 @@ class FavoritesRepository(private val db: AppDatabase) {
     suspend fun exists(senseId: String, targetLang: Language): Boolean = withContext(Dispatchers.IO) {
         db.favoritesQueries.countBySenseIdAndLang(sense_id = senseId, target_lang = targetLang.code)
             .executeAsOne() > 0
+    }
+
+    suspend fun getOne(senseId: String, targetLang: Language): Favorite? = withContext(Dispatchers.IO) {
+        db.favoritesQueries.selectOne(sense_id = senseId, target_lang = targetLang.code)
+            .executeAsOneOrNull()
+            ?.let { row ->
+                Favorite(
+                    senseId = row.sense_id,
+                    targetLang = Language.fromCode(row.target_lang),
+                    lemma = row.lemma,
+                    createdAt = row.created_at
+                )
+            }
     }
 
     suspend fun deleteAll() = withContext(Dispatchers.IO) {

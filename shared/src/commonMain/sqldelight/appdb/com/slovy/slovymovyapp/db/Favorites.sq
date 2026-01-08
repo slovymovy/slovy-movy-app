@@ -40,5 +40,9 @@ ORDER BY (SELECT MAX(created_at) FROM favorites f2 WHERE f2.lemma = favorites.le
 countBySenseIdAndLang:
 SELECT COUNT(*) FROM favorites WHERE sense_id = ? AND target_lang = ?;
 
+selectOne:
+SELECT sense_id, target_lang, lemma, created_at FROM favorites
+WHERE sense_id = ? AND target_lang = ?;
+
 deleteAll:
 DELETE FROM favorites;

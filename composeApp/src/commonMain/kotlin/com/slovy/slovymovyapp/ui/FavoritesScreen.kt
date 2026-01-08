@@ -61,6 +61,7 @@ class FavoritesViewModel(
         private set
 
     val scrollState = LazyListState()
+    val snackbarHostState = SnackbarHostState()
 
     private val queryFlow = MutableStateFlow(QueryState("", Uuid.random()))
 
@@ -168,11 +169,25 @@ class FavoritesViewModel(
     fun toggleFavorite(senseId: String) {
         val item = findSense(senseId) ?: return
         viewModelScope.launch {
-            if (favoritesRepository.exists(senseId, item.targetLang)) {
-                favoritesRepository.remove(senseId, item.targetLang)
-                // Remove from list since it's no longer a favorite
-                val content = state as? FavoritesUiState.Content ?: return@launch
-                state = content.copy(senses = content.senses.filter { it.senseId != senseId })
+            // Fetch the favorite to get its createdAt before removal
+            val favorite = favoritesRepository.getOne(senseId, item.targetLang) ?: return@launch
+
+            // Remove from repository and UI
+            favoritesRepository.remove(senseId, favorite.targetLang)
+            val content = state as? FavoritesUiState.Content ?: return@launch
+            state = content.copy(senses = content.senses.filter { it.senseId != senseId })
+
+            // Show snackbar with undo option
+            val result = snackbarHostState.showSnackbar(
+                message = "Removed from favorites",
+                actionLabel = "Undo",
+                duration = SnackbarDuration.Short
+            )
+
+            if (result == SnackbarResult.ActionPerformed) {
+                // Re-add with original createdAt to preserve position
+                favoritesRepository.add(senseId, favorite.targetLang, favorite.lemma, favorite.createdAt)
+                loadFavorites()
             }
         }
     }
@@ -232,6 +247,7 @@ fun FavoritesScreen(
     FavoritesScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
+        snackbarHostState = viewModel.snackbarHostState,
         onNavigateToSearch = onNavigateToSearch,
         onQueryChange = { viewModel.updateQuery(it) },
         onSenseToggle = { viewModel.toggleSense(it) },
@@ -248,6 +264,7 @@ fun FavoritesScreen(
 fun FavoritesScreenContent(
     state: FavoritesUiState,
     scrollState: LazyListState = LazyListState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onNavigateToSearch: () -> Unit = {},
     onQueryChange: (String) -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
@@ -281,6 +298,7 @@ fun FavoritesScreenContent(
                 onNavigateToSettings = onNavigateToSettings
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         when (state) {
