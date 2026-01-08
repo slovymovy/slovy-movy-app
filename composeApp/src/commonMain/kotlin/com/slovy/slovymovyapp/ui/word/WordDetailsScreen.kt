@@ -132,22 +132,50 @@ private fun LanguageCardResponseSense.toSenseUiState(
     )
 }
 
-private fun WordDetailUiState.Content.toggleEntry(entryIndex: Int): WordDetailUiState.Content =
-    updateEntry(entryIndex) { entry -> entry.copy(expanded = !entry.expanded) }
+private fun WordDetailUiState.Content.toggleEntry(entryId: String): WordDetailUiState.Content =
+    updateEntry(entryId) { entry -> entry.copy(expanded = !entry.expanded) }
 
-private fun WordDetailUiState.Content.toggleForms(entryIndex: Int): WordDetailUiState.Content =
-    updateEntry(entryIndex) { entry -> entry.copy(formsExpanded = !entry.formsExpanded) }
+private fun WordDetailUiState.Content.toggleForms(entryId: String): WordDetailUiState.Content =
+    updateEntry(entryId) { entry -> entry.copy(formsExpanded = !entry.formsExpanded) }
 
-private fun WordDetailUiState.Content.toggleSense(entryIndex: Int, senseId: String): WordDetailUiState.Content =
-    updateEntry(entryIndex) { entry -> entry.updateSense(senseId) { sense -> sense.copy(expanded = !sense.expanded) } }
+private fun WordDetailUiState.Content.toggleSense(entryId: String, senseId: String): WordDetailUiState.Content =
+    updateEntry(entryId) { entry ->
+        entry.updateSense(senseId) { sense -> sense.copy(expanded = !sense.expanded) }
+    }
+
+private fun WordDetailUiState.Content.mergeStateFrom(
+    previous: WordDetailUiState.Content
+): WordDetailUiState.Content {
+    var merged = copy(wordFamilyExpanded = previous.wordFamilyExpanded)
+    previous.entries.forEach { previousEntry ->
+        merged = merged.updateEntry(previousEntry.entryId) { entry ->
+            var updatedEntry = entry.copy(
+                expanded = previousEntry.expanded,
+                formsExpanded = previousEntry.formsExpanded
+            )
+            previousEntry.senses.forEach { previousSense ->
+                updatedEntry = updatedEntry.updateSense(previousSense.senseId) { sense ->
+                    sense.copy(
+                        expanded = previousSense.expanded,
+                        examplesExpanded = previousSense.examplesExpanded,
+                        languageExpanded = sense.languageExpanded.mapValues { (language, value) ->
+                            previousSense.languageExpanded[language] ?: value
+                        }
+                    )
+                }
+            }
+            updatedEntry
+        }
+    }
+    return merged
+}
 
 private inline fun WordDetailUiState.Content.updateEntry(
-    entryIndex: Int,
+    entryId: String,
     transform: (EntryUiState) -> EntryUiState
 ): WordDetailUiState.Content {
-    if (entryIndex !in entries.indices) return this
-    val updated = entries.mapIndexed { idx, entry ->
-        if (idx == entryIndex) transform(entry) else entry
+    val updated = entries.map { entry ->
+        if (entry.entryId == entryId) transform(entry) else entry
     }
     return copy(entries = updated)
 }
@@ -156,12 +184,16 @@ private inline fun EntryUiState.updateSense(
     senseId: String,
     transform: (SenseUiState) -> SenseUiState
 ): EntryUiState {
-    val idx = senses.indexOfFirst { it.senseId == senseId }
-    if (idx == -1) return this
-    val updatedSenses = senses.mapIndexed { index, sense ->
-        if (index == idx) transform(sense) else sense
+    var updated = false
+    val updatedSenses = senses.map { sense ->
+        if (sense.senseId == senseId) {
+            updated = true
+            transform(sense)
+        } else {
+            sense
+        }
     }
-    return copy(senses = updatedSenses)
+    return if (updated) copy(senses = updatedSenses) else this
 }
 
 class WordDetailViewModel(
@@ -247,7 +279,15 @@ class WordDetailViewModel(
             val wasTranslationLoading = current?.translationLoading == true
             val errorMessage = result.error?.message
 
-            state = card.toContentUiState(targetSenseId, wordFamilyExpanded, ::isSenseFavorite).copy(
+            val nextState = card.toContentUiState(
+                targetSenseId = targetSenseId,
+                wordFamilyExpanded = wordFamilyExpanded,
+                isSenseFavorite = ::isSenseFavorite
+            ).let { baseState ->
+                if (current != null) baseState.mergeStateFrom(current) else baseState
+            }
+
+            state = nextState.copy(
                 cardLoading = result.isWordLoading,
                 cardError = if (wasWordLoading && errorMessage != null) errorMessage else null,
                 translationLoading = result.isTranslationLoading,
@@ -373,24 +413,24 @@ class WordDetailViewModel(
         hasScrolledToTarget = true
     }
 
-    fun toggleEntry(index: Int) {
+    fun toggleEntry(entryId: String) {
         val current = state
         if (current is WordDetailUiState.Content) {
-            state = current.toggleEntry(index)
+            state = current.toggleEntry(entryId)
         }
     }
 
-    fun toggleForms(index: Int) {
+    fun toggleForms(entryId: String) {
         val current = state
         if (current is WordDetailUiState.Content) {
-            state = current.toggleForms(index)
+            state = current.toggleForms(entryId)
         }
     }
 
-    fun toggleSense(entryIndex: Int, senseId: String) {
+    fun toggleSense(entryId: String, senseId: String) {
         val current = state
         if (current is WordDetailUiState.Content) {
-            state = current.toggleSense(entryIndex, senseId)
+            state = current.toggleSense(entryId, senseId)
         }
     }
 
@@ -539,9 +579,9 @@ fun WordDetailScreen(
         onNavigateToSettings = onNavigateToSettings,
         onPlayWord = { viewModel.playWord() },
         onStopWord = { viewModel.stopPlayback() },
-        onEntryToggle = { index -> viewModel.toggleEntry(index) },
-        onFormsToggle = { index -> viewModel.toggleForms(index) },
-        onSenseToggle = { entryIndex, senseId -> viewModel.toggleSense(entryIndex, senseId) },
+        onEntryToggle = { entryId -> viewModel.toggleEntry(entryId) },
+        onFormsToggle = { entryId -> viewModel.toggleForms(entryId) },
+        onSenseToggle = { entryId, senseId -> viewModel.toggleSense(entryId, senseId) },
         onSensePositioned = { senseId, yOffset -> viewModel.updateSensePosition(senseId, yOffset) },
         isSenseFavorite = { senseId -> viewModel.isSenseFavorite(senseId) },
         onSenseFavoriteToggle = { senseId ->
@@ -567,9 +607,9 @@ fun WordDetailScreenContent(
     onNavigateToSettings: () -> Unit = {},
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
-    onEntryToggle: (Int) -> Unit = {},
-    onFormsToggle: (Int) -> Unit = {},
-    onSenseToggle: (Int, String) -> Unit = { _, _ -> },
+    onEntryToggle: (String) -> Unit = {},
+    onFormsToggle: (String) -> Unit = {},
+    onSenseToggle: (String, String) -> Unit = { _, _ -> },
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {},
@@ -713,9 +753,9 @@ private fun WordDetailContent(
     cardError: String? = null,
     translationLoading: Boolean = false,
     translationError: String? = null,
-    onEntryToggle: (Int) -> Unit,
-    onFormsToggle: (Int) -> Unit,
-    onSenseToggle: (Int, String) -> Unit,
+    onEntryToggle: (String) -> Unit,
+    onFormsToggle: (String) -> Unit,
+    onSenseToggle: (String, String) -> Unit,
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {},
@@ -773,9 +813,9 @@ private fun WordDetailContent(
                     cardError = cardError,
                     translationLoading = translationLoading,
                     translationError = translationError,
-                    onEntryToggle = { onEntryToggle(index) },
-                    onFormsToggle = { onFormsToggle(index) },
-                    onSenseToggle = { senseId -> onSenseToggle(index, senseId) },
+                    onEntryToggle = { onEntryToggle(entryState.entryId) },
+                    onFormsToggle = { onFormsToggle(entryState.entryId) },
+                    onSenseToggle = { senseId -> onSenseToggle(entryState.entryId, senseId) },
                     onSensePositioned = { senseId, windowY ->
                         // Calculate position relative to scroll container
                         val relativeY = windowY - scrollContainerY
