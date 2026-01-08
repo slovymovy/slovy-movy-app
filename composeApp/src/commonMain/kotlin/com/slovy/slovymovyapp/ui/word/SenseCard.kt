@@ -345,17 +345,12 @@ internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
 
     val hash = lemma.hashCode()
 
-    // Generate subtle hue shift (0-360 degrees mapped to a small range)
-    val hueShift = (hash and 0xFF) / 255f * 120f  // 0-120 degree shift
+    val hue = (hash and 0x3FF) / 1023f * 360f
+    val saturation = 0.45f + ((hash shr 10) and 0x3F) / 63f * 0.30f
+    val lightness = 0.45f + ((hash shr 16) and 0x1F) / 31f * 0.20f
+    val tintColor = Color.hsl(hue = hue, saturation = saturation, lightness = lightness)
 
-    // Apply very subtle tint based on hash
-    val tintColor = Color.hsl(
-        hue = hueShift,
-        saturation = 0.15f,
-        lightness = 0.5f
-    )
-
-    val percent = 0.15f
+    val percent = 0.08f
     return baseColor.copy(
         red = (baseColor.red * (1.0f - percent) + tintColor.red * percent),
         green = (baseColor.green * (1.0f - percent) + tintColor.green * percent),
