@@ -54,7 +54,9 @@ internal fun SenseCard(
                 onPositioned(data.senseId, coordinates.positionInWindow().y)
             },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = colorForLemma(data.lemma, MaterialTheme.colorScheme.surface)
+        )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -336,4 +338,27 @@ private fun LanguageCardResponseSense.translationsHeader(): String? {
         prefix + it.value.map { translation -> translation.targetLangWord }.sortedBy { text -> text }
             .joinToString(separator = ", ")
     }
+}
+
+internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
+    if (lemma == null) return baseColor
+
+    val hash = lemma.hashCode()
+
+    // Generate subtle hue shift (0-360 degrees mapped to a small range)
+    val hueShift = (hash and 0xFF) / 255f * 120f  // 0-120 degree shift
+
+    // Apply very subtle tint based on hash
+    val tintColor = Color.hsl(
+        hue = hueShift,
+        saturation = 0.15f,
+        lightness = 0.5f
+    )
+
+    val percent = 0.15f
+    return baseColor.copy(
+        red = (baseColor.red * (1.0f - percent) + tintColor.red * percent),
+        green = (baseColor.green * (1.0f - percent) + tintColor.green * percent),
+        blue = (baseColor.blue * (1.0f - percent) + tintColor.blue * percent)
+    )
 }
