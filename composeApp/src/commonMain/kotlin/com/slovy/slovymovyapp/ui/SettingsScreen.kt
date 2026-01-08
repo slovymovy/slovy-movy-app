@@ -1,6 +1,8 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,6 +11,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -36,6 +40,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.AppBuildConfig
+import com.slovy.slovymovyapp.getPlatform
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.AvailableLanguageInfo
 import com.slovy.slovymovyapp.data.remote.DataDbManager
@@ -218,7 +223,7 @@ class SettingsViewModel(
             try {
                 dataDbManager.deleteDictionary(language)
                 dictionaryRepository.clearSenseCache()
-                loadDatabases()
+                reloadSettings()
                 snackbarHostState.showSnackbar("Database deleted successfully")
             } catch (e: Exception) {
                 state = state.copy(errorMessage = "Failed to delete database: ${e.message}")
@@ -256,7 +261,7 @@ class SettingsViewModel(
                     downloadingItems = state.downloadingItems - downloadKey
                 )
                 dictionaryRepository.clearSenseCache()
-                loadDatabases()
+                reloadSettings()
                 snackbarHostState.showSnackbar("Dictionary downloaded successfully")
             } catch (e: Exception) {
                 state = state.copy(
@@ -305,13 +310,28 @@ class SettingsViewModel(
             }
             try {
                 val languages = ttsManager.getAvailableLanguages()
+                val downloadedDatabases = dataDbManager.listDownloadedDatabases()
+                val downloadedLanguages = downloadedDatabases.filterIsInstance<com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Dictionary>()
+                    .map { it.language }
+                    .toSet()
+
+                val filteredLanguages = languages.filter { it.language in downloadedLanguages }
+
                 state = state.copy(
-                    languages = languages.associateWith { language ->
+                    languages = filteredLanguages.associateWith { language ->
                         // Preserve existing state if language already exists
                         state.languages[language] ?: LanguageUiState()
                     },
                     isLoading = false
                 )
+
+                // Load enabled voice IDs for each language so counts can be shown
+                filteredLanguages.forEach { language ->
+                    val enabledIds = voiceFilterHelper.getEnabledVoices(language)
+                    if (enabledIds.isNotEmpty()) {
+                        updateLanguageState(language) { it.copy(enabledVoiceIds = enabledIds) }
+                    }
+                }
             } catch (e: Exception) {
                 state = state.copy(
                     isLoading = false,
@@ -443,15 +463,6 @@ fun SettingsScreen(
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
         onDownloadDictionary = { language -> viewModel.downloadDictionary(language) },
         onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
-        onResetOnboarding = {
-            viewModel.showDeleteConfirmation(
-                displayName = "Onboarding Data",
-                additionalInfo = "This will reset your onboarding progress.",
-                onConfirm = {
-                    // Logic to reset onboarding if needed
-                }
-            )
-        },
         wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -474,7 +485,6 @@ fun SettingsScreenContent(
     onDismissDeleteConfirmation: () -> Unit = {},
     onDownloadDictionary: (Language) -> Unit = {},
     onDownloadTranslation: (Language, Language) -> Unit = { _, _ -> },
-    onResetOnboarding: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -634,27 +644,17 @@ fun SettingsScreenContent(
                                 }
                             }
 
-                            // Voice section header
-                            item {
-                                Text(
-                                    text = "Voice",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                                )
-                            }
-
-                            if (state.languages.isEmpty()) {
+                            if (state.languages.isNotEmpty()) {
+                                // Voice section header
                                 item {
                                     Text(
-                                        text = "No voices available. Download language data from system settings to enable text-to-speech.",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        text = "Voice",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                                     )
                                 }
-                            } else {
-                                // Find Dutch voice for the preview style if it exists, otherwise just list them
-                                // In reality we just want to follow the list
+
                                 items(state.languages.entries.toList()) { e ->
                                     VoiceSectionItem(
                                         language = e.key,
@@ -664,6 +664,68 @@ fun SettingsScreenContent(
                                         onToggleVoiceEnabled = { voiceId -> onToggleVoiceEnabled(e.key, voiceId) },
                                         testingVoice = state.testingVoice
                                     )
+                                }
+
+                                item {
+                                    ElevatedCard(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = MaterialTheme.shapes.extraLarge,
+                                        colors = CardDefaults.elevatedCardColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                                        ),
+                                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
+                                        onClick = onOpenSettings
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(48.dp)
+                                                    .clip(CircleShape)
+                                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Download,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                                )
+                                            }
+
+                                            Spacer(modifier = Modifier.width(16.dp))
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = "Download more voices",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                )
+                                                val platform = getPlatform().name
+                                                val voicesText = when {
+                                                    platform.contains("Android", ignoreCase = true) -> "Open system settings"
+                                                    platform.contains("iOS", ignoreCase = true) -> "Accessibility → Spoken Content → Voices"
+                                                    else -> ""
+                                                }
+
+                                                if (voicesText.isNotEmpty()) {
+                                                    Text(
+                                                        text = voicesText,
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                }
+                                            }
+
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
                                 }
                             }
 
@@ -680,8 +742,7 @@ fun SettingsScreenContent(
 
                                 item {
                                     AboutSection(
-                                        buildConfig = buildConfig,
-                                        onResetOnboarding = onResetOnboarding
+                                        buildConfig = buildConfig
                                     )
                                 }
                             }
@@ -718,10 +779,24 @@ private fun DictionaryCard(
     downloadingItems: Map<String, DownloadProgress>
 ) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(
+                if (isDownloaded) {
+                    Modifier.border(
+                        1.dp,
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        MaterialTheme.shapes.extraLarge
+                    )
+                } else Modifier
+            ),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = if (isDownloaded) {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f)
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            }
         ),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
@@ -838,54 +913,66 @@ private fun TranslationItem(
     onDownload: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = if (isDownloaded) {
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+        } else {
+            androidx.compose.ui.graphics.Color.Transparent
+        },
+        border = if (isDownloaded) {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+        } else null
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "${targetLanguage.flag} ${targetLanguage.selfName}",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = formatFileSize(sizeBytes),
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        if (isDownloading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(20.dp),
-                strokeWidth = 2.dp,
-                progress = { downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f }
-            )
-        } else if (isDownloaded) {
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "${targetLanguage.flag} ${targetLanguage.selfName}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = formatFileSize(sizeBytes),
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
-        } else {
-            IconButton(
-                onClick = onDownload,
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Download,
-                    contentDescription = "Download",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+
+            if (isDownloading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    progress = { downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f }
                 )
+            } else if (isDownloaded) {
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            } else {
+                IconButton(
+                    onClick = onDownload,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Download,
+                        contentDescription = "Download",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
@@ -903,6 +990,9 @@ private fun VoiceSectionItem(
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -917,13 +1007,13 @@ private fun VoiceSectionItem(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.VolumeUp,
+                        imageVector = Icons.AutoMirrored.Filled.VolumeUp,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
 
@@ -933,22 +1023,26 @@ private fun VoiceSectionItem(
                     Text(
                         text = "${language.language.selfName} voice",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
                     )
-                    val enabledVoices = languageState.voices.filter { it.id in languageState.enabledVoiceIds }
+                    val enabledVoicesCount = languageState.enabledVoiceIds.size
                     val voiceText = when {
-                        enabledVoices.isEmpty() -> "No voices enabled"
-                        enabledVoices.size == 1 -> enabledVoices.first().name ?: "Default voice"
-                        else -> "${enabledVoices.size} voices enabled"
+                        enabledVoicesCount == 0 -> "No voices enabled"
+                        enabledVoicesCount == 1 -> {
+                            languageState.voices.find { it.id in languageState.enabledVoiceIds }?.let {
+                                "${it.name ?: "Unknown"} (${it.language.code.uppercase()})"
+                            } ?: "1 voice enabled"
+                        }
+                        else -> "$enabledVoicesCount voices enabled"
                     }
                     Text(
                         text = voiceText,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
                 Icon(
-                    imageVector = if (languageState.isExpanded) Icons.Default.KeyboardArrowUp else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    imageVector = if (languageState.isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = if (languageState.isExpanded) "Collapse" else "Expand",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -975,10 +1069,16 @@ private fun VoiceSectionItem(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            .padding(horizontal = 16.dp),
                     ) {
-                        languageState.voices.forEach { voice ->
+                        languageState.voices.forEachIndexed { index, voice ->
+                            if (index > 0) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    thickness = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                )
+                            }
                             VoiceItem(
                                 voice = voice,
                                 onTest = { onTestVoice(voice) },
@@ -989,7 +1089,7 @@ private fun VoiceSectionItem(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -997,8 +1097,7 @@ private fun VoiceSectionItem(
 
 @Composable
 private fun AboutSection(
-    buildConfig: AppBuildConfig,
-    onResetOnboarding: () -> Unit
+    buildConfig: AppBuildConfig
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -1129,7 +1228,6 @@ fun DeleteConfirmationDialog(
     )
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun VoiceItem(
     voice: Text2SpeechVoice,
@@ -1138,289 +1236,118 @@ private fun VoiceItem(
     isEnabled: Boolean = true,
     onToggleEnabled: () -> Unit = {}
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp
-        )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                if (voice.name != null) {
-                    Text(
-                        text = voice.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+            if (voice.name != null) {
                 Text(
-                    text = voice.id,
+                    text = voice.name,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontWeight = FontWeight.SemiBold
                 )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AssistChip(
-                        onClick = {},
-                        enabled = false,
-                        label = {
-                            Text(
-                                text = when (voice.quality) {
-                                    VoiceQuality.BEST -> "Best"
-                                    VoiceQuality.GOOD -> "Good"
-                                    VoiceQuality.MEDIUM -> "Medium"
-                                },
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = when (voice.quality) {
-                                VoiceQuality.BEST -> MaterialTheme.colorScheme.primaryContainer
-                                VoiceQuality.GOOD -> MaterialTheme.colorScheme.secondaryContainer
-                                VoiceQuality.MEDIUM -> MaterialTheme.colorScheme.surfaceVariant
-                            },
-                            labelColor = when (voice.quality) {
-                                VoiceQuality.BEST -> MaterialTheme.colorScheme.onPrimaryContainer
-                                VoiceQuality.GOOD -> MaterialTheme.colorScheme.onSecondaryContainer
-                                VoiceQuality.MEDIUM -> MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                            disabledContainerColor = when (voice.quality) {
-                                VoiceQuality.BEST -> MaterialTheme.colorScheme.primaryContainer
-                                VoiceQuality.GOOD -> MaterialTheme.colorScheme.secondaryContainer
-                                VoiceQuality.MEDIUM -> MaterialTheme.colorScheme.surfaceVariant
-                            },
-                            disabledLabelColor = when (voice.quality) {
-                                VoiceQuality.BEST -> MaterialTheme.colorScheme.onPrimaryContainer
-                                VoiceQuality.GOOD -> MaterialTheme.colorScheme.onSecondaryContainer
-                                VoiceQuality.MEDIUM -> MaterialTheme.colorScheme.onSurfaceVariant
-                            }
-                        )
-                    )
-                    if (voice.networkConnectionRequired) {
-                        AssistChip(
-                            onClick = {},
-                            enabled = false,
-                            label = {
-                                Text(
-                                    text = "Network required",
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            },
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                labelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                                disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                disabledLabelColor = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                        )
-                    }
-                }
+            }
+            Text(
+                text = voice.id,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            val languagePair = remember(voice.id) {
+                val pattern1 = Regex("^([a-zA-Z]{2}-[a-zA-Z]{2})")
+                val pattern2 = Regex("com\\.apple\\.voice\\.[a-zA-Z]+\\.([a-zA-Z]{2}-[a-zA-Z]{2})\\.")
+
+                (pattern1.find(voice.id)?.groupValues?.get(1)
+                    ?: pattern2.find(voice.id)?.groupValues?.get(1))?.uppercase()
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
-            Checkbox(
-                checked = isEnabled,
-                onCheckedChange = { onToggleEnabled() }
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Surface(
-                shape = MaterialTheme.shapes.small,
-                color = if (isTesting) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = if (isTesting) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            if (languagePair != null) {
+                Text(
+                    text = languagePair,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onTest) {
-                    Icon(
-                        imageVector = Icons.Filled.PlayArrow,
-                        contentDescription = "Test voice"
+                val qualityColor = when (voice.quality) {
+                    VoiceQuality.BEST -> MaterialTheme.colorScheme.primary
+                    VoiceQuality.GOOD -> androidx.compose.ui.graphics.Color(0xFF4CAF50) // Greenish
+                    VoiceQuality.MEDIUM -> androidx.compose.ui.graphics.Color(0xFFFFA000) // Amber
+                }
+                Surface(
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, qualityColor.copy(alpha = 0.5f)),
+                    color = androidx.compose.ui.graphics.Color.Transparent
+                ) {
+                    Text(
+                        text = when (voice.quality) {
+                            VoiceQuality.BEST -> "High"
+                            VoiceQuality.GOOD -> "Good"
+                            VoiceQuality.MEDIUM -> "Medium"
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = qualityColor,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                     )
+                }
+                if (voice.networkConnectionRequired) {
+                    Surface(
+                        shape = CircleShape,
+                        color = androidx.compose.ui.graphics.Color.Transparent
+                    ) {
+                        Text(
+                            text = "Network required",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
                 }
             }
         }
-    }
-}
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun DatabaseLanguageCard(
-    languageInfo: AvailableLanguageInfo,
-    dictionaryDb: DatabaseItemUiState?,
-    onDownloadDictionary: () -> Unit,
-    onDeleteDictionary: () -> Unit,
-    onDownloadTranslation: (Language) -> Unit,
-    onDeleteTranslation: (Language) -> Unit,
-    downloadedTranslations: List<DatabaseItemUiState>,
-    downloadingItems: Map<String, DownloadProgress>
-) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 1.dp
-        )
-    ) {
-        Column(
+        IconButton(onClick = onTest) {
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Test Voice",
+                tint = if (isTesting) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Dictionary section
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Dictionary: ${languageInfo.language.selfName}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    val sizeBytes = dictionaryDb?.sizeBytes ?: languageInfo.dictionarySizeBytes
-                    if (sizeBytes != null) {
-                        Text(
-                            text = formatFileSize(sizeBytes),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-
-                val dictDownloadKey = "dict_${languageInfo.language.code}"
-                val dictDownloading = downloadingItems.containsKey(dictDownloadKey)
-                val dictProgress = downloadingItems[dictDownloadKey]
-
-                if (dictionaryDb != null) {
-                    // Downloaded - show delete button
-                    FilledTonalButton(
-                        onClick = onDeleteDictionary,
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                    ) {
-                        Text("Delete")
-                    }
-                } else if (dictDownloading) {
-                    // Downloading - show progress
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                        if (dictProgress?.percent != null && dictProgress.percent >= 0) {
-                            Text(
-                                text = "${dictProgress.percent}%",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                } else {
-                    // Not downloaded - show download button
-                    FilledTonalButton(onClick = onDownloadDictionary) {
-                        Icon(
-                            imageVector = Icons.Filled.Download,
-                            contentDescription = "Download",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Download")
-                    }
-                }
-            }
-
-            // Translations section
-            if (languageInfo.availableTranslations.isNotEmpty()) {
-                HorizontalDivider(thickness = 1.dp)
-                Text(
-                    text = "Translations:",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(
+                    if (isEnabled) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                 )
-                languageInfo.availableTranslations.forEach { translation ->
-                    val transDownloadKey = "trans_${languageInfo.language.code}_${translation.targetLanguage.code}"
-                    val transDownloading = downloadingItems.containsKey(transDownloadKey)
-                    val transProgress = downloadingItems[transDownloadKey]
-                    val transDb = downloadedTranslations.find {
-                        it.displayName == "Translation: ${languageInfo.language.selfName} → ${translation.targetLanguage.selfName}"
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "→ ${translation.targetLanguage.selfName}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            val transSizeBytes = transDb?.sizeBytes ?: translation.sizeBytes
-                            Text(
-                                text = formatFileSize(transSizeBytes),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        if (transDb != null) {
-                            // Downloaded - show delete button
-                            FilledTonalButton(
-                                onClick = { onDeleteTranslation(translation.targetLanguage) },
-                                colors = ButtonDefaults.filledTonalButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                                ),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                            ) {
-                                Text("Delete", style = MaterialTheme.typography.labelMedium)
-                            }
-                        } else if (transDownloading) {
-                            // Downloading - show progress
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
-                                if (transProgress?.percent != null && transProgress.percent >= 0) {
-                                    Text(
-                                        text = "${transProgress.percent}%",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        } else {
-                            // Not downloaded - show download button (disabled if dictionary not downloaded)
-                            FilledTonalButton(
-                                onClick = { onDownloadTranslation(translation.targetLanguage) },
-                                enabled = dictionaryDb != null, // Only allow download if dictionary is downloaded
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Download,
-                                    contentDescription = "Download",
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Download", style = MaterialTheme.typography.labelMedium)
-                            }
-                        }
-                    }
-                }
+                .clickable { onToggleEnabled() }
+                .border(
+                    width = 1.dp,
+                    color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isEnabled) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Selected",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }
@@ -1434,99 +1361,6 @@ private fun formatFileSize(bytes: Long): String {
         else -> {
             val gb = (bytes * 100 / (1024 * 1024 * 1024)).toDouble() / 100.0
             "$gb GB"
-        }
-    }
-}
-
-@Composable
-private fun AboutCard(
-    buildConfig: AppBuildConfig
-) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 1.dp
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Version",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = buildConfig.versionName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Build",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = buildConfig.versionCode.toString(),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Surface(
-                        shape = MaterialTheme.shapes.small,
-                        color = if (buildConfig.isDebug)
-                            MaterialTheme.colorScheme.tertiaryContainer
-                        else
-                            MaterialTheme.colorScheme.primaryContainer
-                    ) {
-                        Text(
-                            text = if (buildConfig.isDebug) "Debug" else "Release",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = if (buildConfig.isDebug)
-                                MaterialTheme.colorScheme.onTertiaryContainer
-                            else
-                                MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Package",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = buildConfig.applicationId,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
         }
     }
 }
@@ -1783,6 +1617,7 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
                 ),
                 deleteConfirmation = DeleteConfirmationState(
                     displayName = "Dictionary: English",
+                    additionalInfo = "2 translations will also be deleted",
                     onConfirm = {}
                 )
             )
