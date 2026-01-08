@@ -23,7 +23,6 @@ import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -209,7 +208,8 @@ fun App(
                                 dataManager.ensureDictionary(dictLang, onProgress, cancel)
                             },
                             onSuccess = {
-                                val missingTranslation = nativeLanguages.find { !dataManager.hasTranslation(dictLang, it) }
+                                val missingTranslation =
+                                    nativeLanguages.find { !dataManager.hasTranslation(dictLang, it) }
                                 if (missingTranslation == null) {
                                     navController.navigate(AppDestination.Search) {
                                         popUpTo<AppDestination.SetupLanguages> { inclusive = false }
@@ -265,9 +265,10 @@ fun App(
                                         onProgress = { p ->
                                             // Combine progress of multiple downloads
                                             val currentBase = (index.toFloat() / missingTranslations.size) * 100
-                                            val currentProgress = if (p.percent >= 0) (p.percent.toFloat() / missingTranslations.size) else 0f
+                                            val currentProgress =
+                                                if (p.percent >= 0) (p.percent.toFloat() / missingTranslations.size) else 0f
                                             val totalPercent = (currentBase + currentProgress).toInt()
-                                            
+
                                             // Create a dummy DownloadProgress with the combined percentage
                                             onProgress(object : DownloadProgress(p.bytesDownloaded, p.totalBytes) {
                                                 override val percent: Int = totalPercent
@@ -387,18 +388,26 @@ fun App(
             composable<AppDestination.WordDetail> { backStackEntry ->
                 val args = backStackEntry.toRoute<AppDestination.WordDetail>()
 
-                // Remove cached ViewModel if it has error or loading (will be recreated fresh)
                 wordDetailViewModels[args]?.let { cached ->
                     if (cached.hasError()) {
+                        cached.dispose()
                         wordDetailViewModels.remove(args)
+                    } else {
+                        // Move to end so "last" reflects most recently viewed.
+                        wordDetailViewModels.remove(args)
+                        wordDetailViewModels[args] = cached
                     }
                 }
 
-                // Try to retrieve cached ViewModel, otherwise create new one with proper lifecycle
-                val viewModel = viewModel(
-                    viewModelStoreOwner = backStackEntry
-                ) {
-                    wordDetailViewModels[args] ?: WordDetailViewModel(
+                val viewModel = wordDetailViewModels[args] ?: run {
+                    if (wordDetailViewModels.size >= 10) {
+                        val oldest = wordDetailViewModels.entries.firstOrNull()
+                        if (oldest != null) {
+                            oldest.value.dispose()
+                            wordDetailViewModels.remove(oldest.key)
+                        }
+                    }
+                    WordDetailViewModel(
                         dictionaryRepository,
                         wordFetchManager,
                         favoritesRepository,
@@ -408,13 +417,9 @@ fun App(
                         args.lemma,
                         args.targetSenseId,
                         args.translationLanguages
-                    )
-                }.also {
-                    // Enforce max N cached ViewModels (remove oldest if at capacity)
-                    if (wordDetailViewModels.size >= 10 && args !in wordDetailViewModels) {
-                        wordDetailViewModels.remove(wordDetailViewModels.keys.first())
+                    ).also { created ->
+                        wordDetailViewModels[args] = created
                     }
-                    wordDetailViewModels[args] = it
                 }
 
 

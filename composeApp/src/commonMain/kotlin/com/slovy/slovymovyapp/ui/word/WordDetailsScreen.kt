@@ -33,6 +33,7 @@ import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
 import com.slovy.slovymovyapp.ui.components.AppCard
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
@@ -416,6 +417,11 @@ class WordDetailViewModel(
     override fun onCleared() {
         super.onCleared()
         ttsManager.stop()
+    }
+
+    fun dispose() {
+        ttsManager.stop()
+        viewModelScope.cancel()
     }
 }
 
