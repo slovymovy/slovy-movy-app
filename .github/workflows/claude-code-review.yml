@@ -3,6 +3,7 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, synchronize]
+    tags: [claude-revew]
     # Optional: Only run on specific file changes
     # paths:
     #   - "src/**/*.ts"
