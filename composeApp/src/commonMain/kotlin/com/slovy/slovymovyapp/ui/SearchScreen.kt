@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -242,7 +244,16 @@ fun SearchScreenContent(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
 ) {
-    Surface(modifier = Modifier.fillMaxSize()) {
+    val focusManager = LocalFocusManager.current
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }
+    ) {
         Scaffold(
             bottomBar = {
                 AppNavigationBar(
