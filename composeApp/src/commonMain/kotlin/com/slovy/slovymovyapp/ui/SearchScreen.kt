@@ -29,6 +29,7 @@ import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.ui.components.AppCard
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.CompactFrequencyBadge
+import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
 import kotlinx.coroutines.Dispatchers
@@ -494,7 +495,7 @@ private fun EmptySearchState() {
             .verticalScroll(rememberScrollState()),
         contentAlignment = Alignment.Center
     ) {
-        com.slovy.slovymovyapp.ui.components.EmptyState(
+        EmptyState(
             icon = Icons.Filled.Search,
             title = "Expand Your Vocabulary",
             description = "Search for words to discover their meanings, pronunciations, and examples"
@@ -510,7 +511,7 @@ private fun NoResultsState(query: String) {
             .verticalScroll(rememberScrollState()),
         contentAlignment = Alignment.Center
     ) {
-        com.slovy.slovymovyapp.ui.components.EmptyState(
+        EmptyState(
             icon = Icons.Filled.Search,
             title = "No results found",
             description = "We couldn't find any words matching \"$query\". Try a different spelling or search term."
@@ -530,24 +531,6 @@ private fun SearchScreenPreviewEmptyQuery(
                 results = emptyList(),
                 showNoResults = false,
                 availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN)
-            ),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SearchScreenPreviewEmptyQueryLanguageExpanded(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        SearchScreenContent(
-            state = SearchUiState(
-                query = "",
-                results = emptyList(),
-                showNoResults = false,
-                availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN),
-                isLanguageDropdownExpanded = true
             ),
         )
     }
