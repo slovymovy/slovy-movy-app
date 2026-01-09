@@ -351,7 +351,7 @@ fun FavoritesScreenContent(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                                 .padding(top = 16.dp),
-                            placeholder = "Search my words..."
+                            placeholder = "Type a word..."
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
