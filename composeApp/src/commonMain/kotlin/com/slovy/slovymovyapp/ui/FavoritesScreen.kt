@@ -356,15 +356,15 @@ fun FavoritesScreenContent(
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Surface(
-                                    modifier = Modifier.size(96.dp),
                                     shape = MaterialTheme.shapes.extraLarge,
-                                    color = MaterialTheme.colorScheme.primaryContainer
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                    modifier = Modifier.size(80.dp)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
                                             imageVector = Icons.Outlined.FavoriteBorder,
                                             contentDescription = null,
-                                            modifier = Modifier.size(48.dp),
+                                            modifier = Modifier.size(40.dp),
                                             tint = MaterialTheme.colorScheme.primary
                                         )
                                     }
@@ -377,7 +377,7 @@ fun FavoritesScreenContent(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "Start adding meanings to your favorites by tapping the heart icon",
+                                    text = "Search a word and tap the heart icon",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center,

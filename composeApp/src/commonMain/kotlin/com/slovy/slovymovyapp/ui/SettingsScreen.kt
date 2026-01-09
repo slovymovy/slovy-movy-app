@@ -311,9 +311,10 @@ class SettingsViewModel(
             try {
                 val languages = ttsManager.getAvailableLanguages()
                 val downloadedDatabases = dataDbManager.listDownloadedDatabases()
-                val downloadedLanguages = downloadedDatabases.filterIsInstance<com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Dictionary>()
-                    .map { it.language }
-                    .toSet()
+                val downloadedLanguages =
+                    downloadedDatabases.filterIsInstance<com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Dictionary>()
+                        .map { it.language }
+                        .toSet()
 
                 val filteredLanguages = languages.filter { it.language in downloadedLanguages }
 
@@ -587,11 +588,12 @@ fun SettingsScreenContent(
                                         isDownloaded = true,
                                         isExpanded = expandedDictionaries.contains(langInfo.language.code),
                                         onExpand = {
-                                            expandedDictionaries = if (expandedDictionaries.contains(langInfo.language.code)) {
-                                                expandedDictionaries - langInfo.language.code
-                                            } else {
-                                                expandedDictionaries + langInfo.language.code
-                                            }
+                                            expandedDictionaries =
+                                                if (expandedDictionaries.contains(langInfo.language.code)) {
+                                                    expandedDictionaries - langInfo.language.code
+                                                } else {
+                                                    expandedDictionaries + langInfo.language.code
+                                                }
                                         },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
@@ -620,11 +622,12 @@ fun SettingsScreenContent(
                                         isDownloaded = false,
                                         isExpanded = expandedDictionaries.contains(langInfo.language.code),
                                         onExpand = {
-                                            expandedDictionaries = if (expandedDictionaries.contains(langInfo.language.code)) {
-                                                expandedDictionaries - langInfo.language.code
-                                            } else {
-                                                expandedDictionaries + langInfo.language.code
-                                            }
+                                            expandedDictionaries =
+                                                if (expandedDictionaries.contains(langInfo.language.code)) {
+                                                    expandedDictionaries - langInfo.language.code
+                                                } else {
+                                                    expandedDictionaries + langInfo.language.code
+                                                }
                                         },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
@@ -705,8 +708,16 @@ fun SettingsScreenContent(
                                                 )
                                                 val platform = getPlatform().name
                                                 val voicesText = when {
-                                                    platform.contains("Android", ignoreCase = true) -> "Open system settings"
-                                                    platform.contains("iOS", ignoreCase = true) -> "Accessibility → Spoken Content → Voices"
+                                                    platform.contains(
+                                                        "Android",
+                                                        ignoreCase = true
+                                                    ) -> "Open system settings"
+
+                                                    platform.contains(
+                                                        "iOS",
+                                                        ignoreCase = true
+                                                    ) -> "Accessibility → Spoken Content → Voices"
+
                                                     else -> ""
                                                 }
 
@@ -824,7 +835,11 @@ private fun DictionaryCard(
                     val sizeBytes = dictionaryDb?.sizeBytes ?: languageInfo.dictionarySizeBytes
                     if (sizeBytes != null) {
                         Text(
-                            text = "${if (isDownloaded) "Downloaded dictionary" else "Dictionary"} ${formatFileSize(sizeBytes)}",
+                            text = "${if (isDownloaded) "Downloaded dictionary" else "Dictionary"} ${
+                                formatFileSize(
+                                    sizeBytes
+                                )
+                            }",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -1021,7 +1036,7 @@ private fun VoiceSectionItem(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "${language.language.selfName} voice",
+                        text = "${language.language.selfName}",
                         style = MaterialTheme.typography.titleMedium,
                     )
                     val enabledVoicesCount = languageState.enabledVoiceIds.size
@@ -1032,6 +1047,7 @@ private fun VoiceSectionItem(
                                 "${it.name ?: "Unknown"} (${it.language.code.uppercase()})"
                             } ?: "1 voice enabled"
                         }
+
                         else -> "$enabledVoicesCount voices enabled"
                     }
                     Text(
@@ -1247,18 +1263,20 @@ private fun VoiceItem(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            if (voice.name != null) {
+            if (voice.name == null) {
+                Text(
+                    text = voice.id,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
                 Text(
                     text = voice.name,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold
                 )
             }
-            Text(
-                text = voice.id,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+
 
             val languagePair = remember(voice.id) {
                 val pattern1 = Regex("^([a-zA-Z]{2}-[a-zA-Z]{2})")
