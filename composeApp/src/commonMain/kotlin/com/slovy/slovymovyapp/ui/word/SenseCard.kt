@@ -20,6 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.text.Typography.bullet
 
 data class SenseCardData(
@@ -30,7 +33,8 @@ data class SenseCardData(
     val loading: Boolean = false,
     val error: String? = null,
     val translationLoading: Boolean = false,
-    val translationError: String? = null
+    val translationError: String? = null,
+    val createdAt: Long? = null
 )
 
 @Composable
@@ -72,7 +76,24 @@ internal fun SenseCard(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     when {
-                        data.error != null -> ErrorPlaceholder(data.error)
+                        data.error != null -> {
+                            ErrorPlaceholder(data.error)
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(
+                                    text = "ID: ${data.senseId}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                data.createdAt?.let { epochSeconds ->
+                                    Text(
+                                        text = "Added: ${formatEpochDate(epochSeconds)}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
                         data.loading -> LoadingPlaceholder("Loading meaning…")
                         data.translationError != null -> ErrorPlaceholder(data.translationError)
                         data.translationLoading -> LoadingPlaceholder("Preparing translation…")
@@ -364,4 +385,11 @@ internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
         green = (baseColor.green * (1.0f - percent) + tintColor.green * percent),
         blue = (baseColor.blue * (1.0f - percent) + tintColor.blue * percent)
     )
+}
+
+private fun formatEpochDate(epochSeconds: Long): String {
+    val months = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+    val instant = Instant.fromEpochSeconds(epochSeconds)
+    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+    return "${months[localDateTime.monthNumber - 1]} ${localDateTime.dayOfMonth}, ${localDateTime.year}"
 }
