@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -10,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -276,7 +278,15 @@ fun FavoritesScreenContent(
     onNavigateToSettings: () -> Unit = {},
     onPrefetchVisible: (List<FavoriteSenseItem>, IntRange) -> Unit = { _, _ -> }
 ) {
+    val focusManager = LocalFocusManager.current
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
