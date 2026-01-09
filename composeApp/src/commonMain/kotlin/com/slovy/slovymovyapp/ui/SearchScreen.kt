@@ -64,12 +64,16 @@ class SearchViewModel(
     )
 
     var state by mutableStateOf(
-        SearchUiState(
-            query = "",
-            results = emptyList(),
-            showNoResults = false,
-            availableLanguages = repository.installedDictionaries()
-        )
+        run {
+            val installed = repository.installedDictionaries()
+            SearchUiState(
+                query = "",
+                results = emptyList(),
+                showNoResults = false,
+                availableLanguages = installed,
+                selectedLanguage = installed.firstOrNull()
+            )
+        }
     )
         private set
 
@@ -127,11 +131,12 @@ class SearchViewModel(
     }
 
     fun refreshLanguageIndicators() {
+        val installed = repository.installedDictionaries()
         state = state.copy(
-            availableLanguages = repository.installedDictionaries()
+            availableLanguages = installed
         )
         if (state.selectedLanguage !in state.availableLanguages) {
-            setSelectedLanguage(null)
+            setSelectedLanguage(state.availableLanguages.firstOrNull())
         }
     }
 
@@ -292,7 +297,7 @@ fun SearchScreenContent(
                     if (state.availableLanguages.isNotEmpty()) {
                         val isSingleLanguage = state.availableLanguages.size == 1
                         val currentLanguage =
-                            if (isSingleLanguage) state.availableLanguages.first() else state.selectedLanguage
+                            if (isSingleLanguage) state.availableLanguages.first() else (state.selectedLanguage ?: state.availableLanguages.firstOrNull())
                         val interactionSource = remember { MutableInteractionSource() }
 
                         if (!isSingleLanguage) {
@@ -301,7 +306,7 @@ fun SearchScreenContent(
                                 onExpandedChange = { onToggleLanguageDropdown() }
                             ) {
                                 OutlinedTextField(
-                                    value = currentLanguage?.flag ?: "🌍",
+                                    value = currentLanguage?.flag ?: "",
                                     onValueChange = {},
                                     readOnly = true,
                                     modifier = Modifier
@@ -326,22 +331,6 @@ fun SearchScreenContent(
                                         .menuAnchor(PrimaryEditable)
                                         .width(200.dp)
                                 ) {
-                                    DropdownMenuItem(
-                                        text = {
-                                            Row(
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text("🌍")
-                                                Text("All languages")
-                                            }
-                                        },
-                                        onClick = {
-                                            onLanguageSelected(null)
-                                            onDismissLanguageDropdown()
-                                        },
-                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                    )
                                     state.availableLanguages.forEach { language ->
                                         DropdownMenuItem(
                                             text = {
