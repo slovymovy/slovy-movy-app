@@ -169,6 +169,7 @@ internal fun EntryCard(
                                 SenseCard(
                                     data = SenseCardData(
                                         lemma = lemma,
+                                        showLemma = false,
                                         senseId = sense.senseId,
                                         sense = sense,
                                         pos = entry.pos,

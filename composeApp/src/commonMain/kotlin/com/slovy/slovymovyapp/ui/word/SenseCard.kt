@@ -20,21 +20,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import kotlin.text.Typography.bullet
 
 data class SenseCardData(
     val senseId: String,
-    val lemma: String? = null,
+    val lemma: String,
+    val showLemma: Boolean = true,
     val sense: LanguageCardResponseSense? = null,
     val pos: PartOfSpeech? = null,
     val loading: Boolean = false,
     val error: String? = null,
     val translationLoading: Boolean = false,
     val translationError: String? = null,
-    val createdAt: Long? = null
+    val diagnosticInfoOnError: String? = null
 )
 
 @Composable
@@ -78,19 +76,12 @@ internal fun SenseCard(
                     when {
                         data.error != null -> {
                             ErrorPlaceholder(data.error)
-                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            data.diagnosticInfoOnError?.let { info ->
                                 Text(
-                                    text = "ID: ${data.senseId}",
+                                    text = info,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                data.createdAt?.let { epochSeconds ->
-                                    Text(
-                                        text = "Added: ${formatEpochDate(epochSeconds)}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
                             }
                         }
 
@@ -98,9 +89,9 @@ internal fun SenseCard(
                         data.translationError != null -> ErrorPlaceholder(data.translationError)
                         data.translationLoading -> LoadingPlaceholder("Preparing translation…")
                     }
-                    data.lemma?.let {
+                    if (data.showLemma) {
                         HighlightedText(
-                            text = it,
+                            text = data.lemma,
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -385,11 +376,4 @@ internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
         green = (baseColor.green * (1.0f - percent) + tintColor.green * percent),
         blue = (baseColor.blue * (1.0f - percent) + tintColor.blue * percent)
     )
-}
-
-private fun formatEpochDate(epochSeconds: Long): String {
-    val months = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-    val instant = Instant.fromEpochSeconds(epochSeconds)
-    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${months[localDateTime.monthNumber - 1]} ${localDateTime.dayOfMonth}, ${localDateTime.year}"
 }

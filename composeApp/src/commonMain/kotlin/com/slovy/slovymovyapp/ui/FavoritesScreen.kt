@@ -27,8 +27,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.*
+import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
+import kotlinx.datetime.format.char
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 data class FavoriteSenseItem(
@@ -181,7 +185,7 @@ class FavoritesViewModel(
             val content = state as? FavoritesUiState.Content ?: return@launch
             state = content.copy(senses = content.senses.filter { it.senseId != senseId })
 
-            // Show snackbar with undo option
+            // Show snackbar with an undo option
             val result = snackbarHostState.showSnackbar(
                 message = "Removed from favorites",
                 actionLabel = "Undo",
@@ -189,7 +193,7 @@ class FavoritesViewModel(
             )
 
             if (result == SnackbarResult.ActionPerformed) {
-                // Re-add with original createdAt to preserve position
+                // Re-add with the original createdAt to preserve position
                 favoritesRepository.add(senseId, favorite.targetLang, favorite.lemma, favorite.createdAt)
                 loadFavorites()
             }
@@ -465,19 +469,30 @@ private fun FavoriteSenseCard(
         pos = item.pos
     )
     SenseCard(
-        data = SenseCardData(
+        data =  SenseCardData(
             senseId = item.senseId,
             lemma = item.lemma,
+            showLemma = true,
             sense = item.sense,
             pos = item.pos,
             loading = item.loading,
             error = item.error,
-            createdAt = item.createdAt
+            diagnosticInfoOnError = buildDiagnosticInfo(item.senseId, item.createdAt)
         ),
         state = senseState,
         onToggle = onToggle,
         onFavoriteToggle = onFavoriteToggle
     )
+}
+
+private val dateFormat = LocalDateTime.Format { date(LocalDate.Formats.ISO); char(' '); time(LocalTime.Formats.ISO) }
+
+private fun buildDiagnosticInfo(senseId: String, createdAt: Long): String {
+    val instant = Instant.fromEpochSeconds(createdAt)
+    val timeZone = currentSystemDefault()
+    val localDateTime: LocalDateTime = instant.toLocalDateTime(timeZone)
+    val dateStr = localDateTime.format(dateFormat)
+    return "ID: $senseId\nAdded: $dateStr"
 }
 
 // Preview helpers
