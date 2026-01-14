@@ -11,13 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.slovy.slovymovyapp.data.remote.CancelToken
-import com.slovy.slovymovyapp.data.remote.DownloadProgress
+import com.slovy.slovymovyapp.data.remote.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 class DownloadViewModel(
+    private val downloadCoordinator: DownloadCoordinator,
+    private val downloadKey: String,
     private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
     private val onSuccess: () -> Unit,
     private val onCancel: () -> Unit,
@@ -27,39 +29,84 @@ class DownloadViewModel(
     var state by mutableStateOf<DownloadUiState>(DownloadUiState.Idle)
         private set
 
-    private val cancel = CancelToken()
+    private var terminalHandled = false
 
     init {
-        startDownload()
+        val downloadFlow = startDownload()
+        observeProgress(downloadFlow)
+        attachDownloadCallbacks(downloadFlow)
     }
 
-    private fun startDownload() {
-        viewModelScope.launch {
-            state = DownloadUiState.Running(0, null)
-            try {
-                val onProgress: (DownloadProgress) -> Unit =
-                    { p -> state = DownloadUiState.Running(p.percent.coerceAtLeast(0), p.totalBytes) }
+    private fun startDownload(): Flow<DownloadEntry?> {
+        return downloadCoordinator.startDownload(downloadKey, download)
+    }
 
-                download(onProgress, cancel)
-                state = DownloadUiState.Done
-                onSuccess()
-            } catch (t: Throwable) {
-                if (cancel.isCancelled) {
-                    state = DownloadUiState.Cancelled
-                    onCancel()
-                } else {
-                    state = DownloadUiState.Failed(t)
-                    onError(t)
+    private fun observeProgress(downloadFlow: Flow<DownloadEntry?>) {
+        viewModelScope.launch {
+            downloadFlow.collect { entry ->
+                when (entry?.status ?: DownloadStatus.Idle) {
+                    DownloadStatus.Idle -> {
+                        if (!terminalHandled) {
+                            state = DownloadUiState.Idle
+                        }
+                    }
+
+                    DownloadStatus.Running -> {
+                        val progress = entry?.progress
+                        val percent = progress?.percent?.coerceAtLeast(0) ?: 0
+                        state = DownloadUiState.Running(percent, progress?.totalBytes)
+                    }
+
+                    else -> Unit
+                }
+            }
+        }
+    }
+
+    private fun attachDownloadCallbacks(downloadFlow: Flow<DownloadEntry?>) {
+        viewModelScope.launch {
+            downloadFlow.collect { entry ->
+                when (entry?.status ?: DownloadStatus.Idle) {
+                    DownloadStatus.Done -> {
+                        state = DownloadUiState.Done
+                        if (!terminalHandled) {
+                            terminalHandled = true
+                            onSuccess()
+                            downloadCoordinator.clear(downloadKey)
+                        }
+                    }
+
+                    DownloadStatus.Cancelled -> {
+                        state = DownloadUiState.Cancelled
+                        if (!terminalHandled) {
+                            terminalHandled = true
+                            onCancel()
+                            downloadCoordinator.clear(downloadKey)
+                        }
+                    }
+
+                    DownloadStatus.Failed -> {
+                        val error = entry?.error ?: Throwable("Unknown error")
+                        state = DownloadUiState.Failed(error)
+                        if (!terminalHandled) {
+                            terminalHandled = true
+                            onError(error)
+                            downloadCoordinator.clear(downloadKey)
+                        }
+                    }
+
+                    else -> Unit
                 }
             }
         }
     }
 
     fun cancelDownload() {
-        cancel.cancel()
+        downloadCoordinator.cancel(downloadKey)
     }
 
     fun retry() {
+        terminalHandled = false
         state = DownloadUiState.Idle
         startDownload()
     }
