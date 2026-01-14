@@ -223,16 +223,12 @@ internal fun SenseCard(
                                                 HighlightedText(
                                                     text = ex.text,
                                                     style = MaterialTheme.typography.bodyLarge,
-                                                    clickableWords = relatedWords.keys,
-                                                    onWordClick = onWordClick
                                                 )
                                                 if (ex.targetLangTranslations.isNotEmpty()) {
                                                     ex.targetLangTranslations.forEach { (_, translation) ->
                                                         HighlightedText(
                                                             text = translation,
                                                             style = MaterialTheme.typography.bodySmall,
-                                                            clickableWords = relatedWords.keys,
-                                                            onWordClick = onWordClick
                                                         )
                                                     }
                                                 }
