@@ -187,6 +187,8 @@ internal fun SenseCard(
                                     if (translationBasedHeader != null) {
                                         HighlightedText(
                                             text = sense.senseDefinition,
+                                            clickableWords = relatedWords.keys,
+                                            onWordClick = onWordClick,
                                             style = MaterialTheme.typography.bodyLarge,
                                         )
                                     }
