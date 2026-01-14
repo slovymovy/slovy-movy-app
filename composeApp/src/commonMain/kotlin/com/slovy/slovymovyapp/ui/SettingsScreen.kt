@@ -12,20 +12,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Error
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.RestartAlt
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,18 +24,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.AppBuildConfig
-import com.slovy.slovymovyapp.getPlatform
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.remote.AvailableLanguageInfo
-import com.slovy.slovymovyapp.data.remote.DataDbManager
-import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.remote.DownloadProgress
+import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.getPlatform
 import com.slovy.slovymovyapp.speech.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
@@ -96,6 +86,7 @@ class SettingsViewModel(
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
     private val dataDbManager: DataDbManager,
+    private val downloadCoordinator: DownloadCoordinator,
     private val dictionaryRepository: DictionaryRepository,
     buildConfig: AppBuildConfig
 ) : ViewModel() {
@@ -105,12 +96,14 @@ class SettingsViewModel(
 
     val scrollState = LazyListState()
     val snackbarHostState = SnackbarHostState()
+    private val downloadJobs = mutableMapOf<String, Job>()
 
     init {
         loadLanguages()
         loadDatabases()
         loadAvailableLanguages()
         setupTTSListeners()
+        observeDownloads()
     }
 
     private fun setupTTSListeners() {
@@ -246,58 +239,46 @@ class SettingsViewModel(
 
     fun downloadDictionary(language: Language) {
         val downloadKey = "dict_${language.code}"
-        viewModelScope.launch {
-            try {
-                dataDbManager.ensureDictionary(
-                    lang = language,
-                    onProgress = { progress ->
-                        state = state.copy(
-                            downloadingItems = state.downloadingItems + (downloadKey to progress)
-                        )
-                    }
-                )
-                // Remove from downloading items and reload databases
-                state = state.copy(
-                    downloadingItems = state.downloadingItems - downloadKey
-                )
-                dictionaryRepository.clearSenseCache()
-                reloadSettings()
-                snackbarHostState.showSnackbar("Dictionary downloaded successfully")
-            } catch (e: Exception) {
-                state = state.copy(
-                    downloadingItems = state.downloadingItems - downloadKey,
-                    errorMessage = "Failed to download dictionary: ${e.message}"
-                )
-            }
+        if (downloadCoordinator.isRunning(downloadKey)) return
+
+        val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
+            dataDbManager.ensureDictionary(
+                lang = language,
+                onProgress = onProgress,
+                cancelToken = cancelToken
+            )
+        }
+        attachDownloadCallbacks(
+            downloadKey = downloadKey,
+            downloadFlow = downloadFlow,
+            successMessage = "Dictionary downloaded successfully",
+            errorPrefix = "Failed to download dictionary"
+        ) {
+            dictionaryRepository.clearSenseCache()
+            reloadSettings()
         }
     }
 
     fun downloadTranslation(sourceLanguage: Language, targetLanguage: Language) {
         val downloadKey = "trans_${sourceLanguage.code}_${targetLanguage.code}"
-        viewModelScope.launch {
-            try {
-                dataDbManager.ensureTranslation(
-                    src = sourceLanguage,
-                    tgt = targetLanguage,
-                    onProgress = { progress ->
-                        state = state.copy(
-                            downloadingItems = state.downloadingItems + (downloadKey to progress)
-                        )
-                    }
-                )
-                // Remove from downloading items and reload databases
-                state = state.copy(
-                    downloadingItems = state.downloadingItems - downloadKey
-                )
-                dictionaryRepository.clearSenseCache()
-                loadDatabases()
-                snackbarHostState.showSnackbar("Translation downloaded successfully")
-            } catch (e: Exception) {
-                state = state.copy(
-                    downloadingItems = state.downloadingItems - downloadKey,
-                    errorMessage = "Failed to download translation: ${e.message}"
-                )
-            }
+        if (downloadCoordinator.isRunning(downloadKey)) return
+
+        val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
+            dataDbManager.ensureTranslation(
+                src = sourceLanguage,
+                tgt = targetLanguage,
+                onProgress = onProgress,
+                cancelToken = cancelToken
+            )
+        }
+        attachDownloadCallbacks(
+            downloadKey = downloadKey,
+            downloadFlow = downloadFlow,
+            successMessage = "Translation downloaded successfully",
+            errorPrefix = "Failed to download translation"
+        ) {
+            dictionaryRepository.clearSenseCache()
+            loadDatabases()
         }
     }
 
@@ -433,6 +414,61 @@ class SettingsViewModel(
     override fun onCleared() {
         super.onCleared()
         ttsManager.stop()
+    }
+
+    private fun observeDownloads() {
+        viewModelScope.launch {
+            downloadCoordinator.downloadEntries()
+                .map { entries ->
+                    entries.filterValues { it.status == DownloadStatus.Running }
+                        .mapValues { (_, entry) -> entry.progress ?: DownloadProgress(0, 1) }
+                }
+                .distinctUntilChanged()
+                .collect { running ->
+                    state = state.copy(downloadingItems = running)
+                }
+        }
+    }
+
+    private fun attachDownloadCallbacks(
+        downloadKey: String,
+        downloadFlow: Flow<DownloadEntry?>,
+        successMessage: String,
+        errorPrefix: String,
+        onSuccess: suspend () -> Unit
+    ) {
+        if (downloadJobs[downloadKey]?.isActive == true) return
+
+        downloadJobs[downloadKey] = viewModelScope.launch {
+            try {
+                downloadFlow.collect { entry ->
+                    when (entry?.status) {
+                        DownloadStatus.Done -> {
+                            downloadCoordinator.clear(downloadKey)
+                            onSuccess()
+                            snackbarHostState.showSnackbar(successMessage)
+                            cancel()
+                        }
+
+                        DownloadStatus.Cancelled -> {
+                            downloadCoordinator.clear(downloadKey)
+                            cancel()
+                        }
+
+                        DownloadStatus.Failed -> {
+                            downloadCoordinator.clear(downloadKey)
+                            val message = entry.error?.message ?: "Unknown error"
+                            state = state.copy(errorMessage = "$errorPrefix: $message")
+                            cancel()
+                        }
+
+                        else -> Unit
+                    }
+                }
+            } finally {
+                downloadJobs.remove(downloadKey)
+            }
+        }
     }
 }
 
