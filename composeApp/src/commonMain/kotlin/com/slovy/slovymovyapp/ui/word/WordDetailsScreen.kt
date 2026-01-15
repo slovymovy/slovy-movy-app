@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -27,7 +28,6 @@ import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
-import com.slovy.slovymovyapp.ui.components.AppCard
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
@@ -564,7 +564,9 @@ fun WordDetailScreenContent(
                             is WordDetailUiState.Content ->
                                 Text(
                                     text = state.card.lemma,
-                                    style = MaterialTheme.typography.headlineSmall,
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
                                     maxLines = 1,
                                     softWrap = false,
                                     overflow = TextOverflow.Ellipsis
@@ -572,7 +574,9 @@ fun WordDetailScreenContent(
 
                             is WordDetailUiState.Empty -> HighlightedText(
                                 text = titleText,
-                                style = MaterialTheme.typography.headlineSmall,
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -634,7 +638,7 @@ fun WordDetailScreenContent(
                         .fillMaxSize()
                         .verticalScroll(scrollState)
                         .padding(innerPadding)
-                        .padding(horizontal = 16.dp, vertical = 24.dp),
+                        .padding(horizontal = 12.dp, vertical = 20.dp),
                     cardLoading = state.cardLoading,
                     cardError = state.cardError,
                     translationLoading = state.translationLoading,
@@ -702,25 +706,25 @@ private fun WordDetailContent(
     ) {
         // Display word family if available
         if (card.wordFamily.isNotEmpty()) {
-            AppCard(
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    EntryList(
-                        label = "Word Family",
-                        values = card.wordFamily,
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        relatedWords = card.relatedWords,
-                        onWordClick = onWordClick
-                    )
-                }
+                EntryList(
+                    label = "Word Family",
+                    values = card.wordFamily,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    relatedWords = card.relatedWords,
+                    onWordClick = onWordClick
+                )
             }
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
         }
 
         if (card.entries.isEmpty()) {
@@ -731,6 +735,13 @@ private fun WordDetailContent(
             )
         } else {
             card.entries.forEachIndexed { index, entry ->
+                // Add divider between POS sections (not before the first one)
+                if (index > 0) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                }
                 val entryState = entryStates.getOrNull(index) ?: entry.toEntryUiState(
                     index,
                     isSenseFavorite = isSenseFavorite,
