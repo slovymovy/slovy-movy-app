@@ -1,12 +1,12 @@
 package com.slovy.slovymovyapp.ui.word.preview
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.word.WordDetailScreenContent
 import com.slovy.slovymovyapp.ui.word.toContentUiState
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 // Amazon word previews - multiple POS and senses
 @Preview

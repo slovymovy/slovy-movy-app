@@ -16,8 +16,6 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 /**
  * Badge displaying word frequency level with color-coded indicators.
@@ -126,10 +124,10 @@ fun CompactFrequencyBadge(
 }
 
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun FrequencyBadgePreview(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         Column(
@@ -143,10 +141,10 @@ private fun FrequencyBadgePreview(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun CompactFrequencyBadgePreview(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         Column(

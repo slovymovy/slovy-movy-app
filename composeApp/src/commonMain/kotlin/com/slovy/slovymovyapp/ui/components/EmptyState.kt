@@ -17,8 +17,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 /**
  * Empty state component with icon, title, and description.
@@ -130,10 +128,10 @@ fun CompactEmptyState(
 }
 
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun EmptyStatePreview(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         EmptyState(
@@ -144,10 +142,10 @@ private fun EmptyStatePreview(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun EmptyStateWithActionPreview(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         EmptyState(
@@ -163,10 +161,10 @@ private fun EmptyStateWithActionPreview(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun CompactEmptyStatePreview(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         CompactEmptyState(

@@ -30,8 +30,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.format.char
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -543,20 +541,20 @@ private fun createSenseItem(
     error = error
 )
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun PreviewFavoritesScreenLoading(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(state = FavoritesUiState.Loading)
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun PreviewFavoritesScreenEmpty(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(
@@ -565,10 +563,10 @@ fun PreviewFavoritesScreenEmpty(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun PreviewFavoritesScreenCollapsed(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
@@ -597,10 +595,10 @@ fun PreviewFavoritesScreenCollapsed(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun PreviewFavoritesScreenExpanded(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
@@ -630,10 +628,10 @@ fun PreviewFavoritesScreenExpanded(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun PreviewFavoritesScreenWithSearch(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
@@ -652,10 +650,10 @@ fun PreviewFavoritesScreenWithSearch(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun PreviewFavoritesScreenNoResults(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(
@@ -664,10 +662,10 @@ fun PreviewFavoritesScreenNoResults(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun PreviewFavoritesScreenLoadingAndError(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(

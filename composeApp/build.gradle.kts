@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeHotReload)
     alias(libs.plugins.serialization)
     alias(libs.plugins.sqldelight)
 }
@@ -62,8 +61,8 @@ kotlin {
     sourceSets {
         val desktopMain by getting
         androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(compose.uiTooling)
+            implementation(libs.compose.ui.tooling.preview)
+            implementation(libs.compose.ui.tooling)
             implementation(libs.androidx.activity.compose)
             implementation(libs.sqldelight.androidDriver)
             implementation(libs.ktor.client.okhttp)
@@ -74,13 +73,13 @@ kotlin {
             implementation(libs.androidx.customview.poolingcontainer)
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.compose.material.icons.extended)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.components.resources)
+            implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
@@ -100,7 +99,7 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
+            implementation(libs.compose.desktop)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.sqldelight.sqliteDriver)
             implementation(libs.ktor.client.cio)
