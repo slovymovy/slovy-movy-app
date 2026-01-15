@@ -40,6 +40,7 @@ import com.slovy.slovymovyapp.ui.word.ErrorIcon
 fun PartOfSpeechIndicator(
     partOfSpeech: String,
     modifier: Modifier = Modifier,
+    meaningCount: Int? = null,
     cardLoading: Boolean = false,
     cardError: String? = null
 ) {
@@ -71,6 +72,15 @@ fun PartOfSpeechIndicator(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
+            // Optional meaning count (secondary)
+            if (meaningCount != null) {
+                val plural = if (meaningCount == 1) "" else "s"
+                Text(
+                    text = "· $meaningCount meaning$plural",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         } else if (cardLoading) {
             Text(
                 text = "Generating definitions and examples…",
@@ -141,10 +151,10 @@ private fun PartOfSpeechIndicatorPreview(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
-            PartOfSpeechIndicator(partOfSpeech = "verb")
-            PartOfSpeechIndicator(partOfSpeech = "noun")
-            PartOfSpeechIndicator(partOfSpeech = "adjective")
-            PartOfSpeechIndicator(partOfSpeech = "adverb")
+            PartOfSpeechIndicator(partOfSpeech = "verb", meaningCount = 3)
+            PartOfSpeechIndicator(partOfSpeech = "noun", meaningCount = 1)
+            PartOfSpeechIndicator(partOfSpeech = "adjective", meaningCount = 5)
+            PartOfSpeechIndicator(partOfSpeech = "adverb", meaningCount = 2)
             PartOfSpeechIndicator(partOfSpeech = "preposition")
             PartOfSpeechIndicator(partOfSpeech = "pronoun")
         }

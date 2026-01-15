@@ -1,10 +1,7 @@
 package com.slovy.slovymovyapp.ui.word
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -14,10 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -477,70 +472,6 @@ private fun WordDetailUiState.Content.reloadFavorite(isSenseFavorite: (String) -
     )
 }
 
-@Composable
-internal fun ExpandableSection(
-    title: String,
-    expanded: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier,
-    supportingText: String? = null,
-    headlineStyle: TextStyle = MaterialTheme.typography.titleMedium,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .clickable(onClick = onToggle),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    HighlightedText(text = title, style = headlineStyle)
-                    supportingText?.takeIf { !expanded }?.let {
-                        HighlightedText(
-                            text = it,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        )
-                    }
-                }
-                Icon(
-                    imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
-                    contentDescription = if (expanded) {
-                        "Collapse $title"
-                    } else {
-                        "Expand $title"
-                    },
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-
-        AnimatedVisibility(
-            visible = expanded,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                content()
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WordDetailScreen(
@@ -767,7 +698,7 @@ private fun WordDetailContent(
         modifier = modifier.onGloballyPositioned { coordinates ->
             scrollContainerY = coordinates.positionInWindow().y
         },
-        verticalArrangement = Arrangement.spacedBy(24.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         // Display word family if available
         if (card.wordFamily.isNotEmpty()) {
