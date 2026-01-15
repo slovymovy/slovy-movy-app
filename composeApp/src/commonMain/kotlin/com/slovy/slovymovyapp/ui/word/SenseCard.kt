@@ -185,7 +185,7 @@ internal fun SenseCard(
                         if (sense.targetLangDefinitions.isNotEmpty()) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 SectionLabel("Definition")
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     if (translationBasedHeader != null) {
                                         HighlightedText(
                                             text = sense.senseDefinition,
@@ -198,7 +198,9 @@ internal fun SenseCard(
                                         text = sense.targetLangDefinitions.map { definition ->
                                             definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
                                         }.joinToString("\n"),
-                                        style = MaterialTheme.typography.bodySmall,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        ),
                                     )
                                 }
                             }
@@ -253,7 +255,6 @@ internal fun SenseCard(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TraitsList(traits: List<LanguageCardTrait>) {
     if (traits.isEmpty()) return
@@ -262,39 +263,39 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         SectionLabel("Usage Context")
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 11.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             traits.forEach { trait ->
-                val (tc, tcc) = colorsForTraitType(trait.traitType)
-
-                OutlinedCard(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.outlinedCardColors(containerColor = tc.copy(alpha = 0.3f))
-                ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = trait.traitType.displayName,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                color = tcc
-                            )
+                val annotatedText = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        if (trait.comment.isNotBlank()) {
-                            Text(
-                                text = trait.comment,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                    ) {
+                        append(trait.traitType.displayName)
+                    }
+                    if (trait.comment.isNotBlank()) {
+                        append(": ")
+                        withStyle(
+                            style = SpanStyle(
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                             )
+                        ) {
+                            append(trait.comment)
                         }
                     }
                 }
+                Text(
+                    text = annotatedText,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
             }
         }
     }

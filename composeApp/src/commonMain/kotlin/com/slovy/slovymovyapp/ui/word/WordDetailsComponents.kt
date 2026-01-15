@@ -35,13 +35,19 @@ internal fun navigationArrow(isOnline: Boolean?): String =
 
 @Composable
 internal fun SectionLabel(text: String) {
-    HighlightedText(
-        text = text,
-        style = MaterialTheme.typography.labelLarge.copy(
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp)
+    ) {
+        HighlightedText(
+            text = text,
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         )
-    )
+    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -160,65 +166,6 @@ internal fun HighlightedText(
         style = style.merge(TextStyle(color = style.color)),
         modifier = modifier,
         textAlign = textAlign
-    )
-}
-
-@Composable
-internal fun BulletHighlightedText(
-    text: String,
-    style: TextStyle,
-    clickableWords: Set<String> = emptySet(),
-    onWordClick: (String) -> Unit = {},
-    modifier: Modifier = Modifier.Companion,
-) {
-    val highlight = SpanStyle(
-        color = MaterialTheme.colorScheme.secondary,
-        fontWeight = FontWeight.Light
-    )
-    val clickableHighlight = SpanStyle(
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Medium,
-        textDecoration = TextDecoration.Underline
-    )
-    val annotated = buildAnnotatedString {
-        append(Typography.bullet)
-        appendTextWithW(this, text, highlight, clickableHighlight, clickableWords, onWordClick)
-    }
-
-    Text(
-        text = annotated,
-        style = style.merge(TextStyle(color = style.color)),
-        modifier = modifier
-    )
-}
-
-@Composable
-internal fun PrefixedHighlightedText(
-    prefix: String,
-    text: String,
-    style: TextStyle,
-    modifier: Modifier = Modifier.Companion,
-    clickableWords: Set<String> = emptySet(),
-    onWordClick: (String) -> Unit = {}
-) {
-    val highlight = SpanStyle(
-        color = MaterialTheme.colorScheme.secondary,
-        fontWeight = FontWeight.Light
-    )
-    val clickableHighlight = SpanStyle(
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Medium,
-        textDecoration = TextDecoration.Underline
-    )
-    val annotated = buildAnnotatedString {
-        append(prefix)
-        appendTextWithW(this, text, highlight, clickableHighlight, clickableWords, onWordClick)
-    }
-
-    Text(
-        text = annotated,
-        style = style.merge(TextStyle(color = style.color)),
-        modifier = modifier
     )
 }
 
