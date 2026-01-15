@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
@@ -209,31 +211,12 @@ internal fun SenseCard(
                         if (sense.examples.isNotEmpty()) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 SectionLabel(text = "Examples")
-                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                                     sense.examples.forEach { ex ->
-                                        OutlinedCard(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            shape = RoundedCornerShape(16.dp),
-                                            colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                                        ) {
-                                            Column(
-                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                                            ) {
-                                                HighlightedText(
-                                                    text = ex.text,
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                )
-                                                if (ex.targetLangTranslations.isNotEmpty()) {
-                                                    ex.targetLangTranslations.forEach { (_, translation) ->
-                                                        HighlightedText(
-                                                            text = translation,
-                                                            style = MaterialTheme.typography.bodySmall,
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        ExampleItem(
+                                            example = ex,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
                                     }
                                 }
                             }
@@ -315,6 +298,68 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
             }
         }
     }
+}
+
+@Composable
+internal fun ExampleItem(
+    example: LanguageCardExample,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(1.5.dp))
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.weight(1f)
+        ) {
+            ExampleText(
+                text = example.text,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f
+                ),
+            )
+            if (example.targetLangTranslations.isNotEmpty()) {
+                example.targetLangTranslations.forEach { (_, translation) ->
+                    ExampleText(
+                        text = translation,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1f
+                        ),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExampleText(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier
+) {
+    val highlight = SpanStyle(
+        fontWeight = FontWeight.Bold,
+        color = style.color
+    )
+    val annotated = buildAnnotatedString {
+        appendTextWithW(this, text, highlight, highlight, emptySet()) { }
+    }
+
+    Text(
+        text = annotated,
+        style = style,
+        modifier = modifier
+    )
 }
 
 @Composable
