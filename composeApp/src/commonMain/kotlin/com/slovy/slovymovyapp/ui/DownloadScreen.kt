@@ -14,8 +14,6 @@ import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.remote.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 class DownloadViewModel(
     private val downloadCoordinator: DownloadCoordinator,
@@ -181,50 +179,50 @@ sealed interface DownloadUiState {
     data object Done : DownloadUiState
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun DownloadScreenPreviewIdle(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Idle)
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun DownloadScreenPreviewRunning(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Running(percent = 42, total = 1000L))
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun DownloadScreenPreviewFailed(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Failed(Throwable("Network error")))
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun DownloadScreenPreviewCancelled(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Cancelled)
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun DownloadScreenPreviewDone(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Done)

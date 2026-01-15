@@ -18,8 +18,6 @@ import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.word.ErrorIcon
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 /**
  * Vertical color bar indicator for parts of speech, matching Figma design.
@@ -133,10 +131,10 @@ fun PartOfSpeechBadge(
 }
 
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun PartOfSpeechIndicatorPreview(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         Column(
@@ -153,10 +151,10 @@ private fun PartOfSpeechIndicatorPreview(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun PartOfSpeechIndicatorPreviewLoadingError(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         Column(
@@ -169,10 +167,10 @@ private fun PartOfSpeechIndicatorPreviewLoadingError(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun PartOfSpeechBadgePreview(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         Column(

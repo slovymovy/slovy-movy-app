@@ -6,13 +6,11 @@ import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.word.WordDetailScreenContent
 import com.slovy.slovymovyapp.ui.word.toContentUiState
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewWithWordFamily(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         WordDetailScreenContent(
@@ -24,20 +22,20 @@ private fun WordDetailScreenPreviewWithWordFamily(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewWithWordFamilyCollapsed(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         WordDetailScreenContent(state = sampleDoubleCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewClickableRelatedWords(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         WordDetailScreenContent(
@@ -50,10 +48,10 @@ private fun WordDetailScreenPreviewClickableRelatedWords(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewWithRelatedWordsInSynonyms(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val programmaticallyWithRelated = sampleProgrammaticallyCard().copy(
@@ -71,10 +69,10 @@ private fun WordDetailScreenPreviewWithRelatedWordsInSynonyms(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewWithClickableHighlightedWords(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val amazonWithRelated = sampleAmazonCard().copy(

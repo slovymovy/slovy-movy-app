@@ -6,14 +6,12 @@ import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.word.WordDetailScreenContent
 import com.slovy.slovymovyapp.ui.word.toContentUiState
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 // Special UI state previews for different word complexity
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewSimpleWord(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         // Simple single-sense word like "celebration"
@@ -21,10 +19,10 @@ private fun WordDetailScreenPreviewSimpleWord(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewComplexWord(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         // Complex multi-POS word like "amazon"
@@ -32,10 +30,10 @@ private fun WordDetailScreenPreviewComplexWord(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewProperNoun(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         // Proper noun with multiple geographical meanings like "Richmond"
@@ -43,10 +41,10 @@ private fun WordDetailScreenPreviewProperNoun(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewAdverb(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         // Technical adverb like "programmatically"
@@ -55,10 +53,10 @@ private fun WordDetailScreenPreviewAdverb(
 }
 
 // UI state edge cases
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewPartiallyExpanded(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         // Show a complex word with some sections expanded and others collapsed
@@ -84,10 +82,10 @@ private fun WordDetailScreenPreviewPartiallyExpanded(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewHighFrequencyWord(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         // Show a high-frequency word (celebration)
@@ -95,10 +93,10 @@ private fun WordDetailScreenPreviewHighFrequencyWord(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewLowFrequencyWord(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         // Show a low-frequency/rare word (whippersnapper)

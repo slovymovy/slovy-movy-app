@@ -38,8 +38,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 data class LanguageUiState(
     val voices: List<Text2SpeechVoice> = emptyList(),
@@ -127,11 +125,11 @@ class SettingsViewModel(
                 val files = dataDbManager.listDownloadedDatabases()
                 val uiItems = files.map { fileInfo ->
                     when (fileInfo) {
-                        is com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Dictionary -> {
+                        is DatabaseFileInfo.Dictionary -> {
                             val displayName = "Dictionary: ${fileInfo.language.selfName}"
                             // Count how many translations will be deleted along with the dictionary
                             val translationCount = files.count {
-                                it is com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Translation &&
+                                it is DatabaseFileInfo.Translation &&
                                         it.sourceLanguage == fileInfo.language
                             }
                             val additionalInfo = if (translationCount > 0) {
@@ -149,7 +147,7 @@ class SettingsViewModel(
                             )
                         }
 
-                        is com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Translation -> {
+                        is DatabaseFileInfo.Translation -> {
                             val displayName =
                                 "Translation: ${fileInfo.sourceLanguage.selfName} → ${fileInfo.targetLanguage.selfName}"
                             DatabaseItemUiState(
@@ -293,7 +291,7 @@ class SettingsViewModel(
                 val languages = ttsManager.getAvailableLanguages()
                 val downloadedDatabases = dataDbManager.listDownloadedDatabases()
                 val downloadedLanguages =
-                    downloadedDatabases.filterIsInstance<com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Dictionary>()
+                    downloadedDatabases.filterIsInstance<DatabaseFileInfo.Dictionary>()
                         .map { it.language }
                         .toSet()
 
@@ -1072,7 +1070,7 @@ private fun VoiceSectionItem(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "${language.language.selfName}",
+                        text = language.language.selfName,
                         style = MaterialTheme.typography.titleMedium,
                     )
                     val enabledVoicesCount = languageState.enabledVoiceIds.size
@@ -1419,10 +1417,10 @@ private fun formatFileSize(bytes: Long): String {
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewLoading(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1431,10 +1429,10 @@ private fun SettingsScreenPreviewLoading(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewEmpty(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1447,10 +1445,10 @@ private fun SettingsScreenPreviewEmpty(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithDatabases(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1506,10 +1504,10 @@ private fun SettingsScreenPreviewWithDatabases(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithLanguages(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1554,10 +1552,10 @@ private fun SettingsScreenPreviewWithLanguages(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithExpandedLanguage(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1612,10 +1610,10 @@ private fun SettingsScreenPreviewWithExpandedLanguage(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithError(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1641,10 +1639,10 @@ private fun SettingsScreenPreviewWithError(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithDeleteConfirmation(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1679,10 +1677,10 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithMixedDatabaseStates(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(

@@ -6,23 +6,21 @@ import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.word.WordDetailScreenContent
 import com.slovy.slovymovyapp.ui.word.WordDetailUiState
 import com.slovy.slovymovyapp.ui.word.toContentUiState
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewContent(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         WordDetailScreenContent(state = sampleTestingCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview))
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewCollapsed(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val base = sampleTestingCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
@@ -45,10 +43,10 @@ private fun WordDetailScreenPreviewCollapsed(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewLoading(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         WordDetailScreenContent(
@@ -61,10 +59,10 @@ private fun WordDetailScreenPreviewLoading(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewError(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         WordDetailScreenContent(

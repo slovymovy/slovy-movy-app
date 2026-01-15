@@ -7,13 +7,11 @@ import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.word.WordDetailScreenContent
 import com.slovy.slovymovyapp.ui.word.WordDetailUiState
 import com.slovy.slovymovyapp.ui.word.toContentUiState
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewCardLoading(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val loadingCard = createLoadingCard("testing", listOf(PartOfSpeech.NOUN))
@@ -27,10 +25,10 @@ private fun WordDetailScreenPreviewCardLoading(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewCardLoadingMultiPos(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val loadingCard = createLoadingCard("amazon", listOf(PartOfSpeech.NOUN, PartOfSpeech.NAME))
@@ -44,10 +42,10 @@ private fun WordDetailScreenPreviewCardLoadingMultiPos(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewTranslationLoading(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
@@ -57,10 +55,10 @@ private fun WordDetailScreenPreviewTranslationLoading(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewSenseTranslationLoading(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
@@ -75,10 +73,10 @@ private fun WordDetailScreenPreviewSenseTranslationLoading(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewCardError(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val loadingCard = createLoadingCard("testing", listOf(PartOfSpeech.NOUN))
@@ -92,10 +90,10 @@ private fun WordDetailScreenPreviewCardError(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewCardErrorMultiPos(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val loadingCard = createLoadingCard("amazon", listOf(PartOfSpeech.NOUN, PartOfSpeech.NAME))
@@ -109,10 +107,10 @@ private fun WordDetailScreenPreviewCardErrorMultiPos(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun WordDetailScreenPreviewSenseTranslationError(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
