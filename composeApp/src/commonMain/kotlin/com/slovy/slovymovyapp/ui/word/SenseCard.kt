@@ -57,7 +57,7 @@ internal fun SenseCard(
             .onGloballyPositioned { coordinates ->
                 onPositioned(data.senseId, coordinates.positionInWindow().y)
             },
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.small,
         colors = CardDefaults.outlinedCardColors(
             containerColor = colorForLemma(data.lemma, MaterialTheme.colorScheme.surface)
         )
@@ -66,7 +66,7 @@ internal fun SenseCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(MaterialTheme.shapes.small)
                     .clickable(onClick = onToggle)
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically

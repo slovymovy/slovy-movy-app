@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.LanguageCardForm
 import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
 import com.slovy.slovymovyapp.data.remote.RelatedWord
-import com.slovy.slovymovyapp.ui.components.AppCard
 import com.slovy.slovymovyapp.ui.components.PartOfSpeechIndicator
 
 @Composable
@@ -115,91 +114,89 @@ internal fun EntryCard(
     lemma: String
 ) {
     val expanded = entryState.expanded && !cardLoading && cardError == null
-    AppCard(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // POS Header - kept with its own padding
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.extraLarge)
+                .clickable(onClick = onEntryToggle)
+                .padding(horizontal = 8.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            PartOfSpeechIndicator(
+                partOfSpeech = entry.pos.name,
+                meaningCount = if (!cardLoading && cardError == null) entry.senses.size else null,
+                cardLoading = cardLoading,
+                cardError = cardError
+            )
+            if (!cardLoading && cardError == null) {
+                Spacer(modifier = Modifier.weight(1f))
+
+                Icon(
+                    imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
+                    contentDescription = if (expanded) {
+                        "Collapse ${entry.pos} entry"
+                    } else {
+                        "Expand ${entry.pos} entry"
+                    },
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.extraLarge)
-                    .clickable(onClick = onEntryToggle)
-                    .padding(horizontal = 20.dp, vertical = 18.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(bottom = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                PartOfSpeechIndicator(
-                    partOfSpeech = entry.pos.name,
-                    meaningCount = if (!cardLoading && cardError == null) entry.senses.size else null,
-                    cardLoading = cardLoading,
-                    cardError = cardError
-                )
-                if (!cardLoading && cardError == null) {
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Icon(
-                        imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
-                        contentDescription = if (expanded) {
-                            "Collapse ${entry.pos} entry"
-                        } else {
-                            "Expand ${entry.pos} entry"
-                        },
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                // Grammar section - indented under POS header
+                if (entry.forms.isNotEmpty()) {
+                    GrammarSection(
+                        forms = entry.forms,
+                        expanded = entryState.formsExpanded,
+                        onToggle = onFormsToggle,
+                        modifier = Modifier.padding(horizontal = 8.dp)
                     )
                 }
-            }
 
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 0.dp)
-                        .padding(bottom = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                // Senses - edge-to-edge (no horizontal padding)
+                val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
+                groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
+                    val showGroup = groupEntries.size > 1 && groupIndex > 0 && senseList.size > 1
 
-                    if (entry.forms.isNotEmpty()) {
-                        GrammarSection(
-                            forms = entry.forms,
-                            expanded = entryState.formsExpanded,
-                            onToggle = onFormsToggle
-                        )
-                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (showGroup) {
+                            SectionLabel("Group: $groupId")
+                        }
 
-                    val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
-                    groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
-                        val showGroup = groupEntries.size > 1 && groupIndex > 0 && senseList.size > 1
-
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            if (showGroup) {
-                                SectionLabel("Group: $groupId")
-                            }
-
-                            senseList.forEach { sense ->
-                                val senseState = entryState.senses.find { it.senseId == sense.senseId }
-                                    ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
-                                SenseCard(
-                                    data = SenseCardData(
-                                        lemma = lemma,
-                                        showLemma = false,
-                                        senseId = sense.senseId,
-                                        sense = sense,
-                                        pos = entry.pos,
-                                        translationLoading = translationLoading || senseState.translationLoading,
-                                        translationError = translationError ?: senseState.translationError
-                                    ),
-                                    state = senseState,
-                                    onToggle = { onSenseToggle(sense.senseId) },
-                                    onPositioned = onSensePositioned,
-                                    onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
-                                    relatedWords = relatedWords,
-                                    onWordClick = onWordClick
-                                )
-                            }
+                        senseList.forEach { sense ->
+                            val senseState = entryState.senses.find { it.senseId == sense.senseId }
+                                ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
+                            SenseCard(
+                                data = SenseCardData(
+                                    lemma = lemma,
+                                    showLemma = false,
+                                    senseId = sense.senseId,
+                                    sense = sense,
+                                    pos = entry.pos,
+                                    translationLoading = translationLoading || senseState.translationLoading,
+                                    translationError = translationError ?: senseState.translationError
+                                ),
+                                state = senseState,
+                                onToggle = { onSenseToggle(sense.senseId) },
+                                onPositioned = onSensePositioned,
+                                onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
+                                relatedWords = relatedWords,
+                                onWordClick = onWordClick
+                            )
                         }
                     }
                 }
