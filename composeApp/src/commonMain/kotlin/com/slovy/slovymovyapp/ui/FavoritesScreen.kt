@@ -291,15 +291,7 @@ fun FavoritesScreenContent(
             },
         topBar = {
             CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "My words",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+                title = { Text("My words") }
             )
         },
         bottomBar = {
@@ -351,11 +343,10 @@ fun FavoritesScreenContent(
                             onQueryChange = onQueryChange,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 16.dp),
+                                .padding(horizontal = 16.dp),
                             placeholder = "Type a word..."
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                     }
 
                     when {
@@ -423,7 +414,7 @@ fun FavoritesScreenContent(
                                     })",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp)
                                 )
 
                                 LazyColumn(
