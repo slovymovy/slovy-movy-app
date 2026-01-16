@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
 import androidx.compose.runtime.*
@@ -22,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -356,8 +359,15 @@ fun SearchScreenContent(
 
                 // Result area
                 when {
+                    state.availableLanguages.isEmpty() -> {
+                        NoDictionaryState(onNavigateToSettings = onNavigateToSettings)
+                    }
+
                     state.query.isEmpty() -> {
-                        EmptySearchState()
+                        EmptySearchState(
+                            selectedLanguage = state.selectedLanguage,
+                            onWordClick = { word -> onQueryChange(word) }
+                        )
                     }
 
                     state.showNoResults -> {
@@ -452,19 +462,134 @@ private fun SearchResultCard(
     }
 }
 
+private val WORD_SUGGESTIONS = mapOf(
+    Language.ENGLISH to listOf("Biohack", "Authentic", "Aliveness", "Mindful", "Grateful"),
+    Language.DUTCH to listOf("Gezellig", "Verbinding", "Trots", "Bewust", "Genieten"),
+    Language.POLISH to listOf("Klasa", "Radość", "Inspiracja", "Rozwój", "Wspólnota"),
+    Language.RUSSIAN to listOf("Успех", "Счастье", "Вдохновение", "Осознанность", "Эмпатия")
+)
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun EmptySearchState() {
-    Box(
+private fun EmptySearchState(
+    selectedLanguage: Language?,
+    onWordClick: (String) -> Unit
+) {
+    val suggestions = selectedLanguage?.let { WORD_SUGGESTIONS[it] } ?: emptyList()
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        contentAlignment = Alignment.Center
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp)
+            .padding(top = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        EmptyState(
-            icon = Icons.Filled.Search,
-            title = "Expand Your Vocabulary",
-            description = "Search for words to discover their meanings, pronunciations, and examples"
+        Text(
+            text = "Search your word",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
         )
+
+        if (suggestions.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "or try searching for:",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                suggestions.forEach { word ->
+                    SuggestionChip(
+                        onClick = { onWordClick(word) },
+                        label = {
+                            Text(
+                                text = word,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        border = SuggestionChipDefaults.suggestionChipBorder(
+                            enabled = true,
+                            borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                        ),
+                        elevation = SuggestionChipDefaults.suggestionChipElevation(
+                            elevation = 2.dp
+                        )
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Lightbulb,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "You can search by translations and grammar forms too!",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NoDictionaryState(
+    onNavigateToSettings: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "No dictionary downloaded",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Download a dictionary to start searching for words",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        FilledTonalButton(onClick = onNavigateToSettings) {
+            Text("Go to Settings")
+        }
     }
 }
 
@@ -484,10 +609,10 @@ private fun NoResultsState(query: String) {
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SearchScreenPreviewEmptyQuery(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
@@ -495,16 +620,35 @@ private fun SearchScreenPreviewEmptyQuery(
                 query = "",
                 results = emptyList(),
                 showNoResults = false,
-                availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN)
+                availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN),
+                selectedLanguage = Language.ENGLISH
             ),
         )
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
+@Composable
+private fun SearchScreenPreviewNoDictionary(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                query = "",
+                results = emptyList(),
+                showNoResults = false,
+                availableLanguages = emptyList(),
+                selectedLanguage = null
+            ),
+        )
+    }
+}
+
+@Preview
 @Composable
 private fun SearchScreenPreviewWithResults(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
@@ -558,10 +702,10 @@ private fun SearchScreenPreviewWithResults(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SearchScreenPreviewMultilingualResults(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
@@ -615,10 +759,10 @@ private fun SearchScreenPreviewMultilingualResults(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SearchScreenPreviewNoResults(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
@@ -632,10 +776,10 @@ private fun SearchScreenPreviewNoResults(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SearchScreenPreviewInfoDialog(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
@@ -660,10 +804,10 @@ private fun SearchScreenPreviewInfoDialog(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SearchScreenPreviewSingleLanguage(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
@@ -697,10 +841,10 @@ private fun SearchScreenPreviewSingleLanguage(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SearchScreenPreviewMultilingualWithoutPOS(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(
@@ -744,10 +888,10 @@ private fun SearchScreenPreviewMultilingualWithoutPOS(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SearchScreenPreviewMixedLanguagesAndForms(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SearchScreenContent(

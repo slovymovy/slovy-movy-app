@@ -14,7 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
@@ -51,9 +53,22 @@ fun AppSearchBar(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
+    // Use TextFieldValue to control cursor position
+    var textFieldValue by remember { mutableStateOf(TextFieldValue(query, TextRange(query.length))) }
+
+    // Sync external query changes and place cursor at end
+    LaunchedEffect(query) {
+        if (textFieldValue.text != query) {
+            textFieldValue = TextFieldValue(query, TextRange(query.length))
+        }
+    }
+
     OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
+        value = textFieldValue,
+        onValueChange = { newValue ->
+            textFieldValue = newValue
+            onQueryChange(newValue.text)
+        },
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp),
@@ -74,9 +89,12 @@ fun AppSearchBar(
                 }
             )
         },
-        trailingIcon = if (query.isNotEmpty()) {
+        trailingIcon = if (textFieldValue.text.isNotEmpty()) {
             {
-                IconButton(onClick = { onQueryChange("") }) {
+                IconButton(onClick = {
+                    textFieldValue = TextFieldValue("", TextRange(0))
+                    onQueryChange("")
+                }) {
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Clear",
