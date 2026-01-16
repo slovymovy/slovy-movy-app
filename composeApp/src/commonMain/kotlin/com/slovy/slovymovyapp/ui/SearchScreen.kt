@@ -30,7 +30,6 @@ import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.ui.components.AppCard
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
-import com.slovy.slovymovyapp.ui.components.CompactFrequencyBadge
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
@@ -403,74 +402,22 @@ private fun SearchResultCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(horizontal = 16.dp, vertical = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Word display
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = item.display,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+            Text(
+                text = item.display,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
 
-                // Meaning count could be shown here if available
-                if (item.pos.isNotEmpty()) {
-                    Text(
-                        text = "${item.pos.size} ${if (item.pos.size == 1) "part of speech" else "parts of speech"}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            // Badges section
+            // Icons section - aligned to the right
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Favorite indicator - always reserve space for alignment
-                Box(
-                    modifier = Modifier.size(20.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (item.isFavorite) {
-                        Icon(
-                            imageVector = Icons.Filled.Favorite,
-                            contentDescription = "Favorite",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    if (item.onlineOnly) {
-                        Icon(
-                            imageVector = Icons.Filled.DownloadForOffline,
-                            contentDescription = "Online",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                // Frequency badge - fixed width for alignment
-                Box(
-                    modifier = Modifier.width(64.dp),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    val frequencyLevel = when {
-                        item.zipfFrequency >= 5.0f -> "high"
-                        item.zipfFrequency >= 3.0f -> "medium"
-                        else -> "low"
-                    }
-                    CompactFrequencyBadge(
-                        frequency = frequencyLevel
-                    )
-                }
-
                 // Show language badge if searching multiple dictionaries
                 if (showLanguageIndicator) {
                     Badge(
@@ -478,6 +425,26 @@ private fun SearchResultCard(
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                         shape = RoundedCornerShape(4.dp)
+                    )
+                }
+
+                // Favorite icon
+                if (item.isFavorite) {
+                    Icon(
+                        imageVector = Icons.Filled.Favorite,
+                        contentDescription = "Favorite",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // Online-only / download icon
+                if (item.onlineOnly) {
+                    Icon(
+                        imageVector = Icons.Filled.DownloadForOffline,
+                        contentDescription = "Online",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
