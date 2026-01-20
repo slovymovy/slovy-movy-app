@@ -10,7 +10,7 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 fun main() = application {
     val buildConfig = AppBuildConfig(
         versionName = "1.0.0",
-        versionCode = 7, // version
+        versionCode = 8, // version
         isDebug = false,
         applicationId = "com.slovy.slovymovyapp"
     )
