@@ -137,6 +137,20 @@ class HtmlTagParserTest {
     }
 
     @Test
+    fun parseTextSegments_singleWordTag_returnsTaggedSegment() {
+        val text = "Say <hello> there"
+        val result = HtmlTagParser.parseTextSegments(text)
+
+        assertEquals(3, result.size)
+        assertEquals("Say ", result[0].text)
+        assertEquals(false, result[0].isTagged)
+        assertEquals("hello", result[1].text)
+        assertEquals(true, result[1].isTagged)
+        assertEquals(" there", result[2].text)
+        assertEquals(false, result[2].isTagged)
+    }
+
+    @Test
     fun extractTaggedWords_emptyString_returnsEmptyList() {
         val result = HtmlTagParser.extractTaggedWords("")
         assertTrue(result.isEmpty())
@@ -219,6 +233,12 @@ class HtmlTagParserTest {
         val text = "A <w>synonym</w> is a word that means the same as another <w>word</w>."
         val result = HtmlTagParser.extractTaggedWords(text)
         assertEquals(listOf("synonym", "word"), result)
+    }
+
+    @Test
+    fun extractTaggedWords_singleWordTag_extractsWord() {
+        val result = HtmlTagParser.extractTaggedWords("Use <hello> here")
+        assertEquals(listOf("hello"), result)
     }
 
     @Test

@@ -1,13 +1,18 @@
 package com.slovy.slovymovyapp.data.util
 
+import com.slovy.slovymovyapp.data.util.HtmlTagParser.extractTaggedWords
+
+
 /**
  * Utility for parsing HTML-like tags in text, specifically `<w>...</w>` tags
+ * and single-word `<word>` tags
  * used to highlight words in dictionary definitions, examples, and phrases.
  *
  * This parser handles various edge cases:
  * - Nested tags: `<w>outer <w>inner</w></w>` - extracts "outer inner" as a single word
  * - Multiple words in one tag: `<w>word1 word2</w>` - can be split into individual words
  * - Malformed tags: `<w>unclosed` or `</w>no opening` - skips malformed sections
+ * - Single-word tags: `<word>` - extracts "word" as a tagged segment
  * - Escaped content: Treats all content between tags as literal text
  */
 object HtmlTagParser {
@@ -28,7 +33,7 @@ object HtmlTagParser {
     )
 
     /**
-     * Parses text containing `<w>...</w>` tags into segments.
+     * Parses text containing `<w>...</w>` tags or `<word>` tags into segments.
      *
      * This function splits the input text into segments, marking which parts
      * were inside tags and which were not. It properly handles:
@@ -49,7 +54,7 @@ object HtmlTagParser {
      * // ]
      * ```
      *
-     * @param text The input text containing `<w>` tags
+     * @param text The input text containing `<w>` tags or `<word>` tags
      * @return List of text segments with tag information
      */
     fun parseTextSegments(text: String): List<TextSegment> {
@@ -63,9 +68,15 @@ object HtmlTagParser {
             val endTag = "</w>"
 
             val tagStart = text.indexOf(startTag, i)
+            val singleTagStart = findNextSingleWordTagStart(text, i)
+            val nextTagStart = when {
+                tagStart == -1 -> singleTagStart
+                singleTagStart == -1 -> tagStart
+                else -> minOf(tagStart, singleTagStart)
+            }
 
             // No more tags found - append remaining text
-            if (tagStart == -1) {
+            if (nextTagStart == -1) {
                 if (i < text.length) {
                     segments.add(TextSegment(text.substring(i), false, i, text.length))
                 }
@@ -73,51 +84,69 @@ object HtmlTagParser {
             }
 
             // Append text before the tag
-            if (tagStart > i) {
-                segments.add(TextSegment(text.substring(i, tagStart), false, i, tagStart))
+            if (nextTagStart > i) {
+                segments.add(TextSegment(text.substring(i, nextTagStart), false, i, nextTagStart))
             }
 
-            // Find matching closing tag, handling nesting
-            val contentStart = tagStart + startTag.length
-            var depth = 1
-            var searchPos = contentStart
-            var tagEnd = -1
+            if (nextTagStart == tagStart) {
+                // Find matching closing tag, handling nesting
+                val contentStart = tagStart + startTag.length
+                var depth = 1
+                var searchPos = contentStart
+                var tagEnd = -1
 
-            while (searchPos < text.length && depth > 0) {
-                val nextOpen = text.indexOf(startTag, searchPos)
-                val nextClose = text.indexOf(endTag, searchPos)
+                while (searchPos < text.length && depth > 0) {
+                    val nextOpen = text.indexOf(startTag, searchPos)
+                    val nextClose = text.indexOf(endTag, searchPos)
 
-                when {
-                    nextClose == -1 -> {
-                        // No closing tag found - treat the rest as untagged text
-                        depth = 0
-                        tagEnd = -1
-                    }
-                    nextOpen != -1 && nextOpen < nextClose -> {
-                        // Found nested opening tag
-                        depth++
-                        searchPos = nextOpen + startTag.length
-                    }
-                    else -> {
-                        // Found closing tag
-                        depth--
-                        if (depth == 0) {
-                            tagEnd = nextClose
+                    when {
+                        nextClose == -1 -> {
+                            // No closing tag found - treat the rest as untagged text
+                            depth = 0
+                            tagEnd = -1
                         }
-                        searchPos = nextClose + endTag.length
+
+                        nextOpen != -1 && nextOpen < nextClose -> {
+                            // Found nested opening tag
+                            depth++
+                            searchPos = nextOpen + startTag.length
+                        }
+
+                        else -> {
+                            // Found closing tag
+                            depth--
+                            if (depth == 0) {
+                                tagEnd = nextClose
+                            }
+                            searchPos = nextClose + endTag.length
+                        }
                     }
                 }
-            }
 
-            if (tagEnd != -1) {
-                // Found matching closing tag
-                val content = text.substring(contentStart, tagEnd)
-                segments.add(TextSegment(content, true, tagStart, tagEnd + endTag.length))
-                i = tagEnd + endTag.length
+                if (tagEnd != -1) {
+                    // Found matching closing tag
+                    val content = text.substring(contentStart, tagEnd)
+                    segments.add(TextSegment(content, true, tagStart, tagEnd + endTag.length))
+                    i = tagEnd + endTag.length
+                } else {
+                    // No matching closing tag - treat rest of text as untagged
+                    segments.add(TextSegment(text.substring(tagStart), false, tagStart, text.length))
+                    break
+                }
             } else {
-                // No matching closing tag - treat rest of text as untagged
-                segments.add(TextSegment(text.substring(tagStart), false, tagStart, text.length))
-                break
+                val tagEnd = text.indexOf('>', nextTagStart + 1)
+                if (tagEnd == -1) {
+                    segments.add(TextSegment(text.substring(nextTagStart), false, nextTagStart, text.length))
+                    break
+                }
+
+                val content = text.substring(nextTagStart + 1, tagEnd)
+                if (isSingleWordTag(content)) {
+                    segments.add(TextSegment(content, true, nextTagStart, tagEnd + 1))
+                } else {
+                    segments.add(TextSegment(text.substring(nextTagStart, tagEnd + 1), false, nextTagStart, tagEnd + 1))
+                }
+                i = tagEnd + 1
             }
         }
 
@@ -176,5 +205,37 @@ object HtmlTagParser {
         splitMultipleWords: Boolean = false
     ): Set<String> {
         return extractTaggedWords(text, splitMultipleWords).toSet()
+    }
+
+    private fun findNextSingleWordTagStart(text: String, startIndex: Int): Int {
+        var searchIndex = startIndex
+        while (searchIndex < text.length) {
+            val candidateStart = text.indexOf('<', searchIndex)
+            if (candidateStart == -1) return -1
+
+            if (text.startsWith("<w>", candidateStart) || text.startsWith("</w>", candidateStart)) {
+                searchIndex = candidateStart + 1
+                continue
+            }
+
+            val candidateEnd = text.indexOf('>', candidateStart + 1)
+            if (candidateEnd == -1) return candidateStart
+
+            val content = text.substring(candidateStart + 1, candidateEnd)
+            if (isSingleWordTag(content)) {
+                return candidateStart
+            }
+
+            searchIndex = candidateStart + 1
+        }
+
+        return -1
+    }
+
+    private fun isSingleWordTag(content: String): Boolean {
+        if (content.isEmpty()) return false
+        if (content.startsWith("/")) return false
+        if (content == "w") return false
+        return content.none { it.isWhitespace() }
     }
 }

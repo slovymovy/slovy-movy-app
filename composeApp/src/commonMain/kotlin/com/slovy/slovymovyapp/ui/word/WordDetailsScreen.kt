@@ -1,10 +1,7 @@
 package com.slovy.slovymovyapp.ui.word
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -14,10 +11,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -32,7 +28,6 @@ import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
-import com.slovy.slovymovyapp.ui.components.AppCard
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
@@ -477,70 +472,6 @@ private fun WordDetailUiState.Content.reloadFavorite(isSenseFavorite: (String) -
     )
 }
 
-@Composable
-internal fun ExpandableSection(
-    title: String,
-    expanded: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier,
-    supportingText: String? = null,
-    headlineStyle: TextStyle = MaterialTheme.typography.titleMedium,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .clickable(onClick = onToggle),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    HighlightedText(text = title, style = headlineStyle)
-                    supportingText?.takeIf { !expanded }?.let {
-                        HighlightedText(
-                            text = it,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        )
-                    }
-                }
-                Icon(
-                    imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
-                    contentDescription = if (expanded) {
-                        "Collapse $title"
-                    } else {
-                        "Expand $title"
-                    },
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-
-        AnimatedVisibility(
-            visible = expanded,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                content()
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WordDetailScreen(
@@ -633,7 +564,9 @@ fun WordDetailScreenContent(
                             is WordDetailUiState.Content ->
                                 Text(
                                     text = state.card.lemma,
-                                    style = MaterialTheme.typography.headlineSmall,
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
                                     maxLines = 1,
                                     softWrap = false,
                                     overflow = TextOverflow.Ellipsis
@@ -641,7 +574,9 @@ fun WordDetailScreenContent(
 
                             is WordDetailUiState.Empty -> HighlightedText(
                                 text = titleText,
-                                style = MaterialTheme.typography.headlineSmall,
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -703,7 +638,7 @@ fun WordDetailScreenContent(
                         .fillMaxSize()
                         .verticalScroll(scrollState)
                         .padding(innerPadding)
-                        .padding(horizontal = 16.dp, vertical = 24.dp),
+                        .padding(horizontal = 12.dp, vertical = 20.dp),
                     cardLoading = state.cardLoading,
                     cardError = state.cardError,
                     translationLoading = state.translationLoading,
@@ -767,29 +702,29 @@ private fun WordDetailContent(
         modifier = modifier.onGloballyPositioned { coordinates ->
             scrollContainerY = coordinates.positionInWindow().y
         },
-        verticalArrangement = Arrangement.spacedBy(24.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         // Display word family if available
         if (card.wordFamily.isNotEmpty()) {
-            AppCard(
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    EntryList(
-                        label = "Word Family",
-                        values = card.wordFamily,
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        relatedWords = card.relatedWords,
-                        onWordClick = onWordClick
-                    )
-                }
+                EntryList(
+                    label = "Word Family",
+                    values = card.wordFamily,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    relatedWords = card.relatedWords,
+                    onWordClick = onWordClick
+                )
             }
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
         }
 
         if (card.entries.isEmpty()) {
@@ -800,6 +735,13 @@ private fun WordDetailContent(
             )
         } else {
             card.entries.forEachIndexed { index, entry ->
+                // Add divider between POS sections (not before the first one)
+                if (index > 0) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                }
                 val entryState = entryStates.getOrNull(index) ?: entry.toEntryUiState(
                     index,
                     isSenseFavorite = isSenseFavorite,

@@ -12,44 +12,32 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Error
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.RestartAlt
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.AppBuildConfig
-import com.slovy.slovymovyapp.getPlatform
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.remote.AvailableLanguageInfo
-import com.slovy.slovymovyapp.data.remote.DataDbManager
-import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.remote.DownloadProgress
+import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.getPlatform
 import com.slovy.slovymovyapp.speech.*
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 
 data class LanguageUiState(
     val voices: List<Text2SpeechVoice> = emptyList(),
@@ -69,6 +57,7 @@ data class SettingsUiState(
     val databases: List<DatabaseItemUiState> = emptyList(),
     val availableLanguages: List<AvailableLanguageInfo> = emptyList(),
     val downloadingItems: Map<String, DownloadProgress> = emptyMap(),
+    val expandedDictionaries: Set<String> = emptySet(),
     val isLoading: Boolean = true,
     val isLoadingAvailable: Boolean = false,
     val errorMessage: String? = null,
@@ -96,6 +85,7 @@ class SettingsViewModel(
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
     private val dataDbManager: DataDbManager,
+    private val downloadCoordinator: DownloadCoordinator,
     private val dictionaryRepository: DictionaryRepository,
     buildConfig: AppBuildConfig
 ) : ViewModel() {
@@ -105,12 +95,14 @@ class SettingsViewModel(
 
     val scrollState = LazyListState()
     val snackbarHostState = SnackbarHostState()
+    private val downloadJobs = mutableMapOf<String, Job>()
 
     init {
         loadLanguages()
         loadDatabases()
         loadAvailableLanguages()
         setupTTSListeners()
+        observeDownloads()
     }
 
     private fun setupTTSListeners() {
@@ -134,11 +126,11 @@ class SettingsViewModel(
                 val files = dataDbManager.listDownloadedDatabases()
                 val uiItems = files.map { fileInfo ->
                     when (fileInfo) {
-                        is com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Dictionary -> {
+                        is DatabaseFileInfo.Dictionary -> {
                             val displayName = "Dictionary: ${fileInfo.language.selfName}"
                             // Count how many translations will be deleted along with the dictionary
                             val translationCount = files.count {
-                                it is com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Translation &&
+                                it is DatabaseFileInfo.Translation &&
                                         it.sourceLanguage == fileInfo.language
                             }
                             val additionalInfo = if (translationCount > 0) {
@@ -156,7 +148,7 @@ class SettingsViewModel(
                             )
                         }
 
-                        is com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Translation -> {
+                        is DatabaseFileInfo.Translation -> {
                             val displayName =
                                 "Translation: ${fileInfo.sourceLanguage.selfName} → ${fileInfo.targetLanguage.selfName}"
                             DatabaseItemUiState(
@@ -246,58 +238,48 @@ class SettingsViewModel(
 
     fun downloadDictionary(language: Language) {
         val downloadKey = "dict_${language.code}"
-        viewModelScope.launch {
-            try {
-                dataDbManager.ensureDictionary(
-                    lang = language,
-                    onProgress = { progress ->
-                        state = state.copy(
-                            downloadingItems = state.downloadingItems + (downloadKey to progress)
-                        )
-                    }
-                )
-                // Remove from downloading items and reload databases
-                state = state.copy(
-                    downloadingItems = state.downloadingItems - downloadKey
-                )
-                dictionaryRepository.clearSenseCache()
-                reloadSettings()
-                snackbarHostState.showSnackbar("Dictionary downloaded successfully")
-            } catch (e: Exception) {
-                state = state.copy(
-                    downloadingItems = state.downloadingItems - downloadKey,
-                    errorMessage = "Failed to download dictionary: ${e.message}"
-                )
-            }
+        if (downloadCoordinator.isRunning(downloadKey)) return
+
+        val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
+            dataDbManager.ensureDictionary(
+                lang = language,
+                onProgress = onProgress,
+                cancelToken = cancelToken
+            )
+        }
+        attachDownloadCallbacks(
+            downloadKey = downloadKey,
+            downloadFlow = downloadFlow,
+            successMessage = "Dictionary downloaded successfully",
+            errorPrefix = "Failed to download dictionary"
+        ) {
+            dictionaryRepository.clearSenseCache()
+            reloadSettings()
+            // Auto-expand the dictionary card to reveal translations
+            expandDictionary(language.code)
         }
     }
 
     fun downloadTranslation(sourceLanguage: Language, targetLanguage: Language) {
         val downloadKey = "trans_${sourceLanguage.code}_${targetLanguage.code}"
-        viewModelScope.launch {
-            try {
-                dataDbManager.ensureTranslation(
-                    src = sourceLanguage,
-                    tgt = targetLanguage,
-                    onProgress = { progress ->
-                        state = state.copy(
-                            downloadingItems = state.downloadingItems + (downloadKey to progress)
-                        )
-                    }
-                )
-                // Remove from downloading items and reload databases
-                state = state.copy(
-                    downloadingItems = state.downloadingItems - downloadKey
-                )
-                dictionaryRepository.clearSenseCache()
-                loadDatabases()
-                snackbarHostState.showSnackbar("Translation downloaded successfully")
-            } catch (e: Exception) {
-                state = state.copy(
-                    downloadingItems = state.downloadingItems - downloadKey,
-                    errorMessage = "Failed to download translation: ${e.message}"
-                )
-            }
+        if (downloadCoordinator.isRunning(downloadKey)) return
+
+        val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
+            dataDbManager.ensureTranslation(
+                src = sourceLanguage,
+                tgt = targetLanguage,
+                onProgress = onProgress,
+                cancelToken = cancelToken
+            )
+        }
+        attachDownloadCallbacks(
+            downloadKey = downloadKey,
+            downloadFlow = downloadFlow,
+            successMessage = "Translation downloaded successfully",
+            errorPrefix = "Failed to download translation"
+        ) {
+            dictionaryRepository.clearSenseCache()
+            loadDatabases()
         }
     }
 
@@ -312,7 +294,7 @@ class SettingsViewModel(
                 val languages = ttsManager.getAvailableLanguages()
                 val downloadedDatabases = dataDbManager.listDownloadedDatabases()
                 val downloadedLanguages =
-                    downloadedDatabases.filterIsInstance<com.slovy.slovymovyapp.data.remote.DatabaseFileInfo.Dictionary>()
+                    downloadedDatabases.filterIsInstance<DatabaseFileInfo.Dictionary>()
                         .map { it.language }
                         .toSet()
 
@@ -411,6 +393,22 @@ class SettingsViewModel(
         state = state.copy(errorMessage = null)
     }
 
+    fun toggleDictionaryExpansion(languageCode: String) {
+        state = state.copy(
+            expandedDictionaries = if (state.expandedDictionaries.contains(languageCode)) {
+                state.expandedDictionaries - languageCode
+            } else {
+                state.expandedDictionaries + languageCode
+            }
+        )
+    }
+
+    private fun expandDictionary(languageCode: String) {
+        state = state.copy(
+            expandedDictionaries = state.expandedDictionaries + languageCode
+        )
+    }
+
     fun toggleVoiceEnabled(language: Text2SpeechLanguage, voiceId: String) {
         viewModelScope.launch {
             try {
@@ -433,6 +431,61 @@ class SettingsViewModel(
     override fun onCleared() {
         super.onCleared()
         ttsManager.stop()
+    }
+
+    private fun observeDownloads() {
+        viewModelScope.launch {
+            downloadCoordinator.downloadEntries()
+                .map { entries ->
+                    entries.filterValues { it.status == DownloadStatus.Running }
+                        .mapValues { (_, entry) -> entry.progress ?: DownloadProgress(0, 1) }
+                }
+                .distinctUntilChanged()
+                .collect { running ->
+                    state = state.copy(downloadingItems = running)
+                }
+        }
+    }
+
+    private fun attachDownloadCallbacks(
+        downloadKey: String,
+        downloadFlow: Flow<DownloadEntry?>,
+        successMessage: String,
+        errorPrefix: String,
+        onSuccess: suspend () -> Unit
+    ) {
+        if (downloadJobs[downloadKey]?.isActive == true) return
+
+        downloadJobs[downloadKey] = viewModelScope.launch {
+            try {
+                downloadFlow.collect { entry ->
+                    when (entry?.status) {
+                        DownloadStatus.Done -> {
+                            downloadCoordinator.clear(downloadKey)
+                            onSuccess()
+                            snackbarHostState.showSnackbar(successMessage)
+                            cancel()
+                        }
+
+                        DownloadStatus.Cancelled -> {
+                            downloadCoordinator.clear(downloadKey)
+                            cancel()
+                        }
+
+                        DownloadStatus.Failed -> {
+                            downloadCoordinator.clear(downloadKey)
+                            val message = entry.error?.message ?: "Unknown error"
+                            state = state.copy(errorMessage = "$errorPrefix: $message")
+                            cancel()
+                        }
+
+                        else -> Unit
+                    }
+                }
+            } finally {
+                downloadJobs.remove(downloadKey)
+            }
+        }
     }
 }
 
@@ -464,6 +517,7 @@ fun SettingsScreen(
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
         onDownloadDictionary = { language -> viewModel.downloadDictionary(language) },
         onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
+        onToggleDictionaryExpansion = { languageCode -> viewModel.toggleDictionaryExpansion(languageCode) },
         wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -486,6 +540,7 @@ fun SettingsScreenContent(
     onDismissDeleteConfirmation: () -> Unit = {},
     onDownloadDictionary: (Language) -> Unit = {},
     onDownloadTranslation: (Language, Language) -> Unit = { _, _ -> },
+    onToggleDictionaryExpansion: (String) -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -502,8 +557,6 @@ fun SettingsScreenContent(
             onDismissError()
         }
     }
-
-    var expandedDictionaries by rememberSaveable { mutableStateOf(setOf<String>()) }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -542,26 +595,21 @@ fun SettingsScreenContent(
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             state = scrollState,
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                            contentPadding = PaddingValues(AppSpacing.lg),
+                            verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                         ) {
                             // Languages and Dictionaries
                             item {
-                                Text(
-                                    text = "Languages and Dictionaries",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
+                                SectionHeader(title = "Languages and Dictionaries")
                             }
 
                             if (state.isLoadingAvailable) {
                                 item {
                                     Box(
-                                        modifier = Modifier.fillMaxWidth().padding(20.dp),
+                                        modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        CircularProgressIndicator(modifier = Modifier.size(28.dp))
+                                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
                                     }
                                 }
                             } else if (state.availableLanguages.isEmpty()) {
@@ -578,7 +626,10 @@ fun SettingsScreenContent(
                                     state.databases.any { it.displayName == "Dictionary: ${langInfo.language.selfName}" }
                                 }
 
-                                items(downloaded) { langInfo ->
+                                items(
+                                    items = downloaded,
+                                    key = { "downloaded_${it.language.code}" }
+                                ) { langInfo ->
                                     val dictDb = state.databases.find {
                                         it.displayName == "Dictionary: ${langInfo.language.selfName}"
                                     }
@@ -586,15 +637,8 @@ fun SettingsScreenContent(
                                         languageInfo = langInfo,
                                         dictionaryDb = dictDb,
                                         isDownloaded = true,
-                                        isExpanded = expandedDictionaries.contains(langInfo.language.code),
-                                        onExpand = {
-                                            expandedDictionaries =
-                                                if (expandedDictionaries.contains(langInfo.language.code)) {
-                                                    expandedDictionaries - langInfo.language.code
-                                                } else {
-                                                    expandedDictionaries + langInfo.language.code
-                                                }
-                                        },
+                                        isExpanded = state.expandedDictionaries.contains(langInfo.language.code),
+                                        onExpand = { onToggleDictionaryExpansion(langInfo.language.code) },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
                                         onDownloadTranslation = { tgtLang ->
@@ -612,7 +656,36 @@ fun SettingsScreenContent(
                                     )
                                 }
 
-                                items(available) { langInfo ->
+                                if (available.isNotEmpty() && downloaded.isNotEmpty()) {
+                                    item {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = AppSpacing.sm),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            HorizontalDivider(
+                                                modifier = Modifier.weight(1f),
+                                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                            )
+                                            Text(
+                                                text = "Available to download",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.padding(horizontal = AppSpacing.md)
+                                            )
+                                            HorizontalDivider(
+                                                modifier = Modifier.weight(1f),
+                                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                items(
+                                    items = available,
+                                    key = { "available_${it.language.code}" }
+                                ) { langInfo ->
                                     val dictDb = state.databases.find {
                                         it.displayName == "Dictionary: ${langInfo.language.selfName}"
                                     }
@@ -620,15 +693,8 @@ fun SettingsScreenContent(
                                         languageInfo = langInfo,
                                         dictionaryDb = dictDb,
                                         isDownloaded = false,
-                                        isExpanded = expandedDictionaries.contains(langInfo.language.code),
-                                        onExpand = {
-                                            expandedDictionaries =
-                                                if (expandedDictionaries.contains(langInfo.language.code)) {
-                                                    expandedDictionaries - langInfo.language.code
-                                                } else {
-                                                    expandedDictionaries + langInfo.language.code
-                                                }
-                                        },
+                                        isExpanded = state.expandedDictionaries.contains(langInfo.language.code),
+                                        onExpand = { onToggleDictionaryExpansion(langInfo.language.code) },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
                                         onDownloadTranslation = { tgtLang ->
@@ -650,15 +716,16 @@ fun SettingsScreenContent(
                             if (state.languages.isNotEmpty()) {
                                 // Voice section header
                                 item {
-                                    Text(
-                                        text = "Voice",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                                    SectionHeader(
+                                        title = "Voice",
+                                        modifier = Modifier.padding(top = AppSpacing.sm)
                                     )
                                 }
 
-                                items(state.languages.entries.toList()) { e ->
+                                items(
+                                    items = state.languages.entries.toList(),
+                                    key = { "voice_${it.key.language.code}" }
+                                ) { e ->
                                     VoiceSectionItem(
                                         language = e.key,
                                         languageState = e.value,
@@ -682,12 +749,12 @@ fun SettingsScreenContent(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(16.dp),
+                                                .padding(AppSpacing.lg),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Box(
                                                 modifier = Modifier
-                                                    .size(48.dp)
+                                                    .size(40.dp)
                                                     .clip(CircleShape)
                                                     .background(MaterialTheme.colorScheme.primaryContainer),
                                                 contentAlignment = Alignment.Center
@@ -695,11 +762,12 @@ fun SettingsScreenContent(
                                                 Icon(
                                                     imageVector = Icons.Default.Download,
                                                     contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    modifier = Modifier.size(24.dp)
                                                 )
                                             }
 
-                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Spacer(modifier = Modifier.width(AppSpacing.lg))
 
                                             Column(modifier = Modifier.weight(1f)) {
                                                 Text(
@@ -743,11 +811,9 @@ fun SettingsScreenContent(
                             // About section
                             state.buildConfig.let { buildConfig ->
                                 item {
-                                    Text(
-                                        text = "About",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                                    SectionHeader(
+                                        title = "About",
+                                        modifier = Modifier.padding(top = AppSpacing.sm)
                                     )
                                 }
 
@@ -816,31 +882,41 @@ private fun DictionaryCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onExpand() }
-                    .padding(16.dp),
+                    .padding(AppSpacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = if (isDownloaded) "I'm learning" else "Available",
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs)
+                    ) {
+                        if (isDownloaded) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                        Text(
+                            text = if (isDownloaded) "I'm learning" else "Available",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (isDownloaded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(AppSpacing.xs))
                     Text(
                         text = "${languageInfo.language.flag} ${languageInfo.language.selfName}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(AppSpacing.xs))
                     val sizeBytes = dictionaryDb?.sizeBytes ?: languageInfo.dictionarySizeBytes
                     if (sizeBytes != null) {
                         Text(
-                            text = "${if (isDownloaded) "Downloaded dictionary" else "Dictionary"} ${
-                                formatFileSize(
-                                    sizeBytes
-                                )
-                            }",
-                            style = MaterialTheme.typography.bodyMedium
+                            text = "${if (isDownloaded) "Downloaded" else "Dictionary"} ${formatFileSize(sizeBytes)}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -849,27 +925,32 @@ private fun DictionaryCard(
                 val dictDownloading = downloadingItems.containsKey(dictDownloadKey)
                 val dictProgress = downloadingItems[dictDownloadKey]
 
-                if (dictDownloading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp,
-                        progress = { dictProgress?.percent?.toFloat()?.div(100f) ?: 0f }
-                    )
-                } else if (isDownloaded) {
-                    IconButton(onClick = onDeleteDictionary) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                Box(
+                    modifier = Modifier.size(48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (dictDownloading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp,
+                            progress = { dictProgress?.percent?.toFloat()?.div(100f) ?: 0f }
                         )
-                    }
-                } else {
-                    IconButton(onClick = onDownloadDictionary) {
-                        Icon(
-                            imageVector = Icons.Default.Download,
-                            contentDescription = "Download",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                    } else if (isDownloaded) {
+                        IconButton(onClick = onDeleteDictionary) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = onDownloadDictionary) {
+                            Icon(
+                                imageVector = Icons.Default.Download,
+                                contentDescription = "Download",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
 
@@ -884,14 +965,22 @@ private fun DictionaryCard(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(horizontal = AppSpacing.lg)
+                        .padding(bottom = AppSpacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
                 ) {
                     val (downloadedTrans, availableTrans) = languageInfo.availableTranslations.partition { translation ->
                         downloadedTranslations.any {
                             it.displayName == "Translation: ${languageInfo.language.selfName} → ${translation.targetLanguage.selfName}"
                         }
+                    }
+
+                    if (languageInfo.availableTranslations.isNotEmpty()) {
+                        Text(
+                            text = "Translations",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
 
                     (downloadedTrans + availableTrans).forEach { translation ->
@@ -943,10 +1032,9 @@ private fun TranslationItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = AppSpacing.md, vertical = AppSpacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "${targetLanguage.flag} ${targetLanguage.selfName}",
@@ -954,39 +1042,39 @@ private fun TranslationItem(
                 )
                 Text(
                     text = formatFileSize(sizeBytes),
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            if (isDownloading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    progress = { downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f }
-                )
-            } else if (isDownloaded) {
-                IconButton(
-                    onClick = onDelete,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
+            Box(
+                modifier = Modifier.size(40.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isDownloading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        progress = { downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f }
                     )
-                }
-            } else {
-                IconButton(
-                    onClick = onDownload,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = "Download",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
+                } else if (isDownloaded) {
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                } else {
+                    IconButton(onClick = onDownload) {
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = "Download",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }
@@ -1015,12 +1103,12 @@ private fun VoiceSectionItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onExpand() }
-                    .padding(16.dp),
+                    .padding(AppSpacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
@@ -1028,16 +1116,17 @@ private fun VoiceSectionItem(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.VolumeUp,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(AppSpacing.lg))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "${language.language.selfName}",
-                        style = MaterialTheme.typography.titleMedium,
+                        text = language.language.selfName,
+                        style = MaterialTheme.typography.titleMedium
                     )
                     val enabledVoicesCount = languageState.enabledVoiceIds.size
                     val voiceText = when {
@@ -1069,7 +1158,7 @@ private fun VoiceSectionItem(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(AppSpacing.lg),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
@@ -1079,18 +1168,18 @@ private fun VoiceSectionItem(
                         text = "No voices available",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        modifier = Modifier.padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm)
                     )
                 } else {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = AppSpacing.lg),
                     ) {
                         languageState.voices.forEachIndexed { index, voice ->
                             if (index > 0) {
                                 HorizontalDivider(
-                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    modifier = Modifier.padding(vertical = AppSpacing.sm),
                                     thickness = 0.5.dp,
                                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                                 )
@@ -1105,7 +1194,7 @@ private fun VoiceSectionItem(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(AppSpacing.lg))
             }
         }
     }
@@ -1119,7 +1208,7 @@ private fun AboutSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
@@ -1129,20 +1218,21 @@ private fun AboutSection(
                 title = "Send us feedback",
                 subtitle = "We'd love to hear from you",
                 onClick = {},
-                iconBackground = MaterialTheme.colorScheme.primary,
-                iconTint = MaterialTheme.colorScheme.onPrimary
+                iconBackground = MaterialTheme.colorScheme.primaryContainer,
+                iconTint = MaterialTheme.colorScheme.onPrimaryContainer
             )
             HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                thickness = 0.5.dp
+                modifier = Modifier.padding(horizontal = AppSpacing.lg),
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
             )
             AboutItem(
                 icon = Icons.Outlined.Info,
                 title = "Version",
                 subtitle = buildConfig.versionName,
                 onClick = {},
-                iconBackground = MaterialTheme.colorScheme.primary,
-                iconTint = MaterialTheme.colorScheme.onPrimary
+                iconBackground = MaterialTheme.colorScheme.primaryContainer,
+                iconTint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }
@@ -1161,7 +1251,7 @@ private fun AboutItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(16.dp),
+            .padding(AppSpacing.lg),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -1178,17 +1268,16 @@ private fun AboutItem(
                 modifier = Modifier.size(24.dp)
             )
         }
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(AppSpacing.lg))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.titleMedium
             )
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -1245,6 +1334,19 @@ fun DeleteConfirmationDialog(
 }
 
 @Composable
+private fun SectionHeader(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier.padding(vertical = AppSpacing.sm)
+    )
+}
+
+@Composable
 private fun VoiceItem(
     voice: Text2SpeechVoice,
     onTest: () -> Unit = {},
@@ -1255,13 +1357,13 @@ private fun VoiceItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = AppSpacing.xs),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)
         ) {
             if (voice.name == null) {
                 Text(
@@ -1295,18 +1397,18 @@ private fun VoiceItem(
             }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val qualityColor = when (voice.quality) {
                     VoiceQuality.BEST -> MaterialTheme.colorScheme.primary
-                    VoiceQuality.GOOD -> androidx.compose.ui.graphics.Color(0xFF4CAF50) // Greenish
-                    VoiceQuality.MEDIUM -> androidx.compose.ui.graphics.Color(0xFFFFA000) // Amber
+                    VoiceQuality.GOOD -> MaterialTheme.colorScheme.tertiary
+                    VoiceQuality.MEDIUM -> MaterialTheme.colorScheme.outline
                 }
                 Surface(
                     shape = CircleShape,
                     border = BorderStroke(1.dp, qualityColor.copy(alpha = 0.5f)),
-                    color = androidx.compose.ui.graphics.Color.Transparent
+                    color = qualityColor.copy(alpha = 0.1f)
                 ) {
                     Text(
                         text = when (voice.quality) {
@@ -1316,19 +1418,19 @@ private fun VoiceItem(
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = qualityColor,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = 2.dp)
                     )
                 }
                 if (voice.networkConnectionRequired) {
                     Surface(
                         shape = CircleShape,
-                        color = androidx.compose.ui.graphics.Color.Transparent
+                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
                     ) {
                         Text(
-                            text = "Network required",
+                            text = "Online",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = 2.dp)
                         )
                     }
                 }
@@ -1383,10 +1485,10 @@ private fun formatFileSize(bytes: Long): String {
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewLoading(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1395,10 +1497,10 @@ private fun SettingsScreenPreviewLoading(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewEmpty(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1411,10 +1513,10 @@ private fun SettingsScreenPreviewEmpty(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithDatabases(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1470,10 +1572,10 @@ private fun SettingsScreenPreviewWithDatabases(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithLanguages(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1518,10 +1620,10 @@ private fun SettingsScreenPreviewWithLanguages(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithExpandedLanguage(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1576,10 +1678,10 @@ private fun SettingsScreenPreviewWithExpandedLanguage(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithError(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1605,10 +1707,10 @@ private fun SettingsScreenPreviewWithError(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithDeleteConfirmation(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1643,10 +1745,10 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
     }
 }
 
-@Preview
+@androidx.compose.ui.tooling.preview.Preview
 @Composable
 private fun SettingsScreenPreviewWithMixedDatabaseStates(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(

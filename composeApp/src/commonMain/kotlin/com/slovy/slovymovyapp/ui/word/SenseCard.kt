@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
@@ -55,7 +57,7 @@ internal fun SenseCard(
             .onGloballyPositioned { coordinates ->
                 onPositioned(data.senseId, coordinates.positionInWindow().y)
             },
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.small,
         colors = CardDefaults.outlinedCardColors(
             containerColor = colorForLemma(data.lemma, MaterialTheme.colorScheme.surface)
         )
@@ -64,7 +66,7 @@ internal fun SenseCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(MaterialTheme.shapes.small)
                     .clickable(onClick = onToggle)
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -183,10 +185,12 @@ internal fun SenseCard(
                         if (sense.targetLangDefinitions.isNotEmpty()) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 SectionLabel("Definition")
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     if (translationBasedHeader != null) {
                                         HighlightedText(
                                             text = sense.senseDefinition,
+                                            clickableWords = relatedWords.keys,
+                                            onWordClick = onWordClick,
                                             style = MaterialTheme.typography.bodyLarge,
                                         )
                                     }
@@ -194,7 +198,9 @@ internal fun SenseCard(
                                         text = sense.targetLangDefinitions.map { definition ->
                                             definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
                                         }.joinToString("\n"),
-                                        style = MaterialTheme.typography.bodySmall,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        ),
                                     )
                                 }
                             }
@@ -207,35 +213,12 @@ internal fun SenseCard(
                         if (sense.examples.isNotEmpty()) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 SectionLabel(text = "Examples")
-                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                                     sense.examples.forEach { ex ->
-                                        OutlinedCard(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            shape = RoundedCornerShape(16.dp),
-                                            colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                                        ) {
-                                            Column(
-                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                                            ) {
-                                                HighlightedText(
-                                                    text = ex.text,
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    clickableWords = relatedWords.keys,
-                                                    onWordClick = onWordClick
-                                                )
-                                                if (ex.targetLangTranslations.isNotEmpty()) {
-                                                    ex.targetLangTranslations.forEach { (_, translation) ->
-                                                        HighlightedText(
-                                                            text = translation,
-                                                            style = MaterialTheme.typography.bodySmall,
-                                                            clickableWords = relatedWords.keys,
-                                                            onWordClick = onWordClick
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        ExampleItem(
+                                            example = ex,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
                                     }
                                 }
                             }
@@ -272,7 +255,6 @@ internal fun SenseCard(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TraitsList(traits: List<LanguageCardTrait>) {
     if (traits.isEmpty()) return
@@ -281,42 +263,104 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         SectionLabel("Usage Context")
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 11.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             traits.forEach { trait ->
-                val (tc, tcc) = colorsForTraitType(trait.traitType)
-
-                OutlinedCard(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.outlinedCardColors(containerColor = tc.copy(alpha = 0.3f))
-                ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = trait.traitType.displayName,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                color = tcc
-                            )
+                val annotatedText = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        if (trait.comment.isNotBlank()) {
-                            Text(
-                                text = trait.comment,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                    ) {
+                        append(trait.traitType.displayName)
+                    }
+                    if (trait.comment.isNotBlank()) {
+                        append(": ")
+                        withStyle(
+                            style = SpanStyle(
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                             )
+                        ) {
+                            append(trait.comment)
                         }
                     }
+                }
+                Text(
+                    text = annotatedText,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun ExampleItem(
+    example: LanguageCardExample,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(1.5.dp))
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.weight(1f)
+        ) {
+            ExampleText(
+                text = example.text,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f
+                ),
+            )
+            if (example.targetLangTranslations.isNotEmpty()) {
+                example.targetLangTranslations.forEach { (_, translation) ->
+                    ExampleText(
+                        text = translation,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1f
+                        ),
+                    )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ExampleText(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier
+) {
+    val highlight = SpanStyle(
+        fontWeight = FontWeight.Bold,
+        color = style.color
+    )
+    val annotated = buildAnnotatedString {
+        appendTextWithW(this, text, highlight, highlight, emptySet()) { }
+    }
+
+    Text(
+        text = annotated,
+        style = style,
+        modifier = modifier
+    )
 }
 
 @Composable

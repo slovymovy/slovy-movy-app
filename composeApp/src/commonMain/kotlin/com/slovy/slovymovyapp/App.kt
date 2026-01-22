@@ -93,6 +93,7 @@ fun App(
     val wordFetchManager = remember(dictionaryClient) {
         WordFetchManager(dictionaryClient)
     }
+    val downloadCoordinator = remember { DownloadCoordinator() }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
     val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
 
@@ -103,8 +104,21 @@ fun App(
     val favoritesViewModel = remember { FavoritesViewModel(favoritesRepository, dictionaryRepository) }
     val buildConfig = remember { appBuildConfig }
     val settingsViewModel =
-        remember { SettingsViewModel(ttsManager, voiceFilterHelper, dataManager, dictionaryRepository, buildConfig) }
+        remember {
+            SettingsViewModel(
+                ttsManager,
+                voiceFilterHelper,
+                dataManager,
+                downloadCoordinator,
+                dictionaryRepository,
+                buildConfig
+            )
+        }
     val coroutineScope = rememberCoroutineScope()
+
+    DisposableEffect(Unit) {
+        onDispose { downloadCoordinator.close() }
+    }
 
     suspend fun selectInitialDestination(): AppDestination {
         // Check if data version is current
@@ -204,6 +218,8 @@ fun App(
                         viewModelStoreOwner = backStackEntry
                     ) {
                         DownloadViewModel(
+                            downloadCoordinator = downloadCoordinator,
+                            downloadKey = "dict_${dictLang.code}",
                             download = { onProgress, cancel ->
                                 dataManager.ensureDictionary(dictLang, onProgress, cancel)
                             },
@@ -256,7 +272,11 @@ fun App(
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
+                        val downloadKey = "setup_trans_${dictLang.code}_" +
+                                missingTranslations.joinToString("_") { it.code }
                         DownloadViewModel(
+                            downloadCoordinator = downloadCoordinator,
+                            downloadKey = downloadKey,
                             //TODO if one of multiple translations fails we show error, but other langs downloaded.
                             download = { onProgress, cancel ->
                                 missingTranslations.forEachIndexed { index, target ->
