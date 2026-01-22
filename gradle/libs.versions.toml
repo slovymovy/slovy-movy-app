@@ -29,7 +29,7 @@ kotlinx-datetime = "0.7.1"
 kotlinx-serialization = "1.9.0"
 ktor = "3.3.3"
 openaiJava = "4.14.0"
-logback = "1.5.24"
+logback = "1.5.25"
 sqldelight = "2.2.1"
 material3 = '1.11.0-alpha01'
 
