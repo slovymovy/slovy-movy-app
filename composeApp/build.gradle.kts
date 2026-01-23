@@ -99,7 +99,7 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         desktopMain.dependencies {
-            implementation(libs.compose.desktop)
+            implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.sqldelight.sqliteDriver)
             implementation(libs.ktor.client.cio)
