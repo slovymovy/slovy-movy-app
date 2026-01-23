@@ -256,7 +256,7 @@ internal fun SenseCard(
 
             // Footer action for viewing full word details (used in Favorites)
             AnimatedVisibility(
-                visible = expanded && sense != null && onViewFullDetails != null,
+                visible = expanded && onViewFullDetails != null,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
