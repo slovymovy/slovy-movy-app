@@ -1,11 +1,17 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -238,6 +244,7 @@ class FavoritesViewModel(
 fun FavoritesScreen(
     viewModel: FavoritesViewModel,
     onNavigateToSearch: () -> Unit = {},
+    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
@@ -258,6 +265,7 @@ fun FavoritesScreen(
         onQueryChange = { viewModel.updateQuery(it) },
         onSenseToggle = { viewModel.toggleSense(it) },
         onFavoriteToggle = { viewModel.toggleFavorite(it) },
+        onNavigateToWordDetail = onNavigateToWordDetail,
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
         onNavigateToSettings = onNavigateToSettings,
@@ -275,6 +283,7 @@ fun FavoritesScreenContent(
     onQueryChange: (String) -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
     onFavoriteToggle: (String) -> Unit = {},
+    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
@@ -429,7 +438,10 @@ fun FavoritesScreenContent(
                                         FavoriteSenseCard(
                                             item = item,
                                             onToggle = { onSenseToggle(item.senseId) },
-                                            onFavoriteToggle = { onFavoriteToggle(item.senseId) }
+                                            onFavoriteToggle = { onFavoriteToggle(item.senseId) },
+                                            onViewFullCard = {
+                                                onNavigateToWordDetail(item.targetLang, item.lemma, item.senseId)
+                                            }
                                         )
                                     }
                                 }
@@ -446,7 +458,8 @@ fun FavoritesScreenContent(
 private fun FavoriteSenseCard(
     item: FavoriteSenseItem,
     onToggle: () -> Unit,
-    onFavoriteToggle: () -> Unit
+    onFavoriteToggle: () -> Unit,
+    onViewFullCard: () -> Unit
 ) {
     val senseState = SenseUiState(
         senseId = item.senseId,
@@ -457,21 +470,48 @@ private fun FavoriteSenseCard(
         showFavoriteToggle = item.expanded,
         pos = item.pos
     )
-    SenseCard(
-        data =  SenseCardData(
-            senseId = item.senseId,
-            lemma = item.lemma,
-            showLemma = true,
-            sense = item.sense,
-            pos = item.pos,
-            loading = item.loading,
-            error = item.error,
-            diagnosticInfoOnError = buildDiagnosticInfo(item.senseId, item.createdAt)
-        ),
-        state = senseState,
-        onToggle = onToggle,
-        onFavoriteToggle = onFavoriteToggle
-    )
+    Column {
+        SenseCard(
+            data = SenseCardData(
+                senseId = item.senseId,
+                lemma = item.lemma,
+                showLemma = true,
+                sense = item.sense,
+                pos = item.pos,
+                loading = item.loading,
+                error = item.error,
+                diagnosticInfoOnError = buildDiagnosticInfo(item.senseId, item.createdAt)
+            ),
+            state = senseState,
+            onToggle = onToggle,
+            onFavoriteToggle = onFavoriteToggle
+        )
+        AnimatedVisibility(
+            visible = item.expanded && item.sense != null,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = onViewFullCard) {
+                    Text(
+                        text = "View full card",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
+    }
 }
 
 private val dateFormat = LocalDateTime.Format { date(LocalDate.Formats.ISO); char(' '); time(LocalTime.Formats.ISO) }
