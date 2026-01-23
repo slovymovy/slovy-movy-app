@@ -1,17 +1,11 @@
 package com.slovy.slovymovyapp.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -439,7 +433,7 @@ fun FavoritesScreenContent(
                                             item = item,
                                             onToggle = { onSenseToggle(item.senseId) },
                                             onFavoriteToggle = { onFavoriteToggle(item.senseId) },
-                                            onViewFullCard = {
+                                            onViewFullDetails = {
                                                 onNavigateToWordDetail(item.targetLang, item.lemma, item.senseId)
                                             }
                                         )
@@ -459,7 +453,7 @@ private fun FavoriteSenseCard(
     item: FavoriteSenseItem,
     onToggle: () -> Unit,
     onFavoriteToggle: () -> Unit,
-    onViewFullCard: () -> Unit
+    onViewFullDetails: () -> Unit
 ) {
     val senseState = SenseUiState(
         senseId = item.senseId,
@@ -470,48 +464,22 @@ private fun FavoriteSenseCard(
         showFavoriteToggle = item.expanded,
         pos = item.pos
     )
-    Column {
-        SenseCard(
-            data = SenseCardData(
-                senseId = item.senseId,
-                lemma = item.lemma,
-                showLemma = true,
-                sense = item.sense,
-                pos = item.pos,
-                loading = item.loading,
-                error = item.error,
-                diagnosticInfoOnError = buildDiagnosticInfo(item.senseId, item.createdAt)
-            ),
-            state = senseState,
-            onToggle = onToggle,
-            onFavoriteToggle = onFavoriteToggle
-        )
-        AnimatedVisibility(
-            visible = item.expanded && item.sense != null,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(onClick = onViewFullCard) {
-                    Text(
-                        text = "View full card",
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-        }
-    }
+    SenseCard(
+        data = SenseCardData(
+            senseId = item.senseId,
+            lemma = item.lemma,
+            showLemma = true,
+            sense = item.sense,
+            pos = item.pos,
+            loading = item.loading,
+            error = item.error,
+            diagnosticInfoOnError = buildDiagnosticInfo(item.senseId, item.createdAt)
+        ),
+        state = senseState,
+        onToggle = onToggle,
+        onFavoriteToggle = onFavoriteToggle,
+        onViewFullDetails = onViewFullDetails
+    )
 }
 
 private val dateFormat = LocalDateTime.Format { date(LocalDate.Formats.ISO); char(' '); time(LocalTime.Formats.ISO) }

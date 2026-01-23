@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
@@ -45,7 +46,8 @@ internal fun SenseCard(
     onPositioned: (String, Float) -> Unit = { _, _ -> },
     onFavoriteToggle: () -> Unit = {},
     relatedWords: Map<String, RelatedWord> = emptyMap(),
-    onWordClick: (String) -> Unit = {}
+    onWordClick: (String) -> Unit = {},
+    onViewFullDetails: (() -> Unit)? = null
 ) {
     val sense = data.sense
     val translationBasedHeader = remember(data.senseId, sense?.translations) { sense?.translationsHeader() }
@@ -247,6 +249,39 @@ internal fun SenseCard(
                             MaterialTheme.colorScheme.onErrorContainer,
                             relatedWords = relatedWords,
                             onWordClick = onWordClick
+                        )
+                    }
+                }
+            }
+
+            // Footer action for viewing full word details (used in Favorites)
+            AnimatedVisibility(
+                visible = expanded && sense != null && onViewFullDetails != null,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onViewFullDetails?.invoke() }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "See full word",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
