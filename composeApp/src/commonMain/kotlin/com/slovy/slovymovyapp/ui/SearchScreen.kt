@@ -49,7 +49,8 @@ data class SearchUiState(
     val scrollState: LazyListState = LazyListState(),
     val availableLanguages: List<Language> = emptyList(),
     val selectedLanguage: Language? = null,
-    val isLanguageDropdownExpanded: Boolean = false
+    val isLanguageDropdownExpanded: Boolean = false,
+    val wordSuggestions: List<String> = emptyList()
 )
 
 class SearchViewModel(
@@ -78,6 +79,7 @@ class SearchViewModel(
         private set
 
     private val queryFlow = MutableStateFlow(Search("", state.selectedLanguage, Uuid.random()))
+    private var suggestionsInitialized = false
 
     init {
         viewModelScope.launch {
@@ -106,6 +108,25 @@ class SearchViewModel(
                         state.scrollState.scrollToItem(0)
                     }
                 }
+        }
+        // Load initial suggestions
+        viewModelScope.launch {
+            loadSuggestionsForCurrentLanguage()
+            suggestionsInitialized = true
+        }
+    }
+
+    private suspend fun loadSuggestionsForCurrentLanguage() {
+        val language = state.selectedLanguage ?: return
+        val suggestions = repository.getWordSuggestions(language)
+        state = state.copy(wordSuggestions = suggestions)
+    }
+
+    fun refreshSuggestions() {
+        // Skip if initial load hasn't completed yet (avoid double load on first open)
+        if (!suggestionsInitialized) return
+        viewModelScope.launch {
+            loadSuggestionsForCurrentLanguage()
         }
     }
 
@@ -141,11 +162,17 @@ class SearchViewModel(
     }
 
     fun setSelectedLanguage(language: Language?) {
-        val resetFocus = state.selectedLanguage != language
+        val langChanged = state.selectedLanguage != language
         state = state.copy(selectedLanguage = language)
         // Re-trigger search with new language filter
         if (state.query.isNotEmpty()) {
-            queryFlow.value = queryFlow.value.copy(language = language, force = Uuid.random(), resetFocus = resetFocus)
+            queryFlow.value = queryFlow.value.copy(language = language, force = Uuid.random(), resetFocus = langChanged)
+        }
+        // Load suggestions for new language
+        if (langChanged) {
+            viewModelScope.launch {
+                loadSuggestionsForCurrentLanguage()
+            }
         }
     }
 
@@ -176,9 +203,10 @@ fun SearchScreen(
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
 
-    // Refresh language indicators and search results when screen is opened
+    // Refresh language indicators, suggestions, and search results when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
+        viewModel.refreshSuggestions()
         viewModel.refreshResults()
     }
 
@@ -365,7 +393,7 @@ fun SearchScreenContent(
 
                     state.query.isEmpty() -> {
                         EmptySearchState(
-                            selectedLanguage = state.selectedLanguage,
+                            wordSuggestions = state.wordSuggestions,
                             onWordClick = { word -> onQueryChange(word) }
                         )
                     }
@@ -462,21 +490,12 @@ private fun SearchResultCard(
     }
 }
 
-private val WORD_SUGGESTIONS = mapOf(
-    Language.ENGLISH to listOf("Biohack", "Authentic", "Aliveness", "Mindful", "Grateful"),
-    Language.DUTCH to listOf("Gezellig", "Verbinding", "Trots", "Bewust", "Genieten"),
-    Language.POLISH to listOf("Klasa", "Radość", "Inspiracja", "Rozwój", "Wspólnota"),
-    Language.RUSSIAN to listOf("Успех", "Счастье", "Вдохновение", "Осознанность", "Эмпатия")
-)
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun EmptySearchState(
-    selectedLanguage: Language?,
+    wordSuggestions: List<String>,
     onWordClick: (String) -> Unit
 ) {
-    val suggestions = selectedLanguage?.let { WORD_SUGGESTIONS[it] } ?: emptyList()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -491,7 +510,7 @@ private fun EmptySearchState(
             color = MaterialTheme.colorScheme.onSurface
         )
 
-        if (suggestions.isNotEmpty()) {
+        if (wordSuggestions.isNotEmpty()) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
@@ -507,7 +526,7 @@ private fun EmptySearchState(
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                suggestions.forEach { word ->
+                wordSuggestions.forEach { word ->
                     SuggestionChip(
                         onClick = { onWordClick(word) },
                         label = {
@@ -621,7 +640,8 @@ private fun SearchScreenPreviewEmptyQuery(
                 results = emptyList(),
                 showNoResults = false,
                 availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN),
-                selectedLanguage = Language.ENGLISH
+                selectedLanguage = Language.ENGLISH,
+                wordSuggestions = listOf("the", "be", "to", "of", "and")
             ),
         )
     }

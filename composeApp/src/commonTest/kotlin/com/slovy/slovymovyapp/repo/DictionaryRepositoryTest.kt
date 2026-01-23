@@ -515,4 +515,83 @@ class DictionaryRepositoryTest : BaseTest() {
             }
         }
     }
+
+    @Test
+    fun getWordSuggestions_returns_empty_when_no_dictionary() {
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        // Ensure no dictionary exists
+        runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+
+        val favoritesRepo = favoritesRepository()
+        val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+
+        val suggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
+        assertTrue(suggestions.isEmpty(), "Should return empty list when no dictionary installed")
+    }
+
+    @Test
+    fun getWordSuggestions_returns_high_frequency_words() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        // Ensure a clean state
+        runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+
+        try {
+            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
+
+            val favoritesRepo = favoritesRepository()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+
+            val suggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
+
+            assertEquals(5, suggestions.size, "Should return 5 suggestions")
+            assertTrue(suggestions.all { it.isNotEmpty() }, "All suggestions should be non-empty strings")
+        } finally {
+            runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+        }
+    }
+
+    @Test
+    fun getWordSuggestions_excludes_favorites() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        // Ensure a clean state
+        runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+
+        try {
+            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
+
+            val favoritesRepo = favoritesRepository()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+
+            // Get initial suggestions
+            val initialSuggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
+            assertTrue(initialSuggestions.isNotEmpty(), "Should have initial suggestions")
+
+            // Add the first suggestion to favorites (using a dummy sense ID since we just need the lemma match)
+            val wordToFavorite = initialSuggestions.first()
+            runBlocking { favoritesRepo.add("dummy-sense-id", Language.ENGLISH, wordToFavorite) }
+
+            // Get suggestions again
+            val newSuggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
+
+            assertFalse(
+                newSuggestions.any { it.equals(wordToFavorite, ignoreCase = true) },
+                "Favorited word '$wordToFavorite' should not appear in suggestions"
+            )
+            assertEquals(5, newSuggestions.size, "Should still return 5 suggestions after excluding favorite")
+        } finally {
+            runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+        }
+    }
 }

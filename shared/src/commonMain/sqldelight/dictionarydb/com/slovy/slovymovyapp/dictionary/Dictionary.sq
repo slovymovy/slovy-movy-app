@@ -100,6 +100,8 @@ CREATE TABLE sense_trait (
 -- Indexes to speed up searches by lemma (lang_code as leading column for multi-language queries)
 CREATE INDEX IF NOT EXISTS idx_lemma_lang_lemma ON lemma(lang_code, lemma);
 CREATE INDEX IF NOT EXISTS idx_lemma_lang_lemma_normalized ON lemma(lang_code, lemma_normalized);
+-- Index to speed up search of top words for search suggestion
+CREATE INDEX IF NOT EXISTS idx_lemma_frequency_lang_lemma_online_only ON lemma(zipf_frequency, lang_code, lemma, online_only);
 
 -- Index for POS lookups
 CREATE INDEX IF NOT EXISTS idx_lemma_pos_lemma_id ON lemma_pos(lemma_id);
@@ -350,3 +352,10 @@ SELECT sense_id, trait_type, comment FROM sense_trait WHERE sense_id IN ?;
 
 selectSenseExamplesBySenseIds:
 SELECT sense_id, example_id, text FROM sense_example WHERE sense_id IN ?;
+
+selectTopFrequentLemmas:
+SELECT l.id, l.lemma, l.zipf_frequency
+FROM lemma l
+WHERE l.lang_code = ? AND l.online_only = 0 AND length(l.lemma) > 3
+ORDER BY l.zipf_frequency DESC
+LIMIT ? OFFSET ?;
