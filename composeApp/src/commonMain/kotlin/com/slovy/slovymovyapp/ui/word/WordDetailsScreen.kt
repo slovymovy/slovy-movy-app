@@ -75,19 +75,35 @@ internal fun LanguageCard.toContentUiState(
     targetSenseId: String? = null,
     wordFamilyExpanded: Boolean = false,
     isSenseFavorite: (String) -> Boolean
-): WordDetailUiState.Content =
-    WordDetailUiState.Content(
-        card = this,
+): WordDetailUiState.Content {
+    // Sort senses by level (A1→C2) then frequency (HIGH→LOW)
+    val senseComparator = compareBy<LanguageCardResponseSense>(
+        { it.learnerLevel.ordinal },
+        { it.frequency.ordinal }
+    )
+
+    // Sort entries: by first sense's level/frequency, NAME always last
+    val sortedEntries = entries
+        .map { entry -> entry.copy(senses = entry.senses.sortedWith(senseComparator)) }
+        .sortedWith(
+            compareBy<LanguageCardPosEntry> { it.pos == PartOfSpeech.NAME }
+                .thenBy { it.senses.firstOrNull()?.learnerLevel?.ordinal ?: Int.MAX_VALUE }
+                .thenBy { it.senses.firstOrNull()?.frequency?.ordinal ?: Int.MAX_VALUE }
+        )
+
+    return WordDetailUiState.Content(
+        card = this.copy(entries = sortedEntries),
         wordFamilyExpanded = wordFamilyExpanded,
-        entries = entries.mapIndexed { index, entry ->
+        entries = sortedEntries.mapIndexed { index, entry ->
             entry.toEntryUiState(
                 index,
                 targetSenseId,
                 isSenseFavorite,
-                entries.size
+                sortedEntries.size
             )
         }
     )
+}
 
 private fun LanguageCardPosEntry.toEntryUiState(
     index: Int,
