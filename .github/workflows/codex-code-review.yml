@@ -57,13 +57,18 @@ jobs:
       - name: Report Codex feedback
         uses: actions/github-script@v7
         env:
-          CODEX_FINAL_MESSAGE: ${{ needs.codex-review.outputs.final_message }}
+          CODEX_FINAL_MESSAGE: ${{ needs.codex.outputs.final_message }}
         with:
           github-token: ${{ github.token }}
           script: |
+            const message = (process.env.CODEX_FINAL_MESSAGE || '').trim();
+            if (!message) {
+              core.info('Skipping comment: CODEX_FINAL_MESSAGE is empty.');
+              return;
+            }
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              body: process.env.CODEX_FINAL_MESSAGE,
+              body: message,
             });
