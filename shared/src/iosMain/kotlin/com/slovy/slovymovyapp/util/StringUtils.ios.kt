@@ -3,8 +3,6 @@ package com.slovy.slovymovyapp.util
 import platform.Foundation.NSString
 import platform.Foundation.decomposedStringWithCanonicalMapping
 
-actual fun String.lowercaseInvariant(): String = lowercase()
-
 actual fun normalizeAndStripAccents(s: String): String {
     // Use Foundation's NFD normalization (decomposedStringWithCanonicalMapping)
     @Suppress("CAST_NEVER_SUCCEEDS")

@@ -7,7 +7,6 @@ import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.translation.TranslationDatabase
-import com.slovy.slovymovyapp.util.lowercaseInvariant
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.*
 import kotlin.uuid.Uuid
@@ -117,7 +116,7 @@ class DictionaryRepository(
 
         val result = mutableMapOf<String, RelatedWord>()
         // Normalize to lowercase for case-insensitive matching (DB stores lemmas lowercase)
-        val lowercaseWords = relatedWords.map { it.lowercaseInvariant() }.toSet()
+        val lowercaseWords = relatedWords.map { it.lowercase() }.toSet()
 
         for (db in databases) {
             db.dictionaryQueries.selectLemmasByWords(language.code, lowercaseWords.toList())
@@ -201,7 +200,7 @@ class DictionaryRepository(
                         )
                     )
                     seenDisplays.add(key)
-                    seenLemmas.add("${lang.code}::${lemma.lowercaseInvariant()}")
+                    seenLemmas.add("${lang.code}::${lemma.lowercase()}")
                 }
             }
 
@@ -213,7 +212,7 @@ class DictionaryRepository(
                 onlineOnly: Boolean
             ) {
                 // Skip forms if the base lemma is already in the results
-                val lemmaKey = "${lang.code}::${lemma.lowercaseInvariant()}"
+                val lemmaKey = "${lang.code}::${lemma.lowercase()}"
                 if (seenLemmas.contains(lemmaKey)) {
                     return
                 }
@@ -244,7 +243,7 @@ class DictionaryRepository(
                 onlineOnly: Boolean
             ) {
                 // Skip translation if the base lemma is already in the results
-                val lemmaKey = "${lang.code}::${lemma.lowercaseInvariant()}"
+                val lemmaKey = "${lang.code}::${lemma.lowercase()}"
                 if (seenLemmas.contains(lemmaKey)) {
                     return
                 }
@@ -416,10 +415,10 @@ class DictionaryRepository(
 
         // Check favorite status for all items (single query instead of N queries)
         val allFavorites = favoritesRepository.getAll()
-        val favoriteItems = allFavorites.map { "${it.targetLang.code}::${it.lemma.lowercaseInvariant()}" }.toSet()
+        val favoriteItems = allFavorites.map { "${it.targetLang.code}::${it.lemma.lowercase()}" }.toSet()
 
         return result.map { item ->
-            val key = "${item.language.code}::${item.lemma.lowercaseInvariant()}"
+            val key = "${item.language.code}::${item.lemma.lowercase()}"
             if (favoriteItems.contains(key)) {
                 item.copy(isFavorite = true)
             } else {
@@ -445,7 +444,7 @@ class DictionaryRepository(
         var sourceDb: DictionaryDatabase? = null
 
         // Normalize to lowercase for case-insensitive matching (DB stores lemmas lowercase)
-        val normalizedLemma = lemma.lowercaseInvariant()
+        val normalizedLemma = lemma.lowercase()
         for (db in dictDatabases) {
             val result = db.dictionaryQueries
                 .selectLemmasByWord(language.code, normalizedLemma)

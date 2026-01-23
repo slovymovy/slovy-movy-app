@@ -1,9 +1,6 @@
 package com.slovy.slovymovyapp.util
 
 import java.text.Normalizer
-import java.util.Locale
-
-actual fun String.lowercaseInvariant(): String = lowercase(Locale.ROOT)
 
 actual fun normalizeAndStripAccents(s: String): String {
     // NFD decomposes accented characters into base + combining marks

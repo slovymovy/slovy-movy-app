@@ -1,11 +1,6 @@
 package com.slovy.slovymovyapp.util
 
 /**
- * Returns a copy of this string converted to lower case using locale-invariant rules.
- */
-expect fun String.lowercaseInvariant(): String
-
-/**
  * Removes diacritics/accents from Latin characters while preserving Cyrillic text.
  *
  * This function is deterministic and produces identical output across all platforms.
@@ -20,7 +15,7 @@ expect fun String.lowercaseInvariant(): String
  */
 fun stripAccents(s: String): String {
     // Normalize to lowercase first
-    val lower = s.lowercaseInvariant()
+    val lower = s.lowercase()
 
     // Handle specific Latin ligatures/letters before NFD normalization
     val replaced = lower
