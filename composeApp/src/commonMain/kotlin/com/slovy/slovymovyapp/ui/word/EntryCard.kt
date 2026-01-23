@@ -168,37 +168,26 @@ internal fun EntryCard(
                 }
 
                 // Senses - edge-to-edge (no horizontal padding)
-                val groupEntries = entry.senses.groupBy { it.semanticGroupId }.entries.toList()
-                groupEntries.forEachIndexed { groupIndex, (groupId, senseList) ->
-                    val showGroup = groupEntries.size > 1 && groupIndex > 0 && senseList.size > 1
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (showGroup) {
-                            SectionLabel("Group: $groupId")
-                        }
-
-                        senseList.forEach { sense ->
-                            val senseState = entryState.senses.find { it.senseId == sense.senseId }
-                                ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
-                            SenseCard(
-                                data = SenseCardData(
-                                    lemma = lemma,
-                                    showLemma = false,
-                                    senseId = sense.senseId,
-                                    sense = sense,
-                                    pos = entry.pos,
-                                    translationLoading = translationLoading || senseState.translationLoading,
-                                    translationError = translationError ?: senseState.translationError
-                                ),
-                                state = senseState,
-                                onToggle = { onSenseToggle(sense.senseId) },
-                                onPositioned = onSensePositioned,
-                                onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
-                                relatedWords = relatedWords,
-                                onWordClick = onWordClick
-                            )
-                        }
-                    }
+                entry.senses.forEach { sense ->
+                    val senseState = entryState.senses.find { it.senseId == sense.senseId }
+                        ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
+                    SenseCard(
+                        data = SenseCardData(
+                            lemma = lemma,
+                            showLemma = false,
+                            senseId = sense.senseId,
+                            sense = sense,
+                            pos = entry.pos,
+                            translationLoading = translationLoading || senseState.translationLoading,
+                            translationError = translationError ?: senseState.translationError
+                        ),
+                        state = senseState,
+                        onToggle = { onSenseToggle(sense.senseId) },
+                        onPositioned = onSensePositioned,
+                        onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
+                        relatedWords = relatedWords,
+                        onWordClick = onWordClick
+                    )
                 }
             }
         }
