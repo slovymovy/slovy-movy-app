@@ -115,9 +115,11 @@ class DictionaryRepository(
         if (relatedWords.isEmpty()) return emptyMap()
 
         val result = mutableMapOf<String, RelatedWord>()
+        // Normalize to lowercase for case-insensitive matching (DB stores lemmas lowercase)
+        val lowercaseWords = relatedWords.map { it.lowercase() }.toSet()
 
         for (db in databases) {
-            db.dictionaryQueries.selectLemmasByWords(language.code, relatedWords.toList())
+            db.dictionaryQueries.selectLemmasByWords(language.code, lowercaseWords.toList())
                 .executeAsList()
                 .forEach { row ->
                     if (row.lemma !in result || result[row.lemma]!!.online) {
@@ -441,9 +443,11 @@ class DictionaryRepository(
         var zipfFrequency = 0f
         var sourceDb: DictionaryDatabase? = null
 
+        // Normalize to lowercase for case-insensitive matching (DB stores lemmas lowercase)
+        val normalizedLemma = lemma.lowercase()
         for (db in dictDatabases) {
             val result = db.dictionaryQueries
-                .selectLemmasByWord(language.code, lemma)
+                .selectLemmasByWord(language.code, normalizedLemma)
                 .executeAsList()
                 .firstOrNull()
             if (result != null) {
