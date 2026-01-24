@@ -78,6 +78,8 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual fun speak(text: String) {
         val voice = currentVoice ?: return
+        // Stop any current speech without deactivating session (new speech follows immediately)
+        synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
         activateAudioSession()
         val utterance = AVSpeechUtterance.speechUtteranceWithString(text)
         //TODO maybe we need to make speed configurable
