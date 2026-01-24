@@ -19,7 +19,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     private val synthesizer = AVSpeechSynthesizer()
     private val delegate = TTSDelegate()
-    private var currentUtterance: AVSpeechUtterance? = null
     private var currentVoice: AVSpeechSynthesisVoice? = null
 
     private var onWordBoundary: ((IntRange) -> Unit)? = null
@@ -75,9 +74,10 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 
     actual fun speak(text: String) {
-        val voice = currentVoice ?: return
-        // Stop any current speech - its cancel callback will have the OLD generation from the map
+        if (text.isEmpty()) return
+        // Stop any current speech first - maintains consistent behavior regardless of voice state
         synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
+        val voice = currentVoice ?: return
         // Increment generation for the new utterance
         speechGeneration++
         activateAudioSession()
@@ -88,7 +88,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         utterance.volume = 1.0f
         utterance.voice = voice
 
-        currentUtterance = utterance
         // Register this utterance with its generation before speaking
         delegate.registerUtterance(utterance, speechGeneration)
         synthesizer.speakUtterance(utterance)
@@ -159,16 +158,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 
     actual fun stop() {
-        if (!synthesizer.isSpeaking()) {
-            // Not speaking - but session might be active if synth failed to start
-            // Ensure clean state by deactivating and setting IDLE
-            deactivateAudioSession()
-            onStatusChange?.invoke(TTSStatus.IDLE)
-            return
-        }
-        // Stop synthesizer - cancel callback will fire and handle deactivation/status
-        // Generation stays the same so callback knows this is a valid stop
+        // Always stop synthesizer to cancel any queued utterances
         synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
+        // Clear any pending utterances from the map to prevent memory leak
+        delegate.clearUtterances()
+        // Deactivate session and set idle state
+        // (callback may also fire, but generation won't match after clear)
+        deactivateAudioSession()
+        onStatusChange?.invoke(TTSStatus.IDLE)
     }
 
     actual fun setOnWordBoundaryListener(listener: (wordRange: IntRange) -> Unit) {
@@ -204,8 +201,17 @@ private class TTSDelegate : NSObject(), AVSpeechSynthesizerDelegateProtocol {
     }
 
     fun registerUtterance(utterance: AVSpeechUtterance, generation: Long) {
+        // Clear old entries to prevent memory leak if callbacks never fire
+        // (we use queue-flush behavior, so only one utterance at a time)
+        utteranceGenerations.clear()
         currentGeneration = generation
         utteranceGenerations[utterance] = generation
+    }
+
+    fun clearUtterances() {
+        // Clear map and reset generation so any pending callbacks are ignored
+        utteranceGenerations.clear()
+        currentGeneration = -1
     }
 
     private fun getAndRemoveGeneration(utterance: AVSpeechUtterance): Long {
@@ -219,8 +225,8 @@ private class TTSDelegate : NSObject(), AVSpeechSynthesizerDelegateProtocol {
     ) {
         started = false
         val utteranceGeneration = getAndRemoveGeneration(didFinishSpeechUtterance)
-        // Only notify if this utterance's generation matches current and nothing else queued
-        if (utteranceGeneration == currentGeneration && !synthesizer.isSpeaking()) {
+        // Only notify if this utterance's generation matches current, is valid (>0), and nothing else queued
+        if (utteranceGeneration > 0 && utteranceGeneration == currentGeneration && !synthesizer.isSpeaking()) {
             onSpeechEnded?.invoke(utteranceGeneration)
         }
     }
@@ -232,8 +238,8 @@ private class TTSDelegate : NSObject(), AVSpeechSynthesizerDelegateProtocol {
     ) {
         started = false
         val utteranceGeneration = getAndRemoveGeneration(didCancelSpeechUtterance)
-        // Only notify if this utterance's generation matches current and nothing else queued
-        if (utteranceGeneration == currentGeneration && !synthesizer.isSpeaking()) {
+        // Only notify if this utterance's generation matches current, is valid (>0), and nothing else queued
+        if (utteranceGeneration > 0 && utteranceGeneration == currentGeneration && !synthesizer.isSpeaking()) {
             onSpeechEnded?.invoke(utteranceGeneration)
         }
     }
