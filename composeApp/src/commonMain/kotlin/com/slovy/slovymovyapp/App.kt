@@ -347,6 +347,16 @@ fun App(
                         )
                         navController.navigate(destination)
                     },
+                    onSuggestionSelected = { language, lemma ->
+                        val translationCodes = dictionaryRepository.installedTranslationTargets(language)
+                            .map { it.code }
+                        val destination = AppDestination.WordDetail(
+                            dictionaryLanguageCode = language.code,
+                            lemma = lemma,
+                            translationLanguageCodes = translationCodes
+                        )
+                        navController.navigate(destination)
+                    },
                     wordDetailLabel = wordDetailViewModels.keys.lastOrNull()?.lemma,
                     onNavigateToWordDetail = {
                         wordDetailViewModels.keys.lastOrNull()?.let { destination ->
