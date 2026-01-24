@@ -194,6 +194,7 @@ class SearchViewModel(
 fun SearchScreen(
     viewModel: SearchViewModel,
     onWordSelected: (DictionaryRepository.SearchItem) -> Unit = { _ -> },
+    onSuggestionSelected: (language: Language, lemma: String) -> Unit = { _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -229,6 +230,12 @@ fun SearchScreen(
         onResultSelected = { item ->
             focusManager.clearFocus()
             onWordSelected(item)
+        },
+        onSuggestionSelected = { word ->
+            focusManager.clearFocus()
+            viewModel.state.selectedLanguage?.let { language ->
+                onSuggestionSelected(language, word)
+            }
         },
         onLanguageSelected = { language ->
             viewModel.setShowLanguageIndicators(language == null && viewModel.state.availableLanguages.size > 1)
@@ -269,6 +276,7 @@ fun SearchScreenContent(
     state: SearchUiState,
     onQueryChange: (String) -> Unit = {},
     onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
+    onSuggestionSelected: (String) -> Unit = {},
     onLanguageSelected: (Language?) -> Unit = {},
     onToggleLanguageDropdown: () -> Unit = {},
     onDismissLanguageDropdown: () -> Unit = {},
@@ -394,7 +402,7 @@ fun SearchScreenContent(
                     state.query.isEmpty() -> {
                         EmptySearchState(
                             wordSuggestions = state.wordSuggestions,
-                            onWordClick = { word -> onQueryChange(word) }
+                            onWordClick = onSuggestionSelected
                         )
                     }
 
@@ -514,7 +522,7 @@ private fun EmptySearchState(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "or try searching for:",
+                text = "or explore:",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
