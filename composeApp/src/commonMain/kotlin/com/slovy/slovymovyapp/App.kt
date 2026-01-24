@@ -375,6 +375,17 @@ fun App(
                         if (!navController.popBackStack(AppDestination.Search, inclusive = false))
                             navController.navigate(AppDestination.Search)
                     },
+                    onNavigateToWordDetail = { language, lemma, senseId ->
+                        val translationCodes = dictionaryRepository.installedTranslationTargets(language)
+                            .map { it.code }
+                        val destination = AppDestination.WordDetail(
+                            dictionaryLanguageCode = language.code,
+                            lemma = lemma,
+                            targetSenseId = senseId,
+                            translationLanguageCodes = translationCodes
+                        )
+                        navController.navigate(destination)
+                    },
                     wordDetailLabel = wordDetailViewModels.keys.lastOrNull()?.lemma,
                     onNavigateToLastWordDetail = {
                         wordDetailViewModels.keys.lastOrNull()?.let { destination ->
