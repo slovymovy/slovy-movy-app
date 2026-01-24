@@ -77,13 +77,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 
     actual fun speak(text: String) {
+        val voice = currentVoice ?: return
         activateAudioSession()
         val utterance = AVSpeechUtterance.speechUtteranceWithString(text)
         //TODO maybe we need to make speed configurable
         utterance.rate = 0.3f
         utterance.pitchMultiplier = 1.0f
         utterance.volume = 1.0f
-        utterance.voice = currentVoice ?: return
+        utterance.voice = voice
 
         currentUtterance = utterance
         synthesizer.speakUtterance(utterance)
@@ -201,7 +202,10 @@ private class TTSDelegate : NSObject(), AVSpeechSynthesizerDelegateProtocol {
         didFinishSpeechUtterance: AVSpeechUtterance
     ) {
         started = false
-        onFinish?.invoke()
+        // Only notify finish when no more utterances are queued
+        if (!synthesizer.isSpeaking()) {
+            onFinish?.invoke()
+        }
     }
 
     override fun speechSynthesizer(
