@@ -1,1 +1,1 @@
-CREATE INDEX IF NOT EXISTS idx_lemma_frequency_lang_lemma_online_only ON lemma(zipf_frequency, lang_code, lemma, online_only);
+CREATE INDEX IF NOT EXISTS idx_lemma_lang_frequency_lemma_online_only ON lemma(lang_code, zipf_frequency, lemma, online_only);
