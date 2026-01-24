@@ -4,6 +4,7 @@ package com.slovy.slovymovyapp.speech
 import com.slovy.slovymovyapp.data.Language
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.ObjCSignatureOverride
 import kotlinx.cinterop.useContents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -24,13 +25,19 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     private var onWordBoundary: ((IntRange) -> Unit)? = null
     private var onStatusChange: ((TTSStatus) -> Unit)? = null
 
+    // Generation counter to track speech requests and ignore stale callbacks
+    private var speechGeneration: Long = 0
+
     init {
         synthesizer.delegate = delegate
         delegate.setCallbacks(
             onStart = { onStatusChange?.invoke(TTSStatus.SPEAKING) },
-            onFinish = {
-                deactivateAudioSession()
-                onStatusChange?.invoke(TTSStatus.IDLE)
+            onSpeechEnded = { generation ->
+                // Only deactivate if this callback is for the current generation
+                if (generation == speechGeneration) {
+                    deactivateAudioSession()
+                    onStatusChange?.invoke(TTSStatus.IDLE)
+                }
             },
             onWordBoundary = { range -> onWordBoundary?.invoke(range) }
         )
@@ -78,8 +85,12 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual fun speak(text: String) {
         val voice = currentVoice ?: return
+        // Increment generation so any pending callbacks from previous speech are ignored
+        speechGeneration++
+        val currentGeneration = speechGeneration
         // Stop any current speech without deactivating session (new speech follows immediately)
         synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
+        delegate.setCurrentGeneration(currentGeneration)
         activateAudioSession()
         val utterance = AVSpeechUtterance.speechUtteranceWithString(text)
         //TODO maybe we need to make speed configurable
@@ -157,6 +168,8 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 
     actual fun stop() {
+        // Increment generation so delegate callbacks from stopped speech are ignored
+        speechGeneration++
         synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
         deactivateAudioSession()
         onStatusChange?.invoke(TTSStatus.IDLE)
@@ -175,38 +188,47 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 private class TTSDelegate : NSObject(), AVSpeechSynthesizerDelegateProtocol {
 
     private var onStart: (() -> Unit)? = null
-    private var onFinish: (() -> Unit)? = null
+    private var onSpeechEnded: ((Long) -> Unit)? = null
     private var onWordBoundary: ((IntRange) -> Unit)? = null
 
-    // TODO: see todo below
     private var started: Boolean = false
+    private var currentGeneration: Long = 0
 
     fun setCallbacks(
         onStart: () -> Unit,
-        onFinish: () -> Unit,
+        onSpeechEnded: (Long) -> Unit,
         onWordBoundary: (IntRange) -> Unit
     ) {
         this.onStart = onStart
-        this.onFinish = onFinish
+        this.onSpeechEnded = onSpeechEnded
         this.onWordBoundary = onWordBoundary
     }
 
-    // TODO: can't override it, because conflicts with didFinishSpeechUtterance
-    /*override fun speechSynthesizer(
-        synthesizer: AVSpeechSynthesizer,
-        didStartSpeechUtterance: AVSpeechUtterance
-    ) {
-        onStart?.invoke()
-    }*/
+    fun setCurrentGeneration(generation: Long) {
+        currentGeneration = generation
+    }
 
+    @ObjCSignatureOverride
     override fun speechSynthesizer(
         synthesizer: AVSpeechSynthesizer,
         didFinishSpeechUtterance: AVSpeechUtterance
     ) {
         started = false
-        // Only notify finish when no more utterances are queued
+        // Only notify when no more utterances are queued
         if (!synthesizer.isSpeaking()) {
-            onFinish?.invoke()
+            onSpeechEnded?.invoke(currentGeneration)
+        }
+    }
+
+    @ObjCSignatureOverride
+    override fun speechSynthesizer(
+        synthesizer: AVSpeechSynthesizer,
+        didCancelSpeechUtterance: AVSpeechUtterance
+    ) {
+        started = false
+        // Handle cancellation (system interruption, manual stop, etc.)
+        if (!synthesizer.isSpeaking()) {
+            onSpeechEnded?.invoke(currentGeneration)
         }
     }
 
