@@ -74,9 +74,9 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 
     actual fun speak(text: String) {
-        if (text.isEmpty()) return
-        // Stop any current speech first - maintains consistent behavior regardless of voice state
+        // Stop any current speech first - maintains consistent behavior regardless of text/voice state
         synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
+        if (text.isEmpty()) return
         val voice = currentVoice ?: return
         // Increment generation for the new utterance
         speechGeneration++
@@ -158,12 +158,11 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 
     actual fun stop() {
-        // Always stop synthesizer to cancel any queued utterances
-        synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
-        // Clear any pending utterances from the map to prevent memory leak
+        // Clear map BEFORE stopping so any sync callback is ignored (generation won't match)
         delegate.clearUtterances()
+        // Stop synthesizer to cancel any queued utterances
+        synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
         // Deactivate session and set idle state
-        // (callback may also fire, but generation won't match after clear)
         deactivateAudioSession()
         onStatusChange?.invoke(TTSStatus.IDLE)
     }
