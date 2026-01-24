@@ -28,29 +28,56 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         synthesizer.delegate = delegate
         delegate.setCallbacks(
             onStart = { onStatusChange?.invoke(TTSStatus.SPEAKING) },
-            onFinish = { onStatusChange?.invoke(TTSStatus.IDLE) },
+            onFinish = {
+                deactivateAudioSession()
+                onStatusChange?.invoke(TTSStatus.IDLE)
+            },
             onWordBoundary = { range -> onWordBoundary?.invoke(range) }
         )
         configureAudioSession()
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    //TODO it is right place to configure audio session?
     private fun configureAudioSession() {
         val audioSession = AVAudioSession.sharedInstance()
         try {
             audioSession.setCategory(
                 AVAudioSessionCategoryPlayback,
-                AVAudioSessionCategoryOptions.MIN_VALUE,
+                AVAudioSessionCategoryOptionDuckOthers,
                 null
             )
-            audioSession.setActive(true, null)
+            // Don't activate here - only activate when speaking
         } catch (e: Exception) {
             // Audio session configuration failed
         }
     }
 
+    @OptIn(ExperimentalForeignApi::class)
+    private fun activateAudioSession() {
+        val audioSession = AVAudioSession.sharedInstance()
+        try {
+            audioSession.setActive(true, null)
+        } catch (e: Exception) {
+            // Audio session activation failed
+        }
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    private fun deactivateAudioSession() {
+        val audioSession = AVAudioSession.sharedInstance()
+        try {
+            audioSession.setActive(
+                false,
+                AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation,
+                null
+            )
+        } catch (e: Exception) {
+            // Audio session deactivation failed
+        }
+    }
+
     actual fun speak(text: String) {
+        activateAudioSession()
         val utterance = AVSpeechUtterance.speechUtteranceWithString(text)
         //TODO maybe we need to make speed configurable
         utterance.rate = 0.3f
@@ -128,6 +155,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual fun stop() {
         synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
+        deactivateAudioSession()
         onStatusChange?.invoke(TTSStatus.IDLE)
     }
 
