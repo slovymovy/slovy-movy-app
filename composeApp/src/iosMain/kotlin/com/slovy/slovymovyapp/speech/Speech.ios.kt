@@ -41,31 +41,22 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
             },
             onWordBoundary = { range -> onWordBoundary?.invoke(range) }
         )
-        configureAudioSession()
-    }
-
-    @OptIn(ExperimentalForeignApi::class)
-    private fun configureAudioSession() {
-        val audioSession = AVAudioSession.sharedInstance()
-        try {
-            audioSession.setCategory(
-                AVAudioSessionCategoryPlayback,
-                AVAudioSessionCategoryOptionDuckOthers,
-                null
-            )
-            // Don't activate here - only activate when speaking
-        } catch (e: Exception) {
-            // Audio session configuration failed
-        }
     }
 
     @OptIn(ExperimentalForeignApi::class)
     private fun activateAudioSession() {
         val audioSession = AVAudioSession.sharedInstance()
         try {
+            // Reapply category each time to ensure ducking is configured
+            // (another component may have changed the session category)
+            audioSession.setCategory(
+                AVAudioSessionCategoryPlayback,
+                AVAudioSessionCategoryOptionDuckOthers,
+                null
+            )
             audioSession.setActive(true, null)
         } catch (e: Exception) {
-            // Audio session activation failed
+            // Audio session configuration/activation failed
         }
     }
 
@@ -169,7 +160,10 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual fun stop() {
         if (!synthesizer.isSpeaking()) {
-            // Nothing playing, just ensure we're in idle state
+            // Not speaking - but session might be active if synth failed to start
+            // Ensure clean state by deactivating and setting IDLE
+            deactivateAudioSession()
+            onStatusChange?.invoke(TTSStatus.IDLE)
             return
         }
         // Stop synthesizer - cancel callback will fire and handle deactivation/status
