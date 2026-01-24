@@ -5,14 +5,14 @@ import com.slovy.slovymovyapp.data.util.HtmlTagParser.extractTaggedWords
 
 /**
  * Utility for parsing HTML-like tags in text, specifically `<w>...</w>` tags
- * and single-word `<word>` tags
+ * and simple `<content>` tags (without closing tag)
  * used to highlight words in dictionary definitions, examples, and phrases.
  *
  * This parser handles various edge cases:
  * - Nested tags: `<w>outer <w>inner</w></w>` - extracts "outer inner" as a single word
  * - Multiple words in one tag: `<w>word1 word2</w>` - can be split into individual words
  * - Malformed tags: `<w>unclosed` or `</w>no opening` - skips malformed sections
- * - Single-word tags: `<word>` - extracts "word" as a tagged segment
+ * - Simple tags: `<word>` or `<multi word phrase>` - extracts content as a tagged segment
  * - Escaped content: Treats all content between tags as literal text
  */
 object HtmlTagParser {
@@ -68,7 +68,7 @@ object HtmlTagParser {
             val endTag = "</w>"
 
             val tagStart = text.indexOf(startTag, i)
-            val singleTagStart = findNextSingleWordTagStart(text, i)
+            val singleTagStart = findNextSimpleTagStart(text, i)
             val nextTagStart = when {
                 tagStart == -1 -> singleTagStart
                 singleTagStart == -1 -> tagStart
@@ -141,7 +141,7 @@ object HtmlTagParser {
                 }
 
                 val content = text.substring(nextTagStart + 1, tagEnd)
-                if (isSingleWordTag(content)) {
+                if (isHighlightTag(content)) {
                     segments.add(TextSegment(content, true, nextTagStart, tagEnd + 1))
                 } else {
                     segments.add(TextSegment(text.substring(nextTagStart, tagEnd + 1), false, nextTagStart, tagEnd + 1))
@@ -207,7 +207,7 @@ object HtmlTagParser {
         return extractTaggedWords(text, splitMultipleWords).toSet()
     }
 
-    private fun findNextSingleWordTagStart(text: String, startIndex: Int): Int {
+    private fun findNextSimpleTagStart(text: String, startIndex: Int): Int {
         var searchIndex = startIndex
         while (searchIndex < text.length) {
             val candidateStart = text.indexOf('<', searchIndex)
@@ -222,7 +222,7 @@ object HtmlTagParser {
             if (candidateEnd == -1) return candidateStart
 
             val content = text.substring(candidateStart + 1, candidateEnd)
-            if (isSingleWordTag(content)) {
+            if (isHighlightTag(content)) {
                 return candidateStart
             }
 
@@ -232,10 +232,10 @@ object HtmlTagParser {
         return -1
     }
 
-    private fun isSingleWordTag(content: String): Boolean {
+    private fun isHighlightTag(content: String): Boolean {
         if (content.isEmpty()) return false
         if (content.startsWith("/")) return false
         if (content == "w") return false
-        return content.none { it.isWhitespace() }
+        return true
     }
 }

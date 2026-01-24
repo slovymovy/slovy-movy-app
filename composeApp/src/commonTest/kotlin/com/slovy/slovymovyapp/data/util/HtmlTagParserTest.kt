@@ -151,6 +151,20 @@ class HtmlTagParserTest {
     }
 
     @Test
+    fun parseTextSegments_multiWordTag_returnsTaggedSegment() {
+        val text = "We need to <smash it> today"
+        val result = HtmlTagParser.parseTextSegments(text)
+
+        assertEquals(3, result.size)
+        assertEquals("We need to ", result[0].text)
+        assertEquals(false, result[0].isTagged)
+        assertEquals("smash it", result[1].text)
+        assertEquals(true, result[1].isTagged)
+        assertEquals(" today", result[2].text)
+        assertEquals(false, result[2].isTagged)
+    }
+
+    @Test
     fun extractTaggedWords_emptyString_returnsEmptyList() {
         val result = HtmlTagParser.extractTaggedWords("")
         assertTrue(result.isEmpty())
@@ -239,6 +253,12 @@ class HtmlTagParserTest {
     fun extractTaggedWords_singleWordTag_extractsWord() {
         val result = HtmlTagParser.extractTaggedWords("Use <hello> here")
         assertEquals(listOf("hello"), result)
+    }
+
+    @Test
+    fun extractTaggedWords_multiWordTag_extractsPhrase() {
+        val result = HtmlTagParser.extractTaggedWords("We need to <smash it> today")
+        assertEquals(listOf("smash it"), result)
     }
 
     @Test
