@@ -733,6 +733,54 @@ class DictionaryRepository(
         return cached + loaded
     }
 
+    /**
+     * Gets word suggestions for the empty search state.
+     * Returns high-frequency words that are not in favorites.
+     * Uses a random offset for variety.
+     */
+    suspend fun getWordSuggestions(
+        language: Language,
+        count: Int = 5,
+        offset: Int = 500
+    ): List<String> = withContext(Dispatchers.IO) {
+        if (!dataDbManager.hasDictionary(language)) {
+            return@withContext emptyList()
+        }
+
+        val db = dataDbManager.openDictionaryReadOnly(language)
+        val q = db.dictionaryQueries
+
+        // Get favorites to exclude (case-insensitive)
+        val favorites = favoritesRepository.getAll()
+            .filter { it.targetLang == language }
+            .map { it.lemma.lowercase() }
+            .toSet()
+
+        val suggestions = mutableListOf<String>()
+        val batchSize = 100L
+        // Start at a random offset (0 to 500) for variety among high-frequency words
+        var offset = (0..offset).random().toLong()
+        val maxAttempts = 10
+
+        repeat(maxAttempts) {
+            if (suggestions.size >= count) return@repeat
+
+            val batch = q.selectTopFrequentLemmas(language.code, batchSize, offset).executeAsList()
+            if (batch.isEmpty()) return@repeat
+
+            for (row in batch) {
+                if (suggestions.size >= count) break
+                if (row.lemma.lowercase() !in favorites) {
+                    suggestions.add(row.lemma)
+                }
+            }
+
+            offset += batchSize
+        }
+
+        suggestions.take(count)
+    }
+
     private fun prefixRange(prefix: String): Pair<String, String> {
         if (prefix.isEmpty()) return "" to "\uFFFF"
         return prefix to prefix + '\uFFFF'
