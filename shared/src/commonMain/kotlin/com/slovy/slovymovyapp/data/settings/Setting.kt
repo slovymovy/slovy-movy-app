@@ -12,6 +12,7 @@ data class Setting(
     enum class Name() {
         TEST_PROPERTY,
         WELCOME_MESSAGE,
+        WELCOME_COMPLETED,
         LANGUAGE,
         DICTIONARY,
         DATA_VERSION,

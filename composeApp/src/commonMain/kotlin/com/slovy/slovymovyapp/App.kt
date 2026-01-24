@@ -29,6 +29,9 @@ import kotlinx.serialization.json.jsonPrimitive
 @Serializable
 private sealed interface AppDestination {
     @Serializable
+    data object Welcome : AppDestination
+
+    @Serializable
     data object DownloadDictionary : AppDestination
 
     @Serializable
@@ -121,6 +124,12 @@ fun App(
     }
 
     suspend fun selectInitialDestination(): AppDestination {
+        // Check if user has completed welcome screen
+        val welcomeCompleted = settingsRepository.getById(Setting.Name.WELCOME_COMPLETED)?.value
+        if (welcomeCompleted == null) {
+            return AppDestination.Welcome
+        }
+
         // Check if data version is current
         if (!dataManager.hasRequiredVersion()) {
             val savedVersion = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
@@ -171,6 +180,30 @@ fun App(
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
         ) {
+            composable<AppDestination.Welcome> { backStackEntry ->
+                val viewModel = viewModel(
+                    viewModelStoreOwner = backStackEntry
+                ) {
+                    WelcomeViewModel()
+                }
+
+                WelcomeScreen(
+                    viewModel = viewModel,
+                    onGetStarted = {
+                        coroutineScope.launch {
+                            settingsRepository.insert(
+                                Setting(
+                                    id = Setting.Name.WELCOME_COMPLETED,
+                                    value = Json.parseToJsonElement("true")
+                                )
+                            )
+                            navController.navigate(AppDestination.SetupLanguages) {
+                                popUpTo<AppDestination.Welcome> { inclusive = true }
+                            }
+                        }
+                    }
+                )
+            }
             composable<AppDestination.SetupLanguages> { backStackEntry ->
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
