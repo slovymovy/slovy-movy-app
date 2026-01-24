@@ -238,6 +238,7 @@ class FavoritesViewModel(
 fun FavoritesScreen(
     viewModel: FavoritesViewModel,
     onNavigateToSearch: () -> Unit = {},
+    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
@@ -258,6 +259,7 @@ fun FavoritesScreen(
         onQueryChange = { viewModel.updateQuery(it) },
         onSenseToggle = { viewModel.toggleSense(it) },
         onFavoriteToggle = { viewModel.toggleFavorite(it) },
+        onNavigateToWordDetail = onNavigateToWordDetail,
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
         onNavigateToSettings = onNavigateToSettings,
@@ -275,6 +277,7 @@ fun FavoritesScreenContent(
     onQueryChange: (String) -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
     onFavoriteToggle: (String) -> Unit = {},
+    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
@@ -429,7 +432,10 @@ fun FavoritesScreenContent(
                                         FavoriteSenseCard(
                                             item = item,
                                             onToggle = { onSenseToggle(item.senseId) },
-                                            onFavoriteToggle = { onFavoriteToggle(item.senseId) }
+                                            onFavoriteToggle = { onFavoriteToggle(item.senseId) },
+                                            onViewFullDetails = {
+                                                onNavigateToWordDetail(item.targetLang, item.lemma, item.senseId)
+                                            }
                                         )
                                     }
                                 }
@@ -446,7 +452,8 @@ fun FavoritesScreenContent(
 private fun FavoriteSenseCard(
     item: FavoriteSenseItem,
     onToggle: () -> Unit,
-    onFavoriteToggle: () -> Unit
+    onFavoriteToggle: () -> Unit,
+    onViewFullDetails: () -> Unit
 ) {
     val senseState = SenseUiState(
         senseId = item.senseId,
@@ -458,7 +465,7 @@ private fun FavoriteSenseCard(
         pos = item.pos
     )
     SenseCard(
-        data =  SenseCardData(
+        data = SenseCardData(
             senseId = item.senseId,
             lemma = item.lemma,
             showLemma = true,
@@ -470,7 +477,8 @@ private fun FavoriteSenseCard(
         ),
         state = senseState,
         onToggle = onToggle,
-        onFavoriteToggle = onFavoriteToggle
+        onFavoriteToggle = onFavoriteToggle,
+        onViewFullDetails = onViewFullDetails
     )
 }
 
