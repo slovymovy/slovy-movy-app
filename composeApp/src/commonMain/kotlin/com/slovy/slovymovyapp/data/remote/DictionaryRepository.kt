@@ -846,7 +846,7 @@ class DictionaryRepository(
     ): List<Uuid> {
         // sqlite limit for IN()
         return senseUuids.chunked(999).flatMap { chunk ->
-            return translationQueries
+            translationQueries
                 .selectSenseIdsByTranslationWordPrefix(
                     sourceLanguage.code,
                     prefixStart,
