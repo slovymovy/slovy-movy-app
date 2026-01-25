@@ -2,6 +2,8 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,6 +36,10 @@ class WelcomeViewModel : ViewModel() {
         state = state.copy(isStarting = true)
         onComplete()
     }
+
+    fun onError() {
+        state = state.copy(isStarting = false)
+    }
 }
 
 @Composable
@@ -62,56 +68,66 @@ fun WelcomeScreenContent(
                 .padding(horizontal = AppSpacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.weight(0.15f))
-
-            // Welcome title
-            Text(
-                text = "Open Words",
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-0.5).sp
-                ),
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(AppSpacing.sm))
-
-            Text(
-                text = "An ad-free, supercharged dictionary\nfor serious learners.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.weight(0.12f))
-
-            // Selling points
+            // Scrollable content
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                SellingPointCard(
-                    icon = Icons.Outlined.Lightbulb,
-                    title = "Deep Word Insights",
-                    description = "Build strong associations with word frequency, common phrases, and real-world examples."
+                Spacer(modifier = Modifier.height(AppSpacing.xxxl))
+
+                // Welcome title
+                Text(
+                    text = "Open Words",
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.5).sp
+                    ),
+                    color = MaterialTheme.colorScheme.primary
                 )
 
-                SellingPointCard(
-                    icon = Icons.Outlined.Favorite,
-                    title = "Your Collection",
-                    description = "Save words to your personal library and build your vocabulary locally."
+                Spacer(modifier = Modifier.height(AppSpacing.sm))
+
+                Text(
+                    text = "An ad-free, supercharged dictionary\nfor serious learners.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
                 )
 
-                SellingPointCard(
-                    icon = Icons.Outlined.OfflinePin,
-                    title = "Smart Offline Access",
-                    description = "Download the core library to learn on the go. Essential data stays on your device."
-                )
+                Spacer(modifier = Modifier.height(AppSpacing.xxl))
+
+                // Selling points
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
+                ) {
+                    SellingPointCard(
+                        icon = Icons.Outlined.Lightbulb,
+                        title = "Deep Word Insights",
+                        description = "Build strong associations with word frequency, common phrases, and real-world examples."
+                    )
+
+                    SellingPointCard(
+                        icon = Icons.Outlined.Favorite,
+                        title = "Your Collection",
+                        description = "Save words to your personal library and build your vocabulary locally."
+                    )
+
+                    SellingPointCard(
+                        icon = Icons.Outlined.OfflinePin,
+                        title = "Smart Offline Access",
+                        description = "Download the core library to learn on the go. Essential data stays on your device."
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(AppSpacing.lg))
             }
 
-            Spacer(modifier = Modifier.weight(0.15f))
+            // Fixed button at bottom
+            Spacer(modifier = Modifier.height(AppSpacing.lg))
 
-            // Get Started button
             Button(
                 onClick = onGetStarted,
                 enabled = !state.isStarting,

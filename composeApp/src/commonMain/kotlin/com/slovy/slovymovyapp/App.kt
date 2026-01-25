@@ -124,13 +124,7 @@ fun App(
     }
 
     suspend fun selectInitialDestination(): AppDestination {
-        // Check if user has completed welcome screen
-        val welcomeCompleted = settingsRepository.getById(Setting.Name.WELCOME_COMPLETED)?.value
-        if (welcomeCompleted == null) {
-            return AppDestination.Welcome
-        }
-
-        // Check if data version is current
+        // Check if data version is current (before welcome, so existing users see mismatch)
         if (!dataManager.hasRequiredVersion()) {
             val savedVersion = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
             // If version exists but is outdated, show error before deleting
@@ -146,6 +140,8 @@ fun App(
             listOfNotNull(nativeJson?.jsonPrimitive?.content)
         }
         val natives = nativeCodes.mapNotNull { Language.fromCodeOrNull(it) }
+
+        // Existing user: has language settings configured
         if (natives.isNotEmpty()) {
             nativeLanguages = natives
             val dictionaryCode = settingsRepository.getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
@@ -160,6 +156,13 @@ fun App(
                 }
             }
         }
+
+        // New user: show welcome if not completed yet
+        val welcomeCompleted = settingsRepository.getById(Setting.Name.WELCOME_COMPLETED)?.value
+        if (welcomeCompleted == null) {
+            return AppDestination.Welcome
+        }
+
         return AppDestination.SetupLanguages
     }
 
@@ -191,14 +194,18 @@ fun App(
                     viewModel = viewModel,
                     onGetStarted = {
                         coroutineScope.launch {
-                            settingsRepository.insert(
-                                Setting(
-                                    id = Setting.Name.WELCOME_COMPLETED,
-                                    value = Json.parseToJsonElement("true")
+                            try {
+                                settingsRepository.insert(
+                                    Setting(
+                                        id = Setting.Name.WELCOME_COMPLETED,
+                                        value = Json.parseToJsonElement("true")
+                                    )
                                 )
-                            )
-                            navController.navigate(AppDestination.SetupLanguages) {
-                                popUpTo<AppDestination.Welcome> { inclusive = true }
+                                navController.navigate(AppDestination.SetupLanguages) {
+                                    popUpTo<AppDestination.Welcome> { inclusive = true }
+                                }
+                            } catch (e: Exception) {
+                                viewModel.onError()
                             }
                         }
                     }
