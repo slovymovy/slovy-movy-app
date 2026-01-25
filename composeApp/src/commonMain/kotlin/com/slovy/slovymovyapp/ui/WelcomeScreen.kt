@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 
 data class WelcomeUiState(
     val isStarting: Boolean = false
@@ -72,7 +74,6 @@ fun WelcomeScreenContent(
                 .padding(horizontal = AppSpacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Scrollable content
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -81,7 +82,6 @@ fun WelcomeScreenContent(
             ) {
                 Spacer(modifier = Modifier.height(AppSpacing.xxxl))
 
-                // Welcome title
                 Text(
                     text = "Open Words",
                     style = MaterialTheme.typography.displaySmall.copy(
@@ -102,7 +102,6 @@ fun WelcomeScreenContent(
 
                 Spacer(modifier = Modifier.height(AppSpacing.xxl))
 
-                // Selling points
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
@@ -129,7 +128,6 @@ fun WelcomeScreenContent(
                 Spacer(modifier = Modifier.height(AppSpacing.lg))
             }
 
-            // Fixed button at bottom
             Spacer(modifier = Modifier.height(AppSpacing.lg))
 
             Button(
@@ -184,7 +182,6 @@ private fun SellingPointCard(
             modifier = Modifier.padding(AppSpacing.lg),
             verticalAlignment = Alignment.Top
         ) {
-            // Icon in circle
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -226,20 +223,20 @@ private fun SellingPointCard(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun WelcomeScreenPreview(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         WelcomeScreenContent()
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun WelcomeScreenLoadingPreview(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         WelcomeScreenContent(state = WelcomeUiState(isStarting = true))
