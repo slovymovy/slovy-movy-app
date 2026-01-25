@@ -1,8 +1,8 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +31,8 @@ class WelcomeViewModel : ViewModel() {
     var state by mutableStateOf(WelcomeUiState())
         private set
 
+    val scrollState = ScrollState(0)
+
     fun onGetStarted(onComplete: () -> Unit) {
         if (state.isStarting) return
         state = state.copy(isStarting = true)
@@ -49,6 +51,7 @@ fun WelcomeScreen(
 ) {
     WelcomeScreenContent(
         state = viewModel.state,
+        scrollState = viewModel.scrollState,
         onGetStarted = { viewModel.onGetStarted(onGetStarted) }
     )
 }
@@ -56,6 +59,7 @@ fun WelcomeScreen(
 @Composable
 fun WelcomeScreenContent(
     state: WelcomeUiState = WelcomeUiState(),
+    scrollState: ScrollState = ScrollState(0),
     onGetStarted: () -> Unit = {}
 ) {
     Surface(
@@ -72,7 +76,7 @@ fun WelcomeScreenContent(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(AppSpacing.xxxl))
