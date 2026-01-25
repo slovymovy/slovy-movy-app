@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.translation.TranslationDatabase
+import com.slovy.slovymovyapp.translation.TranslationQueries
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.*
 import kotlin.uuid.Uuid
@@ -415,7 +416,7 @@ class DictionaryRepository(
 
         // Check favorite status for all items (single query instead of N queries)
         val allFavorites = favoritesRepository.getAll()
-        val favoriteItems = allFavorites.map { "${it.targetLang.code}::${it.lemma.lowercase()}" }.toSet()
+        val favoriteItems = allFavorites.map { "${it.language.code}::${it.lemma.lowercase()}" }.toSet()
 
         return result.map { item ->
             val key = "${item.language.code}::${item.lemma.lowercase()}"
@@ -752,7 +753,7 @@ class DictionaryRepository(
 
         // Get favorites to exclude (case-insensitive)
         val favorites = favoritesRepository.getAll()
-            .filter { it.targetLang == language }
+            .filter { it.language == language }
             .map { it.lemma.lowercase() }
             .toSet()
 
@@ -779,6 +780,81 @@ class DictionaryRepository(
         }
 
         suggestions.take(count)
+    }
+
+    /**
+     * Searches translation databases for sense_ids that have translations matching the query prefix.
+     * Used for filtering favorites by translation text.
+     *
+     * @param senseIds The set of sense IDs to search within (e.g., favorite sense IDs)
+     * @param query The search query (will be normalized and used as prefix)
+     * @param sourceLanguage The source language of the dictionary
+     * @return Set of sense IDs that have matching translations
+     */
+    suspend fun searchSenseIdsByTranslation(
+        senseIds: Set<String>,
+        query: String,
+        sourceLanguage: Language
+    ): Set<String> = withContext(Dispatchers.IO) {
+        if (senseIds.isEmpty() || query.isBlank()) return@withContext emptySet()
+
+        val normalizedQuery = stripAccents(query.trim().lowercase())
+        val (prefixStart, prefixEnd) = prefixRange(normalizedQuery)
+
+        // Convert string sense IDs to UUIDs for the query
+        val senseUuids = senseIds.mapNotNull { id ->
+            try {
+                Uuid.parse(id)
+            } catch (_: Exception) {
+                null
+            }
+        }
+        if (senseUuids.isEmpty()) return@withContext emptySet()
+
+        val matchingSenseIds = mutableSetOf<String>()
+        val installedTargets = installedTranslationTargets(sourceLanguage)
+
+        // Search downloaded translation DBs for installed targets
+        for (targetLang in installedTargets) {
+            currentCoroutineContext().ensureActive()
+            if (dataDbManager.hasTranslation(sourceLanguage, targetLang)) {
+                val translationQueries = dataDbManager.openTranslationReadOnly(sourceLanguage, targetLang)
+                    .translationQueries
+
+                val results =
+                    searchSensesByTranslations(translationQueries, sourceLanguage, prefixStart, prefixEnd, senseUuids)
+                matchingSenseIds.addAll(results.map { it.toString() })
+            }
+        }
+
+        currentCoroutineContext().ensureActive()
+
+        // Search the local translation DB
+        val localTransDb = localDbManager.openLocalTranslation()
+        val translationQueries = localTransDb.translationQueries
+        val results = searchSensesByTranslations(translationQueries, sourceLanguage, prefixStart, prefixEnd, senseUuids)
+        matchingSenseIds.addAll(results.map { it.toString() })
+        matchingSenseIds
+    }
+
+    private fun searchSensesByTranslations(
+        translationQueries: TranslationQueries,
+        sourceLanguage: Language,
+        prefixStart: String,
+        prefixEnd: String,
+        senseUuids: List<Uuid>
+    ): List<Uuid> {
+        // sqlite limit for IN()
+        return senseUuids.chunked(999).flatMap { chunk ->
+            translationQueries
+                .selectSenseIdsByTranslationWordPrefix(
+                    sourceLanguage.code,
+                    prefixStart,
+                    prefixEnd,
+                    chunk
+                )
+                .executeAsList()
+        }
     }
 
     private fun prefixRange(prefix: String): Pair<String, String> {

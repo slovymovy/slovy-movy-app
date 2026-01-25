@@ -4,7 +4,7 @@ import com.slovy.slovymovyapp.data.Language
 
 data class Favorite(
     val senseId: String,
-    val targetLang: Language,
+    val language: Language,
     val lemma: String,
     val createdAt: Long = 0
 )

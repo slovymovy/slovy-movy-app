@@ -41,7 +41,7 @@ class FavoritesRepository(private val db: AppDatabase) {
         db.favoritesQueries.selectAll().executeAsList().map { row ->
             Favorite(
                 senseId = row.sense_id,
-                targetLang = Language.fromCode(row.target_lang),
+                language = Language.fromCode(row.target_lang),
                 lemma = row.lemma,
                 createdAt = row.created_at
             )
@@ -55,7 +55,7 @@ class FavoritesRepository(private val db: AppDatabase) {
                 .map { row ->
                     Favorite(
                         senseId = row.sense_id,
-                        targetLang = Language.fromCode(row.target_lang),
+                        language = Language.fromCode(row.target_lang),
                         lemma = row.lemma,
                         createdAt = row.created_at
                     )
@@ -66,7 +66,7 @@ class FavoritesRepository(private val db: AppDatabase) {
         db.favoritesQueries.selectAllOrderedByLangAndLemma().executeAsList().map { row ->
             Favorite(
                 senseId = row.sense_id,
-                targetLang = Language.fromCode(row.target_lang),
+                language = Language.fromCode(row.target_lang),
                 lemma = row.lemma,
                 createdAt = row.created_at
             )
@@ -78,7 +78,7 @@ class FavoritesRepository(private val db: AppDatabase) {
         db.favoritesQueries.selectByLemmaSearch(pattern).executeAsList().map { row ->
             Favorite(
                 senseId = row.sense_id,
-                targetLang = Language.fromCode(row.target_lang),
+                language = Language.fromCode(row.target_lang),
                 lemma = row.lemma,
                 createdAt = row.created_at
             )
@@ -96,7 +96,7 @@ class FavoritesRepository(private val db: AppDatabase) {
             ?.let { row ->
                 Favorite(
                     senseId = row.sense_id,
-                    targetLang = Language.fromCode(row.target_lang),
+                    language = Language.fromCode(row.target_lang),
                     lemma = row.lemma,
                     createdAt = row.created_at
                 )

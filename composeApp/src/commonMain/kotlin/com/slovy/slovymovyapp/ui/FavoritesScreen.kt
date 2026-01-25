@@ -112,7 +112,24 @@ class FavoritesViewModel(
         val favorites = if (trimmedQuery.isEmpty()) {
             allFavorites
         } else {
-            favoritesRepository.searchByLemma(trimmedQuery)
+            // Search by lemma
+            val lemmaMatches = favoritesRepository.searchByLemma(trimmedQuery)
+            val lemmaMatchIds = lemmaMatches.map { it.senseId }.toSet()
+
+            // Search by translation - for each source language in favorites
+            val sourceLanguages = allFavorites.map { it.language }.distinct()
+
+            val translationMatchIds = sourceLanguages.flatMap { lang ->
+                dictionaryRepository.searchSenseIdsByTranslation(allFavorites.filter { it.language == lang }
+                    .map { it.senseId }.toSet(), trimmedQuery, lang)
+            }.toSet()
+
+            // Prioritize lemma matches first, then translation-only matches
+            val lemmaMatchFavorites = allFavorites.filter { it.senseId in lemmaMatchIds }
+            val translationOnlyIds = translationMatchIds - lemmaMatchIds
+            val translationOnlyFavorites = allFavorites.filter { it.senseId in translationOnlyIds }
+
+            lemmaMatchFavorites + translationOnlyFavorites
         }
 
         val senses = favorites.map { favorite ->
@@ -137,7 +154,7 @@ class FavoritesViewModel(
     ): FavoriteSenseItem {
         return FavoriteSenseItem(
             senseId = favorite.senseId,
-            targetLang = favorite.targetLang,
+            targetLang = favorite.language,
             lemma = favorite.lemma,
             createdAt = favorite.createdAt,
             sense = cached?.sense ?: existing?.sense,
@@ -179,7 +196,7 @@ class FavoritesViewModel(
             val favorite = favoritesRepository.getOne(senseId, item.targetLang) ?: return@launch
 
             // Remove from repository and UI
-            favoritesRepository.remove(senseId, favorite.targetLang)
+            favoritesRepository.remove(senseId, favorite.language)
             val content = state as? FavoritesUiState.Content ?: return@launch
             state = content.copy(senses = content.senses.filter { it.senseId != senseId })
 
@@ -192,7 +209,7 @@ class FavoritesViewModel(
 
             if (result == SnackbarResult.ActionPerformed) {
                 // Re-add with the original createdAt to preserve position
-                favoritesRepository.add(senseId, favorite.targetLang, favorite.lemma, favorite.createdAt)
+                favoritesRepository.add(senseId, favorite.language, favorite.lemma, favorite.createdAt)
                 loadFavorites()
             }
         }
