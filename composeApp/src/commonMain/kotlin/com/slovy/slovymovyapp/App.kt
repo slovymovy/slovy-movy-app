@@ -29,6 +29,9 @@ import kotlinx.serialization.json.jsonPrimitive
 @Serializable
 private sealed interface AppDestination {
     @Serializable
+    data object Welcome : AppDestination
+
+    @Serializable
     data object DownloadDictionary : AppDestination
 
     @Serializable
@@ -121,7 +124,7 @@ fun App(
     }
 
     suspend fun selectInitialDestination(): AppDestination {
-        // Check if data version is current
+        // Check if data version is current (before welcome, so existing users see mismatch)
         if (!dataManager.hasRequiredVersion()) {
             val savedVersion = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
             // If version exists but is outdated, show error before deleting
@@ -137,6 +140,8 @@ fun App(
             listOfNotNull(nativeJson?.jsonPrimitive?.content)
         }
         val natives = nativeCodes.mapNotNull { Language.fromCodeOrNull(it) }
+
+        // Existing user: has language settings configured
         if (natives.isNotEmpty()) {
             nativeLanguages = natives
             val dictionaryCode = settingsRepository.getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
@@ -150,7 +155,17 @@ fun App(
                     else -> AppDestination.Search
                 }
             }
+            // LANGUAGE set but DICTIONARY missing - return to setup
+            return AppDestination.SetupLanguages
         }
+
+        // New user: show welcome if not completed yet
+        val welcomeCompleted = settingsRepository.getById(Setting.Name.WELCOME_COMPLETED)
+            ?.value?.jsonPrimitive?.content == "true"
+        if (!welcomeCompleted) {
+            return AppDestination.Welcome
+        }
+
         return AppDestination.SetupLanguages
     }
 
@@ -171,6 +186,34 @@ fun App(
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
         ) {
+            composable<AppDestination.Welcome> { backStackEntry ->
+                val viewModel = viewModel(
+                    viewModelStoreOwner = backStackEntry
+                ) {
+                    WelcomeViewModel()
+                }
+
+                WelcomeScreen(
+                    viewModel = viewModel,
+                    onGetStarted = {
+                        coroutineScope.launch {
+                            try {
+                                settingsRepository.insert(
+                                    Setting(
+                                        id = Setting.Name.WELCOME_COMPLETED,
+                                        value = Json.parseToJsonElement("true")
+                                    )
+                                )
+                                navController.navigate(AppDestination.SetupLanguages) {
+                                    popUpTo<AppDestination.Welcome> { inclusive = true }
+                                }
+                            } catch (e: Exception) {
+                                viewModel.onError()
+                            }
+                        }
+                    }
+                )
+            }
             composable<AppDestination.SetupLanguages> { backStackEntry ->
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
