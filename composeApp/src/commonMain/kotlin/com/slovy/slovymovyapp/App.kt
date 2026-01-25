@@ -155,11 +155,14 @@ fun App(
                     else -> AppDestination.Search
                 }
             }
+            // LANGUAGE set but DICTIONARY missing - return to setup
+            return AppDestination.SetupLanguages
         }
 
         // New user: show welcome if not completed yet
-        val welcomeCompleted = settingsRepository.getById(Setting.Name.WELCOME_COMPLETED)?.value
-        if (welcomeCompleted == null) {
+        val welcomeCompleted = settingsRepository.getById(Setting.Name.WELCOME_COMPLETED)
+            ?.value?.jsonPrimitive?.content == "true"
+        if (!welcomeCompleted) {
             return AppDestination.Welcome
         }
 
