@@ -50,9 +50,9 @@ open class FavoritesRepositoryTest : BaseTest() {
         val all = repo.getAll()
 
         assertEquals(3, all.size)
-        assertTrue(all.any { it.senseId == "sense1" && it.targetLang == Language.ENGLISH && it.lemma == "hello" })
-        assertTrue(all.any { it.senseId == "sense2" && it.targetLang == Language.ENGLISH && it.lemma == "world" })
-        assertTrue(all.any { it.senseId == "sense3" && it.targetLang == Language.RUSSIAN && it.lemma == "bonjour" })
+        assertTrue(all.any { it.senseId == "sense1" && it.language == Language.ENGLISH && it.lemma == "hello" })
+        assertTrue(all.any { it.senseId == "sense2" && it.language == Language.ENGLISH && it.lemma == "world" })
+        assertTrue(all.any { it.senseId == "sense3" && it.language == Language.RUSSIAN && it.lemma == "bonjour" })
     }
 
     @Test
@@ -69,7 +69,7 @@ open class FavoritesRepositoryTest : BaseTest() {
         val results = repo.getByLangAndLemma(Language.ENGLISH, "hello")
 
         assertEquals(2, results.size)
-        assertTrue(results.all { it.targetLang == Language.ENGLISH && it.lemma == "hello" })
+        assertTrue(results.all { it.language == Language.ENGLISH && it.lemma == "hello" })
         assertTrue(results.any { it.senseId == "sense1" })
         assertTrue(results.any { it.senseId == "sense2" })
     }
@@ -116,13 +116,13 @@ open class FavoritesRepositoryTest : BaseTest() {
         assertEquals(4, results.size)
 
         // Verify ordering: when all timestamps equal, sorts by target_lang ASC, lemma ASC
-        assertEquals(Language.ENGLISH, results[0].targetLang)
+        assertEquals(Language.ENGLISH, results[0].language)
         assertEquals("hello", results[0].lemma)
-        assertEquals(Language.ENGLISH, results[1].targetLang)
+        assertEquals(Language.ENGLISH, results[1].language)
         assertEquals("world", results[1].lemma)
-        assertEquals(Language.RUSSIAN, results[2].targetLang)
+        assertEquals(Language.RUSSIAN, results[2].language)
         assertEquals("bonjour", results[2].lemma)
-        assertEquals(Language.RUSSIAN, results[3].targetLang)
+        assertEquals(Language.RUSSIAN, results[3].language)
         assertEquals("monde", results[3].lemma)
     }
 }

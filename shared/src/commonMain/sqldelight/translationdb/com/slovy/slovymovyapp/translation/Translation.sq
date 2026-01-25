@@ -99,3 +99,13 @@ ORDER BY idx;
 selectExampleTranslationsBySenseIds:
 SELECT sense_id, example_id, translation FROM example_translation
 WHERE sense_id IN ? AND from_lang_code = ? AND target_lang_code = ?;
+
+-- Search translations by normalized word prefix, filtered to specific sense_ids
+selectSenseIdsByTranslationWordPrefix:
+SELECT DISTINCT sense_id
+FROM sense_translation INDEXED BY sense_translation_lang_word_normalized_idx
+WHERE from_lang_code = ?
+  AND target_lang_word_normalized >= ?
+  AND target_lang_word_normalized < ?
+  AND sense_id IN ?;
+

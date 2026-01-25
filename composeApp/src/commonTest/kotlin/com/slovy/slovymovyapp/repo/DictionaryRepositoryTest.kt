@@ -594,4 +594,71 @@ class DictionaryRepositoryTest : BaseTest() {
             runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
         }
     }
+
+    @Test
+    fun searchSenseIdsByTranslation_matches_local_translation_prefix() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking {
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
+
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(localTransPath)) {
+            platform.deleteFile(localTransPath)
+        }
+
+        try {
+            val senseMatch = Uuid.random()
+            val senseOther = Uuid.random()
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+
+            val localTransDb = localMgr.openLocalTranslation()
+            val tq = localTransDb.translationQueries
+            tq.insertSenseTranslation(
+                sense_id = senseMatch,
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                idx = 0,
+                target_lang_word = "Привет",
+                target_lang_word_normalized = "привет",
+                target_lang_sense_clarification = null,
+                lemma_id = lemmaId,
+                lemma_pos_id = lemmaPosId
+            )
+            tq.insertSenseTranslation(
+                sense_id = senseOther,
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                idx = 0,
+                target_lang_word = "Пока",
+                target_lang_word_normalized = "пока",
+                target_lang_sense_clarification = null,
+                lemma_id = Uuid.random(),
+                lemma_pos_id = Uuid.random()
+            )
+
+            val favoritesRepo = favoritesRepository()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+
+            val results = runBlocking {
+                repo.searchSenseIdsByTranslation(
+                    setOf(senseMatch.toString(), senseOther.toString()),
+                    "пр",
+                    Language.ENGLISH
+                )
+            }
+
+            assertTrue(results.contains(senseMatch.toString()), "Expected matching sense ID to be returned")
+            assertFalse(results.contains(senseOther.toString()), "Non-matching sense ID should not be returned")
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localTransPath)) {
+                platform.deleteFile(localTransPath)
+            }
+        }
+    }
 }
