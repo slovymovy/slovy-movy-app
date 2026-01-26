@@ -8,6 +8,7 @@ import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
+import com.slovy.slovymovyapp.util.normalizeSearchQuery
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.*
 import kotlin.uuid.Uuid
@@ -155,7 +156,7 @@ class DictionaryRepository(
         translationTargets: List<Language>? = null,
         maxItems: Int = 200
     ): List<SearchItem> {
-        val trimmed = query.trim()
+        val trimmed = normalizeSearchQuery(query.trim())
         if (trimmed.isEmpty()) return emptyList()
         val normalizedPrefix = stripAccents(trimmed)
         val (prefixStart, prefixEnd) = prefixRange(normalizedPrefix)
@@ -798,7 +799,7 @@ class DictionaryRepository(
     ): Set<String> = withContext(Dispatchers.IO) {
         if (senseIds.isEmpty() || query.isBlank()) return@withContext emptySet()
 
-        val normalizedQuery = stripAccents(query.trim().lowercase())
+        val normalizedQuery = stripAccents(normalizeSearchQuery(query.trim()))
         val (prefixStart, prefixEnd) = prefixRange(normalizedQuery)
 
         // Convert string sense IDs to UUIDs for the query

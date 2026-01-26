@@ -661,4 +661,93 @@ class DictionaryRepositoryTest : BaseTest() {
             }
         }
     }
+
+    @Test
+    fun searchSenseIdsByTranslation_normalizes_apostrophe_variants() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking {
+            mgr.deleteTranslation(Language.ENGLISH, Language.DUTCH)
+        }
+
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(localTransPath)) {
+            platform.deleteFile(localTransPath)
+        }
+
+        try {
+            val senseMatch = Uuid.random()
+            val senseOther = Uuid.random()
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+
+            // Insert translation with typographic apostrophe (U+2019) as stored in DB
+            val localTransDb = localMgr.openLocalTranslation()
+            val tq = localTransDb.translationQueries
+            tq.insertSenseTranslation(
+                sense_id = senseMatch,
+                from_lang_code = "en",
+                target_lang_code = "nl",
+                idx = 0,
+                target_lang_word = "zo\u2019n",  // typographic apostrophe
+                target_lang_word_normalized = "zo\u2019n",
+                target_lang_sense_clarification = null,
+                lemma_id = lemmaId,
+                lemma_pos_id = lemmaPosId
+            )
+            tq.insertSenseTranslation(
+                sense_id = senseOther,
+                from_lang_code = "en",
+                target_lang_code = "nl",
+                idx = 0,
+                target_lang_word = "andere",
+                target_lang_word_normalized = "andere",
+                target_lang_sense_clarification = null,
+                lemma_id = Uuid.random(),
+                lemma_pos_id = Uuid.random()
+            )
+
+            val favoritesRepo = favoritesRepository()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+
+            // Test ASCII apostrophe (U+0027) - most common from keyboards
+            val resultsAscii = runBlocking {
+                repo.searchSenseIdsByTranslation(
+                    setOf(senseMatch.toString(), senseOther.toString()),
+                    "zo'n",  // ASCII apostrophe
+                    Language.ENGLISH
+                )
+            }
+            assertTrue(
+                resultsAscii.contains(senseMatch.toString()),
+                "ASCII apostrophe query should match typographic apostrophe in DB"
+            )
+
+            // Test backtick (U+0060)
+            val resultsBacktick = runBlocking {
+                repo.searchSenseIdsByTranslation(
+                    setOf(senseMatch.toString(), senseOther.toString()),
+                    "zo`n",  // backtick
+                    Language.ENGLISH
+                )
+            }
+            assertTrue(
+                resultsBacktick.contains(senseMatch.toString()),
+                "Backtick query should match typographic apostrophe in DB"
+            )
+
+            // Verify non-matching word is not returned
+            assertFalse(
+                resultsAscii.contains(senseOther.toString()),
+                "Non-matching sense ID should not be returned"
+            )
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localTransPath)) {
+                platform.deleteFile(localTransPath)
+            }
+        }
+    }
 }

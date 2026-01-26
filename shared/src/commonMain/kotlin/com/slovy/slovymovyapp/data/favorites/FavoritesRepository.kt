@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.data.favorites
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.db.AppDatabase
+import com.slovy.slovymovyapp.util.normalizeSearchQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -74,7 +75,8 @@ class FavoritesRepository(private val db: AppDatabase) {
     }
 
     suspend fun searchByLemma(query: String): List<Favorite> = withContext(Dispatchers.IO) {
-        val pattern = "%$query%"
+        // Normalize apostrophes to match DB format (ASCII ' -> typographic ')
+        val pattern = "%${normalizeSearchQuery(query)}%"
         db.favoritesQueries.selectByLemmaSearch(pattern).executeAsList().map { row ->
             Favorite(
                 senseId = row.sense_id,

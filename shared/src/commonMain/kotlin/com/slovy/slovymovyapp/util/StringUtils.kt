@@ -37,3 +37,27 @@ fun stripAccents(s: String): String {
  * combining diacritical marks (Unicode range U+0300 to U+036F).
  */
 expect fun normalizeAndStripAccents(s: String): String
+
+/**
+ * Normalizes a search query to match the format stored in the database.
+ *
+ * The database stores text with typographic apostrophes (U+2019 '), but users
+ * may type various apostrophe-like characters. This function converts all common
+ * apostrophe variants to typographic ones so search queries match the stored data.
+ *
+ * Handled variants:
+ * - U+0027 ' ASCII apostrophe (most common from keyboards)
+ * - U+2018 ' left single quotation mark
+ * - U+02BC ʼ modifier letter apostrophe
+ * - U+0060 ` grave accent / backtick
+ *
+ * @param query The search query entered by the user
+ * @return The query with apostrophes normalized to match DB format
+ */
+fun normalizeSearchQuery(query: String): String {
+    return query
+        .replace('\'', '\u2019')   // U+0027 ASCII apostrophe
+        .replace('\u2018', '\u2019') // U+2018 left single quote
+        .replace('\u02BC', '\u2019') // U+02BC modifier letter apostrophe
+        .replace('`', '\u2019')      // U+0060 backtick
+}
