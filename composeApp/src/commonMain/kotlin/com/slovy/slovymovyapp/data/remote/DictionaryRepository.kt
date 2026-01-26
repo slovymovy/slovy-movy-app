@@ -361,7 +361,7 @@ class DictionaryRepository(
                     val tq = tdb.translationQueries
                     val dq = dictDb.dictionaryQueries
                     val trRows =
-                        tq.selectSenseTranslationsByNormalizedSingleWord(lang.code, tgt.code, prefixStart, prefixEnd)
+                        tq.selectSenseTranslationsByNormalizedPrefix(lang.code, tgt.code, prefixStart, prefixEnd)
                             .executeAsList()
                     val lemmaRows =
                         dq.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }

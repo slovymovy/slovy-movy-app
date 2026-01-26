@@ -76,14 +76,13 @@ SELECT translation
 FROM example_translation
 WHERE sense_id = ? AND from_lang_code = ? AND target_lang_code = ? AND example_id = ?;
 
--- Lookup by normalized target word (excludes multi-word translations)
-selectSenseTranslationsByNormalizedSingleWord:
+-- Lookup by normalized target word prefix
+selectSenseTranslationsByNormalizedPrefix:
 SELECT sense_id, idx, target_lang_word, target_lang_word_normalized, target_lang_sense_clarification, lemma_id, lemma_pos_id
 FROM sense_translation INDEXED BY sense_translation_lang_word_normalized_idx
 WHERE from_lang_code = ? AND target_lang_code = ?
   AND target_lang_word_normalized >= ?
   AND target_lang_word_normalized < ?
-  AND instr(target_lang_word_normalized, ' ') = 0
 ORDER BY idx;
 
 selectDefinitionsBySenseIds:
