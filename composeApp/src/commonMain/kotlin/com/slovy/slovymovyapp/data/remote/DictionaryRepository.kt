@@ -747,15 +747,25 @@ class DictionaryRepository(
             ).executeAsList()
             if (batch.isEmpty()) return@repeat
 
-            // Sample non-favorite rows with gaps to avoid sequential suggestions.
+            // Sample non-favorite rows with gaps, then fill remaining from unused candidates.
             val candidates = batch.filter { it.lemma.lowercase() !in favorites }
             if (candidates.isNotEmpty()) {
                 val startIndex = (0 until candidates.size).random()
                 var index = startIndex
                 val step = (2..50).random()
+                val used = BooleanArray(candidates.size)
                 while (suggestions.size < count && index < candidates.size) {
                     suggestions.add(candidates[index].lemma)
+                    used[index] = true
                     index += step
+                }
+                if (suggestions.size < count) {
+                    for (i in candidates.indices) {
+                        if (suggestions.size >= count) break
+                        if (!used[i]) {
+                            suggestions.add(candidates[i].lemma)
+                        }
+                    }
                 }
             }
         }
