@@ -295,10 +295,9 @@ class DictionaryRepository(
             }
 
             // Search each database (local first, then RO)
+            // 1) Exact lemma matches across all databases
             for (db in databases) {
                 val q = db.dictionaryQueries
-
-                // search exact lemma matches first
                 val byWord: List<SelectLemmasByWord> =
                     q.selectLemmasByWord(lang.code, trimmed).executeAsList()
                 val byNorm: List<SelectLemmasByNormalized> =
@@ -306,11 +305,12 @@ class DictionaryRepository(
                 byWord.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
                 byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
                 if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
-
-                // Check for cancellation before next stage
                 currentCoroutineContext().ensureActive()
+            }
 
-                // search exact form equals (including normalized)
+            // 2) Exact form matches across all databases
+            for (db in databases) {
+                val q = db.dictionaryQueries
                 val formEq: List<SelectLemmasByFormEquals> =
                     q.selectLemmasByFormEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
                 val formEqNorm: List<SelectLemmasByFormNormalizedEquals> =
@@ -318,19 +318,22 @@ class DictionaryRepository(
                 formEq.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
                 formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
                 if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
-
-                // Check for cancellation before next stage
                 currentCoroutineContext().ensureActive()
+            }
 
-                // and by prefix later (lemma and forms) - use normalized prefix range to stay index-friendly
+            // 3) Prefix lemma matches across all databases
+            for (db in databases) {
+                val q = db.dictionaryQueries
                 val lemmaNormLike: List<SelectLemmasNormalizedLike> =
                     q.selectLemmasNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong()).executeAsList()
                 lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
                 if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
-
-                // Check for cancellation before next stage
                 currentCoroutineContext().ensureActive()
+            }
 
+            // 4) Prefix form matches across all databases
+            for (db in databases) {
+                val q = db.dictionaryQueries
                 val formNormLike: List<SelectLemmasFromFormsNormalizedLike> =
                     q.selectLemmasFromFormsNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong())
                         .executeAsList()
@@ -339,8 +342,6 @@ class DictionaryRepository(
 
                 // Enrich POS for items found in this database
                 enrichPosForLang(q)
-
-                // Check for cancellation before next database
                 currentCoroutineContext().ensureActive()
             }
 
