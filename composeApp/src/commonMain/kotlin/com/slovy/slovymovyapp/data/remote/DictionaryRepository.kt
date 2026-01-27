@@ -305,7 +305,7 @@ class DictionaryRepository(
                     q.selectLemmasByNormalized(lang.code, trimmed).executeAsList()
                 byWord.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
                 byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
-                if (shouldEarlyReturn(q)) return out.take(maxItems)
+                if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
 
                 // Check for cancellation before next stage
                 currentCoroutineContext().ensureActive()
@@ -317,7 +317,7 @@ class DictionaryRepository(
                     q.selectLemmasByFormNormalizedEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
                 formEq.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
                 formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
-                if (shouldEarlyReturn(q)) return out.take(maxItems)
+                if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
 
                 // Check for cancellation before next stage
                 currentCoroutineContext().ensureActive()
@@ -326,7 +326,7 @@ class DictionaryRepository(
                 val lemmaNormLike: List<SelectLemmasNormalizedLike> =
                     q.selectLemmasNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong()).executeAsList()
                 lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
-                if (shouldEarlyReturn(q)) return out.take(maxItems)
+                if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
 
                 // Check for cancellation before next stage
                 currentCoroutineContext().ensureActive()
@@ -335,7 +335,7 @@ class DictionaryRepository(
                     q.selectLemmasFromFormsNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong())
                         .executeAsList()
                 formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
-                if (shouldEarlyReturn(q)) return out.take(maxItems)
+                if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
 
                 // Enrich POS for items found in this database
                 enrichPosForLang(q)
@@ -377,7 +377,7 @@ class DictionaryRepository(
                                 lemmaRow.zipf_frequency.toFloat(),
                                 lemmaRow.online_only
                             )
-                            if (shouldEarlyReturn(dq)) return out.take(maxItems)
+                            if (shouldEarlyReturn(dq)) return finalizeSearchResults(out, maxItems)
                         }
                     }
 
@@ -390,42 +390,7 @@ class DictionaryRepository(
             currentCoroutineContext().ensureActive()
         }
 
-        // Check for cancellation before final processing
-        currentCoroutineContext().ensureActive()
-
-        // Recheck online_only items against local database
-        // Items marked online_only might exist in local DB (added after initial RO search)
-        var result = out.take(maxItems)
-        val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
-        if (onlineOnlyIds.isNotEmpty()) {
-            val localDb = localDbManager.openLocalDictionary()
-            val localLemmaIds = localDb.dictionaryQueries
-                .selectLemmasByIds(onlineOnlyIds)
-                .executeAsList()
-                .map { it.id }
-                .toSet()
-
-            result = result.map { item ->
-                if (item.onlineOnly && item.lemmaId in localLemmaIds) {
-                    item.copy(onlineOnly = false)
-                } else {
-                    item
-                }
-            }
-        }
-
-        // Check favorite status for all items (single query instead of N queries)
-        val allFavorites = favoritesRepository.getAll()
-        val favoriteItems = allFavorites.map { "${it.language.code}::${it.lemma.lowercase()}" }.toSet()
-
-        return result.map { item ->
-            val key = "${item.language.code}::${item.lemma.lowercase()}"
-            if (favoriteItems.contains(key)) {
-                item.copy(isFavorite = true)
-            } else {
-                item
-            }
-        }
+        return finalizeSearchResults(out, maxItems)
     }
 
     suspend fun getLanguageCard(
@@ -897,5 +862,47 @@ class DictionaryRepository(
         // Remove the main lemma itself (case-insensitive)
         allRelatedWords.removeAll { it.equals(lemma, ignoreCase = true) }
         return allRelatedWords
+    }
+
+    private suspend fun finalizeSearchResults(
+        out: List<SearchItem>,
+        maxItems: Int
+    ): List<SearchItem> {
+        // Check for cancellation before final processing
+        currentCoroutineContext().ensureActive()
+
+        // Recheck online_only items against local database
+        // Items marked online_only might exist in local DB (added after initial RO search)
+        var result = out.take(maxItems)
+        val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
+        if (onlineOnlyIds.isNotEmpty()) {
+            val localDb = localDbManager.openLocalDictionary()
+            val localLemmaIds = localDb.dictionaryQueries
+                .selectLemmasByIds(onlineOnlyIds)
+                .executeAsList()
+                .map { it.id }
+                .toSet()
+
+            result = result.map { item ->
+                if (item.onlineOnly && item.lemmaId in localLemmaIds) {
+                    item.copy(onlineOnly = false)
+                } else {
+                    item
+                }
+            }
+        }
+
+        // Check favorite status for all items (single query instead of N queries)
+        val allFavorites = favoritesRepository.getAll()
+        val favoriteItems = allFavorites.map { "${it.language.code}::${it.lemma.lowercase()}" }.toSet()
+
+        return result.map { item ->
+            val key = "${item.language.code}::${item.lemma.lowercase()}"
+            if (favoriteItems.contains(key)) {
+                item.copy(isFavorite = true)
+            } else {
+                item
+            }
+        }
     }
 }
