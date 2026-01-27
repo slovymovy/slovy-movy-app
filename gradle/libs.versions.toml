@@ -31,7 +31,7 @@ ktor = "3.4.0"
 openaiJava = "4.16.1"
 logback = "1.5.25"
 sqldelight = "2.2.1"
-material3 = '1.11.0-alpha01'
+material3 = '1.10.0-alpha05'
 
 [libraries]
 androidx-emoji2 = { module = "androidx.emoji2:emoji2", version.ref = "emoji2" }
