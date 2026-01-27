@@ -356,6 +356,14 @@ SELECT sense_id, example_id, text FROM sense_example WHERE sense_id IN ?;
 selectTopFrequentLemmas:
 SELECT l.id, l.lemma, l.zipf_frequency
 FROM lemma l INDEXED BY idx_lemma_lang_frequency_lemma_online_only
-WHERE l.lang_code = ? AND l.online_only = 0 AND length(l.lemma) > 3
+WHERE l.lang_code = ?
+  AND l.online_only = 0
+  AND length(l.lemma) > 3
+  AND NOT EXISTS (
+    SELECT 1
+    FROM lemma_pos lp
+    WHERE lp.lemma_id = l.id
+      AND lp.pos IN ?
+  )
 ORDER BY l.zipf_frequency DESC
 LIMIT ? OFFSET ?;
