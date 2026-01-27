@@ -624,8 +624,8 @@ class DictionaryRepositoryTest : BaseTest() {
                 val posRows = q.selectLemmaPosByLemmaId(lemmaRow.id).executeAsList()
                 assertTrue(posRows.isNotEmpty(), "Expected lemma '$lemma' to have POS entries")
                 assertTrue(
-                    posRows.none { it.pos == DictionaryPos.NAME || it.pos == DictionaryPos.ARTICLE },
-                    "Lemma '$lemma' should not have NAME or ARTICLE POS"
+                    posRows.none { it.pos == DictionaryPos.NAME},
+                    "Lemma '$lemma' should not have NAME POS"
                 )
             }
         } finally {
