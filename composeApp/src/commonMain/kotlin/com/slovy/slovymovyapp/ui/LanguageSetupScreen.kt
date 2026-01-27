@@ -13,15 +13,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import kotlinx.coroutines.launch
 
 data class LanguageSetupUiState(
@@ -134,46 +136,50 @@ fun LanguageSetupScreenContent(
             }
         } else if (state.errorMessage != null) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(24.dp),
+                modifier = Modifier.fillMaxSize().padding(AppSpacing.xl),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(state.errorMessage, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
-                Button(onClick = onRetry, modifier = Modifier.padding(top = 16.dp)) {
+                Button(onClick = onRetry, modifier = Modifier.padding(top = AppSpacing.lg)) {
                     Text("Retry")
                 }
             }
         } else {
             Column(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp),
+                modifier = Modifier.fillMaxSize().padding(horizontal = AppSpacing.xl),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(Modifier.height(48.dp))
+                Spacer(Modifier.height(AppSpacing.xxxl))
 
                 Text(
-                    text = "Choose Your Languages",
+                    text = "Select Languages",
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold
-                    )
+                    ),
+                    color = MaterialTheme.colorScheme.primary
                 )
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(AppSpacing.sm))
 
                 Text(
-                    text = "Select the language you want to learn and your native languages",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "Choose what you're learning and your translation preferences",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(AppSpacing.xxl))
 
                 // I'm learning... section
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = "I'm learning...",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        )
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(AppSpacing.sm))
 
                     var expanded by remember { mutableStateOf(false) }
 
@@ -186,22 +192,30 @@ fun LanguageSetupScreenContent(
                             modifier = Modifier.fillMaxWidth()
                                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                             shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, Color.LightGray)
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                         ) {
                             Row(
-                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                modifier = Modifier.padding(AppSpacing.lg).fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(state.learningLanguage?.flag ?: "", fontSize = 20.sp)
-                                    Spacer(Modifier.width(12.dp))
+                                    Spacer(Modifier.width(AppSpacing.md))
                                     Text(
                                         text = state.learningLanguage?.selfName ?: "Select language",
-                                        style = MaterialTheme.typography.bodyLarge
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = if (state.learningLanguage != null)
+                                            MaterialTheme.colorScheme.onSurface
+                                        else
+                                            MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                                Icon(
+                                    Icons.Default.ArrowDropDown,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
 
@@ -214,7 +228,7 @@ fun LanguageSetupScreenContent(
                                     text = {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Text(language.flag)
-                                            Spacer(Modifier.width(8.dp))
+                                            Spacer(Modifier.width(AppSpacing.sm))
                                             Text(language.selfName)
                                         }
                                     },
@@ -228,18 +242,20 @@ fun LanguageSetupScreenContent(
                     }
                 }
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(AppSpacing.xxl))
 
                 // My native language(s) section
                 Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     Text(
-                        text = "My native language(s):",
-                        style = MaterialTheme.typography.bodyLarge
+                        text = "Language(s) I know:",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        )
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(AppSpacing.sm))
 
                     LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                     ) {
                         items(state.availableLanguages) { language ->
                             val isSelected = language in state.nativeLanguages
@@ -252,18 +268,19 @@ fun LanguageSetupScreenContent(
                                 ),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = if (isEnabled) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant.copy(
-                                        alpha = 0.5f
-                                    )
+                                    containerColor = if (isEnabled)
+                                        MaterialTheme.colorScheme.surface
+                                    else
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                 ),
-                                border = if (isSelected) BorderStroke(
-                                    2.dp,
-                                    MaterialTheme.colorScheme.primary
-                                ) else BorderStroke(1.dp, Color.LightGray),
+                                border = if (isSelected)
+                                    BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                                else
+                                    BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                    modifier = Modifier.padding(AppSpacing.lg).fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
@@ -271,13 +288,19 @@ fun LanguageSetupScreenContent(
                                         Text(
                                             text = language.flag,
                                             fontSize = 20.sp,
-                                            color = if (isEnabled) Color.Unspecified else Color.Gray
+                                            color = if (isEnabled)
+                                                LocalContentColor.current
+                                            else
+                                                MaterialTheme.colorScheme.onSurfaceVariant
                                         )
-                                        Spacer(Modifier.width(12.dp))
+                                        Spacer(Modifier.width(AppSpacing.md))
                                         Text(
                                             text = language.selfName,
                                             style = MaterialTheme.typography.bodyLarge,
-                                            color = if (isEnabled) Color.Unspecified else Color.Gray
+                                            color = if (isEnabled)
+                                                MaterialTheme.colorScheme.onSurface
+                                            else
+                                                MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                     if (isSelected) {
@@ -293,34 +316,43 @@ fun LanguageSetupScreenContent(
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(AppSpacing.lg))
+
+                Text(
+                    text = "Update anytime in Settings",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(Modifier.height(AppSpacing.lg))
 
                 Button(
                     onClick = onNext,
                     enabled = canGoNext,
                     modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(28.dp)
+                    shape = RoundedCornerShape(28.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
                 ) {
-                    Text("Next", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Next",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
                 }
 
-                Spacer(Modifier.height(16.dp))
-
-                Text(
-                    text = "You can adjust these settings later in Settings",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(AppSpacing.xxl))
             }
         }
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun LanguageSetupScreenDefaultPreview(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         LanguageSetupScreenContent(
@@ -332,10 +364,10 @@ private fun LanguageSetupScreenDefaultPreview(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun LanguageSetupScreenSelectedPreview(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         LanguageSetupScreenContent(

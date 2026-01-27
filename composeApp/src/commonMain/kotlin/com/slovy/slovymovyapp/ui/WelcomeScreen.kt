@@ -84,9 +84,8 @@ fun WelcomeScreenContent(
 
                 Text(
                     text = "Open Words",
-                    style = MaterialTheme.typography.displaySmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.5).sp
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold
                     ),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -157,7 +156,7 @@ fun WelcomeScreenContent(
                 }
             }
 
-            Spacer(modifier = Modifier.height(AppSpacing.xxxl))
+            Spacer(modifier = Modifier.height(AppSpacing.xxl))
         }
     }
 }
