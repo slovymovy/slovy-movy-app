@@ -708,7 +708,7 @@ class DictionaryRepository(
     suspend fun getWordSuggestions(
         language: Language,
         count: Int = 5,
-        offset: Int = 500
+        offset: Int = 2000
     ): List<String> = withContext(Dispatchers.IO) {
         if (!dataDbManager.hasDictionary(language)) {
             return@withContext emptyList()
@@ -725,24 +725,39 @@ class DictionaryRepository(
 
         val suggestions = mutableListOf<String>()
         val batchSize = 100L
-        // Start at a random offset (0 to 500) for variety among high-frequency words
-        var offset = (0..offset).random().toLong()
         val maxAttempts = 10
 
         repeat(maxAttempts) {
             if (suggestions.size >= count) return@repeat
+            val offset = (0..offset).random().toLong()
 
-            val batch = q.selectTopFrequentLemmas(language.code, batchSize, offset).executeAsList()
+            val batch = q.selectTopFrequentLemmas(
+                language.code,
+                listOf(
+                    DictionaryPos.NAME,
+                    DictionaryPos.ARTICLE,
+                    DictionaryPos.PREPOSITION,
+                    DictionaryPos.CONJUNCTION,
+                    DictionaryPos.INTERJECTION,
+                    DictionaryPos.DETERMINER,
+                    DictionaryPos.NUMERAL
+                ),
+                batchSize,
+                offset
+            ).executeAsList()
             if (batch.isEmpty()) return@repeat
 
-            for (row in batch) {
-                if (suggestions.size >= count) break
-                if (row.lemma.lowercase() !in favorites) {
-                    suggestions.add(row.lemma)
+            // Sample non-favorite rows with gaps to avoid sequential suggestions.
+            val candidates = batch.filter { it.lemma.lowercase() !in favorites }
+            if (candidates.isNotEmpty()) {
+                val startIndex = (0 until candidates.size).random()
+                var index = startIndex
+                val step = (2..50).random()
+                while (suggestions.size < count && index < candidates.size) {
+                    suggestions.add(candidates[index].lemma)
+                    index += step
                 }
             }
-
-            offset += batchSize
         }
 
         suggestions.take(count)

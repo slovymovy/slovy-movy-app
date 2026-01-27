@@ -596,6 +596,44 @@ class DictionaryRepositoryTest : BaseTest() {
     }
 
     @Test
+    fun getWordSuggestions_excludes_name_and_article_pos() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        // Ensure a clean state
+        runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+
+        try {
+            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
+
+            val favoritesRepo = favoritesRepository()
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+
+            val suggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, count = 10, offset = 0) }
+            assertEquals(10, suggestions.size, "Should return 10 suggestions")
+
+            val roDb = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
+            val q = roDb.dictionaryQueries
+
+            suggestions.forEach { lemma ->
+                val lemmaRow = q.selectLemmasByWord("en", lemma).executeAsList().firstOrNull()
+                assertNotNull(lemmaRow, "Expected lemma '$lemma' to exist in dictionary")
+                val posRows = q.selectLemmaPosByLemmaId(lemmaRow.id).executeAsList()
+                assertTrue(posRows.isNotEmpty(), "Expected lemma '$lemma' to have POS entries")
+                assertTrue(
+                    posRows.none { it.pos == DictionaryPos.NAME || it.pos == DictionaryPos.ARTICLE },
+                    "Lemma '$lemma' should not have NAME or ARTICLE POS"
+                )
+            }
+        } finally {
+            runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+        }
+    }
+
+    @Test
     fun searchSenseIdsByTranslation_matches_local_translation_prefix() {
         val platform = testPlatformDbSupport()
         val mgr = testDataDbManager()
