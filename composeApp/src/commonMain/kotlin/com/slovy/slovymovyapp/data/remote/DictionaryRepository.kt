@@ -724,6 +724,7 @@ class DictionaryRepository(
             .toSet()
 
         val suggestions = mutableListOf<String>()
+        val seenSuggestions = HashSet<String>()
         val batchSize = 100L
         val maxAttempts = 10
 
@@ -733,15 +734,7 @@ class DictionaryRepository(
 
             val batch = q.selectTopFrequentLemmas(
                 language.code,
-                listOf(
-                    DictionaryPos.NAME,
-                    DictionaryPos.ARTICLE,
-                    DictionaryPos.PREPOSITION,
-                    DictionaryPos.CONJUNCTION,
-                    DictionaryPos.INTERJECTION,
-                    DictionaryPos.DETERMINER,
-                    DictionaryPos.NUMERAL
-                ),
+                listOf(DictionaryPos.NAME),
                 batchSize,
                 offset
             ).executeAsList()
@@ -753,17 +746,21 @@ class DictionaryRepository(
                 val startIndex = (0 until candidates.size).random()
                 var index = startIndex
                 val step = (2..50).random()
-                val used = BooleanArray(candidates.size)
                 while (suggestions.size < count && index < candidates.size) {
-                    suggestions.add(candidates[index].lemma)
-                    used[index] = true
+                    val lemma = candidates[index].lemma
+                    val key = lemma.lowercase()
+                    if (seenSuggestions.add(key)) {
+                        suggestions.add(lemma)
+                    }
                     index += step
                 }
                 if (suggestions.size < count) {
                     for (i in candidates.indices) {
                         if (suggestions.size >= count) break
-                        if (!used[i]) {
-                            suggestions.add(candidates[i].lemma)
+                        val lemma = candidates[i].lemma
+                        val key = lemma.lowercase()
+                        if (seenSuggestions.add(key)) {
+                            suggestions.add(lemma)
                         }
                     }
                 }
