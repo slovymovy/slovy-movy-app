@@ -143,12 +143,12 @@ fun DownloadScreenContent(
     onRetryClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = AppSpacing.xl),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = AppSpacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(AppSpacing.xxxl))

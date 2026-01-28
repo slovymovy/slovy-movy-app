@@ -126,17 +126,17 @@ fun LanguageSetupScreenContent(
 ) {
     val canGoNext = state.learningLanguage != null && state.nativeLanguages.isNotEmpty()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         if (state.isLoading) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                Modifier.fillMaxSize().padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         } else if (state.errorMessage != null) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(AppSpacing.xl),
+                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(AppSpacing.xl),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -147,7 +147,7 @@ fun LanguageSetupScreenContent(
             }
         } else {
             Column(
-                modifier = Modifier.fillMaxSize().padding(horizontal = AppSpacing.xl),
+                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = AppSpacing.xl),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(Modifier.height(AppSpacing.xxxl))

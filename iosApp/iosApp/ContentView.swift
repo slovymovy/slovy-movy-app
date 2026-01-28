@@ -14,7 +14,7 @@ struct ComposeView: UIViewControllerRepresentable {
 struct ContentView: View {
     var body: some View {
         ComposeView()
-            .ignoresSafeArea(.keyboard) // Compose has own keyboard handler
+            .ignoresSafeArea() // Edge-to-edge: Compose fills entire screen, handles insets via Scaffold
     }
 }
 
