@@ -64,13 +64,11 @@ fun WelcomeScreenContent(
     scrollState: ScrollState = ScrollState(0),
     onGetStarted: () -> Unit = {}
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .padding(horizontal = AppSpacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
