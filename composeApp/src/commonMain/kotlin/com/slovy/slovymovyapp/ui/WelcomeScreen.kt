@@ -64,7 +64,7 @@ fun WelcomeScreenContent(
     scrollState: ScrollState = ScrollState(0),
     onGetStarted: () -> Unit = {}
 ) {
-    Scaffold { innerPadding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

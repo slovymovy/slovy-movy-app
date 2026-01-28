@@ -32,7 +32,7 @@ fun ErrorScreenContent(
     state: ErrorViewModel,
     onOkay: () -> Unit = {}
 ) {
-    Scaffold { innerPadding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(innerPadding).padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),

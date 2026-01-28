@@ -143,7 +143,7 @@ fun DownloadScreenContent(
     onRetryClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
 ) {
-    Scaffold { innerPadding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

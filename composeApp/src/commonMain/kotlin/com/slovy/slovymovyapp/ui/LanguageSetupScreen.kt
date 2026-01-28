@@ -126,7 +126,7 @@ fun LanguageSetupScreenContent(
 ) {
     val canGoNext = state.learningLanguage != null && state.nativeLanguages.isNotEmpty()
 
-    Scaffold { innerPadding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         if (state.isLoading) {
             Box(
                 Modifier.fillMaxSize().padding(innerPadding),
