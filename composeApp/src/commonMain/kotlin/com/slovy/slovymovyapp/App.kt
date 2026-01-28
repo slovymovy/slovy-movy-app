@@ -366,7 +366,7 @@ fun App(
 
                     DownloadScreen(
                         viewModel = viewModel,
-                        description = "Downloading translation"
+                        description = "Preparing translations"
                     )
                 }
             }

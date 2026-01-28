@@ -1,17 +1,27 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material3.*
+import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -113,7 +123,7 @@ class DownloadViewModel(
 @Composable
 fun DownloadScreen(
     viewModel: DownloadViewModel,
-    description: String = "Downloading data"
+    description: String = "Setting up your library"
 ) {
     DownloadScreenContent(
         state = viewModel.state,
@@ -128,45 +138,154 @@ fun DownloadScreen(
 @Composable
 fun DownloadScreenContent(
     state: DownloadUiState,
-    description: String = "Downloading data",
+    description: String = "Setting up your library",
     onCancelClick: () -> Unit = {},
     onRetryClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
 ) {
-    Surface(Modifier.fillMaxSize()) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier.fillMaxSize().padding(horizontal = AppSpacing.xl),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            when (state) {
-                is DownloadUiState.Idle -> Text("Preparing download…")
-                is DownloadUiState.Running -> {
-                    LinearWavyProgressIndicator(progress = { state.percent / 100f })
-                    Spacer(Modifier.height(16.dp))
-                    val pct = if (state.percent >= 0) "${state.percent}%" else "…"
-                    Text("$description $pct", style = MaterialTheme.typography.bodyMedium)
-                    Spacer(Modifier.height(16.dp))
-                    FilledTonalButton(onClick = onCancelClick) { Text("Cancel") }
-                }
+            Spacer(Modifier.height(AppSpacing.xxxl))
 
-                is DownloadUiState.Failed -> {
-                    val message = state.error.message ?: "Unknown error"
-                    Text("Download failed: $message")
-                    Spacer(Modifier.height(16.dp))
-                    FilledTonalButton(onClick = onRetryClick) { Text("Retry") }
-                }
+            Text(
+                text = "Setting Up",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.primary
+            )
 
-                is DownloadUiState.Cancelled -> {
-                    Text("Download cancelled")
-                    Spacer(Modifier.height(16.dp))
-                    FilledTonalButton(onClick = onCloseClick) { Text("Close") }
-                }
+            Spacer(Modifier.height(AppSpacing.sm))
 
-                is DownloadUiState.Done -> {
-                    Text("Download completed")
+            Text(
+                text = "Getting your library ready.\nWill take a moment.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+
+            // Centered progress area
+            Box(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    // Icon container
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.CloudDownload,
+                            contentDescription = null,
+                            modifier = Modifier.size(36.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+
+                    Spacer(Modifier.height(AppSpacing.xxl))
+
+                    when (state) {
+                        is DownloadUiState.Idle -> {
+                            CircularProgressIndicator()
+                            Spacer(Modifier.height(AppSpacing.lg))
+                            Text(
+                                text = "Preparing...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        is DownloadUiState.Running -> {
+                            LinearWavyProgressIndicator(progress = { state.percent / 100f })
+                            Spacer(Modifier.height(AppSpacing.lg))
+                            val pct = if (state.percent >= 0) "${state.percent}%" else ""
+                            Text(
+                                text = "$description... $pct",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        is DownloadUiState.Failed -> {
+                            val message = state.error.message ?: "Unknown error"
+                            Text(
+                                text = "Download failed",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(Modifier.height(AppSpacing.sm))
+                            Text(
+                                text = message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        is DownloadUiState.Cancelled -> {
+                            Text(
+                                text = "Download cancelled",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        is DownloadUiState.Done -> {
+                            Text(
+                                text = "Download completed",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 }
             }
+
+            // Fixed button area at bottom
+            Box(
+                modifier = Modifier.height(AppSpacing.xxxl),
+                contentAlignment = Alignment.Center
+            ) {
+                when (state) {
+                    is DownloadUiState.Running -> {
+                        TextButton(onClick = onCancelClick) {
+                            Text(
+                                "Cancel",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    is DownloadUiState.Failed -> {
+                        OutlinedButton(onClick = onRetryClick) {
+                            Text("Retry")
+                        }
+                    }
+
+                    is DownloadUiState.Cancelled -> {
+                        TextButton(onClick = onCloseClick) {
+                            Text(
+                                "Close",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    else -> {}
+                }
+            }
+
+            Spacer(Modifier.height(AppSpacing.xxl))
         }
     }
 }
@@ -179,50 +298,50 @@ sealed interface DownloadUiState {
     data object Done : DownloadUiState
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun DownloadScreenPreviewIdle(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Idle)
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun DownloadScreenPreviewRunning(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Running(percent = 42, total = 1000L))
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun DownloadScreenPreviewFailed(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Failed(Throwable("Network error")))
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun DownloadScreenPreviewCancelled(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Cancelled)
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun DownloadScreenPreviewDone(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Done)
