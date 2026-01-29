@@ -58,10 +58,11 @@ fun EmptyState(
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                glowColor.copy(alpha = 0.25f),
                                 glowColor.copy(alpha = 0.15f),
-                                glowColor.copy(alpha = 0.08f),
+                                glowColor.copy(alpha = 0.10f),
+                                glowColor.copy(alpha = 0.06f),
                                 glowColor.copy(alpha = 0.03f),
+                                glowColor.copy(alpha = 0.01f),
                                 glowColor.copy(alpha = 0f)
                             )
                         )

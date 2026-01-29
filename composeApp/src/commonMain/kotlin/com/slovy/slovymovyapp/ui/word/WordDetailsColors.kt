@@ -62,9 +62,9 @@ internal fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> {
             Color(0xFFE2E8D9) to Color(0xFF4A5D40) // Warm sage / Forest
         }
         SenseFrequency.MIDDLE -> if (isDark) {
-            Color(0xFF3D3830) to Color(0xFFC4B8A0) // Deep taupe bg / Sand
+            Color(0xFF3E3E3A) to Color(0xFFD5D0C8) // Neutral gray-taupe bg / Muted cream
         } else {
-            Color(0xFFE8DFD0) to Color(0xFF5A4A38) // Warmer sand / Darker taupe
+            Color(0xFFE2DEDA) to Color(0xFF4A4540) // Neutral warm gray bg / Soft charcoal
         }
         SenseFrequency.LOW -> if (isDark) {
             Color(0xFF443830) to Color(0xFFCAAA98) // Deep clay bg / Warm terracotta
