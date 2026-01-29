@@ -1,5 +1,10 @@
 package com.slovy.slovymovyapp.ui.word
 
+// NOTE: Color helpers use isSystemInDarkTheme() which follows the OS setting.
+// If the app adds user-selectable theme override in the future, refactor these
+// functions to use a CompositionLocal (e.g., LocalIsDarkTheme) provided by AppTheme
+// instead of isSystemInDarkTheme() to ensure badge colors stay in sync with the active theme.
+
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
