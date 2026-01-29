@@ -209,6 +209,32 @@ internal fun colorsForTraitType(traitType: TraitType): Pair<Color, Color> = when
     TraitType.SURNAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232)
 }
 
+/**
+ * Colors for synonyms badges - warm sage tones indicating similarity/harmony
+ */
+@Composable
+internal fun colorsForSynonyms(): Pair<Color, Color> {
+    val isDark = isSystemInDarkTheme()
+    return if (isDark) {
+        Color(0xFF3D4A36) to Color(0xFFB8C4A8) // Muted olive bg / Sage text
+    } else {
+        Color(0xFFE2E8D8) to Color(0xFF4A5D3A) // Light sage / Deeper olive
+    }
+}
+
+/**
+ * Colors for antonyms badges - warm dusty rose tones indicating contrast
+ */
+@Composable
+internal fun colorsForAntonyms(): Pair<Color, Color> {
+    val isDark = isSystemInDarkTheme()
+    return if (isDark) {
+        Color(0xFF4A3438) to Color(0xFFCAADB2) // Deep mauve bg / Dusty rose
+    } else {
+        Color(0xFFEBDDD8) to Color(0xFF7A4A50) // Light dusty rose / Mauve
+    }
+}
+
 internal val ExpandMoreVector: ImageVector = ImageVector.Builder(
     name = "ExpandableChevronDown",
     defaultWidth = 24.dp,

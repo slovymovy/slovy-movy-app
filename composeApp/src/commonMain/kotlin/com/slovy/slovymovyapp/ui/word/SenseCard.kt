@@ -203,7 +203,7 @@ internal fun SenseCard(
                                             definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
                                         }.joinToString("\n"),
                                         style = MaterialTheme.typography.bodyMedium.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         ),
                                     )
                                 }
@@ -231,24 +231,26 @@ internal fun SenseCard(
                         EntryList(
                             "Common phrases",
                             sense.commonPhrases,
-                            MaterialTheme.colorScheme.tertiaryContainer,
-                            MaterialTheme.colorScheme.onTertiaryContainer,
-                            relatedWords = relatedWords,
-                            onWordClick = onWordClick
-                        )
-                        EntryList(
-                            "Synonyms",
-                            sense.synonyms,
                             MaterialTheme.colorScheme.primaryContainer,
                             MaterialTheme.colorScheme.onPrimaryContainer,
                             relatedWords = relatedWords,
                             onWordClick = onWordClick
                         )
+                        val (synonymBg, synonymText) = colorsForSynonyms()
+                        EntryList(
+                            "Synonyms",
+                            sense.synonyms,
+                            synonymBg,
+                            synonymText,
+                            relatedWords = relatedWords,
+                            onWordClick = onWordClick
+                        )
+                        val (antonymBg, antonymText) = colorsForAntonyms()
                         EntryList(
                             "Antonyms",
                             sense.antonyms,
-                            MaterialTheme.colorScheme.errorContainer,
-                            MaterialTheme.colorScheme.onErrorContainer,
+                            antonymBg,
+                            antonymText,
                             relatedWords = relatedWords,
                             onWordClick = onWordClick
                         )
@@ -369,7 +371,7 @@ internal fun ExampleItem(
                     ExampleText(
                         text = translation,
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1f
                         ),
                     )

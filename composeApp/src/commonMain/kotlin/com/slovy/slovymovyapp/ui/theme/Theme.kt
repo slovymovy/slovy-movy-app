@@ -15,8 +15,8 @@ private val LightColorScheme = lightColorScheme(
     primaryContainer = androidx.compose.ui.graphics.Color(0xFFF5E6D8), // Light warm peach
     onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFF3D2810), // Dark bronze
 
-    // Secondary colors - Warm Taupe
-    secondary = androidx.compose.ui.graphics.Color(0xFF7A6B5A), // Warm taupe
+    // Secondary colors - Warm Taupe (brighter for text visibility)
+    secondary = androidx.compose.ui.graphics.Color(0xFF8B7A68), // Brighter warm taupe
     onSecondary = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
     secondaryContainer = androidx.compose.ui.graphics.Color(0xFFEDE6DD), // Light warm cream
     onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFF2D261E), // Dark warm brown
@@ -61,8 +61,8 @@ private val DarkColorScheme = darkColorScheme(
     primaryContainer = androidx.compose.ui.graphics.Color(0xFF3D342A), // Muted gold-brown
     onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFFF5EBD7), // Light gold tint
 
-    // Secondary colors - cool slate
-    secondary = androidx.compose.ui.graphics.Color(0xFF9BA3B8),
+    // Secondary colors - cool slate (brighter for text visibility)
+    secondary = androidx.compose.ui.graphics.Color(0xFFB0B8C8),
     onSecondary = androidx.compose.ui.graphics.Color(0xFF1E212E),
     secondaryContainer = androidx.compose.ui.graphics.Color(0xFF2D3245),
     onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFFE2E4ED),

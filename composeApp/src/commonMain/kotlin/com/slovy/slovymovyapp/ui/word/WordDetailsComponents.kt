@@ -226,9 +226,10 @@ internal fun Badge(
         color = containerColor,
         contentColor = contentColor,
         shape = shape,
-        border = if (isClickable) {
-            BorderStroke(1.5.dp, contentColor.copy(alpha = 0.4f))
-        } else null,
+        border = BorderStroke(
+            width = if (isClickable) 0.75.dp else 0.5.dp,
+            color = contentColor.copy(alpha = if (isClickable) 0.4f else 0.15f)
+        ),
         tonalElevation = if (isClickable) 2.dp else 0.dp,
         shadowElevation = if (isClickable) 1.dp else 0.dp,
         modifier = if (onClick != null) {
