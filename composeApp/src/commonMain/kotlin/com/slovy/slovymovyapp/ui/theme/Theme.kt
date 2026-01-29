@@ -6,26 +6,34 @@ import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 
-// Material 3 color scheme from Figma design
+/**
+ * CompositionLocal indicating whether the current theme is dark.
+ * Use this instead of isSystemInDarkTheme() to respect the theme set by AppTheme.
+ */
+val LocalIsDarkTheme = compositionLocalOf { false }
+
+// Material 3 color scheme - Copper warm palette
 private val LightColorScheme = lightColorScheme(
-    // Primary colors
-    primary = androidx.compose.ui.graphics.Color(0xFF6750A4),
+    // Primary colors - Copper
+    primary = androidx.compose.ui.graphics.Color(0xFFB87333), // Copper
     onPrimary = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
-    primaryContainer = androidx.compose.ui.graphics.Color(0xFFE8DEF8),
-    onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFF21005D),
+    primaryContainer = androidx.compose.ui.graphics.Color(0xFFF5E6D8), // Light warm peach
+    onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFF3D2810), // Dark bronze
 
-    // Secondary colors
-    secondary = androidx.compose.ui.graphics.Color(0xFF625B71),
+    // Secondary colors - Warm Taupe (brighter for text visibility)
+    secondary = androidx.compose.ui.graphics.Color(0xFF8B7A68), // Brighter warm taupe
     onSecondary = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
-    secondaryContainer = androidx.compose.ui.graphics.Color(0xFFE8DEF8),
-    onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFF1D192B),
+    secondaryContainer = androidx.compose.ui.graphics.Color(0xFFEDE6DD), // Light warm cream
+    onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFF2D261E), // Dark warm brown
 
-    // Tertiary colors
-    tertiary = androidx.compose.ui.graphics.Color(0xFF7D5260),
+    // Tertiary colors - Muted Teal (complementary)
+    tertiary = androidx.compose.ui.graphics.Color(0xFF5A8080), // Muted teal
     onTertiary = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
-    tertiaryContainer = androidx.compose.ui.graphics.Color(0xFFFFD8E4),
-    onTertiaryContainer = androidx.compose.ui.graphics.Color(0xFF31111D),
+    tertiaryContainer = androidx.compose.ui.graphics.Color(0xFFDDE8E8), // Light teal tint
+    onTertiaryContainer = androidx.compose.ui.graphics.Color(0xFF1A2D2D), // Dark teal
 
     // Error colors
     error = androidx.compose.ui.graphics.Color(0xFFBA1A1A),
@@ -34,69 +42,69 @@ private val LightColorScheme = lightColorScheme(
     onErrorContainer = androidx.compose.ui.graphics.Color(0xFF410E0B),
 
     // Surface colors
-    background = androidx.compose.ui.graphics.Color(0xFFFEF7FF),
-    onBackground = androidx.compose.ui.graphics.Color(0xFF1D1B20),
-    surface = androidx.compose.ui.graphics.Color(0xFFFEF7FF),
-    onSurface = androidx.compose.ui.graphics.Color(0xFF1D1B20),
-    surfaceVariant = androidx.compose.ui.graphics.Color(0xFFE7E0EC),
-    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFF49454F),
+    background = androidx.compose.ui.graphics.Color(0xFFF9F7F2), // Warm Linen
+    onBackground = androidx.compose.ui.graphics.Color(0xFF2D2620), // Warm dark brown
+    surface = androidx.compose.ui.graphics.Color(0xFFF9F7F2), // Warm Linen
+    onSurface = androidx.compose.ui.graphics.Color(0xFF2D2620), // Warm dark brown
+    surfaceVariant = androidx.compose.ui.graphics.Color(0xFFEBE4DB), // Warm light tan
+    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFF5A524A), // Warm gray-brown
 
-    // Surface containers (from Figma)
+    // Surface containers - Warm Linen gradient
     surfaceContainerLowest = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
-    surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFFF7F2FA),
-    surfaceContainer = androidx.compose.ui.graphics.Color(0xFFF3EDF7),
-    surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFFECE6F0),
-    surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFFE6E0E9),
+    surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFFFCFAF6),
+    surfaceContainer = androidx.compose.ui.graphics.Color(0xFFF7F4EE),
+    surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFFF2EEE6),
+    surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFFEDE8E0),
 
-    // Outline colors
-    outline = androidx.compose.ui.graphics.Color(0xFF79747E),
-    outlineVariant = androidx.compose.ui.graphics.Color(0xFFCAC4D0),
+    // Outline colors - Warm gray
+    outline = androidx.compose.ui.graphics.Color(0xFF9A9080), // Warm gray
+    outlineVariant = androidx.compose.ui.graphics.Color(0xFFCBC4B8), // Light warm gray
 )
 
 // Material 3 dark color scheme from Figma design
 private val DarkColorScheme = darkColorScheme(
-    // Primary colors
-    primary = androidx.compose.ui.graphics.Color(0xFFD0BCFF),
-    onPrimary = androidx.compose.ui.graphics.Color(0xFF381E72),
-    primaryContainer = androidx.compose.ui.graphics.Color(0xFF4F378B),
-    onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFFE8DEF8),
+    // Primary colors - Burnished Gold
+    primary = androidx.compose.ui.graphics.Color(0xFFC5A367), // Burnished Gold
+    onPrimary = androidx.compose.ui.graphics.Color(0xFF2C241C), // Dark espresso
+    primaryContainer = androidx.compose.ui.graphics.Color(0xFF3D342A), // Muted gold-brown
+    onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFFF5EBD7), // Light gold tint
 
-    // Secondary colors
-    secondary = androidx.compose.ui.graphics.Color(0xFFCCC2DC),
-    onSecondary = androidx.compose.ui.graphics.Color(0xFF332D41),
-    secondaryContainer = androidx.compose.ui.graphics.Color(0xFF4A4458),
-    onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFFE8DEF8),
+    // Secondary colors - cool slate (brighter for text visibility)
+    secondary = androidx.compose.ui.graphics.Color(0xFFB0B8C8),
+    onSecondary = androidx.compose.ui.graphics.Color(0xFF1E212E),
+    secondaryContainer = androidx.compose.ui.graphics.Color(0xFF2D3245),
+    onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFFE2E4ED),
 
-    // Tertiary colors
-    tertiary = androidx.compose.ui.graphics.Color(0xFFEFB8C8),
-    onTertiary = androidx.compose.ui.graphics.Color(0xFF492532),
-    tertiaryContainer = androidx.compose.ui.graphics.Color(0xFF633B48),
-    onTertiaryContainer = androidx.compose.ui.graphics.Color(0xFFFFD8E4),
+    // Tertiary colors - deep sage
+    tertiary = androidx.compose.ui.graphics.Color(0xFF8BA38E),
+    onTertiary = androidx.compose.ui.graphics.Color(0xFF1E212E),
+    tertiaryContainer = androidx.compose.ui.graphics.Color(0xFF5C6B5E),
+    onTertiaryContainer = androidx.compose.ui.graphics.Color(0xFFC8D4C6),
 
-    // Error colors
-    error = androidx.compose.ui.graphics.Color(0xFFF2B8B5),
-    onError = androidx.compose.ui.graphics.Color(0xFF601410),
-    errorContainer = androidx.compose.ui.graphics.Color(0xFF8C1D18),
-    onErrorContainer = androidx.compose.ui.graphics.Color(0xFFF9DEDC),
+    // Error colors - muted dusty red
+    error = androidx.compose.ui.graphics.Color(0xFFD4908F),
+    onError = androidx.compose.ui.graphics.Color(0xFF2A1414),
+    errorContainer = androidx.compose.ui.graphics.Color(0xFF4A2828),
+    onErrorContainer = androidx.compose.ui.graphics.Color(0xFFF2D0D0),
 
     // Surface colors
-    background = androidx.compose.ui.graphics.Color(0xFF1C1B1F),
-    onBackground = androidx.compose.ui.graphics.Color(0xFFE6E1E5),
-    surface = androidx.compose.ui.graphics.Color(0xFF1C1B1F),
-    onSurface = androidx.compose.ui.graphics.Color(0xFFE6E1E5),
-    surfaceVariant = androidx.compose.ui.graphics.Color(0xFF49454F),
-    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFFCAC4D0),
+    background = androidx.compose.ui.graphics.Color(0xFF12141C), // Midnight Ink
+    onBackground = androidx.compose.ui.graphics.Color(0xFFE2E4ED), // Soft Ghost
+    surface = androidx.compose.ui.graphics.Color(0xFF12141C), // Midnight Ink
+    onSurface = androidx.compose.ui.graphics.Color(0xFFE2E4ED), // Soft Ghost
+    surfaceVariant = androidx.compose.ui.graphics.Color(0xFF2A2D38), // Dark parchment tint
+    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFF9499B0), // Aged Parchment
 
-    // Surface containers (from Figma)
-    surfaceContainerLowest = androidx.compose.ui.graphics.Color(0xFF0F0D13),
-    surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFF1A1A1D),
-    surfaceContainer = androidx.compose.ui.graphics.Color(0xFF211F26),
-    surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFF2B2930),
-    surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFF36343B),
+    // Surface containers - Midnight Ink → Library Dust gradient
+    surfaceContainerLowest = androidx.compose.ui.graphics.Color(0xFF0E1017),
+    surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFF151720),
+    surfaceContainer = androidx.compose.ui.graphics.Color(0xFF191C26),
+    surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFF1C1F2A),
+    surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFF1E212E), // Library Dust
 
-    // Outline colors
-    outline = androidx.compose.ui.graphics.Color(0xFF938F99),
-    outlineVariant = androidx.compose.ui.graphics.Color(0xFF49454F),
+    // Outline colors - slate blue
+    outline = androidx.compose.ui.graphics.Color(0xFF32384D),
+    outlineVariant = androidx.compose.ui.graphics.Color(0xFF2A2D38),
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -107,10 +115,12 @@ fun AppTheme(
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-    MaterialExpressiveTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        shapes = AppShapes,
-        content = content
-    )
+    CompositionLocalProvider(LocalIsDarkTheme provides darkTheme) {
+        MaterialExpressiveTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            shapes = AppShapes,
+            content = content
+        )
+    }
 }

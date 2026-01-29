@@ -1,8 +1,10 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -378,19 +380,36 @@ fun FavoritesScreenContent(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Surface(
-                                    shape = MaterialTheme.shapes.extraLarge,
-                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                    modifier = Modifier.size(80.dp)
+                                // Glowing icon with soft radial gradient
+                                Box(
+                                    modifier = Modifier.size(120.dp),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.FavoriteBorder,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(40.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
+                                    // Soft radial glow background
+                                    val glowColor = MaterialTheme.colorScheme.primary
+                                    Box(
+                                        modifier = Modifier
+                                            .size(120.dp)
+                                            .background(
+                                                brush = Brush.radialGradient(
+                                                    colors = listOf(
+                                                        glowColor.copy(alpha = 0.15f),
+                                                        glowColor.copy(alpha = 0.10f),
+                                                        glowColor.copy(alpha = 0.06f),
+                                                        glowColor.copy(alpha = 0.03f),
+                                                        glowColor.copy(alpha = 0.01f),
+                                                        glowColor.copy(alpha = 0f)
+                                                    )
+                                                )
+                                            )
+                                    )
+                                    // Main icon
+                                    Icon(
+                                        imageVector = Icons.Outlined.FavoriteBorder,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(48.dp),
+                                        tint = glowColor
+                                    )
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(

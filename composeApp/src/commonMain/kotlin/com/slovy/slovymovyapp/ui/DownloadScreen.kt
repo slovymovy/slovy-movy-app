@@ -2,11 +2,10 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material3.*
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -176,19 +175,35 @@ fun DownloadScreenContent(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    // Icon container
+                    // Glowing icon with soft radial gradient
                     Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        modifier = Modifier.size(120.dp),
                         contentAlignment = Alignment.Center
                     ) {
+                        // Soft radial glow background
+                        val glowColor = MaterialTheme.colorScheme.primary
+                        Box(
+                            modifier = Modifier
+                                .size(120.dp)
+                                .background(
+                                    brush = Brush.radialGradient(
+                                        colors = listOf(
+                                            glowColor.copy(alpha = 0.15f),
+                                            glowColor.copy(alpha = 0.10f),
+                                            glowColor.copy(alpha = 0.06f),
+                                            glowColor.copy(alpha = 0.03f),
+                                            glowColor.copy(alpha = 0.01f),
+                                            glowColor.copy(alpha = 0f)
+                                        )
+                                    )
+                                )
+                        )
+                        // Main icon
                         Icon(
                             imageVector = Icons.Outlined.CloudDownload,
                             contentDescription = null,
-                            modifier = Modifier.size(36.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            modifier = Modifier.size(48.dp),
+                            tint = glowColor
                         )
                     }
 
