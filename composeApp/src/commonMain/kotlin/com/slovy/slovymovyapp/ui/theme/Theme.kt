@@ -6,6 +6,14 @@ import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
+
+/**
+ * CompositionLocal indicating whether the current theme is dark.
+ * Use this instead of isSystemInDarkTheme() to respect the theme set by AppTheme.
+ */
+val LocalIsDarkTheme = compositionLocalOf { false }
 
 // Material 3 color scheme - Copper warm palette
 private val LightColorScheme = lightColorScheme(
@@ -107,10 +115,12 @@ fun AppTheme(
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-    MaterialExpressiveTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        shapes = AppShapes,
-        content = content
-    )
+    CompositionLocalProvider(LocalIsDarkTheme provides darkTheme) {
+        MaterialExpressiveTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            shapes = AppShapes,
+            content = content
+        )
+    }
 }
