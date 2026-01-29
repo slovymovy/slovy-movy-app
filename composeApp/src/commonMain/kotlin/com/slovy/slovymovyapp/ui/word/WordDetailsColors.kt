@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui.word
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
@@ -13,47 +14,186 @@ import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.data.remote.TraitType
 
 @Composable
-internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> = when (level) {
-    LearnerLevel.A1 -> Color(0xFFE0F7D4) to Color(0xFF215732)
-    LearnerLevel.A2 -> Color(0xFFBFEBD7) to Color(0xFF0F4C3C)
-    LearnerLevel.B1 -> Color(0xFFCCE3FF) to Color(0xFF0F3D7A)
-    LearnerLevel.B2 -> Color(0xFFB7D2FF) to Color(0xFF0F3566)
-    LearnerLevel.C1 -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
-    LearnerLevel.C2 -> Color(0xFFFBD0D9) to Color(0xFF7A1232)
+internal fun colorsForLevel(level: LearnerLevel): Pair<Color, Color> {
+    val isDark = isSystemInDarkTheme()
+    return when (level) {
+        // Warm earth-tone progression: approachable → mature
+        LearnerLevel.A1 -> if (isDark) {
+            Color(0xFF3D4A36) to Color(0xFFB8C4A8) // Muted olive bg / Sage text
+        } else {
+            Color(0xFFE2E8D8) to Color(0xFF4A5D3A) // Light sage / Deeper olive
+        }
+        LearnerLevel.A2 -> if (isDark) {
+            Color(0xFF354030) to Color(0xFFAABD9A) // Deep forest bg / Light sage
+        } else {
+            Color(0xFFDDE4D5) to Color(0xFF4A5D40) // Warm sage / Forest
+        }
+        LearnerLevel.B1 -> if (isDark) {
+            Color(0xFF3A404A) to Color(0xFFB0B8C4) // Dark slate bg / Light steel
+        } else {
+            Color(0xFFE0E4E8) to Color(0xFF4A5666) // Dusty slate / Steel
+        }
+        LearnerLevel.B2 -> if (isDark) {
+            Color(0xFF2E3640) to Color(0xFFA0AAB8) // Charcoal bg / Muted silver
+        } else {
+            Color(0xFFD8DDE3) to Color(0xFF3D4A5A) // Muted steel / Charcoal
+        }
+        LearnerLevel.C1 -> if (isDark) {
+            Color(0xFF4A3D20) to Color(0xFFD4B86A) // Deep bronze bg / Warm gold
+        } else {
+            Color(0xFFF0E4D6) to Color(0xFF8B6914) // Warm amber / Bronze
+        }
+        LearnerLevel.C2 -> if (isDark) {
+            Color(0xFF4A3438) to Color(0xFFCAADB2) // Deep mauve bg / Dusty rose
+        } else {
+            Color(0xFFEBDDD8) to Color(0xFF7A4A50) // Dusty rose / Mauve
+        }
+    }
 }
 
 @Composable
-internal fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> = when (f) {
-    SenseFrequency.HIGH -> Color(0xFFDFF6DD) to Color(0xFF1C5E20)
-    SenseFrequency.MIDDLE -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
-    SenseFrequency.LOW -> Color(0xFFFFE0B2) to Color(0xFF8C4513)
-    SenseFrequency.VERY_LOW -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
+internal fun colorsForFrequency(f: SenseFrequency): Pair<Color, Color> {
+    val isDark = isSystemInDarkTheme()
+    return when (f) {
+        // Muted earth tones: natural materials feel
+        SenseFrequency.HIGH -> if (isDark) {
+            Color(0xFF3A4530) to Color(0xFFAABD9A) // Deep sage bg / Light sage
+        } else {
+            Color(0xFFE2E8D9) to Color(0xFF4A5D40) // Warm sage / Forest
+        }
+        SenseFrequency.MIDDLE -> if (isDark) {
+            Color(0xFF3D3830) to Color(0xFFC4B8A0) // Deep taupe bg / Sand
+        } else {
+            Color(0xFFE8DFD0) to Color(0xFF5A4A38) // Warmer sand / Darker taupe
+        }
+        SenseFrequency.LOW -> if (isDark) {
+            Color(0xFF443830) to Color(0xFFCAAA98) // Deep clay bg / Warm terracotta
+        } else {
+            Color(0xFFEBE0D6) to Color(0xFF7A5A45) // Warm clay / Terracotta
+        }
+        SenseFrequency.VERY_LOW -> if (isDark) {
+            Color(0xFF38363A) to Color(0xFFB0ADA8) // Deep stone bg / Light stone
+        } else {
+            Color(0xFFE5E3E0) to Color(0xFF5A5650) // Warm gray / Stone
+        }
+    }
 }
 
 @Composable
-internal fun colorsForNameType(nameType: NameType): Pair<Color, Color> = when (nameType) {
-    NameType.NO -> Color(0xFFE0E0E0) to Color(0xFF424242)
-    NameType.PERSON_NAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232)
-    NameType.PLACE_NAME -> Color(0xFFE0F2F1) to Color(0xFF004D40)
-    NameType.GEOGRAPHICAL_FEATURE -> Color(0xFFE0F7FA) to Color(0xFF006064)
-    NameType.ORGANIZATION_NAME -> Color(0xFFE8EAF6) to Color(0xFF283593)
-    NameType.FICTIONAL_NAME -> Color(0xFFF3E5F5) to Color(0xFF6A1B9A)
-    NameType.HISTORICAL_NAME -> Color(0xFFFFF3E0) to Color(0xFFEF6C00)
-    NameType.EVENT_NAME -> Color(0xFFFFF1C5) to Color(0xFF6C4A00)
-    NameType.WORK_OF_ART_NAME -> Color(0xFFFFE2C6) to Color(0xFF7A3E00)
-    NameType.LANGUAGE_NAME -> Color(0xFFE1F5FE) to Color(0xFF01579B)
-    NameType.ETHNIC_GROUP_NAME -> Color(0xFFFCE4EC) to Color(0xFF880E4F)
-    NameType.DEITY_OR_RELIGIOUS_NAME -> Color(0xFFF9E7FA) to Color(0xFF7B1FA2)
-    NameType.RELIGION_OR_PHILOSOPHY_NAME -> Color(0xFFEDE7F6) to Color(0xFF512DA8)
-    NameType.ASTRONOMICAL_NAME -> Color(0xFFE8EAF6) to Color(0xFF1A237E)
-    NameType.TITLE_OR_HONORIFIC_NAME -> Color(0xFFFFF9C4) to Color(0xFFF57F17)
-    NameType.BRAND_OR_PRODUCT_NAME -> Color(0xFFFFE0E9) to Color(0xFFC2185B)
-    NameType.TECHNOLOGY_OR_SOFTWARE_NAME -> Color(0xFFE0F2F1) to Color(0xFF00695C)
-    NameType.GAME_OR_SPORT_NAME -> Color(0xFFE8F5E9) to Color(0xFF2E7D32)
-    NameType.IDEOLOGY_OR_MOVEMENT_NAME -> Color(0xFFFFF8E1) to Color(0xFFF57C00)
-    NameType.MYTHOLOGICAL_OR_ASTROLOGICAL_ENTITY -> Color(0xFFF3E5F5) to Color(0xFF4A148C)
-    NameType.DOCUMENT_OR_PROGRAM_NAME -> Color(0xFFECEFF1) to Color(0xFF37474F)
-    NameType.OTHER -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
+internal fun colorsForNameType(nameType: NameType): Pair<Color, Color> {
+    val isDark = isSystemInDarkTheme()
+    return when (nameType) {
+        NameType.NO -> if (isDark) {
+            Color(0xFF3A3A3A) to Color(0xFFB0B0B0)
+        } else {
+            Color(0xFFE5E3E0) to Color(0xFF5A5650)
+        }
+        NameType.PERSON_NAME -> if (isDark) {
+            Color(0xFF4A3438) to Color(0xFFCAADB2)
+        } else {
+            Color(0xFFEBDDD8) to Color(0xFF7A4A50)
+        }
+        NameType.PLACE_NAME -> if (isDark) {
+            Color(0xFF2E403D) to Color(0xFF9ABAB5)
+        } else {
+            Color(0xFFDDE8E6) to Color(0xFF3D5A55)
+        }
+        NameType.GEOGRAPHICAL_FEATURE -> if (isDark) {
+            Color(0xFF2D4044) to Color(0xFF9AC0C6)
+        } else {
+            Color(0xFFDCE8EA) to Color(0xFF3D5860)
+        }
+        NameType.ORGANIZATION_NAME -> if (isDark) {
+            Color(0xFF363A4A) to Color(0xFFA8B0C8)
+        } else {
+            Color(0xFFE2E4EC) to Color(0xFF4A5070)
+        }
+        NameType.FICTIONAL_NAME -> if (isDark) {
+            Color(0xFF403848) to Color(0xFFBAACC4)
+        } else {
+            Color(0xFFE8E2EC) to Color(0xFF5A4A68)
+        }
+        NameType.HISTORICAL_NAME -> if (isDark) {
+            Color(0xFF4A4030) to Color(0xFFD0B890)
+        } else {
+            Color(0xFFF0E8DA) to Color(0xFF7A6030)
+        }
+        NameType.EVENT_NAME -> if (isDark) {
+            Color(0xFF4A4228) to Color(0xFFD0C090)
+        } else {
+            Color(0xFFF0EBD8) to Color(0xFF6B5830)
+        }
+        NameType.WORK_OF_ART_NAME -> if (isDark) {
+            Color(0xFF4A3D28) to Color(0xFFD4B888)
+        } else {
+            Color(0xFFF0E6D6) to Color(0xFF7A5A28)
+        }
+        NameType.LANGUAGE_NAME -> if (isDark) {
+            Color(0xFF30404A) to Color(0xFF98B8C8)
+        } else {
+            Color(0xFFDEE8ED) to Color(0xFF3D5868)
+        }
+        NameType.ETHNIC_GROUP_NAME -> if (isDark) {
+            Color(0xFF483440) to Color(0xFFC8A0B4)
+        } else {
+            Color(0xFFECE0E6) to Color(0xFF6A4058)
+        }
+        NameType.DEITY_OR_RELIGIOUS_NAME -> if (isDark) {
+            Color(0xFF443850) to Color(0xFFC0A8D0)
+        } else {
+            Color(0xFFEAE4F0) to Color(0xFF5A4070)
+        }
+        NameType.RELIGION_OR_PHILOSOPHY_NAME -> if (isDark) {
+            Color(0xFF3A3848) to Color(0xFFB4ACC4)
+        } else {
+            Color(0xFFE6E4EC) to Color(0xFF4A4568)
+        }
+        NameType.ASTRONOMICAL_NAME -> if (isDark) {
+            Color(0xFF32384A) to Color(0xFFA0AAC4)
+        } else {
+            Color(0xFFE2E4EC) to Color(0xFF3D4568)
+        }
+        NameType.TITLE_OR_HONORIFIC_NAME -> if (isDark) {
+            Color(0xFF4A4428) to Color(0xFFD8C880)
+        } else {
+            Color(0xFFF2ECD4) to Color(0xFF6B5A18)
+        }
+        NameType.BRAND_OR_PRODUCT_NAME -> if (isDark) {
+            Color(0xFF4A3440) to Color(0xFFCC9EB0)
+        } else {
+            Color(0xFFEEDEE6) to Color(0xFF7A4058)
+        }
+        NameType.TECHNOLOGY_OR_SOFTWARE_NAME -> if (isDark) {
+            Color(0xFF2E4040) to Color(0xFF98BAB8)
+        } else {
+            Color(0xFFDCE8E6) to Color(0xFF3D5855)
+        }
+        NameType.GAME_OR_SPORT_NAME -> if (isDark) {
+            Color(0xFF344538) to Color(0xFFA0C0A4)
+        } else {
+            Color(0xFFE0EAE2) to Color(0xFF406048)
+        }
+        NameType.IDEOLOGY_OR_MOVEMENT_NAME -> if (isDark) {
+            Color(0xFF4A4028) to Color(0xFFD4BC80)
+        } else {
+            Color(0xFFF0EAD4) to Color(0xFF7A5A18)
+        }
+        NameType.MYTHOLOGICAL_OR_ASTROLOGICAL_ENTITY -> if (isDark) {
+            Color(0xFF3C3048) to Color(0xFFB8A0C8)
+        } else {
+            Color(0xFFE8E0F0) to Color(0xFF503870)
+        }
+        NameType.DOCUMENT_OR_PROGRAM_NAME -> if (isDark) {
+            Color(0xFF363A40) to Color(0xFFA8B0B8)
+        } else {
+            Color(0xFFE4E6E8) to Color(0xFF4A5058)
+        }
+        NameType.OTHER -> if (isDark) {
+            Color(0xFF38363A) to Color(0xFFB0ADA8)
+        } else {
+            Color(0xFFE5E3E0) to Color(0xFF5A5650)
+        }
+    }
 }
 
 @Composable

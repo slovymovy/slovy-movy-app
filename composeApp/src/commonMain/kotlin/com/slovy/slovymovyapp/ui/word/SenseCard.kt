@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -62,7 +63,8 @@ internal fun SenseCard(
         shape = MaterialTheme.shapes.small,
         colors = CardDefaults.outlinedCardColors(
             containerColor = colorForLemma(data.lemma, MaterialTheme.colorScheme.surface)
-        )
+        ),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -152,7 +154,7 @@ internal fun SenseCard(
                                     Icons.Outlined.FavoriteBorder
                                 },
                                 tint = if (state.favorite) {
-                                    Color.Red
+                                    Color(0xFFC46060) // Warm dusty rose
                                 } else {
                                     LocalContentColor.current
                                 },

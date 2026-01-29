@@ -217,7 +217,7 @@ internal fun Badge(
     containerColor: Color,
     contentColor: Color,
     style: TextStyle = MaterialTheme.typography.labelMedium,
-    shape: Shape = RoundedCornerShape(12.dp),
+    shape: Shape = RoundedCornerShape(6.dp),
     isClickable: Boolean = false,
     isOnline: Boolean? = null,
     onClick: (() -> Unit)? = null
