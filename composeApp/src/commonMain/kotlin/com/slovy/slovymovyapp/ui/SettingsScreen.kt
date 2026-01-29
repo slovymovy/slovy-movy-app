@@ -752,22 +752,14 @@ fun SettingsScreenContent(
                                                 .padding(AppSpacing.lg),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(40.dp)
-                                                    .clip(CircleShape)
-                                                    .background(MaterialTheme.colorScheme.primaryContainer),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Download,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                    modifier = Modifier.size(24.dp)
-                                                )
-                                            }
+                                            Icon(
+                                                imageVector = Icons.Default.Download,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(24.dp)
+                                            )
 
-                                            Spacer(modifier = Modifier.width(AppSpacing.lg))
+                                            Spacer(modifier = Modifier.width(AppSpacing.md))
 
                                             Column(modifier = Modifier.weight(1f)) {
                                                 Text(
@@ -1106,22 +1098,14 @@ private fun VoiceSectionItem(
                     .padding(AppSpacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
 
-                Spacer(modifier = Modifier.width(AppSpacing.lg))
+                Spacer(modifier = Modifier.width(AppSpacing.md))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -1217,9 +1201,7 @@ private fun AboutSection(
                 icon = Icons.Outlined.Feedback,
                 title = "Send us feedback",
                 subtitle = "We'd love to hear from you",
-                onClick = {},
-                iconBackground = MaterialTheme.colorScheme.primaryContainer,
-                iconTint = MaterialTheme.colorScheme.onPrimaryContainer
+                onClick = {}
             )
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = AppSpacing.lg),
@@ -1230,9 +1212,7 @@ private fun AboutSection(
                 icon = Icons.Outlined.Info,
                 title = "Version",
                 subtitle = buildConfig.versionName,
-                onClick = {},
-                iconBackground = MaterialTheme.colorScheme.primaryContainer,
-                iconTint = MaterialTheme.colorScheme.onPrimaryContainer
+                onClick = {}
             )
         }
     }
@@ -1243,9 +1223,7 @@ private fun AboutItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    onClick: () -> Unit,
-    iconTint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary,
-    iconBackground: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -1254,21 +1232,13 @@ private fun AboutItem(
             .padding(AppSpacing.lg),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(iconBackground),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-        Spacer(modifier = Modifier.width(AppSpacing.lg))
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(AppSpacing.md))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,

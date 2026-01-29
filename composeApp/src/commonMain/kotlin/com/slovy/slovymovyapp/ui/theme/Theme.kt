@@ -7,50 +7,50 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
-// Material 3 color scheme from Figma design
+// Material 3 color scheme - Copper warm palette
 private val LightColorScheme = lightColorScheme(
-    // Primary colors - Teal
-    primary = androidx.compose.ui.graphics.Color(0xFF4A8B8B), // Teal
+    // Primary colors - Copper
+    primary = androidx.compose.ui.graphics.Color(0xFFB87333), // Copper
     onPrimary = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
-    primaryContainer = androidx.compose.ui.graphics.Color(0xFFE0EDED), // Light teal tint
-    onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFF1A3030), // Dark teal
+    primaryContainer = androidx.compose.ui.graphics.Color(0xFFF5E6D8), // Light warm peach
+    onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFF3D2810), // Dark bronze
 
-    // Secondary colors - warm neutrals
-    secondary = androidx.compose.ui.graphics.Color(0xFF6B635A),
+    // Secondary colors - Warm Taupe
+    secondary = androidx.compose.ui.graphics.Color(0xFF7A6B5A), // Warm taupe
     onSecondary = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
-    secondaryContainer = androidx.compose.ui.graphics.Color(0xFFE8E4D9),
-    onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFF2D2D2D),
+    secondaryContainer = androidx.compose.ui.graphics.Color(0xFFEDE6DD), // Light warm cream
+    onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFF2D261E), // Dark warm brown
 
-    // Tertiary colors - Sage Haze
-    tertiary = androidx.compose.ui.graphics.Color(0xFF8B9482),
+    // Tertiary colors - Muted Teal (complementary)
+    tertiary = androidx.compose.ui.graphics.Color(0xFF5A8080), // Muted teal
     onTertiary = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
-    tertiaryContainer = androidx.compose.ui.graphics.Color(0xFFE8EBE6),
-    onTertiaryContainer = androidx.compose.ui.graphics.Color(0xFF2D2D2D),
+    tertiaryContainer = androidx.compose.ui.graphics.Color(0xFFDDE8E8), // Light teal tint
+    onTertiaryContainer = androidx.compose.ui.graphics.Color(0xFF1A2D2D), // Dark teal
 
-    // Error colors - muted dusty rose
-    error = androidx.compose.ui.graphics.Color(0xFFC17D7D),
+    // Error colors
+    error = androidx.compose.ui.graphics.Color(0xFFBA1A1A),
     onError = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
-    errorContainer = androidx.compose.ui.graphics.Color(0xFFF5E0E0),
-    onErrorContainer = androidx.compose.ui.graphics.Color(0xFF5A2E2E),
+    errorContainer = androidx.compose.ui.graphics.Color(0xFFF9DEDC),
+    onErrorContainer = androidx.compose.ui.graphics.Color(0xFF410E0B),
 
     // Surface colors
     background = androidx.compose.ui.graphics.Color(0xFFF9F7F2), // Warm Linen
-    onBackground = androidx.compose.ui.graphics.Color(0xFF2D2D2D), // Charcoal Silk
+    onBackground = androidx.compose.ui.graphics.Color(0xFF2D2620), // Warm dark brown
     surface = androidx.compose.ui.graphics.Color(0xFFF9F7F2), // Warm Linen
-    onSurface = androidx.compose.ui.graphics.Color(0xFF2D2D2D), // Charcoal Silk
-    surfaceVariant = androidx.compose.ui.graphics.Color(0xFFE8EBE6), // Light sage tint
-    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFF8B9482), // Sage Haze
+    onSurface = androidx.compose.ui.graphics.Color(0xFF2D2620), // Warm dark brown
+    surfaceVariant = androidx.compose.ui.graphics.Color(0xFFEBE4DB), // Warm light tan
+    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFF5A524A), // Warm gray-brown
 
-    // Surface containers - Warm Linen → Morning Mist gradient
-    surfaceContainerLowest = androidx.compose.ui.graphics.Color(0xFFFFFFFF), // Morning Mist
-    surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFFFDFCFA),
-    surfaceContainer = androidx.compose.ui.graphics.Color(0xFFFBFAF7),
-    surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFFF7F5F0),
-    surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFFF3F1EC),
+    // Surface containers - Warm Linen gradient
+    surfaceContainerLowest = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
+    surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFFFCFAF6),
+    surfaceContainer = androidx.compose.ui.graphics.Color(0xFFF7F4EE),
+    surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFFF2EEE6),
+    surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFFEDE8E0),
 
-    // Outline colors - warm gray
-    outline = androidx.compose.ui.graphics.Color(0xFFDDD8CC),
-    outlineVariant = androidx.compose.ui.graphics.Color(0xFFE8E4D9),
+    // Outline colors - Warm gray
+    outline = androidx.compose.ui.graphics.Color(0xFF9A9080), // Warm gray
+    outlineVariant = androidx.compose.ui.graphics.Color(0xFFCBC4B8), // Light warm gray
 )
 
 // Material 3 dark color scheme from Figma design

@@ -1,10 +1,12 @@
 package com.slovy.slovymovyapp.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,23 +46,33 @@ fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Icon in circular background
-        Surface(
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-            modifier = Modifier.size(80.dp)
+        // Icon with soft radial glow
+        Box(
+            modifier = Modifier.size(120.dp),
+            contentAlignment = Alignment.Center
         ) {
+            val glowColor = MaterialTheme.colorScheme.primary
             Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+                modifier = Modifier
+                    .size(120.dp)
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                glowColor.copy(alpha = 0.25f),
+                                glowColor.copy(alpha = 0.15f),
+                                glowColor.copy(alpha = 0.08f),
+                                glowColor.copy(alpha = 0.03f),
+                                glowColor.copy(alpha = 0f)
+                            )
+                        )
+                    )
+            )
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = glowColor
+            )
         }
 
         Spacer(modifier = Modifier.height(AppSpacing.lg))

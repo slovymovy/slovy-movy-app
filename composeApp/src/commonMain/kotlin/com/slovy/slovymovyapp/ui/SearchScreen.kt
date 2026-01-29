@@ -573,7 +573,7 @@ private fun EmptySearchState(
                 Icon(
                     imageVector = Icons.Outlined.Lightbulb,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
