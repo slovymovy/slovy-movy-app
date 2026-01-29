@@ -9,64 +9,36 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import com.slovy.slovymovyapp.ui.word.colorsForFrequency
 
 /**
- * Badge displaying word frequency level with color-coded indicators.
+ * Badge displaying word frequency level with theme-aware color-coded indicators.
  *
- * Frequency levels:
- * - High: Green background/text (#10B981/#065F46)
- * - Medium: Amber background/text (#F59E0B/#92400E)
- * - Low: Gray background/text (#6B7280/#374151)
+ * Uses [colorsForFrequency] for consistent theming across the app.
  *
- * @param frequency Frequency level: "high", "medium", or "low"
+ * @param frequency Frequency level from [SenseFrequency]
  * @param modifier Modifier to be applied to the badge
  */
 @Composable
 fun FrequencyBadge(
-    frequency: String,
+    frequency: SenseFrequency,
     modifier: Modifier = Modifier
 ) {
-    val (backgroundColor, textColor, borderColor) = when (frequency.lowercase()) {
-        "high" -> Triple(
-            Color(0xFF10B981).copy(alpha = 0.1f),
-            Color(0xFF065F46),
-            Color(0xFF10B981).copy(alpha = 0.2f)
-        )
-
-        "medium" -> Triple(
-            Color(0xFFF59E0B).copy(alpha = 0.1f),
-            Color(0xFF92400E),
-            Color(0xFFF59E0B).copy(alpha = 0.2f)
-        )
-
-        "low" -> Triple(
-            Color(0xFF6B7280).copy(alpha = 0.1f),
-            Color(0xFF374151),
-            Color(0xFF6B7280).copy(alpha = 0.2f)
-        )
-
-        else -> Triple(
-            MaterialTheme.colorScheme.surfaceVariant,
-            MaterialTheme.colorScheme.onSurfaceVariant,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-        )
-    }
+    val (backgroundColor, textColor) = colorsForFrequency(frequency)
 
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.small,
         color = backgroundColor,
-        border = BorderStroke(1.dp, borderColor)
+        border = BorderStroke(0.5.dp, textColor.copy(alpha = 0.15f))
     ) {
         Text(
-            text = frequency.capitalize(Locale.current),
+            text = frequency.label,
             modifier = Modifier.padding(horizontal = AppSpacing.md, vertical = 6.dp),
             style = MaterialTheme.typography.labelSmall,
             color = textColor
@@ -79,43 +51,19 @@ fun FrequencyBadge(
  */
 @Composable
 fun CompactFrequencyBadge(
-    frequency: String,
+    frequency: SenseFrequency,
     modifier: Modifier = Modifier
 ) {
-    val (backgroundColor, textColor, borderColor) = when (frequency.lowercase()) {
-        "high" -> Triple(
-            Color(0xFF10B981).copy(alpha = 0.1f),
-            Color(0xFF065F46),
-            Color(0xFF10B981).copy(alpha = 0.2f)
-        )
-
-        "medium" -> Triple(
-            Color(0xFFF59E0B).copy(alpha = 0.1f),
-            Color(0xFF92400E),
-            Color(0xFFF59E0B).copy(alpha = 0.2f)
-        )
-
-        "low" -> Triple(
-            Color(0xFF6B7280).copy(alpha = 0.1f),
-            Color(0xFF374151),
-            Color(0xFF6B7280).copy(alpha = 0.2f)
-        )
-
-        else -> Triple(
-            MaterialTheme.colorScheme.surfaceVariant,
-            MaterialTheme.colorScheme.onSurfaceVariant,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-        )
-    }
+    val (backgroundColor, textColor) = colorsForFrequency(frequency)
 
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         color = backgroundColor,
-        border = BorderStroke(1.dp, borderColor)
+        border = BorderStroke(0.5.dp, textColor.copy(alpha = 0.15f))
     ) {
         Text(
-            text = frequency.capitalize(Locale.current),
+            text = frequency.label,
             modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = 4.dp),
             style = MaterialTheme.typography.labelSmall,
             color = textColor
@@ -134,9 +82,10 @@ private fun FrequencyBadgePreview(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
-            FrequencyBadge(frequency = "high")
-            FrequencyBadge(frequency = "medium")
-            FrequencyBadge(frequency = "low")
+            FrequencyBadge(frequency = SenseFrequency.HIGH)
+            FrequencyBadge(frequency = SenseFrequency.MIDDLE)
+            FrequencyBadge(frequency = SenseFrequency.LOW)
+            FrequencyBadge(frequency = SenseFrequency.VERY_LOW)
         }
     }
 }
@@ -151,9 +100,10 @@ private fun CompactFrequencyBadgePreview(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
         ) {
-            CompactFrequencyBadge(frequency = "high")
-            CompactFrequencyBadge(frequency = "medium")
-            CompactFrequencyBadge(frequency = "low")
+            CompactFrequencyBadge(frequency = SenseFrequency.HIGH)
+            CompactFrequencyBadge(frequency = SenseFrequency.MIDDLE)
+            CompactFrequencyBadge(frequency = SenseFrequency.LOW)
+            CompactFrequencyBadge(frequency = SenseFrequency.VERY_LOW)
         }
     }
 }
