@@ -290,7 +290,7 @@ class OpenAIProvider : AIProvider {
     }
 
     override fun countTokens(text: String, model: String): Int {
-        return encodingRegistry.getEncoding(EncodingType.CL100K_BASE).countTokens(text)
+        return encodingRegistry.getEncoding(EncodingType.O200K_BASE).countTokens(text)
     }
 
 
