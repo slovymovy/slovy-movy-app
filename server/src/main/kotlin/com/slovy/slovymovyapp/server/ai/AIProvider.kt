@@ -114,7 +114,7 @@ interface AIProvider {
  */
 fun calculateMaxOutputTokens(
     inputTokens: Int,
-    multiplier: Int = 5,
+    multiplier: Int = 3,
     maxCap: Int = 32768
 ): Int {
     return minOf(inputTokens * multiplier, maxCap)
