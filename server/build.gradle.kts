@@ -31,6 +31,7 @@ dependencies {
         exclude(group = "commons-logging", module = "commons-logging")
     }
     api(libs.openai.java)
+    api(libs.jtokkit)
 
     // GitHub client
     api(libs.github.api)
