@@ -119,5 +119,9 @@ class EnhancerSenseIdValidationTest {
         override fun getAvailableModels(): List<ModelInfo> = emptyList()
 
         override fun isAvailable(): Boolean = true
+
+        override fun countTokens(text: String, model: String): Int {
+            return text.split(" ").size
+        }
     }
 }

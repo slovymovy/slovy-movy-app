@@ -21,7 +21,7 @@ class LanguageCardEnhancer {
      * @param reasoningBudget Reasoning budget for models that support it
      * @param seed Random seed for reproducibility
      * @param model Model identifier
-     * @param maxOutputTokens Maximum tokens in output
+     * @param maxOutputTokens Maximum tokens in output (null = auto-calculate as 4x input tokens)
      * @param topP Top-p sampling parameter
      * @param verbosity Verbosity level for GPT-5 series
      * @param cache AI cache implementation (defaults to NoOpAICache)
@@ -35,13 +35,20 @@ class LanguageCardEnhancer {
         reasoningBudget: Int = 2000,
         seed: Int? = null,
         model: String,
-        maxOutputTokens: Int = 32768,
+        maxOutputTokens: Int? = null,
         topP: Float = 1.0f,
         verbosity: String? = null,
         cache: AICache = NoOpAICache,
         retryStrategy: RetryStrategy = NoRetryStrategy
     ): LanguageCardResponse {
         val schema = buildSchema(request)
+        val inputJson = Json.encodeToString(LanguageCardRequest.serializer(), request)
+
+        // Calculate effective max output tokens
+        val effectiveMaxTokens = maxOutputTokens ?: run {
+            val inputTokens = provider.countTokens(inputJson + systemPrompt + schema , model)
+            calculateMaxOutputTokens(inputTokens)
+        }
 
         // Select appropriate temperature based on provider
         val providerTemperature = when (provider) {
@@ -50,14 +57,14 @@ class LanguageCardEnhancer {
         }
 
         val parameters = AIParameters(
-            parts = listOf(Json.encodeToString(LanguageCardRequest.serializer(), request)),
+            parts = listOf(inputJson),
             temperature = providerTemperature,
             seed = seed ?: 1234567890,
             reasoningBudget = reasoningBudget,
             model = model,
             schema = schema,
             systemPrompt = systemPrompt,
-            maxOutputTokens = maxOutputTokens,
+            maxOutputTokens = effectiveMaxTokens,
             topP = topP,
             verbosity = verbosity?.let { Verbosity.valueOf(it.uppercase()) }
         )

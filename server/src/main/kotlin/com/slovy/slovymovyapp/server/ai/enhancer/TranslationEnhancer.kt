@@ -22,7 +22,7 @@ class TranslationEnhancer {
      * @param reasoningBudget Reasoning budget for models that support it
      * @param model Model identifier
      * @param seed Random seed for reproducibility
-     * @param maxOutputTokens Maximum tokens in output
+     * @param maxOutputTokens Maximum tokens in output (null = auto-calculate as 4x input tokens)
      * @param topP Top-p sampling parameter
      * @param verbosity Verbosity level for GPT-5 series
      * @param cache AI cache implementation (defaults to NoOpAICache)
@@ -37,7 +37,7 @@ class TranslationEnhancer {
         reasoningBudget: Int = 2000,
         model: String,
         seed: Int? = null,
-        maxOutputTokens: Int = 32768,
+        maxOutputTokens: Int? = null,
         topP: Float = 1.0f,
         verbosity: String? = null,
         cache: AICache = NoOpAICache,
@@ -45,6 +45,13 @@ class TranslationEnhancer {
     ): TranslationResponse {
         val processedSystemPrompt = systemPrompt.replace("\$TARGET_LANG", targetLanguageName)
         val schema = buildTranslationSchema(request)
+        val inputJson = Json.encodeToString(TranslationRequest.serializer(), request)
+
+        // Calculate effective max output tokens
+        val effectiveMaxTokens = maxOutputTokens ?: run {
+            val inputTokens = provider.countTokens(inputJson + processedSystemPrompt + schema, model)
+            calculateMaxOutputTokens(inputTokens)
+        }
 
         // Select appropriate temperature based on provider
         val providerTemperature = when (provider) {
@@ -53,14 +60,14 @@ class TranslationEnhancer {
         }
 
         val parameters = AIParameters(
-            parts = listOf(Json.encodeToString(TranslationRequest.serializer(), request)),
+            parts = listOf(inputJson),
             temperature = providerTemperature,
             seed = seed ?: 1234567890,
             reasoningBudget = reasoningBudget,
             model = model,
             schema = schema,
             systemPrompt = processedSystemPrompt,
-            maxOutputTokens = maxOutputTokens,
+            maxOutputTokens = effectiveMaxTokens,
             topP = topP,
             verbosity = verbosity?.let { Verbosity.valueOf(it.uppercase()) }
         )

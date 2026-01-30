@@ -185,6 +185,19 @@ class GeminiProvider : AIProvider {
             false
         }
     }
+
+    override fun countTokens(text: String, model: String): Int {
+        val clientProvider = Gemini.clientProvider()
+        val client = clientProvider()
+        val contents = listOf(
+            Content.builder()
+                .role("user")
+                .parts(listOf(Part.fromText(text)))
+                .build()
+        )
+        val response = client.models.countTokens(model, contents, null)
+        return response.totalTokens().orElseThrow()
+    }
 }
 
 const val GEMINI_3_0_PREVIEW = "gemini-3-pro-preview"

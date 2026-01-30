@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.server.ai
 
+import com.knuddels.jtokkit.Encodings
+import com.knuddels.jtokkit.api.EncodingType
 import com.openai.client.OpenAIClient
 import com.openai.client.okhttp.OpenAIOkHttpClient
 import com.openai.core.JsonValue
@@ -161,6 +163,7 @@ object OpenAI {
 class OpenAIProvider : AIProvider {
 
     private val cacheJson = Json { prettyPrint = true }
+    private val encodingRegistry = Encodings.newDefaultEncodingRegistry()
 
     override fun complete(parameters: AIParameters, cache: AICache, retryStrategy: RetryStrategy): String {
         val clientProvider = OpenAI.clientProvider()
@@ -285,6 +288,11 @@ class OpenAIProvider : AIProvider {
             false
         }
     }
+
+    override fun countTokens(text: String, model: String): Int {
+        return encodingRegistry.getEncoding(EncodingType.O200K_BASE).countTokens(text)
+    }
+
 
     /**
      * Converts Gemini thinkingBudget (int) to OpenAI reasoningEffort (string).
