@@ -22,7 +22,7 @@ class TranslationEnhancer {
      * @param reasoningBudget Reasoning budget for models that support it
      * @param model Model identifier
      * @param seed Random seed for reproducibility
-     * @param maxOutputTokens Maximum tokens in output (null = auto-calculate as 5x input tokens)
+     * @param maxOutputTokens Maximum tokens in output (null = auto-calculate as 4x input tokens)
      * @param topP Top-p sampling parameter
      * @param verbosity Verbosity level for GPT-5 series
      * @param cache AI cache implementation (defaults to NoOpAICache)
@@ -49,7 +49,7 @@ class TranslationEnhancer {
 
         // Calculate effective max output tokens
         val effectiveMaxTokens = maxOutputTokens ?: run {
-            val inputTokens = provider.countTokens(inputJson + processedSystemPrompt, model)
+            val inputTokens = provider.countTokens(inputJson + processedSystemPrompt + schema, model)
             calculateMaxOutputTokens(inputTokens)
         }
 

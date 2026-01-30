@@ -341,10 +341,20 @@ internal suspend fun <T> raceWithFallback(
                 }
             }
         } catch (firstError: Throwable) {
-            // First to complete failed, wait for the other
-            val otherJob = if (primaryJob.isCompleted) fallbackJob else primaryJob
+            // One job failed. Try to get a successful result from the other.
             try {
-                otherJob.await()
+                when {
+                    !primaryJob.isCompleted -> primaryJob.await()
+                    !fallbackJob.isCompleted -> fallbackJob.await()
+                    else -> {
+                        // Both completed - try primary first (preferred), then fallback
+                        try {
+                            primaryJob.await()
+                        } catch (_: Throwable) {
+                            fallbackJob.await()
+                        }
+                    }
+                }
             } catch (_: Throwable) {
                 // Both failed - throw the first error
                 throw firstError

@@ -390,4 +390,62 @@ class RaceWithFallbackTest {
         assertEquals("primary", result)
         assertFalse(fallbackStarted.get(), "Fallback should not start when primary succeeds within timeout")
     }
+
+    @Test
+    fun fallbackFailsQuickly_primarySucceedsLater() = runBlocking {
+        // Edge case: fallback fails immediately, but primary (still running) succeeds
+        val result = raceWithFallback(
+            primaryAvailable = true,
+            fallbackAvailable = true,
+            primary = {
+                delay(200) // Slow but succeeds
+                "primary"
+            },
+            fallback = {
+                throw RuntimeException("Fallback failed immediately")
+            },
+            timeoutMs = 50 // Short timeout triggers fallback
+        )
+
+        assertEquals("primary", result, "Should return primary result even if fallback fails first")
+    }
+
+    @Test
+    fun bothCompleteSimultaneously_primarySucceeds_fallbackFails() = runBlocking {
+        // Both complete around the same time, primary succeeds, fallback fails
+        val result = raceWithFallback(
+            primaryAvailable = true,
+            fallbackAvailable = true,
+            primary = {
+                delay(150)
+                "primary"
+            },
+            fallback = {
+                delay(100) // Fallback completes first but fails
+                throw RuntimeException("Fallback failed")
+            },
+            timeoutMs = 50
+        )
+
+        assertEquals("primary", result, "Should return primary result when fallback fails")
+    }
+
+    @Test
+    fun primaryFailsFirst_fallbackSucceedsLater() = runBlocking {
+        val result = raceWithFallback(
+            primaryAvailable = true,
+            fallbackAvailable = true,
+            primary = {
+                delay(100)
+                throw RuntimeException("Primary failed")
+            },
+            fallback = {
+                delay(200)
+                "fallback"
+            },
+            timeoutMs = 50
+        )
+
+        assertEquals("fallback", result, "Should return fallback result when primary fails first")
+    }
 }
