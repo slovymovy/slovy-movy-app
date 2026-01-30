@@ -1,6 +1,5 @@
 package com.slovy.slovymovyapp.ui
 
-import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Favorite
@@ -12,10 +11,8 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 
 enum class AppScreen {
     SEARCH,
@@ -38,7 +35,9 @@ fun AppNavigationBar(
         selectedIconColor = MaterialTheme.colorScheme.primary,
         selectedTextColor = MaterialTheme.colorScheme.primary,
         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        disabledIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+        disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
     )
 
     NavigationBar(
@@ -59,7 +58,6 @@ fun AppNavigationBar(
             label = {
                 Text(
                     "Search",
-                    modifier = Modifier.offset(y = (-4).dp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall
@@ -83,7 +81,6 @@ fun AppNavigationBar(
             label = {
                 Text(
                     "Favorites",
-                    modifier = Modifier.offset(y = (-4).dp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall
@@ -107,7 +104,6 @@ fun AppNavigationBar(
             label = {
                 Text(
                     wordDetailLabel ?: "Word Detail",
-                    modifier = Modifier.offset(y = (-4).dp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall
@@ -132,7 +128,6 @@ fun AppNavigationBar(
             label = {
                 Text(
                     "Settings",
-                    modifier = Modifier.offset(y = (-4).dp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall
