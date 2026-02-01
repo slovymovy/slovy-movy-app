@@ -526,6 +526,9 @@ class JsonIngestionBuilder(
                 )
                 // traits
                 sense.traits.forEach { t ->
+                    if (t.traitType == TraitType.UNKNOWN) {
+                        return@forEach
+                    }
                     dictQ.insertSenseTrait(
                         sense_id = senseId,
                         trait_type = mapTraitType(t.traitType),
