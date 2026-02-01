@@ -1,0 +1,3115 @@
+{
+    "word": "afspreken",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                "word": "afspreken",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "31c0d1b5-0a59-486a-858e-2b61e3fa013e",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "infinitive"
+                        ],
+                        "form": "afspreken"
+                    },
+                    {
+                        "form_id": "23c90992-95b7-41b8-95ea-c0074ed9786f",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "gerund",
+                            "neuter"
+                        ],
+                        "form": "afspreken"
+                    },
+                    {
+                        "form_id": "af1d07cb-2cac-472d-92c5-362ac9764931",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "spreek af"
+                    },
+                    {
+                        "form_id": "ddd6de09-0acd-471e-8fe4-672d355684fa",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "past",
+                            "singular"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "4d547be8-db04-4cbf-ad25-71caac998520",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "first-person",
+                            "present",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "afspreek"
+                    },
+                    {
+                        "form_id": "ffb77825-1983-4df9-a86e-41f566ccdddd",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "first-person",
+                            "past",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "afsprak"
+                    },
+                    {
+                        "form_id": "1673242b-f20c-443e-a552-2fd0c2fb8621",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "spreekt af"
+                    },
+                    {
+                        "form_id": "44b46cf7-f5f6-45a3-80b2-5a27216b32ae",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "spreek af"
+                    },
+                    {
+                        "form_id": "e63e6f48-b5aa-4280-8f24-976e0cffbd64",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "8dfef35d-531c-496a-b388-3ad0e4d2f585",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "afspreekt"
+                    },
+                    {
+                        "form_id": "8ad5b716-b63c-4767-998b-d460a50accff",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "afsprak"
+                    },
+                    {
+                        "form_id": "fd81b894-01df-4195-a8fc-2130a50771e5",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "spreekt af"
+                    },
+                    {
+                        "form_id": "53cec908-45c4-47f6-ac18-29b6bc73a284",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "2f09d852-c7ce-49b9-8292-9d8f41deb292",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "formal",
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "afspreekt"
+                    },
+                    {
+                        "form_id": "93c2e352-328b-425a-972b-7757cb3839f6",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "formal",
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "afsprak"
+                    },
+                    {
+                        "form_id": "b3c9e555-b9e1-40be-81d0-c377e911b2ea",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "spreekt af"
+                    },
+                    {
+                        "form_id": "415b0d86-421c-4c31-800c-ca79111c1812",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "4bcf3351-be44-4c22-82e5-f9087f47f2aa",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "afspreekt"
+                    },
+                    {
+                        "form_id": "926e108d-0c57-4854-9b26-77870af54024",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "past",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "afsprak"
+                    },
+                    {
+                        "form_id": "c0814936-9554-4e82-b1b2-76a122eb2b0c",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "main-clause",
+                            "plural",
+                            "present"
+                        ],
+                        "form": "spreken af"
+                    },
+                    {
+                        "form_id": "ede9c61b-036e-48ee-94ee-7a123687caca",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "plural"
+                        ],
+                        "form": "spraken af"
+                    },
+                    {
+                        "form_id": "b98dd420-9053-44ae-820b-ec4ac278b913",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "plural",
+                            "present",
+                            "subordinate-clause"
+                        ],
+                        "form": "afspreken"
+                    },
+                    {
+                        "form_id": "a00eee88-5b6d-4900-a29e-0fb4696bb359",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "past",
+                            "plural",
+                            "subordinate-clause"
+                        ],
+                        "form": "afspraken"
+                    },
+                    {
+                        "form_id": "80c503b5-0c02-4e83-8874-fa7dc905b37a",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "imperative",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "spreek af"
+                    },
+                    {
+                        "form_id": "b998c287-991f-438d-ab38-63e2b9a41136",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "present"
+                        ],
+                        "form": "afsprekend"
+                    },
+                    {
+                        "form_id": "aaeae46d-1fd9-4446-ad10-ec41fc6fa143",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "past"
+                        ],
+                        "form": "afgesproken"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "5d64df10-5840-3792-bdd5-56f2ea9624c4",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "glosses": [
+                            "to agree, to make an agreement"
+                        ],
+                        "tags": [
+                            "transitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "cef1eb45-2ef4-48c2-bdc8-7138dfd8d0a2",
+                                "sense_id": "5d64df10-5840-3792-bdd5-56f2ea9624c4",
+                                "text": "We hebben afgesproken dat we morgen om 10 uur beginnen.",
+                                "translation": "We agreed to start at 10 o'clock tomorrow.",
+                                "english": "We agreed to start at 10 o'clock tomorrow."
+                            },
+                            {
+                                "example_id": "1063b278-31c8-4d4d-83e6-fd001d9c76ab",
+                                "sense_id": "5d64df10-5840-3792-bdd5-56f2ea9624c4",
+                                "text": "We moeten de voorwaarden nog afspreken voordat we het contract tekenen.",
+                                "translation": "We need to agree on the terms before signing the contract.",
+                                "english": "We need to agree on the terms before signing the contract."
+                            },
+                            {
+                                "example_id": "218fb2a3-2fc0-4507-a1ff-26ca7fde39f3",
+                                "sense_id": "5d64df10-5840-3792-bdd5-56f2ea9624c4",
+                                "text": "We hebben afgesproken dat iedereen zijn bijdrage zal leveren aan het project.",
+                                "translation": "We agreed that everyone will contribute to the project.",
+                                "english": "We agreed that everyone will contribute to the project."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "89ead669-ebe4-3a50-97ac-8796d57a35b9",
+                        "entry_id": "0e7524ea-adc2-3d06-b689-97190cbc17e8",
+                        "glosses": [
+                            "to make an appointment"
+                        ],
+                        "tags": [
+                            "intransitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "83e146fb-d986-4eec-a8c7-cc8686dd3808",
+                                "sense_id": "89ead669-ebe4-3a50-97ac-8796d57a35b9",
+                                "text": "Laten we een tijd afspreken om elkaar te ontmoeten.",
+                                "translation": "Let's make an appointment to meet each other.",
+                                "english": "Let's make an appointment to meet each other."
+                            },
+                            {
+                                "example_id": "2a8379c4-f308-4e74-a4d3-dba32a71cb81",
+                                "sense_id": "89ead669-ebe4-3a50-97ac-8796d57a35b9",
+                                "text": "We hebben afgesproken dat we elkaar om 3 uur bij de ingang zouden ontmoeten.",
+                                "translation": "We agreed to meet each other at the entrance at 3 o'clock.",
+                                "english": "We agreed to meet each other at the entrance at 3 o'clock."
+                            },
+                            {
+                                "example_id": "40610910-cdac-4362-ab8f-c865b924cf92",
+                                "sense_id": "89ead669-ebe4-3a50-97ac-8796d57a35b9",
+                                "text": "Ik heb afgesproken om morgen met mijn collega's te lunchen.",
+                                "translation": "I have arranged to have lunch with my colleagues tomorrow.",
+                                "english": "I have arranged to have lunch with my colleagues tomorrow."
+                            },
+                            {
+                                "example_id": "86340ceb-d76d-4b2a-ba20-fde758b736ef",
+                                "sense_id": "89ead669-ebe4-3a50-97ac-8796d57a35b9",
+                                "text": "We kunnen een datum afspreken voor de volgende vergadering.",
+                                "translation": "We can set a date for the next meeting.",
+                                "english": "We can set a date for the next meeting."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                "word": "afspreken",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "360eff58-3cad-4f1b-8ea4-755bad76a936",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "11b5ea7d-0fb2-4fa5-8b42-83b1fbfb8d7d",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "afgesproken"
+                    },
+                    {
+                        "form_id": "fbea1752-f195-47e3-aa42-e5bc6a9a3c3e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "imperfect",
+                            "present",
+                            "long-form"
+                        ],
+                        "form": "af te spreken"
+                    },
+                    {
+                        "form_id": "7df65c64-f1f2-484f-b4ca-de1b94ee6ed3",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "imperfect",
+                            "future",
+                            "short-form"
+                        ],
+                        "form": "zullen afspreken\naf zullen spreken"
+                    },
+                    {
+                        "form_id": "82a7b655-2f7f-4eab-bbb0-222a684eb1bc",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "imperfect",
+                            "future",
+                            "long-form"
+                        ],
+                        "form": "te zullen afspreken\naf te zullen spreken"
+                    },
+                    {
+                        "form_id": "82458f91-f658-48d4-9634-4edc7530ebac",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "present",
+                            "short-form"
+                        ],
+                        "form": "hebben afgesproken"
+                    },
+                    {
+                        "form_id": "211e9e52-79ea-467b-89dd-b3a916115efb",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "present",
+                            "long-form"
+                        ],
+                        "form": "te hebben afgesproken"
+                    },
+                    {
+                        "form_id": "e76cfbaf-1158-4bf4-9788-aa7182efd91f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "future",
+                            "short-form"
+                        ],
+                        "form": "afgesproken zullen hebben"
+                    },
+                    {
+                        "form_id": "b0732770-cce0-4abf-8edf-c7cff8e1bb8e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "future",
+                            "long-form"
+                        ],
+                        "form": "afgesproken te zullen hebben"
+                    },
+                    {
+                        "form_id": "b8bc4719-a9ca-405d-9995-1e5176dd86eb",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "imperfect",
+                            "participle"
+                        ],
+                        "form": "afsprekend"
+                    },
+                    {
+                        "form_id": "00fd0220-5095-48f7-a63e-3d84c02cc168",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "afgesproken"
+                    },
+                    {
+                        "form_id": "c3303aca-7de3-433c-81cd-a9613ae5e758",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "imperative"
+                        ],
+                        "form": "ev.\n spreek af"
+                    },
+                    {
+                        "form_id": "87ab4228-d45e-49a7-a5e2-6d5e9bc5567c",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "spreek af"
+                    },
+                    {
+                        "form_id": "8b7cf7f4-55ae-4673-8012-af6c39831292",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "spreekt af"
+                    },
+                    {
+                        "form_id": "44096b59-786e-4e59-b8fa-f68b2c957dc1",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "spreekt af"
+                    },
+                    {
+                        "form_id": "a3c8560e-b8ad-4768-a51f-439a0d8d5478",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "spreekt af"
+                    },
+                    {
+                        "form_id": "7064f6e5-b604-4ccf-a8bb-7e2a081034d0",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "spreekt af"
+                    },
+                    {
+                        "form_id": "d3e4e372-e45c-4e02-9896-e730a7b50aed",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "spreken af"
+                    },
+                    {
+                        "form_id": "fa1b9482-1442-4344-b390-0972a4f23207",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "spreken af"
+                    },
+                    {
+                        "form_id": "4578ee8e-0b5a-465e-8ec8-f488ab29b65e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "spreken af"
+                    },
+                    {
+                        "form_id": "e3088ec5-fa96-4092-8c7c-104ee055351c",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "e77ea129-c245-47ac-9bc8-d97746a94956",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "c1d8f8b7-053a-4d85-b3de-86c6331d78a4",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "8a52a0a5-477c-4a73-bca7-3d7656e8fd3b",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "spraakt af"
+                    },
+                    {
+                        "form_id": "de7be6ed-d5f2-4fb1-83b5-abec02082d9e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "916f9462-57a9-4b65-a923-cad561f5f30a",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "spraken af"
+                    },
+                    {
+                        "form_id": "d5c52d5a-6636-462a-9a10-375544718179",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "spraken af"
+                    },
+                    {
+                        "form_id": "a86bbf75-c7e7-4c44-831b-143dee02fb59",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "spraken af"
+                    },
+                    {
+                        "form_id": "284211fa-a471-4cac-ba31-b63464edfea9",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "zal afspreken"
+                    },
+                    {
+                        "form_id": "2bb77f47-321e-4f98-b813-50ca99e80af9",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zult afspreken"
+                    },
+                    {
+                        "form_id": "884be13c-adea-477c-978b-64fe95056c6a",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zal afspreken"
+                    },
+                    {
+                        "form_id": "eb2a6653-a60c-4844-8373-e6494d85cfca",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zult afspreken"
+                    },
+                    {
+                        "form_id": "8f601004-168d-42c3-9973-98dfd90a488d",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zal afspreken"
+                    },
+                    {
+                        "form_id": "6e6fe6e9-877b-43e0-aa9e-ad363421cc1b",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zult afspreken"
+                    },
+                    {
+                        "form_id": "9d683f9f-13fd-4002-9704-e9c7b006a836",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "zal afspreken"
+                    },
+                    {
+                        "form_id": "b3ee3091-45e2-4ad9-a2e2-cdd997bc253f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "zullen afspreken"
+                    },
+                    {
+                        "form_id": "391e5f22-4caf-41f9-a0b4-8a5ed02c8924",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "zullen afspreken"
+                    },
+                    {
+                        "form_id": "23ece986-729c-460c-9ba7-a009bdb88b85",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "zullen afspreken"
+                    },
+                    {
+                        "form_id": "81f01483-fda0-4b21-8a34-0433851d8f9d",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "zou afspreken"
+                    },
+                    {
+                        "form_id": "9eccbf71-2c0f-486e-bb0f-80354260e5f1",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zou afspreken"
+                    },
+                    {
+                        "form_id": "acf2a1a0-841a-41b9-808b-6e02b5d850b0",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zou(dt) afspreken"
+                    },
+                    {
+                        "form_id": "b423938a-dd68-496f-a8c9-624284367a8a",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zoudt afspreken"
+                    },
+                    {
+                        "form_id": "eb2a436c-a7ce-4183-8d7f-61b501a5bcf9",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "zou afspreken"
+                    },
+                    {
+                        "form_id": "2aec5138-0bfa-44c3-9fbe-855cf7efcba1",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "zouden afspreken"
+                    },
+                    {
+                        "form_id": "0f8518e0-6e18-4da8-bf59-4c0c6425c980",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "zouden afspreken"
+                    },
+                    {
+                        "form_id": "ffbd230d-9b4a-4ea0-b993-2d735f3c8697",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "zouden afspreken"
+                    },
+                    {
+                        "form_id": "c9d78360-a772-47be-a4bd-543164962c57",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "present"
+                        ],
+                        "form": "afspreek"
+                    },
+                    {
+                        "form_id": "420a2120-cd7a-45ca-8b38-86e0b8f38cbd",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "present"
+                        ],
+                        "form": "afspreekt"
+                    },
+                    {
+                        "form_id": "4f5e3924-d3a9-414a-a342-9ecf83e978eb",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "present"
+                        ],
+                        "form": "afspreekt"
+                    },
+                    {
+                        "form_id": "780207e2-23b1-4f1c-b87a-05f909fe4964",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "present"
+                        ],
+                        "form": "afspreekt"
+                    },
+                    {
+                        "form_id": "4eae98bb-ea86-4a29-a710-6aec6f7b5b69",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "present"
+                        ],
+                        "form": "afspreekt"
+                    },
+                    {
+                        "form_id": "7a2a6849-ce07-41e4-9ab7-9c822c854c78",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "afsprak"
+                    },
+                    {
+                        "form_id": "788c8d6a-8f8c-4a47-b0af-9b588c7458bf",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "afsprak"
+                    },
+                    {
+                        "form_id": "c089fd12-651d-4a50-8a12-88447f9894cd",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "afsprak"
+                    },
+                    {
+                        "form_id": "1f3016ce-5ee5-4e23-a124-fb41de8405f2",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "afspraakt"
+                    },
+                    {
+                        "form_id": "a6e6d9cb-aa60-4159-8956-8445e25c0151",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "afsprak"
+                    },
+                    {
+                        "form_id": "d259d48b-7a8c-46a5-893f-f35a4287e237",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "afspraken"
+                    },
+                    {
+                        "form_id": "20794ccd-486c-44d9-b8ee-5ce4ea7c0c1c",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "afspraken"
+                    },
+                    {
+                        "form_id": "f4f7a571-0c4c-45fd-afd1-c7f0a983e033",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "afspraken"
+                    },
+                    {
+                        "form_id": "1f832107-50a8-47cc-8442-a4229763dae9",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zal afspreken\naf zal spreken"
+                    },
+                    {
+                        "form_id": "413b407d-be9f-482f-acf3-f1db6005385d",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zult afspreken\naf zult/zal spreken"
+                    },
+                    {
+                        "form_id": "bd4a1b81-df37-411a-96f4-928d1565676d",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zal afspreken\naf zult/zal spreken"
+                    },
+                    {
+                        "form_id": "136d0e5a-17d8-4793-8cd9-a8aa642354f2",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zult afspreken\naf zult/zal spreken"
+                    },
+                    {
+                        "form_id": "6849ce5e-a8a6-4f91-a504-303d096b4ab3",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zal afspreken\naf zult/zal spreken"
+                    },
+                    {
+                        "form_id": "01f2f50d-67b3-4d6d-b44a-4ccb2ccf4e8f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zult afspreken\naf zult spreken"
+                    },
+                    {
+                        "form_id": "422fa56f-5e01-43b3-8d98-0e22cd36645e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zal afspreken\naf zal spreken"
+                    },
+                    {
+                        "form_id": "f72e0752-4065-413b-a35a-b58003780c84",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zullen afspreken\naf zullen spreken"
+                    },
+                    {
+                        "form_id": "d517f548-d1da-4473-ab4f-ad47efdfe8d0",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zullen afspreken\naf zullen spreken"
+                    },
+                    {
+                        "form_id": "1284e314-49ac-4ec0-8905-e74dae174a39",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zullen afspreken\naf zullen spreken"
+                    },
+                    {
+                        "form_id": "9caf85e1-1af7-4955-abb0-7419d93d3b4a",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zou afspreken\naf zou spreken"
+                    },
+                    {
+                        "form_id": "a7859739-b531-407c-ab47-8d4bdedaf5ad",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zou afspreken\naf zou spreken"
+                    },
+                    {
+                        "form_id": "c535120a-9116-40f2-8007-b36dcee21c57",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zou(dt) afspreken\naf zou(dt) spreken"
+                    },
+                    {
+                        "form_id": "3e4351d1-4ff0-47a0-9e16-90219373933a",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zoudt afspreken\naf zoudt spreken"
+                    },
+                    {
+                        "form_id": "2e305c44-4c6e-40af-a2fd-0e3c2f4bd465",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zou afspreken\naf zou spreken"
+                    },
+                    {
+                        "form_id": "c6dfd0d9-3270-4cc6-b8af-97fdb6632350",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zouden afspreken\naf zouden spreken"
+                    },
+                    {
+                        "form_id": "0280470f-631b-4d23-926f-c2a7d3b63c65",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zouden afspreken\naf zouden spreken"
+                    },
+                    {
+                        "form_id": "f0511d13-89d9-4728-b9be-6c018af1c9f6",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zouden afspreken\naf zouden spreken"
+                    },
+                    {
+                        "form_id": "7e609fc3-870c-43d8-a9ed-7853679b3eb7",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "heb afgesproken"
+                    },
+                    {
+                        "form_id": "d0dca4de-e6d7-475f-ac17-2206b7a867b6",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "hebt afgesproken"
+                    },
+                    {
+                        "form_id": "2d517b0c-003c-4ba9-abe6-f006191aca5f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "hebt afgesproken"
+                    },
+                    {
+                        "form_id": "41a3f0b7-b661-4028-97e2-a87609752bda",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "heeft afgesproken"
+                    },
+                    {
+                        "form_id": "b6944cbf-cc9b-43dd-8a7d-ef5cd9cee31d",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "hebt afgesproken"
+                    },
+                    {
+                        "form_id": "2b72bb09-0faa-4bdd-a000-46e3b62cc512",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "heeft afgesproken"
+                    },
+                    {
+                        "form_id": "b33acb79-f10f-4a23-97b2-e0af8ed951a1",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "hebben afgesproken"
+                    },
+                    {
+                        "form_id": "f1d6ef30-3b85-4674-82cd-2e1b5e0e753d",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "hebben afgesproken"
+                    },
+                    {
+                        "form_id": "e5b8031e-2f44-4ecb-82d9-7f394b8e53da",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "hebben afgesproken"
+                    },
+                    {
+                        "form_id": "9faa5415-969c-4f22-b38c-06c8ba1ac8a5",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "had afgesproken"
+                    },
+                    {
+                        "form_id": "4c99ae50-bb0a-4ff8-ad30-bbd45839cc8e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "had afgesproken"
+                    },
+                    {
+                        "form_id": "6b20759c-bd22-4593-a488-6c10a8c46eb7",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "had afgesproken"
+                    },
+                    {
+                        "form_id": "f791d624-ae56-4a55-90b0-3dfd5cb06e77",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "hadt afgesproken"
+                    },
+                    {
+                        "form_id": "b14adc06-4800-4139-a911-c1aa76f24a8f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "had afgesproken"
+                    },
+                    {
+                        "form_id": "07e59909-62e9-4790-b820-f29fa9faf5b8",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "hadden afgesproken"
+                    },
+                    {
+                        "form_id": "7934cf54-d6b4-436d-85a6-5deabcdf83db",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "hadden afgesproken"
+                    },
+                    {
+                        "form_id": "94a584e4-ed48-4504-9bf7-142ce335781e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "hadden afgesproken"
+                    },
+                    {
+                        "form_id": "0072d091-5317-46e4-9337-a350ef7c57bb",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zal afgesproken hebben"
+                    },
+                    {
+                        "form_id": "68913987-0feb-48bc-88a5-1725e110f132",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zal afgesproken hebben"
+                    },
+                    {
+                        "form_id": "5e312c2a-7a90-485e-97ba-cbf7a664e6a6",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult afgesproken hebben"
+                    },
+                    {
+                        "form_id": "e2cdc121-dd94-4f5d-9171-4fb74510adc8",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult afgesproken hebben"
+                    },
+                    {
+                        "form_id": "3de2bed3-4f2b-4204-a22b-320285fa4146",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zal afgesproken hebben"
+                    },
+                    {
+                        "form_id": "d71f8b99-508c-499d-8fb6-7b69ccd64ee4",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult afgesproken hebben"
+                    },
+                    {
+                        "form_id": "e2a1a689-e63a-4bd2-878b-0ce0c47afeb2",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zal afgesproken hebben"
+                    },
+                    {
+                        "form_id": "8944b22b-5afa-41e9-b6a0-b7912c59720f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zullen afgesproken hebben"
+                    },
+                    {
+                        "form_id": "1f43abe6-4656-4bd3-8630-9ee04b0a7cff",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zullen afgesproken hebben"
+                    },
+                    {
+                        "form_id": "f6ffe053-e8ea-475d-b4e4-c11ef4c22001",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zullen afgesproken hebben"
+                    },
+                    {
+                        "form_id": "90b6c766-43e0-42a8-9d1a-d5ec82449c90",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zou afgesproken hebben"
+                    },
+                    {
+                        "form_id": "5417fcba-851c-4c70-aec0-474088e1ecb3",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou afgesproken hebben"
+                    },
+                    {
+                        "form_id": "f4863b7e-2152-4b3f-a2b0-55bf7cadbbbb",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou afgesproken hebben"
+                    },
+                    {
+                        "form_id": "266bbbe2-c51c-4657-94c6-071111bd9c3f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt afgesproken hebben"
+                    },
+                    {
+                        "form_id": "fb24229f-7a71-4603-b25a-2f7e8c70134b",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt afgesproken hebben"
+                    },
+                    {
+                        "form_id": "c4ce0fab-f717-452a-b0bd-fa1c4f85dcfe",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zou afgesproken hebben"
+                    },
+                    {
+                        "form_id": "571fc0f8-3b11-402a-97d2-1eb9d3ae9706",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zouden afgesproken hebben"
+                    },
+                    {
+                        "form_id": "2cd19560-9ffd-44a2-b946-7d70fb4a9af2",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zouden afgesproken hebben"
+                    },
+                    {
+                        "form_id": "56b7cc97-e972-417a-a024-f5ad1f4c0cdf",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zouden afgesproken hebben"
+                    },
+                    {
+                        "form_id": "bc526dc9-b7d2-46e5-8e54-ab2fff31b7fc",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "present",
+                            "imperfect"
+                        ],
+                        "form": "er wordt afgesproken"
+                    },
+                    {
+                        "form_id": "88d7569c-7f9e-4d28-a004-97155e6091f3",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "present",
+                            "perfect"
+                        ],
+                        "form": "er is afgesproken"
+                    },
+                    {
+                        "form_id": "6b15554a-979d-4a4a-8165-01f9632015e1",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "past",
+                            "imperfect"
+                        ],
+                        "form": "er werd afgesproken"
+                    },
+                    {
+                        "form_id": "fdb11a1e-30b7-4926-9b8d-0e656f45786d",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "past",
+                            "perfect"
+                        ],
+                        "form": "er was afgesproken"
+                    },
+                    {
+                        "form_id": "c50fc64e-2001-4a5b-a751-5e1d0e32f221",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "future",
+                            "imperfect"
+                        ],
+                        "form": "er zal afgesproken worden"
+                    },
+                    {
+                        "form_id": "7dc91bb9-4095-4586-be4b-abc84318de8e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "future",
+                            "perfect"
+                        ],
+                        "form": "er zal afgesproken zijn"
+                    },
+                    {
+                        "form_id": "70f8f328-788a-4592-92c9-d670a3e94c65",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "conditional",
+                            "imperfect"
+                        ],
+                        "form": "er zou afgesproken worden"
+                    },
+                    {
+                        "form_id": "501d787c-6927-4532-8206-32fe10c0cc14",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "conditional",
+                            "perfect"
+                        ],
+                        "form": "er zou afgesproken zijn"
+                    },
+                    {
+                        "form_id": "5e2d50a1-0061-4b7c-9c96-7d9272d56e15",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "imperfect",
+                            "present",
+                            "short-form"
+                        ],
+                        "form": "afgesproken worden"
+                    },
+                    {
+                        "form_id": "ed526645-8338-44f9-a5a2-6ba4d82a11af",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "imperfect",
+                            "present",
+                            "long-form"
+                        ],
+                        "form": "afgesproken te worden"
+                    },
+                    {
+                        "form_id": "b513ab48-3709-4597-a532-2b7448e8f596",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "imperfect",
+                            "future",
+                            "short-form"
+                        ],
+                        "form": "afgesproken zullen worden"
+                    },
+                    {
+                        "form_id": "b64cf321-32f0-443a-a286-d75aa75ef300",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "imperfect",
+                            "future",
+                            "long-form"
+                        ],
+                        "form": "afgesproken te zullen worden"
+                    },
+                    {
+                        "form_id": "5abb1031-b640-4b11-a092-81d74f7954ee",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "perfect",
+                            "present",
+                            "short-form"
+                        ],
+                        "form": "afgesproken zijn"
+                    },
+                    {
+                        "form_id": "4662f12a-c0e5-4c71-b7a6-308d392e29ff",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "perfect",
+                            "present",
+                            "long-form"
+                        ],
+                        "form": "afgesproken te zijn"
+                    },
+                    {
+                        "form_id": "b1069d4f-7025-459f-9314-30b276ce2960",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "perfect",
+                            "future",
+                            "short-form"
+                        ],
+                        "form": "afgesproken zullen zijn"
+                    },
+                    {
+                        "form_id": "e2264a05-b4e3-4562-8a03-ff752e82f205",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "perfect",
+                            "future",
+                            "long-form"
+                        ],
+                        "form": "afgesproken te zullen zijn"
+                    },
+                    {
+                        "form_id": "9b0fa004-d125-42f8-a5bd-1ac1451f4404",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "word afgesproken"
+                    },
+                    {
+                        "form_id": "ab878ee1-c758-4bfb-b09e-a70ff7f6b787",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "wordt afgesproken"
+                    },
+                    {
+                        "form_id": "6aaa9fce-822d-43af-bc58-4d06b099859e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "wordt afgesproken"
+                    },
+                    {
+                        "form_id": "7016323c-c707-4dd8-a5df-6349241ce0df",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "wordt afgesproken"
+                    },
+                    {
+                        "form_id": "88c0ed36-a2cd-4413-9baf-e3660fe24569",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "wordt afgesproken"
+                    },
+                    {
+                        "form_id": "7f2d2557-9de6-4a85-9160-2649bc32f504",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "worden afgesproken"
+                    },
+                    {
+                        "form_id": "b65ba9fc-503b-4973-bd9a-828f48014846",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "worden afgesproken"
+                    },
+                    {
+                        "form_id": "9fcfeac3-1368-4e68-8e1d-e57b6a2f2adc",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "worden afgesproken"
+                    },
+                    {
+                        "form_id": "a0d1d0c1-1128-4456-8970-e90b12fa3c48",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "werd afgesproken"
+                    },
+                    {
+                        "form_id": "117edb94-ac3c-46cd-bf66-84a6fb670f5a",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "werd afgesproken"
+                    },
+                    {
+                        "form_id": "2fa27c60-c923-465e-b7b4-a41e64e9e656",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "werd afgesproken"
+                    },
+                    {
+                        "form_id": "031ad4e8-f344-4b34-843c-3d4d11f13a48",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "werdt afgesproken"
+                    },
+                    {
+                        "form_id": "aeca6bc2-fd77-4baf-bf1d-6fce6417cd37",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "werd afgesproken"
+                    },
+                    {
+                        "form_id": "44689e19-fceb-4ae1-b949-d16ec8cf4544",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "werden afgesproken"
+                    },
+                    {
+                        "form_id": "4cea737d-5054-4583-96dd-3d32a5bc08f8",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "werden afgesproken"
+                    },
+                    {
+                        "form_id": "a767de65-dd10-4ec8-bb11-afe894c73ef8",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "werden afgesproken"
+                    },
+                    {
+                        "form_id": "208267d9-a75d-4ff7-abcf-eccb1b5443b9",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zal afgesproken worden"
+                    },
+                    {
+                        "form_id": "082c6e0a-a076-4287-9d87-f1f41bba36be",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult afgesproken worden"
+                    },
+                    {
+                        "form_id": "7fc22d71-d058-4233-9be4-f73ad8ede96f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult afgesproken worden"
+                    },
+                    {
+                        "form_id": "d8e815d3-1393-4497-852d-c2e173a9e28f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult afgesproken worden"
+                    },
+                    {
+                        "form_id": "57e79e39-502e-4c53-9432-06a8ecb5e174",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "zal afgesproken worden"
+                    },
+                    {
+                        "form_id": "97bea89a-58f7-47ed-a07c-e478230a7f6b",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "zullen afgesproken worden"
+                    },
+                    {
+                        "form_id": "445c2355-48fc-4527-bfda-cf01f3bec6fc",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "zullen afgesproken worden"
+                    },
+                    {
+                        "form_id": "108bf4d1-4b1b-49d1-ba82-0e68b3d2c0c8",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zullen afgesproken worden"
+                    },
+                    {
+                        "form_id": "4de62bb7-4f07-46e6-a6aa-556b0448bf64",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zou afgesproken worden"
+                    },
+                    {
+                        "form_id": "708d5f03-bbc2-4468-94ea-73051c50b82c",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou afgesproken worden"
+                    },
+                    {
+                        "form_id": "cc3dfb83-c9b2-47fa-bc2e-82c7c02196a0",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou afgesproken worden"
+                    },
+                    {
+                        "form_id": "8710c26e-c835-42d4-961e-0bc641bb5103",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt afgesproken worden"
+                    },
+                    {
+                        "form_id": "a77523cb-94b6-4e54-8fb3-9705c4ecac9f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt afgesproken worden"
+                    },
+                    {
+                        "form_id": "099adcbf-a538-41eb-97e1-45a4589ba55b",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "zou afgesproken worden"
+                    },
+                    {
+                        "form_id": "3078ac04-9d3b-40e5-a742-55849f25cc5e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "zouden afgesproken worden"
+                    },
+                    {
+                        "form_id": "802210ed-883b-422d-8f97-ff3a48e33c36",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "zouden afgesproken worden"
+                    },
+                    {
+                        "form_id": "9c897cff-1d52-49ec-bf1f-dd6ca37b7630",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zouden afgesproken worden"
+                    },
+                    {
+                        "form_id": "01a5ddba-296c-40ae-a2ac-7e18e86a348f",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "ben afgesproken"
+                    },
+                    {
+                        "form_id": "15396953-e376-4f6b-b135-bc3892f7da24",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "bent afgesproken"
+                    },
+                    {
+                        "form_id": "49aac79f-da5e-4755-a2ea-e03cf70c13c0",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "bent afgesproken"
+                    },
+                    {
+                        "form_id": "715be63a-fac8-4cdd-b00d-08b79c8f87fc",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "is afgesproken"
+                    },
+                    {
+                        "form_id": "1a1f57b1-fdb3-479f-97e9-a905e05856ed",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "zijt afgesproken"
+                    },
+                    {
+                        "form_id": "886d9515-a4f7-46aa-bcb2-a2d43e62d8c2",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "is afgesproken"
+                    },
+                    {
+                        "form_id": "1fd2506c-e664-4428-afbb-f51b68a4f4b9",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "zijn afgesproken"
+                    },
+                    {
+                        "form_id": "32268e46-5826-45fa-91a2-8b940261d2d3",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "zijn afgesproken"
+                    },
+                    {
+                        "form_id": "2dcf2d48-a5fd-47e5-af63-fc9d8645713b",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "zijn afgesproken"
+                    },
+                    {
+                        "form_id": "511a8ede-2c95-45af-8205-cb6d77ca82b8",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "was afgesproken"
+                    },
+                    {
+                        "form_id": "03eb74fe-dfbb-4a86-903f-67c61547387b",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "was afgesproken"
+                    },
+                    {
+                        "form_id": "69570166-7706-478f-8baf-995187dcb7cf",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "was afgesproken"
+                    },
+                    {
+                        "form_id": "c2057bd7-7d5e-46c8-87d3-a268bc5cd5dc",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "waart afgesproken"
+                    },
+                    {
+                        "form_id": "42fb2b53-b9d3-4009-8922-849f59dc890a",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "was afgesproken"
+                    },
+                    {
+                        "form_id": "36b7ad73-2e9e-4be3-a276-c49b750dcfb9",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "waren afgesproken"
+                    },
+                    {
+                        "form_id": "9a560e13-58c4-4d32-b2b7-81e4eb534c1a",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "waren afgesproken"
+                    },
+                    {
+                        "form_id": "cc59dfb1-a185-4754-bf87-79bdecf02003",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "waren afgesproken"
+                    },
+                    {
+                        "form_id": "92d0be43-487a-4bb6-bb5a-a64235dfdfaa",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zal afgesproken zijn"
+                    },
+                    {
+                        "form_id": "652cf795-6f9c-4f10-b914-1c8146970f65",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult afgesproken zijn"
+                    },
+                    {
+                        "form_id": "cd41c63b-8df8-4215-9fed-d53e19fb32ee",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult afgesproken zijn"
+                    },
+                    {
+                        "form_id": "b5e9e7a3-f03f-4e36-aaa4-600623fabc30",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult afgesproken zijn"
+                    },
+                    {
+                        "form_id": "55bae917-758e-4430-a40f-6800f248d289",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zal afgesproken zijn"
+                    },
+                    {
+                        "form_id": "21532729-2e14-41ac-861c-f30192da6aa1",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zullen afgesproken zijn"
+                    },
+                    {
+                        "form_id": "98de9628-d923-490f-8e8b-634ce8dee517",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zullen afgesproken zijn"
+                    },
+                    {
+                        "form_id": "ab20f8cb-05e0-4c20-a008-6d675e85498e",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zullen afgesproken zijn"
+                    },
+                    {
+                        "form_id": "f008abc7-f90d-4a64-a9d8-64b5a49522f6",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zou afgesproken zijn"
+                    },
+                    {
+                        "form_id": "455e01e7-d3bb-4da1-a881-69534b7a03ca",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou afgesproken zijn"
+                    },
+                    {
+                        "form_id": "c1b945e7-51d7-4ecc-92bd-a0ffd6e9bbd8",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou afgesproken zijn"
+                    },
+                    {
+                        "form_id": "02011a74-0f44-4f9b-8ece-e25825959fe8",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt afgesproken zijn"
+                    },
+                    {
+                        "form_id": "35f7b050-8798-41f3-8f82-51652a217157",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt afgesproken zijn"
+                    },
+                    {
+                        "form_id": "ef4e85f6-e70f-4881-bacb-fe82acdb559c",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zou afgesproken zijn"
+                    },
+                    {
+                        "form_id": "1e441ab2-31b0-490a-9483-12e73db560a7",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zouden afgesproken zijn"
+                    },
+                    {
+                        "form_id": "65677eac-c636-42b5-b70a-47b7276995a6",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zouden afgesproken zijn"
+                    },
+                    {
+                        "form_id": "4b682f00-dfdc-4b21-bc71-39fb72a348aa",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zouden afgesproken zijn"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "ed3f2d6d-890f-3b88-8cbf-88f61755e81c",
+                        "entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "glosses": [
+                            "een onderling vergelijk vastleggen, overeenkomen"
+                        ],
+                        "tags": [
+                            "transitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "930e5c58-9de6-45af-b5da-ec9546433af7",
+                                "sense_id": "ed3f2d6d-890f-3b88-8cbf-88f61755e81c",
+                                "text": "Zij spraken af om de vergadering te verzetten."
+                            },
+                            {
+                                "example_id": "806fc40a-1dc2-4573-bfe8-6ffc4c878d00",
+                                "sense_id": "ed3f2d6d-890f-3b88-8cbf-88f61755e81c",
+                                "text": "Om de week spraken Genie, Jetfighter en ik af in een lokaal café om te ontbijten en de trailroddels door te nemen. We waren geen vaste trailfamilie, maar wel een sterke drie-eenheid die elkaar steeds opzocht."
+                            },
+                            {
+                                "example_id": "abb78d52-6c6f-4da0-9491-340b6ff5a527",
+                                "sense_id": "ed3f2d6d-890f-3b88-8cbf-88f61755e81c",
+                                "text": "Achter hen stonden Max en Dennis met grote ogen te kijken naar de achterkant van een klein fototoestel dat Sander vasthield. Alsof het zo was afgesproken, stapte Denise de kamer binnen op het moment dat zij alle aanwezigen kort had bekeken."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "8d0a4a88-0be1-4ebf-aa55-bc63e4ad10f8",
+                        "source_entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "source_sense_id": "ed3f2d6d-890f-3b88-8cbf-88f61755e81c",
+                        "source_sense_description": "een onderling vergelijk vastleggen",
+                        "target_lang_word": "vereinbaren",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "vereinbaren",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "ba91eaa6-d7a7-34f8-92dd-a3b4882d2cbe",
+                                        "entry_id": "3eb9f22b-7c6d-3f0b-aa12-ad50dcb227b2",
+                                        "glosses": [
+                                            "eine Abmachung treffen"
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "fe6f3906-a022-4d30-8d05-88554e8a5be6",
+                                                "sense_id": "ba91eaa6-d7a7-34f8-92dd-a3b4882d2cbe",
+                                                "text": "Den Impftermin für die Coronaimpfung konnte ich online vereinbaren."
+                                            },
+                                            {
+                                                "example_id": "86f27990-19cd-4875-880e-ab9913e035ec",
+                                                "sense_id": "ba91eaa6-d7a7-34f8-92dd-a3b4882d2cbe",
+                                                "text": "Sie vereinbaren den Preis."
+                                            },
+                                            {
+                                                "example_id": "6108a90f-dc37-4f71-ad71-21ad5f9a9fa6",
+                                                "sense_id": "ba91eaa6-d7a7-34f8-92dd-a3b4882d2cbe",
+                                                "text": "Das genaue Vorgehen in diesem Projekt muss erst noch vereinbart werden."
+                                            },
+                                            {
+                                                "example_id": "a6d4570c-cc9d-4c90-9a68-d8e7f5ecb00e",
+                                                "sense_id": "ba91eaa6-d7a7-34f8-92dd-a3b4882d2cbe",
+                                                "text": "Ich möchte einen Termin vereinbaren."
+                                            },
+                                            {
+                                                "example_id": "13cd0086-9a1c-480e-8cd9-e4cc3b25883d",
+                                                "sense_id": "ba91eaa6-d7a7-34f8-92dd-a3b4882d2cbe",
+                                                "text": "„Smartphones sind fester Bestandteil des Alltags. In Gruppen-Chats verschicken wir Fotos oder vereinbaren Termine mit Freunden.“"
+                                            },
+                                            {
+                                                "example_id": "13e8b48c-3c95-47a2-841f-9883e7586c37",
+                                                "sense_id": "ba91eaa6-d7a7-34f8-92dd-a3b4882d2cbe",
+                                                "text": "[1898:] „Russland und Japan vereinbaren, sich nicht in die inneren Angelegenheiten Koreas einzumischen.“"
+                                            },
+                                            {
+                                                "example_id": "276de5bd-f75f-463a-88ea-1f268c3f547d",
+                                                "sense_id": "ba91eaa6-d7a7-34f8-92dd-a3b4882d2cbe",
+                                                "text": "„Anstatt sich ausschließlich auf ungelöste historische Streitigkeiten zu konzentrieren, vereinbarten die beiden Premiers, in der kommenden Woche ein gemeinsames Regierungstreffen in Sofia abzuhalten“ […]."
+                                            },
+                                            {
+                                                "example_id": "d3b50024-b8bc-4beb-86b9-e73d880c1c44",
+                                                "sense_id": "ba91eaa6-d7a7-34f8-92dd-a3b4882d2cbe",
+                                                "text": "„Die neue Regierung hat im Koalitionsvertrag vereinbart, die Rüstungsexporte mit einem Kontrollgesetz weiter einzuschränken - vor allem die an sogenannte Drittstaaten außerhalb von EU und NATO.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "1f438571-4b79-3de1-8160-1aa90bca7d10",
+                                        "entry_id": "3eb9f22b-7c6d-3f0b-aa12-ad50dcb227b2",
+                                        "glosses": [
+                                            "etwas mit etwas anderem in Übereinstimmung bringen"
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "1383b427-4cd7-4e57-b513-87eabe425a16",
+                                                "sense_id": "1f438571-4b79-3de1-8160-1aa90bca7d10",
+                                                "text": "Oft lassen sich Kind und Beruf nur schwer miteinander vereinbaren."
+                                            },
+                                            {
+                                                "example_id": "99b29e19-d64e-4480-a9f2-2e93410ed895",
+                                                "sense_id": "1f438571-4b79-3de1-8160-1aa90bca7d10",
+                                                "text": "„Daheim arbeiten statt im Büro - so lassen sich Arbeit und Familienleben besser miteinander vereinbaren.“"
+                                            },
+                                            {
+                                                "example_id": "71bdd127-1489-49c3-9e63-6c88abdfe089",
+                                                "sense_id": "1f438571-4b79-3de1-8160-1aa90bca7d10",
+                                                "text": "Ich kann mein Hobby gut mit meinem Beruf vereinbaren."
+                                            },
+                                            {
+                                                "example_id": "7f67e681-a6d9-4ab4-8a1c-8fd5680685ec",
+                                                "sense_id": "1f438571-4b79-3de1-8160-1aa90bca7d10",
+                                                "text": "„Lassen sich Leistungssport und berufliche Karriere vereinbaren?“"
+                                            },
+                                            {
+                                                "example_id": "de8f5dbd-4483-4156-9eef-5baf0cbf9091",
+                                                "sense_id": "1f438571-4b79-3de1-8160-1aa90bca7d10",
+                                                "text": "„Veronica versucht Modeln und Medizinstudium zu vereinbaren.“"
+                                            },
+                                            {
+                                                "example_id": "59e91b6e-f13c-42e8-ae7c-bafece9999d7",
+                                                "sense_id": "1f438571-4b79-3de1-8160-1aa90bca7d10",
+                                                "text": "[Traumberuf Arzt?:] „Als junger Familienvater erlebt er, dass Kita-Schließungszeiten nicht mit dem Arztberuf zu vereinbaren sind.“"
+                                            },
+                                            {
+                                                "example_id": "3d31f2df-249c-4a2e-bf3d-8459dd91bf84",
+                                                "sense_id": "1f438571-4b79-3de1-8160-1aa90bca7d10",
+                                                "text": "„Einige wenige gläubige Menschen konnten das Tun der Nationalsozialisten nicht mit ihrem Gewissen vereinbaren und gingen deshalb in den Widerstand.“"
+                                            },
+                                            {
+                                                "example_id": "a7dbff15-9b8f-4fb1-bb2b-b9b3c58c692f",
+                                                "sense_id": "1f438571-4b79-3de1-8160-1aa90bca7d10",
+                                                "text": "„Die zentrale Frage lautet: lassen sich Tourismus, Landwirtschaft und Minenbetrieb in der reizvollen Urlaubsregion miteinander vereinbaren?“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "vereinbaren",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "3ad0a808-a36f-3629-a0e4-ac51f3432f73",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Genitiv Singular Maskulinum der starken Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "form-of",
+                                            "genitive",
+                                            "masculine",
+                                            "singular"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "ae5242a0-17c8-321e-a06f-c3fbeae5e1bd",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Akkusativ Singular Maskulinum der starken Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "accusative",
+                                            "form-of",
+                                            "masculine",
+                                            "singular"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "84ce4e1d-2df1-3df2-9981-9f30c43e4983",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Genitiv Singular Neutrum der starken Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "form-of",
+                                            "genitive",
+                                            "neuter",
+                                            "singular"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "f8cfa4c9-d0ee-3a62-b8f0-53ee24b04173",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Dativ Plural alle Genera der starken Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "dative",
+                                            "form-of",
+                                            "plural"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "069321aa-36f6-38ff-be49-af581989b6f5",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Genitiv Singular alle Genera der schwachen Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "form-of",
+                                            "genitive",
+                                            "singular"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "3b225f7d-5c52-3a0b-8f65-7f88325f3e24",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Dativ Singular alle Genera der schwachen Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "dative",
+                                            "form-of",
+                                            "singular"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "14659607-9d87-33f8-b635-8c730855e98a",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Akkusativ Singular Maskulinum der schwachen Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "accusative",
+                                            "form-of",
+                                            "masculine",
+                                            "singular"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "fe276c83-0a90-3959-9221-08c77c3e7731",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Alle Kasus Plural alle Genera der schwachen Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "form-of",
+                                            "plural"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "192fa154-0880-370e-8f83-96b1d4ed0bc7",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Genitiv Singular alle Genera der gemischten Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "form-of",
+                                            "genitive",
+                                            "singular"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "d6423da5-5f9c-326c-80e4-81dc0358e3d6",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Dativ Singular alle Genera der gemischten Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "dative",
+                                            "form-of",
+                                            "singular"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "c2f7f7af-e653-3fe8-ac8f-84051131918c",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Akkusativ Singular Maskulinum der gemischten Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "accusative",
+                                            "form-of",
+                                            "masculine",
+                                            "singular"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "4daf0a86-b55a-3b52-8108-f40cf59148e8",
+                                        "entry_id": "9801eeee-cdfc-3c16-81e2-35a6008e97c8",
+                                        "glosses": [
+                                            "Alle Kasus Plural alle Genera der gemischten Deklination des Positivs des Adjektivs vereinbar"
+                                        ],
+                                        "tags": [
+                                            "form-of",
+                                            "plural"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "a4b01492-dfe9-4e52-8f31-3e66a0211333",
+                        "source_entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "source_sense_id": "ed3f2d6d-890f-3b88-8cbf-88f61755e81c",
+                        "source_sense_description": "een onderling vergelijk vastleggen",
+                        "target_lang_word": "umówić sie",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "c8810f3e-43e1-4c42-97bb-8ddb81a465f7",
+                        "source_entry_id": "d9173f6d-68a1-35a2-9ac1-b5e5d09b08d9",
+                        "source_sense_id": "ed3f2d6d-890f-3b88-8cbf-88f61755e81c",
+                        "source_sense_description": "een onderling vergelijk vastleggen",
+                        "target_lang_word": "convenir",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "convenir",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "04250358-9b24-33a0-88cc-334f1c3b0d88",
+                                        "entry_id": "c279628c-09b1-3196-9b7c-d6787f4f0577",
+                                        "glosses": [
+                                            "Ser de un mismo parecer y dictamen; llegar a un acuerdo."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "0b8c813c-c00d-4198-8fff-21323b2ff31f",
+                                                "sense_id": "04250358-9b24-33a0-88cc-334f1c3b0d88",
+                                                "text": "Al final de la comida hemos convenido que mi suegra vendrá con nosotros al campo."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "d595afc5-af84-33d9-9575-89aacee80b40",
+                                        "entry_id": "c279628c-09b1-3196-9b7c-d6787f4f0577",
+                                        "glosses": [
+                                            "Ser favorable o adecuado a los intereses de una persona o en general."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"2\""
+                                    },
+                                    {
+                                        "sense_id": "353484f4-ac98-3e3d-b179-1d65274ed68c",
+                                        "entry_id": "c279628c-09b1-3196-9b7c-d6787f4f0577",
+                                        "glosses": [
+                                            "Corresponder, pertenecer."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"3\""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "f4fa4296-bc4e-3c65-a52b-66e686d85ec3",
+                "word": "afspreken",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "8ca4db5e-fea5-3b45-adef-66cc4aadcb12",
+                        "entry_id": "f4fa4296-bc4e-3c65-a52b-66e686d85ec3",
+                        "glosses": [
+                            "umówić, ustalić, uzgodnić"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    },
+                    {
+                        "sense_id": "c8bc0170-3658-338e-8dac-5bd7d0894b4c",
+                        "entry_id": "f4fa4296-bc4e-3c65-a52b-66e686d85ec3",
+                        "glosses": [
+                            "zgodzić się"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.2\""
+                    },
+                    {
+                        "sense_id": "2a0593e7-94e8-3dda-95cf-4f28797147e7",
+                        "entry_id": "f4fa4296-bc4e-3c65-a52b-66e686d85ec3",
+                        "glosses": [
+                            "spotkać się, umówić się"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1.3\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "fr-extract.jsonl": [
+            {
+                "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                "word": "afspreken",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "977bbaef-01fe-4e04-9c64-2fdd5181d37d",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "singular"
+                        ],
+                        "form": "spreek af"
+                    },
+                    {
+                        "form_id": "45aa4987-82c4-4475-a9ed-13280898eaa9",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "singular",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "f706269d-9d1d-4f9f-b7bb-91cd3880e3e8",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "informal"
+                        ],
+                        "form": "spreekt af"
+                    },
+                    {
+                        "form_id": "5489bfac-98af-47ec-90cb-77d4a4f50e2b",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "spreekt af"
+                    },
+                    {
+                        "form_id": "419e3865-d4e5-4ff1-8183-73bc57766354",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "plural"
+                        ],
+                        "form": "spreken af"
+                    },
+                    {
+                        "form_id": "7bedc672-97c7-44ae-90b8-c5c31c504ba0",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "plural",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "spraken af"
+                    },
+                    {
+                        "form_id": "26b3459e-633d-417b-82e1-4c18481ccae5",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "plural",
+                            "informal"
+                        ],
+                        "form": "spreken af"
+                    },
+                    {
+                        "form_id": "bf85c1b3-4a79-431e-9ee9-420b1e3794af",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "present",
+                            "third-person",
+                            "plural"
+                        ],
+                        "form": "spreken af"
+                    },
+                    {
+                        "form_id": "155ce0d5-5167-468e-9978-75ac2b7c31a1",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "spreekt af"
+                    },
+                    {
+                        "form_id": "c1363f0c-869b-4c8f-a928-b01ae7aa79f3",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "preterite",
+                            "second-person"
+                        ],
+                        "form": "sprak af"
+                    },
+                    {
+                        "form_id": "49685411-ce2d-4c57-88dd-f1a1de9cec39",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "auxiliary"
+                        ],
+                        "form": "hebben"
+                    },
+                    {
+                        "form_id": "9b29158e-2cef-42d2-9d5b-ded4ed91b754",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "spreken afd"
+                    },
+                    {
+                        "form_id": "4abd322c-2b52-415d-947a-12ee929e62f4",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "tags": [
+                            "participle",
+                            "past"
+                        ],
+                        "form": "afgesproken"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "48bf349b-e16d-38a1-9a56-3d15da23f9ac",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "glosses": [
+                            "Convenir (de tomber d'accord sur quelque chose)."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "147aa0f8-bca2-3afe-b63d-d819b22f7ab9",
+                        "entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "glosses": [
+                            "Convenir (de rencontrer quelqu’un), prendre un rendez-vous."
+                        ],
+                        "tags": [
+                            "intransitive"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "06da31bb-3e6b-428e-ad21-e54117405f25",
+                        "source_entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "een afspraak maken"
+                    },
+                    {
+                        "linkage_id": "285bab02-b5ed-4450-93c0-2e3fcb2a0f75",
+                        "source_entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "een schikking treffen"
+                    },
+                    {
+                        "linkage_id": "fc6b7293-ba83-4423-9738-3b54bef70a5f",
+                        "source_entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "het eens zijn"
+                    },
+                    {
+                        "linkage_id": "22561c01-83bb-4c88-b838-683f0612e3ac",
+                        "source_entry_id": "16031cc8-4cb0-3c46-b55d-ed89e7c495d2",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "overeenkomen"
+                    }
+                ]
+            }
+        ],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": []
+    }
+}

@@ -1,0 +1,131 @@
+{
+    "word_family": [
+        "afspraak",
+        "spreken"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "89ead669-ebe4-3a50-97ac-8796d57a35b9",
+                    "sense_definition": "Een tijd en plaats vastleggen om iemand te ontmoeten.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "meeting",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Zullen we volgende week een keer <w>afspreken</w> om bij te praten?",
+                            "target_lang_translations": {
+                                "en": "Shall we <w>meet up</w> sometime next week to catch up?",
+                                "ru": "Может, <w>встретимся</w> как-нибудь на следующей неделе, чтобы поболтать?"
+                            }
+                        },
+                        {
+                            "text": "Ik heb met mijn vrienden in het park <w>afgesproken</w>.",
+                            "target_lang_translations": {
+                                "en": "I <w>arranged to meet</w> my friends in the park.",
+                                "ru": "Я <w>договорился встретиться</w> с друзьями в парке."
+                            }
+                        }
+                    ],
+                    "antonyms": [
+                        "afzeggen",
+                        "annuleren"
+                    ],
+                    "common_phrases": [
+                        "met vrienden afspreken",
+                        "een tijd afspreken",
+                        "iets leuks afspreken"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To set a time and place to meet someone.",
+                        "ru": "Назначить время и место для встречи с кем-либо."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "meet up",
+                                "target_lang_sense_clarification": "social context"
+                            },
+                            {
+                                "target_lang_word": "arrange to meet",
+                                "target_lang_sense_clarification": "general context"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "договариваться о встрече",
+                                "target_lang_sense_clarification": "назначать встречу"
+                            },
+                            {
+                                "target_lang_word": "встречаться",
+                                "target_lang_sense_clarification": "собираться вместе по договоренности"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "5d64df10-5840-3792-bdd5-56f2ea9624c4",
+                    "sense_definition": "Samen beslissen dat iets op een bepaalde manier zal gebeuren.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "agreement",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "We hebben <w>afgesproken</w> dat we de kosten eerlijk zullen delen.",
+                            "target_lang_translations": {
+                                "en": "We <w>agreed</w> that we will share the costs fairly.",
+                                "ru": "Мы <w>договорились</w>, что честно поделим расходы."
+                            }
+                        },
+                        {
+                            "text": "Je moet van tevoren een vaste prijs <w>afspreken</w> met de verkoper.",
+                            "target_lang_translations": {
+                                "en": "You must <w>agree on</w> a fixed price with the seller in advance.",
+                                "ru": "Нужно заранее <w>договориться о</w> фиксированной цене с продавцом."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "overeenkomen",
+                        "besluiten"
+                    ],
+                    "common_phrases": [
+                        "zoals afgesproken",
+                        "een prijs afspreken",
+                        "regels afspreken"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To decide together that something will happen in a certain way.",
+                        "ru": "Совместно решить, что что-то произойдет определенным образом."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "agree",
+                                "target_lang_sense_clarification": "come to an agreement"
+                            },
+                            {
+                                "target_lang_word": "agree on",
+                                "target_lang_sense_clarification": "settle details"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "договариваться",
+                                "target_lang_sense_clarification": "приходить к соглашению"
+                            },
+                            {
+                                "target_lang_word": "уславливаться",
+                                "target_lang_sense_clarification": "заключать устное соглашение"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
