@@ -240,7 +240,7 @@ class JsonIngestionBuilder(
         )
 
         // Include POS even when the entry has no forms to avoid skipping POS in processed-over-raw ingestion.
-        val posToEntryId = collectPosToEntryId(allEntries)
+        val posToEntryId = collectPosToEntryId(entriesSelection)
 
         posToEntryId.forEach { (pos, entryId) ->
             dictQ.insertLemmaPos(
@@ -702,9 +702,16 @@ class JsonIngestionBuilder(
         )
     }
 
-    private fun collectPosToEntryId(entries: List<ExtractedWordEntry>): Map<DictionaryPos, Uuid> {
+    private fun collectPosToEntryId(entriesSelection: EntriesSelection): Map<DictionaryPos, Uuid> {
         val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
-        entries.forEach { entry ->
+        val nativeById = entriesSelection.nativeEntries
+            .sortedBy { it.entryId.toString() }
+        val allById = entriesSelection.allEntries
+            .sortedBy { it.entryId.toString() }
+        val nativeIds = nativeById.map { it.entryId }.toHashSet()
+        val orderedEntries = nativeById + allById.filterNot { nativeIds.contains(it.entryId) }
+
+        orderedEntries.forEach { entry ->
             val pos = mapPos(entry.pos) ?: return@forEach
             if (!posToEntryId.containsKey(pos)) {
                 posToEntryId[pos] = uuidParse(entry.entryId.toString())
