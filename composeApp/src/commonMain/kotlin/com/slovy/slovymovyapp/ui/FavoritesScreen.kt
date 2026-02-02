@@ -1,13 +1,12 @@
 package com.slovy.slovymovyapp.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,6 +22,8 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.components.CompactEmptyState
+import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.word.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -313,7 +314,13 @@ fun FavoritesScreenContent(
             },
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("My words") }
+                title = {
+                    Text(
+                        "My words",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             )
         },
         bottomBar = {
@@ -373,57 +380,19 @@ fun FavoritesScreenContent(
 
                     when {
                         state.senses.isEmpty() && state.query.isEmpty() -> {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                // Glowing icon with soft radial gradient
-                                Box(
-                                    modifier = Modifier.size(120.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    // Soft radial glow background
-                                    val glowColor = MaterialTheme.colorScheme.primary
-                                    Box(
-                                        modifier = Modifier
-                                            .size(120.dp)
-                                            .background(
-                                                brush = Brush.radialGradient(
-                                                    colors = listOf(
-                                                        glowColor.copy(alpha = 0.15f),
-                                                        glowColor.copy(alpha = 0.10f),
-                                                        glowColor.copy(alpha = 0.06f),
-                                                        glowColor.copy(alpha = 0.03f),
-                                                        glowColor.copy(alpha = 0.01f),
-                                                        glowColor.copy(alpha = 0f)
-                                                    )
-                                                )
-                                            )
-                                    )
-                                    // Main icon
-                                    Icon(
-                                        imageVector = Icons.Outlined.FavoriteBorder,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(48.dp),
-                                        tint = glowColor
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "No Favorites Yet",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Search a word and tap the heart icon",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(horizontal = 32.dp)
+                                EmptyState(
+                                    icon = Icons.Outlined.FavoriteBorder,
+                                    title = "No Favorites Yet",
+                                    description = "Save words you want to remember",
+                                    action = {
+                                        FilledTonalButton(onClick = onNavigateToSearch) {
+                                            Text("Start searching")
+                                        }
+                                    }
                                 )
                             }
                         }
@@ -433,11 +402,9 @@ fun FavoritesScreenContent(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "No favorites match your search",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center
+                                CompactEmptyState(
+                                    icon = Icons.Filled.Search,
+                                    message = "No favorites match your search"
                                 )
                             }
                         }
