@@ -446,14 +446,10 @@ fun FavoritesScreenContent(
                             Column(modifier = Modifier.fillMaxSize()) {
                                 val words = state.senses.distinctBy { it.lemma }
                                 Text(
-                                    text = "${state.senses.size} meaning${pluralEnding(state.senses)} (${words.size} word${
-                                        pluralEnding(
-                                            words
-                                        )
-                                    })",
+                                    text = "${state.senses.size} meaning${pluralEnding(state.senses)} · ${words.size} word${pluralEnding(words)}",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp)
+                                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
                                 )
 
                                 LazyColumn(
