@@ -970,7 +970,7 @@ private fun DictionaryCard(
                         CancellableProgressIndicator(
                             progress = dictProgress?.percent?.toFloat()?.div(100f) ?: 0f,
                             onCancel = { onCancelDownload(dictDownloadKey) },
-                            size = 36.dp
+                            size = 48.dp
                         )
                     } else if (isDownloaded) {
                         IconButton(onClick = onDeleteDictionary) {
@@ -1094,7 +1094,7 @@ private fun TranslationItem(
                     CancellableProgressIndicator(
                         progress = downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f,
                         onCancel = onCancel,
-                        size = 36.dp
+                        size = 48.dp
                     )
                 } else if (isDownloaded) {
                     IconButton(onClick = onDelete) {
@@ -1511,6 +1511,9 @@ private fun CancellableProgressIndicator(
 ) {
     val iconSize = size * 0.4f
     val strokeWidth = 2.5.dp
+    // Clamp progress to valid range, use indeterminate if unknown (-1)
+    val clampedProgress = progress.coerceIn(0f, 1f)
+    val isIndeterminate = progress < 0f
 
     Box(
         modifier = modifier
@@ -1518,18 +1521,28 @@ private fun CancellableProgressIndicator(
             .clip(CircleShape)
             .clickable(
                 onClick = onCancel,
+                onClickLabel = "Cancel download",
                 role = Role.Button
             ),
         contentAlignment = Alignment.Center
     ) {
         // Progress ring with track
-        CircularProgressIndicator(
-            progress = { progress },
-            modifier = Modifier.size(size),
-            strokeWidth = strokeWidth,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            color = MaterialTheme.colorScheme.primary
-        )
+        if (isIndeterminate) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(size),
+                strokeWidth = strokeWidth,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.primary
+            )
+        } else {
+            CircularProgressIndicator(
+                progress = { clampedProgress },
+                modifier = Modifier.size(size),
+                strokeWidth = strokeWidth,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
 
         // Cancel icon with subtle background
         Surface(
