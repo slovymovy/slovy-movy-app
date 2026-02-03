@@ -4,6 +4,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.*
@@ -621,10 +622,10 @@ fun WordDetailScreenContent(
                     }
                 },
                 navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(
-                            text = "Back",
-                            style = MaterialTheme.typography.labelLarge
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
                         )
                     }
                 },
