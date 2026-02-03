@@ -596,7 +596,13 @@ fun SettingsScreenContent(
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text("Settings") }
+                    title = {
+                        Text(
+                            "Settings",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 )
             },
             bottomBar = {
