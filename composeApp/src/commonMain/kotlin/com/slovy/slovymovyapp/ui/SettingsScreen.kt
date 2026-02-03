@@ -1526,12 +1526,12 @@ private fun CancellableProgressIndicator(
             .clip(CircleShape)
             .semantics(mergeDescendants = true) {
                 // Expose progress to screen readers
-                if (isIndeterminate) {
-                    stateDescription = "Downloading"
+                progressBarRangeInfo = if (isIndeterminate) {
+                    ProgressBarRangeInfo.Indeterminate
                 } else {
-                    progressBarRangeInfo = ProgressBarRangeInfo(clampedProgress, 0f..1f)
-                    stateDescription = "Downloading $progressPercent%"
+                    ProgressBarRangeInfo(clampedProgress, 0f..1f)
                 }
+                stateDescription = if (isIndeterminate) "Downloading" else "Downloading $progressPercent%"
             }
             .clickable(
                 onClick = onCancel,
