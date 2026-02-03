@@ -35,13 +35,13 @@ For synonyms and antonyms:
 * Synonyms or antonyms should be of the same part of speech as `sense_definition`.
 * If a `sense_definition` has no synonyms or antonyms, leave the corresponding field blank.
 * If there is any uncertainty about whether a synonym or antonym precisely fits the sense_definition, don't add it rather than guessing.
-* Only include synonyms that are interchangeable in context of sense definition and example sentences.
+* Only include synonyms that are interchangeable in typical contexts for this sense.
 
 Provide common_phrases that must include the target word. 
 Semantic Filtering: Every phrase must directly correlate to the specific sense_definition.
 Idiom Restriction: Only include idiomatic phrases if the sense_definition itself is idiomatic. If the sense is literal, the phrases must be literal.
 Grammatical Fitness: Use 2–5 words. Do not use full sentences. Avoid specific subjects (pronouns or names). Ensure the word appears in the same part_of_speech as the sense. If there are no good common phrases, leave common_phrases empty. 
-No Punctuation/Tags: Do not use periods, commas, or exclamation marks (except hyphens within a word). Do not use <w> tags in this section.
+No Punctuation/Tags: Do not use punctuation (except hyphens within a word). Do not use <w> tags in this section.
 
 Provide at least 2 example sentences per sense that match its learner_level.
 Examples must:
