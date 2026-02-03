@@ -78,7 +78,6 @@ data class DeleteConfirmationState(
     val title: String,
     val message: String,
     val warning: String? = null,
-    val toastMessage: String,
     val onConfirm: () -> Unit
 )
 
@@ -155,8 +154,7 @@ class SettingsViewModel(
                                     showDeleteConfirmation(
                                         title = "Delete $langName Dictionary?",
                                         message = "You can re-download it anytime.",
-                                        warning = warning,
-                                        toastMessage = toastMsg
+                                        warning = warning
                                     ) {
                                         deleteDictionary(fileInfo.language, toastMsg)
                                     }
@@ -175,9 +173,7 @@ class SettingsViewModel(
                                 deleteAction = {
                                     showDeleteConfirmation(
                                         title = "Delete $srcName → $tgtName Translation?",
-                                        message = "You can re-download it anytime.",
-                                        warning = null,
-                                        toastMessage = toastMsg
+                                        message = "You can re-download it anytime."
                                     ) {
                                         deleteTranslation(
                                             fileInfo.sourceLanguage,
@@ -219,7 +215,6 @@ class SettingsViewModel(
         title: String,
         message: String,
         warning: String? = null,
-        toastMessage: String,
         onConfirm: () -> Unit
     ) {
         state = state.copy(
@@ -227,7 +222,6 @@ class SettingsViewModel(
                 title = title,
                 message = message,
                 warning = warning,
-                toastMessage = toastMessage,
                 onConfirm = onConfirm
             )
         )
@@ -1570,7 +1564,7 @@ private fun CancellableProgressIndicator(
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Close,
-                    contentDescription = "Cancel download",
+                    contentDescription = null, // Parent provides accessibility label
                     modifier = Modifier.size(iconSize),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1845,7 +1839,6 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
                     title = "Delete English Dictionary?",
                     message = "You can re-download it anytime.",
                     warning = "This will also remove 2 translations.",
-                    toastMessage = "English dictionary deleted",
                     onConfirm = {}
                 )
             )

@@ -42,7 +42,7 @@ class DownloadCoordinator(
 
         val cancelToken = CancelToken()
         cancelTokens[key] = cancelToken
-        updateEntry(key, DownloadEntry(status = DownloadStatus.Running, progress = DownloadProgress(0, 1)))
+        updateEntry(key, DownloadEntry(status = DownloadStatus.Running, progress = null))
 
         val job = scope.launch {
             try {
