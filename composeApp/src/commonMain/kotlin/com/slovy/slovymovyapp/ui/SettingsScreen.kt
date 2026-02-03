@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -428,6 +430,10 @@ class SettingsViewModel(
         }
     }
 
+    fun cancelDownload(downloadKey: String) {
+        downloadCoordinator.cancel(downloadKey)
+    }
+
     override fun onCleared() {
         super.onCleared()
         ttsManager.stop()
@@ -469,6 +475,7 @@ class SettingsViewModel(
 
                         DownloadStatus.Cancelled -> {
                             downloadCoordinator.clear(downloadKey)
+                            snackbarHostState.showSnackbar("Download cancelled")
                             cancel()
                         }
 
@@ -516,6 +523,7 @@ fun SettingsScreen(
         onConfirmDelete = { viewModel.confirmDelete() },
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
         onDownloadDictionary = { language -> viewModel.downloadDictionary(language) },
+        onCancelDownload = { key -> viewModel.cancelDownload(key) },
         onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
         onToggleDictionaryExpansion = { languageCode -> viewModel.toggleDictionaryExpansion(languageCode) },
         wordDetailLabel = wordDetailLabel,
@@ -539,6 +547,7 @@ fun SettingsScreenContent(
     onConfirmDelete: () -> Unit = {},
     onDismissDeleteConfirmation: () -> Unit = {},
     onDownloadDictionary: (Language) -> Unit = {},
+    onCancelDownload: (String) -> Unit = {},
     onDownloadTranslation: (Language, Language) -> Unit = { _, _ -> },
     onToggleDictionaryExpansion: (String) -> Unit = {},
     wordDetailLabel: String? = null,
@@ -640,6 +649,7 @@ fun SettingsScreenContent(
                                         isExpanded = state.expandedDictionaries.contains(langInfo.language.code),
                                         onExpand = { onToggleDictionaryExpansion(langInfo.language.code) },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
+                                        onCancelDownload = onCancelDownload,
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
                                         onDownloadTranslation = { tgtLang ->
                                             onDownloadTranslation(langInfo.language, tgtLang)
@@ -696,6 +706,7 @@ fun SettingsScreenContent(
                                         isExpanded = state.expandedDictionaries.contains(langInfo.language.code),
                                         onExpand = { onToggleDictionaryExpansion(langInfo.language.code) },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
+                                        onCancelDownload = onCancelDownload,
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
                                         onDownloadTranslation = { tgtLang ->
                                             onDownloadTranslation(langInfo.language, tgtLang)
@@ -841,6 +852,7 @@ private fun DictionaryCard(
     isExpanded: Boolean,
     onExpand: () -> Unit,
     onDownloadDictionary: () -> Unit,
+    onCancelDownload: (String) -> Unit,
     onDeleteDictionary: () -> Unit,
     onDownloadTranslation: (Language) -> Unit,
     onDeleteTranslation: (Language) -> Unit,
@@ -922,10 +934,10 @@ private fun DictionaryCard(
                     contentAlignment = Alignment.Center
                 ) {
                     if (dictDownloading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp,
-                            progress = { dictProgress?.percent?.toFloat()?.div(100f) ?: 0f }
+                        CancellableProgressIndicator(
+                            progress = dictProgress?.percent?.toFloat()?.div(100f) ?: 0f,
+                            onCancel = { onCancelDownload(dictDownloadKey) },
+                            size = 36.dp
                         )
                     } else if (isDownloaded) {
                         IconButton(onClick = onDeleteDictionary) {
@@ -990,6 +1002,7 @@ private fun DictionaryCard(
                             isDownloading = transDownloading,
                             downloadProgress = transProgress,
                             onDownload = { onDownloadTranslation(translation.targetLanguage) },
+                            onCancel = { onCancelDownload(transDownloadKey) },
                             onDelete = { onDeleteTranslation(translation.targetLanguage) }
                         )
                     }
@@ -1007,6 +1020,7 @@ private fun TranslationItem(
     isDownloading: Boolean,
     downloadProgress: DownloadProgress?,
     onDownload: () -> Unit,
+    onCancel: () -> Unit,
     onDelete: () -> Unit
 ) {
     Surface(
@@ -1044,10 +1058,10 @@ private fun TranslationItem(
                 contentAlignment = Alignment.Center
             ) {
                 if (isDownloading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        progress = { downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f }
+                    CancellableProgressIndicator(
+                        progress = downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f,
+                        onCancel = onCancel,
+                        size = 32.dp
                     )
                 } else if (isDownloaded) {
                     IconButton(onClick = onDelete) {
@@ -1437,6 +1451,53 @@ private fun VoiceItem(
                     contentDescription = "Selected",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CancellableProgressIndicator(
+    progress: Float,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp
+) {
+    val iconSize = size * 0.4f
+    val strokeWidth = 2.5.dp
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .clickable(onClick = onCancel),
+        contentAlignment = Alignment.Center
+    ) {
+        // Progress ring with track
+        CircularProgressIndicator(
+            progress = { progress },
+            modifier = Modifier.size(size),
+            strokeWidth = strokeWidth,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        // Cancel icon with subtle background
+        Surface(
+            modifier = Modifier.size(iconSize + 6.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Close,
+                    contentDescription = "Cancel download",
+                    modifier = Modifier.size(iconSize),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
