@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
@@ -21,7 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -56,7 +63,7 @@ data class SettingsUiState(
     val languages: Map<Text2SpeechLanguage, LanguageUiState> = emptyMap(),
     val databases: List<DatabaseItemUiState> = emptyList(),
     val availableLanguages: List<AvailableLanguageInfo> = emptyList(),
-    val downloadingItems: Map<String, DownloadProgress> = emptyMap(),
+    val downloadingItems: Map<String, DownloadProgress?> = emptyMap(),
     val expandedDictionaries: Set<String> = emptySet(),
     val isLoading: Boolean = true,
     val isLoadingAvailable: Boolean = false,
@@ -68,8 +75,9 @@ data class SettingsUiState(
 )
 
 data class DeleteConfirmationState(
-    val displayName: String,
-    val additionalInfo: String? = null,
+    val title: String,
+    val message: String,
+    val warning: String? = null,
     val onConfirm: () -> Unit
 )
 
@@ -127,38 +135,50 @@ class SettingsViewModel(
                 val uiItems = files.map { fileInfo ->
                     when (fileInfo) {
                         is DatabaseFileInfo.Dictionary -> {
-                            val displayName = "Dictionary: ${fileInfo.language.selfName}"
+                            val langName = fileInfo.language.selfName
+                            val displayName = "Dictionary: $langName"
                             // Count how many translations will be deleted along with the dictionary
                             val translationCount = files.count {
                                 it is DatabaseFileInfo.Translation &&
                                         it.sourceLanguage == fileInfo.language
                             }
-                            val additionalInfo = if (translationCount > 0) {
-                                "$translationCount translation${if (translationCount > 1) "s" else ""} will also be deleted"
+                            val warning = if (translationCount > 0) {
+                                "This will also remove $translationCount translation${if (translationCount > 1) "s" else ""}."
                             } else null
 
+                            val toastMsg = "$langName dictionary deleted"
                             DatabaseItemUiState(
                                 displayName = displayName,
                                 sizeBytes = fileInfo.sizeBytes,
                                 deleteAction = {
-                                    showDeleteConfirmation(displayName, additionalInfo) {
-                                        deleteDictionary(fileInfo.language)
+                                    showDeleteConfirmation(
+                                        title = "Delete $langName Dictionary?",
+                                        message = "You can re-download it anytime.",
+                                        warning = warning
+                                    ) {
+                                        deleteDictionary(fileInfo.language, toastMsg)
                                     }
                                 }
                             )
                         }
 
                         is DatabaseFileInfo.Translation -> {
-                            val displayName =
-                                "Translation: ${fileInfo.sourceLanguage.selfName} → ${fileInfo.targetLanguage.selfName}"
+                            val srcName = fileInfo.sourceLanguage.selfName
+                            val tgtName = fileInfo.targetLanguage.selfName
+                            val displayName = "Translation: $srcName → $tgtName"
+                            val toastMsg = "$srcName → $tgtName translation deleted"
                             DatabaseItemUiState(
                                 displayName = displayName,
                                 sizeBytes = fileInfo.sizeBytes,
                                 deleteAction = {
-                                    showDeleteConfirmation(displayName) {
+                                    showDeleteConfirmation(
+                                        title = "Delete $srcName → $tgtName Translation?",
+                                        message = "You can re-download it anytime."
+                                    ) {
                                         deleteTranslation(
                                             fileInfo.sourceLanguage,
-                                            fileInfo.targetLanguage
+                                            fileInfo.targetLanguage,
+                                            toastMsg
                                         )
                                     }
                                 }
@@ -191,11 +211,17 @@ class SettingsViewModel(
         }
     }
 
-    fun showDeleteConfirmation(displayName: String, additionalInfo: String? = null, onConfirm: () -> Unit) {
+    fun showDeleteConfirmation(
+        title: String,
+        message: String,
+        warning: String? = null,
+        onConfirm: () -> Unit
+    ) {
         state = state.copy(
             deleteConfirmation = DeleteConfirmationState(
-                displayName = displayName,
-                additionalInfo = additionalInfo,
+                title = title,
+                message = message,
+                warning = warning,
                 onConfirm = onConfirm
             )
         )
@@ -210,28 +236,28 @@ class SettingsViewModel(
         state = state.copy(deleteConfirmation = null)
     }
 
-    private fun deleteDictionary(language: Language) {
+    private fun deleteDictionary(language: Language, toastMessage: String) {
         viewModelScope.launch {
             try {
                 dataDbManager.deleteDictionary(language)
                 dictionaryRepository.clearSenseCache()
                 reloadSettings()
-                snackbarHostState.showSnackbar("Database deleted successfully")
+                snackbarHostState.showSnackbar(toastMessage)
             } catch (e: Exception) {
-                state = state.copy(errorMessage = "Failed to delete database: ${e.message}")
+                state = state.copy(errorMessage = "Failed to delete: ${e.message}")
             }
         }
     }
 
-    private fun deleteTranslation(src: Language, tgt: Language) {
+    private fun deleteTranslation(src: Language, tgt: Language, toastMessage: String) {
         viewModelScope.launch {
             try {
                 dataDbManager.deleteTranslation(src, tgt)
                 dictionaryRepository.clearSenseCache()
                 loadDatabases()
-                snackbarHostState.showSnackbar("Database deleted successfully")
+                snackbarHostState.showSnackbar(toastMessage)
             } catch (e: Exception) {
-                state = state.copy(errorMessage = "Failed to delete database: ${e.message}")
+                state = state.copy(errorMessage = "Failed to delete: ${e.message}")
             }
         }
     }
@@ -428,6 +454,10 @@ class SettingsViewModel(
         }
     }
 
+    fun cancelDownload(downloadKey: String) {
+        downloadCoordinator.cancel(downloadKey)
+    }
+
     override fun onCleared() {
         super.onCleared()
         ttsManager.stop()
@@ -438,7 +468,7 @@ class SettingsViewModel(
             downloadCoordinator.downloadEntries()
                 .map { entries ->
                     entries.filterValues { it.status == DownloadStatus.Running }
-                        .mapValues { (_, entry) -> entry.progress ?: DownloadProgress(0, 1) }
+                        .mapValues { (_, entry) -> entry.progress }
                 }
                 .distinctUntilChanged()
                 .collect { running ->
@@ -469,6 +499,7 @@ class SettingsViewModel(
 
                         DownloadStatus.Cancelled -> {
                             downloadCoordinator.clear(downloadKey)
+                            snackbarHostState.showSnackbar("Download cancelled")
                             cancel()
                         }
 
@@ -516,6 +547,7 @@ fun SettingsScreen(
         onConfirmDelete = { viewModel.confirmDelete() },
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
         onDownloadDictionary = { language -> viewModel.downloadDictionary(language) },
+        onCancelDownload = { key -> viewModel.cancelDownload(key) },
         onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
         onToggleDictionaryExpansion = { languageCode -> viewModel.toggleDictionaryExpansion(languageCode) },
         wordDetailLabel = wordDetailLabel,
@@ -539,6 +571,7 @@ fun SettingsScreenContent(
     onConfirmDelete: () -> Unit = {},
     onDismissDeleteConfirmation: () -> Unit = {},
     onDownloadDictionary: (Language) -> Unit = {},
+    onCancelDownload: (String) -> Unit = {},
     onDownloadTranslation: (Language, Language) -> Unit = { _, _ -> },
     onToggleDictionaryExpansion: (String) -> Unit = {},
     wordDetailLabel: String? = null,
@@ -562,7 +595,13 @@ fun SettingsScreenContent(
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text("Settings") }
+                    title = {
+                        Text(
+                            "Settings",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 )
             },
             bottomBar = {
@@ -640,6 +679,7 @@ fun SettingsScreenContent(
                                         isExpanded = state.expandedDictionaries.contains(langInfo.language.code),
                                         onExpand = { onToggleDictionaryExpansion(langInfo.language.code) },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
+                                        onCancelDownload = onCancelDownload,
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
                                         onDownloadTranslation = { tgtLang ->
                                             onDownloadTranslation(langInfo.language, tgtLang)
@@ -696,6 +736,7 @@ fun SettingsScreenContent(
                                         isExpanded = state.expandedDictionaries.contains(langInfo.language.code),
                                         onExpand = { onToggleDictionaryExpansion(langInfo.language.code) },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
+                                        onCancelDownload = onCancelDownload,
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
                                         onDownloadTranslation = { tgtLang ->
                                             onDownloadTranslation(langInfo.language, tgtLang)
@@ -824,8 +865,9 @@ fun SettingsScreenContent(
         // Delete confirmation dialog
         state.deleteConfirmation?.let { confirmation ->
             DeleteConfirmationDialog(
-                displayName = confirmation.displayName,
-                additionalInfo = confirmation.additionalInfo,
+                title = confirmation.title,
+                message = confirmation.message,
+                warning = confirmation.warning,
                 onConfirm = onConfirmDelete,
                 onDismiss = onDismissDeleteConfirmation
             )
@@ -841,11 +883,12 @@ private fun DictionaryCard(
     isExpanded: Boolean,
     onExpand: () -> Unit,
     onDownloadDictionary: () -> Unit,
+    onCancelDownload: (String) -> Unit,
     onDeleteDictionary: () -> Unit,
     onDownloadTranslation: (Language) -> Unit,
     onDeleteTranslation: (Language) -> Unit,
     downloadedTranslations: List<DatabaseItemUiState>,
-    downloadingItems: Map<String, DownloadProgress>
+    downloadingItems: Map<String, DownloadProgress?>
 ) {
     ElevatedCard(
         modifier = Modifier
@@ -922,10 +965,10 @@ private fun DictionaryCard(
                     contentAlignment = Alignment.Center
                 ) {
                     if (dictDownloading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp,
-                            progress = { dictProgress?.percent?.toFloat()?.div(100f) ?: 0f }
+                        CancellableProgressIndicator(
+                            progress = dictProgress?.percent?.toFloat()?.div(100f) ?: -1f,
+                            onCancel = { onCancelDownload(dictDownloadKey) },
+                            size = 48.dp
                         )
                     } else if (isDownloaded) {
                         IconButton(onClick = onDeleteDictionary) {
@@ -990,6 +1033,7 @@ private fun DictionaryCard(
                             isDownloading = transDownloading,
                             downloadProgress = transProgress,
                             onDownload = { onDownloadTranslation(translation.targetLanguage) },
+                            onCancel = { onCancelDownload(transDownloadKey) },
                             onDelete = { onDeleteTranslation(translation.targetLanguage) }
                         )
                     }
@@ -1007,6 +1051,7 @@ private fun TranslationItem(
     isDownloading: Boolean,
     downloadProgress: DownloadProgress?,
     onDownload: () -> Unit,
+    onCancel: () -> Unit,
     onDelete: () -> Unit
 ) {
     Surface(
@@ -1040,14 +1085,14 @@ private fun TranslationItem(
             }
 
             Box(
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(48.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (isDownloading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        progress = { downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f }
+                    CancellableProgressIndicator(
+                        progress = downloadProgress?.percent?.toFloat()?.div(100f) ?: -1f,
+                        onCancel = onCancel,
+                        size = 48.dp
                     )
                 } else if (isDownloaded) {
                     IconButton(onClick = onDelete) {
@@ -1262,23 +1307,30 @@ private fun LoadingIndicator(modifier: Modifier = Modifier) {
 
 @Composable
 fun DeleteConfirmationDialog(
-    displayName: String,
-    additionalInfo: String? = null,
+    title: String,
+    message: String,
+    warning: String? = null,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Delete Data?")
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall
+            )
         },
         text = {
-            Column {
-                Text("Are you sure you want to delete $displayName?")
-                if (additionalInfo != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (warning != null) {
                     Text(
-                        text = additionalInfo,
+                        text = warning,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -1296,7 +1348,12 @@ fun DeleteConfirmationDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
                 Text("Cancel")
             }
         }
@@ -1437,6 +1494,79 @@ private fun VoiceItem(
                     contentDescription = "Selected",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CancellableProgressIndicator(
+    progress: Float,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp
+) {
+    val iconSize = size * 0.4f
+    val strokeWidth = 2.5.dp
+    // Clamp progress to valid range, use indeterminate if unknown (-1)
+    val clampedProgress = progress.coerceIn(0f, 1f)
+    val isIndeterminate = progress < 0f
+    val progressPercent = if (isIndeterminate) null else (clampedProgress * 100).toInt()
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .semantics(mergeDescendants = true) {
+                // Expose progress to screen readers
+                progressBarRangeInfo = if (isIndeterminate) {
+                    ProgressBarRangeInfo.Indeterminate
+                } else {
+                    ProgressBarRangeInfo(clampedProgress, 0f..1f)
+                }
+                stateDescription = if (isIndeterminate) "Downloading" else "Downloading $progressPercent%"
+            }
+            .clickable(
+                onClick = onCancel,
+                onClickLabel = "Cancel download",
+                role = Role.Button
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        // Progress ring with track
+        if (isIndeterminate) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(size),
+                strokeWidth = strokeWidth,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.primary
+            )
+        } else {
+            CircularProgressIndicator(
+                progress = { clampedProgress },
+                modifier = Modifier.size(size),
+                strokeWidth = strokeWidth,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        // Cancel icon with subtle background
+        Surface(
+            modifier = Modifier.size(iconSize + 6.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Close,
+                    contentDescription = null, // Parent provides accessibility label
+                    modifier = Modifier.size(iconSize),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -1706,8 +1836,9 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
                     )
                 ),
                 deleteConfirmation = DeleteConfirmationState(
-                    displayName = "Dictionary: English",
-                    additionalInfo = "2 translations will also be deleted",
+                    title = "Delete English Dictionary?",
+                    message = "You can re-download it anytime.",
+                    warning = "This will also remove 2 translations.",
                     onConfirm = {}
                 )
             )
