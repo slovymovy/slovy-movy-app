@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -1086,14 +1087,14 @@ private fun TranslationItem(
             }
 
             Box(
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(48.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (isDownloading) {
                     CancellableProgressIndicator(
                         progress = downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f,
                         onCancel = onCancel,
-                        size = 32.dp
+                        size = 36.dp
                     )
                 } else if (isDownloaded) {
                     IconButton(onClick = onDelete) {
@@ -1515,7 +1516,10 @@ private fun CancellableProgressIndicator(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .clickable(onClick = onCancel),
+            .clickable(
+                onClick = onCancel,
+                role = Role.Button
+            ),
         contentAlignment = Alignment.Center
     ) {
         // Progress ring with track
