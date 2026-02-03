@@ -70,8 +70,10 @@ data class SettingsUiState(
 )
 
 data class DeleteConfirmationState(
-    val displayName: String,
-    val additionalInfo: String? = null,
+    val title: String,
+    val message: String,
+    val warning: String? = null,
+    val toastMessage: String,
     val onConfirm: () -> Unit
 )
 
@@ -129,38 +131,53 @@ class SettingsViewModel(
                 val uiItems = files.map { fileInfo ->
                     when (fileInfo) {
                         is DatabaseFileInfo.Dictionary -> {
-                            val displayName = "Dictionary: ${fileInfo.language.selfName}"
+                            val langName = fileInfo.language.selfName
+                            val displayName = "Dictionary: $langName"
                             // Count how many translations will be deleted along with the dictionary
                             val translationCount = files.count {
                                 it is DatabaseFileInfo.Translation &&
                                         it.sourceLanguage == fileInfo.language
                             }
-                            val additionalInfo = if (translationCount > 0) {
-                                "$translationCount translation${if (translationCount > 1) "s" else ""} will also be deleted"
+                            val warning = if (translationCount > 0) {
+                                "This will also remove $translationCount translation${if (translationCount > 1) "s" else ""}."
                             } else null
 
+                            val toastMsg = "$langName dictionary deleted"
                             DatabaseItemUiState(
                                 displayName = displayName,
                                 sizeBytes = fileInfo.sizeBytes,
                                 deleteAction = {
-                                    showDeleteConfirmation(displayName, additionalInfo) {
-                                        deleteDictionary(fileInfo.language)
+                                    showDeleteConfirmation(
+                                        title = "Delete $langName Dictionary?",
+                                        message = "You can re-download it anytime.",
+                                        warning = warning,
+                                        toastMessage = toastMsg
+                                    ) {
+                                        deleteDictionary(fileInfo.language, toastMsg)
                                     }
                                 }
                             )
                         }
 
                         is DatabaseFileInfo.Translation -> {
-                            val displayName =
-                                "Translation: ${fileInfo.sourceLanguage.selfName} → ${fileInfo.targetLanguage.selfName}"
+                            val srcName = fileInfo.sourceLanguage.selfName
+                            val tgtName = fileInfo.targetLanguage.selfName
+                            val displayName = "Translation: $srcName → $tgtName"
+                            val toastMsg = "$srcName → $tgtName translation deleted"
                             DatabaseItemUiState(
                                 displayName = displayName,
                                 sizeBytes = fileInfo.sizeBytes,
                                 deleteAction = {
-                                    showDeleteConfirmation(displayName) {
+                                    showDeleteConfirmation(
+                                        title = "Delete $srcName → $tgtName Translation?",
+                                        message = "You can re-download it anytime.",
+                                        warning = null,
+                                        toastMessage = toastMsg
+                                    ) {
                                         deleteTranslation(
                                             fileInfo.sourceLanguage,
-                                            fileInfo.targetLanguage
+                                            fileInfo.targetLanguage,
+                                            toastMsg
                                         )
                                     }
                                 }
@@ -193,11 +210,19 @@ class SettingsViewModel(
         }
     }
 
-    fun showDeleteConfirmation(displayName: String, additionalInfo: String? = null, onConfirm: () -> Unit) {
+    fun showDeleteConfirmation(
+        title: String,
+        message: String,
+        warning: String? = null,
+        toastMessage: String,
+        onConfirm: () -> Unit
+    ) {
         state = state.copy(
             deleteConfirmation = DeleteConfirmationState(
-                displayName = displayName,
-                additionalInfo = additionalInfo,
+                title = title,
+                message = message,
+                warning = warning,
+                toastMessage = toastMessage,
                 onConfirm = onConfirm
             )
         )
@@ -212,28 +237,28 @@ class SettingsViewModel(
         state = state.copy(deleteConfirmation = null)
     }
 
-    private fun deleteDictionary(language: Language) {
+    private fun deleteDictionary(language: Language, toastMessage: String) {
         viewModelScope.launch {
             try {
                 dataDbManager.deleteDictionary(language)
                 dictionaryRepository.clearSenseCache()
                 reloadSettings()
-                snackbarHostState.showSnackbar("Database deleted successfully")
+                snackbarHostState.showSnackbar(toastMessage)
             } catch (e: Exception) {
-                state = state.copy(errorMessage = "Failed to delete database: ${e.message}")
+                state = state.copy(errorMessage = "Failed to delete: ${e.message}")
             }
         }
     }
 
-    private fun deleteTranslation(src: Language, tgt: Language) {
+    private fun deleteTranslation(src: Language, tgt: Language, toastMessage: String) {
         viewModelScope.launch {
             try {
                 dataDbManager.deleteTranslation(src, tgt)
                 dictionaryRepository.clearSenseCache()
                 loadDatabases()
-                snackbarHostState.showSnackbar("Database deleted successfully")
+                snackbarHostState.showSnackbar(toastMessage)
             } catch (e: Exception) {
-                state = state.copy(errorMessage = "Failed to delete database: ${e.message}")
+                state = state.copy(errorMessage = "Failed to delete: ${e.message}")
             }
         }
     }
@@ -835,8 +860,9 @@ fun SettingsScreenContent(
         // Delete confirmation dialog
         state.deleteConfirmation?.let { confirmation ->
             DeleteConfirmationDialog(
-                displayName = confirmation.displayName,
-                additionalInfo = confirmation.additionalInfo,
+                title = confirmation.title,
+                message = confirmation.message,
+                warning = confirmation.warning,
                 onConfirm = onConfirmDelete,
                 onDismiss = onDismissDeleteConfirmation
             )
@@ -1276,23 +1302,30 @@ private fun LoadingIndicator(modifier: Modifier = Modifier) {
 
 @Composable
 fun DeleteConfirmationDialog(
-    displayName: String,
-    additionalInfo: String? = null,
+    title: String,
+    message: String,
+    warning: String? = null,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Delete Data?")
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall
+            )
         },
         text = {
-            Column {
-                Text("Are you sure you want to delete $displayName?")
-                if (additionalInfo != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (warning != null) {
                     Text(
-                        text = additionalInfo,
+                        text = warning,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -1310,7 +1343,12 @@ fun DeleteConfirmationDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
                 Text("Cancel")
             }
         }
@@ -1767,8 +1805,10 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
                     )
                 ),
                 deleteConfirmation = DeleteConfirmationState(
-                    displayName = "Dictionary: English",
-                    additionalInfo = "2 translations will also be deleted",
+                    title = "Delete English Dictionary?",
+                    message = "You can re-download it anytime.",
+                    warning = "This will also remove 2 translations.",
+                    toastMessage = "English dictionary deleted",
                     onConfirm = {}
                 )
             )
