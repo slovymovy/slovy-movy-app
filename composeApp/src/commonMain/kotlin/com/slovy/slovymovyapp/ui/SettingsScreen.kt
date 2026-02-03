@@ -63,7 +63,7 @@ data class SettingsUiState(
     val languages: Map<Text2SpeechLanguage, LanguageUiState> = emptyMap(),
     val databases: List<DatabaseItemUiState> = emptyList(),
     val availableLanguages: List<AvailableLanguageInfo> = emptyList(),
-    val downloadingItems: Map<String, DownloadProgress> = emptyMap(),
+    val downloadingItems: Map<String, DownloadProgress?> = emptyMap(),
     val expandedDictionaries: Set<String> = emptySet(),
     val isLoading: Boolean = true,
     val isLoadingAvailable: Boolean = false,
@@ -474,7 +474,7 @@ class SettingsViewModel(
             downloadCoordinator.downloadEntries()
                 .map { entries ->
                     entries.filterValues { it.status == DownloadStatus.Running }
-                        .mapValues { (_, entry) -> entry.progress ?: DownloadProgress(0, 1) }
+                        .mapValues { (_, entry) -> entry.progress }
                 }
                 .distinctUntilChanged()
                 .collect { running ->
@@ -894,7 +894,7 @@ private fun DictionaryCard(
     onDownloadTranslation: (Language) -> Unit,
     onDeleteTranslation: (Language) -> Unit,
     downloadedTranslations: List<DatabaseItemUiState>,
-    downloadingItems: Map<String, DownloadProgress>
+    downloadingItems: Map<String, DownloadProgress?>
 ) {
     ElevatedCard(
         modifier = Modifier
