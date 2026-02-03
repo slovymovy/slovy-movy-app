@@ -968,7 +968,7 @@ private fun DictionaryCard(
                 ) {
                     if (dictDownloading) {
                         CancellableProgressIndicator(
-                            progress = dictProgress?.percent?.toFloat()?.div(100f) ?: 0f,
+                            progress = dictProgress?.percent?.toFloat()?.div(100f) ?: -1f,
                             onCancel = { onCancelDownload(dictDownloadKey) },
                             size = 48.dp
                         )
@@ -1092,7 +1092,7 @@ private fun TranslationItem(
             ) {
                 if (isDownloading) {
                     CancellableProgressIndicator(
-                        progress = downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f,
+                        progress = downloadProgress?.percent?.toFloat()?.div(100f) ?: -1f,
                         onCancel = onCancel,
                         size = 48.dp
                     )
