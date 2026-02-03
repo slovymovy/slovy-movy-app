@@ -22,7 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -1514,11 +1518,21 @@ private fun CancellableProgressIndicator(
     // Clamp progress to valid range, use indeterminate if unknown (-1)
     val clampedProgress = progress.coerceIn(0f, 1f)
     val isIndeterminate = progress < 0f
+    val progressPercent = if (isIndeterminate) null else (clampedProgress * 100).toInt()
 
     Box(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
+            .semantics(mergeDescendants = true) {
+                // Expose progress to screen readers
+                if (isIndeterminate) {
+                    stateDescription = "Downloading"
+                } else {
+                    progressBarRangeInfo = ProgressBarRangeInfo(clampedProgress, 0f..1f)
+                    stateDescription = "Downloading $progressPercent%"
+                }
+            }
             .clickable(
                 onClick = onCancel,
                 onClickLabel = "Cancel download",
