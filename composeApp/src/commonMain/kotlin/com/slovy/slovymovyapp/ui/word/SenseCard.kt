@@ -183,7 +183,7 @@ internal fun SenseCard(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         if (sense.targetLangDefinitions.isNotEmpty()) {
