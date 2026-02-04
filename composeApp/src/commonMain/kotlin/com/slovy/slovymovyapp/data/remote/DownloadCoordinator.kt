@@ -52,7 +52,7 @@ class DownloadCoordinator(
                 )
                 updateEntry(key, DownloadEntry(status = DownloadStatus.Done))
             } catch (e: CancellationException) {
-                updateEntry(key, DownloadEntry(status = DownloadStatus.Failed, error = e))
+                updateEntry(key, DownloadEntry(status = DownloadStatus.Cancelled))
                 throw e
             } catch (_: DataDbManager.DownloadCancelledException) {
                 updateEntry(key, DownloadEntry(status = DownloadStatus.Cancelled))
