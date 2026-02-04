@@ -316,7 +316,7 @@ fun SearchScreenContent(
 
                         ExposedDropdownMenuBox(
                             expanded = state.isLanguageDropdownExpanded,
-                            onExpandedChange = { onToggleLanguageDropdown() }
+                            onExpandedChange = { } // no-op, handled by clickable on anchor
                         ) {
                             Surface(
                                 modifier = Modifier
