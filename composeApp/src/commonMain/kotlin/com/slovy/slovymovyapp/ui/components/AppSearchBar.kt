@@ -77,7 +77,7 @@ fun AppSearchBar(
     }
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
         tonalElevation = elevation,
         shadowElevation = elevation,

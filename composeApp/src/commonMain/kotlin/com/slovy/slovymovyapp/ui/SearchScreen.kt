@@ -319,7 +319,8 @@ fun SearchScreenContent(
                             Surface(
                                 modifier = Modifier
                                     .menuAnchor(PrimaryEditable)
-                                    .height(56.dp),
+                                    .height(56.dp)
+                                    .widthIn(min = 56.dp),
                                 shape = MaterialTheme.shapes.extraLarge,
                                 tonalElevation = 1.dp,
                                 shadowElevation = 1.dp,
