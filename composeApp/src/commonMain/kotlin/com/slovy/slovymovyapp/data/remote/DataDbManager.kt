@@ -283,6 +283,8 @@ class DataDbManager(
         file
     }
 
+    class DownloadCancelledException : RuntimeException()
+
     private suspend fun downloadToFile(
         url: String,
         headers: Map<String, String>,
@@ -333,7 +335,7 @@ class DataDbManager(
                             out.flush()
                             out.close()
                             platform.deleteFile(tempPath)
-                            throw CancellationException("Download cancelled")
+                            throw DownloadCancelledException()
                         }
 
                         val read = channel.readAvailable(buffer, 0, buffer.size)
