@@ -59,6 +59,7 @@ fun AppSearchBar(
     // In dark theme, use higher elevation when focused for a soft glow effect
     val elevation by animateDpAsState(
         targetValue = when {
+            !enabled -> 0.dp
             isFocused && isDarkTheme -> 6.dp
             isFocused -> 3.dp
             else -> 1.dp
@@ -81,10 +82,10 @@ fun AppSearchBar(
         shape = MaterialTheme.shapes.extraLarge,
         tonalElevation = elevation,
         shadowElevation = elevation,
-        color = if (isFocused) {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerHighest
+        color = when {
+            !enabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            isFocused -> MaterialTheme.colorScheme.surfaceContainerHigh
+            else -> MaterialTheme.colorScheme.surfaceContainerHighest
         }
     ) {
         OutlinedTextField(
