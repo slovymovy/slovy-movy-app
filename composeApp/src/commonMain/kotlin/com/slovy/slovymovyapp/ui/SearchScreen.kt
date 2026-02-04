@@ -1,6 +1,5 @@
 package com.slovy.slovymovyapp.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -316,17 +314,13 @@ fun SearchScreenContent(
 
                         ExposedDropdownMenuBox(
                             expanded = state.isLanguageDropdownExpanded,
-                            onExpandedChange = { } // no-op, handled by clickable on anchor
+                            onExpandedChange = { onToggleLanguageDropdown() }
                         ) {
                             Surface(
                                 modifier = Modifier
                                     .menuAnchor(PrimaryEditable)
                                     .height(56.dp)
-                                    .widthIn(min = 56.dp)
-                                    .clickable(
-                                        onClick = { onToggleLanguageDropdown() },
-                                        role = Role.Button
-                                    ),
+                                    .widthIn(min = 56.dp),
                                 shape = MaterialTheme.shapes.extraLarge,
                                 tonalElevation = 1.dp,
                                 shadowElevation = 1.dp,
