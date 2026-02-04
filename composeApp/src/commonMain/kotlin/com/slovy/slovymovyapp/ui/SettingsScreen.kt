@@ -13,20 +13,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.progressBarRangeInfo
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -39,6 +35,7 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.getPlatform
 import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -202,10 +199,12 @@ class SettingsViewModel(
                     availableLanguages = available,
                     isLoadingAvailable = false
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 state = state.copy(
                     isLoadingAvailable = false,
-                    errorMessage = "Failed to load available languages: ${e.message}"
+                    errorMessage = NetworkErrorClassifier.userMessage(e)
                 )
             }
         }
@@ -341,10 +340,12 @@ class SettingsViewModel(
                         updateLanguageState(language) { it.copy(enabledVoiceIds = enabledIds) }
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 state = state.copy(
                     isLoading = false,
-                    errorMessage = "Failed to load languages: ${e.message}"
+                    errorMessage = NetworkErrorClassifier.userMessage(e)
                 )
             }
         }
@@ -505,7 +506,8 @@ class SettingsViewModel(
 
                         DownloadStatus.Failed -> {
                             downloadCoordinator.clear(downloadKey)
-                            val message = entry.error?.message ?: "Unknown error"
+                            val message =
+                                if (entry.error != null) NetworkErrorClassifier.userMessage(entry.error) else "Unknown error"
                             state = state.copy(errorMessage = "$errorPrefix: $message")
                             cancel()
                         }

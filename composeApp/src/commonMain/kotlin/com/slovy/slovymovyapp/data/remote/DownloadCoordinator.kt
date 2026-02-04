@@ -51,7 +51,10 @@ class DownloadCoordinator(
                     cancelToken
                 )
                 updateEntry(key, DownloadEntry(status = DownloadStatus.Done))
-            } catch (_: CancellationException) {
+            } catch (e: CancellationException) {
+                updateEntry(key, DownloadEntry(status = DownloadStatus.Failed, error = e))
+                throw e
+            } catch (_: DataDbManager.DownloadCancelledException) {
                 updateEntry(key, DownloadEntry(status = DownloadStatus.Cancelled))
             } catch (t: Throwable) {
                 updateEntry(key, DownloadEntry(status = DownloadStatus.Failed, error = t))

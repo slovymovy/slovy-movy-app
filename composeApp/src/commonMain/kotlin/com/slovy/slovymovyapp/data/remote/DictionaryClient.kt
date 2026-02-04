@@ -203,7 +203,7 @@ class DictionaryClient(
         return when (e) {
             is DictionaryClientException -> e
             else -> DictionaryClientException.NetworkException(
-                e.message ?: "Network error",
+                NetworkErrorClassifier.userMessage(e),
                 e
             )
         }

@@ -23,7 +23,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 data class LanguageSetupUiState(
@@ -63,10 +65,12 @@ class LanguageSetupViewModel(
                     isLoading = false,
                     availableLanguages = available
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 state = state.copy(
                     isLoading = false,
-                    errorMessage = "Failed to load languages: ${e.message}"
+                    errorMessage = NetworkErrorClassifier.userMessage(e)
                 )
             }
         }
