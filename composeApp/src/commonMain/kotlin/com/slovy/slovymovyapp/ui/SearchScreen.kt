@@ -1,7 +1,6 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -20,7 +19,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
@@ -253,25 +251,6 @@ fun SearchScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun languageFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedContainerColor = MaterialTheme.colorScheme.surface,
-    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-    focusedBorderColor = Color.Transparent,
-    unfocusedBorderColor = Color.Transparent,
-    disabledBorderColor = Color.Transparent,
-    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-    focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-    unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    focusedTrailingIconColor = MaterialTheme.colorScheme.primary,
-    unfocusedTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 fun SearchScreenContent(
     state: SearchUiState,
     onQueryChange: (String) -> Unit = {},
@@ -330,61 +309,61 @@ fun SearchScreenContent(
                     )
 
                     // Language filter dropdown
-                    if (state.availableLanguages.isNotEmpty()) {
-                        val isSingleLanguage = state.availableLanguages.size == 1
-                        val currentLanguage =
-                            if (isSingleLanguage) state.availableLanguages.first() else (state.selectedLanguage ?: state.availableLanguages.firstOrNull())
-                        val interactionSource = remember { MutableInteractionSource() }
+                    if (state.availableLanguages.isNotEmpty() && state.availableLanguages.size > 1) {
+                        val currentLanguage = state.selectedLanguage ?: state.availableLanguages.firstOrNull()
 
-                        if (!isSingleLanguage) {
-                            ExposedDropdownMenuBox(
-                                expanded = state.isLanguageDropdownExpanded,
-                                onExpandedChange = { onToggleLanguageDropdown() }
+                        ExposedDropdownMenuBox(
+                            expanded = state.isLanguageDropdownExpanded,
+                            onExpandedChange = { onToggleLanguageDropdown() }
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .menuAnchor(PrimaryEditable)
+                                    .height(56.dp)
+                                    .widthIn(min = 56.dp),
+                                shape = MaterialTheme.shapes.extraLarge,
+                                tonalElevation = 1.dp,
+                                shadowElevation = 1.dp,
+                                color = MaterialTheme.colorScheme.surfaceContainerHighest
                             ) {
-                                OutlinedTextField(
-                                    value = currentLanguage?.flag ?: "",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    modifier = Modifier
-                                        .menuAnchor(PrimaryEditable)
-                                        .width(87.dp),
-                                    trailingIcon = run {
-                                        {
-                                            ExposedDropdownMenuDefaults.TrailingIcon(
-                                                expanded = state.isLanguageDropdownExpanded
-                                            )
-                                        }
-                                    },
-                                    colors = languageFieldColors(),
-                                    shape = MaterialTheme.shapes.extraLarge,
-                                    textStyle = MaterialTheme.typography.bodyLarge,
-                                    interactionSource = interactionSource
-                                )
-                                ExposedDropdownMenu(
-                                    expanded = state.isLanguageDropdownExpanded,
-                                    onDismissRequest = onDismissLanguageDropdown,
-                                    modifier = Modifier
-                                        .menuAnchor(PrimaryEditable)
-                                        .width(200.dp)
+                                Row(
+                                    modifier = Modifier.padding(start = 16.dp, end = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    state.availableLanguages.forEach { language ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Row(
-                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(language.flag)
-                                                    Text(language.selfName)
-                                                }
-                                            },
-                                            onClick = {
-                                                onLanguageSelected(language)
-                                                onDismissLanguageDropdown()
-                                            },
-                                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                        )
-                                    }
+                                    Text(
+                                        text = currentLanguage?.flag ?: "",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                        expanded = state.isLanguageDropdownExpanded
+                                    )
+                                }
+                            }
+                            ExposedDropdownMenu(
+                                expanded = state.isLanguageDropdownExpanded,
+                                onDismissRequest = onDismissLanguageDropdown,
+                                modifier = Modifier.width(200.dp),
+                                shape = MaterialTheme.shapes.small,
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                shadowElevation = 2.dp
+                            ) {
+                                state.availableLanguages.forEach { language ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(language.flag)
+                                                Text(language.selfName)
+                                            }
+                                        },
+                                        onClick = {
+                                            onLanguageSelected(language)
+                                            onDismissLanguageDropdown()
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
                                 }
                             }
                         }
