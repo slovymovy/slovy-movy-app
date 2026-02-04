@@ -6,6 +6,7 @@ import kotlin.test.assertTrue
 private class UnknownHostException : Exception()
 private class ConnectException : Exception()
 private class NoRouteToHostException : Exception()
+private class UnresolvedAddressException : Exception()
 private class SocketTimeoutException : Exception()
 private class HttpRequestTimeoutException : Exception()
 private class ConnectTimeoutException : Exception()
@@ -16,7 +17,7 @@ class NetworkErrorClassifierTest {
         assertTrue(NetworkErrorClassifier.classify(UnknownHostException()) is NetworkError.Offline)
         assertTrue(NetworkErrorClassifier.classify(ConnectException()) is NetworkError.Offline)
         assertTrue(NetworkErrorClassifier.classify(NoRouteToHostException()) is NetworkError.Offline)
-        assertTrue(NetworkErrorClassifier.classify(NetworkOfflineException()) is NetworkError.Offline)
+        assertTrue(NetworkErrorClassifier.classify(UnresolvedAddressException()) is NetworkError.Offline)
     }
 
     @Test

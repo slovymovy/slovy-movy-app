@@ -17,10 +17,6 @@ object NetworkErrorClassifier {
     fun classify(throwable: Throwable): NetworkError {
         val chain = generateSequence(throwable) { it.cause }.toList()
 
-        if (chain.any { it is NetworkOfflineException }) {
-            return NetworkError.Offline
-        }
-
         // Server errors (explicit status)
         chain.firstOrNull { it is DictionaryClientException.ServerException }?.let { t ->
             val server = t as DictionaryClientException.ServerException
@@ -75,7 +71,8 @@ object NetworkErrorClassifier {
         return when (throwable::class.simpleName) {
             "UnknownHostException",
             "ConnectException",
-            "NoRouteToHostException" -> true
+            "NoRouteToHostException",
+            "UnresolvedAddressException" -> true
 
             else -> false
         }
@@ -126,5 +123,3 @@ object NetworkErrorClassifier {
                 (m.contains("nsurlerrordomain") && m.contains("-1001"))
     }
 }
-
-class NetworkOfflineException : Exception("No internet connection")
