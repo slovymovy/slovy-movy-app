@@ -137,7 +137,7 @@ class FavoritesViewModel(
      */
     internal suspend fun computeFavoritesState(
         query: String,
-        currentContent: FavoritesUiState.Content? = state as? FavoritesUiState.Content
+        currentContent: FavoritesUiState.Content?
     ): FavoritesUiState.Content {
         val currentSenses = currentContent?.senses.orEmpty()
         val currentById = currentSenses.associateBy { it.senseId }
@@ -212,7 +212,7 @@ class FavoritesViewModel(
     /** Computes and applies favorites state. Exposed for tests; production code uses the
      *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
     internal suspend fun loadAndApplyState(query: String) {
-        state = computeFavoritesState(query)
+        state = computeFavoritesState(query, state as? FavoritesUiState.Content)
     }
 
 
