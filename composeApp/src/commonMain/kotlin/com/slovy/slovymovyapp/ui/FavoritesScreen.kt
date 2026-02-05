@@ -58,9 +58,13 @@ sealed interface FavoritesUiState {
         val senses: List<FavoriteSenseItem>,
         val query: String = "",
         val hasAnyFavorites: Boolean = false,
-        val favoriteLemmas: Set<String> = emptySet()
+        val favoriteLemmas: Set<String> = emptySet(),
+        val availableLanguages: List<Language> = emptyList(),
+        val selectedLanguage: Language? = null,
+        val isLanguageDropdownExpanded: Boolean = false
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
+        val showLanguagePicker: Boolean get() = availableLanguages.size > 1
     }
 }
 
@@ -108,33 +112,73 @@ class FavoritesViewModel(
         queryFlow.value = QueryState(currentQuery, Uuid.random())
     }
 
+    fun setSelectedLanguage(language: Language) {
+        val content = state as? FavoritesUiState.Content ?: return
+        if (content.selectedLanguage == language) return
+        state = content.copy(selectedLanguage = language)
+        queryFlow.value = QueryState(content.query, Uuid.random())
+    }
+
+    fun toggleLanguageDropdown() {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.copy(isLanguageDropdownExpanded = !content.isLanguageDropdownExpanded)
+    }
+
+    fun dismissLanguageDropdown() {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.copy(isLanguageDropdownExpanded = false)
+    }
+
     private suspend fun loadFavoritesInternal(query: String) {
-        val currentSenses = (state as? FavoritesUiState.Content)?.senses.orEmpty()
+        val currentContent = state as? FavoritesUiState.Content
+        val currentSenses = currentContent?.senses.orEmpty()
         val currentById = currentSenses.associateBy { it.senseId }
 
         val allFavorites = favoritesRepository.getAllGroupedByLangAndLemma()
         val hasAnyFavorites = allFavorites.isNotEmpty()
 
+        // Derive available languages from all favorites
+        val availableLanguages = allFavorites.map { it.language }.distinct().sorted()
+
+        // Determine selected language: keep current if still valid, else first available
+        val selectedLanguage = when {
+            availableLanguages.size <= 1 -> availableLanguages.firstOrNull()
+            currentContent?.selectedLanguage in availableLanguages -> currentContent?.selectedLanguage
+            else -> availableLanguages.first()
+        }
+
+        // Filter favorites to selected language when multi-language
+        val langFiltered = if (availableLanguages.size > 1 && selectedLanguage != null) {
+            allFavorites.filter { it.language == selectedLanguage }
+        } else {
+            allFavorites
+        }
+
         val trimmedQuery = query.trim()
         val favorites = if (trimmedQuery.isEmpty()) {
-            allFavorites
+            langFiltered
         } else {
-            // Search by lemma
+            // Search by lemma — scope to language-filtered favorites
             val lemmaMatches = favoritesRepository.searchByLemma(trimmedQuery)
-            val lemmaMatchIds = lemmaMatches.map { it.senseId }.toSet()
+            val langFilteredSenseIds = langFiltered.map { it.senseId }.toSet()
+            val lemmaMatchIds = lemmaMatches.filter { it.senseId in langFilteredSenseIds }
+                .map { it.senseId }.toSet()
 
-            // Search by translation - for each source language in favorites
-            val sourceLanguages = allFavorites.map { it.language }.distinct()
+            // Search by translation — scoped to selected language
+            val searchLanguages = if (selectedLanguage != null) listOf(selectedLanguage)
+            else langFiltered.map { it.language }.distinct()
 
-            val translationMatchIds = sourceLanguages.flatMap { lang ->
-                dictionaryRepository.searchSenseIdsByTranslation(allFavorites.filter { it.language == lang }
-                    .map { it.senseId }.toSet(), trimmedQuery, lang)
+            val translationMatchIds = searchLanguages.flatMap { lang ->
+                dictionaryRepository.searchSenseIdsByTranslation(
+                    langFiltered.filter { it.language == lang }.map { it.senseId }.toSet(),
+                    trimmedQuery, lang
+                )
             }.toSet()
 
             // Prioritize lemma matches first, then translation-only matches
-            val lemmaMatchFavorites = allFavorites.filter { it.senseId in lemmaMatchIds }
+            val lemmaMatchFavorites = langFiltered.filter { it.senseId in lemmaMatchIds }
             val translationOnlyIds = translationMatchIds - lemmaMatchIds
-            val translationOnlyFavorites = allFavorites.filter { it.senseId in translationOnlyIds }
+            val translationOnlyFavorites = langFiltered.filter { it.senseId in translationOnlyIds }
 
             lemmaMatchFavorites + translationOnlyFavorites
         }
@@ -149,7 +193,10 @@ class FavoritesViewModel(
             senses = senses,
             query = query,
             hasAnyFavorites = hasAnyFavorites,
-            favoriteLemmas = allFavorites.map { it.lemma }.toSet()
+            favoriteLemmas = allFavorites.map { it.lemma }.toSet(),
+            availableLanguages = availableLanguages,
+            selectedLanguage = selectedLanguage,
+            isLanguageDropdownExpanded = currentContent?.isLanguageDropdownExpanded ?: false
         )
 
         prefetchSenses(senses.take(PREFETCH_LIMIT))
@@ -207,7 +254,36 @@ class FavoritesViewModel(
             // Remove from repository and UI
             favoritesRepository.remove(senseId, favorite.language)
             val content = state as? FavoritesUiState.Content ?: return@launch
-            state = content.copy(senses = content.senses.filter { it.senseId != senseId })
+            val remainingSenses = content.senses.filter { it.senseId != senseId }
+
+            // Derive available languages from all languages, removing current only if no senses remain
+            val remainingLanguages = if (remainingSenses.isEmpty()) {
+                content.availableLanguages.filter { it != content.selectedLanguage }
+            } else {
+                content.availableLanguages
+            }
+            val needsLanguageSwitch = content.selectedLanguage !in remainingLanguages
+            val newSelectedLanguage = if (needsLanguageSwitch) {
+                remainingLanguages.firstOrNull()
+            } else {
+                content.selectedLanguage
+            }
+
+            if (needsLanguageSwitch && newSelectedLanguage != null) {
+                // Set new language without clearing senses to avoid empty screen flash,
+                // then load new language's favorites directly (bypassing debounce)
+                state = content.copy(
+                    availableLanguages = remainingLanguages,
+                    selectedLanguage = newSelectedLanguage
+                )
+                loadFavoritesInternal(content.query)
+            } else {
+                state = content.copy(
+                    senses = remainingSenses,
+                    availableLanguages = remainingLanguages,
+                    selectedLanguage = newSelectedLanguage
+                )
+            }
 
             // Show snackbar with an undo option
             val result = snackbarHostState.showSnackbar(
@@ -290,7 +366,10 @@ fun FavoritesScreen(
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
         onNavigateToSettings = onNavigateToSettings,
-        onPrefetchVisible = { senses, range -> viewModel.prefetchVisibleRange(senses, range) }
+        onPrefetchVisible = { senses, range -> viewModel.prefetchVisibleRange(senses, range) },
+        onLanguageSelected = { viewModel.setSelectedLanguage(it) },
+        onToggleLanguageDropdown = { viewModel.toggleLanguageDropdown() },
+        onDismissLanguageDropdown = { viewModel.dismissLanguageDropdown() }
     )
 }
 
@@ -308,7 +387,10 @@ fun FavoritesScreenContent(
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
-    onPrefetchVisible: (List<FavoriteSenseItem>, IntRange) -> Unit = { _, _ -> }
+    onPrefetchVisible: (List<FavoriteSenseItem>, IntRange) -> Unit = { _, _ -> },
+    onLanguageSelected: (Language) -> Unit = {},
+    onToggleLanguageDropdown: () -> Unit = {},
+    onDismissLanguageDropdown: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -374,14 +456,81 @@ fun FavoritesScreenContent(
                         .padding(innerPadding)
                 ) {
                     if (state.hasAnyFavorites) {
-                        com.slovy.slovymovyapp.ui.components.AppSearchBar(
-                            query = state.query,
-                            onQueryChange = onQueryChange,
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            placeholder = "Type a word..."
-                        )
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            com.slovy.slovymovyapp.ui.components.AppSearchBar(
+                                query = state.query,
+                                onQueryChange = onQueryChange,
+                                modifier = Modifier.weight(1f),
+                                placeholder = "Type a word..."
+                            )
+
+                            if (state.showLanguagePicker) {
+                                val currentLanguage = state.selectedLanguage
+                                    ?: state.availableLanguages.firstOrNull()
+
+                                ExposedDropdownMenuBox(
+                                    expanded = state.isLanguageDropdownExpanded,
+                                    onExpandedChange = { onToggleLanguageDropdown() }
+                                ) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+                                            .height(56.dp)
+                                            .widthIn(min = 56.dp),
+                                        shape = MaterialTheme.shapes.extraLarge,
+                                        tonalElevation = 1.dp,
+                                        shadowElevation = 1.dp,
+                                        color = MaterialTheme.colorScheme.surfaceContainerHighest
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(start = 16.dp, end = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = currentLanguage?.flag ?: "",
+                                                style = MaterialTheme.typography.bodyLarge
+                                            )
+                                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                                expanded = state.isLanguageDropdownExpanded
+                                            )
+                                        }
+                                    }
+                                    ExposedDropdownMenu(
+                                        expanded = state.isLanguageDropdownExpanded,
+                                        onDismissRequest = onDismissLanguageDropdown,
+                                        modifier = Modifier.width(200.dp),
+                                        shape = MaterialTheme.shapes.small,
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        shadowElevation = 2.dp
+                                    ) {
+                                        state.availableLanguages.forEach { language ->
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Row(
+                                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Text(language.flag)
+                                                        Text(language.selfName)
+                                                    }
+                                                },
+                                                onClick = {
+                                                    onLanguageSelected(language)
+                                                    onDismissLanguageDropdown()
+                                                },
+                                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         Spacer(modifier = Modifier.height(4.dp))
                     }
 
@@ -706,6 +855,37 @@ fun PreviewFavoritesScreenLoadingAndError(
                 )
             ),
             hasAnyFavorites = true
+        )
+        FavoritesScreenContent(state = state)
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview
+@Composable
+fun PreviewFavoritesScreenMultiLanguage(
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val state = FavoritesUiState.Content(
+            senses = listOf(
+                createSenseItem(
+                    senseId = "run-1",
+                    lemma = "run",
+                    targetLang = Language.ENGLISH,
+                    sense = createMockSense("run-1", "to move swiftly on foot"),
+                    pos = PartOfSpeech.VERB
+                ),
+                createSenseItem(
+                    senseId = "book-1",
+                    lemma = "book",
+                    targetLang = Language.ENGLISH,
+                    sense = createMockSense("book-1", "a written or printed work"),
+                    pos = PartOfSpeech.NOUN
+                )
+            ),
+            hasAnyFavorites = true,
+            availableLanguages = listOf(Language.ENGLISH, Language.POLISH),
+            selectedLanguage = Language.ENGLISH
         )
         FavoritesScreenContent(state = state)
     }
