@@ -722,6 +722,17 @@ class DictionaryRepository(
     }
 
     /**
+     * Gets recent favorite lemmas for the given language, most recent first.
+     */
+    suspend fun getRecentFavoriteLemmas(language: Language, limit: Int = 5): List<String> =
+        withContext(Dispatchers.IO) {
+            favoritesRepository.getAll()
+                .filter { it.language == language }
+                .map { it.lemma }
+                .take(limit)
+        }
+
+    /**
      * Gets word suggestions for the empty search state.
      * Returns high-frequency words that are not in favorites.
      * Uses a random offset for variety.
