@@ -119,14 +119,9 @@ class FavoritesViewModel(
         queryFlow.value = QueryState(content.query, Uuid.random())
     }
 
-    fun toggleLanguageDropdown() {
+    fun setLanguageDropdownExpanded(expanded: Boolean) {
         val content = state as? FavoritesUiState.Content ?: return
-        state = content.copy(isLanguageDropdownExpanded = !content.isLanguageDropdownExpanded)
-    }
-
-    fun dismissLanguageDropdown() {
-        val content = state as? FavoritesUiState.Content ?: return
-        state = content.copy(isLanguageDropdownExpanded = false)
+        state = content.copy(isLanguageDropdownExpanded = expanded)
     }
 
     private suspend fun loadFavoritesInternal(query: String) {
@@ -251,39 +246,14 @@ class FavoritesViewModel(
             // Fetch the favorite to get its createdAt before removal
             val favorite = favoritesRepository.getOne(senseId, item.targetLang) ?: return@launch
 
-            // Remove from repository and UI
+            // Remove from repository, then remove from displayed list for immediate feedback
             favoritesRepository.remove(senseId, favorite.language)
             val content = state as? FavoritesUiState.Content ?: return@launch
-            val remainingSenses = content.senses.filter { it.senseId != senseId }
+            state = content.copy(senses = content.senses.filter { it.senseId != senseId })
 
-            // Derive available languages from all languages, removing current only if no senses remain
-            val remainingLanguages = if (remainingSenses.isEmpty()) {
-                content.availableLanguages.filter { it != content.selectedLanguage }
-            } else {
-                content.availableLanguages
-            }
-            val needsLanguageSwitch = content.selectedLanguage !in remainingLanguages
-            val newSelectedLanguage = if (needsLanguageSwitch) {
-                remainingLanguages.firstOrNull()
-            } else {
-                content.selectedLanguage
-            }
-
-            if (needsLanguageSwitch && newSelectedLanguage != null) {
-                // Set new language without clearing senses to avoid empty screen flash,
-                // then load new language's favorites directly (bypassing debounce)
-                state = content.copy(
-                    availableLanguages = remainingLanguages,
-                    selectedLanguage = newSelectedLanguage
-                )
-                loadFavoritesInternal(content.query)
-            } else {
-                state = content.copy(
-                    senses = remainingSenses,
-                    availableLanguages = remainingLanguages,
-                    selectedLanguage = newSelectedLanguage
-                )
-            }
+            // Recompute languages and filtered senses from repository (handles query
+            // filtering, language switches, and all edge cases correctly)
+            loadFavoritesInternal(content.query)
 
             // Show snackbar with an undo option
             val result = snackbarHostState.showSnackbar(
@@ -368,8 +338,7 @@ fun FavoritesScreen(
         onNavigateToSettings = onNavigateToSettings,
         onPrefetchVisible = { senses, range -> viewModel.prefetchVisibleRange(senses, range) },
         onLanguageSelected = { viewModel.setSelectedLanguage(it) },
-        onToggleLanguageDropdown = { viewModel.toggleLanguageDropdown() },
-        onDismissLanguageDropdown = { viewModel.dismissLanguageDropdown() }
+        onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) }
     )
 }
 
@@ -389,8 +358,7 @@ fun FavoritesScreenContent(
     onNavigateToSettings: () -> Unit = {},
     onPrefetchVisible: (List<FavoriteSenseItem>, IntRange) -> Unit = { _, _ -> },
     onLanguageSelected: (Language) -> Unit = {},
-    onToggleLanguageDropdown: () -> Unit = {},
-    onDismissLanguageDropdown: () -> Unit = {}
+    onSetLanguageDropdownExpanded: (Boolean) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -476,7 +444,7 @@ fun FavoritesScreenContent(
 
                                 ExposedDropdownMenuBox(
                                     expanded = state.isLanguageDropdownExpanded,
-                                    onExpandedChange = { onToggleLanguageDropdown() }
+                                    onExpandedChange = onSetLanguageDropdownExpanded
                                 ) {
                                     Surface(
                                         modifier = Modifier
@@ -503,7 +471,7 @@ fun FavoritesScreenContent(
                                     }
                                     ExposedDropdownMenu(
                                         expanded = state.isLanguageDropdownExpanded,
-                                        onDismissRequest = onDismissLanguageDropdown,
+                                        onDismissRequest = { onSetLanguageDropdownExpanded(false) },
                                         modifier = Modifier.width(200.dp),
                                         shape = MaterialTheme.shapes.small,
                                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -522,7 +490,7 @@ fun FavoritesScreenContent(
                                                 },
                                                 onClick = {
                                                     onLanguageSelected(language)
-                                                    onDismissLanguageDropdown()
+                                                    onSetLanguageDropdownExpanded(false)
                                                 },
                                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                                             )

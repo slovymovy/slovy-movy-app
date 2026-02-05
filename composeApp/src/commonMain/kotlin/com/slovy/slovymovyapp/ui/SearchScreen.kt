@@ -198,12 +198,8 @@ class SearchViewModel(
         }
     }
 
-    fun toggleLanguageDropdown() {
-        state = state.copy(isLanguageDropdownExpanded = !state.isLanguageDropdownExpanded)
-    }
-
-    fun dismissLanguageDropdown() {
-        state = state.copy(isLanguageDropdownExpanded = false)
+    fun setLanguageDropdownExpanded(expanded: Boolean) {
+        state = state.copy(isLanguageDropdownExpanded = expanded)
     }
 
     fun setShowLanguageIndicators(show: Boolean) {
@@ -264,8 +260,7 @@ fun SearchScreen(
             viewModel.setSelectedLanguage(language)
             // TODO: search is not relaunched or query
         },
-        onToggleLanguageDropdown = { viewModel.toggleLanguageDropdown() },
-        onDismissLanguageDropdown = { viewModel.dismissLanguageDropdown() },
+        onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onRefreshSuggestions = { viewModel.refreshSuggestionsFromPull() },
         wordDetailLabel = wordDetailLabel,
         onNavigateToWordDetail = onNavigateToWordDetail,
@@ -282,8 +277,7 @@ fun SearchScreenContent(
     onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
     onSuggestionSelected: (String) -> Unit = {},
     onLanguageSelected: (Language?) -> Unit = {},
-    onToggleLanguageDropdown: () -> Unit = {},
-    onDismissLanguageDropdown: () -> Unit = {},
+    onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onRefreshSuggestions: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
@@ -348,7 +342,7 @@ fun SearchScreenContent(
 
                         ExposedDropdownMenuBox(
                             expanded = state.isLanguageDropdownExpanded,
-                            onExpandedChange = { onToggleLanguageDropdown() }
+                            onExpandedChange = onSetLanguageDropdownExpanded
                         ) {
                             Surface(
                                 modifier = Modifier
@@ -375,7 +369,7 @@ fun SearchScreenContent(
                             }
                             ExposedDropdownMenu(
                                 expanded = state.isLanguageDropdownExpanded,
-                                onDismissRequest = onDismissLanguageDropdown,
+                                onDismissRequest = { onSetLanguageDropdownExpanded(false) },
                                 modifier = Modifier.width(200.dp),
                                 shape = MaterialTheme.shapes.small,
                                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -394,7 +388,7 @@ fun SearchScreenContent(
                                         },
                                         onClick = {
                                             onLanguageSelected(language)
-                                            onDismissLanguageDropdown()
+                                            onSetLanguageDropdownExpanded(false)
                                         },
                                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                                     )
