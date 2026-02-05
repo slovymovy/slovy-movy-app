@@ -124,7 +124,7 @@ class FavoritesViewModel(
         state = content.copy(isLanguageDropdownExpanded = expanded)
     }
 
-    private suspend fun loadFavoritesInternal(query: String) {
+    internal suspend fun loadFavoritesInternal(query: String) {
         val currentContent = state as? FavoritesUiState.Content
         val currentSenses = currentContent?.senses.orEmpty()
         val currentById = currentSenses.associateBy { it.senseId }
@@ -191,7 +191,8 @@ class FavoritesViewModel(
             favoriteLemmas = allFavorites.map { it.lemma }.toSet(),
             availableLanguages = availableLanguages,
             selectedLanguage = selectedLanguage,
-            isLanguageDropdownExpanded = currentContent?.isLanguageDropdownExpanded ?: false
+            isLanguageDropdownExpanded = if (availableLanguages.size > 1)
+                currentContent?.isLanguageDropdownExpanded ?: false else false
         )
 
         prefetchSenses(senses.take(PREFETCH_LIMIT))
