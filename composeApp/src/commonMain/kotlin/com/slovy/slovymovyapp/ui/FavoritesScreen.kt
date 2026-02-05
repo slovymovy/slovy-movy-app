@@ -95,7 +95,8 @@ class FavoritesViewModel(
             queryFlow
                 .debounce(QUERY_DEBOUNCE_MS)
                 .flatMapLatest { queryState ->
-                    flow { emit(computeFavoritesState(queryState.query)) }
+                    val snapshot = state as? FavoritesUiState.Content
+                    flow { emit(computeFavoritesState(queryState.query, snapshot)) }
                         .flowOn(Dispatchers.Default)
                 }
                 .collect { newState ->
@@ -131,9 +132,13 @@ class FavoritesViewModel(
     /**
      * Computes the new favorites state from the repository. Safe to call from any dispatcher.
      * Returns the new [FavoritesUiState.Content] without mutating [state].
+     *
+     * @param currentContent snapshot of the current UI state, captured on Main before dispatching.
      */
-    internal suspend fun computeFavoritesState(query: String): FavoritesUiState.Content {
-        val currentContent = state as? FavoritesUiState.Content
+    internal suspend fun computeFavoritesState(
+        query: String,
+        currentContent: FavoritesUiState.Content? = state as? FavoritesUiState.Content
+    ): FavoritesUiState.Content {
         val currentSenses = currentContent?.senses.orEmpty()
         val currentById = currentSenses.associateBy { it.senseId }
 
@@ -267,7 +272,8 @@ class FavoritesViewModel(
 
             // Recompute languages and filtered senses from repository (handles query
             // filtering, language switches, and all edge cases correctly)
-            val newState = withContext(Dispatchers.Default) { computeFavoritesState(content.query) }
+            val snapshot = state as? FavoritesUiState.Content
+            val newState = withContext(Dispatchers.Default) { computeFavoritesState(content.query, snapshot) }
             state = newState
             prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
 
