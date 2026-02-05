@@ -95,10 +95,13 @@ class FavoritesViewModel(
             queryFlow
                 .debounce(QUERY_DEBOUNCE_MS)
                 .flatMapLatest { queryState ->
-                    flow { emit(loadFavoritesInternal(queryState.query)) }
+                    flow { emit(computeFavoritesState(queryState.query)) }
                         .flowOn(Dispatchers.Default)
                 }
-                .collect { }
+                .collect { newState ->
+                    state = newState
+                    prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
+                }
         }
     }
 
@@ -125,7 +128,11 @@ class FavoritesViewModel(
         state = content.copy(isLanguageDropdownExpanded = expanded)
     }
 
-    internal suspend fun loadFavoritesInternal(query: String) {
+    /**
+     * Computes the new favorites state from the repository. Safe to call from any dispatcher.
+     * Returns the new [FavoritesUiState.Content] without mutating [state].
+     */
+    internal suspend fun computeFavoritesState(query: String): FavoritesUiState.Content {
         val currentContent = state as? FavoritesUiState.Content
         val currentSenses = currentContent?.senses.orEmpty()
         val currentById = currentSenses.associateBy { it.senseId }
@@ -185,7 +192,7 @@ class FavoritesViewModel(
             buildSenseItem(favorite, cached, existing)
         }
 
-        state = FavoritesUiState.Content(
+        return FavoritesUiState.Content(
             senses = senses,
             query = query,
             hasAnyFavorites = hasAnyFavorites,
@@ -195,9 +202,14 @@ class FavoritesViewModel(
             isLanguageDropdownExpanded = if (availableLanguages.size > 1)
                 currentContent?.isLanguageDropdownExpanded ?: false else false
         )
-
-        prefetchSenses(senses.take(PREFETCH_LIMIT))
     }
+
+    /** Computes and applies favorites state. Exposed for tests; production code uses the
+     *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
+    internal suspend fun loadAndApplyState(query: String) {
+        state = computeFavoritesState(query)
+    }
+
 
     private fun buildSenseItem(
         favorite: Favorite,
@@ -255,7 +267,9 @@ class FavoritesViewModel(
 
             // Recompute languages and filtered senses from repository (handles query
             // filtering, language switches, and all edge cases correctly)
-            withContext(Dispatchers.Default) { loadFavoritesInternal(content.query) }
+            val newState = withContext(Dispatchers.Default) { computeFavoritesState(content.query) }
+            state = newState
+            prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
 
             // Show snackbar with an undo option
             val result = snackbarHostState.showSnackbar(

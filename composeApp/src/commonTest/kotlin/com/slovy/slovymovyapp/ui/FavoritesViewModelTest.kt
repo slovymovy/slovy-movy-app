@@ -54,7 +54,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s2", Language.ENGLISH, "world")
 
         val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
 
         val content = contentState(vm)
         assertEquals(2, content.senses.size)
@@ -70,7 +70,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s2", Language.RUSSIAN, "привет")
 
         val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
 
         val content = contentState(vm)
         assertTrue(content.showLanguagePicker)
@@ -89,7 +89,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s3", Language.RUSSIAN, "привет")
 
         val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
 
         var content = contentState(vm)
         assertTrue(content.senses.all { it.targetLang == Language.ENGLISH })
@@ -97,7 +97,7 @@ open class FavoritesViewModelTest : BaseTest() {
 
         // Switch to Russian — update selectedLanguage then reload
         vm.setSelectedLanguage(Language.RUSSIAN)
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
 
         content = contentState(vm)
         assertEquals(Language.RUSSIAN, content.selectedLanguage)
@@ -114,16 +114,16 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s3", Language.RUSSIAN, "привет")
 
         val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
 
         // Switch to Russian (only 1 favorite)
         vm.setSelectedLanguage(Language.RUSSIAN)
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
         assertEquals(Language.RUSSIAN, contentState(vm).selectedLanguage)
 
         // Remove the only Russian favorite and reload (simulates toggleFavorite's logic)
         favRepo.remove("s3", Language.RUSSIAN)
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
 
         val content = contentState(vm)
         assertEquals(Language.ENGLISH, content.selectedLanguage,
@@ -141,10 +141,10 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s3", Language.RUSSIAN, "привет")
 
         val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
 
         // Search for "hello" — only matches s1 in English
-        vm.loadFavoritesInternal("hello")
+        vm.loadAndApplyState("hello")
 
         var content = contentState(vm)
         assertEquals(1, content.senses.size)
@@ -152,7 +152,7 @@ open class FavoritesViewModelTest : BaseTest() {
 
         // Remove "hello" — English still has "world", should stay on English
         favRepo.remove("s1", Language.ENGLISH)
-        vm.loadFavoritesInternal("hello")
+        vm.loadAndApplyState("hello")
 
         content = contentState(vm)
         assertEquals(Language.ENGLISH, content.selectedLanguage,
@@ -169,10 +169,10 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s2", Language.RUSSIAN, "hello")
 
         val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
 
         // Search for "hello" while on English
-        vm.loadFavoritesInternal("hello")
+        vm.loadAndApplyState("hello")
 
         val content = contentState(vm)
         assertEquals(Language.ENGLISH, content.selectedLanguage)
@@ -188,17 +188,17 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s2", Language.RUSSIAN, "привет")
 
         val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
 
         // Switch to Russian and open the dropdown
         vm.setSelectedLanguage(Language.RUSSIAN)
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
         vm.setLanguageDropdownExpanded(true)
         assertTrue(contentState(vm).isLanguageDropdownExpanded)
 
         // Remove the only Russian favorite — picker becomes hidden
         favRepo.remove("s2", Language.RUSSIAN)
-        vm.loadFavoritesInternal("")
+        vm.loadAndApplyState("")
 
         val content = contentState(vm)
         assertFalse(content.showLanguagePicker)
