@@ -30,6 +30,7 @@ import com.slovy.slovymovyapp.ui.word.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
@@ -254,7 +255,7 @@ class FavoritesViewModel(
 
             // Recompute languages and filtered senses from repository (handles query
             // filtering, language switches, and all edge cases correctly)
-            loadFavoritesInternal(content.query)
+            withContext(Dispatchers.Default) { loadFavoritesInternal(content.query) }
 
             // Show snackbar with an undo option
             val result = snackbarHostState.showSnackbar(
