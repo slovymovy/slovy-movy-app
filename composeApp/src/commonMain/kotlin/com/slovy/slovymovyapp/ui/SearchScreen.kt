@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
@@ -287,12 +288,18 @@ fun SearchScreenContent(
     onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
+    val searchFocusRequester = remember { FocusRequester() }
+    var isSearchFocused by remember { mutableStateOf(false) }
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(Unit) {
+            .pointerInput(state.query, isSearchFocused) {
                 detectTapGestures(onTap = {
-                    focusManager.clearFocus()
+                    if (!isSearchFocused && state.query.isEmpty()) {
+                        searchFocusRequester.requestFocus()
+                    } else {
+                        focusManager.clearFocus()
+                    }
                 })
             }
     ) {
@@ -327,7 +334,9 @@ fun SearchScreenContent(
                         query = state.query,
                         onQueryChange = onQueryChange,
                         modifier = Modifier.weight(1f),
-                        placeholder = "Search your word..."
+                        placeholder = "Search your word...",
+                        focusRequester = searchFocusRequester,
+                        onFocusChanged = { isSearchFocused = it }
                     )
 
                     // Language filter dropdown
