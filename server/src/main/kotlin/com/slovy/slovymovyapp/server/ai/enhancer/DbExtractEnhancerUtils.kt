@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.server.ai.enhancer
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.ingestion.*
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -76,19 +77,8 @@ object DbExtractEnhancerUtils {
     }
 
     fun targetLanguageName(langCode: String): String {
-        return when (langCode) {
-            "en" -> "English"
-            "nl" -> "Dutch"
-            "ru" -> "Russian"
-            "pl" -> "Polish"
-            "fr" -> "French"
-            "it" -> "Italian"
-            "de" -> "German"
-            "cs" -> "Czech"
-            "es" -> "Spanish"
-            "tr" -> "Turkish"
-            else -> error("Unsupported language code: $langCode")
-        }
+        return Language.fromCodeOrNull(langCode)?.englishName
+            ?: error("Unsupported language code: $langCode")
     }
 
     private fun ExtractedWordEntry.toRequestEntry(): LanguageCardEntry {

@@ -111,7 +111,7 @@ fun LanguageSetupScreen(
         onNext = {
             val learning = viewModel.state.learningLanguage
             val native = viewModel.state.nativeLanguages.toList()
-            if (learning != null && native.isNotEmpty()) {
+            if (learning != null) {
                 onNext(learning, native)
             }
         },
@@ -128,7 +128,7 @@ fun LanguageSetupScreenContent(
     onNext: () -> Unit = {},
     onRetry: () -> Unit = {}
 ) {
-    val canGoNext = state.learningLanguage != null && state.nativeLanguages.isNotEmpty()
+    val canGoNext = state.learningLanguage != null
 
     Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         if (state.isLoading) {
@@ -261,7 +261,7 @@ fun LanguageSetupScreenContent(
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                     ) {
-                        items(state.availableLanguages) { language ->
+                        items(Language.entries.toList()) { language ->
                             val isSelected = language in state.nativeLanguages
                             val isEnabled = language != state.learningLanguage
 
