@@ -43,7 +43,8 @@ const val SERVER_PORT = 8080
 
 @Serializable
 private data class FeedbackIssueRequest(
-    val comment: String
+    val comment: String,
+    val email: String? = null
 )
 
 @Serializable
@@ -227,7 +228,8 @@ fun Application.module() {
                     lang = lang,
                     word = word,
                     translationCodes = translationCodes,
-                    comment = comment
+                    comment = comment,
+                    email = feedbackRequest.email
                 )
                 val response = FeedbackIssueResponse(
                     issueNumber = createdIssue.number,

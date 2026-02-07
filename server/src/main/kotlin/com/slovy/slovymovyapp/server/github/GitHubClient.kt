@@ -303,7 +303,8 @@ object GitHubClient {
         lang: String,
         word: String,
         comment: String,
-        translationCodes: List<String> = emptyList()
+        translationCodes: List<String> = emptyList(),
+        email: String? = null
     ): CreatedIssue {
         val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
         ensureFeedbackLabelExists(repository)
@@ -316,7 +317,8 @@ object GitHubClient {
             lang = lang,
             word = word,
             translationCodes = translationCodes,
-            comment = comment
+            comment = comment,
+            email = email
         )
         val issue = repository.createIssue(title)
             .body(body)
@@ -347,7 +349,8 @@ object GitHubClient {
         lang: String,
         word: String,
         translationCodes: List<String>,
-        comment: String
+        comment: String,
+        email: String? = null
     ): String {
         val translations = normalizeTranslationCodes(translationCodes)
         val translationLine = if (translations.isEmpty()) "n/a" else translations.joinToString(", ")
@@ -357,6 +360,10 @@ object GitHubClient {
             appendLine("- Language: `$lang`")
             appendLine("- Word: `$word`")
             appendLine("- Translation codes: `$translationLine`")
+            if (!email.isNullOrBlank()) {
+                val obfuscated = email.trim().replace("@", " [$word] ")
+                appendLine("- Email: `$obfuscated`")
+            }
             appendLine()
             appendLine("Comment:")
             appendLine(comment.trim())
