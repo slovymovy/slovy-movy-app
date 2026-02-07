@@ -148,6 +148,17 @@ class DataDbManager(
         runBlocking { databaseCache.closeAll() }
     }
 
+    /**
+     * Returns the subset of [candidates] that have downloadable translation DBs
+     * for the given [src] language on the remote bucket.
+     */
+    suspend fun downloadableTranslationTargets(src: Language, candidates: List<Language>): List<Language> {
+        val available = fetchAvailableLanguages()
+        val targets = available.find { it.language == src }
+            ?.availableTranslations?.map { it.targetLanguage } ?: emptyList()
+        return candidates.filter { it != src && it in targets }
+    }
+
     fun hasDictionary(lang: Language): Boolean {
         return platform.fileExists(platform.getDatabasePath(dictionaryFileName(lang)))
     }
