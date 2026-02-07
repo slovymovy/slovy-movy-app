@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.StopCircle
+import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -49,7 +50,11 @@ sealed interface WordDetailUiState {
         val cardLoading: Boolean = false,
         val cardError: String? = null,
         val translationLoading: Boolean = false,
-        val translationError: String? = null
+        val translationError: String? = null,
+        val feedbackDialogVisible: Boolean = false,
+        val feedbackComment: String = "",
+        val feedbackSubmitting: Boolean = false,
+        val feedbackError: String? = null
     ) : WordDetailUiState
 }
 
@@ -210,6 +215,7 @@ private inline fun EntryUiState.updateSense(
 
 class WordDetailViewModel(
     private val repository: DictionaryRepository,
+    private val dictionaryClient: DictionaryClient,
     private val wordFetchManager: WordFetchManager,
     private val favoritesRepository: FavoritesRepository,
     private val ttsManager: TextToSpeechManager,
@@ -244,15 +250,22 @@ class WordDetailViewModel(
     var availableVoices by mutableStateOf<List<Text2SpeechVoice>>(emptyList())
         private set
 
+    val snackbarHostState = SnackbarHostState()
+
     private var currentVoiceIndex: Int = 0
     private var hasScrolledToTarget = false
+    private var requestedTranslationLanguages: List<Language> =
+        translationLanguages?.distinctBy { it.code } ?: emptyList()
 
     init {
         viewModelScope.launch {
+            val resolvedTranslations = translationLanguages?.distinctBy { it.code }
+                ?: repository.installedTranslationTargets(dictionaryLanguage).distinctBy { it.code }
+            requestedTranslationLanguages = resolvedTranslations
             wordFetchManager.getWord(
                 dictionaryLanguage,
                 lemma,
-                translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage),
+                resolvedTranslations,
                 pushToRepo = true
             ).onCompletion { cause ->
                 if (cause is CancellationException) {
@@ -303,7 +316,11 @@ class WordDetailViewModel(
                 cardLoading = result.isWordLoading,
                 cardError = if (wasWordLoading && errorMessage != null) errorMessage else null,
                 translationLoading = result.isTranslationLoading,
-                translationError = if (wasTranslationLoading && errorMessage != null) errorMessage else null
+                translationError = if (wasTranslationLoading && errorMessage != null) errorMessage else null,
+                feedbackDialogVisible = current?.feedbackDialogVisible ?: false,
+                feedbackComment = current?.feedbackComment ?: "",
+                feedbackSubmitting = current?.feedbackSubmitting ?: false,
+                feedbackError = current?.feedbackError
             )
         } else if (result.error != null) {
             state = WordDetailUiState.Empty(
@@ -341,10 +358,14 @@ class WordDetailViewModel(
 
     private fun loadFavorites() {
         viewModelScope.launch {
+            val resolvedTranslations = requestedTranslationLanguages.ifEmpty {
+                repository.installedTranslationTargets(dictionaryLanguage).distinctBy { it.code }
+                    .also { requestedTranslationLanguages = it }
+            }
             val card = repository.getLanguageCard(
                 dictionaryLanguage,
                 lemma,
-                translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage)
+                resolvedTranslations
             )
             val allSenseIds = card?.entries?.flatMap { entry ->
                 entry.senses.map { it.senseId }
@@ -446,6 +467,70 @@ class WordDetailViewModel(
         }
     }
 
+    fun openFeedbackDialog() {
+        val current = state as? WordDetailUiState.Content ?: return
+        state = current.copy(
+            feedbackDialogVisible = true,
+            feedbackComment = "",
+            feedbackSubmitting = false,
+            feedbackError = null
+        )
+    }
+
+    fun dismissFeedbackDialog() {
+        val current = state as? WordDetailUiState.Content ?: return
+        if (current.feedbackSubmitting) return
+        state = current.copy(
+            feedbackDialogVisible = false,
+            feedbackComment = "",
+            feedbackError = null
+        )
+    }
+
+    fun updateFeedbackComment(comment: String) {
+        val current = state as? WordDetailUiState.Content ?: return
+        state = current.copy(feedbackComment = comment, feedbackError = null)
+    }
+
+    fun submitFeedback() {
+        val current = state as? WordDetailUiState.Content ?: return
+        if (current.feedbackSubmitting) return
+
+        val comment = current.feedbackComment.trim()
+        if (comment.isBlank()) {
+            state = current.copy(feedbackError = "Comment is required")
+            return
+        }
+
+        state = current.copy(feedbackSubmitting = true, feedbackError = null)
+        viewModelScope.launch {
+            try {
+                dictionaryClient.sendFeedback(
+                    language = dictionaryLanguage,
+                    lemma = lemma,
+                    translationTargets = requestedTranslationLanguages,
+                    comment = comment
+                )
+                val latest = state as? WordDetailUiState.Content
+                if (latest != null) {
+                    state = latest.copy(
+                        feedbackDialogVisible = false,
+                        feedbackComment = "",
+                        feedbackSubmitting = false,
+                        feedbackError = null
+                    )
+                }
+                snackbarHostState.showSnackbar("Feedback sent")
+            } catch (e: Exception) {
+                val latest = state as? WordDetailUiState.Content ?: return@launch
+                state = latest.copy(
+                    feedbackSubmitting = false,
+                    feedbackError = e.message ?: "Failed to send feedback"
+                )
+            }
+        }
+    }
+
     fun playWord() {
         if (availableVoices.isEmpty()) return
 
@@ -518,6 +603,7 @@ fun WordDetailScreen(
     WordDetailScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
+        snackbarHostState = viewModel.snackbarHostState,
         isPlaying = viewModel.isPlaying,
         isPreparing = viewModel.isPreparing,
         canPlay = viewModel.availableVoices.isNotEmpty(),
@@ -527,6 +613,10 @@ fun WordDetailScreen(
         onNavigateToSettings = onNavigateToSettings,
         onPlayWord = { viewModel.playWord() },
         onStopWord = { viewModel.stopPlayback() },
+        onOpenFeedback = { viewModel.openFeedbackDialog() },
+        onDismissFeedback = { viewModel.dismissFeedbackDialog() },
+        onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
+        onSubmitFeedback = { viewModel.submitFeedback() },
         onEntryToggle = { entryId -> viewModel.toggleEntry(entryId) },
         onFormsToggle = { entryId -> viewModel.toggleForms(entryId) },
         onSenseToggle = { entryId, senseId -> viewModel.toggleSense(entryId, senseId) },
@@ -546,6 +636,7 @@ fun WordDetailScreen(
 fun WordDetailScreenContent(
     state: WordDetailUiState,
     scrollState: ScrollState = ScrollState(0),
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
     isPlaying: Boolean = false,
     isPreparing: Boolean = false,
     canPlay: Boolean = false,
@@ -555,6 +646,10 @@ fun WordDetailScreenContent(
     onNavigateToSettings: () -> Unit = {},
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
+    onOpenFeedback: () -> Unit = {},
+    onDismissFeedback: () -> Unit = {},
+    onFeedbackCommentChange: (String) -> Unit = {},
+    onSubmitFeedback: () -> Unit = {},
     onEntryToggle: (String) -> Unit = {},
     onFormsToggle: (String) -> Unit = {},
     onSenseToggle: (String, String) -> Unit = { _, _ -> },
@@ -618,6 +713,17 @@ fun WordDetailScreenContent(
                                     )
                                 }
                             }
+                            IconButton(
+                                onClick = onOpenFeedback,
+                                enabled = !state.feedbackSubmitting,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Feedback,
+                                    contentDescription = "Send feedback",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 },
@@ -644,6 +750,7 @@ fun WordDetailScreenContent(
                 wordDetailLabel = titleText
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         when (state) {
@@ -694,6 +801,81 @@ fun WordDetailScreenContent(
             }
         }
     }
+
+    if (state is WordDetailUiState.Content && state.feedbackDialogVisible) {
+        FeedbackDialog(
+            comment = state.feedbackComment,
+            isSending = state.feedbackSubmitting,
+            error = state.feedbackError,
+            onCommentChange = onFeedbackCommentChange,
+            onDismiss = onDismissFeedback,
+            onSend = onSubmitFeedback
+        )
+    }
+}
+
+@Composable
+private fun FeedbackDialog(
+    comment: String,
+    isSending: Boolean,
+    error: String?,
+    onCommentChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onSend: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = {
+            if (!isSending) onDismiss()
+        },
+        title = {
+            Text("Send feedback")
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = comment,
+                    onValueChange = onCommentChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3,
+                    maxLines = 6,
+                    singleLine = false,
+                    enabled = !isSending,
+                    label = { Text("Comment") },
+                    isError = error != null
+                )
+                if (error != null) {
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onSend,
+                enabled = !isSending && comment.isNotBlank()
+            ) {
+                if (isSending) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Send")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isSending
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable

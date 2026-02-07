@@ -530,6 +530,7 @@ fun App(
                     }
                     WordDetailViewModel(
                         dictionaryRepository,
+                        dictionaryClient,
                         wordFetchManager,
                         favoritesRepository,
                         ttsManager,

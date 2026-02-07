@@ -22,6 +22,15 @@ object GitHubClient {
     private const val WORDS_PATH = "words"
     private const val DEFAULT_BRANCH = "main"
     private const val PUSH_BRANCH = "push"
+    private const val FEEDBACK_LABEL = "feedback"
+    private const val FEEDBACK_LABEL_COLOR = "0E8A16"
+    private const val FEEDBACK_LABEL_DESCRIPTION = "Feedback reported from application users"
+
+    data class CreatedIssue(
+        val number: Int,
+        val title: String,
+        val htmlUrl: String
+    )
 
     private val clientInstance: GitHub by lazy {
         val token = loadToken()
@@ -285,6 +294,92 @@ object GitHubClient {
             .branch(branchName)
             .sha(fileSha)
             .commit()
+    }
+
+    /**
+     * Creates a feedback issue in the words repository and applies the "feedback" label.
+     */
+    fun createFeedbackIssue(
+        lang: String,
+        word: String,
+        comment: String,
+        translationCodes: List<String> = emptyList()
+    ): CreatedIssue {
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        ensureFeedbackLabelExists(repository)
+        val title = buildFeedbackIssueTitle(
+            lang = lang,
+            word = word,
+            translationCodes = translationCodes
+        )
+        val body = buildFeedbackIssueBody(
+            lang = lang,
+            word = word,
+            translationCodes = translationCodes,
+            comment = comment
+        )
+        val issue = repository.createIssue(title)
+            .body(body)
+            .label(FEEDBACK_LABEL)
+            .create()
+        return CreatedIssue(
+            number = issue.number,
+            title = issue.title,
+            htmlUrl = issue.htmlUrl.toString()
+        )
+    }
+
+    /**
+     * Closes an issue in the words repository.
+     */
+    fun closeIssue(issueNumber: Int) {
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        repository.getIssue(issueNumber).close()
+    }
+
+    internal fun buildFeedbackIssueTitle(lang: String, word: String, translationCodes: List<String>): String {
+        val translations = normalizeTranslationCodes(translationCodes)
+        val translationSuffix = if (translations.isEmpty()) "n/a" else translations.joinToString(",")
+        return "Feedback: [$lang] $word (translations: $translationSuffix)"
+    }
+
+    internal fun buildFeedbackIssueBody(
+        lang: String,
+        word: String,
+        translationCodes: List<String>,
+        comment: String
+    ): String {
+        val translations = normalizeTranslationCodes(translationCodes)
+        val translationLine = if (translations.isEmpty()) "n/a" else translations.joinToString(", ")
+        return buildString {
+            appendLine("Feedback submitted from application.")
+            appendLine()
+            appendLine("- Language: `$lang`")
+            appendLine("- Word: `$word`")
+            appendLine("- Translation codes: `$translationLine`")
+            appendLine()
+            appendLine("Comment:")
+            appendLine(comment.trim())
+        }
+    }
+
+    private fun normalizeTranslationCodes(translationCodes: List<String>): List<String> {
+        return translationCodes
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .distinct()
+    }
+
+    private fun ensureFeedbackLabelExists(repository: GHRepository) {
+        try {
+            repository.getLabel(FEEDBACK_LABEL)
+        } catch (_: GHFileNotFoundException) {
+            repository.createLabel(
+                FEEDBACK_LABEL,
+                FEEDBACK_LABEL_COLOR,
+                FEEDBACK_LABEL_DESCRIPTION
+            )
+        }
     }
 
     private fun loadToken(): String {
