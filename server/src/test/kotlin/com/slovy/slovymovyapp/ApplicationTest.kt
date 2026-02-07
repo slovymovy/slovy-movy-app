@@ -179,6 +179,55 @@ class ApplicationTest {
         assertEquals("base", chunks.first()["stage"]?.jsonPrimitive?.content)
     }
 
+    @Test
+    fun testFeedback_createsIssueAndClosesIt() = testApplication {
+        if (!GitHubClient.isAvailable()) return@testApplication
+
+        application {
+            module()
+        }
+
+        var issueNumber: Int? = null
+        try {
+            val response = client.post("/feedback/en/test?translations=ru,pl") {
+                contentType(ContentType.Application.Json)
+                setBody("""{"comment":"this is a test"}""")
+            }
+
+            assertEquals(HttpStatusCode.Created, response.status)
+            assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
+
+            val json = Json { ignoreUnknownKeys = true }
+            val responseJson = json.parseToJsonElement(response.bodyAsText()).jsonObject
+            issueNumber = responseJson["issueNumber"]?.jsonPrimitive?.content?.toIntOrNull()
+            assertNotNull(issueNumber, "Issue number should be present in response")
+            val createdIssueNumber = issueNumber
+
+            val issueTitle = responseJson["issueTitle"]?.jsonPrimitive?.content
+            assertNotNull(issueTitle, "Issue title should be present in response")
+            assertTrue(issueTitle.contains("[en]"), "Issue title should contain source language")
+            assertTrue(issueTitle.contains("test"), "Issue title should contain word")
+            assertTrue(issueTitle.contains("ru"), "Issue title should contain 'ru' translation code")
+            assertTrue(issueTitle.contains("pl"), "Issue title should contain 'pl' translation code")
+
+            val issue = GitHubClient.client().getRepository("slovymovy/words").getIssue(createdIssueNumber)
+            assertTrue(
+                issue.labels.any { it.name == "feedback" },
+                "Created issue should have 'feedback' label"
+            )
+            assertTrue(
+                issue.body.contains("this is a test"),
+                "Created issue body should contain the provided comment"
+            )
+            assertTrue(
+                issue.body.contains("ru") && issue.body.contains("pl"),
+                "Created issue body should contain all translation codes"
+            )
+        } finally {
+            issueNumber?.let { GitHubClient.closeIssue(it) }
+        }
+    }
+
     private fun parseNdjson(body: String, json: Json) =
         body
             .lineSequence()

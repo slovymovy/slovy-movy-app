@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -99,6 +100,9 @@ class DictionaryClient(
 
     // Server may have newer trait types, so ignore unknown keys
     private val json = Json { ignoreUnknownKeys = true }
+
+    @Serializable
+    private data class FeedbackRequest(val comment: String)
 
     /**
      * Fetches word data with progressive updates.
@@ -439,6 +443,57 @@ class DictionaryClient(
             if (push) {
                 append(if (targets.isEmpty()) "?" else "&")
                 append("push=1")
+            }
+        }
+    }
+
+    suspend fun sendFeedback(
+        language: Language,
+        lemma: String,
+        translationTargets: List<Language>,
+        comment: String
+    ) {
+        val url = buildFeedbackUrl(language, lemma, translationTargets)
+
+        try {
+            val response = httpClient.post(url) {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    json.encodeToString(
+                        FeedbackRequest.serializer(),
+                        FeedbackRequest(comment.trim())
+                    )
+                )
+            }
+
+            if (!response.status.isSuccess()) {
+                val body = response.bodyAsText()
+                throw DictionaryClientException.ServerException(response.status.value, body)
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw DictionaryClientException.NetworkException(
+                NetworkErrorClassifier.userMessage(e),
+                e
+            )
+        }
+    }
+
+    private fun buildFeedbackUrl(
+        language: Language,
+        lemma: String,
+        targets: List<Language>
+    ): String {
+        return buildString {
+            append(serverBaseUrl)
+            append("/feedback/")
+            append(language.code)
+            append("/")
+            append(lemma.encodeURLPath())
+            if (targets.isNotEmpty()) {
+                append("?translations=")
+                append(targets.distinct().joinToString(",") { it.code })
             }
         }
     }

@@ -29,6 +29,7 @@ import io.ktor.server.routing.*
 import io.ktor.util.logging.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.kohsuke.github.GHFileNotFoundException
@@ -39,6 +40,18 @@ import java.nio.file.Files
 const val updateRepoPath = "/internal/update-repo/"
 const val SERVER_PORT_ENV = "SERVER_PORT"
 const val SERVER_PORT = 8080
+
+@Serializable
+private data class FeedbackIssueRequest(
+    val comment: String
+)
+
+@Serializable
+private data class FeedbackIssueResponse(
+    val issueNumber: Int,
+    val issueTitle: String,
+    val issueUrl: String
+)
 
 fun main() {
     val port = System.getenv(SERVER_PORT_ENV)?.toIntOrNull() ?: SERVER_PORT
@@ -119,13 +132,9 @@ fun Application.module() {
 
                 // Step 2: Stream results as NDJSON (base, then translated if available)
                 call.respondTextWriter(contentType = ContentType.parse("application/x-ndjson")) {
-                    // Parse requested language codes for filtering
-                    // If no translations parameter provided, return empty list (no translations in response)
-                    val requestedLangCodes = if (!translationsParam.isNullOrBlank()) {
-                        translationsParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
-                    } else {
-                        emptyList()
-                    }
+                    // Parse requested language codes for filtering.
+                    // If no translations parameter provided, return empty list (no translations in response).
+                    val requestedLangCodes = parseTranslationCodes(translationsParam)
 
                     // Send filtered base response to client (always filter based on requested codes)
                     val baseResponseToClient = filterTranslations(baseResult.response, requestedLangCodes)
@@ -138,12 +147,12 @@ fun Application.module() {
                     var fullResponse = baseResult.response
                     var wasProcessed = baseResult.wasProcessed
 
-                    if (!translationsParam.isNullOrBlank()) {
+                    if (requestedLangCodes.isNotEmpty()) {
                         val translationResult = addMissingTranslations(
                             response = fullResponse,
                             lang = lang,
                             word = word,
-                            translationsParam = translationsParam,
+                            requestedLangCodes = requestedLangCodes,
                             json = json,
                             logger = call.application.environment.log
                         )
@@ -177,6 +186,65 @@ fun Application.module() {
             } catch (e: Exception) {
                 call.application.environment.log.error("Failed to process $lang/$word: ${e.message}", e)
                 call.respond(HttpStatusCode.InternalServerError, "Failed to process word: ${e.message}")
+            }
+        }
+
+        post("/feedback/{lang}/{word}") {
+            val lang = call.parameters["lang"]?.trim()
+            val word = call.parameters["word"]?.trim()
+
+            if (lang.isNullOrBlank() || word.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing lang or word parameter")
+                return@post
+            }
+
+            if (!GitHubClient.isAvailable()) {
+                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+                return@post
+            }
+
+            val json = Json { ignoreUnknownKeys = true }
+            val feedbackRequest = try {
+                json.decodeFromString(
+                    FeedbackIssueRequest.serializer(),
+                    call.receiveText()
+                )
+            } catch (_: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid request body")
+                return@post
+            }
+
+            val comment = feedbackRequest.comment.trim()
+            if (comment.isBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing comment")
+                return@post
+            }
+
+            val translationCodes = parseTranslationCodes(call.request.queryParameters["translations"])
+
+            try {
+                val createdIssue = GitHubClient.createFeedbackIssue(
+                    lang = lang,
+                    word = word,
+                    translationCodes = translationCodes,
+                    comment = comment
+                )
+                val response = FeedbackIssueResponse(
+                    issueNumber = createdIssue.number,
+                    issueTitle = createdIssue.title,
+                    issueUrl = createdIssue.htmlUrl
+                )
+                call.respondText(
+                    text = json.encodeToString(FeedbackIssueResponse.serializer(), response),
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.Created
+                )
+            } catch (e: Exception) {
+                call.application.environment.log.error(
+                    "Failed to create feedback issue for $lang/$word: ${e.message}",
+                    e
+                )
+                call.respond(HttpStatusCode.InternalServerError, "Failed to create feedback issue")
             }
         }
 
@@ -265,6 +333,16 @@ fun Application.module() {
             }
         }
     }
+}
+
+private fun parseTranslationCodes(source: String?): List<String> {
+    val raw = source ?: return emptyList()
+    return raw.split(',')
+        .asSequence()
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+        .distinct()
+        .toList()
 }
 
 internal const val AI_FALLBACK_TIMEOUT_MS = 20_000L
@@ -465,14 +543,10 @@ private suspend fun addMissingTranslations(
     response: LanguageCardResponse,
     lang: String,
     word: String,
-    translationsParam: String,
+    requestedLangCodes: List<String>,
     json: Json,
     logger: Logger
 ): TranslationResult {
-    val requestedLangCodes = translationsParam.split(",")
-        .map { it.trim() }
-        .filter { it.isNotBlank() }
-        .distinct()
     if (requestedLangCodes.isEmpty()) return TranslationResult(response, updated = false)
 
     // Skip self-translation requests (e.g. en -> en).
