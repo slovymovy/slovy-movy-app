@@ -161,6 +161,24 @@ class ApplicationTest {
         assertTrue(translations.containsKey("pl"), "Translations should contain 'pl' key")
     }
 
+    @Test
+    fun testWord_skipsSelfTranslationRequest() = testApplication {
+        if (!GitHubClient.isAvailable()) return@testApplication
+
+        application {
+            module()
+        }
+        val response = client.get("/word/en/test?translations=en")
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(ContentType.parse("application/x-ndjson"), response.contentType()?.withoutParameters())
+
+        val body = response.bodyAsText()
+        val json = Json { ignoreUnknownKeys = true }
+        val chunks = parseNdjson(body, json)
+        assertEquals(1, chunks.size, "Self-translation request should not produce a translated stage")
+        assertEquals("base", chunks.first()["stage"]?.jsonPrimitive?.content)
+    }
+
     private fun parseNdjson(body: String, json: Json) =
         body
             .lineSequence()

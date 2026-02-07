@@ -469,13 +469,21 @@ private suspend fun addMissingTranslations(
     json: Json,
     logger: Logger
 ): TranslationResult {
-    val requestedLangCodes = translationsParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
+    val requestedLangCodes = translationsParam.split(",")
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+        .distinct()
     if (requestedLangCodes.isEmpty()) return TranslationResult(response, updated = false)
+
+    // Skip self-translation requests (e.g. en -> en).
+    val targetLangCodes = requestedLangCodes.filterNot { it.equals(lang, ignoreCase = true) }
+    if (targetLangCodes.isEmpty()) return TranslationResult(response, updated = false)
+
     // ensure all languages are valid - throws in case of invalid language code
-    requestedLangCodes.forEach { targetLanguageName(it) }
+    targetLangCodes.forEach { targetLanguageName(it) }
 
     val existingLanguages = getExistingTranslationLanguages(response)
-    val missingLangCodes = requestedLangCodes.filter { it !in existingLanguages }
+    val missingLangCodes = targetLangCodes.filter { it !in existingLanguages }
     if (missingLangCodes.isEmpty()) return TranslationResult(response, updated = false)
 
     val geminiProvider = GeminiProvider()

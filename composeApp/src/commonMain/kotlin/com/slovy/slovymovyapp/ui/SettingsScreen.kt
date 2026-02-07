@@ -24,6 +24,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -83,7 +85,13 @@ private val TEST_PHRASES = mapOf(
     Language.ENGLISH to "Hello! This is a test of the text to speech system.",
     Language.RUSSIAN to "Привет! Это тест системы синтеза речи.",
     Language.POLISH to "Cześć! To jest test systemu syntezy mowy.",
-    Language.DUTCH to "Hallo! Dit is een test van het tekst-naar-spraak systeem."
+    Language.DUTCH to "Hallo! Dit is een test van het tekst-naar-spraak systeem.",
+    Language.GERMAN to "Hallo! Dies ist ein Test des Text-zu-Sprache-Systems.",
+    Language.FRENCH to "Bonjour ! Ceci est un test du système de synthèse vocale.",
+    Language.ITALIAN to "Ciao! Questo è un test del sistema di sintesi vocale.",
+    Language.CZECH to "Ahoj! Toto je test systému převodu textu na řeč.",
+    Language.TURKISH to "Merhaba! Bu, metinden konuşmaya sisteminin bir testidir.",
+    Language.SPANISH to "¡Hola! Esta es una prueba del sistema de texto a voz."
 )
 
 class SettingsViewModel(
@@ -526,6 +534,9 @@ class SettingsViewModel(
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    learningLanguage: Language? = null,
+    nativeLanguages: List<Language> = emptyList(),
+    onChangeLanguages: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -541,6 +552,9 @@ fun SettingsScreen(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
         snackbarHostState = viewModel.snackbarHostState,
+        learningLanguage = learningLanguage,
+        nativeLanguages = nativeLanguages,
+        onChangeLanguages = onChangeLanguages,
         onLanguageExpand = { viewModel.toggleLanguageExpansion(it) },
         onTestVoice = { voice -> viewModel.testVoice(voice) },
         onToggleVoiceEnabled = { language, voiceId -> viewModel.toggleVoiceEnabled(language, voiceId) },
@@ -565,6 +579,9 @@ fun SettingsScreenContent(
     state: SettingsUiState,
     scrollState: LazyListState = LazyListState(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    learningLanguage: Language? = null,
+    nativeLanguages: List<Language> = emptyList(),
+    onChangeLanguages: () -> Unit = {},
     onLanguageExpand: (Text2SpeechLanguage) -> Unit = {},
     onTestVoice: (Text2SpeechVoice) -> Unit = { _ -> },
     onToggleVoiceEnabled: (Text2SpeechLanguage, String) -> Unit = { _, _ -> },
@@ -639,6 +656,60 @@ fun SettingsScreenContent(
                             contentPadding = PaddingValues(AppSpacing.lg),
                             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                         ) {
+                            // Language Preferences
+                            if (learningLanguage != null) {
+                                item {
+                                    SectionHeader(title = "Language Preferences")
+                                }
+
+                                item {
+                                    ElevatedCard(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = MaterialTheme.shapes.extraLarge,
+                                        colors = CardDefaults.elevatedCardColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                                        ),
+                                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
+                                        onClick = onChangeLanguages
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(AppSpacing.lg),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Language,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+
+                                            Spacer(modifier = Modifier.width(AppSpacing.md))
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = "Learning: ${learningLanguage.flag} ${learningLanguage.selfName}",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                )
+                                                nativeLanguages.forEach { nativeLanguage ->
+                                                    Text(
+                                                        text = "Native: ${nativeLanguage.flag} ${nativeLanguage.selfName}",
+                                                        style = MaterialTheme.typography.titleMedium
+                                                    )
+                                                }
+                                            }
+
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
                             // Languages and Dictionaries
                             item {
                                 SectionHeader(title = "Languages and Dictionaries")
@@ -936,7 +1007,7 @@ private fun DictionaryCard(
                             )
                         }
                         Text(
-                            text = if (isDownloaded) "I'm learning" else "Available",
+                            text = if (isDownloaded) "Downloaded" else "Available",
                             style = MaterialTheme.typography.labelMedium,
                             color = if (isDownloaded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1587,10 +1658,10 @@ private fun formatFileSize(bytes: Long): String {
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewLoading(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1599,10 +1670,10 @@ private fun SettingsScreenPreviewLoading(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewEmpty(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1615,10 +1686,10 @@ private fun SettingsScreenPreviewEmpty(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithDatabases(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1652,7 +1723,7 @@ private fun SettingsScreenPreviewWithDatabases(
                         language = Language.ENGLISH,
                         dictionarySizeBytes = 15 * 1024 * 1024,
                         availableTranslations = listOf(
-                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                            AvailableTranslationInfo(
                                 targetLanguage = Language.RUSSIAN,
                                 sizeBytes = 8 * 1024 * 1024
                             )
@@ -1662,7 +1733,7 @@ private fun SettingsScreenPreviewWithDatabases(
                         language = Language.RUSSIAN,
                         dictionarySizeBytes = 12 * 1024 * 1024,
                         availableTranslations = listOf(
-                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                            AvailableTranslationInfo(
                                 targetLanguage = Language.ENGLISH,
                                 sizeBytes = 8 * 1024 * 1024
                             )
@@ -1674,10 +1745,10 @@ private fun SettingsScreenPreviewWithDatabases(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithLanguages(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1722,10 +1793,66 @@ private fun SettingsScreenPreviewWithLanguages(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
+@Composable
+private fun SettingsScreenPreviewWithMultipleNativeLanguages(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SettingsScreenContent(
+            state = SettingsUiState(
+                isLoading = false,
+                languages = mapOf(
+                    Text2SpeechLanguage(
+                        language = Language.GERMAN,
+                        isAvailable = true,
+                        missingData = false
+                    ) to LanguageUiState(),
+                    Text2SpeechLanguage(
+                        language = Language.ENGLISH,
+                        isAvailable = true,
+                        missingData = false
+                    ) to LanguageUiState()
+                ),
+                databases = listOf(
+                    DatabaseItemUiState(
+                        displayName = "Dictionary: Deutsch",
+                        sizeBytes = 14 * 1024 * 1024,
+                        deleteAction = {}
+                    ),
+                    DatabaseItemUiState(
+                        displayName = "Translation: Deutsch → English",
+                        sizeBytes = 8 * 1024 * 1024,
+                        deleteAction = {}
+                    )
+                ),
+                availableLanguages = listOf(
+                    AvailableLanguageInfo(
+                        language = Language.GERMAN,
+                        dictionarySizeBytes = 14 * 1024 * 1024,
+                        availableTranslations = listOf(
+                            AvailableTranslationInfo(
+                                targetLanguage = Language.ENGLISH,
+                                sizeBytes = 8 * 1024 * 1024
+                            ),
+                            AvailableTranslationInfo(
+                                targetLanguage = Language.SPANISH,
+                                sizeBytes = 7 * 1024 * 1024
+                            )
+                        )
+                    )
+                )
+            ),
+            learningLanguage = Language.GERMAN,
+            nativeLanguages = listOf(Language.ENGLISH, Language.SPANISH, Language.CZECH)
+        )
+    }
+}
+
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithExpandedLanguage(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1780,10 +1907,10 @@ private fun SettingsScreenPreviewWithExpandedLanguage(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithError(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1809,10 +1936,10 @@ private fun SettingsScreenPreviewWithError(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithDeleteConfirmation(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1848,10 +1975,10 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithMixedDatabaseStates(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1875,11 +2002,11 @@ private fun SettingsScreenPreviewWithMixedDatabaseStates(
                         language = Language.ENGLISH,
                         dictionarySizeBytes = 15 * 1024 * 1024,
                         availableTranslations = listOf(
-                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                            AvailableTranslationInfo(
                                 targetLanguage = Language.RUSSIAN,
                                 sizeBytes = 8 * 1024 * 1024
                             ),
-                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                            AvailableTranslationInfo(
                                 targetLanguage = Language.POLISH,
                                 sizeBytes = 7 * 1024 * 1024
                             )
@@ -1889,7 +2016,7 @@ private fun SettingsScreenPreviewWithMixedDatabaseStates(
                         language = Language.RUSSIAN,
                         dictionarySizeBytes = 12 * 1024 * 1024,
                         availableTranslations = listOf(
-                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                            AvailableTranslationInfo(
                                 targetLanguage = Language.ENGLISH,
                                 sizeBytes = 8 * 1024 * 1024
                             )
