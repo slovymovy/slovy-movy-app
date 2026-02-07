@@ -244,7 +244,7 @@ fun Application.module() {
                     "Failed to create feedback issue for $lang/$word: ${e.message}",
                     e
                 )
-                call.respond(HttpStatusCode.InternalServerError, "Failed to create feedback issue: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError, "Failed to create feedback issue")
             }
         }
 

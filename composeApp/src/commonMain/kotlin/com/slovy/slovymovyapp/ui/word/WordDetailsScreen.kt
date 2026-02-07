@@ -525,7 +525,7 @@ class WordDetailViewModel(
                 val latest = state as? WordDetailUiState.Content ?: return@launch
                 state = latest.copy(
                     feedbackSubmitting = false,
-                    feedbackError = e.message ?: "Failed to send feedback"
+                    feedbackError = NetworkErrorClassifier.userMessage(e)
                 )
             }
         }

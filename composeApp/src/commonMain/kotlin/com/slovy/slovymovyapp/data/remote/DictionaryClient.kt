@@ -472,8 +472,6 @@ class DictionaryClient(
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: DictionaryClientException) {
-            throw e
         } catch (e: Exception) {
             throw DictionaryClientException.NetworkException(
                 NetworkErrorClassifier.userMessage(e),
