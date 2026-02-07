@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -53,8 +54,10 @@ sealed interface WordDetailUiState {
         val translationError: String? = null,
         val feedbackDialogVisible: Boolean = false,
         val feedbackComment: String = "",
+        val feedbackEmail: String = "",
         val feedbackSubmitting: Boolean = false,
-        val feedbackError: String? = null
+        val feedbackError: String? = null,
+        val feedbackIssueUrl: String? = null
     ) : WordDetailUiState
 }
 
@@ -252,6 +255,15 @@ class WordDetailViewModel(
 
     val snackbarHostState = SnackbarHostState()
 
+    var pendingIssueUrl by mutableStateOf<String?>(null)
+        private set
+
+    fun consumePendingIssueUrl(): String? {
+        val url = pendingIssueUrl
+        pendingIssueUrl = null
+        return url
+    }
+
     private var currentVoiceIndex: Int = 0
     private var hasScrolledToTarget = false
     private var requestedTranslationLanguages: List<Language> =
@@ -319,8 +331,10 @@ class WordDetailViewModel(
                 translationError = if (wasTranslationLoading && errorMessage != null) errorMessage else null,
                 feedbackDialogVisible = current?.feedbackDialogVisible ?: false,
                 feedbackComment = current?.feedbackComment ?: "",
+                feedbackEmail = current?.feedbackEmail ?: "",
                 feedbackSubmitting = current?.feedbackSubmitting ?: false,
-                feedbackError = current?.feedbackError
+                feedbackError = current?.feedbackError,
+                feedbackIssueUrl = current?.feedbackIssueUrl
             )
         } else if (result.error != null) {
             state = WordDetailUiState.Empty(
@@ -472,24 +486,46 @@ class WordDetailViewModel(
         state = current.copy(
             feedbackDialogVisible = true,
             feedbackComment = "",
+            feedbackEmail = "",
             feedbackSubmitting = false,
-            feedbackError = null
+            feedbackError = null,
+            feedbackIssueUrl = null
         )
     }
 
     fun dismissFeedbackDialog() {
         val current = state as? WordDetailUiState.Content ?: return
         if (current.feedbackSubmitting) return
+        val issueUrl = current.feedbackIssueUrl
         state = current.copy(
             feedbackDialogVisible = false,
             feedbackComment = "",
-            feedbackError = null
+            feedbackEmail = "",
+            feedbackError = null,
+            feedbackIssueUrl = null
         )
+        if (issueUrl != null) {
+            viewModelScope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = "Feedback sent",
+                    actionLabel = "View",
+                    duration = SnackbarDuration.Long
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    pendingIssueUrl = issueUrl
+                }
+            }
+        }
     }
 
     fun updateFeedbackComment(comment: String) {
         val current = state as? WordDetailUiState.Content ?: return
         state = current.copy(feedbackComment = comment, feedbackError = null)
+    }
+
+    fun updateFeedbackEmail(email: String) {
+        val current = state as? WordDetailUiState.Content ?: return
+        state = current.copy(feedbackEmail = email)
     }
 
     fun submitFeedback() {
@@ -505,22 +541,21 @@ class WordDetailViewModel(
         state = current.copy(feedbackSubmitting = true, feedbackError = null)
         viewModelScope.launch {
             try {
-                dictionaryClient.sendFeedback(
+                val feedbackResponse = dictionaryClient.sendFeedback(
                     language = dictionaryLanguage,
                     lemma = lemma,
                     translationTargets = requestedTranslationLanguages,
-                    comment = comment
+                    comment = comment,
+                    email = current.feedbackEmail.trim().takeIf { it.isNotBlank() }
                 )
                 val latest = state as? WordDetailUiState.Content
                 if (latest != null) {
                     state = latest.copy(
-                        feedbackDialogVisible = false,
-                        feedbackComment = "",
                         feedbackSubmitting = false,
-                        feedbackError = null
+                        feedbackError = null,
+                        feedbackIssueUrl = feedbackResponse.issueUrl
                     )
                 }
-                snackbarHostState.showSnackbar("Feedback sent")
             } catch (e: Exception) {
                 val latest = state as? WordDetailUiState.Content ?: return@launch
                 state = latest.copy(
@@ -600,6 +635,15 @@ fun WordDetailScreen(
         }
     }
 
+    val uriHandler = LocalUriHandler.current
+
+    // Handle pending issue URL from snackbar action
+    LaunchedEffect(viewModel.pendingIssueUrl) {
+        viewModel.consumePendingIssueUrl()?.let { url ->
+            uriHandler.openUri(url)
+        }
+    }
+
     WordDetailScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
@@ -616,6 +660,7 @@ fun WordDetailScreen(
         onOpenFeedback = { viewModel.openFeedbackDialog() },
         onDismissFeedback = { viewModel.dismissFeedbackDialog() },
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
+        onFeedbackEmailChange = { viewModel.updateFeedbackEmail(it) },
         onSubmitFeedback = { viewModel.submitFeedback() },
         onEntryToggle = { entryId -> viewModel.toggleEntry(entryId) },
         onFormsToggle = { entryId -> viewModel.toggleForms(entryId) },
@@ -649,6 +694,7 @@ fun WordDetailScreenContent(
     onOpenFeedback: () -> Unit = {},
     onDismissFeedback: () -> Unit = {},
     onFeedbackCommentChange: (String) -> Unit = {},
+    onFeedbackEmailChange: (String) -> Unit = {},
     onSubmitFeedback: () -> Unit = {},
     onEntryToggle: (String) -> Unit = {},
     onFormsToggle: (String) -> Unit = {},
@@ -805,9 +851,12 @@ fun WordDetailScreenContent(
     if (state is WordDetailUiState.Content && state.feedbackDialogVisible) {
         FeedbackDialog(
             comment = state.feedbackComment,
+            email = state.feedbackEmail,
             isSending = state.feedbackSubmitting,
             error = state.feedbackError,
+            issueUrl = state.feedbackIssueUrl,
             onCommentChange = onFeedbackCommentChange,
+            onEmailChange = onFeedbackEmailChange,
             onDismiss = onDismissFeedback,
             onSend = onSubmitFeedback
         )
@@ -817,65 +866,106 @@ fun WordDetailScreenContent(
 @Composable
 private fun FeedbackDialog(
     comment: String,
+    email: String,
     isSending: Boolean,
     error: String?,
+    issueUrl: String?,
     onCommentChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onSend: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = {
-            if (!isSending) onDismiss()
-        },
-        title = {
-            Text("Send feedback")
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = comment,
-                    onValueChange = onCommentChange,
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    maxLines = 6,
-                    singleLine = false,
-                    enabled = !isSending,
-                    label = { Text("Comment") },
-                    isError = error != null
-                )
-                if (error != null) {
+    if (issueUrl != null) {
+        val uriHandler = LocalUriHandler.current
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Feedback sent!") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = error,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
+                        text = "Thank you for your feedback.",
+                        style = MaterialTheme.typography.bodyMedium
                     )
+                    TextButton(
+                        onClick = { uriHandler.openUri(issueUrl) },
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text("View on GitHub")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Close")
                 }
             }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onSend,
-                enabled = !isSending && comment.isNotBlank()
-            ) {
-                if (isSending) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp
+        )
+    } else {
+        AlertDialog(
+            onDismissRequest = {
+                if (!isSending) onDismiss()
+            },
+            title = {
+                Text("Send feedback")
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = comment,
+                        onValueChange = onCommentChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3,
+                        maxLines = 6,
+                        singleLine = false,
+                        enabled = !isSending,
+                        label = { Text("Comment") },
+                        isError = error != null
                     )
-                } else {
-                    Text("Send")
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = onEmailChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        enabled = !isSending,
+                        label = { Text("Email (optional)") },
+                        supportingText = {
+                            Text("May be publicly visible on GitHub")
+                        }
+                    )
+                    if (error != null) {
+                        Text(
+                            text = error,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = onSend,
+                    enabled = !isSending && comment.isNotBlank()
+                ) {
+                    if (isSending) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Send")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = onDismiss,
+                    enabled = !isSending
+                ) {
+                    Text("Cancel")
                 }
             }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                enabled = !isSending
-            ) {
-                Text("Cancel")
-            }
-        }
-    )
+        )
+    }
 }
 
 @Composable

@@ -102,7 +102,10 @@ class DictionaryClient(
     private val json = Json { ignoreUnknownKeys = true }
 
     @Serializable
-    private data class FeedbackRequest(val comment: String)
+    private data class FeedbackRequest(val comment: String, val email: String? = null)
+
+    @Serializable
+    data class FeedbackResponse(val issueUrl: String)
 
     /**
      * Fetches word data with progressive updates.
@@ -451,17 +454,19 @@ class DictionaryClient(
         language: Language,
         lemma: String,
         translationTargets: List<Language>,
-        comment: String
-    ) {
+        comment: String,
+        email: String? = null
+    ): FeedbackResponse {
         val url = buildFeedbackUrl(language, lemma, translationTargets)
 
         try {
             val response = httpClient.post(url) {
                 contentType(ContentType.Application.Json)
+                val trimmedEmail = email?.trim()?.takeIf { it.isNotBlank() }
                 setBody(
                     json.encodeToString(
                         FeedbackRequest.serializer(),
-                        FeedbackRequest(comment.trim())
+                        FeedbackRequest(comment.trim(), trimmedEmail)
                     )
                 )
             }
@@ -470,9 +475,13 @@ class DictionaryClient(
                 val body = response.bodyAsText()
                 throw DictionaryClientException.ServerException(response.status.value, body)
             }
+
+            val body = response.bodyAsText()
+            return json.decodeFromString(FeedbackResponse.serializer(), body)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            if (e is DictionaryClientException) throw e
             throw DictionaryClientException.NetworkException(
                 NetworkErrorClassifier.userMessage(e),
                 e
