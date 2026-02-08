@@ -54,6 +54,19 @@ private data class FeedbackIssueResponse(
     val issueUrl: String
 )
 
+@Serializable
+private data class GeneralFeedbackRequest(
+    val comment: String,
+    val email: String? = null
+)
+
+@Serializable
+private data class GeneralFeedbackResponse(
+    val discussionNumber: Int,
+    val discussionTitle: String,
+    val discussionUrl: String
+)
+
 fun main() {
     val port = System.getenv(SERVER_PORT_ENV)?.toIntOrNull() ?: SERVER_PORT
     embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
@@ -187,6 +200,53 @@ fun Application.module() {
             } catch (e: Exception) {
                 call.application.environment.log.error("Failed to process $lang/$word: ${e.message}", e)
                 call.respond(HttpStatusCode.InternalServerError, "Failed to process word: ${e.message}")
+            }
+        }
+
+        post("/feedback") {
+            if (!GitHubClient.isAvailable()) {
+                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+                return@post
+            }
+
+            val json = Json { ignoreUnknownKeys = true }
+            val feedbackRequest = try {
+                json.decodeFromString(
+                    GeneralFeedbackRequest.serializer(),
+                    call.receiveText()
+                )
+            } catch (_: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid request body")
+                return@post
+            }
+
+            val comment = feedbackRequest.comment.trim()
+            if (comment.isBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing comment")
+                return@post
+            }
+
+            try {
+                val discussion = GitHubClient.createFeedbackDiscussion(
+                    comment = comment,
+                    email = feedbackRequest.email
+                )
+                val response = GeneralFeedbackResponse(
+                    discussionNumber = discussion.number,
+                    discussionTitle = discussion.title,
+                    discussionUrl = discussion.url
+                )
+                call.respondText(
+                    text = json.encodeToString(GeneralFeedbackResponse.serializer(), response),
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.Created
+                )
+            } catch (e: Exception) {
+                call.application.environment.log.error(
+                    "Failed to create feedback discussion: ${e.message}",
+                    e
+                )
+                call.respond(HttpStatusCode.InternalServerError, "Failed to create feedback discussion")
             }
         }
 

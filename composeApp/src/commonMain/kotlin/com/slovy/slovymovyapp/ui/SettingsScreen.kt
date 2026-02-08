@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,7 +71,13 @@ data class SettingsUiState(
     val testingVoice: Text2SpeechVoice? = null,
     val ttsStatus: TTSStatus = TTSStatus.IDLE,
     val deleteConfirmation: DeleteConfirmationState? = null,
-    val buildConfig: AppBuildConfig = AppBuildConfig("compile", 42, true, "com.slovy.slovymovyapp")
+    val buildConfig: AppBuildConfig = AppBuildConfig("compile", 42, true, "com.slovy.slovymovyapp"),
+    val feedbackDialogVisible: Boolean = false,
+    val feedbackComment: String = "",
+    val feedbackEmail: String = "",
+    val feedbackSubmitting: Boolean = false,
+    val feedbackError: String? = null,
+    val feedbackDiscussionUrl: String? = null
 )
 
 data class DeleteConfirmationState(
@@ -100,6 +107,7 @@ class SettingsViewModel(
     private val dataDbManager: DataDbManager,
     private val downloadCoordinator: DownloadCoordinator,
     private val dictionaryRepository: DictionaryRepository,
+    private val dictionaryClient: DictionaryClient,
     buildConfig: AppBuildConfig
 ) : ViewModel() {
 
@@ -467,6 +475,88 @@ class SettingsViewModel(
         downloadCoordinator.cancel(downloadKey)
     }
 
+    var pendingDiscussionUrl by mutableStateOf<String?>(null)
+        private set
+
+    fun consumePendingDiscussionUrl(): String? {
+        val url = pendingDiscussionUrl
+        pendingDiscussionUrl = null
+        return url
+    }
+
+    fun openFeedbackDialog() {
+        state = state.copy(
+            feedbackDialogVisible = true,
+            feedbackComment = "",
+            feedbackEmail = "",
+            feedbackSubmitting = false,
+            feedbackError = null,
+            feedbackDiscussionUrl = null
+        )
+    }
+
+    fun dismissFeedbackDialog() {
+        if (state.feedbackSubmitting) return
+        val discussionUrl = state.feedbackDiscussionUrl
+        state = state.copy(
+            feedbackDialogVisible = false,
+            feedbackComment = "",
+            feedbackEmail = "",
+            feedbackError = null,
+            feedbackDiscussionUrl = null
+        )
+        if (discussionUrl != null) {
+            viewModelScope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = "Feedback sent",
+                    actionLabel = "View",
+                    duration = SnackbarDuration.Long
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    pendingDiscussionUrl = discussionUrl
+                }
+            }
+        }
+    }
+
+    fun updateFeedbackComment(comment: String) {
+        state = state.copy(feedbackComment = comment, feedbackError = null)
+    }
+
+    fun updateFeedbackEmail(email: String) {
+        state = state.copy(feedbackEmail = email)
+    }
+
+    fun submitFeedback() {
+        if (state.feedbackSubmitting) return
+
+        val comment = state.feedbackComment.trim()
+        if (comment.isBlank()) {
+            state = state.copy(feedbackError = "Comment is required")
+            return
+        }
+
+        state = state.copy(feedbackSubmitting = true, feedbackError = null)
+        viewModelScope.launch {
+            try {
+                val response = dictionaryClient.sendGeneralFeedback(
+                    comment = comment,
+                    email = state.feedbackEmail.trim().takeIf { it.isNotBlank() }
+                )
+                state = state.copy(
+                    feedbackSubmitting = false,
+                    feedbackError = null,
+                    feedbackDiscussionUrl = response.discussionUrl
+                )
+            } catch (e: Exception) {
+                state = state.copy(
+                    feedbackSubmitting = false,
+                    feedbackError = NetworkErrorClassifier.userMessage(e)
+                )
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         ttsManager.stop()
@@ -548,6 +638,15 @@ fun SettingsScreen(
         onPauseOrDispose { }
     }
 
+    val uriHandler = LocalUriHandler.current
+
+    // Handle pending discussion URL from snackbar action
+    LaunchedEffect(viewModel.pendingDiscussionUrl) {
+        viewModel.consumePendingDiscussionUrl()?.let { url ->
+            uriHandler.openUri(url)
+        }
+    }
+
     SettingsScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
@@ -566,6 +665,11 @@ fun SettingsScreen(
         onCancelDownload = { key -> viewModel.cancelDownload(key) },
         onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
         onToggleDictionaryExpansion = { languageCode -> viewModel.toggleDictionaryExpansion(languageCode) },
+        onSendFeedback = { viewModel.openFeedbackDialog() },
+        onDismissFeedback = { viewModel.dismissFeedbackDialog() },
+        onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
+        onFeedbackEmailChange = { viewModel.updateFeedbackEmail(it) },
+        onSubmitFeedback = { viewModel.submitFeedback() },
         wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -593,6 +697,11 @@ fun SettingsScreenContent(
     onCancelDownload: (String) -> Unit = {},
     onDownloadTranslation: (Language, Language) -> Unit = { _, _ -> },
     onToggleDictionaryExpansion: (String) -> Unit = {},
+    onSendFeedback: () -> Unit = {},
+    onDismissFeedback: () -> Unit = {},
+    onFeedbackCommentChange: (String) -> Unit = {},
+    onFeedbackEmailChange: (String) -> Unit = {},
+    onSubmitFeedback: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -925,7 +1034,8 @@ fun SettingsScreenContent(
 
                                 item {
                                     AboutSection(
-                                        buildConfig = buildConfig
+                                        buildConfig = buildConfig,
+                                        onSendFeedback = onSendFeedback
                                     )
                                 }
                             }
@@ -943,6 +1053,21 @@ fun SettingsScreenContent(
                 warning = confirmation.warning,
                 onConfirm = onConfirmDelete,
                 onDismiss = onDismissDeleteConfirmation
+            )
+        }
+
+        if (state.feedbackDialogVisible) {
+            FeedbackDialog(
+                title = "App feedback",
+                comment = state.feedbackComment,
+                email = state.feedbackEmail,
+                isSending = state.feedbackSubmitting,
+                error = state.feedbackError,
+                resultUrl = state.feedbackDiscussionUrl,
+                onCommentChange = onFeedbackCommentChange,
+                onEmailChange = onFeedbackEmailChange,
+                onDismiss = onDismissFeedback,
+                onSend = onSubmitFeedback
             )
         }
     }
@@ -1304,7 +1429,8 @@ private fun VoiceSectionItem(
 
 @Composable
 private fun AboutSection(
-    buildConfig: AppBuildConfig
+    buildConfig: AppBuildConfig,
+    onSendFeedback: () -> Unit = {}
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -1319,7 +1445,7 @@ private fun AboutSection(
                 icon = Icons.Outlined.Feedback,
                 title = "Send us feedback",
                 subtitle = "We'd love to hear from you",
-                onClick = {}
+                onClick = onSendFeedback
             )
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = AppSpacing.lg),

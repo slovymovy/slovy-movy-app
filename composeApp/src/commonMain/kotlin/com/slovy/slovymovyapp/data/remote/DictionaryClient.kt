@@ -107,6 +107,9 @@ class DictionaryClient(
     @Serializable
     data class FeedbackResponse(val issueUrl: String)
 
+    @Serializable
+    data class GeneralFeedbackResponse(val discussionUrl: String)
+
     /**
      * Fetches word data with progressive updates.
      *
@@ -478,6 +481,42 @@ class DictionaryClient(
 
             val body = response.bodyAsText()
             return json.decodeFromString(FeedbackResponse.serializer(), body)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (e is DictionaryClientException) throw e
+            throw DictionaryClientException.NetworkException(
+                NetworkErrorClassifier.userMessage(e),
+                e
+            )
+        }
+    }
+
+    suspend fun sendGeneralFeedback(
+        comment: String,
+        email: String? = null
+    ): GeneralFeedbackResponse {
+        val url = "$serverBaseUrl/feedback"
+
+        try {
+            val response = httpClient.post(url) {
+                contentType(ContentType.Application.Json)
+                val trimmedEmail = email?.trim()?.takeIf { it.isNotBlank() }
+                setBody(
+                    json.encodeToString(
+                        FeedbackRequest.serializer(),
+                        FeedbackRequest(comment.trim(), trimmedEmail)
+                    )
+                )
+            }
+
+            if (!response.status.isSuccess()) {
+                val body = response.bodyAsText()
+                throw DictionaryClientException.ServerException(response.status.value, body)
+            }
+
+            val body = response.bodyAsText()
+            return json.decodeFromString(GeneralFeedbackResponse.serializer(), body)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

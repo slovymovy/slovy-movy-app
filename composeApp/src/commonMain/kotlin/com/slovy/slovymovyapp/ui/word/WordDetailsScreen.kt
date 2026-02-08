@@ -849,121 +849,17 @@ fun WordDetailScreenContent(
     }
 
     if (state is WordDetailUiState.Content && state.feedbackDialogVisible) {
-        FeedbackDialog(
+        com.slovy.slovymovyapp.ui.FeedbackDialog(
+            title = "Propose correction",
             comment = state.feedbackComment,
             email = state.feedbackEmail,
             isSending = state.feedbackSubmitting,
             error = state.feedbackError,
-            issueUrl = state.feedbackIssueUrl,
+            resultUrl = state.feedbackIssueUrl,
             onCommentChange = onFeedbackCommentChange,
             onEmailChange = onFeedbackEmailChange,
             onDismiss = onDismissFeedback,
             onSend = onSubmitFeedback
-        )
-    }
-}
-
-@Composable
-private fun FeedbackDialog(
-    comment: String,
-    email: String,
-    isSending: Boolean,
-    error: String?,
-    issueUrl: String?,
-    onCommentChange: (String) -> Unit,
-    onEmailChange: (String) -> Unit,
-    onDismiss: () -> Unit,
-    onSend: () -> Unit
-) {
-    if (issueUrl != null) {
-        val uriHandler = LocalUriHandler.current
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text("Feedback sent!") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Thank you for your feedback.",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    TextButton(
-                        onClick = { uriHandler.openUri(issueUrl) },
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Text("View on GitHub")
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = onDismiss) {
-                    Text("Close")
-                }
-            }
-        )
-    } else {
-        AlertDialog(
-            onDismissRequest = {
-                if (!isSending) onDismiss()
-            },
-            title = {
-                Text("Send feedback")
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = comment,
-                        onValueChange = onCommentChange,
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 3,
-                        maxLines = 6,
-                        singleLine = false,
-                        enabled = !isSending,
-                        label = { Text("Comment") },
-                        isError = error != null
-                    )
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = onEmailChange,
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        enabled = !isSending,
-                        label = { Text("Email (optional)") },
-                        supportingText = {
-                            Text("May be publicly visible on GitHub")
-                        }
-                    )
-                    if (error != null) {
-                        Text(
-                            text = error,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = onSend,
-                    enabled = !isSending && comment.isNotBlank()
-                ) {
-                    if (isSending) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text("Send")
-                    }
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = onDismiss,
-                    enabled = !isSending
-                ) {
-                    Text("Cancel")
-                }
-            }
         )
     }
 }
