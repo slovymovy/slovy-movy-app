@@ -179,6 +179,7 @@ class ApplicationTest {
         assertEquals("base", chunks.first()["stage"]?.jsonPrimitive?.content)
     }
 
+    @Ignore("Avoid repo pollution")
     @Test
     fun testFeedback_createsIssueAndClosesIt() = testApplication {
         if (!GitHubClient.isAvailable()) return@testApplication
@@ -226,6 +227,62 @@ class ApplicationTest {
         } finally {
             issueNumber?.let { GitHubClient.closeIssue(it) }
         }
+    }
+
+    @Ignore("Avoid repo pollution")
+    @Test
+    fun testGeneralFeedback_createsDiscussion() = testApplication {
+        if (!GitHubClient.isAvailable()) return@testApplication
+
+        application {
+            module()
+        }
+
+        val response = client.post("/feedback") {
+            contentType(ContentType.Application.Json)
+            setBody("""{"comment":"General app feedback from test"}""")
+        }
+
+        assertEquals(HttpStatusCode.Created, response.status)
+        assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
+
+        val json = Json { ignoreUnknownKeys = true }
+        val responseJson = json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val discussionNumber = responseJson["discussionNumber"]?.jsonPrimitive?.content?.toIntOrNull()
+        assertNotNull(discussionNumber, "Discussion number should be present in response")
+        assertTrue(discussionNumber > 0, "Discussion number should be positive")
+
+        val discussionUrl = responseJson["discussionUrl"]?.jsonPrimitive?.content
+        assertNotNull(discussionUrl, "Discussion URL should be present in response")
+        assertTrue(discussionUrl.contains("github.com"), "URL should be a GitHub URL")
+    }
+
+    @Test
+    fun testGeneralFeedback_returnsBadRequestForEmptyComment() = testApplication {
+        application {
+            module()
+        }
+
+        val response = client.post("/feedback") {
+            contentType(ContentType.Application.Json)
+            setBody("""{"comment":"   "}""")
+        }
+
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
+    fun testGeneralFeedback_returnsBadRequestForInvalidBody() = testApplication {
+        application {
+            module()
+        }
+
+        val response = client.post("/feedback") {
+            contentType(ContentType.Application.Json)
+            setBody("""not json""")
+        }
+
+        assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
     private fun parseNdjson(body: String, json: Json) =
@@ -402,7 +459,7 @@ class RaceWithFallbackTest {
             )
         }
 
-        assertTrue(exception.message?.contains("No AI provider available") == true)
+        assertEquals(exception.message?.contains("No AI provider available"), true)
     }
 
     @Test

@@ -249,6 +249,37 @@ class GitHubClientTest {
     }
 
     @Test
+    fun buildGeneralFeedbackBody_withEmail() {
+        val body = GitHubClient.buildGeneralFeedbackBody("Great app!", "user@example.com")
+        assertTrue(body.contains("Feedback submitted from application."), "Body should contain header")
+        assertTrue(body.contains("Great app!"), "Body should contain comment")
+        assertTrue(body.contains("[feedback]"), "Email should be obfuscated with [feedback]")
+        assertFalse(body.contains("@example"), "Email @ should be replaced")
+    }
+
+    @Test
+    fun buildGeneralFeedbackBody_withoutEmail() {
+        val body = GitHubClient.buildGeneralFeedbackBody("Bug report")
+        assertTrue(body.contains("Bug report"), "Body should contain comment")
+        assertFalse(body.contains("Email"), "Body should not contain Email line")
+    }
+
+    @Test
+    @Ignore("prevent repo pollution")
+    fun createFeedbackDiscussion_createsAndReturns() {
+        if (!GitHubClient.isAvailable()) return
+
+        val discussion = GitHubClient.createFeedbackDiscussion(
+            comment = "Integration test feedback - please ignore",
+            email = null
+        )
+
+        assertTrue(discussion.number > 0, "Discussion number should be positive")
+        assertEquals("App feedback", discussion.title)
+        assertTrue(discussion.url.contains("github.com"), "URL should be a GitHub URL")
+    }
+
+    @Test
     fun fileOperations_throwsForNonExistentFileOnBranch() {
         val testBranch = "test-${UUID.randomUUID()}"
 

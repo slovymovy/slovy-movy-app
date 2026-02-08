@@ -115,6 +115,7 @@ fun App(
                 dataManager,
                 downloadCoordinator,
                 dictionaryRepository,
+                dictionaryClient,
                 buildConfig
             )
         }
