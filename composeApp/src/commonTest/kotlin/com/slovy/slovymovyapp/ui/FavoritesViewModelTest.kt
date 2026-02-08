@@ -5,35 +5,21 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.test.BaseTest
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalCoroutinesApi::class)
 open class FavoritesViewModelTest : BaseTest() {
 
-    private val testDispatcher = StandardTestDispatcher()
     private val viewModelStore = ViewModelStore()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-    }
 
     @AfterTest
     fun tearDown() {
         viewModelStore.clear()
-        Dispatchers.resetMain()
     }
 
     private fun favoritesRepository(): FavoritesRepository {
@@ -59,7 +45,7 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
-    fun initialLoad_singleLanguage_hiddenPicker() = runTest(testDispatcher) {
+    fun initialLoad_singleLanguage_hiddenPicker() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         favRepo.add("s1", Language.ENGLISH, "hello")
@@ -75,7 +61,7 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
-    fun initialLoad_multiLanguage_showsPicker_defaultsToFirst() = runTest(testDispatcher) {
+    fun initialLoad_multiLanguage_showsPicker_defaultsToFirst() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         favRepo.add("s1", Language.ENGLISH, "hello")
@@ -93,7 +79,7 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
-    fun setSelectedLanguage_filtersFavoritesToThatLanguage() = runTest(testDispatcher) {
+    fun setSelectedLanguage_filtersFavoritesToThatLanguage() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         favRepo.add("s1", Language.ENGLISH, "hello")
@@ -118,7 +104,7 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
-    fun removingLastFavoriteInLanguage_switchesToOtherLanguage() = runTest(testDispatcher) {
+    fun removingLastFavoriteInLanguage_switchesToOtherLanguage() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         favRepo.add("s1", Language.ENGLISH, "hello")
@@ -145,7 +131,7 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
-    fun removingLastVisibleResult_withActiveQuery_staysOnSameLanguage() = runTest(testDispatcher) {
+    fun removingLastVisibleResult_withActiveQuery_staysOnSameLanguage() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         favRepo.add("s1", Language.ENGLISH, "hello")
@@ -173,7 +159,7 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
-    fun queryResults_scopedToSelectedLanguage() = runTest(testDispatcher) {
+    fun queryResults_scopedToSelectedLanguage() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         // Same lemma in two languages
@@ -193,7 +179,7 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
-    fun dropdownExpandedState_resetsWhenPickerBecomesHidden() = runTest(testDispatcher) {
+    fun dropdownExpandedState_resetsWhenPickerBecomesHidden() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         favRepo.add("s1", Language.ENGLISH, "hello")
