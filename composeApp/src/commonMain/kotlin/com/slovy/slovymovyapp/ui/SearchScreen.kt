@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -48,7 +49,9 @@ data class SearchUiState(
     val availableLanguages: List<Language> = emptyList(),
     val selectedLanguage: Language? = null,
     val isLanguageDropdownExpanded: Boolean = false,
-    val wordSuggestions: List<String> = emptyList()
+    val wordSuggestions: List<String> = emptyList(),
+    val isSuggestionsRefreshing: Boolean = false,
+    val showPullToRefreshHint: Boolean = true
 )
 
 class SearchViewModel(
@@ -125,6 +128,22 @@ class SearchViewModel(
         if (!suggestionsInitialized) return
         viewModelScope.launch {
             loadSuggestionsForCurrentLanguage()
+        }
+    }
+
+    fun refreshSuggestionsFromPull() {
+        // Skip until initial data is loaded and avoid concurrent refresh jobs.
+        if (!suggestionsInitialized || state.isSuggestionsRefreshing) return
+        viewModelScope.launch {
+            state = state.copy(isSuggestionsRefreshing = true)
+            try {
+                loadSuggestionsForCurrentLanguage()
+            } finally {
+                state = state.copy(
+                    isSuggestionsRefreshing = false,
+                    showPullToRefreshHint = false
+                )
+            }
         }
     }
 
@@ -242,6 +261,7 @@ fun SearchScreen(
         },
         onToggleLanguageDropdown = { viewModel.toggleLanguageDropdown() },
         onDismissLanguageDropdown = { viewModel.dismissLanguageDropdown() },
+        onRefreshSuggestions = { viewModel.refreshSuggestionsFromPull() },
         wordDetailLabel = wordDetailLabel,
         onNavigateToWordDetail = onNavigateToWordDetail,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -259,6 +279,7 @@ fun SearchScreenContent(
     onLanguageSelected: (Language?) -> Unit = {},
     onToggleLanguageDropdown: () -> Unit = {},
     onDismissLanguageDropdown: () -> Unit = {},
+    onRefreshSuggestions: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -379,10 +400,17 @@ fun SearchScreenContent(
                     }
 
                     state.query.isEmpty() -> {
-                        EmptySearchState(
-                            wordSuggestions = state.wordSuggestions,
-                            onWordClick = onSuggestionSelected
-                        )
+                        PullToRefreshBox(
+                            modifier = Modifier.fillMaxSize(),
+                            isRefreshing = state.isSuggestionsRefreshing,
+                            onRefresh = onRefreshSuggestions
+                        ) {
+                            EmptySearchState(
+                                wordSuggestions = state.wordSuggestions,
+                                onWordClick = onSuggestionSelected,
+                                showPullToRefreshHint = state.showPullToRefreshHint && !state.isSuggestionsRefreshing
+                            )
+                        }
                     }
 
                     state.showNoResults -> {
@@ -481,7 +509,8 @@ private fun SearchResultCard(
 @Composable
 private fun EmptySearchState(
     wordSuggestions: List<String>,
-    onWordClick: (String) -> Unit
+    onWordClick: (String) -> Unit,
+    showPullToRefreshHint: Boolean = true
 ) {
     Column(
         modifier = Modifier
@@ -496,6 +525,15 @@ private fun EmptySearchState(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
+
+        if (showPullToRefreshHint) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Pull down to refresh suggestions",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
         if (wordSuggestions.isNotEmpty()) {
             Spacer(modifier = Modifier.height(24.dp))
