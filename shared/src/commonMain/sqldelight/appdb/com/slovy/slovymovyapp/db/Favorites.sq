@@ -44,5 +44,8 @@ selectOne:
 SELECT sense_id, target_lang, lemma, created_at FROM favorites
 WHERE sense_id = ? AND target_lang = ?;
 
+selectDistinctLemmasByLang:
+SELECT DISTINCT lemma FROM favorites WHERE target_lang = ?;
+
 deleteAll:
 DELETE FROM favorites;

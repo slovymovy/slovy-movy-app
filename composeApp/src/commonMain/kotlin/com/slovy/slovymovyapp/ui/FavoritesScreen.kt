@@ -54,7 +54,8 @@ sealed interface FavoritesUiState {
     data class Content(
         val senses: List<FavoriteSenseItem>,
         val query: String = "",
-        val hasAnyFavorites: Boolean = false
+        val hasAnyFavorites: Boolean = false,
+        val favoriteLemmas: Set<String> = emptySet()
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
     }
@@ -144,7 +145,8 @@ class FavoritesViewModel(
         state = FavoritesUiState.Content(
             senses = senses,
             query = query,
-            hasAnyFavorites = hasAnyFavorites
+            hasAnyFavorites = hasAnyFavorites,
+            favoriteLemmas = allFavorites.map { it.lemma }.toSet()
         )
 
         prefetchSenses(senses.take(PREFETCH_LIMIT))
@@ -413,7 +415,11 @@ fun FavoritesScreenContent(
                             Column(modifier = Modifier.fillMaxSize()) {
                                 val words = state.senses.distinctBy { it.lemma }
                                 Text(
-                                    text = "${state.senses.size} meaning${pluralEnding(state.senses)} · ${words.size} word${pluralEnding(words)}",
+                                    text = "${state.senses.size} meaning${pluralEnding(state.senses)} · ${words.size} word${
+                                        pluralEnding(
+                                            words
+                                        )
+                                    }",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
@@ -434,7 +440,8 @@ fun FavoritesScreenContent(
                                             onFavoriteToggle = { onFavoriteToggle(item.senseId) },
                                             onViewFullDetails = {
                                                 onNavigateToWordDetail(item.targetLang, item.lemma, item.senseId)
-                                            }
+                                            },
+                                            favoriteLemmas = state.favoriteLemmas
                                         )
                                     }
                                 }
@@ -452,7 +459,8 @@ private fun FavoriteSenseCard(
     item: FavoriteSenseItem,
     onToggle: () -> Unit,
     onFavoriteToggle: () -> Unit,
-    onViewFullDetails: () -> Unit
+    onViewFullDetails: () -> Unit,
+    favoriteLemmas: Set<String> = emptySet()
 ) {
     val senseState = SenseUiState(
         senseId = item.senseId,
@@ -477,7 +485,8 @@ private fun FavoriteSenseCard(
         state = senseState,
         onToggle = onToggle,
         onFavoriteToggle = onFavoriteToggle,
-        onViewFullDetails = onViewFullDetails
+        onViewFullDetails = onViewFullDetails,
+        favoriteLemmas = favoriteLemmas
     )
 }
 

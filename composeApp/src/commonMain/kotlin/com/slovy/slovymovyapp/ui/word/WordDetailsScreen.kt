@@ -255,6 +255,9 @@ class WordDetailViewModel(
     var favoriteSenses by mutableStateOf<Set<String>>(emptySet())
         private set
 
+    var favoriteLemmas by mutableStateOf<Set<String>>(emptySet())
+        private set
+
     var isPlaying by mutableStateOf(false)
         private set
 
@@ -438,6 +441,7 @@ class WordDetailViewModel(
             }
 
             favoriteSenses = favoriteSenseIds
+            favoriteLemmas = favoritesRepository.getDistinctLemmasByLang(dictionaryLanguage)
             val current = state
             if (current is WordDetailUiState.Content) {
                 state = current.reloadFavorite(::isSenseFavorite)
@@ -697,6 +701,7 @@ fun WordDetailScreen(
         isPlaying = viewModel.isPlaying,
         isPreparing = viewModel.isPreparing,
         canPlay = viewModel.availableVoices.isNotEmpty(),
+        favoriteLemmas = viewModel.favoriteLemmas,
         onRefresh = { viewModel.refreshFromPull() },
         onBack = onBack,
         onNavigateToSearch = onNavigateToSearch,
@@ -732,6 +737,7 @@ fun WordDetailScreenContent(
     isPlaying: Boolean = false,
     isPreparing: Boolean = false,
     canPlay: Boolean = false,
+    favoriteLemmas: Set<String> = emptySet(),
     onRefresh: () -> Unit = {},
     onBack: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
@@ -871,7 +877,8 @@ fun WordDetailScreenContent(
                         onSensePositioned = onSensePositioned,
                         isSenseFavorite = isSenseFavorite,
                         onSenseFavoriteToggle = onSenseFavoriteToggle,
-                        onWordClick = onWordClick
+                        onWordClick = onWordClick,
+                        favoriteLemmas = favoriteLemmas
                     )
                 }
 
@@ -934,7 +941,8 @@ private fun WordDetailContent(
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {},
-    onWordClick: (String) -> Unit = {}
+    onWordClick: (String) -> Unit = {},
+    favoriteLemmas: Set<String> = emptySet()
 ) {
     var scrollContainerY by remember { mutableStateOf(0f) }
 
@@ -958,7 +966,8 @@ private fun WordDetailContent(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     relatedWords = card.relatedWords,
-                    onWordClick = onWordClick
+                    onWordClick = onWordClick,
+                    favoriteLemmas = favoriteLemmas
                 )
             }
             HorizontalDivider(
@@ -1005,7 +1014,8 @@ private fun WordDetailContent(
                     },
                     onSenseFavoriteToggle = onSenseFavoriteToggle,
                     relatedWords = card.relatedWords,
-                    onWordClick = onWordClick
+                    onWordClick = onWordClick,
+                    favoriteLemmas = favoriteLemmas
                 )
             }
         }

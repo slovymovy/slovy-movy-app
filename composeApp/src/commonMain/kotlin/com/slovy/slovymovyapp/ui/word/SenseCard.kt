@@ -19,8 +19,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
@@ -48,7 +51,8 @@ internal fun SenseCard(
     onFavoriteToggle: () -> Unit = {},
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
-    onViewFullDetails: (() -> Unit)? = null
+    onViewFullDetails: (() -> Unit)? = null,
+    favoriteLemmas: Set<String> = emptySet()
 ) {
     val sense = data.sense
     val translationBasedHeader = remember(data.senseId, sense?.translations) { sense?.translationsHeader() }
@@ -234,7 +238,8 @@ internal fun SenseCard(
                             MaterialTheme.colorScheme.primaryContainer,
                             MaterialTheme.colorScheme.onPrimaryContainer,
                             relatedWords = relatedWords,
-                            onWordClick = onWordClick
+                            onWordClick = onWordClick,
+                            favoriteLemmas = favoriteLemmas
                         )
                         val (synonymBg, synonymText) = colorsForSynonyms()
                         EntryList(
@@ -243,7 +248,8 @@ internal fun SenseCard(
                             synonymBg,
                             synonymText,
                             relatedWords = relatedWords,
-                            onWordClick = onWordClick
+                            onWordClick = onWordClick,
+                            favoriteLemmas = favoriteLemmas
                         )
                         val (antonymBg, antonymText) = colorsForAntonyms()
                         EntryList(
@@ -252,7 +258,8 @@ internal fun SenseCard(
                             antonymBg,
                             antonymText,
                             relatedWords = relatedWords,
-                            onWordClick = onWordClick
+                            onWordClick = onWordClick,
+                            favoriteLemmas = favoriteLemmas
                         )
                     }
                 }
