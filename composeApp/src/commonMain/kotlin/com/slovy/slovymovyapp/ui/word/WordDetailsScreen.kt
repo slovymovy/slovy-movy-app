@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -9,16 +10,17 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,6 +34,7 @@ import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
@@ -41,7 +44,8 @@ sealed interface WordDetailUiState {
         val lemma: String? = null,
         val message: String = "No entries available.",
         val isError: Boolean = false,
-        val isLoading: Boolean = false
+        val isLoading: Boolean = false,
+        val isRefreshing: Boolean = false
     ) : WordDetailUiState
 
     data class Content(
@@ -57,9 +61,16 @@ sealed interface WordDetailUiState {
         val feedbackEmail: String = "",
         val feedbackSubmitting: Boolean = false,
         val feedbackError: String? = null,
-        val feedbackIssueUrl: String? = null
+        val feedbackIssueUrl: String? = null,
+        val isRefreshing: Boolean = false
     ) : WordDetailUiState
 }
+
+val WordDetailUiState.isRefreshing: Boolean
+    get() = when (this) {
+        is WordDetailUiState.Empty -> isRefreshing
+        is WordDetailUiState.Content -> isRefreshing
+    }
 
 data class EntryUiState(
     val entryId: String,
@@ -350,11 +361,46 @@ class WordDetailViewModel(
         loadVoices()
     }
 
+    fun refreshFromPull() {
+        if (state.isRefreshing) return
+        state = when (val s = state) {
+            is WordDetailUiState.Empty -> s.copy(isRefreshing = true)
+            is WordDetailUiState.Content -> s.copy(isRefreshing = true)
+        }
+        if (!isLoading()) {
+            viewModelScope.launch {
+                wordFetchManager.getWord(
+                    dictionaryLanguage,
+                    lemma,
+                    requestedTranslationLanguages,
+                    pushToRepo = true
+                ).collect { result ->
+                    updateStateFromResult(result)
+                }
+            }
+        }
+        viewModelScope.launch {
+            delay(200)
+            state = when (val s = state) {
+                is WordDetailUiState.Empty -> s.copy(isRefreshing = false)
+                is WordDetailUiState.Content -> s.copy(isRefreshing = false)
+            }
+        }
+    }
+
     fun hasError(): Boolean {
         return when (val s = state) {
             is WordDetailUiState.Empty -> s.isError
             is WordDetailUiState.Content ->
                 s.cardError != null || s.translationError != null
+        }
+    }
+
+    fun isLoading(): Boolean {
+        return when (val s = state) {
+            is WordDetailUiState.Empty -> s.isLoading
+            is WordDetailUiState.Content ->
+                s.cardLoading || s.translationLoading
         }
     }
 
@@ -651,6 +697,7 @@ fun WordDetailScreen(
         isPlaying = viewModel.isPlaying,
         isPreparing = viewModel.isPreparing,
         canPlay = viewModel.availableVoices.isNotEmpty(),
+        onRefresh = { viewModel.refreshFromPull() },
         onBack = onBack,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -685,6 +732,7 @@ fun WordDetailScreenContent(
     isPlaying: Boolean = false,
     isPreparing: Boolean = false,
     canPlay: Boolean = false,
+    onRefresh: () -> Unit = {},
     onBack: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -799,49 +847,56 @@ fun WordDetailScreenContent(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        when (state) {
-            is WordDetailUiState.Content -> {
-                WordDetailContent(
-                    card = state.card,
-                    entryStates = state.entries,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(innerPadding)
-                        .padding(horizontal = 12.dp, vertical = 20.dp),
-                    cardLoading = state.cardLoading,
-                    cardError = state.cardError,
-                    translationLoading = state.translationLoading,
-                    translationError = state.translationError,
-                    onEntryToggle = onEntryToggle,
-                    onFormsToggle = onFormsToggle,
-                    onSenseToggle = onSenseToggle,
-                    onSensePositioned = onSensePositioned,
-                    isSenseFavorite = isSenseFavorite,
-                    onSenseFavoriteToggle = onSenseFavoriteToggle,
-                    onWordClick = onWordClick
-                )
-            }
+        PullToRefreshBox(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            isRefreshing = state.isRefreshing,
+            onRefresh = onRefresh
+        ) {
+            when (state) {
+                is WordDetailUiState.Content -> {
+                    WordDetailContent(
+                        card = state.card,
+                        entryStates = state.entries,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                            .padding(horizontal = 12.dp, vertical = 20.dp),
+                        cardLoading = state.cardLoading,
+                        cardError = state.cardError,
+                        translationLoading = state.translationLoading,
+                        translationError = state.translationError,
+                        onEntryToggle = onEntryToggle,
+                        onFormsToggle = onFormsToggle,
+                        onSenseToggle = onSenseToggle,
+                        onSensePositioned = onSensePositioned,
+                        isSenseFavorite = isSenseFavorite,
+                        onSenseFavoriteToggle = onSenseFavoriteToggle,
+                        onWordClick = onWordClick
+                    )
+                }
 
-            is WordDetailUiState.Empty -> {
-                Surface(Modifier.fillMaxSize()) {
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        if (state.isLoading) {
-                            LoadingIndicator()
-                        } else if (state.isError) {
-                            ErrorIcon(Modifier.size(30.dp))
+                is WordDetailUiState.Empty -> {
+                    Surface(Modifier.fillMaxSize()) {
+                        Column(
+                            modifier = Modifier.fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            if (state.isLoading) {
+                                LoadingIndicator()
+                            } else if (state.isError) {
+                                ErrorIcon(Modifier.size(30.dp))
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = state.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
                         }
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = state.message,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
                     }
                 }
             }
