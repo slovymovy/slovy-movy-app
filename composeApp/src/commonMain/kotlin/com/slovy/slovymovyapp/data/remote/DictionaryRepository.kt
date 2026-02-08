@@ -38,7 +38,8 @@ class DictionaryRepository(
 
     data class SenseWithPos(
         val sense: LanguageCardResponseSense,
-        val pos: PartOfSpeech
+        val pos: PartOfSpeech,
+        val relatedWords: Map<String, RelatedWord> = emptyMap()
     )
 
     // Cache for loaded senses - reusable across the app
@@ -643,7 +644,6 @@ class DictionaryRepository(
                     targetLangDefinitions = tgtDefinitions,
                     translations = tgtTranslations,
                 )
-                cacheSense(s.senseId.toString(), SenseWithPos(result, posData.pos))
                 result
             }
 
@@ -663,6 +663,21 @@ class DictionaryRepository(
             dictDatabases, language,
             collectAllRelatedWords(entries, wordFamily, lemma)
         )
+
+        // Keep related words alongside each cached sense so lightweight sense loads
+        // (e.g. Favorites) can still render clickable related terms.
+        entries.forEach { entry ->
+            entry.senses.forEach { sense ->
+                cacheSense(
+                    sense.senseId,
+                    SenseWithPos(
+                        sense = sense,
+                        pos = entry.pos,
+                        relatedWords = relatedWordsMap
+                    )
+                )
+            }
+        }
 
         LanguageCard(
             entries = entries,
@@ -694,7 +709,13 @@ class DictionaryRepository(
         // Load missing senses (getLanguageCard will cache them automatically)
         val card = getLanguageCard(language, lemma, translationTargets, missingIds) ?: return cached
         val loaded = card.entries.flatMap { entry ->
-            entry.senses.map { sense -> sense.senseId to SenseWithPos(sense, entry.pos) }
+            entry.senses.map { sense ->
+                sense.senseId to SenseWithPos(
+                    sense = sense,
+                    pos = entry.pos,
+                    relatedWords = card.relatedWords
+                )
+            }
         }.toMap()
 
         return cached + loaded

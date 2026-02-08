@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -42,6 +44,7 @@ data class FavoriteSenseItem(
     val lemma: String,
     val createdAt: Long,
     val sense: LanguageCardResponseSense? = null,
+    val relatedWords: Map<String, RelatedWord> = emptyMap(),
     val pos: PartOfSpeech? = null,
     val expanded: Boolean = false,
     val loading: Boolean = false,
@@ -163,6 +166,7 @@ class FavoritesViewModel(
             lemma = favorite.lemma,
             createdAt = favorite.createdAt,
             sense = cached?.sense ?: existing?.sense,
+            relatedWords = cached?.relatedWords ?: existing?.relatedWords.orEmpty(),
             pos = cached?.pos ?: existing?.pos,
             expanded = existing?.expanded ?: false,
             loading = existing?.loading == true && cached == null,
@@ -228,6 +232,7 @@ class FavoritesViewModel(
             updateSense(item.senseId) {
                 it.copy(
                     sense = result?.sense,
+                    relatedWords = result?.relatedWords ?: it.relatedWords,
                     pos = result?.pos,
                     loading = false,
                     error = if (result == null) "Meaning not found" else null
@@ -260,7 +265,7 @@ class FavoritesViewModel(
 fun FavoritesScreen(
     viewModel: FavoritesViewModel,
     onNavigateToSearch: () -> Unit = {},
-    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> },
+    onNavigateToWordDetail: (Language, String, String?) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
@@ -299,7 +304,7 @@ fun FavoritesScreenContent(
     onQueryChange: (String) -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
     onFavoriteToggle: (String) -> Unit = {},
-    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> },
+    onNavigateToWordDetail: (Language, String, String?) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
@@ -441,6 +446,9 @@ fun FavoritesScreenContent(
                                             onViewFullDetails = {
                                                 onNavigateToWordDetail(item.targetLang, item.lemma, item.senseId)
                                             },
+                                            onWordClick = { word ->
+                                                onNavigateToWordDetail(item.targetLang, word, null)
+                                            },
                                             favoriteLemmas = state.favoriteLemmas
                                         )
                                     }
@@ -460,6 +468,7 @@ private fun FavoriteSenseCard(
     onToggle: () -> Unit,
     onFavoriteToggle: () -> Unit,
     onViewFullDetails: () -> Unit,
+    onWordClick: (String) -> Unit = {},
     favoriteLemmas: Set<String> = emptySet()
 ) {
     val senseState = SenseUiState(
@@ -486,6 +495,8 @@ private fun FavoriteSenseCard(
         onToggle = onToggle,
         onFavoriteToggle = onFavoriteToggle,
         onViewFullDetails = onViewFullDetails,
+        relatedWords = item.relatedWords,
+        onWordClick = onWordClick,
         favoriteLemmas = favoriteLemmas
     )
 }
@@ -548,20 +559,20 @@ private fun createSenseItem(
     error = error
 )
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenLoading(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(state = FavoritesUiState.Loading)
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenEmpty(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(
@@ -570,10 +581,10 @@ fun PreviewFavoritesScreenEmpty(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenCollapsed(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
@@ -602,10 +613,10 @@ fun PreviewFavoritesScreenCollapsed(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenExpanded(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
@@ -635,10 +646,10 @@ fun PreviewFavoritesScreenExpanded(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenWithSearch(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
@@ -657,10 +668,10 @@ fun PreviewFavoritesScreenWithSearch(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenNoResults(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(
@@ -669,10 +680,10 @@ fun PreviewFavoritesScreenNoResults(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenLoadingAndError(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
