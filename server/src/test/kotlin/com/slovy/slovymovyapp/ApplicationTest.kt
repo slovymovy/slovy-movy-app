@@ -179,6 +179,7 @@ class ApplicationTest {
         assertEquals("base", chunks.first()["stage"]?.jsonPrimitive?.content)
     }
 
+    @Ignore("Avoid repo pollution")
     @Test
     fun testFeedback_createsIssueAndClosesIt() = testApplication {
         if (!GitHubClient.isAvailable()) return@testApplication
@@ -228,6 +229,7 @@ class ApplicationTest {
         }
     }
 
+    @Ignore("Avoid repo pollution")
     @Test
     fun testGeneralFeedback_createsDiscussion() = testApplication {
         if (!GitHubClient.isAvailable()) return@testApplication
@@ -457,7 +459,7 @@ class RaceWithFallbackTest {
             )
         }
 
-        assertTrue(exception.message?.contains("No AI provider available") == true)
+        assertEquals(exception.message?.contains("No AI provider available"), true)
     }
 
     @Test
