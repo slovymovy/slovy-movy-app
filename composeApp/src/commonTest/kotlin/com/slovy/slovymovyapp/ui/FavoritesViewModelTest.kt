@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.lifecycle.ViewModelStore
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
@@ -22,6 +23,7 @@ import kotlin.test.assertTrue
 open class FavoritesViewModelTest : BaseTest() {
 
     private val testDispatcher = StandardTestDispatcher()
+    private val viewModelStore = ViewModelStore()
 
     @BeforeTest
     fun setUp() {
@@ -30,6 +32,7 @@ open class FavoritesViewModelTest : BaseTest() {
 
     @AfterTest
     fun tearDown() {
+        viewModelStore.clear()
         Dispatchers.resetMain()
     }
 
@@ -39,6 +42,15 @@ open class FavoritesViewModelTest : BaseTest() {
 
     private fun dictionaryRepository(favoritesRepo: FavoritesRepository): DictionaryRepository {
         return DictionaryRepository(testDataDbManager(), testLocalDbManager(), favoritesRepo)
+    }
+
+    private fun createViewModel(
+        favRepo: FavoritesRepository,
+        dictRepo: DictionaryRepository = dictionaryRepository(favRepo)
+    ): FavoritesViewModel {
+        val vm = FavoritesViewModel(favRepo, dictRepo)
+        viewModelStore.put("test", vm)
+        return vm
     }
 
     private fun contentState(vm: FavoritesViewModel): FavoritesUiState.Content {
@@ -53,7 +65,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s1", Language.ENGLISH, "hello")
         favRepo.add("s2", Language.ENGLISH, "world")
 
-        val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
+        val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
         val content = contentState(vm)
@@ -69,7 +81,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s1", Language.ENGLISH, "hello")
         favRepo.add("s2", Language.RUSSIAN, "привет")
 
-        val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
+        val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
         val content = contentState(vm)
@@ -88,7 +100,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s2", Language.ENGLISH, "world")
         favRepo.add("s3", Language.RUSSIAN, "привет")
 
-        val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
+        val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
         var content = contentState(vm)
@@ -113,7 +125,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s2", Language.ENGLISH, "world")
         favRepo.add("s3", Language.RUSSIAN, "привет")
 
-        val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
+        val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
         // Switch to Russian (only 1 favorite)
@@ -140,7 +152,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s2", Language.ENGLISH, "world")
         favRepo.add("s3", Language.RUSSIAN, "привет")
 
-        val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
+        val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
         // Search for "hello" — only matches s1 in English
@@ -168,7 +180,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s1", Language.ENGLISH, "hello")
         favRepo.add("s2", Language.RUSSIAN, "hello")
 
-        val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
+        val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
         // Search for "hello" while on English
@@ -187,7 +199,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s1", Language.ENGLISH, "hello")
         favRepo.add("s2", Language.RUSSIAN, "привет")
 
-        val vm = FavoritesViewModel(favRepo, dictionaryRepository(favRepo))
+        val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
         // Switch to Russian and open the dropdown
