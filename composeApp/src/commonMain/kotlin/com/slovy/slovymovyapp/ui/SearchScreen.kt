@@ -124,8 +124,7 @@ class SearchViewModel(
 
     private suspend fun loadSuggestionsForCurrentLanguage() {
         val language = state.selectedLanguage ?: return
-        val suggestions = repository.getWordSuggestions(language)
-        val favorites = repository.getRecentFavoriteLemmas(language)
+        val (suggestions, favorites) = repository.getSearchEmptyStateData(language)
         state = state.copy(wordSuggestions = suggestions, favoriteLemmas = favorites)
     }
 
