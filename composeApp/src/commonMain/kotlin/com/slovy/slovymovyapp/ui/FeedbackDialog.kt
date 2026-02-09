@@ -122,12 +122,10 @@ fun FeedbackDialog(
                             )
                         },
                         shape = MaterialTheme.shapes.small,
-                        colors = fieldColors
-                    )
-                    Text(
-                        text = "May be publicly visible on GitHub",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        colors = fieldColors,
+                        supportingText = {
+                            Text("May be publicly visible on GitHub")
+                        }
                     )
                     if (error != null) {
                         Text(
