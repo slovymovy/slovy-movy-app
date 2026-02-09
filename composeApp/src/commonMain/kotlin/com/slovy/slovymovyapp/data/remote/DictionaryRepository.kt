@@ -747,7 +747,7 @@ class DictionaryRepository(
     ): List<String> = withContext(Dispatchers.IO) {
         (favorites ?: favoritesRepository.getAll())
             .filter { it.language == language }
-            .distinctBy { it.lemma }
+            .distinctBy { it.lemma.lowercase() }
             .take(limit)
             .map { it.lemma }
     }
