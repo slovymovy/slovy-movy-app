@@ -296,9 +296,9 @@ fun SearchScreenContent(
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(state.query, isSearchFocused) {
+            .pointerInput(isSearchFocused) {
                 detectTapGestures(onTap = {
-                    if (!isSearchFocused && state.query.isEmpty()) {
+                    if (!isSearchFocused) {
                         searchFocusRequester.requestFocus()
                     } else {
                         focusManager.clearFocus()
@@ -556,7 +556,13 @@ private fun EmptySearchState(
             )
         }
 
-        if (showPullToRefreshHint) {
+        if (wordSuggestions.isEmpty() && favoriteLemmas.isEmpty()) {
+            Text(
+                text = "Start typing to search",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else if (showPullToRefreshHint) {
             Spacer(modifier = Modifier.height(0.dp)) // reset arrangement gap
             Text(
                 modifier = Modifier.offset(y = (-12).dp),
@@ -584,7 +590,7 @@ private fun WordChipSection(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
+                Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
