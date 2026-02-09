@@ -1,10 +1,14 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -12,6 +16,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FeedbackDialog(
     title: String,
+    commentPlaceholder: String,
     comment: String,
     email: String,
     isSending: Boolean,
@@ -26,18 +31,36 @@ fun FeedbackDialog(
         val uriHandler = LocalUriHandler.current
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text("Feedback sent!") },
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Feedback sent",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                }
+            },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Thank you for your feedback.",
+                        text = "Thank you! We've created a tracking issue for your feedback. You can follow its progress on GitHub.",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     TextButton(
                         onClick = { uriHandler.openUri(resultUrl) },
                         contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text("View on GitHub")
+                        Text("Track on GitHub")
                     }
                 }
             },
@@ -53,9 +76,17 @@ fun FeedbackDialog(
                 if (!isSending) onDismiss()
             },
             title = {
-                Text(title)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
             },
             text = {
+                val fieldColors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = comment,
@@ -65,7 +96,14 @@ fun FeedbackDialog(
                         maxLines = 6,
                         singleLine = false,
                         enabled = !isSending,
-                        label = { Text("Comment") },
+                        placeholder = {
+                            Text(
+                                text = commentPlaceholder,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        shape = MaterialTheme.shapes.small,
+                        colors = fieldColors,
                         isError = error != null
                     )
                     OutlinedTextField(
@@ -74,10 +112,19 @@ fun FeedbackDialog(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         enabled = !isSending,
-                        label = { Text("Email (optional)") },
-                        supportingText = {
-                            Text("May be publicly visible on GitHub")
-                        }
+                        placeholder = {
+                            Text(
+                                text = "Email (optional)",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        shape = MaterialTheme.shapes.small,
+                        colors = fieldColors
+                    )
+                    Text(
+                        text = "May be publicly visible on GitHub",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (error != null) {
                         Text(
@@ -98,6 +145,8 @@ fun FeedbackDialog(
                             modifier = Modifier.size(16.dp),
                             strokeWidth = 2.dp
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Sending…")
                     } else {
                         Text("Send")
                     }
@@ -106,7 +155,10 @@ fun FeedbackDialog(
             dismissButton = {
                 TextButton(
                     onClick = onDismiss,
-                    enabled = !isSending
+                    enabled = !isSending,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 ) {
                     Text("Cancel")
                 }
@@ -123,6 +175,7 @@ private fun FeedbackDialogInputPreview(
     ThemedPreview(darkTheme = isDark) {
         FeedbackDialog(
             title = "App feedback",
+            commentPlaceholder = "Share your thoughts…",
             comment = "",
             email = "",
             isSending = false,
@@ -144,6 +197,7 @@ private fun FeedbackDialogSendingPreview(
     ThemedPreview(darkTheme = isDark) {
         FeedbackDialog(
             title = "App feedback",
+            commentPlaceholder = "Share your thoughts…",
             comment = "Great app!",
             email = "user@example.com",
             isSending = true,
@@ -165,6 +219,7 @@ private fun FeedbackDialogErrorPreview(
     ThemedPreview(darkTheme = isDark) {
         FeedbackDialog(
             title = "App feedback",
+            commentPlaceholder = "Share your thoughts…",
             comment = "",
             email = "",
             isSending = false,
@@ -186,6 +241,7 @@ private fun FeedbackDialogSuccessPreview(
     ThemedPreview(darkTheme = isDark) {
         FeedbackDialog(
             title = "App feedback",
+            commentPlaceholder = "Share your thoughts…",
             comment = "",
             email = "",
             isSending = false,
