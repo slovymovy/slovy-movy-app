@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -20,8 +21,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -30,7 +35,6 @@ import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
-import com.slovy.slovymovyapp.ui.components.AppCard
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.word.Badge
@@ -49,9 +53,10 @@ data class SearchUiState(
     val availableLanguages: List<Language> = emptyList(),
     val selectedLanguage: Language? = null,
     val isLanguageDropdownExpanded: Boolean = false,
-    val wordSuggestions: List<String> = emptyList(),
     val isSuggestionsRefreshing: Boolean = false,
-    val showPullToRefreshHint: Boolean = true
+    val showPullToRefreshHint: Boolean = true,
+    val wordSuggestions: List<String> = emptyList(),
+    val favoriteLemmas: List<String> = emptyList()
 )
 
 class SearchViewModel(
@@ -119,8 +124,8 @@ class SearchViewModel(
 
     private suspend fun loadSuggestionsForCurrentLanguage() {
         val language = state.selectedLanguage ?: return
-        val suggestions = repository.getWordSuggestions(language)
-        state = state.copy(wordSuggestions = suggestions)
+        val (suggestions, favorites) = repository.getSearchEmptyStateData(language)
+        state = state.copy(wordSuggestions = suggestions, favoriteLemmas = favorites)
     }
 
     fun refreshSuggestions() {
@@ -286,12 +291,18 @@ fun SearchScreenContent(
     onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
+    val searchFocusRequester = remember { FocusRequester() }
+    var isSearchFocused by remember { mutableStateOf(false) }
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(Unit) {
+            .pointerInput(isSearchFocused) {
                 detectTapGestures(onTap = {
-                    focusManager.clearFocus()
+                    if (!isSearchFocused) {
+                        searchFocusRequester.requestFocus()
+                    } else {
+                        focusManager.clearFocus()
+                    }
                 })
             }
     ) {
@@ -326,7 +337,9 @@ fun SearchScreenContent(
                         query = state.query,
                         onQueryChange = onQueryChange,
                         modifier = Modifier.weight(1f),
-                        placeholder = "Type a word..."
+                        placeholder = "Search your word...",
+                        focusRequester = searchFocusRequester,
+                        onFocusChanged = { isSearchFocused = it }
                     )
 
                     // Language filter dropdown
@@ -407,7 +420,8 @@ fun SearchScreenContent(
                         ) {
                             EmptySearchState(
                                 wordSuggestions = state.wordSuggestions,
-                                onWordClick = onSuggestionSelected,
+                                favoriteLemmas = state.favoriteLemmas,
+                            onWordClick = onSuggestionSelected,
                                 showPullToRefreshHint = state.showPullToRefreshHint && !state.isSuggestionsRefreshing
                             )
                         }
@@ -447,10 +461,14 @@ private fun SearchResultCard(
     onClick: () -> Unit
 ) {
     val containerColor = colorForLemma(item.lemma, MaterialTheme.colorScheme.surface)
-    AppCard(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        onClick = onClick
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { role = Role.Button }
+            .clickable(onClickLabel = "Open ${item.display}", onClick = onClick),
+        shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.outlinedCardColors(containerColor = containerColor),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
@@ -509,6 +527,7 @@ private fun SearchResultCard(
 @Composable
 private fun EmptySearchState(
     wordSuggestions: List<String>,
+    favoriteLemmas: List<String>,
     onWordClick: (String) -> Unit,
     showPullToRefreshHint: Boolean = true
 ) {
@@ -517,30 +536,63 @@ private fun EmptySearchState(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
-            .padding(top = 48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(top = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Text(
-            text = "Search your word",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        if (wordSuggestions.isNotEmpty()) {
+            WordChipSection(
+                title = "Explore new words",
+                words = wordSuggestions,
+                onWordClick = onWordClick
+            )
+        }
 
-        if (showPullToRefreshHint) {
-            Spacer(modifier = Modifier.height(12.dp))
+        if (favoriteLemmas.isNotEmpty()) {
+            WordChipSection(
+                title = "Your latest favorites",
+                words = favoriteLemmas,
+                onWordClick = onWordClick
+            )
+        }
+
+        if (wordSuggestions.isEmpty() && favoriteLemmas.isEmpty()) {
             Text(
+                text = "Start typing to search",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else if (showPullToRefreshHint) {
+            Spacer(modifier = Modifier.height(0.dp)) // reset arrangement gap
+            Text(
+                modifier = Modifier.offset(y = (-12).dp),
                 text = "Pull down to refresh suggestions",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
 
-        if (wordSuggestions.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "or explore:",
-                style = MaterialTheme.typography.bodyMedium,
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WordChipSection(
+    title: String,
+    words: List<String>,
+    onWordClick: (String) -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+                Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -551,7 +603,7 @@ private fun EmptySearchState(
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                wordSuggestions.forEach { word ->
+                words.forEach { word ->
                     SuggestionChip(
                         onClick = { onWordClick(word) },
                         label = {
@@ -573,31 +625,6 @@ private fun EmptySearchState(
                         )
                     )
                 }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Surface(
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-            shape = MaterialTheme.shapes.medium
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Lightbulb,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
-                )
-                Text(
-                    text = "You can search by translations and grammar forms too!",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
             }
         }
     }
@@ -666,7 +693,8 @@ private fun SearchScreenPreviewEmptyQuery(
                 showNoResults = false,
                 availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN),
                 selectedLanguage = Language.ENGLISH,
-                wordSuggestions = listOf("the", "be", "to", "of", "and")
+                wordSuggestions = listOf("the", "be", "to", "of", "and"),
+                favoriteLemmas = listOf("world", "time", "love")
             ),
         )
     }
