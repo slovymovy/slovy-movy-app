@@ -20,6 +20,7 @@ import com.slovy.slovymovyapp.ui.*
 import com.slovy.slovymovyapp.ui.theme.AppTheme
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -114,6 +115,7 @@ fun App(
                 dataManager,
                 downloadCoordinator,
                 dictionaryRepository,
+                dictionaryClient,
                 buildConfig
             )
         }
@@ -133,7 +135,8 @@ fun App(
             }
         }
 
-        val nativeJson = settingsRepository.getById(Setting.Name.LANGUAGE)?.value
+        val nativeSetting = settingsRepository.getById(Setting.Name.LANGUAGE)
+        val nativeJson = nativeSetting?.value
         val nativeCodes = if (nativeJson is JsonArray) {
             nativeJson.mapNotNull { it.jsonPrimitive.content }
         } else {
@@ -141,18 +144,28 @@ fun App(
         }
         val natives = nativeCodes.mapNotNull { Language.fromCodeOrNull(it) }
 
-        // Existing user: has language settings configured
-        if (natives.isNotEmpty()) {
+        // Existing user: has language settings configured (empty array is a valid selection).
+        if (nativeSetting != null) {
             nativeLanguages = natives
             val dictionaryCode = settingsRepository.getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
             val dictionary = dictionaryCode?.let { Language.fromCodeOrNull(it) }
             if (dictionary != null) {
                 dictionaryLanguage = dictionary
-                val missingTranslation = natives.find { !dataManager.hasTranslation(dictionary, it) }
-                return when {
-                    !dataManager.hasDictionary(dictionary) -> AppDestination.DownloadDictionary
-                    missingTranslation != null -> AppDestination.DownloadTranslation
-                    else -> AppDestination.Search
+                if (!dataManager.hasDictionary(dictionary)) {
+                    return AppDestination.DownloadDictionary
+                }
+                val downloadableTargets = try {
+                    dataManager.downloadableTranslationTargets(dictionary, natives)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                val missingTranslation = downloadableTargets.find { !dataManager.hasTranslation(dictionary, it) }
+                return if (missingTranslation != null) {
+                    AppDestination.DownloadTranslation
+                } else {
+                    AppDestination.Search
                 }
             }
             // LANGUAGE set but DICTIONARY missing - return to setup
@@ -267,15 +280,24 @@ fun App(
                                 dataManager.ensureDictionary(dictLang, onProgress, cancel)
                             },
                             onSuccess = {
-                                val missingTranslation =
-                                    nativeLanguages.find { !dataManager.hasTranslation(dictLang, it) }
-                                if (missingTranslation == null) {
-                                    navController.navigate(AppDestination.Search) {
-                                        popUpTo<AppDestination.SetupLanguages> { inclusive = false }
+                                coroutineScope.launch {
+                                    val downloadable = try {
+                                        dataManager.downloadableTranslationTargets(dictLang, nativeLanguages)
+                                    } catch (e: CancellationException) {
+                                        throw e
+                                    } catch (e: Exception) {
+                                        emptyList()
                                     }
-                                } else {
-                                    navController.navigate(AppDestination.DownloadTranslation) {
-                                        popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
+                                    val missingTranslation =
+                                        downloadable.find { !dataManager.hasTranslation(dictLang, it) }
+                                    if (missingTranslation == null) {
+                                        navController.navigate(AppDestination.Search) {
+                                            popUpTo<AppDestination.SetupLanguages> { inclusive = false }
+                                        }
+                                    } else {
+                                        navController.navigate(AppDestination.DownloadTranslation) {
+                                            popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
+                                        }
                                     }
                                 }
                             },
@@ -300,37 +322,47 @@ fun App(
             }
             composable<AppDestination.DownloadTranslation> { backStackEntry ->
                 val dictLang = dictionaryLanguage
-                val missingTranslations = if (dictLang != null) {
-                    nativeLanguages.filter { !dataManager.hasTranslation(dictLang, it) }
-                } else {
-                    emptyList()
+                val missingTranslations by produceState<List<Language>?>(initialValue = null, dictLang) {
+                    value = if (dictLang != null) {
+                        val downloadable = try {
+                            dataManager.downloadableTranslationTargets(dictLang, nativeLanguages)
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                        downloadable.filter { !dataManager.hasTranslation(dictLang, it) }
+                    } else {
+                        emptyList()
+                    }
                 }
-                if (dictLang == null || missingTranslations.isEmpty()) {
+                val resolved = missingTranslations
+                if (dictLang == null || resolved?.isEmpty() == true) {
                     LaunchedEffect(Unit) {
                         navController.navigate(AppDestination.Search) {
                             popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
                         }
                     }
-                } else {
+                } else if (resolved != null) {
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
                         val downloadKey = "setup_trans_${dictLang.code}_" +
-                                missingTranslations.joinToString("_") { it.code }
+                                resolved.joinToString("_") { it.code }
                         DownloadViewModel(
                             downloadCoordinator = downloadCoordinator,
                             downloadKey = downloadKey,
                             //TODO if one of multiple translations fails we show error, but other langs downloaded.
                             download = { onProgress, cancel ->
-                                missingTranslations.forEachIndexed { index, target ->
+                                resolved.forEachIndexed { index, target ->
                                     dataManager.ensureTranslation(
                                         dictLang,
                                         target,
                                         onProgress = { p ->
                                             // Combine progress of multiple downloads
-                                            val currentBase = (index.toFloat() / missingTranslations.size) * 100
+                                            val currentBase = (index.toFloat() / resolved.size) * 100
                                             val currentProgress =
-                                                if (p.percent >= 0) (p.percent.toFloat() / missingTranslations.size) else 0f
+                                                if (p.percent >= 0) (p.percent.toFloat() / resolved.size) else 0f
                                             val totalPercent = (currentBase + currentProgress).toInt()
 
                                             // Create a dummy DownloadProgress with the combined percentage
@@ -381,7 +413,7 @@ fun App(
                 SearchScreen(
                     viewModel = viewModel,
                     onWordSelected = { item ->
-                        val translationCodes = dictionaryRepository.installedTranslationTargets(item.language)
+                        val translationCodes = nativeLanguages.filter { it != item.language }
                             .map { it.code }
                         val destination = AppDestination.WordDetail(
                             dictionaryLanguageCode = item.language.code,
@@ -391,7 +423,7 @@ fun App(
                         navController.navigate(destination)
                     },
                     onSuggestionSelected = { language, lemma ->
-                        val translationCodes = dictionaryRepository.installedTranslationTargets(language)
+                        val translationCodes = nativeLanguages.filter { it != language }
                             .map { it.code }
                         val destination = AppDestination.WordDetail(
                             dictionaryLanguageCode = language.code,
@@ -429,7 +461,7 @@ fun App(
                             navController.navigate(AppDestination.Search)
                     },
                     onNavigateToWordDetail = { language, lemma, senseId ->
-                        val translationCodes = dictionaryRepository.installedTranslationTargets(language)
+                        val translationCodes = nativeLanguages.filter { it != language }
                             .map { it.code }
                         val destination = AppDestination.WordDetail(
                             dictionaryLanguageCode = language.code,
@@ -454,6 +486,11 @@ fun App(
             composable<AppDestination.Settings> {
                 SettingsScreen(
                     viewModel = settingsViewModel,
+                    learningLanguage = dictionaryLanguage,
+                    nativeLanguages = nativeLanguages,
+                    onChangeLanguages = {
+                        navController.navigate(AppDestination.SetupLanguages)
+                    },
                     onNavigateToSearch = {
                         if (!navController.popBackStack(AppDestination.Search, inclusive = false))
                             navController.navigate(AppDestination.Search)
@@ -494,6 +531,7 @@ fun App(
                     }
                     WordDetailViewModel(
                         dictionaryRepository,
+                        dictionaryClient,
                         wordFetchManager,
                         favoritesRepository,
                         ttsManager,
@@ -528,7 +566,7 @@ fun App(
                             navController.navigate(AppDestination.Settings)
                     },
                     onNavigateToWordDetail = { language, lemma ->
-                        val translationCodes = dictionaryRepository.installedTranslationTargets(language)
+                        val translationCodes = nativeLanguages.filter { it != language }
                             .map { it.code }
                         val destination = AppDestination.WordDetail(
                             dictionaryLanguageCode = language.code,

@@ -1,7 +1,8 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -13,16 +14,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -31,7 +35,6 @@ import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
-import com.slovy.slovymovyapp.ui.components.AppCard
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.word.Badge
@@ -50,7 +53,10 @@ data class SearchUiState(
     val availableLanguages: List<Language> = emptyList(),
     val selectedLanguage: Language? = null,
     val isLanguageDropdownExpanded: Boolean = false,
-    val wordSuggestions: List<String> = emptyList()
+    val isSuggestionsRefreshing: Boolean = false,
+    val showPullToRefreshHint: Boolean = true,
+    val wordSuggestions: List<String> = emptyList(),
+    val favoriteLemmas: List<String> = emptyList()
 )
 
 class SearchViewModel(
@@ -118,8 +124,8 @@ class SearchViewModel(
 
     private suspend fun loadSuggestionsForCurrentLanguage() {
         val language = state.selectedLanguage ?: return
-        val suggestions = repository.getWordSuggestions(language)
-        state = state.copy(wordSuggestions = suggestions)
+        val (suggestions, favorites) = repository.getSearchEmptyStateData(language)
+        state = state.copy(wordSuggestions = suggestions, favoriteLemmas = favorites)
     }
 
     fun refreshSuggestions() {
@@ -127,6 +133,22 @@ class SearchViewModel(
         if (!suggestionsInitialized) return
         viewModelScope.launch {
             loadSuggestionsForCurrentLanguage()
+        }
+    }
+
+    fun refreshSuggestionsFromPull() {
+        // Skip until initial data is loaded and avoid concurrent refresh jobs.
+        if (!suggestionsInitialized || state.isSuggestionsRefreshing) return
+        viewModelScope.launch {
+            state = state.copy(isSuggestionsRefreshing = true)
+            try {
+                loadSuggestionsForCurrentLanguage()
+            } finally {
+                state = state.copy(
+                    isSuggestionsRefreshing = false,
+                    showPullToRefreshHint = false
+                )
+            }
         }
     }
 
@@ -244,31 +266,13 @@ fun SearchScreen(
         },
         onToggleLanguageDropdown = { viewModel.toggleLanguageDropdown() },
         onDismissLanguageDropdown = { viewModel.dismissLanguageDropdown() },
+        onRefreshSuggestions = { viewModel.refreshSuggestionsFromPull() },
         wordDetailLabel = wordDetailLabel,
         onNavigateToWordDetail = onNavigateToWordDetail,
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToSettings = onNavigateToSettings
     )
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun languageFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedContainerColor = MaterialTheme.colorScheme.surface,
-    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-    focusedBorderColor = Color.Transparent,
-    unfocusedBorderColor = Color.Transparent,
-    disabledBorderColor = Color.Transparent,
-    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-    focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-    unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    focusedTrailingIconColor = MaterialTheme.colorScheme.primary,
-    unfocusedTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -280,18 +284,25 @@ fun SearchScreenContent(
     onLanguageSelected: (Language?) -> Unit = {},
     onToggleLanguageDropdown: () -> Unit = {},
     onDismissLanguageDropdown: () -> Unit = {},
+    onRefreshSuggestions: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
+    val searchFocusRequester = remember { FocusRequester() }
+    var isSearchFocused by remember { mutableStateOf(false) }
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(Unit) {
+            .pointerInput(isSearchFocused) {
                 detectTapGestures(onTap = {
-                    focusManager.clearFocus()
+                    if (!isSearchFocused) {
+                        searchFocusRequester.requestFocus()
+                    } else {
+                        focusManager.clearFocus()
+                    }
                 })
             }
     ) {
@@ -326,65 +337,67 @@ fun SearchScreenContent(
                         query = state.query,
                         onQueryChange = onQueryChange,
                         modifier = Modifier.weight(1f),
-                        placeholder = "Type a word..."
+                        placeholder = "Search your word...",
+                        focusRequester = searchFocusRequester,
+                        onFocusChanged = { isSearchFocused = it }
                     )
 
                     // Language filter dropdown
-                    if (state.availableLanguages.isNotEmpty()) {
-                        val isSingleLanguage = state.availableLanguages.size == 1
-                        val currentLanguage =
-                            if (isSingleLanguage) state.availableLanguages.first() else (state.selectedLanguage ?: state.availableLanguages.firstOrNull())
-                        val interactionSource = remember { MutableInteractionSource() }
+                    if (state.availableLanguages.isNotEmpty() && state.availableLanguages.size > 1) {
+                        val currentLanguage = state.selectedLanguage ?: state.availableLanguages.firstOrNull()
 
-                        if (!isSingleLanguage) {
-                            ExposedDropdownMenuBox(
-                                expanded = state.isLanguageDropdownExpanded,
-                                onExpandedChange = { onToggleLanguageDropdown() }
+                        ExposedDropdownMenuBox(
+                            expanded = state.isLanguageDropdownExpanded,
+                            onExpandedChange = { onToggleLanguageDropdown() }
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .menuAnchor(PrimaryEditable)
+                                    .height(56.dp)
+                                    .widthIn(min = 56.dp),
+                                shape = MaterialTheme.shapes.extraLarge,
+                                tonalElevation = 1.dp,
+                                shadowElevation = 1.dp,
+                                color = MaterialTheme.colorScheme.surfaceContainerHighest
                             ) {
-                                OutlinedTextField(
-                                    value = currentLanguage?.flag ?: "",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    modifier = Modifier
-                                        .menuAnchor(PrimaryEditable)
-                                        .width(87.dp),
-                                    trailingIcon = run {
-                                        {
-                                            ExposedDropdownMenuDefaults.TrailingIcon(
-                                                expanded = state.isLanguageDropdownExpanded
-                                            )
-                                        }
-                                    },
-                                    colors = languageFieldColors(),
-                                    shape = MaterialTheme.shapes.extraLarge,
-                                    textStyle = MaterialTheme.typography.bodyLarge,
-                                    interactionSource = interactionSource
-                                )
-                                ExposedDropdownMenu(
-                                    expanded = state.isLanguageDropdownExpanded,
-                                    onDismissRequest = onDismissLanguageDropdown,
-                                    modifier = Modifier
-                                        .menuAnchor(PrimaryEditable)
-                                        .width(200.dp)
+                                Row(
+                                    modifier = Modifier.padding(start = 16.dp, end = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    state.availableLanguages.forEach { language ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Row(
-                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(language.flag)
-                                                    Text(language.selfName)
-                                                }
-                                            },
-                                            onClick = {
-                                                onLanguageSelected(language)
-                                                onDismissLanguageDropdown()
-                                            },
-                                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                        )
-                                    }
+                                    Text(
+                                        text = currentLanguage?.flag ?: "",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                        expanded = state.isLanguageDropdownExpanded
+                                    )
+                                }
+                            }
+                            ExposedDropdownMenu(
+                                expanded = state.isLanguageDropdownExpanded,
+                                onDismissRequest = onDismissLanguageDropdown,
+                                modifier = Modifier.width(200.dp),
+                                shape = MaterialTheme.shapes.small,
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                shadowElevation = 2.dp
+                            ) {
+                                state.availableLanguages.forEach { language ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(language.flag)
+                                                Text(language.selfName)
+                                            }
+                                        },
+                                        onClick = {
+                                            onLanguageSelected(language)
+                                            onDismissLanguageDropdown()
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
                                 }
                             }
                         }
@@ -400,10 +413,18 @@ fun SearchScreenContent(
                     }
 
                     state.query.isEmpty() -> {
-                        EmptySearchState(
-                            wordSuggestions = state.wordSuggestions,
-                            onWordClick = onSuggestionSelected
-                        )
+                        PullToRefreshBox(
+                            modifier = Modifier.fillMaxSize(),
+                            isRefreshing = state.isSuggestionsRefreshing,
+                            onRefresh = onRefreshSuggestions
+                        ) {
+                            EmptySearchState(
+                                wordSuggestions = state.wordSuggestions,
+                                favoriteLemmas = state.favoriteLemmas,
+                            onWordClick = onSuggestionSelected,
+                                showPullToRefreshHint = state.showPullToRefreshHint && !state.isSuggestionsRefreshing
+                            )
+                        }
                     }
 
                     state.showNoResults -> {
@@ -440,10 +461,14 @@ private fun SearchResultCard(
     onClick: () -> Unit
 ) {
     val containerColor = colorForLemma(item.lemma, MaterialTheme.colorScheme.surface)
-    AppCard(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        onClick = onClick
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { role = Role.Button }
+            .clickable(onClickLabel = "Open ${item.display}", onClick = onClick),
+        shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.outlinedCardColors(containerColor = containerColor),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
@@ -502,28 +527,72 @@ private fun SearchResultCard(
 @Composable
 private fun EmptySearchState(
     wordSuggestions: List<String>,
-    onWordClick: (String) -> Unit
+    favoriteLemmas: List<String>,
+    onWordClick: (String) -> Unit,
+    showPullToRefreshHint: Boolean = true
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
-            .padding(top = 48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(top = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Text(
-            text = "Search your word",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
         if (wordSuggestions.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(24.dp))
+            WordChipSection(
+                title = "Explore new words",
+                words = wordSuggestions,
+                onWordClick = onWordClick
+            )
+        }
 
+        if (favoriteLemmas.isNotEmpty()) {
+            WordChipSection(
+                title = "Your latest favorites",
+                words = favoriteLemmas,
+                onWordClick = onWordClick
+            )
+        }
+
+        if (wordSuggestions.isEmpty() && favoriteLemmas.isEmpty()) {
             Text(
-                text = "or explore:",
+                text = "Start typing to search",
                 style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else if (showPullToRefreshHint) {
+            Spacer(modifier = Modifier.height(0.dp)) // reset arrangement gap
+            Text(
+                modifier = Modifier.offset(y = (-12).dp),
+                text = "Pull down to refresh suggestions",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WordChipSection(
+    title: String,
+    words: List<String>,
+    onWordClick: (String) -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+                Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -534,7 +603,7 @@ private fun EmptySearchState(
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                wordSuggestions.forEach { word ->
+                words.forEach { word ->
                     SuggestionChip(
                         onClick = { onWordClick(word) },
                         label = {
@@ -556,31 +625,6 @@ private fun EmptySearchState(
                         )
                     )
                 }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Surface(
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-            shape = MaterialTheme.shapes.medium
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Lightbulb,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
-                )
-                Text(
-                    text = "You can search by translations and grammar forms too!",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
             }
         }
     }
@@ -649,7 +693,8 @@ private fun SearchScreenPreviewEmptyQuery(
                 showNoResults = false,
                 availableLanguages = listOf(Language.ENGLISH, Language.RUSSIAN),
                 selectedLanguage = Language.ENGLISH,
-                wordSuggestions = listOf("the", "be", "to", "of", "and")
+                wordSuggestions = listOf("the", "be", "to", "of", "and"),
+                favoriteLemmas = listOf("world", "time", "love")
             ),
         )
     }

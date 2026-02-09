@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.LearnerLevel
 import com.slovy.slovymovyapp.data.remote.NameType
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
-import com.slovy.slovymovyapp.data.remote.TraitType
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 
 @Composable
@@ -225,19 +224,6 @@ internal fun colorsForNameType(nameType: NameType): Pair<Color, Color> {
     }
 }
 
-@Composable
-internal fun colorsForTraitType(traitType: TraitType): Pair<Color, Color> = when (traitType) {
-    TraitType.DATED -> Color(0xFFFFE0B2) to Color(0xFF8C4513)
-    TraitType.COLLOQUIAL -> Color(0xFFE3F2FD) to Color(0xFF0D47A1)
-    TraitType.OBSOLETE -> Color(0xFFE7E9F0) to Color(0xFF3F4856)
-    TraitType.DIALECTAL -> Color(0xFFE0F7FA) to Color(0xFF006064)
-    TraitType.ARCHAIC -> Color(0xFFFFF3E0) to Color(0xFFEF6C00)
-    TraitType.REGIONAL -> Color(0xFFF1F8E9) to Color(0xFF33691E)
-    TraitType.SLANG -> Color(0xFFFFEBEE) to Color(0xFFC62828)
-    TraitType.FORM -> Color(0xFFF3E5F5) to Color(0xFF6A1B9A)
-    TraitType.SURNAME -> Color(0xFFFFEBE9) to Color(0xFF7A1232)
-}
-
 /**
  * Colors for synonyms badges - warm sage tones indicating similarity/harmony
  */
@@ -302,30 +288,6 @@ internal val ExpandLessVector: ImageVector = ImageVector.Builder(
         lineTo(17.09f, 15.91f)
         lineTo(18.5f, 14.5f)
         lineTo(12f, 8.0f)
-        close()
-    }
-}.build()
-
-internal val ArrowForwardVector: ImageVector = ImageVector.Builder(
-    name = "ArrowForward",
-    defaultWidth = 24.dp,
-    defaultHeight = 24.dp,
-    viewportWidth = 24f,
-    viewportHeight = 24f
-).apply {
-    path(
-        fill = SolidColor(Color.Black),
-        pathFillType = PathFillType.NonZero
-    ) {
-        moveTo(12f, 4f)
-        lineTo(10.59f, 5.41f)
-        lineTo(16.17f, 11f)
-        lineTo(4f, 11f)
-        lineTo(4f, 13f)
-        lineTo(16.17f, 13f)
-        lineTo(10.59f, 18.59f)
-        lineTo(12f, 20f)
-        lineTo(20f, 12f)
         close()
     }
 }.build()

@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
@@ -38,7 +39,8 @@ class DictionaryRepository(
 
     data class SenseWithPos(
         val sense: LanguageCardResponseSense,
-        val pos: PartOfSpeech
+        val pos: PartOfSpeech,
+        val relatedWords: Map<String, RelatedWord> = emptyMap()
     )
 
     // Cache for loaded senses - reusable across the app
@@ -643,7 +645,6 @@ class DictionaryRepository(
                     targetLangDefinitions = tgtDefinitions,
                     translations = tgtTranslations,
                 )
-                cacheSense(s.senseId.toString(), SenseWithPos(result, posData.pos))
                 result
             }
 
@@ -663,6 +664,21 @@ class DictionaryRepository(
             dictDatabases, language,
             collectAllRelatedWords(entries, wordFamily, lemma)
         )
+
+        // Keep related words alongside each cached sense so lightweight sense loads
+        // (e.g. Favorites) can still render clickable related terms.
+        entries.forEach { entry ->
+            entry.senses.forEach { sense ->
+                cacheSense(
+                    sense.senseId,
+                    SenseWithPos(
+                        sense = sense,
+                        pos = entry.pos,
+                        relatedWords = relatedWordsMap
+                    )
+                )
+            }
+        }
 
         LanguageCard(
             entries = entries,
@@ -694,10 +710,46 @@ class DictionaryRepository(
         // Load missing senses (getLanguageCard will cache them automatically)
         val card = getLanguageCard(language, lemma, translationTargets, missingIds) ?: return cached
         val loaded = card.entries.flatMap { entry ->
-            entry.senses.map { sense -> sense.senseId to SenseWithPos(sense, entry.pos) }
+            entry.senses.map { sense ->
+                sense.senseId to SenseWithPos(
+                    sense = sense,
+                    pos = entry.pos,
+                    relatedWords = card.relatedWords
+                )
+            }
         }.toMap()
 
         return cached + loaded
+    }
+
+    /**
+     * Loads both word suggestions and recent favorite lemmas in a single pass,
+     * fetching favorites from the DB only once.
+     */
+    suspend fun getSearchEmptyStateData(
+        language: Language
+    ): Pair<List<String>, List<String>> {
+        val allFavorites = withContext(Dispatchers.IO) { favoritesRepository.getAll() }
+        val suggestions = getWordSuggestions(language, favorites = allFavorites)
+        val recentFavorites = getRecentFavoriteLemmas(language, favorites = allFavorites)
+        return suggestions to recentFavorites
+    }
+
+    /**
+     * Gets recent favorite lemmas for the given language, most recent first.
+     * Accepts pre-fetched [favorites] to avoid redundant DB reads when the caller
+     * already has the list (e.g. [getSearchEmptyStateData]).
+     */
+    suspend fun getRecentFavoriteLemmas(
+        language: Language,
+        limit: Int = 5,
+        favorites: List<Favorite>? = null
+    ): List<String> = withContext(Dispatchers.IO) {
+        (favorites ?: favoritesRepository.getAll())
+            .filter { it.language == language }
+            .distinctBy { it.lemma.lowercase() }
+            .take(limit)
+            .map { it.lemma }
     }
 
     /**
@@ -708,7 +760,8 @@ class DictionaryRepository(
     suspend fun getWordSuggestions(
         language: Language,
         count: Int = 5,
-        offset: Int = 2000
+        offset: Int = 2000,
+        favorites: List<Favorite>? = null
     ): List<String> = withContext(Dispatchers.IO) {
         if (!dataDbManager.hasDictionary(language)) {
             return@withContext emptyList()
@@ -718,7 +771,7 @@ class DictionaryRepository(
         val q = db.dictionaryQueries
 
         // Get favorites to exclude (case-insensitive)
-        val favorites = favoritesRepository.getAll()
+        val favoriteLemmas = (favorites ?: favoritesRepository.getAll())
             .filter { it.language == language }
             .map { it.lemma.lowercase() }
             .toSet()
@@ -741,7 +794,7 @@ class DictionaryRepository(
             if (batch.isEmpty()) return@repeat
 
             // Sample non-favorite rows with gaps, then fill remaining from unused candidates.
-            val candidates = batch.filter { it.lemma.lowercase() !in favorites }
+            val candidates = batch.filter { it.lemma.lowercase() !in favoriteLemmas }
             if (candidates.isNotEmpty()) {
                 val startIndex = (0 until candidates.size).random()
                 var index = startIndex

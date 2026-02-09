@@ -5,13 +5,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material3.*
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -232,18 +232,11 @@ fun DownloadScreenContent(
                         }
 
                         is DownloadUiState.Failed -> {
-                            val message = state.error.message ?: "Unknown error"
+                            val classified = NetworkErrorClassifier.classify(state.error)
                             Text(
-                                text = "Download failed",
+                                text = classified.userMessage,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.error
-                            )
-                            Spacer(Modifier.height(AppSpacing.sm))
-                            Text(
-                                text = message,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center
                             )
                         }
 

@@ -23,7 +23,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 data class LanguageSetupUiState(
@@ -63,10 +65,12 @@ class LanguageSetupViewModel(
                     isLoading = false,
                     availableLanguages = available
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 state = state.copy(
                     isLoading = false,
-                    errorMessage = "Failed to load languages: ${e.message}"
+                    errorMessage = NetworkErrorClassifier.userMessage(e)
                 )
             }
         }
@@ -107,7 +111,7 @@ fun LanguageSetupScreen(
         onNext = {
             val learning = viewModel.state.learningLanguage
             val native = viewModel.state.nativeLanguages.toList()
-            if (learning != null && native.isNotEmpty()) {
+            if (learning != null) {
                 onNext(learning, native)
             }
         },
@@ -124,7 +128,7 @@ fun LanguageSetupScreenContent(
     onNext: () -> Unit = {},
     onRetry: () -> Unit = {}
 ) {
-    val canGoNext = state.learningLanguage != null && state.nativeLanguages.isNotEmpty()
+    val canGoNext = state.learningLanguage != null
 
     Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         if (state.isLoading) {
@@ -257,7 +261,7 @@ fun LanguageSetupScreenContent(
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                     ) {
-                        items(state.availableLanguages) { language ->
+                        items(Language.entries.toList()) { language ->
                             val isSelected = language in state.nativeLanguages
                             val isEnabled = language != state.learningLanguage
 

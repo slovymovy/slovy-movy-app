@@ -3,11 +3,22 @@ package com.slovy.slovymovyapp.data
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class Language(val code: String, val selfName: String, val flag: String) {
-    ENGLISH("en", "English", "🇬🇧"),
-    RUSSIAN("ru", "Русский", "🇷🇺"),
-    DUTCH("nl", "Nederlands", "🇳🇱"),
-    POLISH("pl", "Polski", "🇵🇱");
+enum class Language(
+    val code: String,
+    val selfName: String,
+    val flag: String,
+    val englishName: String
+) {
+    ENGLISH("en", "English", "🇬🇧", "English"),
+    RUSSIAN("ru", "Русский", "🇷🇺", "Russian"),
+    DUTCH("nl", "Nederlands", "🇳🇱", "Dutch"),
+    POLISH("pl", "Polski", "🇵🇱", "Polish"),
+    GERMAN("de", "Deutsch", "🇩🇪", "German"),
+    FRENCH("fr", "Français", "🇫🇷", "French"),
+    ITALIAN("it", "Italiano", "🇮🇹", "Italian"),
+    CZECH("cs", "Čeština", "🇨🇿", "Czech"),
+    TURKISH("tr", "Türkçe", "🇹🇷", "Turkish"),
+    SPANISH("es", "Español", "🇪🇸", "Spanish");
 
     companion object {
         fun fromCode(code: String): Language {

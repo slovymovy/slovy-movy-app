@@ -1,8 +1,12 @@
 package com.slovy.slovymovyapp.server.github
 
+import kotlinx.serialization.json.*
 import org.kohsuke.github.*
 import java.io.File
 import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 
 /**
  * GitHub client provider for accessing private repository content.
@@ -22,6 +26,26 @@ object GitHubClient {
     private const val WORDS_PATH = "words"
     private const val DEFAULT_BRANCH = "main"
     private const val PUSH_BRANCH = "push"
+    private const val FEEDBACK_LABEL = "feedback"
+    private const val FEEDBACK_LABEL_COLOR = "0E8A16"
+    private const val FEEDBACK_LABEL_DESCRIPTION = "Feedback reported from application users"
+
+    private const val GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
+    private const val FEEDBACK_DISCUSSION_CATEGORY = "Feedback"
+    private const val DISCUSSION_REPO_OWNER = "slovymovy"
+    private const val DISCUSSION_REPO_NAME = "slovy-movy-app"
+
+    data class CreatedDiscussion(
+        val number: Int,
+        val title: String,
+        val url: String
+    )
+
+    data class CreatedIssue(
+        val number: Int,
+        val title: String,
+        val htmlUrl: String
+    )
 
     private val clientInstance: GitHub by lazy {
         val token = loadToken()
@@ -285,6 +309,236 @@ object GitHubClient {
             .branch(branchName)
             .sha(fileSha)
             .commit()
+    }
+
+    /**
+     * Creates a feedback issue in the words repository and applies the "feedback" label.
+     */
+    fun createFeedbackIssue(
+        lang: String,
+        word: String,
+        comment: String,
+        translationCodes: List<String> = emptyList(),
+        email: String? = null
+    ): CreatedIssue {
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        ensureFeedbackLabelExists(repository)
+        val title = buildFeedbackIssueTitle(
+            lang = lang,
+            word = word,
+            translationCodes = translationCodes
+        )
+        val body = buildFeedbackIssueBody(
+            lang = lang,
+            word = word,
+            translationCodes = translationCodes,
+            comment = comment,
+            email = email
+        )
+        val issue = repository.createIssue(title)
+            .body(body)
+            .label(FEEDBACK_LABEL)
+            .create()
+        return CreatedIssue(
+            number = issue.number,
+            title = issue.title,
+            htmlUrl = issue.htmlUrl.toString()
+        )
+    }
+
+    /**
+     * Closes an issue in the words repository.
+     */
+    fun closeIssue(issueNumber: Int) {
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        repository.getIssue(issueNumber).close()
+    }
+
+    internal fun buildFeedbackIssueTitle(lang: String, word: String, translationCodes: List<String>): String {
+        val translations = normalizeTranslationCodes(translationCodes)
+        val translationSuffix = if (translations.isEmpty()) "n/a" else translations.joinToString(",")
+        return "Feedback: [$lang] $word (translations: $translationSuffix)"
+    }
+
+    internal fun buildFeedbackIssueBody(
+        lang: String,
+        word: String,
+        translationCodes: List<String>,
+        comment: String,
+        email: String? = null
+    ): String {
+        val translations = normalizeTranslationCodes(translationCodes)
+        val translationLine = if (translations.isEmpty()) "n/a" else translations.joinToString(", ")
+        return buildString {
+            appendLine("Feedback submitted from application.")
+            appendLine()
+            appendLine("- Language: `$lang`")
+            appendLine("- Word: `$word`")
+            appendLine("- Translation codes: `$translationLine`")
+            if (!email.isNullOrBlank()) {
+                val obfuscated = email.trim().replace("@", " [$word] ")
+                appendLine("- Email: `$obfuscated`")
+            }
+            appendLine()
+            appendLine("Comment:")
+            appendLine(comment.trim())
+        }
+    }
+
+    private fun normalizeTranslationCodes(translationCodes: List<String>): List<String> {
+        return translationCodes
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .distinct()
+    }
+
+    private fun ensureFeedbackLabelExists(repository: GHRepository) {
+        try {
+            repository.getLabel(FEEDBACK_LABEL)
+        } catch (_: GHFileNotFoundException) {
+            repository.createLabel(
+                FEEDBACK_LABEL,
+                FEEDBACK_LABEL_COLOR,
+                FEEDBACK_LABEL_DESCRIPTION
+            )
+        }
+    }
+
+    /**
+     * Creates a feedback discussion in the slovy-movy-app repository.
+     */
+    fun createFeedbackDiscussion(
+        comment: String,
+        email: String? = null
+    ): CreatedDiscussion {
+        val (repoId, categoryId) = resolveDiscussionCategoryId()
+        val title = "App feedback"
+        val body = buildGeneralFeedbackBody(comment, email)
+
+        val mutation = """
+            mutation CreateDiscussion(${'$'}repoId: ID!, ${'$'}categoryId: ID!, ${'$'}title: String!, ${'$'}body: String!) {
+              createDiscussion(input: {repositoryId: ${'$'}repoId, categoryId: ${'$'}categoryId, title: ${'$'}title, body: ${'$'}body}) {
+                discussion {
+                  number
+                  title
+                  url
+                }
+              }
+            }
+        """.trimIndent()
+
+        val variables = buildJsonObject {
+            put("repoId", repoId)
+            put("categoryId", categoryId)
+            put("title", title)
+            put("body", body)
+        }
+
+        val result = executeGraphQL(mutation, variables)
+        val discussion = result.jsonObject["data"]
+            ?.jsonObject?.get("createDiscussion")
+            ?.jsonObject?.get("discussion")
+            ?.jsonObject
+            ?: throw IllegalStateException(
+                "Failed to create discussion: ${result.jsonObject["errors"] ?: result}"
+            )
+
+        return CreatedDiscussion(
+            number = discussion["number"]!!.jsonPrimitive.int,
+            title = discussion["title"]!!.jsonPrimitive.content,
+            url = discussion["url"]!!.jsonPrimitive.content
+        )
+    }
+
+    internal fun buildGeneralFeedbackBody(comment: String, email: String? = null): String {
+        return buildString {
+            appendLine("Feedback submitted from application.")
+            appendLine()
+            if (!email.isNullOrBlank()) {
+                val obfuscated = email.trim().replace("@", " [feedback] ")
+                appendLine("- Email: `$obfuscated`")
+                appendLine()
+            }
+            appendLine("Comment:")
+            appendLine(comment.trim())
+        }
+    }
+
+    private val httpClient: HttpClient by lazy { HttpClient.newHttpClient() }
+
+    @Volatile
+    private var cachedDiscussionIds: Pair<String, String>? = null
+
+    private fun executeGraphQL(query: String, variables: JsonObject? = null): JsonElement {
+        val requestBody = buildJsonObject {
+            put("query", query)
+            if (variables != null) put("variables", variables)
+        }
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create(GRAPHQL_ENDPOINT))
+            .header("Authorization", "bearer ${getToken()}")
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+            .build()
+
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        val parsed = Json.parseToJsonElement(response.body())
+
+        if (response.statusCode() != 200) {
+            throw IllegalStateException(
+                "GraphQL request failed with status ${response.statusCode()}: ${response.body()}"
+            )
+        }
+
+        val errors = parsed.jsonObject["errors"]
+        if (errors != null && errors is JsonArray && errors.isNotEmpty()) {
+            throw IllegalStateException("GraphQL errors: $errors")
+        }
+
+        return parsed
+    }
+
+    private fun resolveDiscussionCategoryId(): Pair<String, String> {
+        cachedDiscussionIds?.let { return it }
+
+        val query = """
+            query(${'$'}owner: String!, ${'$'}name: String!) {
+              repository(owner: ${'$'}owner, name: ${'$'}name) {
+                id
+                discussionCategories(first: 25) {
+                  nodes {
+                    id
+                    name
+                  }
+                }
+              }
+            }
+        """.trimIndent()
+
+        val variables = buildJsonObject {
+            put("owner", DISCUSSION_REPO_OWNER)
+            put("name", DISCUSSION_REPO_NAME)
+        }
+
+        val result = executeGraphQL(query, variables)
+        val repo = result.jsonObject["data"]?.jsonObject?.get("repository")?.jsonObject
+            ?: throw IllegalStateException("Repository $DISCUSSION_REPO_OWNER/$DISCUSSION_REPO_NAME not found")
+
+        val repoId = repo["id"]!!.jsonPrimitive.content
+        val categories = repo["discussionCategories"]?.jsonObject?.get("nodes")?.jsonArray
+            ?: throw IllegalStateException("No discussion categories found")
+
+        val feedbackCategory = categories.firstOrNull {
+            it.jsonObject["name"]?.jsonPrimitive?.content == FEEDBACK_DISCUSSION_CATEGORY
+        }?.jsonObject ?: throw IllegalStateException(
+            "'$FEEDBACK_DISCUSSION_CATEGORY' discussion category not found in $DISCUSSION_REPO_OWNER/$DISCUSSION_REPO_NAME"
+        )
+
+        val categoryId = feedbackCategory["id"]!!.jsonPrimitive.content
+        val ids = repoId to categoryId
+        cachedDiscussionIds = ids
+        return ids
     }
 
     private fun loadToken(): String {

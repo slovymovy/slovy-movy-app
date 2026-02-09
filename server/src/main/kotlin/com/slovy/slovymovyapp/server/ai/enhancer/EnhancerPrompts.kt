@@ -24,7 +24,7 @@ In case some information is absent - please fill it in accordingly to the scheme
 For each sense provide sense_id from the provided data which is base for the sense_definition. If you have decided to merge two senses into one because they are too close - select sense_id of the most accurate one.
 Keep sense_definition clear and comprehensible - they are crucial to explain and clarify the relevant sense of a word.
 
-Assign learner_level (A1, A2, B1, B2, C1, C2) and frequency (High, Middle, Low, Very Low) to sense_definition based on its part of speech, common usage and complexity.
+Assign learner_level (A1, A2, B1, B2, C1, C2) and frequency (High, Middle, Low, Very Low) to sense_definition based on its part of speech, common usage and complexity. Use CEFR and be conservative with leveling. If you are unsure between two levels, always choose the higher (more difficult) one.
 
 For synonyms and antonyms:
 * Select only words from word_linkages that are unequivocally and directly linked to the specific `sense_definition` provided for the word. They must also match the `part_of_speech` of the `sense_definition`.
@@ -35,8 +35,13 @@ For synonyms and antonyms:
 * Synonyms or antonyms should be of the same part of speech as `sense_definition`.
 * If a `sense_definition` has no synonyms or antonyms, leave the corresponding field blank.
 * If there is any uncertainty about whether a synonym or antonym precisely fits the sense_definition, don't add it rather than guessing.
+* Only include synonyms that are interchangeable in typical contexts for this sense.
 
-Provide common_phrases to show fixed, reusable patterns for this sense. Do not write full sentences here. Use 2–5 words each, no subject, no punctuation (except hyphen within a word), and no conjugation unless the language normally stores phrases that way. If there are no good patterns, leave common_phrases empty.
+Provide common_phrases that must include the target word. 
+Semantic Filtering: Every phrase must directly correlate to the specific sense_definition.
+Idiom Restriction: Only include idiomatic phrases if the sense_definition itself is idiomatic. If the sense is literal, the phrases must be literal.
+Grammatical Fitness: Use 2–5 words. Do not use full sentences. Avoid specific subjects (pronouns or names). Ensure the word appears in the same part_of_speech as the sense. If there are no good common phrases, leave common_phrases empty. 
+No Punctuation/Tags: Do not use punctuation (except hyphens within a word). Do not use <w> tags in this section.
 
 Provide at least 2 example sentences per sense that match its learner_level.
 Examples must:
@@ -70,9 +75,11 @@ If it cannot be clearly determined, set it to "no".
 
 If a sense definition states that the sense is a grammatical or morphological form of another word (e.g., comparative, superlative, past tense, past participle, plural, diminutive, etc.), and the base word appears in the definition, enclose only that base word in <w> </w> tags (the word ONLY) within the sense definition. Tag only the base word — do not tag surrounding text, affixes, or punctuation. Tag only when a clear form-of phrase is present, not when it merely repeats or identifies the input word.
 
-For every word, if possible, add a list of derivationally related words that belong to the same word family (nouns, verbs, adjectives, adverbs, etc. formed from the same root).
-Do not include the input word itself in this list.
-Exclude all grammatical inflections or conjugated forms (e.g., plurals, past tense, -ing forms). Only include distinct lexical derivations that share the same root meaning.
+For every word, if possible, add a list of morphological derivations - related words that belong to the same word family (nouns, verbs, adjectives, adverbs, etc. formed from the same root). Every word must share a clear, visible phonetic or orthographic root with the target word.
+- Strictly Exclude: the input word itself.
+- Strictly Exclude: all grammatical inflections or conjugated forms (e.g., plurals, past tense, -ing forms).
+- Strictly Exclude: thematic associates.
+- Strictly Exclude: words that share a prefix but have different roots.
         """.trimIndent()
 
     /**
