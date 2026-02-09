@@ -537,21 +537,6 @@ private fun EmptySearchState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Text(
-            text = "Search your word",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        if (showPullToRefreshHint) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "Pull down to refresh suggestions",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
         if (wordSuggestions.isNotEmpty()) {
             WordChipSection(
                 title = "Explore new words",
@@ -565,6 +550,16 @@ private fun EmptySearchState(
                 title = "Your latest favorites",
                 words = favoriteLemmas,
                 onWordClick = onWordClick
+            )
+        }
+
+        if (showPullToRefreshHint) {
+            Spacer(modifier = Modifier.height(0.dp)) // reset arrangement gap
+            Text(
+                modifier = Modifier.offset(y = (-12).dp),
+                text = "Pull down to refresh suggestions",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
