@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,7 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +24,8 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.components.CompactEmptyState
+import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.word.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,6 +44,7 @@ data class FavoriteSenseItem(
     val lemma: String,
     val createdAt: Long,
     val sense: LanguageCardResponseSense? = null,
+    val relatedWords: Map<String, RelatedWord> = emptyMap(),
     val pos: PartOfSpeech? = null,
     val expanded: Boolean = false,
     val loading: Boolean = false,
@@ -51,7 +57,8 @@ sealed interface FavoritesUiState {
     data class Content(
         val senses: List<FavoriteSenseItem>,
         val query: String = "",
-        val hasAnyFavorites: Boolean = false
+        val hasAnyFavorites: Boolean = false,
+        val favoriteLemmas: Set<String> = emptySet()
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
     }
@@ -141,7 +148,8 @@ class FavoritesViewModel(
         state = FavoritesUiState.Content(
             senses = senses,
             query = query,
-            hasAnyFavorites = hasAnyFavorites
+            hasAnyFavorites = hasAnyFavorites,
+            favoriteLemmas = allFavorites.map { it.lemma }.toSet()
         )
 
         prefetchSenses(senses.take(PREFETCH_LIMIT))
@@ -158,6 +166,7 @@ class FavoritesViewModel(
             lemma = favorite.lemma,
             createdAt = favorite.createdAt,
             sense = cached?.sense ?: existing?.sense,
+            relatedWords = cached?.relatedWords ?: existing?.relatedWords.orEmpty(),
             pos = cached?.pos ?: existing?.pos,
             expanded = existing?.expanded ?: false,
             loading = existing?.loading == true && cached == null,
@@ -223,6 +232,7 @@ class FavoritesViewModel(
             updateSense(item.senseId) {
                 it.copy(
                     sense = result?.sense,
+                    relatedWords = result?.relatedWords ?: it.relatedWords,
                     pos = result?.pos,
                     loading = false,
                     error = if (result == null) "Meaning not found" else null
@@ -255,7 +265,7 @@ class FavoritesViewModel(
 fun FavoritesScreen(
     viewModel: FavoritesViewModel,
     onNavigateToSearch: () -> Unit = {},
-    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> },
+    onNavigateToWordDetail: (Language, String, String?) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
@@ -294,7 +304,7 @@ fun FavoritesScreenContent(
     onQueryChange: (String) -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
     onFavoriteToggle: (String) -> Unit = {},
-    onNavigateToWordDetail: (Language, String, String) -> Unit = { _, _, _ -> },
+    onNavigateToWordDetail: (Language, String, String?) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
@@ -311,7 +321,13 @@ fun FavoritesScreenContent(
             },
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("My words") }
+                title = {
+                    Text(
+                        "My words",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             )
         },
         bottomBar = {
@@ -371,40 +387,19 @@ fun FavoritesScreenContent(
 
                     when {
                         state.senses.isEmpty() && state.query.isEmpty() -> {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Surface(
-                                    shape = MaterialTheme.shapes.extraLarge,
-                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                    modifier = Modifier.size(80.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.FavoriteBorder,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(40.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
+                                EmptyState(
+                                    icon = Icons.Outlined.FavoriteBorder,
+                                    title = "No Favorites Yet",
+                                    description = "Save words you want to remember",
+                                    action = {
+                                        FilledTonalButton(onClick = onNavigateToSearch) {
+                                            Text("Start searching")
+                                        }
                                     }
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "No Favorites Yet",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Search a word and tap the heart icon",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(horizontal = 32.dp)
                                 )
                             }
                         }
@@ -414,11 +409,9 @@ fun FavoritesScreenContent(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "No favorites match your search",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center
+                                CompactEmptyState(
+                                    icon = Icons.Filled.Search,
+                                    message = "No favorites match your search"
                                 )
                             }
                         }
@@ -427,14 +420,14 @@ fun FavoritesScreenContent(
                             Column(modifier = Modifier.fillMaxSize()) {
                                 val words = state.senses.distinctBy { it.lemma }
                                 Text(
-                                    text = "${state.senses.size} meaning${pluralEnding(state.senses)} (${words.size} word${
+                                    text = "${state.senses.size} meaning${pluralEnding(state.senses)} · ${words.size} word${
                                         pluralEnding(
                                             words
                                         )
-                                    })",
+                                    }",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp)
+                                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
                                 )
 
                                 LazyColumn(
@@ -452,7 +445,11 @@ fun FavoritesScreenContent(
                                             onFavoriteToggle = { onFavoriteToggle(item.senseId) },
                                             onViewFullDetails = {
                                                 onNavigateToWordDetail(item.targetLang, item.lemma, item.senseId)
-                                            }
+                                            },
+                                            onWordClick = { word ->
+                                                onNavigateToWordDetail(item.targetLang, word, null)
+                                            },
+                                            favoriteLemmas = state.favoriteLemmas
                                         )
                                     }
                                 }
@@ -470,7 +467,9 @@ private fun FavoriteSenseCard(
     item: FavoriteSenseItem,
     onToggle: () -> Unit,
     onFavoriteToggle: () -> Unit,
-    onViewFullDetails: () -> Unit
+    onViewFullDetails: () -> Unit,
+    onWordClick: (String) -> Unit = {},
+    favoriteLemmas: Set<String> = emptySet()
 ) {
     val senseState = SenseUiState(
         senseId = item.senseId,
@@ -495,7 +494,10 @@ private fun FavoriteSenseCard(
         state = senseState,
         onToggle = onToggle,
         onFavoriteToggle = onFavoriteToggle,
-        onViewFullDetails = onViewFullDetails
+        onViewFullDetails = onViewFullDetails,
+        relatedWords = item.relatedWords,
+        onWordClick = onWordClick,
+        favoriteLemmas = favoriteLemmas
     )
 }
 
@@ -557,20 +559,20 @@ private fun createSenseItem(
     error = error
 )
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenLoading(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(state = FavoritesUiState.Loading)
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenEmpty(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(
@@ -579,10 +581,10 @@ fun PreviewFavoritesScreenEmpty(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenCollapsed(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
@@ -611,10 +613,10 @@ fun PreviewFavoritesScreenCollapsed(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenExpanded(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
@@ -644,10 +646,10 @@ fun PreviewFavoritesScreenExpanded(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenWithSearch(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
@@ -666,10 +668,10 @@ fun PreviewFavoritesScreenWithSearch(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenNoResults(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         FavoritesScreenContent(
@@ -678,10 +680,10 @@ fun PreviewFavoritesScreenNoResults(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun PreviewFavoritesScreenLoadingAndError(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(

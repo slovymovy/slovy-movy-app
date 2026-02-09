@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,8 +19,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
@@ -47,7 +51,8 @@ internal fun SenseCard(
     onFavoriteToggle: () -> Unit = {},
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
-    onViewFullDetails: (() -> Unit)? = null
+    onViewFullDetails: (() -> Unit)? = null,
+    favoriteLemmas: Set<String> = emptySet()
 ) {
     val sense = data.sense
     val translationBasedHeader = remember(data.senseId, sense?.translations) { sense?.translationsHeader() }
@@ -62,7 +67,8 @@ internal fun SenseCard(
         shape = MaterialTheme.shapes.small,
         colors = CardDefaults.outlinedCardColors(
             containerColor = colorForLemma(data.lemma, MaterialTheme.colorScheme.surface)
-        )
+        ),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -152,7 +158,7 @@ internal fun SenseCard(
                                     Icons.Outlined.FavoriteBorder
                                 },
                                 tint = if (state.favorite) {
-                                    Color.Red
+                                    Color(0xFFC46060) // Warm dusty rose
                                 } else {
                                     LocalContentColor.current
                                 },
@@ -181,7 +187,7 @@ internal fun SenseCard(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         if (sense.targetLangDefinitions.isNotEmpty()) {
@@ -201,7 +207,7 @@ internal fun SenseCard(
                                             definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
                                         }.joinToString("\n"),
                                         style = MaterialTheme.typography.bodyMedium.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         ),
                                     )
                                 }
@@ -229,26 +235,31 @@ internal fun SenseCard(
                         EntryList(
                             "Common phrases",
                             sense.commonPhrases,
-                            MaterialTheme.colorScheme.tertiaryContainer,
-                            MaterialTheme.colorScheme.onTertiaryContainer,
-                            relatedWords = relatedWords,
-                            onWordClick = onWordClick
-                        )
-                        EntryList(
-                            "Synonyms",
-                            sense.synonyms,
                             MaterialTheme.colorScheme.primaryContainer,
                             MaterialTheme.colorScheme.onPrimaryContainer,
                             relatedWords = relatedWords,
-                            onWordClick = onWordClick
+                            onWordClick = onWordClick,
+                            favoriteLemmas = favoriteLemmas
                         )
+                        val (synonymBg, synonymText) = colorsForSynonyms()
+                        EntryList(
+                            "Synonyms",
+                            sense.synonyms,
+                            synonymBg,
+                            synonymText,
+                            relatedWords = relatedWords,
+                            onWordClick = onWordClick,
+                            favoriteLemmas = favoriteLemmas
+                        )
+                        val (antonymBg, antonymText) = colorsForAntonyms()
                         EntryList(
                             "Antonyms",
                             sense.antonyms,
-                            MaterialTheme.colorScheme.errorContainer,
-                            MaterialTheme.colorScheme.onErrorContainer,
+                            antonymBg,
+                            antonymText,
                             relatedWords = relatedWords,
-                            onWordClick = onWordClick
+                            onWordClick = onWordClick,
+                            favoriteLemmas = favoriteLemmas
                         )
                     }
                 }
@@ -367,7 +378,7 @@ internal fun ExampleItem(
                     ExampleText(
                         text = translation,
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1f
                         ),
                     )

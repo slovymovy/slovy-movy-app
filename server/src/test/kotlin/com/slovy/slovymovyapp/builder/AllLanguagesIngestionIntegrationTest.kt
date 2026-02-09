@@ -2,6 +2,7 @@
 
 package com.slovy.slovymovyapp.builder
 
+import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.ingestion.*
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -58,48 +59,60 @@ class AllLanguagesIngestionIntegrationTest {
                 val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
                 val entriesCandidates =
                     if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else raw.sourceFileToEntries.values.flatten()
-                // Filter to entries that are actually referenced by processed via sense_id (processed-as-truth)
-                val processedSenseIds = processed.entries.flatMap { it.senses }.map { uuidParse(it.senseId) }.toSet()
-                val entriesUsedByProcessed = entriesCandidates.filter { e ->
-                    e.senses.any { s -> processedSenseIds.contains(uuidParse(s.senseId.toString())) }
+                // Only keep entries whose POS exists in processed entries (forms map by POS)
+                val processedPosSet = processed.entries.mapNotNull { mapPos(it.pos) }.toSet()
+                val entriesUsedByProcessedPos = entriesCandidates.filter { e ->
+                    val pos = mapPos(e.pos)
+                    pos != null && processedPosSet.contains(pos)
                 }
 
-                // Validate presence of all UNIQUE forms from entries used by processed
+                // Validate presence of all UNIQUE forms per POS from entries used by processed
                 data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
 
-                val allExpectedFormKeys = entriesUsedByProcessed.flatMap { it.forms }.map { f ->
-                    FormKey(f.form, stripAccents(f.form), f.tags.toSet())
-                }.toSet() // Deduplicate expected forms
-
-                if (allExpectedFormKeys.isNotEmpty()) {
-                    // Verify each unique form exists in the database
-                    allExpectedFormKeys.forEach { expectedFormKey ->
-                        val formsInDb = dictQ.selectFormsByNormalized(expectedFormKey.formNormalized).executeAsList()
-                        assertTrue(
-                            formsInDb.isNotEmpty(),
-                            "Form '${expectedFormKey.form}' should exist for '$word' in $lang from ${pFile.name}. " +
-                                    "Expected ${allExpectedFormKeys.size} unique forms total: ${
-                                        allExpectedFormKeys.joinToString(
-                                            ", "
-                                        ) { it.form }
-                                    }"
-                        )
+                val expectedFormsByPos = entriesUsedByProcessedPos
+                    .groupBy { it.pos.lowercase() }
+                    .mapValues { (_, entries) ->
+                        entries.flatMap { it.forms }.map { f ->
+                            FormKey(f.form, stripAccents(f.form), f.tags.toSet())
+                        }.toSet()
                     }
 
-                    // Additionally verify the total count of forms for this lemma matches unique forms
+                if (expectedFormsByPos.isNotEmpty()) {
                     val lemmaIds = lemmas.map { it.id }
-                    val lemmaPosIds = lemmaIds.flatMap { lemmaId ->
-                        dictQ.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
+                    val lemmaPosRows = lemmaIds.flatMap { lemmaId ->
+                        dictQ.selectLemmaPosByLemmaId(lemmaId).executeAsList()
                     }
+
+                    lemmaPosRows.forEach { lemmaPos ->
+                        val posKey = lemmaPos.pos.name.lowercase()
+                        val expectedForPos = expectedFormsByPos[posKey].orEmpty()
+                        if (expectedForPos.isNotEmpty()) {
+                            val formsInDb = dictQ.selectFormsWithIdByLemmaPosId(lemmaPos.id).executeAsList()
+                            val actualFormKeys = formsInDb.map { form ->
+                                val tags = dictQ.selectFormTagsByFormId(form.form_id).executeAsList().map { it.tag }.toSet()
+                                FormKey(form.form, stripAccents(form.form), tags)
+                            }.toSet()
+
+                            assertEquals(
+                                expectedForPos.size,
+                                actualFormKeys.size,
+                                "Expected exactly ${expectedForPos.size} unique forms for '$word' POS $posKey in $lang, " +
+                                        "but found ${actualFormKeys.size}. Expected forms: ${
+                                            expectedForPos.joinToString(", ") { it.form }
+                                        }. Found forms: ${actualFormKeys.joinToString(", ") { it.form }}"
+                            )
+                        }
+                    }
+
+                    val expectedTotal = expectedFormsByPos.values.sumOf { it.size }
+                    val lemmaPosIds = lemmaPosRows.map { it.id }
                     val allFormsForLemma = lemmaPosIds.flatMap { lemmaPosId ->
                         dictQ.selectFormsByLemmaPosId(lemmaPosId).executeAsList()
                     }
                     assertEquals(
-                        allExpectedFormKeys.size,
+                        expectedTotal,
                         allFormsForLemma.size,
-                        "Expected exactly ${allExpectedFormKeys.size} unique forms for '$word' in $lang, but found ${allFormsForLemma.size}. " +
-                                "Expected forms: ${allExpectedFormKeys.joinToString(", ") { it.form }}. " +
-                                "Found forms: ${allFormsForLemma.joinToString(", ") { it.form }}"
+                        "Expected exactly $expectedTotal unique forms for '$word' in $lang, but found ${allFormsForLemma.size}."
                     )
                 }
 
@@ -208,6 +221,23 @@ class AllLanguagesIngestionIntegrationTest {
             map[raw.word] = 3.0
         }
         return map
+    }
+
+    private fun mapPos(pos: String): DictionaryPos? {
+        try {
+            return DictionaryPos.valueOf(pos.uppercase())
+        } catch (_: IllegalArgumentException) {
+            return when (pos.uppercase()) {
+                "ADJ" -> DictionaryPos.ADJECTIVE
+                "ADV" -> DictionaryPos.ADVERB
+                "PREP" -> DictionaryPos.PREPOSITION
+                "CONJ" -> DictionaryPos.CONJUNCTION
+                "PRON" -> DictionaryPos.PRONOUN
+                "INTJ" -> DictionaryPos.INTERJECTION
+                "NUM" -> DictionaryPos.NUMERAL
+                else -> null
+            }
+        }
     }
 
     @Test

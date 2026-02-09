@@ -11,6 +11,8 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 
 enum class AppScreen {
     SEARCH,
@@ -28,6 +30,16 @@ fun AppNavigationBar(
     wordDetailLabel: String? = null,
     onNavigateToSettings: () -> Unit = {}
 ) {
+    val itemColors = NavigationBarItemDefaults.colors(
+        indicatorColor = Color.Transparent,
+        selectedIconColor = MaterialTheme.colorScheme.primary,
+        selectedTextColor = MaterialTheme.colorScheme.primary,
+        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        disabledIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+        disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+    )
+
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         tonalElevation = com.slovy.slovymovyapp.ui.theme.AppElevation.level3
@@ -43,9 +55,17 @@ fun AppNavigationBar(
                     contentDescription = "Search"
                 )
             },
-            label = { Text("Search") },
+            label = {
+                Text(
+                    "Search",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
             selected = currentScreen == AppScreen.SEARCH,
-            onClick = onNavigateToSearch
+            onClick = onNavigateToSearch,
+            colors = itemColors
         )
         NavigationBarItem(
             icon = {
@@ -58,9 +78,17 @@ fun AppNavigationBar(
                     contentDescription = "Favorites"
                 )
             },
-            label = { Text("Favorites") },
+            label = {
+                Text(
+                    "Favorites",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
             selected = currentScreen == AppScreen.FAVORITES,
-            onClick = onNavigateToFavorites
+            onClick = onNavigateToFavorites,
+            colors = itemColors
         )
         NavigationBarItem(
             icon = {
@@ -73,10 +101,18 @@ fun AppNavigationBar(
                     contentDescription = "Word Detail"
                 )
             },
-            label = { Text(wordDetailLabel ?: "Word Detail") },
+            label = {
+                Text(
+                    wordDetailLabel ?: "Word Detail",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
             selected = currentScreen == AppScreen.WORD_DETAIL,
             enabled = wordDetailLabel != null,
-            onClick = onNavigateToWordDetail
+            onClick = onNavigateToWordDetail,
+            colors = itemColors
         )
         NavigationBarItem(
             icon = {
@@ -89,9 +125,17 @@ fun AppNavigationBar(
                     contentDescription = "Settings"
                 )
             },
-            label = { Text("Settings") },
+            label = {
+                Text(
+                    "Settings",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
             selected = currentScreen == AppScreen.SETTINGS,
-            onClick = onNavigateToSettings
+            onClick = onNavigateToSettings,
+            colors = itemColors
         )
     }
 }

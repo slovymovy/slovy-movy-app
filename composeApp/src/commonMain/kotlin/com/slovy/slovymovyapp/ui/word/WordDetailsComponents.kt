@@ -6,12 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +19,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
-import kotlin.text.Typography
 
 /**
  * Returns the appropriate navigation arrow based on word availability.
@@ -110,7 +104,8 @@ internal fun EntryList(
     containerColor: Color,
     contentColor: Color,
     relatedWords: Map<String, RelatedWord> = emptyMap(),
-    onWordClick: (String) -> Unit = {}
+    onWordClick: (String) -> Unit = {},
+    favoriteLemmas: Set<String> = emptySet()
 ) {
     if (values.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -129,6 +124,7 @@ internal fun EntryList(
                     contentColor = contentColor,
                     isClickable = isClickable,
                     isOnline = matchingKey?.let { relatedWords[it]?.online },
+                    isFavorite = favoriteLemmas.any { it.equals(word, ignoreCase = true) },
                     onClick = if (isClickable) {
                         { onWordClick(word) }
                     } else null
@@ -217,18 +213,20 @@ internal fun Badge(
     containerColor: Color,
     contentColor: Color,
     style: TextStyle = MaterialTheme.typography.labelMedium,
-    shape: Shape = RoundedCornerShape(12.dp),
+    shape: Shape = RoundedCornerShape(6.dp),
     isClickable: Boolean = false,
     isOnline: Boolean? = null,
+    isFavorite: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
     Surface(
         color = containerColor,
         contentColor = contentColor,
         shape = shape,
-        border = if (isClickable) {
-            BorderStroke(1.5.dp, contentColor.copy(alpha = 0.4f))
-        } else null,
+        border = BorderStroke(
+            width = if (isClickable) 0.75.dp else 0.5.dp,
+            color = contentColor.copy(alpha = if (isClickable) 0.4f else 0.15f)
+        ),
         tonalElevation = if (isClickable) 2.dp else 0.dp,
         shadowElevation = if (isClickable) 1.dp else 0.dp,
         modifier = if (onClick != null) {
@@ -240,6 +238,13 @@ internal fun Badge(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         ) {
+            if (isFavorite) {
+                Text(
+                    text = "\u2665",
+                    style = style,
+                    color = Color(0xFFC46060)
+                )
+            }
             Text(
                 text = text,
                 style = style.copy(

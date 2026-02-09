@@ -219,10 +219,9 @@ class JsonIngestionBuilder(
             ?: throw IllegalArgumentException("Lemma '$lemmaWord' not found in frequency map")
 
         val lemmaNormalized = stripAccents(lemmaWord)
-        val nativeKey = LANG_TO_SOURCE_FILE[langCode]
-        val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
-        val allEntries = raw.sourceFileToEntries.values.flatten()
-        val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
+        val entriesSelection = selectEntries(raw)
+        val allEntries = entriesSelection.allEntries
+        val entriesForForms = entriesSelection.entriesForForms
 
         val baseLemmaId = generateLemmaId(lemmaWord, lemmaNormalized)
 
@@ -240,12 +239,8 @@ class JsonIngestionBuilder(
             online_only = true
         )
 
-        val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
-        entriesForForms.forEach { entry ->
-            val pos = mapPos(entry.pos) ?: return@forEach
-            if (!posToEntryId.containsKey(pos))
-                posToEntryId[pos] = uuidParse(entry.entryId.toString())
-        }
+        // Include POS even when the entry has no forms to avoid skipping POS in processed-over-raw ingestion.
+        val posToEntryId = collectPosToEntryId(entriesSelection)
 
         posToEntryId.forEach { (pos, entryId) ->
             dictQ.insertLemmaPos(
@@ -255,36 +250,8 @@ class JsonIngestionBuilder(
             )
         }
 
-        data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
-
-        val lemmaPosIdToForms = mutableMapOf<Uuid, MutableMap<FormKey, ExtractedWordForm>>()
-        entriesForForms.forEach { entry ->
-            val pos = mapPos(entry.pos) ?: return@forEach
-            val lemmaPosId = posToEntryId[pos] ?: return@forEach
-
-            val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
-            entry.forms.forEach { f ->
-                val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet())
-                if (!formsMap.containsKey(key)) {
-                    formsMap[key] = f
-                }
-            }
-        }
-
-        lemmaPosIdToForms.forEach { (lemmaPosId, formsMap) ->
-            formsMap.values.forEach { f ->
-                val formId = uuidParse(f.formId.toString())
-                dictQ.insertForm(
-                    form_id = formId,
-                    lemma_pos_id = lemmaPosId,
-                    form = f.form,
-                    form_normalized = stripAccents(f.form),
-                )
-                f.tags.forEach { tag ->
-                    dictQ.insertFormTag(form_id = formId, tag = tag)
-                }
-            }
-        }
+        val lemmaPosIdToForms = buildLemmaPosIdToForms(entriesForForms, posToEntryId)
+        insertForms(dictQ, lemmaPosIdToForms)
     }
 
     private fun ingestProcessedInternal(
@@ -299,10 +266,8 @@ class JsonIngestionBuilder(
 
         val lemmaNormalized = stripAccents(lemmaWord)
 
-        // Select native source entries; fallback to any when missing
-        val nativeKey = LANG_TO_SOURCE_FILE[langCode]
-        val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
-        val allEntries = raw.sourceFileToEntries.values.flatten()
+        val entriesSelection = selectEntries(raw)
+        val allEntries = entriesSelection.allEntries
 
         // Build mapping from sense_id -> raw entry
         val senseIdToRawEntry = mutableMapOf<Uuid, ExtractedWordEntry>()
@@ -317,7 +282,6 @@ class JsonIngestionBuilder(
         }
 
         val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
-        val entryIdToPos = mutableMapOf<Uuid, DictionaryPos>()
         processed.entries.forEach { pEntry ->
             val pPos = mapPos(pEntry.pos)!!
             pEntry.senses.forEach { s ->
@@ -327,7 +291,6 @@ class JsonIngestionBuilder(
                     if (!posToEntryId.containsKey(pPos)) {
                         posToEntryId[pPos] = uuidParse(rawEntry.entryId.toString())
                     }
-                    entryIdToPos[uuidParse(rawEntry.entryId.toString())] = pPos
                     return@forEach
                 }
             }
@@ -378,44 +341,9 @@ class JsonIngestionBuilder(
         }
 
         // Insert forms (prefer native source; fallback to others when no forms in native)
-        val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
-
-        // Group forms by lemma_pos_id and deduplicate
-        data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
-
-        val lemmaPosIdToForms = mutableMapOf<Uuid, MutableMap<FormKey, ExtractedWordForm>>()
-
-        entriesForForms.forEach { entry ->
-            val pos = entryIdToPos[uuidParse(entry.entryId.toString())]
-            pos ?: return@forEach
-            val lemmaPosId = posToEntryId[pos] ?: return@forEach
-
-            val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
-            entry.forms.forEach { f ->
-                val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet())
-                // Keep first occurrence of each unique form
-                if (!formsMap.containsKey(key)) {
-                    formsMap[key] = f
-                }
-            }
-        }
-
-        // Insert deduplicated forms
-        lemmaPosIdToForms.forEach { (lemmaPosId, formsMap) ->
-            formsMap.values.forEach { f ->
-                val formId = uuidParse(f.formId.toString())
-                dictQ.insertForm(
-                    form_id = formId,
-                    lemma_pos_id = lemmaPosId,
-                    form = f.form,
-                    form_normalized = stripAccents(f.form),
-                )
-                // tags
-                f.tags.forEach { tag ->
-                    dictQ.insertFormTag(form_id = formId, tag = tag)
-                }
-            }
-        }
+        val entriesForForms = entriesSelection.entriesForForms
+        val lemmaPosIdToForms = buildLemmaPosIdToForms(entriesForForms, posToEntryId)
+        insertForms(dictQ, lemmaPosIdToForms)
 
         insertSensesAndRelatedData(processed, posToEntryId, dictQ)
 
@@ -598,6 +526,9 @@ class JsonIngestionBuilder(
                 )
                 // traits
                 sense.traits.forEach { t ->
+                    if (t.traitType == TraitType.UNKNOWN) {
+                        return@forEach
+                    }
                     dictQ.insertSenseTrait(
                         sense_id = senseId,
                         trait_type = mapTraitType(t.traitType),
@@ -752,6 +683,84 @@ class JsonIngestionBuilder(
             }
         }
         return set
+    }
+
+    private data class EntriesSelection(
+        val nativeEntries: List<ExtractedWordEntry>,
+        val allEntries: List<ExtractedWordEntry>,
+        val entriesForForms: List<ExtractedWordEntry>
+    )
+
+    private data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+
+    private fun selectEntries(raw: ExtractedWordData): EntriesSelection {
+        val nativeKey = LANG_TO_SOURCE_FILE[raw.langCode]
+        val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+        val allEntries = raw.sourceFileToEntries.values.flatten()
+        val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
+        return EntriesSelection(
+            nativeEntries = nativeEntries,
+            allEntries = allEntries,
+            entriesForForms = entriesForForms
+        )
+    }
+
+    private fun collectPosToEntryId(entriesSelection: EntriesSelection): Map<DictionaryPos, Uuid> {
+        val posToEntryId = mutableMapOf<DictionaryPos, Uuid>()
+        val nativeById = entriesSelection.nativeEntries
+            .sortedBy { it.entryId.toString() }
+        val allById = entriesSelection.allEntries
+            .sortedBy { it.entryId.toString() }
+        val nativeIds = nativeById.map { it.entryId }.toHashSet()
+        val orderedEntries = nativeById + allById.filterNot { nativeIds.contains(it.entryId) }
+
+        orderedEntries.forEach { entry ->
+            val pos = mapPos(entry.pos) ?: return@forEach
+            if (!posToEntryId.containsKey(pos)) {
+                posToEntryId[pos] = uuidParse(entry.entryId.toString())
+            }
+        }
+        return posToEntryId
+    }
+
+    private fun buildLemmaPosIdToForms(
+        entries: List<ExtractedWordEntry>,
+        posToLemmaPosId: Map<DictionaryPos, Uuid>
+    ): Map<Uuid, List<ExtractedWordForm>> {
+        val lemmaPosIdToForms = mutableMapOf<Uuid, MutableMap<FormKey, ExtractedWordForm>>()
+        entries.forEach { entry ->
+            val pos = mapPos(entry.pos) ?: return@forEach
+            val lemmaPosId = posToLemmaPosId[pos] ?: return@forEach
+
+            val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
+            entry.forms.forEach { f ->
+                val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet())
+                if (!formsMap.containsKey(key)) {
+                    formsMap[key] = f
+                }
+            }
+        }
+        return lemmaPosIdToForms.mapValues { (_, formsMap) -> formsMap.values.toList() }
+    }
+
+    private fun insertForms(
+        dictQ: DictionaryQueries,
+        lemmaPosIdToForms: Map<Uuid, List<ExtractedWordForm>>
+    ) {
+        lemmaPosIdToForms.forEach { (lemmaPosId, forms) ->
+            forms.forEach { f ->
+                val formId = uuidParse(f.formId.toString())
+                dictQ.insertForm(
+                    form_id = formId,
+                    lemma_pos_id = lemmaPosId,
+                    form = f.form,
+                    form_normalized = stripAccents(f.form),
+                )
+                f.tags.forEach { tag ->
+                    dictQ.insertFormTag(form_id = formId, tag = tag)
+                }
+            }
+        }
     }
 
     companion object {

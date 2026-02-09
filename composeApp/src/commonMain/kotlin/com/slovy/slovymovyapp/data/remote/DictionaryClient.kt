@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -99,6 +100,15 @@ class DictionaryClient(
 
     // Server may have newer trait types, so ignore unknown keys
     private val json = Json { ignoreUnknownKeys = true }
+
+    @Serializable
+    private data class FeedbackRequest(val comment: String, val email: String? = null)
+
+    @Serializable
+    data class FeedbackResponse(val issueUrl: String)
+
+    @Serializable
+    data class GeneralFeedbackResponse(val discussionUrl: String)
 
     /**
      * Fetches word data with progressive updates.
@@ -203,7 +213,7 @@ class DictionaryClient(
         return when (e) {
             is DictionaryClientException -> e
             else -> DictionaryClientException.NetworkException(
-                e.message ?: "Network error",
+                NetworkErrorClassifier.userMessage(e),
                 e
             )
         }
@@ -439,6 +449,99 @@ class DictionaryClient(
             if (push) {
                 append(if (targets.isEmpty()) "?" else "&")
                 append("push=1")
+            }
+        }
+    }
+
+    suspend fun sendFeedback(
+        language: Language,
+        lemma: String,
+        translationTargets: List<Language>,
+        comment: String,
+        email: String? = null
+    ): FeedbackResponse {
+        val url = buildFeedbackUrl(language, lemma, translationTargets)
+
+        try {
+            val response = httpClient.post(url) {
+                contentType(ContentType.Application.Json)
+                val trimmedEmail = email?.trim()?.takeIf { it.isNotBlank() }
+                setBody(
+                    json.encodeToString(
+                        FeedbackRequest.serializer(),
+                        FeedbackRequest(comment.trim(), trimmedEmail)
+                    )
+                )
+            }
+
+            if (!response.status.isSuccess()) {
+                val body = response.bodyAsText()
+                throw DictionaryClientException.ServerException(response.status.value, body)
+            }
+
+            val body = response.bodyAsText()
+            return json.decodeFromString(FeedbackResponse.serializer(), body)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (e is DictionaryClientException) throw e
+            throw DictionaryClientException.NetworkException(
+                NetworkErrorClassifier.userMessage(e),
+                e
+            )
+        }
+    }
+
+    suspend fun sendGeneralFeedback(
+        comment: String,
+        email: String? = null
+    ): GeneralFeedbackResponse {
+        val url = "$serverBaseUrl/feedback"
+
+        try {
+            val response = httpClient.post(url) {
+                contentType(ContentType.Application.Json)
+                val trimmedEmail = email?.trim()?.takeIf { it.isNotBlank() }
+                setBody(
+                    json.encodeToString(
+                        FeedbackRequest.serializer(),
+                        FeedbackRequest(comment.trim(), trimmedEmail)
+                    )
+                )
+            }
+
+            if (!response.status.isSuccess()) {
+                val body = response.bodyAsText()
+                throw DictionaryClientException.ServerException(response.status.value, body)
+            }
+
+            val body = response.bodyAsText()
+            return json.decodeFromString(GeneralFeedbackResponse.serializer(), body)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (e is DictionaryClientException) throw e
+            throw DictionaryClientException.NetworkException(
+                NetworkErrorClassifier.userMessage(e),
+                e
+            )
+        }
+    }
+
+    private fun buildFeedbackUrl(
+        language: Language,
+        lemma: String,
+        targets: List<Language>
+    ): String {
+        return buildString {
+            append(serverBaseUrl)
+            append("/feedback/")
+            append(language.code)
+            append("/")
+            append(lemma.encodeURLPath())
+            if (targets.isNotEmpty()) {
+                append("?translations=")
+                append(targets.distinct().joinToString(",") { it.code })
             }
         }
     }

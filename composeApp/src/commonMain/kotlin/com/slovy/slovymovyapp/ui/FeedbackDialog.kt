@@ -1,0 +1,257 @@
+package com.slovy.slovymovyapp.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun FeedbackDialog(
+    title: String,
+    commentPlaceholder: String,
+    comment: String,
+    email: String,
+    isSending: Boolean,
+    error: String?,
+    resultUrl: String?,
+    onCommentChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onSend: () -> Unit
+) {
+    if (resultUrl != null) {
+        val uriHandler = LocalUriHandler.current
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Feedback sent",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                }
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Thank you! We've created a tracking issue for your feedback. You can follow its progress on GitHub.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    TextButton(
+                        onClick = { uriHandler.openUri(resultUrl) },
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text("Track on GitHub")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Close")
+                }
+            }
+        )
+    } else {
+        AlertDialog(
+            onDismissRequest = {
+                if (!isSending) onDismiss()
+            },
+            title = {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+            },
+            text = {
+                val fieldColors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = comment,
+                        onValueChange = onCommentChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3,
+                        maxLines = 6,
+                        singleLine = false,
+                        enabled = !isSending,
+                        label = { Text("Comment") },
+                        placeholder = {
+                            Text(
+                                text = commentPlaceholder,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        shape = MaterialTheme.shapes.small,
+                        colors = fieldColors,
+                        isError = error != null
+                    )
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = onEmailChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        enabled = !isSending,
+                        label = { Text("Email (optional)") },
+                        placeholder = {
+                            Text(
+                                text = "Email (optional)",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        shape = MaterialTheme.shapes.small,
+                        colors = fieldColors,
+                        supportingText = {
+                            Text("May be publicly visible on GitHub")
+                        }
+                    )
+                    if (error != null) {
+                        Text(
+                            text = error,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = onSend,
+                    enabled = !isSending && comment.isNotBlank()
+                ) {
+                    if (isSending) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Sending…")
+                    } else {
+                        Text("Send")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = onDismiss,
+                    enabled = !isSending,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun FeedbackDialogInputPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        FeedbackDialog(
+            title = "App feedback",
+            commentPlaceholder = "Share your thoughts…",
+            comment = "",
+            email = "",
+            isSending = false,
+            error = null,
+            resultUrl = null,
+            onCommentChange = {},
+            onEmailChange = {},
+            onDismiss = {},
+            onSend = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun FeedbackDialogSendingPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        FeedbackDialog(
+            title = "App feedback",
+            commentPlaceholder = "Share your thoughts…",
+            comment = "Great app!",
+            email = "user@example.com",
+            isSending = true,
+            error = null,
+            resultUrl = null,
+            onCommentChange = {},
+            onEmailChange = {},
+            onDismiss = {},
+            onSend = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun FeedbackDialogErrorPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        FeedbackDialog(
+            title = "App feedback",
+            commentPlaceholder = "Share your thoughts…",
+            comment = "",
+            email = "",
+            isSending = false,
+            error = "Comment is required",
+            resultUrl = null,
+            onCommentChange = {},
+            onEmailChange = {},
+            onDismiss = {},
+            onSend = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun FeedbackDialogSuccessPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        FeedbackDialog(
+            title = "App feedback",
+            commentPlaceholder = "Share your thoughts…",
+            comment = "",
+            email = "",
+            isSending = false,
+            error = null,
+            resultUrl = "https://github.com/slovymovy/slovy-movy-app/discussions/1",
+            onCommentChange = {},
+            onEmailChange = {},
+            onDismiss = {},
+            onSend = {}
+        )
+    }
+}

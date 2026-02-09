@@ -111,7 +111,8 @@ internal fun EntryCard(
     onSenseFavoriteToggle: (String) -> Unit = {},
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
-    lemma: String
+    lemma: String,
+    favoriteLemmas: Set<String> = emptySet()
 ) {
     val expanded = entryState.expanded && !cardLoading && cardError == null
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -186,7 +187,8 @@ internal fun EntryCard(
                         onPositioned = onSensePositioned,
                         onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
                         relatedWords = relatedWords,
-                        onWordClick = onWordClick
+                        onWordClick = onWordClick,
+                        favoriteLemmas = favoriteLemmas
                     )
                 }
             }

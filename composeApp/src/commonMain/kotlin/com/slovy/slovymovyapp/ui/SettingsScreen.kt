@@ -15,13 +15,19 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -32,6 +38,7 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.getPlatform
 import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -56,7 +63,7 @@ data class SettingsUiState(
     val languages: Map<Text2SpeechLanguage, LanguageUiState> = emptyMap(),
     val databases: List<DatabaseItemUiState> = emptyList(),
     val availableLanguages: List<AvailableLanguageInfo> = emptyList(),
-    val downloadingItems: Map<String, DownloadProgress> = emptyMap(),
+    val downloadingItems: Map<String, DownloadProgress?> = emptyMap(),
     val expandedDictionaries: Set<String> = emptySet(),
     val isLoading: Boolean = true,
     val isLoadingAvailable: Boolean = false,
@@ -64,12 +71,19 @@ data class SettingsUiState(
     val testingVoice: Text2SpeechVoice? = null,
     val ttsStatus: TTSStatus = TTSStatus.IDLE,
     val deleteConfirmation: DeleteConfirmationState? = null,
-    val buildConfig: AppBuildConfig = AppBuildConfig("compile", 42, true, "com.slovy.slovymovyapp")
+    val buildConfig: AppBuildConfig = AppBuildConfig("compile", 42, true, "com.slovy.slovymovyapp"),
+    val feedbackDialogVisible: Boolean = false,
+    val feedbackComment: String = "",
+    val feedbackEmail: String = "",
+    val feedbackSubmitting: Boolean = false,
+    val feedbackError: String? = null,
+    val feedbackDiscussionUrl: String? = null
 )
 
 data class DeleteConfirmationState(
-    val displayName: String,
-    val additionalInfo: String? = null,
+    val title: String,
+    val message: String,
+    val warning: String? = null,
     val onConfirm: () -> Unit
 )
 
@@ -78,7 +92,13 @@ private val TEST_PHRASES = mapOf(
     Language.ENGLISH to "Hello! This is a test of the text to speech system.",
     Language.RUSSIAN to "Привет! Это тест системы синтеза речи.",
     Language.POLISH to "Cześć! To jest test systemu syntezy mowy.",
-    Language.DUTCH to "Hallo! Dit is een test van het tekst-naar-spraak systeem."
+    Language.DUTCH to "Hallo! Dit is een test van het tekst-naar-spraak systeem.",
+    Language.GERMAN to "Hallo! Dies ist ein Test des Text-zu-Sprache-Systems.",
+    Language.FRENCH to "Bonjour ! Ceci est un test du système de synthèse vocale.",
+    Language.ITALIAN to "Ciao! Questo è un test del sistema di sintesi vocale.",
+    Language.CZECH to "Ahoj! Toto je test systému převodu textu na řeč.",
+    Language.TURKISH to "Merhaba! Bu, metinden konuşmaya sisteminin bir testidir.",
+    Language.SPANISH to "¡Hola! Esta es una prueba del sistema de texto a voz."
 )
 
 class SettingsViewModel(
@@ -87,6 +107,7 @@ class SettingsViewModel(
     private val dataDbManager: DataDbManager,
     private val downloadCoordinator: DownloadCoordinator,
     private val dictionaryRepository: DictionaryRepository,
+    private val dictionaryClient: DictionaryClient,
     buildConfig: AppBuildConfig
 ) : ViewModel() {
 
@@ -127,38 +148,50 @@ class SettingsViewModel(
                 val uiItems = files.map { fileInfo ->
                     when (fileInfo) {
                         is DatabaseFileInfo.Dictionary -> {
-                            val displayName = "Dictionary: ${fileInfo.language.selfName}"
+                            val langName = fileInfo.language.selfName
+                            val displayName = "Dictionary: $langName"
                             // Count how many translations will be deleted along with the dictionary
                             val translationCount = files.count {
                                 it is DatabaseFileInfo.Translation &&
                                         it.sourceLanguage == fileInfo.language
                             }
-                            val additionalInfo = if (translationCount > 0) {
-                                "$translationCount translation${if (translationCount > 1) "s" else ""} will also be deleted"
+                            val warning = if (translationCount > 0) {
+                                "This will also remove $translationCount translation${if (translationCount > 1) "s" else ""}."
                             } else null
 
+                            val toastMsg = "$langName dictionary deleted"
                             DatabaseItemUiState(
                                 displayName = displayName,
                                 sizeBytes = fileInfo.sizeBytes,
                                 deleteAction = {
-                                    showDeleteConfirmation(displayName, additionalInfo) {
-                                        deleteDictionary(fileInfo.language)
+                                    showDeleteConfirmation(
+                                        title = "Delete $langName Dictionary?",
+                                        message = "You can re-download it anytime.",
+                                        warning = warning
+                                    ) {
+                                        deleteDictionary(fileInfo.language, toastMsg)
                                     }
                                 }
                             )
                         }
 
                         is DatabaseFileInfo.Translation -> {
-                            val displayName =
-                                "Translation: ${fileInfo.sourceLanguage.selfName} → ${fileInfo.targetLanguage.selfName}"
+                            val srcName = fileInfo.sourceLanguage.selfName
+                            val tgtName = fileInfo.targetLanguage.selfName
+                            val displayName = "Translation: $srcName → $tgtName"
+                            val toastMsg = "$srcName → $tgtName translation deleted"
                             DatabaseItemUiState(
                                 displayName = displayName,
                                 sizeBytes = fileInfo.sizeBytes,
                                 deleteAction = {
-                                    showDeleteConfirmation(displayName) {
+                                    showDeleteConfirmation(
+                                        title = "Delete $srcName → $tgtName Translation?",
+                                        message = "You can re-download it anytime."
+                                    ) {
                                         deleteTranslation(
                                             fileInfo.sourceLanguage,
-                                            fileInfo.targetLanguage
+                                            fileInfo.targetLanguage,
+                                            toastMsg
                                         )
                                     }
                                 }
@@ -182,20 +215,28 @@ class SettingsViewModel(
                     availableLanguages = available,
                     isLoadingAvailable = false
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 state = state.copy(
                     isLoadingAvailable = false,
-                    errorMessage = "Failed to load available languages: ${e.message}"
+                    errorMessage = NetworkErrorClassifier.userMessage(e)
                 )
             }
         }
     }
 
-    fun showDeleteConfirmation(displayName: String, additionalInfo: String? = null, onConfirm: () -> Unit) {
+    fun showDeleteConfirmation(
+        title: String,
+        message: String,
+        warning: String? = null,
+        onConfirm: () -> Unit
+    ) {
         state = state.copy(
             deleteConfirmation = DeleteConfirmationState(
-                displayName = displayName,
-                additionalInfo = additionalInfo,
+                title = title,
+                message = message,
+                warning = warning,
                 onConfirm = onConfirm
             )
         )
@@ -210,28 +251,28 @@ class SettingsViewModel(
         state = state.copy(deleteConfirmation = null)
     }
 
-    private fun deleteDictionary(language: Language) {
+    private fun deleteDictionary(language: Language, toastMessage: String) {
         viewModelScope.launch {
             try {
                 dataDbManager.deleteDictionary(language)
                 dictionaryRepository.clearSenseCache()
                 reloadSettings()
-                snackbarHostState.showSnackbar("Database deleted successfully")
+                snackbarHostState.showSnackbar(toastMessage)
             } catch (e: Exception) {
-                state = state.copy(errorMessage = "Failed to delete database: ${e.message}")
+                state = state.copy(errorMessage = "Failed to delete: ${e.message}")
             }
         }
     }
 
-    private fun deleteTranslation(src: Language, tgt: Language) {
+    private fun deleteTranslation(src: Language, tgt: Language, toastMessage: String) {
         viewModelScope.launch {
             try {
                 dataDbManager.deleteTranslation(src, tgt)
                 dictionaryRepository.clearSenseCache()
                 loadDatabases()
-                snackbarHostState.showSnackbar("Database deleted successfully")
+                snackbarHostState.showSnackbar(toastMessage)
             } catch (e: Exception) {
-                state = state.copy(errorMessage = "Failed to delete database: ${e.message}")
+                state = state.copy(errorMessage = "Failed to delete: ${e.message}")
             }
         }
     }
@@ -315,10 +356,12 @@ class SettingsViewModel(
                         updateLanguageState(language) { it.copy(enabledVoiceIds = enabledIds) }
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 state = state.copy(
                     isLoading = false,
-                    errorMessage = "Failed to load languages: ${e.message}"
+                    errorMessage = NetworkErrorClassifier.userMessage(e)
                 )
             }
         }
@@ -428,6 +471,92 @@ class SettingsViewModel(
         }
     }
 
+    fun cancelDownload(downloadKey: String) {
+        downloadCoordinator.cancel(downloadKey)
+    }
+
+    var pendingDiscussionUrl by mutableStateOf<String?>(null)
+        private set
+
+    fun consumePendingDiscussionUrl(): String? {
+        val url = pendingDiscussionUrl
+        pendingDiscussionUrl = null
+        return url
+    }
+
+    fun openFeedbackDialog() {
+        state = state.copy(
+            feedbackDialogVisible = true,
+            feedbackComment = "",
+            feedbackEmail = "",
+            feedbackSubmitting = false,
+            feedbackError = null,
+            feedbackDiscussionUrl = null
+        )
+    }
+
+    fun dismissFeedbackDialog() {
+        if (state.feedbackSubmitting) return
+        val discussionUrl = state.feedbackDiscussionUrl
+        state = state.copy(
+            feedbackDialogVisible = false,
+            feedbackComment = "",
+            feedbackEmail = "",
+            feedbackError = null,
+            feedbackDiscussionUrl = null
+        )
+        if (discussionUrl != null) {
+            viewModelScope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = "Feedback sent",
+                    actionLabel = "View",
+                    duration = SnackbarDuration.Long
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    pendingDiscussionUrl = discussionUrl
+                }
+            }
+        }
+    }
+
+    fun updateFeedbackComment(comment: String) {
+        state = state.copy(feedbackComment = comment, feedbackError = null)
+    }
+
+    fun updateFeedbackEmail(email: String) {
+        state = state.copy(feedbackEmail = email)
+    }
+
+    fun submitFeedback() {
+        if (state.feedbackSubmitting) return
+
+        val comment = state.feedbackComment.trim()
+        if (comment.isBlank()) {
+            state = state.copy(feedbackError = "Comment is required")
+            return
+        }
+
+        state = state.copy(feedbackSubmitting = true, feedbackError = null)
+        viewModelScope.launch {
+            try {
+                val response = dictionaryClient.sendGeneralFeedback(
+                    comment = comment,
+                    email = state.feedbackEmail.trim().takeIf { it.isNotBlank() }
+                )
+                state = state.copy(
+                    feedbackSubmitting = false,
+                    feedbackError = null,
+                    feedbackDiscussionUrl = response.discussionUrl
+                )
+            } catch (e: Exception) {
+                state = state.copy(
+                    feedbackSubmitting = false,
+                    feedbackError = NetworkErrorClassifier.userMessage(e)
+                )
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         ttsManager.stop()
@@ -438,7 +567,7 @@ class SettingsViewModel(
             downloadCoordinator.downloadEntries()
                 .map { entries ->
                     entries.filterValues { it.status == DownloadStatus.Running }
-                        .mapValues { (_, entry) -> entry.progress ?: DownloadProgress(0, 1) }
+                        .mapValues { (_, entry) -> entry.progress }
                 }
                 .distinctUntilChanged()
                 .collect { running ->
@@ -469,12 +598,14 @@ class SettingsViewModel(
 
                         DownloadStatus.Cancelled -> {
                             downloadCoordinator.clear(downloadKey)
+                            snackbarHostState.showSnackbar("Download cancelled")
                             cancel()
                         }
 
                         DownloadStatus.Failed -> {
                             downloadCoordinator.clear(downloadKey)
-                            val message = entry.error?.message ?: "Unknown error"
+                            val message =
+                                if (entry.error != null) NetworkErrorClassifier.userMessage(entry.error) else "Unknown error"
                             state = state.copy(errorMessage = "$errorPrefix: $message")
                             cancel()
                         }
@@ -493,6 +624,9 @@ class SettingsViewModel(
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    learningLanguage: Language? = null,
+    nativeLanguages: List<Language> = emptyList(),
+    onChangeLanguages: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -504,10 +638,22 @@ fun SettingsScreen(
         onPauseOrDispose { }
     }
 
+    val uriHandler = LocalUriHandler.current
+
+    // Handle pending discussion URL from snackbar action
+    LaunchedEffect(viewModel.pendingDiscussionUrl) {
+        viewModel.consumePendingDiscussionUrl()?.let { url ->
+            uriHandler.openUri(url)
+        }
+    }
+
     SettingsScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
         snackbarHostState = viewModel.snackbarHostState,
+        learningLanguage = learningLanguage,
+        nativeLanguages = nativeLanguages,
+        onChangeLanguages = onChangeLanguages,
         onLanguageExpand = { viewModel.toggleLanguageExpansion(it) },
         onTestVoice = { voice -> viewModel.testVoice(voice) },
         onToggleVoiceEnabled = { language, voiceId -> viewModel.toggleVoiceEnabled(language, voiceId) },
@@ -516,8 +662,14 @@ fun SettingsScreen(
         onConfirmDelete = { viewModel.confirmDelete() },
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
         onDownloadDictionary = { language -> viewModel.downloadDictionary(language) },
+        onCancelDownload = { key -> viewModel.cancelDownload(key) },
         onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
         onToggleDictionaryExpansion = { languageCode -> viewModel.toggleDictionaryExpansion(languageCode) },
+        onSendFeedback = { viewModel.openFeedbackDialog() },
+        onDismissFeedback = { viewModel.dismissFeedbackDialog() },
+        onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
+        onFeedbackEmailChange = { viewModel.updateFeedbackEmail(it) },
+        onSubmitFeedback = { viewModel.submitFeedback() },
         wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -531,6 +683,9 @@ fun SettingsScreenContent(
     state: SettingsUiState,
     scrollState: LazyListState = LazyListState(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    learningLanguage: Language? = null,
+    nativeLanguages: List<Language> = emptyList(),
+    onChangeLanguages: () -> Unit = {},
     onLanguageExpand: (Text2SpeechLanguage) -> Unit = {},
     onTestVoice: (Text2SpeechVoice) -> Unit = { _ -> },
     onToggleVoiceEnabled: (Text2SpeechLanguage, String) -> Unit = { _, _ -> },
@@ -539,8 +694,14 @@ fun SettingsScreenContent(
     onConfirmDelete: () -> Unit = {},
     onDismissDeleteConfirmation: () -> Unit = {},
     onDownloadDictionary: (Language) -> Unit = {},
+    onCancelDownload: (String) -> Unit = {},
     onDownloadTranslation: (Language, Language) -> Unit = { _, _ -> },
     onToggleDictionaryExpansion: (String) -> Unit = {},
+    onSendFeedback: () -> Unit = {},
+    onDismissFeedback: () -> Unit = {},
+    onFeedbackCommentChange: (String) -> Unit = {},
+    onFeedbackEmailChange: (String) -> Unit = {},
+    onSubmitFeedback: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -562,7 +723,13 @@ fun SettingsScreenContent(
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text("Settings") }
+                    title = {
+                        Text(
+                            "Settings",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 )
             },
             bottomBar = {
@@ -598,6 +765,60 @@ fun SettingsScreenContent(
                             contentPadding = PaddingValues(AppSpacing.lg),
                             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                         ) {
+                            // Language Preferences
+                            if (learningLanguage != null) {
+                                item {
+                                    SectionHeader(title = "Language Preferences")
+                                }
+
+                                item {
+                                    ElevatedCard(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = MaterialTheme.shapes.extraLarge,
+                                        colors = CardDefaults.elevatedCardColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                                        ),
+                                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
+                                        onClick = onChangeLanguages
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(AppSpacing.lg),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Language,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+
+                                            Spacer(modifier = Modifier.width(AppSpacing.md))
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = "Learning: ${learningLanguage.flag} ${learningLanguage.selfName}",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                )
+                                                nativeLanguages.forEach { nativeLanguage ->
+                                                    Text(
+                                                        text = "Native: ${nativeLanguage.flag} ${nativeLanguage.selfName}",
+                                                        style = MaterialTheme.typography.titleMedium
+                                                    )
+                                                }
+                                            }
+
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
                             // Languages and Dictionaries
                             item {
                                 SectionHeader(title = "Languages and Dictionaries")
@@ -640,6 +861,7 @@ fun SettingsScreenContent(
                                         isExpanded = state.expandedDictionaries.contains(langInfo.language.code),
                                         onExpand = { onToggleDictionaryExpansion(langInfo.language.code) },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
+                                        onCancelDownload = onCancelDownload,
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
                                         onDownloadTranslation = { tgtLang ->
                                             onDownloadTranslation(langInfo.language, tgtLang)
@@ -696,6 +918,7 @@ fun SettingsScreenContent(
                                         isExpanded = state.expandedDictionaries.contains(langInfo.language.code),
                                         onExpand = { onToggleDictionaryExpansion(langInfo.language.code) },
                                         onDownloadDictionary = { onDownloadDictionary(langInfo.language) },
+                                        onCancelDownload = onCancelDownload,
                                         onDeleteDictionary = { dictDb?.deleteAction?.invoke() },
                                         onDownloadTranslation = { tgtLang ->
                                             onDownloadTranslation(langInfo.language, tgtLang)
@@ -752,22 +975,14 @@ fun SettingsScreenContent(
                                                 .padding(AppSpacing.lg),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(40.dp)
-                                                    .clip(CircleShape)
-                                                    .background(MaterialTheme.colorScheme.primaryContainer),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Download,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                    modifier = Modifier.size(24.dp)
-                                                )
-                                            }
+                                            Icon(
+                                                imageVector = Icons.Default.Download,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(24.dp)
+                                            )
 
-                                            Spacer(modifier = Modifier.width(AppSpacing.lg))
+                                            Spacer(modifier = Modifier.width(AppSpacing.md))
 
                                             Column(modifier = Modifier.weight(1f)) {
                                                 Text(
@@ -819,7 +1034,8 @@ fun SettingsScreenContent(
 
                                 item {
                                     AboutSection(
-                                        buildConfig = buildConfig
+                                        buildConfig = buildConfig,
+                                        onSendFeedback = onSendFeedback
                                     )
                                 }
                             }
@@ -832,10 +1048,27 @@ fun SettingsScreenContent(
         // Delete confirmation dialog
         state.deleteConfirmation?.let { confirmation ->
             DeleteConfirmationDialog(
-                displayName = confirmation.displayName,
-                additionalInfo = confirmation.additionalInfo,
+                title = confirmation.title,
+                message = confirmation.message,
+                warning = confirmation.warning,
                 onConfirm = onConfirmDelete,
                 onDismiss = onDismissDeleteConfirmation
+            )
+        }
+
+        if (state.feedbackDialogVisible) {
+            FeedbackDialog(
+                title = "App feedback",
+                commentPlaceholder = "Share your thoughts…",
+                comment = state.feedbackComment,
+                email = state.feedbackEmail,
+                isSending = state.feedbackSubmitting,
+                error = state.feedbackError,
+                resultUrl = state.feedbackDiscussionUrl,
+                onCommentChange = onFeedbackCommentChange,
+                onEmailChange = onFeedbackEmailChange,
+                onDismiss = onDismissFeedback,
+                onSend = onSubmitFeedback
             )
         }
     }
@@ -849,11 +1082,12 @@ private fun DictionaryCard(
     isExpanded: Boolean,
     onExpand: () -> Unit,
     onDownloadDictionary: () -> Unit,
+    onCancelDownload: (String) -> Unit,
     onDeleteDictionary: () -> Unit,
     onDownloadTranslation: (Language) -> Unit,
     onDeleteTranslation: (Language) -> Unit,
     downloadedTranslations: List<DatabaseItemUiState>,
-    downloadingItems: Map<String, DownloadProgress>
+    downloadingItems: Map<String, DownloadProgress?>
 ) {
     ElevatedCard(
         modifier = Modifier
@@ -899,7 +1133,7 @@ private fun DictionaryCard(
                             )
                         }
                         Text(
-                            text = if (isDownloaded) "I'm learning" else "Available",
+                            text = if (isDownloaded) "Downloaded" else "Available",
                             style = MaterialTheme.typography.labelMedium,
                             color = if (isDownloaded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -930,10 +1164,10 @@ private fun DictionaryCard(
                     contentAlignment = Alignment.Center
                 ) {
                     if (dictDownloading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp,
-                            progress = { dictProgress?.percent?.toFloat()?.div(100f) ?: 0f }
+                        CancellableProgressIndicator(
+                            progress = dictProgress?.percent?.toFloat()?.div(100f) ?: -1f,
+                            onCancel = { onCancelDownload(dictDownloadKey) },
+                            size = 48.dp
                         )
                     } else if (isDownloaded) {
                         IconButton(onClick = onDeleteDictionary) {
@@ -998,6 +1232,7 @@ private fun DictionaryCard(
                             isDownloading = transDownloading,
                             downloadProgress = transProgress,
                             onDownload = { onDownloadTranslation(translation.targetLanguage) },
+                            onCancel = { onCancelDownload(transDownloadKey) },
                             onDelete = { onDeleteTranslation(translation.targetLanguage) }
                         )
                     }
@@ -1015,6 +1250,7 @@ private fun TranslationItem(
     isDownloading: Boolean,
     downloadProgress: DownloadProgress?,
     onDownload: () -> Unit,
+    onCancel: () -> Unit,
     onDelete: () -> Unit
 ) {
     Surface(
@@ -1048,14 +1284,14 @@ private fun TranslationItem(
             }
 
             Box(
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(48.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (isDownloading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        progress = { downloadProgress?.percent?.toFloat()?.div(100f) ?: 0f }
+                    CancellableProgressIndicator(
+                        progress = downloadProgress?.percent?.toFloat()?.div(100f) ?: -1f,
+                        onCancel = onCancel,
+                        size = 48.dp
                     )
                 } else if (isDownloaded) {
                     IconButton(onClick = onDelete) {
@@ -1106,22 +1342,14 @@ private fun VoiceSectionItem(
                     .padding(AppSpacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
 
-                Spacer(modifier = Modifier.width(AppSpacing.lg))
+                Spacer(modifier = Modifier.width(AppSpacing.md))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -1202,7 +1430,8 @@ private fun VoiceSectionItem(
 
 @Composable
 private fun AboutSection(
-    buildConfig: AppBuildConfig
+    buildConfig: AppBuildConfig,
+    onSendFeedback: () -> Unit = {}
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -1217,9 +1446,7 @@ private fun AboutSection(
                 icon = Icons.Outlined.Feedback,
                 title = "Send us feedback",
                 subtitle = "We'd love to hear from you",
-                onClick = {},
-                iconBackground = MaterialTheme.colorScheme.primaryContainer,
-                iconTint = MaterialTheme.colorScheme.onPrimaryContainer
+                onClick = onSendFeedback
             )
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = AppSpacing.lg),
@@ -1230,9 +1457,7 @@ private fun AboutSection(
                 icon = Icons.Outlined.Info,
                 title = "Version",
                 subtitle = buildConfig.versionName,
-                onClick = {},
-                iconBackground = MaterialTheme.colorScheme.primaryContainer,
-                iconTint = MaterialTheme.colorScheme.onPrimaryContainer
+                onClick = {}
             )
         }
     }
@@ -1243,9 +1468,7 @@ private fun AboutItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    onClick: () -> Unit,
-    iconTint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary,
-    iconBackground: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -1254,21 +1477,13 @@ private fun AboutItem(
             .padding(AppSpacing.lg),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(iconBackground),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-        Spacer(modifier = Modifier.width(AppSpacing.lg))
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(AppSpacing.md))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
@@ -1292,23 +1507,30 @@ private fun LoadingIndicator(modifier: Modifier = Modifier) {
 
 @Composable
 fun DeleteConfirmationDialog(
-    displayName: String,
-    additionalInfo: String? = null,
+    title: String,
+    message: String,
+    warning: String? = null,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Delete Data?")
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall
+            )
         },
         text = {
-            Column {
-                Text("Are you sure you want to delete $displayName?")
-                if (additionalInfo != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (warning != null) {
                     Text(
-                        text = additionalInfo,
+                        text = warning,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -1326,7 +1548,12 @@ fun DeleteConfirmationDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
                 Text("Cancel")
             }
         }
@@ -1473,6 +1700,79 @@ private fun VoiceItem(
     }
 }
 
+@Composable
+private fun CancellableProgressIndicator(
+    progress: Float,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp
+) {
+    val iconSize = size * 0.4f
+    val strokeWidth = 2.5.dp
+    // Clamp progress to valid range, use indeterminate if unknown (-1)
+    val clampedProgress = progress.coerceIn(0f, 1f)
+    val isIndeterminate = progress < 0f
+    val progressPercent = if (isIndeterminate) null else (clampedProgress * 100).toInt()
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .semantics(mergeDescendants = true) {
+                // Expose progress to screen readers
+                progressBarRangeInfo = if (isIndeterminate) {
+                    ProgressBarRangeInfo.Indeterminate
+                } else {
+                    ProgressBarRangeInfo(clampedProgress, 0f..1f)
+                }
+                stateDescription = if (isIndeterminate) "Downloading" else "Downloading $progressPercent%"
+            }
+            .clickable(
+                onClick = onCancel,
+                onClickLabel = "Cancel download",
+                role = Role.Button
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        // Progress ring with track
+        if (isIndeterminate) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(size),
+                strokeWidth = strokeWidth,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.primary
+            )
+        } else {
+            CircularProgressIndicator(
+                progress = { clampedProgress },
+                modifier = Modifier.size(size),
+                strokeWidth = strokeWidth,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        // Cancel icon with subtle background
+        Surface(
+            modifier = Modifier.size(iconSize + 6.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Close,
+                    contentDescription = null, // Parent provides accessibility label
+                    modifier = Modifier.size(iconSize),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
 private fun formatFileSize(bytes: Long): String {
     return when {
         bytes < 1024 -> "$bytes B"
@@ -1485,10 +1785,10 @@ private fun formatFileSize(bytes: Long): String {
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewLoading(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1497,10 +1797,10 @@ private fun SettingsScreenPreviewLoading(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewEmpty(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1513,10 +1813,10 @@ private fun SettingsScreenPreviewEmpty(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithDatabases(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1550,7 +1850,7 @@ private fun SettingsScreenPreviewWithDatabases(
                         language = Language.ENGLISH,
                         dictionarySizeBytes = 15 * 1024 * 1024,
                         availableTranslations = listOf(
-                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                            AvailableTranslationInfo(
                                 targetLanguage = Language.RUSSIAN,
                                 sizeBytes = 8 * 1024 * 1024
                             )
@@ -1560,7 +1860,7 @@ private fun SettingsScreenPreviewWithDatabases(
                         language = Language.RUSSIAN,
                         dictionarySizeBytes = 12 * 1024 * 1024,
                         availableTranslations = listOf(
-                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                            AvailableTranslationInfo(
                                 targetLanguage = Language.ENGLISH,
                                 sizeBytes = 8 * 1024 * 1024
                             )
@@ -1572,10 +1872,10 @@ private fun SettingsScreenPreviewWithDatabases(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithLanguages(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1620,10 +1920,66 @@ private fun SettingsScreenPreviewWithLanguages(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
+@Composable
+private fun SettingsScreenPreviewWithMultipleNativeLanguages(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SettingsScreenContent(
+            state = SettingsUiState(
+                isLoading = false,
+                languages = mapOf(
+                    Text2SpeechLanguage(
+                        language = Language.GERMAN,
+                        isAvailable = true,
+                        missingData = false
+                    ) to LanguageUiState(),
+                    Text2SpeechLanguage(
+                        language = Language.ENGLISH,
+                        isAvailable = true,
+                        missingData = false
+                    ) to LanguageUiState()
+                ),
+                databases = listOf(
+                    DatabaseItemUiState(
+                        displayName = "Dictionary: Deutsch",
+                        sizeBytes = 14 * 1024 * 1024,
+                        deleteAction = {}
+                    ),
+                    DatabaseItemUiState(
+                        displayName = "Translation: Deutsch → English",
+                        sizeBytes = 8 * 1024 * 1024,
+                        deleteAction = {}
+                    )
+                ),
+                availableLanguages = listOf(
+                    AvailableLanguageInfo(
+                        language = Language.GERMAN,
+                        dictionarySizeBytes = 14 * 1024 * 1024,
+                        availableTranslations = listOf(
+                            AvailableTranslationInfo(
+                                targetLanguage = Language.ENGLISH,
+                                sizeBytes = 8 * 1024 * 1024
+                            ),
+                            AvailableTranslationInfo(
+                                targetLanguage = Language.SPANISH,
+                                sizeBytes = 7 * 1024 * 1024
+                            )
+                        )
+                    )
+                )
+            ),
+            learningLanguage = Language.GERMAN,
+            nativeLanguages = listOf(Language.ENGLISH, Language.SPANISH, Language.CZECH)
+        )
+    }
+}
+
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithExpandedLanguage(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1678,10 +2034,10 @@ private fun SettingsScreenPreviewWithExpandedLanguage(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithError(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1707,10 +2063,10 @@ private fun SettingsScreenPreviewWithError(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithDeleteConfirmation(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1736,8 +2092,9 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
                     )
                 ),
                 deleteConfirmation = DeleteConfirmationState(
-                    displayName = "Dictionary: English",
-                    additionalInfo = "2 translations will also be deleted",
+                    title = "Delete English Dictionary?",
+                    message = "You can re-download it anytime.",
+                    warning = "This will also remove 2 translations.",
                     onConfirm = {}
                 )
             )
@@ -1745,10 +2102,10 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun SettingsScreenPreviewWithMixedDatabaseStates(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         SettingsScreenContent(
@@ -1772,11 +2129,11 @@ private fun SettingsScreenPreviewWithMixedDatabaseStates(
                         language = Language.ENGLISH,
                         dictionarySizeBytes = 15 * 1024 * 1024,
                         availableTranslations = listOf(
-                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                            AvailableTranslationInfo(
                                 targetLanguage = Language.RUSSIAN,
                                 sizeBytes = 8 * 1024 * 1024
                             ),
-                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                            AvailableTranslationInfo(
                                 targetLanguage = Language.POLISH,
                                 sizeBytes = 7 * 1024 * 1024
                             )
@@ -1786,7 +2143,7 @@ private fun SettingsScreenPreviewWithMixedDatabaseStates(
                         language = Language.RUSSIAN,
                         dictionarySizeBytes = 12 * 1024 * 1024,
                         availableTranslations = listOf(
-                            com.slovy.slovymovyapp.data.remote.AvailableTranslationInfo(
+                            AvailableTranslationInfo(
                                 targetLanguage = Language.ENGLISH,
                                 sizeBytes = 8 * 1024 * 1024
                             )

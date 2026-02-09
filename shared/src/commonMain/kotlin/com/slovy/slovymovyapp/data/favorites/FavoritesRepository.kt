@@ -103,6 +103,12 @@ class FavoritesRepository(private val db: AppDatabase) {
             }
     }
 
+    suspend fun getDistinctLemmasByLang(targetLang: Language): Set<String> = withContext(Dispatchers.IO) {
+        db.favoritesQueries.selectDistinctLemmasByLang(target_lang = targetLang.code)
+            .executeAsList()
+            .toSet()
+    }
+
     suspend fun deleteAll() = withContext(Dispatchers.IO) {
         db.favoritesQueries.deleteAll()
     }

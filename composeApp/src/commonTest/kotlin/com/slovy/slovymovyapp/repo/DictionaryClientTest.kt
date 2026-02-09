@@ -369,6 +369,173 @@ class DictionaryClientTest : BaseTest() {
         }
     }
 
+    /**
+     * Looks up a non-online-only lemma in the downloaded Russian dictionary.
+     * Returns the lemma string, or null if the dictionary is empty.
+     */
+    private fun findRussianLemma(mgr: com.slovy.slovymovyapp.data.remote.DataDbManager): String? {
+        val db = runBlocking { mgr.openDictionaryReadOnly(Language.RUSSIAN) }
+        val rows = db.dictionaryQueries
+            .selectLemmasNormalizedLike("ru", "", "\uFFFF", 10)
+            .executeAsList()
+        return rows.firstOrNull { !it.online_only }?.lemma
+    }
+
+    @Test
+    fun getWord_fetchesTranslations_ru_to_german() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
+
+        runBlocking {
+            mgr.deleteDictionary(Language.RUSSIAN)
+            mgr.deleteTranslation(Language.RUSSIAN, Language.GERMAN)
+        }
+
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.RUSSIAN) }
+
+        try {
+            assertTrue(platform.fileExists(dictPath), "Russian dictionary file should exist")
+            assertFalse(
+                mgr.hasTranslation(Language.RUSSIAN, Language.GERMAN),
+                "RU->DE translation should not be downloaded"
+            )
+
+            val lemma = assertNotNull(
+                findRussianLemma(mgr),
+                "Russian dictionary should contain at least one non-online lemma"
+            )
+
+            val client = createClient()
+
+            val results = runBlocking {
+                client.getWord(
+                    language = Language.RUSSIAN,
+                    lemma = lemma,
+                    translationTargets = listOf(Language.GERMAN)
+                ).toList()
+            }
+
+            assertTrue(results.isNotEmpty(), "Should have at least one emission")
+
+            // First emission should be the local card (from downloaded dictionary)
+            val firstResult = results.first()
+            val firstCard = assertNotNull(firstResult.card, "First emission should have local card")
+            assertEquals(lemma, firstCard.lemma, "Lemma should match")
+
+            // If multiple emissions, first should show translation loading
+            if (results.size >= 2) {
+                assertTrue(
+                    firstResult.isTranslationLoading,
+                    "First emission should indicate translation loading"
+                )
+            }
+
+            // Last result should not be loading and must contain German translations
+            val lastResult = results.last()
+            val lastCard = assertNotNull(lastResult.card, "Last emission should have card")
+            assertFalse(lastResult.isTranslationLoading, "Last emission should not be loading translations")
+
+            val allTranslationLanguages = lastCard.entries
+                .flatMap { it.senses }
+                .flatMap { sense -> sense.translations.keys + sense.targetLangDefinitions.keys }
+                .toSet()
+            assertTrue(
+                Language.GERMAN in allTranslationLanguages,
+                "Last card should contain German translations but found: $allTranslationLanguages"
+            )
+        } finally {
+            runBlocking { mgr.deleteDictionary(Language.RUSSIAN) }
+            localMgr.closeAll()
+            if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
+        }
+    }
+
+    @Test
+    fun getWord_fetchesTranslations_ru_to_english_and_german() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
+
+        runBlocking {
+            mgr.deleteDictionary(Language.RUSSIAN)
+            mgr.deleteTranslation(Language.RUSSIAN, Language.ENGLISH)
+            mgr.deleteTranslation(Language.RUSSIAN, Language.GERMAN)
+        }
+
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.RUSSIAN) }
+
+        try {
+            assertTrue(platform.fileExists(dictPath), "Russian dictionary file should exist")
+            assertFalse(
+                mgr.hasTranslation(Language.RUSSIAN, Language.ENGLISH),
+                "RU->EN translation should not be downloaded"
+            )
+            assertFalse(
+                mgr.hasTranslation(Language.RUSSIAN, Language.GERMAN),
+                "RU->DE translation should not be downloaded"
+            )
+
+            val lemma = assertNotNull(
+                findRussianLemma(mgr),
+                "Russian dictionary should contain at least one non-online lemma"
+            )
+
+            val client = createClient()
+
+            val results = runBlocking {
+                client.getWord(
+                    language = Language.RUSSIAN,
+                    lemma = lemma,
+                    translationTargets = listOf(Language.ENGLISH, Language.GERMAN)
+                ).toList()
+            }
+
+            assertTrue(results.isNotEmpty(), "Should have at least one emission")
+
+            val firstResult = results.first()
+            val firstCard = assertNotNull(firstResult.card, "First emission should have local card")
+            assertEquals(lemma, firstCard.lemma, "Lemma should match")
+
+            // With two translation targets, first emission should indicate loading
+            if (results.size >= 2) {
+                assertTrue(
+                    firstResult.isTranslationLoading,
+                    "First emission should indicate translation loading for multiple targets"
+                )
+            }
+
+            // Last result should have complete data with both translation languages
+            val lastResult = results.last()
+            val lastCard = assertNotNull(lastResult.card, "Last emission should have card")
+            assertEquals(lemma, lastCard.lemma, "Last emission lemma should match")
+            assertFalse(lastResult.isTranslationLoading, "Last emission should not be loading")
+
+            val allTranslationLanguages = lastCard.entries
+                .flatMap { it.senses }
+                .flatMap { sense -> sense.translations.keys + sense.targetLangDefinitions.keys }
+                .toSet()
+            assertTrue(
+                Language.ENGLISH in allTranslationLanguages,
+                "Last card should contain English translations but found: $allTranslationLanguages"
+            )
+            assertTrue(
+                Language.GERMAN in allTranslationLanguages,
+                "Last card should contain German translations but found: $allTranslationLanguages"
+            )
+        } finally {
+            runBlocking { mgr.deleteDictionary(Language.RUSSIAN) }
+            localMgr.closeAll()
+            if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
+        }
+    }
+
     @Test
     fun getWord_fetchesBothWordAndTranslations_whenOnlineOnlyWithTranslations() {
         val platform = testPlatformDbSupport()

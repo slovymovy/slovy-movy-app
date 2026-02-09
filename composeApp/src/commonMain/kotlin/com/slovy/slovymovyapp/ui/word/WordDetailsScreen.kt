@@ -2,17 +2,22 @@ package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.StopCircle
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -29,6 +34,7 @@ import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
@@ -38,7 +44,8 @@ sealed interface WordDetailUiState {
         val lemma: String? = null,
         val message: String = "No entries available.",
         val isError: Boolean = false,
-        val isLoading: Boolean = false
+        val isLoading: Boolean = false,
+        val isRefreshing: Boolean = false
     ) : WordDetailUiState
 
     data class Content(
@@ -48,9 +55,22 @@ sealed interface WordDetailUiState {
         val cardLoading: Boolean = false,
         val cardError: String? = null,
         val translationLoading: Boolean = false,
-        val translationError: String? = null
+        val translationError: String? = null,
+        val feedbackDialogVisible: Boolean = false,
+        val feedbackComment: String = "",
+        val feedbackEmail: String = "",
+        val feedbackSubmitting: Boolean = false,
+        val feedbackError: String? = null,
+        val feedbackIssueUrl: String? = null,
+        val isRefreshing: Boolean = false
     ) : WordDetailUiState
 }
+
+val WordDetailUiState.isRefreshing: Boolean
+    get() = when (this) {
+        is WordDetailUiState.Empty -> isRefreshing
+        is WordDetailUiState.Content -> isRefreshing
+    }
 
 data class EntryUiState(
     val entryId: String,
@@ -209,6 +229,7 @@ private inline fun EntryUiState.updateSense(
 
 class WordDetailViewModel(
     private val repository: DictionaryRepository,
+    private val dictionaryClient: DictionaryClient,
     private val wordFetchManager: WordFetchManager,
     private val favoritesRepository: FavoritesRepository,
     private val ttsManager: TextToSpeechManager,
@@ -234,6 +255,9 @@ class WordDetailViewModel(
     var favoriteSenses by mutableStateOf<Set<String>>(emptySet())
         private set
 
+    var favoriteLemmas by mutableStateOf<Set<String>>(emptySet())
+        private set
+
     var isPlaying by mutableStateOf(false)
         private set
 
@@ -243,15 +267,31 @@ class WordDetailViewModel(
     var availableVoices by mutableStateOf<List<Text2SpeechVoice>>(emptyList())
         private set
 
+    val snackbarHostState = SnackbarHostState()
+
+    var pendingIssueUrl by mutableStateOf<String?>(null)
+        private set
+
+    fun consumePendingIssueUrl(): String? {
+        val url = pendingIssueUrl
+        pendingIssueUrl = null
+        return url
+    }
+
     private var currentVoiceIndex: Int = 0
     private var hasScrolledToTarget = false
+    private var requestedTranslationLanguages: List<Language> =
+        translationLanguages?.distinctBy { it.code } ?: emptyList()
 
     init {
         viewModelScope.launch {
+            val resolvedTranslations = translationLanguages?.distinctBy { it.code }
+                ?: repository.installedTranslationTargets(dictionaryLanguage).distinctBy { it.code }
+            requestedTranslationLanguages = resolvedTranslations
             wordFetchManager.getWord(
                 dictionaryLanguage,
                 lemma,
-                translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage),
+                resolvedTranslations,
                 pushToRepo = true
             ).onCompletion { cause ->
                 if (cause is CancellationException) {
@@ -302,7 +342,13 @@ class WordDetailViewModel(
                 cardLoading = result.isWordLoading,
                 cardError = if (wasWordLoading && errorMessage != null) errorMessage else null,
                 translationLoading = result.isTranslationLoading,
-                translationError = if (wasTranslationLoading && errorMessage != null) errorMessage else null
+                translationError = if (wasTranslationLoading && errorMessage != null) errorMessage else null,
+                feedbackDialogVisible = current?.feedbackDialogVisible ?: false,
+                feedbackComment = current?.feedbackComment ?: "",
+                feedbackEmail = current?.feedbackEmail ?: "",
+                feedbackSubmitting = current?.feedbackSubmitting ?: false,
+                feedbackError = current?.feedbackError,
+                feedbackIssueUrl = current?.feedbackIssueUrl
             )
         } else if (result.error != null) {
             state = WordDetailUiState.Empty(
@@ -318,11 +364,46 @@ class WordDetailViewModel(
         loadVoices()
     }
 
+    fun refreshFromPull() {
+        if (state.isRefreshing) return
+        state = when (val s = state) {
+            is WordDetailUiState.Empty -> s.copy(isRefreshing = true)
+            is WordDetailUiState.Content -> s.copy(isRefreshing = true)
+        }
+        if (!isLoading()) {
+            viewModelScope.launch {
+                wordFetchManager.getWord(
+                    dictionaryLanguage,
+                    lemma,
+                    requestedTranslationLanguages,
+                    pushToRepo = true
+                ).collect { result ->
+                    updateStateFromResult(result)
+                }
+            }
+        }
+        viewModelScope.launch {
+            delay(200)
+            state = when (val s = state) {
+                is WordDetailUiState.Empty -> s.copy(isRefreshing = false)
+                is WordDetailUiState.Content -> s.copy(isRefreshing = false)
+            }
+        }
+    }
+
     fun hasError(): Boolean {
         return when (val s = state) {
             is WordDetailUiState.Empty -> s.isError
             is WordDetailUiState.Content ->
                 s.cardError != null || s.translationError != null
+        }
+    }
+
+    fun isLoading(): Boolean {
+        return when (val s = state) {
+            is WordDetailUiState.Empty -> s.isLoading
+            is WordDetailUiState.Content ->
+                s.cardLoading || s.translationLoading
         }
     }
 
@@ -340,10 +421,14 @@ class WordDetailViewModel(
 
     private fun loadFavorites() {
         viewModelScope.launch {
+            val resolvedTranslations = requestedTranslationLanguages.ifEmpty {
+                repository.installedTranslationTargets(dictionaryLanguage).distinctBy { it.code }
+                    .also { requestedTranslationLanguages = it }
+            }
             val card = repository.getLanguageCard(
                 dictionaryLanguage,
                 lemma,
-                translationLanguages ?: repository.installedTranslationTargets(dictionaryLanguage)
+                resolvedTranslations
             )
             val allSenseIds = card?.entries?.flatMap { entry ->
                 entry.senses.map { it.senseId }
@@ -356,6 +441,7 @@ class WordDetailViewModel(
             }
 
             favoriteSenses = favoriteSenseIds
+            favoriteLemmas = favoritesRepository.getDistinctLemmasByLang(dictionaryLanguage)
             val current = state
             if (current is WordDetailUiState.Content) {
                 state = current.reloadFavorite(::isSenseFavorite)
@@ -445,6 +531,91 @@ class WordDetailViewModel(
         }
     }
 
+    fun openFeedbackDialog() {
+        val current = state as? WordDetailUiState.Content ?: return
+        state = current.copy(
+            feedbackDialogVisible = true,
+            feedbackComment = "",
+            feedbackEmail = "",
+            feedbackSubmitting = false,
+            feedbackError = null,
+            feedbackIssueUrl = null
+        )
+    }
+
+    fun dismissFeedbackDialog() {
+        val current = state as? WordDetailUiState.Content ?: return
+        if (current.feedbackSubmitting) return
+        val issueUrl = current.feedbackIssueUrl
+        state = current.copy(
+            feedbackDialogVisible = false,
+            feedbackComment = "",
+            feedbackEmail = "",
+            feedbackError = null,
+            feedbackIssueUrl = null
+        )
+        if (issueUrl != null) {
+            viewModelScope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = "Feedback sent",
+                    actionLabel = "View",
+                    duration = SnackbarDuration.Long
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    pendingIssueUrl = issueUrl
+                }
+            }
+        }
+    }
+
+    fun updateFeedbackComment(comment: String) {
+        val current = state as? WordDetailUiState.Content ?: return
+        state = current.copy(feedbackComment = comment, feedbackError = null)
+    }
+
+    fun updateFeedbackEmail(email: String) {
+        val current = state as? WordDetailUiState.Content ?: return
+        state = current.copy(feedbackEmail = email)
+    }
+
+    fun submitFeedback() {
+        val current = state as? WordDetailUiState.Content ?: return
+        if (current.feedbackSubmitting) return
+
+        val comment = current.feedbackComment.trim()
+        if (comment.isBlank()) {
+            state = current.copy(feedbackError = "Comment is required")
+            return
+        }
+
+        state = current.copy(feedbackSubmitting = true, feedbackError = null)
+        viewModelScope.launch {
+            try {
+                val feedbackResponse = dictionaryClient.sendFeedback(
+                    language = dictionaryLanguage,
+                    lemma = lemma,
+                    translationTargets = requestedTranslationLanguages,
+                    comment = comment,
+                    email = current.feedbackEmail.trim().takeIf { it.isNotBlank() }
+                )
+                val latest = state as? WordDetailUiState.Content
+                if (latest != null) {
+                    state = latest.copy(
+                        feedbackSubmitting = false,
+                        feedbackError = null,
+                        feedbackIssueUrl = feedbackResponse.issueUrl
+                    )
+                }
+            } catch (e: Exception) {
+                val latest = state as? WordDetailUiState.Content ?: return@launch
+                state = latest.copy(
+                    feedbackSubmitting = false,
+                    feedbackError = NetworkErrorClassifier.userMessage(e)
+                )
+            }
+        }
+    }
+
     fun playWord() {
         if (availableVoices.isEmpty()) return
 
@@ -514,18 +685,35 @@ fun WordDetailScreen(
         }
     }
 
+    val uriHandler = LocalUriHandler.current
+
+    // Handle pending issue URL from snackbar action
+    LaunchedEffect(viewModel.pendingIssueUrl) {
+        viewModel.consumePendingIssueUrl()?.let { url ->
+            uriHandler.openUri(url)
+        }
+    }
+
     WordDetailScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
+        snackbarHostState = viewModel.snackbarHostState,
         isPlaying = viewModel.isPlaying,
         isPreparing = viewModel.isPreparing,
         canPlay = viewModel.availableVoices.isNotEmpty(),
+        favoriteLemmas = viewModel.favoriteLemmas,
+        onRefresh = { viewModel.refreshFromPull() },
         onBack = onBack,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToSettings = onNavigateToSettings,
         onPlayWord = { viewModel.playWord() },
         onStopWord = { viewModel.stopPlayback() },
+        onOpenFeedback = { viewModel.openFeedbackDialog() },
+        onDismissFeedback = { viewModel.dismissFeedbackDialog() },
+        onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
+        onFeedbackEmailChange = { viewModel.updateFeedbackEmail(it) },
+        onSubmitFeedback = { viewModel.submitFeedback() },
         onEntryToggle = { entryId -> viewModel.toggleEntry(entryId) },
         onFormsToggle = { entryId -> viewModel.toggleForms(entryId) },
         onSenseToggle = { entryId, senseId -> viewModel.toggleSense(entryId, senseId) },
@@ -545,15 +733,23 @@ fun WordDetailScreen(
 fun WordDetailScreenContent(
     state: WordDetailUiState,
     scrollState: ScrollState = ScrollState(0),
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
     isPlaying: Boolean = false,
     isPreparing: Boolean = false,
     canPlay: Boolean = false,
+    favoriteLemmas: Set<String> = emptySet(),
+    onRefresh: () -> Unit = {},
     onBack: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
+    onOpenFeedback: () -> Unit = {},
+    onDismissFeedback: () -> Unit = {},
+    onFeedbackCommentChange: (String) -> Unit = {},
+    onFeedbackEmailChange: (String) -> Unit = {},
+    onSubmitFeedback: () -> Unit = {},
     onEntryToggle: (String) -> Unit = {},
     onFormsToggle: (String) -> Unit = {},
     onSenseToggle: (String, String) -> Unit = { _, _ -> },
@@ -621,10 +817,10 @@ fun WordDetailScreenContent(
                     }
                 },
                 navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(
-                            text = "Back",
-                            style = MaterialTheme.typography.labelLarge
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
                         )
                     }
                 },
@@ -643,55 +839,81 @@ fun WordDetailScreenContent(
                 wordDetailLabel = titleText
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        when (state) {
-            is WordDetailUiState.Content -> {
-                WordDetailContent(
-                    card = state.card,
-                    entryStates = state.entries,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(innerPadding)
-                        .padding(horizontal = 12.dp, vertical = 20.dp),
-                    cardLoading = state.cardLoading,
-                    cardError = state.cardError,
-                    translationLoading = state.translationLoading,
-                    translationError = state.translationError,
-                    onEntryToggle = onEntryToggle,
-                    onFormsToggle = onFormsToggle,
-                    onSenseToggle = onSenseToggle,
-                    onSensePositioned = onSensePositioned,
-                    isSenseFavorite = isSenseFavorite,
-                    onSenseFavoriteToggle = onSenseFavoriteToggle,
-                    onWordClick = onWordClick
-                )
-            }
+        PullToRefreshBox(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            isRefreshing = state.isRefreshing,
+            onRefresh = onRefresh
+        ) {
+            when (state) {
+                is WordDetailUiState.Content -> {
+                    WordDetailContent(
+                        card = state.card,
+                        entryStates = state.entries,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                            .padding(horizontal = 12.dp, vertical = 20.dp),
+                        cardLoading = state.cardLoading,
+                        cardError = state.cardError,
+                        translationLoading = state.translationLoading,
+                        translationError = state.translationError,
+                        onEntryToggle = onEntryToggle,
+                        onFormsToggle = onFormsToggle,
+                        onSenseToggle = onSenseToggle,
+                        onSensePositioned = onSensePositioned,
+                        isSenseFavorite = isSenseFavorite,
+                        onSenseFavoriteToggle = onSenseFavoriteToggle,
+                        onWordClick = onWordClick,
+                        favoriteLemmas = favoriteLemmas,
+                        onOpenFeedback = onOpenFeedback
+                    )
+                }
 
-            is WordDetailUiState.Empty -> {
-                Surface(Modifier.fillMaxSize()) {
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        if (state.isLoading) {
-                            LoadingIndicator()
-                        } else if (state.isError) {
-                            ErrorIcon(Modifier.size(30.dp))
+                is WordDetailUiState.Empty -> {
+                    Surface(Modifier.fillMaxSize()) {
+                        Column(
+                            modifier = Modifier.fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            if (state.isLoading) {
+                                LoadingIndicator()
+                            } else if (state.isError) {
+                                ErrorIcon(Modifier.size(30.dp))
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = state.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
                         }
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = state.message,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
                     }
                 }
             }
         }
+    }
+
+    if (state is WordDetailUiState.Content && state.feedbackDialogVisible) {
+        com.slovy.slovymovyapp.ui.FeedbackDialog(
+            title = "Suggest a correction",
+            commentPlaceholder = "What needs correcting?",
+            comment = state.feedbackComment,
+            email = state.feedbackEmail,
+            isSending = state.feedbackSubmitting,
+            error = state.feedbackError,
+            resultUrl = state.feedbackIssueUrl,
+            onCommentChange = onFeedbackCommentChange,
+            onEmailChange = onFeedbackEmailChange,
+            onDismiss = onDismissFeedback,
+            onSend = onSubmitFeedback
+        )
     }
 }
 
@@ -710,7 +932,9 @@ private fun WordDetailContent(
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {},
-    onWordClick: (String) -> Unit = {}
+    onWordClick: (String) -> Unit = {},
+    favoriteLemmas: Set<String> = emptySet(),
+    onOpenFeedback: () -> Unit = {}
 ) {
     var scrollContainerY by remember { mutableStateOf(0f) }
 
@@ -734,7 +958,8 @@ private fun WordDetailContent(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     relatedWords = card.relatedWords,
-                    onWordClick = onWordClick
+                    onWordClick = onWordClick,
+                    favoriteLemmas = favoriteLemmas
                 )
             }
             HorizontalDivider(
@@ -781,9 +1006,29 @@ private fun WordDetailContent(
                     },
                     onSenseFavoriteToggle = onSenseFavoriteToggle,
                     relatedWords = card.relatedWords,
-                    onWordClick = onWordClick
+                    onWordClick = onWordClick,
+                    favoriteLemmas = favoriteLemmas
                 )
             }
+        }
+
+        TextButton(
+            onClick = onOpenFeedback,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Flag,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = "Suggest a correction",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }

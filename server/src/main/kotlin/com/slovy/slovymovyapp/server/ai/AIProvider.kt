@@ -95,6 +95,29 @@ interface AIProvider {
 
     fun getAvailableModels(): List<ModelInfo>
     fun isAvailable(): Boolean
+
+    /**
+     * Counts tokens for the given text using the specified model.
+     * @param text The text to count tokens for
+     * @param model The model identifier (used for model-specific tokenization)
+     * @return Token count
+     */
+    fun countTokens(text: String, model: String): Int
+}
+
+/**
+ * Calculates max output tokens as a multiple of input tokens, clamped to a maximum cap.
+ * @param inputTokens The number of input tokens
+ * @param multiplier The multiplier to apply (default 4x)
+ * @param maxCap The maximum cap for output tokens (default 32768)
+ * @return The calculated max output tokens
+ */
+fun calculateMaxOutputTokens(
+    inputTokens: Int,
+    multiplier: Int = 4,
+    maxCap: Int = 32768
+): Int {
+    return minOf(inputTokens * multiplier, maxCap)
 }
 
 
