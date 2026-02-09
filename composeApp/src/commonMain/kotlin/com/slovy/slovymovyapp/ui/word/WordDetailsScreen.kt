@@ -8,7 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.StopCircle
-import androidx.compose.material.icons.outlined.Feedback
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
@@ -813,17 +813,6 @@ fun WordDetailScreenContent(
                                     )
                                 }
                             }
-                            IconButton(
-                                onClick = onOpenFeedback,
-                                enabled = !state.feedbackSubmitting,
-                                modifier = Modifier.size(36.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Feedback,
-                                    contentDescription = "Send feedback",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
                         }
                     }
                 },
@@ -878,7 +867,8 @@ fun WordDetailScreenContent(
                         isSenseFavorite = isSenseFavorite,
                         onSenseFavoriteToggle = onSenseFavoriteToggle,
                         onWordClick = onWordClick,
-                        favoriteLemmas = favoriteLemmas
+                        favoriteLemmas = favoriteLemmas,
+                        onOpenFeedback = onOpenFeedback
                     )
                 }
 
@@ -912,7 +902,8 @@ fun WordDetailScreenContent(
 
     if (state is WordDetailUiState.Content && state.feedbackDialogVisible) {
         com.slovy.slovymovyapp.ui.FeedbackDialog(
-            title = "Propose correction",
+            title = "Suggest a correction",
+            commentPlaceholder = "What needs correcting?",
             comment = state.feedbackComment,
             email = state.feedbackEmail,
             isSending = state.feedbackSubmitting,
@@ -942,7 +933,8 @@ private fun WordDetailContent(
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {},
     onWordClick: (String) -> Unit = {},
-    favoriteLemmas: Set<String> = emptySet()
+    favoriteLemmas: Set<String> = emptySet(),
+    onOpenFeedback: () -> Unit = {}
 ) {
     var scrollContainerY by remember { mutableStateOf(0f) }
 
@@ -1018,6 +1010,25 @@ private fun WordDetailContent(
                     favoriteLemmas = favoriteLemmas
                 )
             }
+        }
+
+        TextButton(
+            onClick = onOpenFeedback,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Flag,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = "Suggest a correction",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }

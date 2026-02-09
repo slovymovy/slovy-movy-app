@@ -1059,6 +1059,7 @@ fun SettingsScreenContent(
         if (state.feedbackDialogVisible) {
             FeedbackDialog(
                 title = "App feedback",
+                commentPlaceholder = "Share your thoughts…",
                 comment = state.feedbackComment,
                 email = state.feedbackEmail,
                 isSending = state.feedbackSubmitting,
