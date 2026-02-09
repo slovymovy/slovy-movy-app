@@ -85,7 +85,8 @@ fun FeedbackDialog(
             },
             text = {
                 val fieldColors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
@@ -96,6 +97,7 @@ fun FeedbackDialog(
                         maxLines = 6,
                         singleLine = false,
                         enabled = !isSending,
+                        label = { Text("Comment") },
                         placeholder = {
                             Text(
                                 text = commentPlaceholder,
@@ -112,6 +114,7 @@ fun FeedbackDialog(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         enabled = !isSending,
+                        label = { Text("Email (optional)") },
                         placeholder = {
                             Text(
                                 text = "Email (optional)",
