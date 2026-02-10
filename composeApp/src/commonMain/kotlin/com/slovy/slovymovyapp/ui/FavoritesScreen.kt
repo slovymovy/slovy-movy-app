@@ -24,12 +24,14 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.CompactEmptyState
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.word.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
@@ -58,9 +60,13 @@ sealed interface FavoritesUiState {
         val senses: List<FavoriteSenseItem>,
         val query: String = "",
         val hasAnyFavorites: Boolean = false,
-        val favoriteLemmas: Set<String> = emptySet()
+        val favoriteLemmas: Set<String> = emptySet(),
+        val availableLanguages: List<Language> = emptyList(),
+        val selectedLanguage: Language? = null,
+        val isLanguageDropdownExpanded: Boolean = false
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
+        val showLanguagePicker: Boolean get() = availableLanguages.size > 1
     }
 }
 
@@ -90,10 +96,14 @@ class FavoritesViewModel(
             queryFlow
                 .debounce(QUERY_DEBOUNCE_MS)
                 .flatMapLatest { queryState ->
-                    flow { emit(loadFavoritesInternal(queryState.query)) }
+                    val snapshot = state as? FavoritesUiState.Content
+                    flow { emit(computeFavoritesState(queryState.query, snapshot)) }
                         .flowOn(Dispatchers.Default)
                 }
-                .collect { }
+                .collect { newState ->
+                    state = newState
+                    prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
+                }
         }
     }
 
@@ -108,33 +118,76 @@ class FavoritesViewModel(
         queryFlow.value = QueryState(currentQuery, Uuid.random())
     }
 
-    private suspend fun loadFavoritesInternal(query: String) {
-        val currentSenses = (state as? FavoritesUiState.Content)?.senses.orEmpty()
+    fun setSelectedLanguage(language: Language) {
+        val content = state as? FavoritesUiState.Content ?: return
+        if (content.selectedLanguage == language) return
+        state = content.copy(selectedLanguage = language)
+        queryFlow.value = QueryState(content.query, Uuid.random())
+    }
+
+    fun setLanguageDropdownExpanded(expanded: Boolean) {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.copy(isLanguageDropdownExpanded = expanded)
+    }
+
+    /**
+     * Computes the new favorites state from the repository. Safe to call from any dispatcher.
+     * Returns the new [FavoritesUiState.Content] without mutating [state].
+     *
+     * @param currentContent snapshot of the current UI state, captured on Main before dispatching.
+     */
+    internal suspend fun computeFavoritesState(
+        query: String,
+        currentContent: FavoritesUiState.Content?
+    ): FavoritesUiState.Content {
+        val currentSenses = currentContent?.senses.orEmpty()
         val currentById = currentSenses.associateBy { it.senseId }
 
         val allFavorites = favoritesRepository.getAllGroupedByLangAndLemma()
         val hasAnyFavorites = allFavorites.isNotEmpty()
 
+        // Derive available languages from all favorites
+        val availableLanguages = allFavorites.map { it.language }.distinct().sorted()
+
+        // Determine selected language: keep current if still valid, else first available
+        val selectedLanguage = when {
+            availableLanguages.size <= 1 -> availableLanguages.firstOrNull()
+            currentContent?.selectedLanguage in availableLanguages -> currentContent?.selectedLanguage
+            else -> availableLanguages.first()
+        }
+
+        // Filter favorites to selected language when multi-language
+        val langFiltered = if (availableLanguages.size > 1 && selectedLanguage != null) {
+            allFavorites.filter { it.language == selectedLanguage }
+        } else {
+            allFavorites
+        }
+
         val trimmedQuery = query.trim()
         val favorites = if (trimmedQuery.isEmpty()) {
-            allFavorites
+            langFiltered
         } else {
-            // Search by lemma
+            // Search by lemma — scope to language-filtered favorites
             val lemmaMatches = favoritesRepository.searchByLemma(trimmedQuery)
-            val lemmaMatchIds = lemmaMatches.map { it.senseId }.toSet()
+            val langFilteredSenseIds = langFiltered.map { it.senseId }.toSet()
+            val lemmaMatchIds = lemmaMatches.filter { it.senseId in langFilteredSenseIds }
+                .map { it.senseId }.toSet()
 
-            // Search by translation - for each source language in favorites
-            val sourceLanguages = allFavorites.map { it.language }.distinct()
+            // Search by translation — scoped to selected language
+            val searchLanguages = if (selectedLanguage != null) listOf(selectedLanguage)
+            else langFiltered.map { it.language }.distinct()
 
-            val translationMatchIds = sourceLanguages.flatMap { lang ->
-                dictionaryRepository.searchSenseIdsByTranslation(allFavorites.filter { it.language == lang }
-                    .map { it.senseId }.toSet(), trimmedQuery, lang)
+            val translationMatchIds = searchLanguages.flatMap { lang ->
+                dictionaryRepository.searchSenseIdsByTranslation(
+                    langFiltered.filter { it.language == lang }.map { it.senseId }.toSet(),
+                    trimmedQuery, lang
+                )
             }.toSet()
 
             // Prioritize lemma matches first, then translation-only matches
-            val lemmaMatchFavorites = allFavorites.filter { it.senseId in lemmaMatchIds }
+            val lemmaMatchFavorites = langFiltered.filter { it.senseId in lemmaMatchIds }
             val translationOnlyIds = translationMatchIds - lemmaMatchIds
-            val translationOnlyFavorites = allFavorites.filter { it.senseId in translationOnlyIds }
+            val translationOnlyFavorites = langFiltered.filter { it.senseId in translationOnlyIds }
 
             lemmaMatchFavorites + translationOnlyFavorites
         }
@@ -145,15 +198,24 @@ class FavoritesViewModel(
             buildSenseItem(favorite, cached, existing)
         }
 
-        state = FavoritesUiState.Content(
+        return FavoritesUiState.Content(
             senses = senses,
             query = query,
             hasAnyFavorites = hasAnyFavorites,
-            favoriteLemmas = allFavorites.map { it.lemma }.toSet()
+            favoriteLemmas = langFiltered.map { it.lemma }.toSet(),
+            availableLanguages = availableLanguages,
+            selectedLanguage = selectedLanguage,
+            isLanguageDropdownExpanded = if (availableLanguages.size > 1)
+                currentContent?.isLanguageDropdownExpanded ?: false else false
         )
-
-        prefetchSenses(senses.take(PREFETCH_LIMIT))
     }
+
+    /** Computes and applies favorites state. Exposed for tests; production code uses the
+     *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
+    internal suspend fun loadAndApplyState(query: String) {
+        state = computeFavoritesState(query, state as? FavoritesUiState.Content)
+    }
+
 
     private fun buildSenseItem(
         favorite: Favorite,
@@ -204,10 +266,17 @@ class FavoritesViewModel(
             // Fetch the favorite to get its createdAt before removal
             val favorite = favoritesRepository.getOne(senseId, item.targetLang) ?: return@launch
 
-            // Remove from repository and UI
+            // Remove from repository, then remove from displayed list for immediate feedback
             favoritesRepository.remove(senseId, favorite.language)
             val content = state as? FavoritesUiState.Content ?: return@launch
             state = content.copy(senses = content.senses.filter { it.senseId != senseId })
+
+            // Recompute languages and filtered senses from repository (handles query
+            // filtering, language switches, and all edge cases correctly)
+            val snapshot = state as? FavoritesUiState.Content
+            val newState = withContext(Dispatchers.Default) { computeFavoritesState(content.query, snapshot) }
+            state = newState
+            prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
 
             // Show snackbar with an undo option
             val result = snackbarHostState.showSnackbar(
@@ -290,7 +359,9 @@ fun FavoritesScreen(
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
         onNavigateToSettings = onNavigateToSettings,
-        onPrefetchVisible = { senses, range -> viewModel.prefetchVisibleRange(senses, range) }
+        onPrefetchVisible = { senses, range -> viewModel.prefetchVisibleRange(senses, range) },
+        onLanguageSelected = { viewModel.setSelectedLanguage(it) },
+        onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) }
     )
 }
 
@@ -308,7 +379,9 @@ fun FavoritesScreenContent(
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
-    onPrefetchVisible: (List<FavoriteSenseItem>, IntRange) -> Unit = { _, _ -> }
+    onPrefetchVisible: (List<FavoriteSenseItem>, IntRange) -> Unit = { _, _ -> },
+    onLanguageSelected: (Language) -> Unit = {},
+    onSetLanguageDropdownExpanded: (Boolean) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -374,14 +447,81 @@ fun FavoritesScreenContent(
                         .padding(innerPadding)
                 ) {
                     if (state.hasAnyFavorites) {
-                        com.slovy.slovymovyapp.ui.components.AppSearchBar(
-                            query = state.query,
-                            onQueryChange = onQueryChange,
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            placeholder = "Type a word..."
-                        )
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            AppSearchBar(
+                                query = state.query,
+                                onQueryChange = onQueryChange,
+                                modifier = Modifier.weight(1f),
+                                placeholder = "Type a word..."
+                            )
+
+                            if (state.showLanguagePicker) {
+                                val currentLanguage = state.selectedLanguage
+                                    ?: state.availableLanguages.firstOrNull()
+
+                                ExposedDropdownMenuBox(
+                                    expanded = state.isLanguageDropdownExpanded,
+                                    onExpandedChange = onSetLanguageDropdownExpanded
+                                ) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+                                            .height(56.dp)
+                                            .widthIn(min = 56.dp),
+                                        shape = MaterialTheme.shapes.extraLarge,
+                                        tonalElevation = 1.dp,
+                                        shadowElevation = 1.dp,
+                                        color = MaterialTheme.colorScheme.surfaceContainerHighest
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(start = 16.dp, end = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = currentLanguage?.flag ?: "",
+                                                style = MaterialTheme.typography.bodyLarge
+                                            )
+                                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                                expanded = state.isLanguageDropdownExpanded
+                                            )
+                                        }
+                                    }
+                                    ExposedDropdownMenu(
+                                        expanded = state.isLanguageDropdownExpanded,
+                                        onDismissRequest = { onSetLanguageDropdownExpanded(false) },
+                                        modifier = Modifier.width(200.dp),
+                                        shape = MaterialTheme.shapes.small,
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        shadowElevation = 2.dp
+                                    ) {
+                                        state.availableLanguages.forEach { language ->
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Row(
+                                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Text(language.flag)
+                                                        Text(language.selfName)
+                                                    }
+                                                },
+                                                onClick = {
+                                                    onLanguageSelected(language)
+                                                    onSetLanguageDropdownExpanded(false)
+                                                },
+                                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         Spacer(modifier = Modifier.height(4.dp))
                     }
 
@@ -706,6 +846,37 @@ fun PreviewFavoritesScreenLoadingAndError(
                 )
             ),
             hasAnyFavorites = true
+        )
+        FavoritesScreenContent(state = state)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewFavoritesScreenMultiLanguage(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val state = FavoritesUiState.Content(
+            senses = listOf(
+                createSenseItem(
+                    senseId = "run-1",
+                    lemma = "run",
+                    targetLang = Language.ENGLISH,
+                    sense = createMockSense("run-1", "to move swiftly on foot"),
+                    pos = PartOfSpeech.VERB
+                ),
+                createSenseItem(
+                    senseId = "book-1",
+                    lemma = "book",
+                    targetLang = Language.ENGLISH,
+                    sense = createMockSense("book-1", "a written or printed work"),
+                    pos = PartOfSpeech.NOUN
+                )
+            ),
+            hasAnyFavorites = true,
+            availableLanguages = listOf(Language.ENGLISH, Language.POLISH),
+            selectedLanguage = Language.ENGLISH
         )
         FavoritesScreenContent(state = state)
     }
