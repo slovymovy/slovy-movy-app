@@ -116,6 +116,7 @@ fun App(
                 downloadCoordinator,
                 dictionaryRepository,
                 dictionaryClient,
+                settingsRepository,
                 buildConfig
             )
         }
@@ -520,11 +521,6 @@ fun App(
             composable<AppDestination.Settings> {
                 SettingsScreen(
                     viewModel = settingsViewModel,
-                    learningLanguage = dictionaryLanguage,
-                    nativeLanguages = nativeLanguages,
-                    onChangeLanguages = {
-                        navController.navigate(AppDestination.SetupLanguages)
-                    },
                     onNavigateToSearch = {
                         if (!navController.popBackStack(AppDestination.Search, inclusive = false))
                             navController.navigate(AppDestination.Search)
