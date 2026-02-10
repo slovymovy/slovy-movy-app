@@ -348,7 +348,7 @@ fun App(
                         description = "Downloading dictionary",
                         onLaterClick = {
                             navController.navigate(AppDestination.Search) {
-                                popUpTo<AppDestination.SetupLanguages> { inclusive = false }
+                                popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
                             }
                         }
                     )

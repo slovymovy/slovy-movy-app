@@ -52,17 +52,11 @@ class DownloadViewModel(
     val hadConfirmation: Boolean = loadItems != null
 
     private var terminalHandled = false
+    private var failedDuringLoadItems = false
 
     init {
         if (loadItems != null) {
-            viewModelScope.launch {
-                try {
-                    val items = loadItems.invoke()
-                    state = DownloadUiState.ReadyToDownload(items)
-                } catch (e: Exception) {
-                    state = DownloadUiState.Failed(e)
-                }
-            }
+            fetchItems()
         } else {
             val downloadFlow = beginDownload()
             observeProgress(downloadFlow)
@@ -70,7 +64,26 @@ class DownloadViewModel(
         }
     }
 
+    private fun fetchItems() {
+        state = DownloadUiState.Loading
+        viewModelScope.launch {
+            try {
+                val items = loadItems!!.invoke()
+                if (items.isEmpty()) {
+                    startDownload()
+                } else {
+                    failedDuringLoadItems = false
+                    state = DownloadUiState.ReadyToDownload(items)
+                }
+            } catch (e: Exception) {
+                failedDuringLoadItems = true
+                state = DownloadUiState.Failed(e)
+            }
+        }
+    }
+
     fun startDownload() {
+        failedDuringLoadItems = false
         state = DownloadUiState.Idle
         val downloadFlow = beginDownload()
         observeProgress(downloadFlow)
@@ -147,10 +160,14 @@ class DownloadViewModel(
 
     fun retry() {
         terminalHandled = false
-        state = DownloadUiState.Idle
-        val downloadFlow = beginDownload()
-        observeProgress(downloadFlow)
-        attachDownloadCallbacks(downloadFlow)
+        if (failedDuringLoadItems) {
+            fetchItems()
+        } else {
+            state = DownloadUiState.Idle
+            val downloadFlow = beginDownload()
+            observeProgress(downloadFlow)
+            attachDownloadCallbacks(downloadFlow)
+        }
     }
 }
 
@@ -194,15 +211,24 @@ fun DownloadScreenContent(
         ) {
             Spacer(Modifier.height(AppSpacing.xxxl))
 
-            val (title, subtitle) = when {
-                state is DownloadUiState.ReadyToDownload ->
+            val (title, subtitle) = when (state) {
+                is DownloadUiState.ReadyToDownload ->
                     "Ready to Download" to "You need these dictionaries to get all set."
 
-                hadConfirmation ->
-                    "Downloading" to "Getting your library ready.\nThis may take a moment."
+                is DownloadUiState.Failed ->
+                    "Download Failed" to "Something went wrong. Please try again."
 
-                else ->
+                is DownloadUiState.Cancelled ->
+                    "Download Cancelled" to "You can retry from Settings."
+
+                is DownloadUiState.Done ->
+                    "All Set" to "Your library is ready."
+
+                else -> if (hadConfirmation) {
+                    "Downloading" to "Getting your library ready.\nThis may take a moment."
+                } else {
                     "Setting Up" to "Getting your library ready.\nWill take a moment."
+                }
             }
 
             Text(
