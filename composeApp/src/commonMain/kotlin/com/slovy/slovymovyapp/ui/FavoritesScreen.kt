@@ -202,7 +202,7 @@ class FavoritesViewModel(
             senses = senses,
             query = query,
             hasAnyFavorites = hasAnyFavorites,
-            favoriteLemmas = allFavorites.map { it.lemma }.toSet(),
+            favoriteLemmas = langFiltered.map { it.lemma }.toSet(),
             availableLanguages = availableLanguages,
             selectedLanguage = selectedLanguage,
             isLanguageDropdownExpanded = if (availableLanguages.size > 1)
