@@ -73,7 +73,8 @@ class DownloadViewModel(
             try {
                 val items = loadItems!!.invoke()
                 if (items.isEmpty()) {
-                    throw IllegalStateException("Could not determine download sizes")
+                    startDownload()
+                    return@launch
                 }
                 failedDuringLoadItems = false
                 state = DownloadUiState.ReadyToDownload(items)
@@ -88,6 +89,7 @@ class DownloadViewModel(
 
     fun startDownload() {
         if (state is DownloadUiState.Idle || state is DownloadUiState.Running) return
+        terminalHandled = false
         failedDuringLoadItems = false
         state = DownloadUiState.Idle
         val downloadFlow = beginDownload()
