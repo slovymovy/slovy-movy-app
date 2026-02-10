@@ -2,7 +2,9 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material3.*
@@ -71,11 +73,10 @@ class DownloadViewModel(
             try {
                 val items = loadItems!!.invoke()
                 if (items.isEmpty()) {
-                    startDownload()
-                } else {
-                    failedDuringLoadItems = false
-                    state = DownloadUiState.ReadyToDownload(items)
+                    throw IllegalStateException("Could not determine download sizes")
                 }
+                failedDuringLoadItems = false
+                state = DownloadUiState.ReadyToDownload(items)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -307,7 +308,9 @@ fun DownloadScreenContent(
 
                         is DownloadUiState.ReadyToDownload -> {
                             Column(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState()),
                                 verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
                             ) {
                                 state.items.forEach { item ->
