@@ -310,13 +310,47 @@ fun App(
                                 navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
                                     popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
                                 }
+                            },
+                            loadItems = {
+                                val available = dataManager.fetchAvailableLanguages()
+                                val langInfo = available.find { it.language == dictLang }
+                                val items = mutableListOf<DownloadItem>()
+                                langInfo?.dictionarySizeBytes?.let { size ->
+                                    items.add(DownloadItem("${dictLang.selfName} Dictionary", size, dictLang.flag))
+                                }
+                                val downloadableTargets = try {
+                                    dataManager.downloadableTranslationTargets(dictLang, nativeLanguages)
+                                } catch (e: CancellationException) {
+                                    throw e
+                                } catch (e: Exception) {
+                                    emptyList()
+                                }
+                                for (target in downloadableTargets) {
+                                    val translationSize = langInfo?.availableTranslations
+                                        ?.find { it.targetLanguage == target }?.sizeBytes
+                                    if (translationSize != null) {
+                                        items.add(
+                                            DownloadItem(
+                                                "${dictLang.selfName} \u2192 ${target.selfName}",
+                                                translationSize,
+                                                target.flag
+                                            )
+                                        )
+                                    }
+                                }
+                                items
                             }
                         )
                     }
 
                     DownloadScreen(
                         viewModel = viewModel,
-                        description = "Downloading dictionary"
+                        description = "Downloading dictionary",
+                        onLaterClick = {
+                            navController.navigate(AppDestination.Search) {
+                                popUpTo<AppDestination.SetupLanguages> { inclusive = false }
+                            }
+                        }
                     )
                 }
             }

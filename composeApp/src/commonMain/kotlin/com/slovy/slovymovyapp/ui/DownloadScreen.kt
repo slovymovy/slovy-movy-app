@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material3.*
@@ -12,6 +13,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,27 +28,56 @@ import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
+data class DownloadItem(
+    val label: String,
+    val sizeBytes: Long,
+    val flag: String = ""
+)
+
 class DownloadViewModel(
     private val downloadCoordinator: DownloadCoordinator,
     private val downloadKey: String,
     private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
     private val onSuccess: () -> Unit,
     private val onCancel: () -> Unit,
-    private val onError: (Throwable) -> Unit
+    private val onError: (Throwable) -> Unit,
+    private val loadItems: (suspend () -> List<DownloadItem>)? = null
 ) : ViewModel() {
 
-    var state by mutableStateOf<DownloadUiState>(DownloadUiState.Idle)
+    var state by mutableStateOf(
+        if (loadItems != null) DownloadUiState.Loading else DownloadUiState.Idle
+    )
         private set
+
+    val hadConfirmation: Boolean = loadItems != null
 
     private var terminalHandled = false
 
     init {
-        val downloadFlow = startDownload()
+        if (loadItems != null) {
+            viewModelScope.launch {
+                try {
+                    val items = loadItems.invoke()
+                    state = DownloadUiState.ReadyToDownload(items)
+                } catch (e: Exception) {
+                    state = DownloadUiState.Failed(e)
+                }
+            }
+        } else {
+            val downloadFlow = beginDownload()
+            observeProgress(downloadFlow)
+            attachDownloadCallbacks(downloadFlow)
+        }
+    }
+
+    fun startDownload() {
+        state = DownloadUiState.Idle
+        val downloadFlow = beginDownload()
         observeProgress(downloadFlow)
         attachDownloadCallbacks(downloadFlow)
     }
 
-    private fun startDownload(): Flow<DownloadEntry?> {
+    private fun beginDownload(): Flow<DownloadEntry?> {
         return downloadCoordinator.startDownload(downloadKey, download)
     }
 
@@ -115,18 +148,24 @@ class DownloadViewModel(
     fun retry() {
         terminalHandled = false
         state = DownloadUiState.Idle
-        startDownload()
+        val downloadFlow = beginDownload()
+        observeProgress(downloadFlow)
+        attachDownloadCallbacks(downloadFlow)
     }
 }
 
 @Composable
 fun DownloadScreen(
     viewModel: DownloadViewModel,
-    description: String = "Setting up your library"
+    description: String = "Setting up your library",
+    onLaterClick: () -> Unit = {}
 ) {
     DownloadScreenContent(
         state = viewModel.state,
         description = description,
+        hadConfirmation = viewModel.hadConfirmation,
+        onDownloadClick = { viewModel.startDownload() },
+        onLaterClick = onLaterClick,
         onCancelClick = { viewModel.cancelDownload() },
         onRetryClick = { viewModel.retry() },
         onCloseClick = { viewModel.cancelDownload() }
@@ -138,6 +177,9 @@ fun DownloadScreen(
 fun DownloadScreenContent(
     state: DownloadUiState,
     description: String = "Setting up your library",
+    hadConfirmation: Boolean = false,
+    onDownloadClick: () -> Unit = {},
+    onLaterClick: () -> Unit = {},
     onCancelClick: () -> Unit = {},
     onRetryClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
@@ -152,8 +194,19 @@ fun DownloadScreenContent(
         ) {
             Spacer(Modifier.height(AppSpacing.xxxl))
 
+            val (title, subtitle) = when {
+                state is DownloadUiState.ReadyToDownload ->
+                    "Ready to Download" to "You need these dictionaries to get all set."
+
+                hadConfirmation ->
+                    "Downloading" to "Getting your library ready.\nThis may take a moment."
+
+                else ->
+                    "Setting Up" to "Getting your library ready.\nWill take a moment."
+            }
+
             Text(
-                text = "Setting Up",
+                text = title,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -163,13 +216,13 @@ fun DownloadScreenContent(
             Spacer(Modifier.height(AppSpacing.sm))
 
             Text(
-                text = "Getting your library ready.\nWill take a moment.",
+                text = subtitle,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
 
-            // Centered progress area
+            // Centered content area
             Box(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 contentAlignment = Alignment.Center
@@ -180,7 +233,6 @@ fun DownloadScreenContent(
                         modifier = Modifier.size(120.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Soft radial glow background
                         val glowColor = MaterialTheme.colorScheme.primary
                         Box(
                             modifier = Modifier
@@ -198,7 +250,6 @@ fun DownloadScreenContent(
                                     )
                                 )
                         )
-                        // Main icon
                         Icon(
                             imageVector = Icons.Outlined.CloudDownload,
                             contentDescription = null,
@@ -210,8 +261,78 @@ fun DownloadScreenContent(
                     Spacer(Modifier.height(AppSpacing.xxl))
 
                     when (state) {
+                        is DownloadUiState.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.semantics {
+                                    contentDescription = "Loading download information"
+                                }
+                            )
+                            Spacer(Modifier.height(AppSpacing.lg))
+                            Text(
+                                text = "Preparing...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        is DownloadUiState.ReadyToDownload -> {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+                            ) {
+                                state.items.forEach { item ->
+                                    val itemDescription = "${item.label}, ${formatFileSize(item.sizeBytes)}"
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .semantics(mergeDescendants = true) {
+                                                contentDescription = itemDescription
+                                            },
+                                        shape = MaterialTheme.shapes.medium,
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(
+                                                    horizontal = AppSpacing.lg,
+                                                    vertical = AppSpacing.md
+                                                ),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            if (item.flag.isNotEmpty()) {
+                                                Text(
+                                                    text = item.flag,
+                                                    modifier = Modifier.clearAndSetSemantics {},
+                                                    style = MaterialTheme.typography.titleMedium
+                                                )
+                                                Spacer(Modifier.width(AppSpacing.md))
+                                            }
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = item.label,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Text(
+                                                    text = formatFileSize(item.sizeBytes),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+
                         is DownloadUiState.Idle -> {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(
+                                modifier = Modifier.semantics {
+                                    contentDescription = "Preparing download"
+                                }
+                            )
                             Spacer(Modifier.height(AppSpacing.lg))
                             Text(
                                 text = "Preparing...",
@@ -221,7 +342,17 @@ fun DownloadScreenContent(
                         }
 
                         is DownloadUiState.Running -> {
-                            LinearWavyProgressIndicator(progress = { state.percent / 100f })
+                            val progressDescription = if (state.percent >= 0) {
+                                "Downloading, ${state.percent} percent complete"
+                            } else {
+                                "Downloading"
+                            }
+                            LinearWavyProgressIndicator(
+                                progress = { state.percent / 100f },
+                                modifier = Modifier.semantics {
+                                    contentDescription = progressDescription
+                                }
+                            )
                             Spacer(Modifier.height(AppSpacing.lg))
                             val pct = if (state.percent >= 0) "${state.percent}%" else ""
                             Text(
@@ -259,37 +390,62 @@ fun DownloadScreenContent(
                 }
             }
 
-            // Fixed button area at bottom
-            Box(
-                modifier = Modifier.height(AppSpacing.xxxl),
-                contentAlignment = Alignment.Center
-            ) {
-                when (state) {
-                    is DownloadUiState.Running -> {
-                        TextButton(onClick = onCancelClick) {
-                            Text(
-                                "Cancel",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+            // Bottom button area
+            when (state) {
+                is DownloadUiState.ReadyToDownload -> {
+                    val totalSize = formatFileSize(state.items.sumOf { it.sizeBytes })
+                    Button(
+                        onClick = onDownloadClick,
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(28.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text(
+                            "Download $totalSize",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold
                             )
-                        }
+                        )
                     }
 
-                    is DownloadUiState.Failed -> {
-                        OutlinedButton(onClick = onRetryClick) {
-                            Text("Retry")
-                        }
-                    }
+                    Spacer(Modifier.height(AppSpacing.sm))
 
-                    is DownloadUiState.Cancelled -> {
-                        TextButton(onClick = onCloseClick) {
-                            Text(
-                                "Close",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                    TextButton(onClick = onLaterClick) {
+                        Text(
+                            "Later",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
+                }
 
-                    else -> {}
+                is DownloadUiState.Running -> {
+                    TextButton(onClick = onCancelClick) {
+                        Text(
+                            "Cancel",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                is DownloadUiState.Failed -> {
+                    OutlinedButton(onClick = onRetryClick) {
+                        Text("Retry")
+                    }
+                }
+
+                is DownloadUiState.Cancelled -> {
+                    TextButton(onClick = onCloseClick) {
+                        Text(
+                            "Close",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                else -> {
+                    Spacer(Modifier.height(AppSpacing.xxxl))
                 }
             }
 
@@ -299,11 +455,41 @@ fun DownloadScreenContent(
 }
 
 sealed interface DownloadUiState {
+    data object Loading : DownloadUiState
+    data class ReadyToDownload(val items: List<DownloadItem>) : DownloadUiState
     data object Idle : DownloadUiState
     data class Running(val percent: Int, val total: Long?) : DownloadUiState
     data class Failed(val error: Throwable) : DownloadUiState
     data object Cancelled : DownloadUiState
     data object Done : DownloadUiState
+}
+
+@Preview
+@Composable
+private fun DownloadScreenPreviewLoading(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DownloadScreenContent(state = DownloadUiState.Loading)
+    }
+}
+
+@Preview
+@Composable
+private fun DownloadScreenPreviewReadyToDownload(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DownloadScreenContent(
+            state = DownloadUiState.ReadyToDownload(
+                items = listOf(
+                    DownloadItem("Nederlands Dictionary", 156_000_000L, "\uD83C\uDDF3\uD83C\uDDF1"),
+                    DownloadItem("Nederlands \u2192 English", 42_000_000L, "\uD83C\uDDEC\uD83C\uDDE7"),
+                    DownloadItem("Nederlands \u2192 Русский", 38_000_000L, "\uD83C\uDDF7\uD83C\uDDFA")
+                )
+            )
+        )
+    }
 }
 
 @Preview
