@@ -24,8 +24,6 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.CompactEmptyState
 import com.slovy.slovymovyapp.ui.components.EmptyState
