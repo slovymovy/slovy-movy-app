@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -75,6 +76,8 @@ class DownloadViewModel(
                     failedDuringLoadItems = false
                     state = DownloadUiState.ReadyToDownload(items)
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 failedDuringLoadItems = true
                 state = DownloadUiState.Failed(e)
@@ -83,6 +86,7 @@ class DownloadViewModel(
     }
 
     fun startDownload() {
+        if (state is DownloadUiState.Idle || state is DownloadUiState.Running) return
         failedDuringLoadItems = false
         state = DownloadUiState.Idle
         val downloadFlow = beginDownload()
