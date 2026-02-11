@@ -1,18 +1,18 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -63,7 +63,14 @@ fun LearningLanguageCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onToggleExpansion() }
+                    .semantics(mergeDescendants = true) {
+                        stateDescription = if (state.isExpanded) "Expanded" else "Collapsed"
+                    }
+                    .clickable(
+                        onClick = onToggleExpansion,
+                        role = Role.Button,
+                        onClickLabel = if (state.isExpanded) "Collapse" else "Expand"
+                    )
                     .padding(AppSpacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -80,10 +87,16 @@ fun LearningLanguageCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (!state.isExpanded && state.translations.isNotEmpty()) {
-                        val downloadedCount = state.translations.count { it.isDownloaded }
-                        val totalCount = state.translations.size
+                        val downloadable = state.translations.filter { it.isDownloadable }
+                        val downloadedCount = downloadable.count { it.isDownloaded }
+                        val downloadableCount = downloadable.size
+                        val summaryText = when {
+                            downloadableCount == 0 -> "${state.translations.size} translations (online only)"
+                            downloadedCount == downloadableCount -> "All $downloadableCount translations downloaded"
+                            else -> "$downloadedCount of $downloadableCount translations downloaded"
+                        }
                         Text(
-                            text = "$downloadedCount of $totalCount translations downloaded",
+                            text = summaryText,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -100,7 +113,7 @@ fun LearningLanguageCard(
 
                 Icon(
                     imageVector = if (state.isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = if (state.isExpanded) "Collapse" else "Expand",
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -210,7 +223,7 @@ private fun TranslationRow(
                         IconButton(onClick = onDelete) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete",
+                                contentDescription = "Delete ${translation.targetLanguage.selfName} translation",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -220,7 +233,7 @@ private fun TranslationRow(
                         IconButton(onClick = onDownload) {
                             Icon(
                                 imageVector = Icons.Default.Download,
-                                contentDescription = "Download",
+                                contentDescription = "Download ${translation.targetLanguage.selfName} translation",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -324,36 +337,89 @@ fun TranslationLanguageSection(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onToggleExpanded() }
-                    .padding(AppSpacing.lg),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    if (!isExpanded) {
-                        if (selectedLanguages.isNotEmpty()) {
-                            Text(
-                                text = selectedLanguages.joinToString("  ") { "${it.flag} ${it.selfName}" },
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        } else {
+            if (!isExpanded) {
+                // Collapsed: one language per row
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics(mergeDescendants = true) {
+                            stateDescription = "Collapsed"
+                        }
+                        .clickable(
+                            onClick = onToggleExpanded,
+                            role = Role.Button,
+                            onClickLabel = "Edit translation languages"
+                        )
+                        .padding(AppSpacing.lg)
+                ) {
+                    if (selectedLanguages.isEmpty()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
                                 text = "No languages selected",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f)
                             )
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Expand",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        selectedLanguages.forEachIndexed { index, language ->
+                            if (index > 0) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = AppSpacing.xs),
+                                    thickness = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                )
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = AppSpacing.xs),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${language.flag} ${language.selfName}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                if (index == 0) {
+                                    Icon(
+                                        imageVector = Icons.Default.KeyboardArrowDown,
+                                        contentDescription = "Expand",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
                         }
                     }
                 }
-
-                Icon(
-                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = if (isExpanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            } else {
+                // Expanded header
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            onClick = onToggleExpanded,
+                            role = Role.Button,
+                            onClickLabel = "Collapse"
+                        )
+                        .padding(AppSpacing.lg),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowUp,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             if (isExpanded) {
@@ -387,46 +453,13 @@ fun TranslationLanguageSection(
 
                             CircularToggle(
                                 isSelected = isSelected,
-                                onClick = { onToggleLanguage(language) }
+                                onClick = { onToggleLanguage(language) },
+                                label = "${language.selfName} translation"
                             )
                         }
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun CircularToggle(
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(32.dp)
-            .clip(CircleShape)
-            .background(
-                if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
-            .clickable { onClick() }
-            .border(
-                width = 1.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.outlineVariant,
-                shape = CircleShape
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = "Selected",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.size(20.dp)
-            )
         }
     }
 }

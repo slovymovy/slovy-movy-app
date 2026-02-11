@@ -1,11 +1,12 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -15,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
@@ -59,7 +59,14 @@ fun VoiceSectionItem(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onExpand() }
+                    .semantics(mergeDescendants = true) {
+                        stateDescription = if (languageState.isExpanded) "Expanded" else "Collapsed"
+                    }
+                    .clickable(
+                        onClick = onExpand,
+                        role = Role.Button,
+                        onClickLabel = if (languageState.isExpanded) "Collapse" else "Expand"
+                    )
                     .padding(AppSpacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -97,7 +104,7 @@ fun VoiceSectionItem(
 
                 Icon(
                     imageVector = if (languageState.isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = if (languageState.isExpanded) "Collapse" else "Expand",
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -239,7 +246,6 @@ fun VoiceItem(
                 )
             }
 
-
             val languagePair = remember(voice.id) {
                 val pattern1 = Regex("^([a-zA-Z]{2}-[a-zA-Z]{2})")
                 val pattern2 = Regex("com\\.apple\\.voice\\.[a-zA-Z]+\\.([a-zA-Z]{2}-[a-zA-Z]{2})\\.")
@@ -305,30 +311,10 @@ fun VoiceItem(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isEnabled) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                )
-                .clickable { onToggleEnabled() }
-                .border(
-                    width = 1.dp,
-                    color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (isEnabled) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Selected",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
+        CircularToggle(
+            isSelected = isEnabled,
+            onClick = onToggleEnabled,
+            label = "Enable ${voice.name ?: voice.id}"
+        )
     }
 }
