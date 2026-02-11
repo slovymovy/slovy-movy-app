@@ -141,9 +141,21 @@ class SettingsViewModel(
                 val learningLanguageStates = available
                     .filter { it.language in installedDicts }
                     .map { langInfo ->
-                        val translations = translationPrefs
+                        // Include selected translation languages + any downloaded translations
+                        // so downloaded translations remain visible/deletable even if deselected
+                        val downloadedTargetsForLang = downloadedTranslations.keys
+                            .filter { it.startsWith("${langInfo.language.code}_") }
+                            .mapNotNull { key ->
+                                val tgtCode = key.substringAfter("_")
+                                Language.fromCodeOrNull(tgtCode)
+                            }
+                            .toSet()
+
+                        val allTargets = (translationPrefs + downloadedTargetsForLang)
                             .filter { it != langInfo.language }
-                            .map { targetLang ->
+                            .sortedBy { it.ordinal }
+
+                        val translations = allTargets.map { targetLang ->
                                 val transKey = "${langInfo.language.code}_${targetLang.code}"
                                 val downloadedSize = downloadedTranslations[transKey]
                                 val isDownloaded = downloadedSize != null

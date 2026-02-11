@@ -126,6 +126,14 @@ fun App(
         onDispose { downloadCoordinator.close() }
     }
 
+    // Keep nativeLanguages in sync with settings changes from SettingsScreen
+    val settingsTranslationLanguages = settingsViewModel.state.translationLanguages
+    LaunchedEffect(settingsTranslationLanguages) {
+        if (settingsTranslationLanguages.isNotEmpty()) {
+            nativeLanguages = settingsTranslationLanguages.sortedBy { it.ordinal }
+        }
+    }
+
     suspend fun selectInitialDestination(): AppDestination {
         // Check if data version is current (before welcome, so existing users see mismatch)
         if (!dataManager.hasRequiredVersion()) {

@@ -370,7 +370,8 @@ fun TranslationLanguageSection(
                             )
                         }
                     } else {
-                        selectedLanguages.forEachIndexed { index, language ->
+                        val sorted = selectedLanguages.sortedBy { it.ordinal }
+                        sorted.forEachIndexed { index, language ->
                             if (index > 0) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(vertical = AppSpacing.xs),
