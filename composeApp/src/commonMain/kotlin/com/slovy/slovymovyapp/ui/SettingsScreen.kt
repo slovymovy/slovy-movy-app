@@ -217,7 +217,8 @@ class SettingsViewModel(
                     translationLanguages = translationPrefs,
                     activeDictionaryLanguage = activeDict,
                     isLoadingAvailable = false,
-                    isLoading = false
+                    isLoading = false,
+                    errorMessage = null
                 )
             } catch (e: CancellationException) {
                 throw e
