@@ -42,8 +42,7 @@ fun AboutSection(
             AboutItem(
                 icon = Icons.Outlined.Info,
                 title = "Version",
-                subtitle = buildConfig.versionName,
-                onClick = {}
+                subtitle = buildConfig.versionName
             )
         }
     }
@@ -54,12 +53,12 @@ fun AboutItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(AppSpacing.lg),
         verticalAlignment = Alignment.CenterVertically
     ) {

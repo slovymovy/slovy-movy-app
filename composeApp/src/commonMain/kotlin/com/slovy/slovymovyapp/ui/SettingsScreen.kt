@@ -47,6 +47,7 @@ data class SettingsUiState(
     val addableLanguages: List<AvailableLanguageInfo> = emptyList(),
     val translationLanguages: Set<Language> = emptySet(),
     val isTranslationLanguagesExpanded: Boolean = false,
+    val activeDictionaryLanguage: Language? = null,
 
     // Voice section
     val languages: Map<Text2SpeechLanguage, LanguageUiState> = emptyMap(),
@@ -189,10 +190,15 @@ class SettingsViewModel(
                     info.dictionarySizeBytes != null && info.language !in installedDicts
                 }
 
+                val activeDictCode = settingsRepository
+                    .getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
+                val activeDict = activeDictCode?.let { Language.fromCodeOrNull(it) }
+
                 state = state.copy(
                     learningLanguages = learningLanguageStates,
                     addableLanguages = addable,
                     translationLanguages = translationPrefs,
+                    activeDictionaryLanguage = activeDict,
                     isLoadingAvailable = false,
                     isLoading = false
                 )

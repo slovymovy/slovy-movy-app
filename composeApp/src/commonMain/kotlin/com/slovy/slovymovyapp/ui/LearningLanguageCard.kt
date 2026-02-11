@@ -410,6 +410,9 @@ fun TranslationLanguageSection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .semantics {
+                            stateDescription = "Expanded"
+                        }
                         .clickable(
                             onClick = onToggleExpanded,
                             role = Role.Button,

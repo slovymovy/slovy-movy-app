@@ -126,11 +126,16 @@ fun App(
         onDispose { downloadCoordinator.close() }
     }
 
-    // Keep nativeLanguages in sync with settings changes from SettingsScreen
+    // Keep nativeLanguages and dictionaryLanguage in sync with settings changes from SettingsScreen
     val settingsState = settingsViewModel.state
     LaunchedEffect(settingsState.translationLanguages, settingsState.isLoading) {
         if (!settingsState.isLoading) {
             nativeLanguages = settingsState.translationLanguages.sortedBy { it.ordinal }
+        }
+    }
+    LaunchedEffect(settingsState.activeDictionaryLanguage, settingsState.isLoading) {
+        if (!settingsState.isLoading) {
+            dictionaryLanguage = settingsState.activeDictionaryLanguage
         }
     }
 
