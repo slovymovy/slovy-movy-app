@@ -149,7 +149,9 @@ class SettingsViewModel(
                 val availableByLang = available.associateBy { it.language }
 
                 // Build cards from installed dictionaries (local), enrich with remote data
-                val learningLanguageStates = installedDicts.map { (language, dictSize) ->
+                // Sort by ordinal for stable card ordering across refreshes
+                val sortedDicts = installedDicts.entries.sortedBy { it.key.ordinal }
+                val learningLanguageStates = sortedDicts.map { (language, dictSize) ->
                     val langInfo = availableByLang[language]
 
                     val downloadedTargetsForLang = downloadedTranslations.keys
@@ -177,25 +179,32 @@ class SettingsViewModel(
                         )
                     }
 
-                    val existingState = state.learningLanguages.find { it.language == language }
                     LearningLanguageUiState(
                         language = language,
-                        isExpanded = existingState?.isExpanded ?: false,
+                        isExpanded = false, // placeholder, merged below
                         dictionarySizeBytes = dictSize,
                         translations = translations
                     )
                 }
 
-                val addable = available.filter { info ->
-                    info.dictionarySizeBytes != null && info.language !in installedDicts
-                }
+                val addable = available
+                    .filter { info -> info.dictionarySizeBytes != null && info.language !in installedDicts }
+                    .sortedBy { it.language.ordinal }
 
                 val activeDictCode = settingsRepository
                     .getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
-                val activeDict = activeDictCode?.let { Language.fromCodeOrNull(it) }
+                val activeDict = activeDictCode?.let { code ->
+                    Language.fromCodeOrNull(code)?.takeIf { it in installedDicts }
+                }
+
+                // Merge with latest state to preserve isExpanded toggled during async fetch
+                val currentExpanded = state.learningLanguages.associate { it.language to it.isExpanded }
+                val mergedStates = learningLanguageStates.map { card ->
+                    card.copy(isExpanded = currentExpanded[card.language] ?: false)
+                }
 
                 state = state.copy(
-                    learningLanguages = learningLanguageStates,
+                    learningLanguages = mergedStates,
                     addableLanguages = addable,
                     translationLanguages = translationPrefs,
                     activeDictionaryLanguage = activeDict,
