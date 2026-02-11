@@ -127,10 +127,10 @@ fun App(
     }
 
     // Keep nativeLanguages in sync with settings changes from SettingsScreen
-    val settingsTranslationLanguages = settingsViewModel.state.translationLanguages
-    LaunchedEffect(settingsTranslationLanguages) {
-        if (settingsTranslationLanguages.isNotEmpty()) {
-            nativeLanguages = settingsTranslationLanguages.sortedBy { it.ordinal }
+    val settingsState = settingsViewModel.state
+    LaunchedEffect(settingsState.translationLanguages, settingsState.isLoading) {
+        if (!settingsState.isLoading) {
+            nativeLanguages = settingsState.translationLanguages.sortedBy { it.ordinal }
         }
     }
 

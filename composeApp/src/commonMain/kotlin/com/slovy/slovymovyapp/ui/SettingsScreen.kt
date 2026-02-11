@@ -247,8 +247,8 @@ class SettingsViewModel(
     }
 
     fun toggleTranslationLanguage(language: Language) {
-        val current = state.translationLanguages
-        val updated = if (language in current) current - language else current + language
+        val previous = state.translationLanguages
+        val updated = if (language in previous) previous - language else previous + language
         state = state.copy(translationLanguages = updated)
         viewModelScope.launch {
             try {
@@ -256,7 +256,10 @@ class SettingsViewModel(
                 settingsRepository.insert(Setting(Setting.Name.LANGUAGE, jsonArray))
                 loadLearningLanguages()
             } catch (e: Exception) {
-                state = state.copy(errorMessage = "Failed to save translation languages: ${e.message}")
+                state = state.copy(
+                    translationLanguages = previous,
+                    errorMessage = "Failed to save translation languages: ${e.message}"
+                )
             }
         }
     }
