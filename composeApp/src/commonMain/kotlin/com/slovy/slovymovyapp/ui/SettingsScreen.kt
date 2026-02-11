@@ -194,9 +194,7 @@ class SettingsViewModel(
 
                 val activeDictCode = settingsRepository
                     .getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
-                val activeDict = activeDictCode?.let { code ->
-                    Language.fromCodeOrNull(code)?.takeIf { it in installedDicts }
-                }
+                val activeDict = activeDictCode?.let { Language.fromCodeOrNull(it) }
 
                 // Merge with latest state to preserve isExpanded toggled during async fetch
                 val currentExpanded = state.learningLanguages.associate { it.language to it.isExpanded }
@@ -319,6 +317,12 @@ class SettingsViewModel(
     private fun deleteDictionary(language: Language, toastMessage: String) {
         viewModelScope.launch {
             try {
+                // Cancel any in-flight downloads for this language before deleting
+                downloadCoordinator.cancel("dict_${language.code}")
+                state.translationLanguages.forEach { tgt ->
+                    downloadCoordinator.cancel("trans_${language.code}_${tgt.code}")
+                }
+
                 dataDbManager.deleteDictionary(language)
                 dictionaryRepository.clearSenseCache()
 
