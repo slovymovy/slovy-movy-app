@@ -163,7 +163,16 @@ class SettingsViewModel(
                         }
                         .toSet()
 
-                    val allTargets = (translationPrefs + downloadedTargetsForLang)
+                    // Include targets with active downloads so progress UI stays visible
+                    val activeDownloadTargets = downloadCoordinator.downloadEntries().value.keys
+                        .filter { it.startsWith("trans_${language.code}_") }
+                        .mapNotNull { key ->
+                            val tgtCode = key.removePrefix("trans_${language.code}_")
+                            Language.fromCodeOrNull(tgtCode)
+                        }
+                        .toSet()
+
+                    val allTargets = (translationPrefs + downloadedTargetsForLang + activeDownloadTargets)
                         .filter { it != language }
                         .sortedBy { it.ordinal }
 
@@ -317,11 +326,11 @@ class SettingsViewModel(
     private fun deleteDictionary(language: Language, toastMessage: String) {
         viewModelScope.launch {
             try {
-                // Cancel any in-flight downloads for this language before deleting
+                // Cancel all in-flight downloads for this language before deleting
                 downloadCoordinator.cancel("dict_${language.code}")
-                state.translationLanguages.forEach { tgt ->
-                    downloadCoordinator.cancel("trans_${language.code}_${tgt.code}")
-                }
+                downloadCoordinator.downloadEntries().value.keys
+                    .filter { it.startsWith("trans_${language.code}_") }
+                    .forEach { downloadCoordinator.cancel(it) }
 
                 dataDbManager.deleteDictionary(language)
                 dictionaryRepository.clearSenseCache()

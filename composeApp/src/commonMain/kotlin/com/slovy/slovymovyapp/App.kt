@@ -127,14 +127,15 @@ fun App(
     }
 
     // Keep nativeLanguages and dictionaryLanguage in sync with settings changes from SettingsScreen
+    // Only sync on successful loads (errorMessage == null) to avoid overwriting with defaults on failure
     val settingsState = settingsViewModel.state
-    LaunchedEffect(settingsState.translationLanguages, settingsState.isLoading) {
-        if (!settingsState.isLoading) {
+    LaunchedEffect(settingsState.translationLanguages, settingsState.isLoading, settingsState.errorMessage) {
+        if (!settingsState.isLoading && settingsState.errorMessage == null) {
             nativeLanguages = settingsState.translationLanguages.sortedBy { it.ordinal }
         }
     }
-    LaunchedEffect(settingsState.activeDictionaryLanguage, settingsState.isLoading) {
-        if (!settingsState.isLoading) {
+    LaunchedEffect(settingsState.activeDictionaryLanguage, settingsState.isLoading, settingsState.errorMessage) {
+        if (!settingsState.isLoading && settingsState.errorMessage == null) {
             dictionaryLanguage = settingsState.activeDictionaryLanguage
         }
     }

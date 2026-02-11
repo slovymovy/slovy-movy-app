@@ -140,6 +140,7 @@ fun LearningLanguageCard(
                     val sorted = state.translations.sortedWith(
                         compareByDescending<TranslationUiState> { it.isDownloaded }
                             .thenByDescending { it.isDownloadable }
+                            .thenBy { it.targetLanguage.ordinal }
                     )
 
                     sorted.forEach { translation ->
