@@ -259,7 +259,7 @@ class SettingsViewModel(
         state = state.copy(translationLanguages = updated)
         viewModelScope.launch {
             try {
-                val jsonArray = JsonArray(updated.map { JsonPrimitive(it.code) })
+                val jsonArray = JsonArray(updated.sortedBy { it.ordinal }.map { JsonPrimitive(it.code) })
                 settingsRepository.insert(Setting(Setting.Name.LANGUAGE, jsonArray))
                 loadLearningLanguages()
             } catch (e: Exception) {

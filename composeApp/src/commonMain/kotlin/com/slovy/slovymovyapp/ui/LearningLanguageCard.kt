@@ -87,7 +87,7 @@ fun LearningLanguageCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (!state.isExpanded && state.translations.isNotEmpty()) {
-                        val downloadable = state.translations.filter { it.isDownloadable }
+                        val downloadable = state.translations.filter { it.isDownloadable || it.isDownloaded }
                         val downloadedCount = downloadable.count { it.isDownloaded }
                         val downloadableCount = downloadable.size
                         val onlineOnlyCount = state.translations.size - downloadableCount
