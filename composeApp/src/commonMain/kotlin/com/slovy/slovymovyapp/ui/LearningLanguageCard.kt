@@ -63,6 +63,9 @@ fun LearningLanguageCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .semantics {
+                        stateDescription = if (state.isExpanded) "Expanded" else "Collapsed"
+                    }
                     .clickable(
                         onClick = onToggleExpansion,
                         role = Role.Button,
@@ -71,13 +74,7 @@ fun LearningLanguageCard(
                     .padding(AppSpacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .semantics {
-                            stateDescription = if (state.isExpanded) "Expanded" else "Collapsed"
-                        }
-                ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "${state.language.flag} ${state.language.selfName}",
                         style = MaterialTheme.typography.titleMedium,
@@ -93,11 +90,15 @@ fun LearningLanguageCard(
                         val downloadable = state.translations.filter { it.isDownloadable }
                         val downloadedCount = downloadable.count { it.isDownloaded }
                         val downloadableCount = downloadable.size
-                        val summaryText = when {
-                            downloadableCount == 0 -> "${state.translations.size} translations (online only)"
-                            downloadedCount == downloadableCount -> "All $downloadableCount translations downloaded"
-                            else -> "$downloadedCount of $downloadableCount translations downloaded"
+                        val onlineOnlyCount = state.translations.size - downloadableCount
+                        val downloadPart = when {
+                            downloadableCount == 0 -> null
+                            downloadedCount == downloadableCount -> "All $downloadableCount downloaded"
+                            else -> "$downloadedCount of $downloadableCount downloaded"
                         }
+                        val onlinePart = if (onlineOnlyCount > 0) "$onlineOnlyCount online only" else null
+                        val summaryText = listOfNotNull(downloadPart, onlinePart).joinToString(", ")
+                            .ifEmpty { "${state.translations.size} translations (online only)" }
                         Text(
                             text = summaryText,
                             style = MaterialTheme.typography.bodySmall,

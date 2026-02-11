@@ -126,7 +126,6 @@ class SettingsViewModel(
         viewModelScope.launch {
             state = state.copy(isLoadingAvailable = state.learningLanguages.isEmpty())
             try {
-                val available = dataDbManager.fetchAvailableLanguages()
                 val downloadedFiles = dataDbManager.listDownloadedDatabases()
                 val translationPrefs = loadTranslationLanguages()
 
@@ -138,45 +137,53 @@ class SettingsViewModel(
                     .filterIsInstance<DatabaseFileInfo.Translation>()
                     .associate { "${it.sourceLanguage.code}_${it.targetLanguage.code}" to it.sizeBytes }
 
-                val learningLanguageStates = available
-                    .filter { it.language in installedDicts }
-                    .map { langInfo ->
-                        // Include selected translation languages + any downloaded translations
-                        // so downloaded translations remain visible/deletable even if deselected
-                        val downloadedTargetsForLang = downloadedTranslations.keys
-                            .filter { it.startsWith("${langInfo.language.code}_") }
-                            .mapNotNull { key ->
-                                val tgtCode = key.substringAfter("_")
-                                Language.fromCodeOrNull(tgtCode)
-                            }
-                            .toSet()
+                // Try to fetch remote availability; degrade gracefully if offline
+                val available = try {
+                    dataDbManager.fetchAvailableLanguages()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    emptyList()
+                }
+                val availableByLang = available.associateBy { it.language }
 
-                        val allTargets = (translationPrefs + downloadedTargetsForLang)
-                            .filter { it != langInfo.language }
-                            .sortedBy { it.ordinal }
+                // Build cards from installed dictionaries (local), enrich with remote data
+                val learningLanguageStates = installedDicts.map { (language, dictSize) ->
+                    val langInfo = availableByLang[language]
 
-                        val translations = allTargets.map { targetLang ->
-                                val transKey = "${langInfo.language.code}_${targetLang.code}"
-                                val downloadedSize = downloadedTranslations[transKey]
-                                val isDownloaded = downloadedSize != null
-                                val availableTrans = langInfo.availableTranslations.find { it.targetLanguage == targetLang }
-                                TranslationUiState(
-                                    targetLanguage = targetLang,
-                                    isDownloaded = isDownloaded,
-                                    isDownloadable = availableTrans != null,
-                                    sizeBytes = downloadedSize ?: availableTrans?.sizeBytes
-                                )
-                            }
+                    val downloadedTargetsForLang = downloadedTranslations.keys
+                        .filter { it.startsWith("${language.code}_") }
+                        .mapNotNull { key ->
+                            val tgtCode = key.substringAfter("_")
+                            Language.fromCodeOrNull(tgtCode)
+                        }
+                        .toSet()
 
-                        // Preserve expansion state
-                        val existingState = state.learningLanguages.find { it.language == langInfo.language }
-                        LearningLanguageUiState(
-                            language = langInfo.language,
-                            isExpanded = existingState?.isExpanded ?: false,
-                            dictionarySizeBytes = installedDicts[langInfo.language]!!,
-                            translations = translations
+                    val allTargets = (translationPrefs + downloadedTargetsForLang)
+                        .filter { it != language }
+                        .sortedBy { it.ordinal }
+
+                    val translations = allTargets.map { targetLang ->
+                        val transKey = "${language.code}_${targetLang.code}"
+                        val downloadedSize = downloadedTranslations[transKey]
+                        val isDownloaded = downloadedSize != null
+                        val availableTrans = langInfo?.availableTranslations?.find { it.targetLanguage == targetLang }
+                        TranslationUiState(
+                            targetLanguage = targetLang,
+                            isDownloaded = isDownloaded,
+                            isDownloadable = availableTrans != null,
+                            sizeBytes = downloadedSize ?: availableTrans?.sizeBytes
                         )
                     }
+
+                    val existingState = state.learningLanguages.find { it.language == language }
+                    LearningLanguageUiState(
+                        language = language,
+                        isExpanded = existingState?.isExpanded ?: false,
+                        dictionarySizeBytes = dictSize,
+                        translations = translations
+                    )
+                }
 
                 val addable = available.filter { info ->
                     info.dictionarySizeBytes != null && info.language !in installedDicts
