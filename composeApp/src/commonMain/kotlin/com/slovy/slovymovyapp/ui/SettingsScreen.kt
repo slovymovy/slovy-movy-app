@@ -294,6 +294,23 @@ class SettingsViewModel(
             try {
                 dataDbManager.deleteDictionary(language)
                 dictionaryRepository.clearSenseCache()
+
+                // If deleted dictionary was the active one, switch to another or clear
+                val activeDictCode = settingsRepository
+                    .getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
+                if (activeDictCode == language.code) {
+                    val remaining = state.learningLanguages
+                        .map { it.language }
+                        .filter { it != language }
+                    if (remaining.isNotEmpty()) {
+                        settingsRepository.insert(
+                            Setting(Setting.Name.DICTIONARY, JsonPrimitive(remaining.first().code))
+                        )
+                    } else {
+                        settingsRepository.deleteById(Setting.Name.DICTIONARY)
+                    }
+                }
+
                 reloadSettings()
                 snackbarHostState.showSnackbar(toastMessage)
             } catch (e: Exception) {
@@ -368,11 +385,6 @@ class SettingsViewModel(
 
     private fun loadLanguages() {
         viewModelScope.launch {
-            state = if (state.languages.isEmpty()) {
-                state.copy(isLoading = true, errorMessage = null)
-            } else {
-                state.copy(errorMessage = null)
-            }
             try {
                 val languages = ttsManager.getAvailableLanguages()
                 val downloadedDatabases = dataDbManager.listDownloadedDatabases()
@@ -386,8 +398,7 @@ class SettingsViewModel(
                 state = state.copy(
                     languages = filteredLanguages.associateWith { language ->
                         state.languages[language] ?: LanguageUiState()
-                    },
-                    isLoading = false
+                    }
                 )
 
                 filteredLanguages.forEach { language ->
@@ -400,7 +411,6 @@ class SettingsViewModel(
                 throw e
             } catch (e: Exception) {
                 state = state.copy(
-                    isLoading = false,
                     errorMessage = NetworkErrorClassifier.userMessage(e)
                 )
             }

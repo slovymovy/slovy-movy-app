@@ -63,9 +63,6 @@ fun LearningLanguageCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .semantics(mergeDescendants = true) {
-                        stateDescription = if (state.isExpanded) "Expanded" else "Collapsed"
-                    }
                     .clickable(
                         onClick = onToggleExpansion,
                         role = Role.Button,
@@ -74,7 +71,13 @@ fun LearningLanguageCard(
                     .padding(AppSpacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .semantics {
+                            stateDescription = if (state.isExpanded) "Expanded" else "Collapsed"
+                        }
+                ) {
                     Text(
                         text = "${state.language.flag} ${state.language.selfName}",
                         style = MaterialTheme.typography.titleMedium,
