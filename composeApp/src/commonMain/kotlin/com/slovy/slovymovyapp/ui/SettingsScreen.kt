@@ -101,6 +101,7 @@ class SettingsViewModel(
     val scrollState = LazyListState()
     val snackbarHostState = SnackbarHostState()
     private val downloadJobs = mutableMapOf<String, Job>()
+    private var translationSaveJob: Job? = null
 
     init {
         loadLearningLanguages()
@@ -272,11 +273,15 @@ class SettingsViewModel(
         val previous = state.translationLanguages
         val updated = if (language in previous) previous - language else previous + language
         state = state.copy(translationLanguages = updated)
-        viewModelScope.launch {
+        translationSaveJob?.cancel()
+        translationSaveJob = viewModelScope.launch {
             try {
-                val jsonArray = JsonArray(updated.sortedBy { it.ordinal }.map { JsonPrimitive(it.code) })
+                val current = state.translationLanguages
+                val jsonArray = JsonArray(current.sortedBy { it.ordinal }.map { JsonPrimitive(it.code) })
                 settingsRepository.insert(Setting(Setting.Name.LANGUAGE, jsonArray))
                 loadLearningLanguages()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 state = state.copy(
                     translationLanguages = previous,
