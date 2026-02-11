@@ -173,7 +173,7 @@ fun LoadingIndicator(modifier: Modifier = Modifier) {
 @Composable
 fun CircularToggle(
     isSelected: Boolean,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     label: String? = null
 ) {
@@ -181,15 +181,19 @@ fun CircularToggle(
         modifier = modifier
             .size(48.dp)
             .clip(CircleShape)
-            .semantics(mergeDescendants = true) {
-                stateDescription = if (isSelected) "Selected" else "Not selected"
-                if (label != null) {
-                    contentDescription = label
+            .then(
+                if (onClick != null) {
+                    Modifier
+                        .semantics(mergeDescendants = true) {
+                            stateDescription = if (isSelected) "Selected" else "Not selected"
+                            if (label != null) {
+                                contentDescription = label
+                            }
+                        }
+                        .clickable(onClick = onClick, role = Role.Checkbox)
+                } else {
+                    Modifier
                 }
-            }
-            .clickable(
-                onClick = onClick,
-                role = Role.Checkbox
             ),
         contentAlignment = Alignment.Center
     ) {

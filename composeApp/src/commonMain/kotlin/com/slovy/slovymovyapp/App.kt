@@ -134,7 +134,7 @@ fun App(
         }
     }
     LaunchedEffect(settingsState.activeDictionaryLanguage, settingsState.isLoading) {
-        if (!settingsState.isLoading && settingsState.activeDictionaryLanguage != null) {
+        if (!settingsState.isLoading) {
             dictionaryLanguage = settingsState.activeDictionaryLanguage
         }
     }

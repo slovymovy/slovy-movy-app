@@ -449,7 +449,14 @@ fun TranslationLanguageSection(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onToggleLanguage(language) }
+                                .semantics(mergeDescendants = true) {
+                                    stateDescription = if (isSelected) "Selected" else "Not selected"
+                                }
+                                .clickable(
+                                    onClick = { onToggleLanguage(language) },
+                                    role = Role.Checkbox,
+                                    onClickLabel = "Toggle ${language.selfName} translation"
+                                )
                                 .padding(vertical = AppSpacing.sm),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -459,11 +466,7 @@ fun TranslationLanguageSection(
                                 modifier = Modifier.weight(1f)
                             )
 
-                            CircularToggle(
-                                isSelected = isSelected,
-                                onClick = { onToggleLanguage(language) },
-                                label = "${language.selfName} translation"
-                            )
+                            CircularToggle(isSelected = isSelected)
                         }
                     }
                 }
