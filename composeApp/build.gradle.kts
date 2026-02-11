@@ -2,6 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -10,6 +11,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.valkyrie)
 }
 
 val testServerPort = 8081
@@ -122,6 +124,23 @@ kotlin {
 
 sqldelight {
     linkSqlite = true
+}
+
+valkyrie {
+    packageName = "com.slovy.slovymovyapp.ui.icons"
+
+    iconPack {
+        name = "SlovyIcons"
+        targetSourceSet = "commonMain"
+    }
+
+    imageVector {
+        generatePreview = true
+    }
+}
+
+tasks.withType<KotlinCompilationTask<*>>().configureEach {
+    dependsOn("generateValkyrieImageVector")
 }
 
 compose.desktop {

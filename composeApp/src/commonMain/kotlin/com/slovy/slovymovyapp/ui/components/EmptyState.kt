@@ -2,23 +2,24 @@ package com.slovy.slovymovyapp.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
-import com.slovy.slovymovyapp.ui.ThemedPreview
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 
 /**
  * Empty state component with icon, title, and description.
@@ -107,6 +108,55 @@ fun EmptyState(
 }
 
 /**
+ * Empty state variant that accepts a custom composable for the icon area.
+ *
+ * Use this when the icon is a multi-color illustration that shouldn't be tinted.
+ */
+@Composable
+fun EmptyState(
+    iconContent: @Composable () -> Unit,
+    title: String,
+    description: String? = null,
+    modifier: Modifier = Modifier,
+    action: (@Composable () -> Unit)? = null
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(AppSpacing.xxxl),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        iconContent()
+
+        Spacer(modifier = Modifier.height(AppSpacing.lg))
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+
+        if (description != null) {
+            Spacer(modifier = Modifier.height(AppSpacing.sm))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.widthIn(max = 280.dp)
+            )
+        }
+
+        if (action != null) {
+            Spacer(modifier = Modifier.height(AppSpacing.xl))
+            action()
+        }
+    }
+}
+
+/**
  * Compact empty state variant for smaller spaces.
  */
 @Composable
@@ -141,10 +191,10 @@ fun CompactEmptyState(
 }
 
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun EmptyStatePreview(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         EmptyState(
@@ -155,10 +205,10 @@ private fun EmptyStatePreview(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun EmptyStateWithActionPreview(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         EmptyState(
@@ -174,10 +224,10 @@ private fun EmptyStateWithActionPreview(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun CompactEmptyStatePreview(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         CompactEmptyState(
