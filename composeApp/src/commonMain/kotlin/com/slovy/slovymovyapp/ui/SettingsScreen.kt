@@ -56,6 +56,7 @@ data class SettingsUiState(
     val downloadingItems: Map<String, DownloadProgress?> = emptyMap(),
     val isLoading: Boolean = true,
     val isLoadingAvailable: Boolean = false,
+    val settingsLoaded: Boolean = false,
     val errorMessage: String? = null,
 
     // Voice
@@ -218,6 +219,7 @@ class SettingsViewModel(
                     activeDictionaryLanguage = activeDict,
                     isLoadingAvailable = false,
                     isLoading = false,
+                    settingsLoaded = true,
                     errorMessage = null
                 )
             } catch (e: CancellationException) {
