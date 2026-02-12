@@ -201,13 +201,27 @@ class SettingsViewModel(
                     )
                 }
 
-                val addable = available
+                val addableFromRemote = available
                     .filter { info -> info.dictionarySizeBytes != null && info.language !in installedDicts }
+
+                // Preserve entries with active dict downloads even when remote is unavailable
+                val addableLanguageCodes = addableFromRemote.map { it.language }.toSet()
+                val activeDownloadEntries = downloadCoordinator.downloadEntries().value.keys
+                    .filter { it.startsWith("dict_") }
+                    .mapNotNull { key ->
+                        val code = key.removePrefix("dict_")
+                        Language.fromCodeOrNull(code)
+                    }
+                    .filter { it !in installedDicts && it !in addableLanguageCodes }
+                    .map { AvailableLanguageInfo(language = it, dictionarySizeBytes = null, availableTranslations = emptyList()) }
+
+                val addable = (addableFromRemote + activeDownloadEntries)
                     .sortedBy { it.language.ordinal }
 
                 val activeDictCode = settingsRepository
                     .getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
                 val activeDict = activeDictCode?.let { Language.fromCodeOrNull(it) }
+                    ?.takeIf { it in installedDicts }
 
                 // Merge with latest state to preserve isExpanded toggled during async fetch
                 val currentExpanded = state.learningLanguages.associate { it.language to it.isExpanded }
