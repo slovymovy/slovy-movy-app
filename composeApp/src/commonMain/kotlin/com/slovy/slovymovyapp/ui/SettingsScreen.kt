@@ -103,6 +103,8 @@ class SettingsViewModel(
     val snackbarHostState = SnackbarHostState()
     private val downloadJobs = mutableMapOf<String, Job>()
     private var translationSaveJob: Job? = null
+    private var loadLearningLanguagesJob: Job? = null
+    private var loadLanguagesJob: Job? = null
 
     init {
         loadLearningLanguages()
@@ -126,7 +128,8 @@ class SettingsViewModel(
     }
 
     private fun loadLearningLanguages() {
-        viewModelScope.launch {
+        loadLearningLanguagesJob?.cancel()
+        loadLearningLanguagesJob = viewModelScope.launch {
             state = state.copy(isLoadingAvailable = state.learningLanguages.isEmpty())
             try {
                 val downloadedFiles = dataDbManager.listDownloadedDatabases()
@@ -427,7 +430,8 @@ class SettingsViewModel(
     }
 
     private fun loadLanguages() {
-        viewModelScope.launch {
+        loadLanguagesJob?.cancel()
+        loadLanguagesJob = viewModelScope.launch {
             try {
                 val languages = ttsManager.getAvailableLanguages()
                 val downloadedDatabases = dataDbManager.listDownloadedDatabases()
@@ -461,7 +465,7 @@ class SettingsViewModel(
     }
 
     fun toggleLanguageExpansion(language: Text2SpeechLanguage) {
-        val s = state.languages[language]!!
+        val s = state.languages[language] ?: return
         if (!s.isExpanded && s.voices.isEmpty()) {
             loadVoicesForLanguage(language)
         }
@@ -922,22 +926,23 @@ fun SettingsScreenContent(
                                     }
                                 }
 
-                                // Translation languages
-                                item {
-                                    SectionHeader(
-                                        title = "Translation languages",
-                                        modifier = Modifier.padding(top = AppSpacing.sm)
-                                    )
-                                }
-                                item {
-                                    TranslationLanguageSection(
-                                        allLanguages = Language.entries.toList(),
-                                        selectedLanguages = state.translationLanguages,
-                                        isExpanded = state.isTranslationLanguagesExpanded,
-                                        onToggleExpanded = onToggleTranslationLanguagesExpanded,
-                                        onToggleLanguage = onToggleTranslationLanguage
-                                    )
-                                }
+                            }
+
+                            // Translation languages (always visible — prefs are local)
+                            item {
+                                SectionHeader(
+                                    title = "Translation languages",
+                                    modifier = Modifier.padding(top = AppSpacing.sm)
+                                )
+                            }
+                            item {
+                                TranslationLanguageSection(
+                                    allLanguages = Language.entries.toList(),
+                                    selectedLanguages = state.translationLanguages,
+                                    isExpanded = state.isTranslationLanguagesExpanded,
+                                    onToggleExpanded = onToggleTranslationLanguagesExpanded,
+                                    onToggleLanguage = onToggleTranslationLanguage
+                                )
                             }
 
                             // === Voice ===
