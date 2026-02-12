@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,13 +27,11 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.CompactEmptyState
 import com.slovy.slovymovyapp.ui.components.EmptyState
+import com.slovy.slovymovyapp.ui.icons.NoFavsImage
+import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.word.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.format.char
@@ -532,7 +530,13 @@ fun FavoritesScreenContent(
                                 contentAlignment = Alignment.Center
                             ) {
                                 EmptyState(
-                                    icon = Icons.Outlined.FavoriteBorder,
+                                    iconContent = {
+                                        Image(
+                                            imageVector = SlovyIcons.NoFavsImage,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(120.dp)
+                                        )
+                                    },
                                     title = "No Favorites Yet",
                                     description = "Save words you want to remember",
                                     action = {
