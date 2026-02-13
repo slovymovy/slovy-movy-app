@@ -207,11 +207,79 @@ fun DownloadScreenContent(
     onRetryClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
 ) {
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = AppSpacing.xl)
+                    .padding(bottom = AppSpacing.xxl),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                when (state) {
+                    is DownloadUiState.ReadyToDownload -> {
+                        val totalSize = formatFileSize(state.items.sumOf { it.sizeBytes })
+                        Button(
+                            onClick = onDownloadClick,
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(28.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text(
+                                "Download $totalSize",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            )
+                        }
+
+                        Spacer(Modifier.height(AppSpacing.sm))
+
+                        TextButton(onClick = onLaterClick) {
+                            Text(
+                                "Later",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    is DownloadUiState.Running -> {
+                        TextButton(onClick = onCancelClick) {
+                            Text(
+                                "Cancel",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    is DownloadUiState.Failed -> {
+                        OutlinedButton(onClick = onRetryClick) {
+                            Text("Retry")
+                        }
+                    }
+
+                    is DownloadUiState.Cancelled -> {
+                        TextButton(onClick = onCloseClick) {
+                            Text(
+                                "Close",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = AppSpacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -265,204 +333,129 @@ fun DownloadScreenContent(
 
             Spacer(Modifier.height(AppSpacing.xxl))
 
-            // Dynamic content area
-            Box(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    when (state) {
-                        is DownloadUiState.Loading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.semantics {
-                                    contentDescription = "Loading download information"
-                                }
-                            )
-                            Spacer(Modifier.height(AppSpacing.lg))
-                            Text(
-                                text = "Preparing...",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+            when (state) {
+                is DownloadUiState.Loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.semantics {
+                            contentDescription = "Loading download information"
                         }
+                    )
+                    Spacer(Modifier.height(AppSpacing.lg))
+                    Text(
+                        text = "Preparing...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
-                        is DownloadUiState.ReadyToDownload -> {
-                            Column(
+                is DownloadUiState.ReadyToDownload -> {
+                    state.items.forEach { item ->
+                        val itemDescription =
+                            "${item.label}, ${formatFileSize(item.sizeBytes)}"
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .semantics(mergeDescendants = true) {
+                                    contentDescription = itemDescription
+                                },
+                            shape = MaterialTheme.shapes.medium,
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        ) {
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .verticalScroll(rememberScrollState()),
-                                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+                                    .padding(
+                                        horizontal = AppSpacing.lg,
+                                        vertical = AppSpacing.md
+                                    ),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                state.items.forEach { item ->
-                                    val itemDescription =
-                                        "${item.label}, ${formatFileSize(item.sizeBytes)}"
-                                    Surface(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .semantics(mergeDescendants = true) {
-                                                contentDescription = itemDescription
-                                            },
-                                        shape = MaterialTheme.shapes.medium,
-                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(
-                                                    horizontal = AppSpacing.lg,
-                                                    vertical = AppSpacing.md
-                                                ),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            if (item.flag.isNotEmpty()) {
-                                                Text(
-                                                    text = item.flag,
-                                                    modifier = Modifier.clearAndSetSemantics {},
-                                                    style = MaterialTheme.typography.titleMedium
-                                                )
-                                                Spacer(Modifier.width(AppSpacing.md))
-                                            }
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                Text(
-                                                    text = item.label,
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Text(
-                                                    text = formatFileSize(item.sizeBytes),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
-                                    }
+                                if (item.flag.isNotEmpty()) {
+                                    Text(
+                                        text = item.flag,
+                                        modifier = Modifier.clearAndSetSemantics {},
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Spacer(Modifier.width(AppSpacing.md))
+                                }
+                                Column {
+                                    Text(
+                                        text = item.label,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = formatFileSize(item.sizeBytes),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                         }
-
-                        is DownloadUiState.Idle -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.semantics {
-                                    contentDescription = "Preparing download"
-                                }
-                            )
-                            Spacer(Modifier.height(AppSpacing.lg))
-                            Text(
-                                text = "Preparing...",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        is DownloadUiState.Running -> {
-                            val progressDescription = if (state.percent >= 0) {
-                                "Downloading, ${state.percent} percent complete"
-                            } else {
-                                "Downloading"
-                            }
-                            LinearWavyProgressIndicator(
-                                progress = { state.percent / 100f },
-                                modifier = Modifier.semantics {
-                                    contentDescription = progressDescription
-                                }
-                            )
-                            Spacer(Modifier.height(AppSpacing.lg))
-                            val pct = if (state.percent >= 0) "${state.percent}%" else ""
-                            Text(
-                                text = "$description... $pct",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        is DownloadUiState.Failed -> {
-                            val classified = NetworkErrorClassifier.classify(state.error)
-                            Text(
-                                text = classified.userMessage,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-
-                        is DownloadUiState.Cancelled -> {
-                            Text(
-                                text = "Download cancelled",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        is DownloadUiState.Done -> {
-                            Text(
-                                text = "Download completed",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                        Spacer(Modifier.height(AppSpacing.sm))
                     }
                 }
-            }
 
-            // Bottom button area
-            when (state) {
-                is DownloadUiState.ReadyToDownload -> {
-                    val totalSize = formatFileSize(state.items.sumOf { it.sizeBytes })
-                    Button(
-                        onClick = onDownloadClick,
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(28.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Text(
-                            "Download $totalSize",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        )
-                    }
-
-                    Spacer(Modifier.height(AppSpacing.sm))
-
-                    TextButton(onClick = onLaterClick) {
-                        Text(
-                            "Later",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                is DownloadUiState.Idle -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.semantics {
+                            contentDescription = "Preparing download"
+                        }
+                    )
+                    Spacer(Modifier.height(AppSpacing.lg))
+                    Text(
+                        text = "Preparing...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
 
                 is DownloadUiState.Running -> {
-                    TextButton(onClick = onCancelClick) {
-                        Text(
-                            "Cancel",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    val progressDescription = if (state.percent >= 0) {
+                        "Downloading, ${state.percent} percent complete"
+                    } else {
+                        "Downloading"
                     }
+                    LinearWavyProgressIndicator(
+                        progress = { state.percent / 100f },
+                        modifier = Modifier.semantics {
+                            contentDescription = progressDescription
+                        }
+                    )
+                    Spacer(Modifier.height(AppSpacing.lg))
+                    val pct = if (state.percent >= 0) "${state.percent}%" else ""
+                    Text(
+                        text = "$description... $pct",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
 
                 is DownloadUiState.Failed -> {
-                    OutlinedButton(onClick = onRetryClick) {
-                        Text("Retry")
-                    }
+                    val classified = NetworkErrorClassifier.classify(state.error)
+                    Text(
+                        text = classified.userMessage,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
 
                 is DownloadUiState.Cancelled -> {
-                    TextButton(onClick = onCloseClick) {
-                        Text(
-                            "Close",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Text(
+                        text = "Download cancelled",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
 
-                else -> {
-                    Spacer(Modifier.height(AppSpacing.xxxl))
+                is DownloadUiState.Done -> {
+                    Text(
+                        text = "Download completed",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
-
-            Spacer(Modifier.height(AppSpacing.xxl))
         }
     }
 }
