@@ -1,8 +1,8 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -52,6 +52,7 @@ class DownloadViewModel(
         private set
 
     val hadConfirmation: Boolean = loadItems != null
+    val scrollState = ScrollState(0)
 
     private var terminalHandled = false
     private var failedDuringLoadItems = false
@@ -185,6 +186,7 @@ fun DownloadScreen(
 ) {
     DownloadScreenContent(
         state = viewModel.state,
+        scrollState = viewModel.scrollState,
         description = description,
         hadConfirmation = viewModel.hadConfirmation,
         onDownloadClick = { viewModel.startDownload() },
@@ -199,6 +201,7 @@ fun DownloadScreen(
 @Composable
 fun DownloadScreenContent(
     state: DownloadUiState,
+    scrollState: ScrollState = ScrollState(0),
     description: String = "Setting up your library",
     hadConfirmation: Boolean = false,
     onDownloadClick: () -> Unit = {},
@@ -207,70 +210,75 @@ fun DownloadScreenContent(
     onRetryClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
 ) {
+    val hasActions = state is DownloadUiState.ReadyToDownload ||
+            state is DownloadUiState.Running ||
+            state is DownloadUiState.Failed ||
+            state is DownloadUiState.Cancelled
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = AppSpacing.xl)
-                    .padding(bottom = AppSpacing.xxl),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                when (state) {
-                    is DownloadUiState.ReadyToDownload -> {
-                        val totalSize = formatFileSize(state.items.sumOf { it.sizeBytes })
-                        Button(
-                            onClick = onDownloadClick,
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(28.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Text(
-                                "Download $totalSize",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
+            if (hasActions) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = AppSpacing.xl)
+                        .padding(bottom = AppSpacing.xxl),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    when (state) {
+                        is DownloadUiState.ReadyToDownload -> {
+                            val totalSize = formatFileSize(state.items.sumOf { it.sizeBytes })
+                            Button(
+                                onClick = onDownloadClick,
+                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                shape = RoundedCornerShape(28.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
                                 )
-                            )
+                            ) {
+                                Text(
+                                    "Download $totalSize",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                )
+                            }
+
+                            Spacer(Modifier.height(AppSpacing.sm))
+
+                            TextButton(onClick = onLaterClick) {
+                                Text(
+                                    "Later",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
 
-                        Spacer(Modifier.height(AppSpacing.sm))
+                        is DownloadUiState.Running -> {
+                            TextButton(onClick = onCancelClick) {
+                                Text(
+                                    "Cancel",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
 
-                        TextButton(onClick = onLaterClick) {
-                            Text(
-                                "Later",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        is DownloadUiState.Failed -> {
+                            OutlinedButton(onClick = onRetryClick) {
+                                Text("Retry")
+                            }
+                        }
+
+                        is DownloadUiState.Cancelled -> {
+                            TextButton(onClick = onCloseClick) {
+                                Text(
+                                    "Close",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
-
-                    is DownloadUiState.Running -> {
-                        TextButton(onClick = onCancelClick) {
-                            Text(
-                                "Cancel",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    is DownloadUiState.Failed -> {
-                        OutlinedButton(onClick = onRetryClick) {
-                            Text("Retry")
-                        }
-                    }
-
-                    is DownloadUiState.Cancelled -> {
-                        TextButton(onClick = onCloseClick) {
-                            Text(
-                                "Close",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    else -> {}
                 }
             }
         }
@@ -279,7 +287,7 @@ fun DownloadScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(horizontal = AppSpacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
