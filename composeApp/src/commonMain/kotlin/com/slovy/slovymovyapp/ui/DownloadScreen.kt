@@ -1,12 +1,10 @@
 package com.slovy.slovymovyapp.ui
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -14,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -26,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.icons.DownloadScreenTransparent
+import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
@@ -252,47 +251,26 @@ fun DownloadScreenContent(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                minLines = 2
             )
 
-            // Centered content area
+            Spacer(Modifier.height(AppSpacing.xxl))
+
+            Image(
+                imageVector = SlovyIcons.DownloadScreenTransparent,
+                contentDescription = null,
+                modifier = Modifier.size(180.dp)
+            )
+
+            Spacer(Modifier.height(AppSpacing.xxl))
+
+            // Dynamic content area
             Box(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.TopCenter
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    // Glowing icon with soft radial gradient
-                    Box(
-                        modifier = Modifier.size(120.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        val glowColor = MaterialTheme.colorScheme.primary
-                        Box(
-                            modifier = Modifier
-                                .size(120.dp)
-                                .background(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(
-                                            glowColor.copy(alpha = 0.15f),
-                                            glowColor.copy(alpha = 0.10f),
-                                            glowColor.copy(alpha = 0.06f),
-                                            glowColor.copy(alpha = 0.03f),
-                                            glowColor.copy(alpha = 0.01f),
-                                            glowColor.copy(alpha = 0f)
-                                        )
-                                    )
-                                )
-                        )
-                        Icon(
-                            imageVector = Icons.Outlined.CloudDownload,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = glowColor
-                        )
-                    }
-
-                    Spacer(Modifier.height(AppSpacing.xxl))
-
                     when (state) {
                         is DownloadUiState.Loading -> {
                             CircularProgressIndicator(
@@ -316,7 +294,8 @@ fun DownloadScreenContent(
                                 verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
                             ) {
                                 state.items.forEach { item ->
-                                    val itemDescription = "${item.label}, ${formatFileSize(item.sizeBytes)}"
+                                    val itemDescription =
+                                        "${item.label}, ${formatFileSize(item.sizeBytes)}"
                                     Surface(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -358,7 +337,6 @@ fun DownloadScreenContent(
                                         }
                                     }
                                 }
-
                             }
                         }
 
