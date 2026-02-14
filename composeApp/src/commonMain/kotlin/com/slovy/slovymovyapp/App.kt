@@ -116,6 +116,7 @@ fun App(
                 downloadCoordinator,
                 dictionaryRepository,
                 dictionaryClient,
+                settingsRepository,
                 buildConfig
             )
         }
@@ -123,6 +124,20 @@ fun App(
 
     DisposableEffect(Unit) {
         onDispose { downloadCoordinator.close() }
+    }
+
+    // Keep nativeLanguages and dictionaryLanguage in sync with settings changes from SettingsScreen
+    // Only sync after settings have successfully loaded at least once
+    val settingsState = settingsViewModel.state
+    LaunchedEffect(settingsState.translationLanguages, settingsState.settingsLoaded) {
+        if (settingsState.settingsLoaded) {
+            nativeLanguages = settingsState.translationLanguages.sortedBy { it.ordinal }
+        }
+    }
+    LaunchedEffect(settingsState.activeDictionaryLanguage, settingsState.settingsLoaded) {
+        if (settingsState.settingsLoaded) {
+            dictionaryLanguage = settingsState.activeDictionaryLanguage
+        }
     }
 
     suspend fun selectInitialDestination(): AppDestination {
@@ -310,13 +325,47 @@ fun App(
                                 navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
                                     popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
                                 }
+                            },
+                            loadItems = {
+                                val available = dataManager.fetchAvailableLanguages()
+                                val langInfo = available.find { it.language == dictLang }
+                                val items = mutableListOf<DownloadItem>()
+                                langInfo?.dictionarySizeBytes?.let { size ->
+                                    items.add(DownloadItem("${dictLang.selfName} Dictionary", size, dictLang.flag))
+                                }
+                                val downloadableTargets = try {
+                                    dataManager.downloadableTranslationTargets(dictLang, nativeLanguages)
+                                } catch (e: CancellationException) {
+                                    throw e
+                                } catch (e: Exception) {
+                                    emptyList()
+                                }
+                                for (target in downloadableTargets) {
+                                    val translationSize = langInfo?.availableTranslations
+                                        ?.find { it.targetLanguage == target }?.sizeBytes
+                                    if (translationSize != null) {
+                                        items.add(
+                                            DownloadItem(
+                                                "${dictLang.selfName} \u2192 ${target.selfName}",
+                                                translationSize,
+                                                target.flag
+                                            )
+                                        )
+                                    }
+                                }
+                                items
                             }
                         )
                     }
 
                     DownloadScreen(
                         viewModel = viewModel,
-                        description = "Downloading dictionary"
+                        description = "Downloading dictionary",
+                        onLaterClick = {
+                            navController.navigate(AppDestination.Search) {
+                                popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
+                            }
+                        }
                     )
                 }
             }
@@ -486,11 +535,6 @@ fun App(
             composable<AppDestination.Settings> {
                 SettingsScreen(
                     viewModel = settingsViewModel,
-                    learningLanguage = dictionaryLanguage,
-                    nativeLanguages = nativeLanguages,
-                    onChangeLanguages = {
-                        navController.navigate(AppDestination.SetupLanguages)
-                    },
                     onNavigateToSearch = {
                         if (!navController.popBackStack(AppDestination.Search, inclusive = false))
                             navController.navigate(AppDestination.Search)

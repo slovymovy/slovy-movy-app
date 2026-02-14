@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -198,12 +199,8 @@ class SearchViewModel(
         }
     }
 
-    fun toggleLanguageDropdown() {
-        state = state.copy(isLanguageDropdownExpanded = !state.isLanguageDropdownExpanded)
-    }
-
-    fun dismissLanguageDropdown() {
-        state = state.copy(isLanguageDropdownExpanded = false)
+    fun setLanguageDropdownExpanded(expanded: Boolean) {
+        state = state.copy(isLanguageDropdownExpanded = expanded)
     }
 
     fun setShowLanguageIndicators(show: Boolean) {
@@ -264,8 +261,7 @@ fun SearchScreen(
             viewModel.setSelectedLanguage(language)
             // TODO: search is not relaunched or query
         },
-        onToggleLanguageDropdown = { viewModel.toggleLanguageDropdown() },
-        onDismissLanguageDropdown = { viewModel.dismissLanguageDropdown() },
+        onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onRefreshSuggestions = { viewModel.refreshSuggestionsFromPull() },
         wordDetailLabel = wordDetailLabel,
         onNavigateToWordDetail = onNavigateToWordDetail,
@@ -282,8 +278,7 @@ fun SearchScreenContent(
     onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
     onSuggestionSelected: (String) -> Unit = {},
     onLanguageSelected: (Language?) -> Unit = {},
-    onToggleLanguageDropdown: () -> Unit = {},
-    onDismissLanguageDropdown: () -> Unit = {},
+    onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onRefreshSuggestions: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
@@ -348,7 +343,7 @@ fun SearchScreenContent(
 
                         ExposedDropdownMenuBox(
                             expanded = state.isLanguageDropdownExpanded,
-                            onExpandedChange = { onToggleLanguageDropdown() }
+                            onExpandedChange = onSetLanguageDropdownExpanded
                         ) {
                             Surface(
                                 modifier = Modifier
@@ -375,7 +370,7 @@ fun SearchScreenContent(
                             }
                             ExposedDropdownMenu(
                                 expanded = state.isLanguageDropdownExpanded,
-                                onDismissRequest = onDismissLanguageDropdown,
+                                onDismissRequest = { onSetLanguageDropdownExpanded(false) },
                                 modifier = Modifier.width(200.dp),
                                 shape = MaterialTheme.shapes.small,
                                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -394,7 +389,7 @@ fun SearchScreenContent(
                                         },
                                         onClick = {
                                             onLanguageSelected(language)
-                                            onDismissLanguageDropdown()
+                                            onSetLanguageDropdownExpanded(false)
                                         },
                                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                                     )
@@ -653,7 +648,8 @@ private fun NoDictionaryState(
         Text(
             text = "Download a dictionary to start searching for words",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(24.dp))
