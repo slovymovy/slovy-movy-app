@@ -295,44 +295,40 @@ class DictionaryClient(
         localIsOnlineOnly: Boolean
     ) {
         val url = buildUrl(language, lemma, targets, push)
+        val response = httpClient.get(url)
+        if (!response.status.isSuccess()) {
+            val body = response.bodyAsText()
+            throw DictionaryClientException.ServerException(response.status.value, body)
+        }
 
-        httpClient.prepareGet(url).execute { response ->
-            if (!response.status.isSuccess()) {
-                val body = response.bodyAsText()
-                throw DictionaryClientException.ServerException(response.status.value, body)
-            }
+        val channel = response.bodyAsChannel()
 
-            val channel = response.bodyAsChannel()
+        // Read line-by-line, parse each as WordStreamChunk
+        while (!channel.isClosedForRead) {
+            val line = channel.readUTF8Line() ?: break
+            if (line.isBlank()) continue
 
-            // Read line-by-line, parse each as WordStreamChunk
-            var receivedBase = false
-            while (!channel.isClosedForRead) {
-                val line = channel.readUTF8Line() ?: break
-                if (line.isBlank()) continue
+            val chunk = json.decodeFromString(WordStreamChunk.serializer(), line)
+            val isBaseStage = chunk.stage == WordStreamStage.BASE
 
-                val chunk = json.decodeFromString(WordStreamChunk.serializer(), line)
-                val isBaseStage = chunk.stage == WordStreamStage.BASE
-                receivedBase = receivedBase || isBaseStage
-
-                val haveRequiredTranslations = chunk.payload.entries.any {
-                    it.senses.any { s ->
-                        s.translations.keys.containsAll(targets.map { k -> k.code })
-                    }
+            val haveRequiredTranslations = chunk.payload.entries.any {
+                it.senses.any { s ->
+                    s.translations.keys.containsAll(targets.map { k -> k.code })
                 }
-                // After base, we expect translated if translations were requested
-                val hasMoreChunks = isBaseStage && !haveRequiredTranslations
-
-                processChunk(
-                    collector = collector,
-                    chunk = chunk,
-                    language = language,
-                    lemma = lemma,
-                    translationTargets = targets,
-                    hasMoreChunks = hasMoreChunks,
-                    frequency = frequency,
-                    localIsOnlineOnly = localIsOnlineOnly
-                )
             }
+            // After base, we expect translated if translations were requested
+            val hasMoreChunks = isBaseStage && !haveRequiredTranslations
+
+            processChunk(
+                collector = collector,
+                chunk = chunk,
+                language = language,
+                lemma = lemma,
+                translationTargets = targets,
+                hasMoreChunks = hasMoreChunks,
+                frequency = frequency,
+                localIsOnlineOnly = localIsOnlineOnly
+            )
         }
     }
 
