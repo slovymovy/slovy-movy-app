@@ -116,6 +116,7 @@ fun App(
                 downloadCoordinator,
                 dictionaryRepository,
                 dictionaryClient,
+                settingsRepository,
                 buildConfig
             )
         }
@@ -123,6 +124,20 @@ fun App(
 
     DisposableEffect(Unit) {
         onDispose { downloadCoordinator.close() }
+    }
+
+    // Keep nativeLanguages and dictionaryLanguage in sync with settings changes from SettingsScreen
+    // Only sync after settings have successfully loaded at least once
+    val settingsState = settingsViewModel.state
+    LaunchedEffect(settingsState.translationLanguages, settingsState.settingsLoaded) {
+        if (settingsState.settingsLoaded) {
+            nativeLanguages = settingsState.translationLanguages.sortedBy { it.ordinal }
+        }
+    }
+    LaunchedEffect(settingsState.activeDictionaryLanguage, settingsState.settingsLoaded) {
+        if (settingsState.settingsLoaded) {
+            dictionaryLanguage = settingsState.activeDictionaryLanguage
+        }
     }
 
     suspend fun selectInitialDestination(): AppDestination {
@@ -520,11 +535,6 @@ fun App(
             composable<AppDestination.Settings> {
                 SettingsScreen(
                     viewModel = settingsViewModel,
-                    learningLanguage = dictionaryLanguage,
-                    nativeLanguages = nativeLanguages,
-                    onChangeLanguages = {
-                        navController.navigate(AppDestination.SetupLanguages)
-                    },
                     onNavigateToSearch = {
                         if (!navController.popBackStack(AppDestination.Search, inclusive = false))
                             navController.navigate(AppDestination.Search)
