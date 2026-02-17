@@ -93,8 +93,9 @@ fun LearningLanguageCard(
                         val onlineOnlyCount = state.translations.size - downloadableCount
                         val downloadPart = when {
                             downloadableCount == 0 -> null
-                            downloadedCount == downloadableCount -> "All $downloadableCount downloaded"
-                            else -> "$downloadedCount of $downloadableCount downloaded"
+                            downloadedCount == downloadableCount -> if (downloadableCount == 1)
+                                "1 translation downloaded" else "All $downloadableCount translations downloaded"
+                            else -> "$downloadedCount/$downloadableCount translations downloaded"
                         }
                         val onlinePart = if (onlineOnlyCount > 0) "$onlineOnlyCount online only" else null
                         val summaryText = listOfNotNull(downloadPart, onlinePart).joinToString(", ")
@@ -343,7 +344,7 @@ fun TranslationLanguageSection(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             if (!isExpanded) {
-                // Collapsed: one language per row
+                // Collapsed: header + language summary
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -357,25 +358,27 @@ fun TranslationLanguageSection(
                         )
                         .padding(AppSpacing.lg)
                 ) {
-                    if (selectedLanguages.isEmpty()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "No languages selected",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Expand",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    } else {
-                        val sorted = selectedLanguages.sortedBy { it.ordinal }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (selectedLanguages.isEmpty()) "No languages selected"
+                            else "${selectedLanguages.size} selected",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Expand",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    if (selectedLanguages.isNotEmpty()) {
+                        Spacer(Modifier.height(AppSpacing.sm))
+                        val sorted = selectedLanguages.sortedBy { it.selfName }
                         sorted.forEachIndexed { index, language ->
                             if (index > 0) {
                                 HorizontalDivider(
@@ -384,25 +387,11 @@ fun TranslationLanguageSection(
                                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                                 )
                             }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = AppSpacing.xs),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "${language.flag} ${language.selfName}",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                if (index == 0) {
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowDown,
-                                        contentDescription = "Expand",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
+                            Text(
+                                text = "${language.flag} ${language.selfName}",
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(vertical = AppSpacing.xs)
+                            )
                         }
                     }
                 }
