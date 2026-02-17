@@ -167,7 +167,7 @@ fun LanguageSetupScreenContent(
                 Spacer(Modifier.height(AppSpacing.sm))
 
                 Text(
-                    text = "Choose what you're learning and your translation preferences",
+                    text = "Choose what you're learning and your translation preferences.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -227,7 +227,7 @@ fun LanguageSetupScreenContent(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }
                         ) {
-                            state.availableLanguages.forEach { language ->
+                            state.availableLanguages.sortedBy { it.selfName }.forEach { language ->
                                 DropdownMenuItem(
                                     text = {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -251,7 +251,7 @@ fun LanguageSetupScreenContent(
                 // My native language(s) section
                 Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     Text(
-                        text = "Language(s) I know:",
+                        text = "Translate into:",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Medium
                         )
@@ -261,21 +261,19 @@ fun LanguageSetupScreenContent(
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                     ) {
-                        items(Language.entries.toList()) { language ->
+                        items(
+                            Language.entries
+                                .filter { it != state.learningLanguage }
+                                .sortedBy { it.selfName }
+                        ) { language ->
                             val isSelected = language in state.nativeLanguages
-                            val isEnabled = language != state.learningLanguage
 
                             Card(
-                                modifier = Modifier.fillMaxWidth().then(
-                                    if (isEnabled) Modifier.clickable { onNativeLanguageToggled(language) }
-                                    else Modifier
-                                ),
+                                modifier = Modifier.fillMaxWidth()
+                                    .clickable { onNativeLanguageToggled(language) },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = if (isEnabled)
-                                        MaterialTheme.colorScheme.surface
-                                    else
-                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                    containerColor = MaterialTheme.colorScheme.surface
                                 ),
                                 border = if (isSelected)
                                     BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
@@ -291,20 +289,13 @@ fun LanguageSetupScreenContent(
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
                                             text = language.flag,
-                                            fontSize = 20.sp,
-                                            color = if (isEnabled)
-                                                LocalContentColor.current
-                                            else
-                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            fontSize = 20.sp
                                         )
                                         Spacer(Modifier.width(AppSpacing.md))
                                         Text(
                                             text = language.selfName,
                                             style = MaterialTheme.typography.bodyLarge,
-                                            color = if (isEnabled)
-                                                MaterialTheme.colorScheme.onSurface
-                                            else
-                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
                                     if (isSelected) {

@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "otter_icon.png",
+      "filename" : "otter_icon_iOS.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
