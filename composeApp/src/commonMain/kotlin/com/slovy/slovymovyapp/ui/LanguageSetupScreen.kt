@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,8 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -274,13 +273,11 @@ fun LanguageSetupScreenContent(
 
                             Card(
                                 modifier = Modifier.fillMaxWidth()
-                                    .semantics {
-                                        stateDescription = if (isSelected) "Selected" else "Not selected"
-                                    }
-                                    .clickable(
+                                    .toggleable(
+                                        value = isSelected,
                                         role = Role.Checkbox,
-                                        onClickLabel = "Toggle ${language.selfName} translation"
-                                    ) { onNativeLanguageToggled(language) },
+                                        onValueChange = { onNativeLanguageToggled(language) }
+                                    ),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.surface

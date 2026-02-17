@@ -383,7 +383,10 @@ fun TranslationLanguageSection(
                     if (selectedLanguages.isNotEmpty()) {
                         Spacer(Modifier.height(AppSpacing.sm))
                         val sorted = selectedLanguages.sortedBy { it.selfName }
-                        sorted.forEachIndexed { index, language ->
+                        val maxVisible = 3
+                        val visible = sorted.take(maxVisible)
+                        val remaining = sorted.size - maxVisible
+                        visible.forEachIndexed { index, language ->
                             if (index > 0) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(vertical = AppSpacing.xs),
@@ -394,6 +397,14 @@ fun TranslationLanguageSection(
                             Text(
                                 text = "${language.flag} ${language.selfName}",
                                 style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(vertical = AppSpacing.xs)
+                            )
+                        }
+                        if (remaining > 0) {
+                            Text(
+                                text = "+$remaining more",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(vertical = AppSpacing.xs)
                             )
                         }
