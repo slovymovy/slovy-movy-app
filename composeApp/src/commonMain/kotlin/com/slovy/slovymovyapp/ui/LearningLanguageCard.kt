@@ -91,11 +91,12 @@ fun LearningLanguageCard(
                         val downloadedCount = downloadable.count { it.isDownloaded }
                         val downloadableCount = downloadable.size
                         val onlineOnlyCount = state.translations.size - downloadableCount
+                        val translationWord = if (downloadableCount == 1) "translation" else "translations"
                         val downloadPart = when {
                             downloadableCount == 0 -> null
                             downloadedCount == downloadableCount -> if (downloadableCount == 1)
                                 "1 translation downloaded" else "All $downloadableCount translations downloaded"
-                            else -> "$downloadedCount of $downloadableCount translations downloaded"
+                            else -> "$downloadedCount of $downloadableCount $translationWord downloaded"
                         }
                         val onlinePart = if (onlineOnlyCount > 0) "$onlineOnlyCount online only" else null
                         val summaryText = listOfNotNull(downloadPart, onlinePart).joinToString(", ")

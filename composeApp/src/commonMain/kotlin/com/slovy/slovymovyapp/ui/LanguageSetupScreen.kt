@@ -13,6 +13,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,7 +47,7 @@ class LanguageSetupViewModel(
     var state by mutableStateOf(
         LanguageSetupUiState(
             learningLanguage = initialLearningLanguage,
-            nativeLanguages = initialNativeLanguages
+            nativeLanguages = initialNativeLanguages - setOfNotNull(initialLearningLanguage)
         )
     )
         private set
@@ -271,9 +274,12 @@ fun LanguageSetupScreenContent(
 
                             Card(
                                 modifier = Modifier.fillMaxWidth()
+                                    .semantics {
+                                        stateDescription = if (isSelected) "Selected" else "Not selected"
+                                    }
                                     .clickable(
-                                        onClickLabel = if (isSelected) "Deselect ${language.selfName}"
-                                        else "Select ${language.selfName}"
+                                        role = Role.Checkbox,
+                                        onClickLabel = "Toggle ${language.selfName} translation"
                                     ) { onNativeLanguageToggled(language) },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
