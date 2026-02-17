@@ -95,7 +95,7 @@ fun LearningLanguageCard(
                             downloadableCount == 0 -> null
                             downloadedCount == downloadableCount -> if (downloadableCount == 1)
                                 "1 translation downloaded" else "All $downloadableCount translations downloaded"
-                            else -> "$downloadedCount/$downloadableCount translations downloaded"
+                            else -> "$downloadedCount of $downloadableCount translations downloaded"
                         }
                         val onlinePart = if (onlineOnlyCount > 0) "$onlineOnlyCount online only" else null
                         val summaryText = listOfNotNull(downloadPart, onlinePart).joinToString(", ")
@@ -363,8 +363,11 @@ fun TranslationLanguageSection(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (selectedLanguages.isEmpty()) "No languages selected"
-                            else "${selectedLanguages.size} selected",
+                            text = when (selectedLanguages.size) {
+                                0 -> "No languages selected"
+                                1 -> "1 language selected"
+                                else -> "${selectedLanguages.size} languages selected"
+                            },
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.weight(1f)

@@ -63,7 +63,7 @@ class LanguageSetupViewModel(
 
                 state = state.copy(
                     isLoading = false,
-                    availableLanguages = available
+                    availableLanguages = available.sortedBy { it.selfName }
                 )
             } catch (e: CancellationException) {
                 throw e
@@ -227,7 +227,7 @@ fun LanguageSetupScreenContent(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }
                         ) {
-                            state.availableLanguages.sortedBy { it.selfName }.forEach { language ->
+                            state.availableLanguages.forEach { language ->
                                 DropdownMenuItem(
                                     text = {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -262,15 +262,19 @@ fun LanguageSetupScreenContent(
                         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                     ) {
                         items(
-                            Language.entries
+                            items = Language.entries
                                 .filter { it != state.learningLanguage }
-                                .sortedBy { it.selfName }
+                                .sortedBy { it.selfName },
+                            key = { it.name }
                         ) { language ->
                             val isSelected = language in state.nativeLanguages
 
                             Card(
                                 modifier = Modifier.fillMaxWidth()
-                                    .clickable { onNativeLanguageToggled(language) },
+                                    .clickable(
+                                        onClickLabel = if (isSelected) "Deselect ${language.selfName}"
+                                        else "Select ${language.selfName}"
+                                    ) { onNativeLanguageToggled(language) },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.surface
