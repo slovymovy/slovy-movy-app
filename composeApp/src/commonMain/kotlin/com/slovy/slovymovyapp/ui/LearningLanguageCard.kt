@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import com.slovy.slovymovyapp.ui.word.pluralEnding
 
 data class LearningLanguageUiState(
     val language: Language,
@@ -91,12 +92,11 @@ fun LearningLanguageCard(
                         val downloadedCount = downloadable.count { it.isDownloaded }
                         val downloadableCount = downloadable.size
                         val onlineOnlyCount = state.translations.size - downloadableCount
-                        val translationWord = if (downloadableCount == 1) "translation" else "translations"
                         val downloadPart = when {
                             downloadableCount == 0 -> null
-                            downloadedCount == downloadableCount -> if (downloadableCount == 1)
-                                "1 translation downloaded" else "All $downloadableCount translations downloaded"
-                            else -> "$downloadedCount of $downloadableCount $translationWord downloaded"
+                            downloadedCount == downloadableCount ->
+                                "All $downloadableCount translation${pluralEnding(downloadableCount)} downloaded"
+                            else -> "$downloadedCount of $downloadableCount translation${pluralEnding(downloadableCount)} downloaded"
                         }
                         val onlinePart = if (onlineOnlyCount > 0) "$onlineOnlyCount online only" else null
                         val summaryText = listOfNotNull(downloadPart, onlinePart).joinToString(", ")
@@ -364,10 +364,10 @@ fun TranslationLanguageSection(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = when (selectedLanguages.size) {
-                                0 -> "No languages selected"
-                                1 -> "1 language selected"
-                                else -> "${selectedLanguages.size} languages selected"
+                            text = if (selectedLanguages.isEmpty()) {
+                                "No languages selected"
+                            } else {
+                                "${selectedLanguages.size} language${pluralEnding(selectedLanguages.size)} selected"
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
