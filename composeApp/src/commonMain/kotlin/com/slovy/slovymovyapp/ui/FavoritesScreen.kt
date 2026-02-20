@@ -534,7 +534,7 @@ fun FavoritesScreenContent(
                                         Image(
                                             imageVector = SlovyIcons.NoFavsImage,
                                             contentDescription = null,
-                                            modifier = Modifier.size(120.dp)
+                                            modifier = Modifier.size(180.dp)
                                         )
                                     },
                                     title = "No Favorites Yet",
