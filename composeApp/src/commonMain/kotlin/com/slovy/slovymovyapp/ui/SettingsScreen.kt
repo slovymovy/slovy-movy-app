@@ -23,6 +23,7 @@ import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import com.slovy.slovymovyapp.ui.word.pluralEnding
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -280,7 +281,7 @@ class SettingsViewModel(
             ?.translations?.count { it.isDownloaded } ?: 0
 
         val warning = if (translationCount > 0) {
-            "This will also remove $translationCount translation${if (translationCount > 1) "s" else ""}."
+            "This will also remove $translationCount translation${pluralEnding(translationCount)}."
         } else null
 
         showDeleteConfirmation(

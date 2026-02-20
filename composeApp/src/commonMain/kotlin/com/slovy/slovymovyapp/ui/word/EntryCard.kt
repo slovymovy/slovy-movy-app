@@ -69,7 +69,7 @@ private fun GrammarSection(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "${forms.size} form${if (forms.size == 1) "" else "s"}",
+                    text = "${forms.size} form${pluralEnding(forms)}",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -196,4 +196,6 @@ internal fun EntryCard(
     }
 }
 
-fun pluralEnding(someList: List<*>): String = if (someList.size == 1) "" else "s"
+fun pluralEnding(count: Int): String = if (count == 1) "" else "s"
+
+fun pluralEnding(someList: List<*>): String = pluralEnding(someList.size)

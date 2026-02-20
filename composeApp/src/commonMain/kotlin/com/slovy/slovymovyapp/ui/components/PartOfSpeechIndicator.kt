@@ -18,6 +18,7 @@ import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.word.ErrorIcon
+import com.slovy.slovymovyapp.ui.word.pluralEnding
 
 /**
  * Vertical color bar indicator for parts of speech, matching Figma design.
@@ -74,9 +75,8 @@ fun PartOfSpeechIndicator(
             )
             // Optional meaning count (secondary)
             if (meaningCount != null) {
-                val plural = if (meaningCount == 1) "" else "s"
                 Text(
-                    text = "· $meaningCount meaning$plural",
+                    text = "· $meaningCount meaning${pluralEnding(meaningCount)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
