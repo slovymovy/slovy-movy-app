@@ -6,11 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -25,9 +24,9 @@ import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
-import com.slovy.slovymovyapp.ui.components.CompactEmptyState
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.icons.NoFavsImage
+import com.slovy.slovymovyapp.ui.icons.SearchOtter
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.word.*
 import kotlinx.coroutines.*
@@ -332,6 +331,7 @@ class FavoritesViewModel(
 fun FavoritesScreen(
     viewModel: FavoritesViewModel,
     onNavigateToSearch: () -> Unit = {},
+    onSearchInDictionary: (String) -> Unit = {},
     onNavigateToWordDetail: (Language, String, String?) -> Unit = { _, _, _ -> },
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
@@ -350,6 +350,7 @@ fun FavoritesScreen(
         scrollState = viewModel.scrollState,
         snackbarHostState = viewModel.snackbarHostState,
         onNavigateToSearch = onNavigateToSearch,
+        onSearchInDictionary = onSearchInDictionary,
         onQueryChange = { viewModel.updateQuery(it) },
         onSenseToggle = { viewModel.toggleSense(it) },
         onFavoriteToggle = { viewModel.toggleFavorite(it) },
@@ -370,6 +371,7 @@ fun FavoritesScreenContent(
     scrollState: LazyListState = LazyListState(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onNavigateToSearch: () -> Unit = {},
+    onSearchInDictionary: (String) -> Unit = {},
     onQueryChange: (String) -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
     onFavoriteToggle: (String) -> Unit = {},
@@ -524,10 +526,10 @@ fun FavoritesScreenContent(
                     }
 
                     when {
-                        state.senses.isEmpty() && state.query.isEmpty() -> {
+                        !state.hasAnyFavorites -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
                             ) {
                                 EmptyState(
                                     iconContent = {
@@ -551,11 +553,25 @@ fun FavoritesScreenContent(
                         state.showNoResults -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
                             ) {
-                                CompactEmptyState(
-                                    icon = Icons.Filled.Search,
-                                    message = "No favorites match your search"
+                                EmptyState(
+                                    iconContent = {
+                                        Image(
+                                            imageVector = SlovyIcons.SearchOtter,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(140.dp)
+                                        )
+                                    },
+                                    title = "No matching favorites for \"${state.query}\"",
+                                    description = "Try a different spelling or search the dictionary instead",
+                                    action = {
+                                        FilledTonalButton(
+                                            onClick = { onSearchInDictionary(state.query) }
+                                        ) {
+                                            Text("Search dictionary")
+                                        }
+                                    }
                                 )
                             }
                         }
