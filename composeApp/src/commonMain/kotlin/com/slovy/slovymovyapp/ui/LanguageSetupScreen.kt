@@ -113,7 +113,7 @@ fun LanguageSetupScreen(
         onNativeLanguageToggled = viewModel::toggleNativeLanguage,
         onNext = {
             val learning = viewModel.state.learningLanguage
-            val native = viewModel.state.nativeLanguages.toList()
+            val native = viewModel.state.nativeLanguages.sortedBy { it.selfName }
             if (learning != null) {
                 onNext(learning, native)
             }
