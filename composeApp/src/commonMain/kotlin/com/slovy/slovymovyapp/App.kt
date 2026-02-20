@@ -81,6 +81,7 @@ fun App(
     appBuildConfig: AppBuildConfig,
     androidContext: Any? = null,
 ) {
+    var pendingSearchQuery by remember { mutableStateOf<String?>(null) }
     var nativeLanguages by remember { mutableStateOf<List<Language>>(emptyList()) }
     var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
     val favoritesRepository = remember(dataManager) {
@@ -459,6 +460,13 @@ fun App(
                     SearchViewModel(dictionaryRepository)
                 }
 
+                LaunchedEffect(pendingSearchQuery) {
+                    pendingSearchQuery?.let { query ->
+                        viewModel.updateQuery(query)
+                        pendingSearchQuery = null
+                    }
+                }
+
                 SearchScreen(
                     viewModel = viewModel,
                     onWordSelected = { item ->
@@ -506,6 +514,11 @@ fun App(
                 FavoritesScreen(
                     viewModel = favoritesViewModel,
                     onNavigateToSearch = {
+                        if (!navController.popBackStack(AppDestination.Search, inclusive = false))
+                            navController.navigate(AppDestination.Search)
+                    },
+                    onSearchInDictionary = { query ->
+                        pendingSearchQuery = query
                         if (!navController.popBackStack(AppDestination.Search, inclusive = false))
                             navController.navigate(AppDestination.Search)
                     },

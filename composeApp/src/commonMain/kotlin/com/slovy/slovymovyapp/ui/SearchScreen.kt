@@ -13,13 +13,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.pointer.pointerInput
@@ -38,6 +39,8 @@ import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
+import com.slovy.slovymovyapp.ui.icons.SearchOtter
+import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
 import kotlinx.coroutines.Dispatchers
@@ -156,7 +159,11 @@ class SearchViewModel(
     fun updateQuery(newQuery: String) {
         val trimmed = newQuery.trim()
         // Update UI state immediately for responsive typing
-        state = state.copy(query = trimmed)
+        state = if (trimmed.isEmpty()) {
+            state.copy(query = trimmed, results = emptyList(), showNoResults = false)
+        } else {
+            state.copy(query = trimmed)
+        }
         // Trigger debounced search
         queryFlow.value =
             queryFlow.value.copy(
@@ -666,12 +673,18 @@ private fun NoResultsState(query: String) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
-        contentAlignment = Alignment.Center
+        contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
     ) {
         EmptyState(
-            icon = Icons.Filled.Search,
-            title = "No results found",
-            description = "We couldn't find any words matching \"$query\". Try a different spelling or search term."
+            iconContent = {
+                Image(
+                    imageVector = SlovyIcons.SearchOtter,
+                    contentDescription = null,
+                    modifier = Modifier.size(140.dp)
+                )
+            },
+            title = "No results for \"$query\"",
+            description = "Try a different spelling or search term?"
         )
     }
 }
