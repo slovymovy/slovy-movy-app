@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Lightbulb
-import androidx.compose.material.icons.outlined.OfflinePin
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -78,7 +78,7 @@ fun WelcomeScreenContent(
                 Spacer(modifier = Modifier.height(AppSpacing.xxxl))
 
                 Text(
-                    text = "Open Words",
+                    text = "OpenWords",
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold
                     ),
@@ -88,7 +88,7 @@ fun WelcomeScreenContent(
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
 
                 Text(
-                    text = "An ad-free, supercharged dictionary\nfor serious learners.",
+                    text = "Deep-dive dictionary\nfor committed learners like you.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -102,20 +102,20 @@ fun WelcomeScreenContent(
                 ) {
                     SellingPointCard(
                         icon = Icons.Outlined.Lightbulb,
-                        title = "Deep Word Insights",
-                        description = "Build strong associations with word frequency, common phrases, and real-world examples."
+                        title = "Beyond one-word translations",
+                        description = "Find all meanings, word frequency, common phrases, and real-world examples."
                     )
 
                     SellingPointCard(
-                        icon = Icons.Outlined.Favorite,
+                        icon = Icons.Outlined.FavoriteBorder,
                         title = "Your Collection",
                         description = "Save words to your personal library and build your vocabulary locally."
                     )
 
                     SellingPointCard(
-                        icon = Icons.Outlined.OfflinePin,
-                        title = "Smart Offline Access",
-                        description = "Download the core library to learn on the go. Essential data stays on your device."
+                        icon = Icons.Outlined.Shield,
+                        title = "No ads, no subscription",
+                        description = "Access the full experience without paywalls. Essential data stays on your device."
                     )
                 }
 

@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,6 +14,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,7 +47,7 @@ class LanguageSetupViewModel(
     var state by mutableStateOf(
         LanguageSetupUiState(
             learningLanguage = initialLearningLanguage,
-            nativeLanguages = initialNativeLanguages
+            nativeLanguages = initialNativeLanguages - setOfNotNull(initialLearningLanguage)
         )
     )
         private set
@@ -63,7 +66,7 @@ class LanguageSetupViewModel(
 
                 state = state.copy(
                     isLoading = false,
-                    availableLanguages = available
+                    availableLanguages = available.sortedBy { it.selfName }
                 )
             } catch (e: CancellationException) {
                 throw e
@@ -110,7 +113,7 @@ fun LanguageSetupScreen(
         onNativeLanguageToggled = viewModel::toggleNativeLanguage,
         onNext = {
             val learning = viewModel.state.learningLanguage
-            val native = viewModel.state.nativeLanguages.toList()
+            val native = viewModel.state.nativeLanguages.sortedBy { it.selfName }
             if (learning != null) {
                 onNext(learning, native)
             }
@@ -167,7 +170,7 @@ fun LanguageSetupScreenContent(
                 Spacer(Modifier.height(AppSpacing.sm))
 
                 Text(
-                    text = "Choose what you're learning and your translation preferences",
+                    text = "Choose what you're learning and your translation preferences.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -251,7 +254,7 @@ fun LanguageSetupScreenContent(
                 // My native language(s) section
                 Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     Text(
-                        text = "Language(s) I know:",
+                        text = "Translate into:",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Medium
                         )
@@ -261,21 +264,25 @@ fun LanguageSetupScreenContent(
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                     ) {
-                        items(Language.entries.toList()) { language ->
+                        items(
+                            items = Language.entries
+                                .filter { it != state.learningLanguage }
+                                .sortedBy { it.selfName },
+                            key = { it.name }
+                        ) { language ->
                             val isSelected = language in state.nativeLanguages
-                            val isEnabled = language != state.learningLanguage
 
                             Card(
-                                modifier = Modifier.fillMaxWidth().then(
-                                    if (isEnabled) Modifier.clickable { onNativeLanguageToggled(language) }
-                                    else Modifier
-                                ),
+                                modifier = Modifier.fillMaxWidth()
+                                    .semantics(mergeDescendants = true) {}
+                                    .toggleable(
+                                        value = isSelected,
+                                        role = Role.Checkbox,
+                                        onValueChange = { onNativeLanguageToggled(language) }
+                                    ),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = if (isEnabled)
-                                        MaterialTheme.colorScheme.surface
-                                    else
-                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                    containerColor = MaterialTheme.colorScheme.surface
                                 ),
                                 border = if (isSelected)
                                     BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
@@ -291,20 +298,13 @@ fun LanguageSetupScreenContent(
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
                                             text = language.flag,
-                                            fontSize = 20.sp,
-                                            color = if (isEnabled)
-                                                LocalContentColor.current
-                                            else
-                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            fontSize = 20.sp
                                         )
                                         Spacer(Modifier.width(AppSpacing.md))
                                         Text(
                                             text = language.selfName,
                                             style = MaterialTheme.typography.bodyLarge,
-                                            color = if (isEnabled)
-                                                MaterialTheme.colorScheme.onSurface
-                                            else
-                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
                                     if (isSelected) {

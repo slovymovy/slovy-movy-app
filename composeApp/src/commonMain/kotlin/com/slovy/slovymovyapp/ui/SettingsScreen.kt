@@ -231,8 +231,8 @@ class SettingsViewModel(
                 }
 
                 state = state.copy(
-                    learningLanguages = mergedStates,
-                    addableLanguages = addable,
+                    learningLanguages = mergedStates.sortedBy { it.language.selfName },
+                    addableLanguages = addable.sortedBy { it.language.selfName },
                     translationLanguages = translationPrefs,
                     activeDictionaryLanguage = activeDict,
                     isLoadingAvailable = false,
@@ -952,7 +952,7 @@ fun SettingsScreenContent(
                             }
                             item {
                                 TranslationLanguageSection(
-                                    allLanguages = Language.entries.toList(),
+                                    allLanguages = Language.entries.sortedBy { it.selfName },
                                     selectedLanguages = state.translationLanguages,
                                     isExpanded = state.isTranslationLanguagesExpanded,
                                     onToggleExpanded = onToggleTranslationLanguagesExpanded,
