@@ -317,35 +317,36 @@ private fun selectTestModeCuratedRawFiles(
     val selectedNames = mutableSetOf<String>()
 
     seeds.forEach { seed ->
-        val preferred = seed.candidates.firstOrNull { word ->
+        val preferredWords = seed.candidates.filter { word ->
             val fileName = "$word.json"
-            if (fileName in selectedNames) return@firstOrNull false
+            if (fileName in selectedNames) return@filter false
             val rawFile = File(rawDir, fileName)
-            if (!rawFile.exists()) return@firstOrNull false
+            if (!rawFile.exists()) return@filter false
             val processedFile = File(processedDir, fileName)
             fileContainsPos(processedFile, seed.pos) || fileContainsPos(rawFile, seed.pos)
         }
 
-        val fallback = if (preferred == null) {
-            seed.candidates.firstOrNull { word ->
-                val fileName = "$word.json"
-                fileName !in selectedNames && File(rawDir, fileName).exists()
+        if (preferredWords.isNotEmpty()) {
+            preferredWords.forEach { chosenWord ->
+                val fileName = "$chosenWord.json"
+                selectedNames += fileName
+                selected += File(rawDir, fileName)
             }
-        } else {
-            null
+            return@forEach
         }
 
-        val chosenWord = preferred ?: fallback
-        if (chosenWord == null) {
+        val fallbackWord = seed.candidates.firstOrNull { word ->
+            val fileName = "$word.json"
+            fileName !in selectedNames && File(rawDir, fileName).exists()
+        }
+
+        if (fallbackWord == null) {
             println("[TEST MODE][$lang] No curated candidate found for POS '${seed.pos}'")
             return@forEach
         }
 
-        if (preferred == null) {
-            println("[TEST MODE][$lang] Using fallback word '$chosenWord' for POS '${seed.pos}'")
-        }
-
-        val fileName = "$chosenWord.json"
+        println("[TEST MODE][$lang] Using fallback word '$fallbackWord' for POS '${seed.pos}'")
+        val fileName = "$fallbackWord.json"
         selectedNames += fileName
         selected += File(rawDir, fileName)
     }
