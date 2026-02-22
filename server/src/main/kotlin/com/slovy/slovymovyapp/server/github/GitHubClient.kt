@@ -4,6 +4,7 @@ import kotlinx.serialization.json.*
 import org.kohsuke.github.*
 import java.io.File
 import java.net.URI
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -557,7 +558,11 @@ object GitHubClient {
         if (encoding == null || encoding == "none") {
             val downloadUrl = content.downloadUrl
                 ?: throw IllegalStateException("Missing download URL for content with encoding '$encoding'")
-            return URI.create(downloadUrl).toURL().openStream().bufferedReader().use { it.readText() }
+            val (scheme, rest) = downloadUrl.split("://", limit = 2)
+            val encodedUrl = "$scheme://" + rest.split("/").joinToString("/") {
+                URLEncoder.encode(it, Charsets.UTF_8)
+            }
+            return URI.create(encodedUrl).toURL().openStream().bufferedReader().use { it.readText() }
         }
         return content.read().bufferedReader().use { it.readText() }
     }
