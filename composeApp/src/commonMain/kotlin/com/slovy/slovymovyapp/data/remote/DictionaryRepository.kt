@@ -4,6 +4,8 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.forms.*
+import com.slovy.slovymovyapp.data.forms.configs.SchemeRegistry
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
@@ -15,6 +17,117 @@ import kotlin.uuid.Uuid
 
 internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
     return PartOfSpeech.valueOf(this.name)
+}
+
+data class LanguageCardForm(
+    val tags: List<String> = emptyList(),
+    val form: String
+)
+
+private data class ResolvedFormTags(
+    val form: String,
+    val tagsByKey: Map<String, Set<String>>,
+    val mappedTagCount: Int
+)
+
+private fun countResolvedMatches(resolved: List<List<String?>>): Pair<Int, Int> {
+    var exact = 0
+    var uncertain = 0
+    resolved.forEach { row ->
+        row.forEach { value ->
+            if (value != null) {
+                if (value.endsWith("?")) uncertain++ else exact++
+            }
+        }
+    }
+    return exact to uncertain
+}
+
+fun resolveSchemeView(
+    forms: List<LanguageCardForm>,
+    view: SchemeView,
+    tagResolver: SchemeTagResolver = DefaultSchemeTagResolver,
+    lemma: String? = null
+): List<List<String?>> {
+    val preprocessedForms = tagResolver
+        .preprocessForms(
+            forms = forms.map { SchemeInputForm(tags = it.tags, form = it.form) },
+            lemma = lemma
+        )
+        .map { form -> LanguageCardForm(tags = form.tags, form = form.form) }
+
+    val resolvedForms = preprocessedForms.map { form ->
+        val mappedTags = tagResolver.resolve(form.tags)
+        ResolvedFormTags(
+            form = form.form,
+            tagsByKey = mappedTags
+                .groupBy { it.key }
+                .mapValues { (_, tags) -> tags.map { it.value }.toSet() },
+            mappedTagCount = mappedTags.size
+        )
+    }
+    return view.grid.map { row ->
+        row.map { cell ->
+            when (cell) {
+                is GridCell.Data -> resolvedForms
+                    .asSequence()
+                    .mapNotNull { resolvedForm ->
+                        val hasConflict = cell.tags.any { (key, expectedValue) ->
+                            resolvedForm.tagsByKey[key]?.let { expectedValue !in it } == true
+                        }
+                        if (hasConflict) return@mapNotNull null
+
+                        val matchedRequiredTags = cell.tags.count { (key, expectedValue) ->
+                            resolvedForm.tagsByKey[key]?.contains(expectedValue) == true
+                        }
+                        if (matchedRequiredTags != cell.tags.size) return@mapNotNull null
+
+                        val matchedSupportingTags = cell.supportingTags.count { (key, supportingValue) ->
+                            resolvedForm.tagsByKey[key]?.contains(supportingValue) == true
+                        }
+                        val extraMappedTags = resolvedForm.mappedTagCount - matchedRequiredTags
+                        SchemeCellCandidate(
+                            missingRequiredTags = 0,
+                            matchedSupportingTags = matchedSupportingTags,
+                            extraMappedTags = extraMappedTags,
+                            form = resolvedForm.form
+                        )
+                    }
+                    .toList()
+                    .let(tagResolver::selectCandidate)
+                    ?.form
+
+                else -> null
+            }
+        }
+    }
+}
+
+fun resolveBestFormsViews(
+    language: Language,
+    pos: DictionaryPos,
+    forms: List<LanguageCardForm>,
+    lemma: String? = null
+): List<FormsSchemeView> {
+    val inputForms = forms.map { SchemeInputForm(tags = it.tags, form = it.form) }
+    val selectedScheme = SchemeRegistry.findSchemes(language, pos, inputForms).firstOrNull() ?: return emptyList()
+    return selectedScheme.views.mapNotNull { view ->
+        val resolved = resolveSchemeView(
+            forms = forms,
+            view = view,
+            tagResolver = selectedScheme.tagResolver,
+            lemma = lemma
+        )
+        val (exactCount, uncertainCount) = countResolvedMatches(resolved)
+        if (exactCount + uncertainCount == 0) {
+            null
+        } else {
+            FormsSchemeView(
+                view = view.copy(viewId = "${selectedScheme.templateId}:${view.viewId}"),
+                forms = resolved
+            )
+        }
+    }
 }
 
 // Repository that provides search across installed dictionaries and builds LanguageCard by lemma ID,
@@ -602,6 +715,9 @@ class DictionaryRepository(
                 )
             }
 
+            val dictionaryPos = DictionaryPos.valueOf(posData.pos.name)
+            val formsViews = resolveBestFormsViews(language, dictionaryPos, forms, lemma)
+
             val senses = posData.senseRows.map { s ->
                 // Return cached sense if available
                 posData.cachedSenses[s.senseId.toString()]?.let { return@map it }
@@ -650,7 +766,7 @@ class DictionaryRepository(
 
             LanguageCardPosEntry(
                 pos = posData.pos,
-                forms = forms,
+                formsViews = formsViews,
                 senses = senses
             )
         }

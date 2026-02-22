@@ -76,6 +76,7 @@ data class EntryUiState(
     val entryId: String,
     val expanded: Boolean = true,
     val formsExpanded: Boolean = false,
+    val selectedFormsViewId: String? = null,
     val senses: List<SenseUiState> = emptyList()
 )
 
@@ -134,6 +135,7 @@ private fun LanguageCardPosEntry.toEntryUiState(
     entryId = "${pos.name.lowercase()}_$index",
     expanded = true,
     formsExpanded = false,
+    selectedFormsViewId = formsViews.firstOrNull()?.view?.viewId,
     senses = senses.map {
         val expanded = if (targetSenseId != null) {
             it.senseId == targetSenseId
@@ -169,20 +171,40 @@ private fun WordDetailUiState.Content.toggleEntry(entryId: String): WordDetailUi
 private fun WordDetailUiState.Content.toggleForms(entryId: String): WordDetailUiState.Content =
     updateEntry(entryId) { entry -> entry.copy(formsExpanded = !entry.formsExpanded) }
 
+private fun WordDetailUiState.Content.selectFormsView(
+    entryId: String,
+    viewId: String
+): WordDetailUiState.Content =
+    updateEntry(entryId) { entry -> entry.copy(selectedFormsViewId = viewId) }
+
 private fun WordDetailUiState.Content.toggleSense(entryId: String, senseId: String): WordDetailUiState.Content =
     updateEntry(entryId) { entry ->
         entry.updateSense(senseId) { sense -> sense.copy(expanded = !sense.expanded) }
     }
 
+internal fun resolveSelectedFormsViewId(
+    preferredViewId: String?,
+    availableViewIds: List<String>
+): String? = preferredViewId?.takeIf { it in availableViewIds } ?: availableViewIds.firstOrNull()
+
 private fun WordDetailUiState.Content.mergeStateFrom(
     previous: WordDetailUiState.Content
 ): WordDetailUiState.Content {
+    val availableFormsViewsByEntryId = card.entries.mapIndexed { index, entry ->
+        "${entry.pos.name.lowercase()}_$index" to entry.formsViews.map { it.view.viewId }
+    }.toMap()
+
     var merged = copy(wordFamilyExpanded = previous.wordFamilyExpanded)
     previous.entries.forEach { previousEntry ->
         merged = merged.updateEntry(previousEntry.entryId) { entry ->
+            val availableViews = availableFormsViewsByEntryId[entry.entryId].orEmpty()
             var updatedEntry = entry.copy(
                 expanded = previousEntry.expanded,
-                formsExpanded = previousEntry.formsExpanded
+                formsExpanded = previousEntry.formsExpanded,
+                selectedFormsViewId = resolveSelectedFormsViewId(
+                    previousEntry.selectedFormsViewId,
+                    availableViews
+                )
             )
             previousEntry.senses.forEach { previousSense ->
                 updatedEntry = updatedEntry.updateSense(previousSense.senseId) { sense ->
@@ -524,6 +546,13 @@ class WordDetailViewModel(
         }
     }
 
+    fun selectFormsView(entryId: String, viewId: String) {
+        val current = state
+        if (current is WordDetailUiState.Content) {
+            state = current.selectFormsView(entryId, viewId)
+        }
+    }
+
     fun toggleSense(entryId: String, senseId: String) {
         val current = state
         if (current is WordDetailUiState.Content) {
@@ -716,6 +745,7 @@ fun WordDetailScreen(
         onSubmitFeedback = { viewModel.submitFeedback() },
         onEntryToggle = { entryId -> viewModel.toggleEntry(entryId) },
         onFormsToggle = { entryId -> viewModel.toggleForms(entryId) },
+        onFormsViewSelect = { entryId, viewId -> viewModel.selectFormsView(entryId, viewId) },
         onSenseToggle = { entryId, senseId -> viewModel.toggleSense(entryId, senseId) },
         onSensePositioned = { senseId, yOffset -> viewModel.updateSensePosition(senseId, yOffset) },
         isSenseFavorite = { senseId -> viewModel.isSenseFavorite(senseId) },
@@ -752,6 +782,7 @@ fun WordDetailScreenContent(
     onSubmitFeedback: () -> Unit = {},
     onEntryToggle: (String) -> Unit = {},
     onFormsToggle: (String) -> Unit = {},
+    onFormsViewSelect: (String, String) -> Unit = { _, _ -> },
     onSenseToggle: (String, String) -> Unit = { _, _ -> },
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
@@ -862,6 +893,7 @@ fun WordDetailScreenContent(
                         translationError = state.translationError,
                         onEntryToggle = onEntryToggle,
                         onFormsToggle = onFormsToggle,
+                        onFormsViewSelect = onFormsViewSelect,
                         onSenseToggle = onSenseToggle,
                         onSensePositioned = onSensePositioned,
                         isSenseFavorite = isSenseFavorite,
@@ -928,6 +960,7 @@ private fun WordDetailContent(
     translationError: String? = null,
     onEntryToggle: (String) -> Unit,
     onFormsToggle: (String) -> Unit,
+    onFormsViewSelect: (String, String) -> Unit,
     onSenseToggle: (String, String) -> Unit,
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
@@ -998,6 +1031,7 @@ private fun WordDetailContent(
                     translationError = translationError,
                     onEntryToggle = { onEntryToggle(entryState.entryId) },
                     onFormsToggle = { onFormsToggle(entryState.entryId) },
+                    onFormsViewSelect = { viewId -> onFormsViewSelect(entryState.entryId, viewId) },
                     onSenseToggle = { senseId -> onSenseToggle(entryState.entryId, senseId) },
                     onSensePositioned = { senseId, windowY ->
                         // Calculate position relative to scroll container

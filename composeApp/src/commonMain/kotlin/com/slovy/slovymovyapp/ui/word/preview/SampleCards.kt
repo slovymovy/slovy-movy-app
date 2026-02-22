@@ -1,9 +1,17 @@
 package com.slovy.slovymovyapp.ui.word.preview
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.forms.configs.EnConjugationScheme
 import com.slovy.slovymovyapp.data.remote.*
 
 val isSenseFavoritePreview: (String) -> Boolean = { it.hashCode() % 2 == 0 }
+
+private fun resolvedEnNounFormsView(vararg taggedForms: Pair<List<String>, String>): FormsSchemeView {
+    val forms = taggedForms.map { (tags, form) -> LanguageCardForm(tags = tags, form = form) }
+    val scheme = EnConjugationScheme.EN_NOUN
+    val view = scheme.views.first()
+    return FormsSchemeView(view, resolveSchemeView(forms, view, scheme.tagResolver))
+}
 
 internal fun sampleAmazonCard(): LanguageCard {
     return LanguageCard(
@@ -13,7 +21,7 @@ internal fun sampleAmazonCard(): LanguageCard {
             // Noun entry with multiple meanings
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                forms = mutableListOf(LanguageCardForm(listOf("plural"), "amazons")),
+                formsViews = listOf(resolvedEnNounFormsView(listOf("plural") to "amazons")),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "000a2542-e328-4b25-ae77-27edac4d3796",
@@ -110,7 +118,7 @@ internal fun sampleAmazonCard(): LanguageCard {
             // Name entry
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NAME,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "e4e736a7-5254-4f11-88e1-1ca59ed5011e",
@@ -151,7 +159,7 @@ internal fun sampleCelebrationCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "65a4e9ac-cd46-4763-a0a4-d2457cfa6071",
@@ -205,7 +213,7 @@ internal fun sampleProgrammaticallyCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.ADVERB,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "d3674bcb-9937-4678-bce7-612fee308dc9",
@@ -256,7 +264,7 @@ internal fun sampleRichmondCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NAME,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "e67ffcc3-a126-470c-ad5b-7e48f6a0eb73",
@@ -333,7 +341,7 @@ internal fun sampleKwartierCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "f6691b39-ac88-4711-a3e9-5d1751ce455d",
@@ -400,7 +408,7 @@ internal fun sampleProgrammaCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "a51a3765-9b26-412d-bca0-c03443ffc445",
@@ -458,7 +466,7 @@ internal fun sampleNoTranslationCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -530,7 +538,7 @@ internal fun sampleMultilingualCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "c3d4e5f6-a7b8-9012-cdef-345678901234",
@@ -667,7 +675,7 @@ internal fun sampleTestingCard(): LanguageCard {
             // Verb entry
             LanguageCardPosEntry(
                 pos = PartOfSpeech.VERB,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "f8731e0a-3d06-4a0f-af1c-98de00309b76",
@@ -711,7 +719,7 @@ internal fun sampleTestingCard(): LanguageCard {
             // Noun entry
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "16f3dcde-882f-464a-8f53-0843847294b2",
@@ -753,7 +761,7 @@ internal fun sampleWordWithTraits(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.VERB,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "trait-example-1",
@@ -812,7 +820,7 @@ internal fun sampleAllTraitTypesCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.PRONOUN,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "all-traits-example",
@@ -874,7 +882,7 @@ internal fun sampleVeryLongWordCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "very-long-word-example",
@@ -930,7 +938,7 @@ internal fun sampleDoubleCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.ADJECTIVE,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "double-adj-1",
@@ -962,7 +970,7 @@ internal fun sampleDoubleCard(): LanguageCard {
             ),
             LanguageCardPosEntry(
                 pos = PartOfSpeech.VERB,
-                forms = mutableListOf(),
+                formsViews = emptyList(),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "double-verb-1",
@@ -1007,7 +1015,7 @@ internal fun createLoadingCard(
     entries = posEntries.map { pos ->
         LanguageCardPosEntry(
             pos = pos,
-            forms = mutableListOf(),
+            formsViews = emptyList(),
             senses = emptyList()
         )
     }
