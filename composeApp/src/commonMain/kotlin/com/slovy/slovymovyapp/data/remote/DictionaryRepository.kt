@@ -19,42 +19,22 @@ internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
     return PartOfSpeech.valueOf(this.name)
 }
 
-data class LanguageCardForm(
-    val tags: List<String> = emptyList(),
-    val form: String
-)
-
 private data class ResolvedFormTags(
     val form: String,
     val tagsByKey: Map<String, Set<String>>,
     val mappedTagCount: Int
 )
 
-private fun countResolvedMatches(resolved: List<List<String?>>): Pair<Int, Int> {
-    var exact = 0
-    var uncertain = 0
-    resolved.forEach { row ->
-        row.forEach { value ->
-            if (value != null) {
-                if (value.endsWith("?")) uncertain++ else exact++
-            }
-        }
-    }
-    return exact to uncertain
-}
+private fun hasAnyResolvedForm(resolved: List<List<String?>>): Boolean =
+    resolved.any { row -> row.any { it != null } }
 
 fun resolveSchemeView(
-    forms: List<LanguageCardForm>,
+    forms: List<SchemeInputForm>,
     view: SchemeView,
     tagResolver: SchemeTagResolver = DefaultSchemeTagResolver,
-    lemma: String? = null
+    lemma: String
 ): List<List<String?>> {
-    val preprocessedForms = tagResolver
-        .preprocessForms(
-            forms = forms.map { SchemeInputForm(tags = it.tags, form = it.form) },
-            lemma = lemma
-        )
-        .map { form -> LanguageCardForm(tags = form.tags, form = form.form) }
+    val preprocessedForms = tagResolver.preprocessForms(forms = forms, lemma = lemma)
 
     val resolvedForms = preprocessedForms.map { form ->
         val mappedTags = tagResolver.resolve(form.tags)
@@ -72,24 +52,19 @@ fun resolveSchemeView(
                 is GridCell.Data -> resolvedForms
                     .asSequence()
                     .mapNotNull { resolvedForm ->
-                        val hasConflict = cell.tags.any { (key, expectedValue) ->
-                            resolvedForm.tagsByKey[key]?.let { expectedValue !in it } == true
-                        }
-                        if (hasConflict) return@mapNotNull null
-
-                        val matchedRequiredTags = cell.tags.count { (key, expectedValue) ->
+                        val matchedRequiredTags = cell.requiredTags.count { (key, expectedValue) ->
                             resolvedForm.tagsByKey[key]?.contains(expectedValue) == true
                         }
-                        if (matchedRequiredTags != cell.tags.size) return@mapNotNull null
+                        if (matchedRequiredTags != cell.requiredTags.size) return@mapNotNull null
 
-                        val matchedSupportingTags = cell.supportingTags.count { (key, supportingValue) ->
+                        val matchedPreferredTags = cell.preferredTags.count { (key, supportingValue) ->
                             resolvedForm.tagsByKey[key]?.contains(supportingValue) == true
                         }
-                        val extraMappedTags = resolvedForm.mappedTagCount - matchedRequiredTags
+                        val extraKnownTags = resolvedForm.mappedTagCount - matchedRequiredTags
                         SchemeCellCandidate(
                             missingRequiredTags = 0,
-                            matchedSupportingTags = matchedSupportingTags,
-                            extraMappedTags = extraMappedTags,
+                            matchedPreferredTags = matchedPreferredTags,
+                            extraKnownTags = extraKnownTags,
                             form = resolvedForm.form
                         )
                     }
@@ -103,14 +78,13 @@ fun resolveSchemeView(
     }
 }
 
-fun resolveBestFormsViews(
+private fun resolveNonEmptyFormsViews(
     language: Language,
     pos: DictionaryPos,
-    forms: List<LanguageCardForm>,
-    lemma: String? = null
+    forms: List<SchemeInputForm>,
+    lemma: String
 ): List<FormsSchemeView> {
-    val inputForms = forms.map { SchemeInputForm(tags = it.tags, form = it.form) }
-    val selectedScheme = SchemeRegistry.findSchemes(language, pos, inputForms).firstOrNull() ?: return emptyList()
+    val selectedScheme = SchemeRegistry.findScheme(language, pos, forms) ?: return emptyList()
     return selectedScheme.views.mapNotNull { view ->
         val resolved = resolveSchemeView(
             forms = forms,
@@ -118,15 +92,13 @@ fun resolveBestFormsViews(
             tagResolver = selectedScheme.tagResolver,
             lemma = lemma
         )
-        val (exactCount, uncertainCount) = countResolvedMatches(resolved)
-        if (exactCount + uncertainCount == 0) {
-            null
-        } else {
-            FormsSchemeView(
-                view = view.copy(viewId = "${selectedScheme.templateId}:${view.viewId}"),
-                forms = resolved
-            )
-        }
+
+        if (!hasAnyResolvedForm(resolved)) return@mapNotNull null
+
+        FormsSchemeView(
+            view = view.copy(viewId = "${selectedScheme.templateId}:${view.viewId}"),
+            forms = resolved
+        )
     }
 }
 
@@ -709,14 +681,14 @@ class DictionaryRepository(
         // Build entries
         val entries = posDataList.map { posData ->
             val forms = posData.forms.map { formData ->
-                LanguageCardForm(
+                SchemeInputForm(
                     tags = formTagsMap[formData.formId] ?: emptyList(),
                     form = formData.form
                 )
             }
 
             val dictionaryPos = DictionaryPos.valueOf(posData.pos.name)
-            val formsViews = resolveBestFormsViews(language, dictionaryPos, forms, lemma)
+            val formsViews = resolveNonEmptyFormsViews(language, dictionaryPos, forms, lemma)
 
             val senses = posData.senseRows.map { s ->
                 // Return cached sense if available
