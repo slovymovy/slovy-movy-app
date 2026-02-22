@@ -15,15 +15,15 @@ object SchemeRegistry {
     )
 
     /**
-     * Returns the conjugation schemes to use for [language] + [pos], optionally filtered
+     * Returns the conjugation scheme to use for [language] + [pos], optionally filtered
      * by the word's raw input [forms] (DB tag strings before preprocessing).
      *
      * When [forms] is empty the language selector still performs POS filtering but cannot
      * apply form-based narrowing (e.g. aspect detection for Russian verbs).
      */
-    fun findSchemes(
+    fun findScheme(
         language: Language,
         pos: DictionaryPos,
         forms: List<SchemeInputForm> = emptyList(),
-    ): List<ConjugationScheme> = selectors[language]?.schemesFor(pos, forms) ?: emptyList()
+    ): ConjugationScheme? = selectors[language]?.schemeFor(pos, forms)
 }

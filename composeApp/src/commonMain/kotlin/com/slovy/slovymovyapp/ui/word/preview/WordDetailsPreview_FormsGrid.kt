@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.slovy.slovymovyapp.data.forms.ConjugationScheme
+import com.slovy.slovymovyapp.data.forms.SchemeInputForm
 import com.slovy.slovymovyapp.data.forms.configs.EnConjugationScheme
 import com.slovy.slovymovyapp.data.forms.configs.NlConjugationScheme
 import com.slovy.slovymovyapp.data.forms.configs.RuConjugationScheme
@@ -27,14 +28,15 @@ private fun previewSense(
 )
 
 private fun resolveFormsViews(
+    lemma: String,
     scheme: ConjugationScheme,
     taggedForms: List<Pair<List<String>, String>>
 ): List<FormsSchemeView> {
-    val forms = taggedForms.map { (tags, form) -> LanguageCardForm(tags = tags, form = form) }
+    val forms = taggedForms.map { (tags, form) -> SchemeInputForm(tags = tags, form = form) }
     return scheme.views.map { view ->
         FormsSchemeView(
             view = view,
-            forms = resolveSchemeView(forms, view, scheme.tagResolver)
+            forms = resolveSchemeView(forms, view, scheme.tagResolver, lemma)
         )
     }
 }
@@ -50,7 +52,7 @@ private fun englishNounGridCard(missingSingular: Boolean = false): LanguageCard 
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                formsViews = resolveFormsViews(EnConjugationScheme.EN_NOUN, forms),
+                formsViews = resolveFormsViews("book", EnConjugationScheme.EN_NOUN, forms),
                 senses = listOf(previewSense("en-noun-1", "A set of bound pages.", "book_sense"))
             )
         )
@@ -78,7 +80,7 @@ private fun russianNounGridCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                formsViews = resolveFormsViews(RuConjugationScheme.RU_NOUN, forms),
+                formsViews = resolveFormsViews("книга", RuConjugationScheme.RU_NOUN, forms),
                 senses = listOf(previewSense("ru-noun-1", "Printed work bound as pages.", "ru_book_sense"))
             )
         )
@@ -108,7 +110,7 @@ private fun dutchVerbGridCard(): LanguageCard {
         entries = listOf(
             LanguageCardPosEntry(
                 pos = PartOfSpeech.VERB,
-                formsViews = resolveFormsViews(NlConjugationScheme.NL_VERB, forms),
+                formsViews = resolveFormsViews("maken", NlConjugationScheme.NL_VERB, forms),
                 senses = listOf(previewSense("nl-verb-1", "To make or create something.", "nl_make_sense"))
             )
         )

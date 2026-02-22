@@ -1,16 +1,20 @@
 package com.slovy.slovymovyapp.ui.word.preview
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.forms.SchemeInputForm
 import com.slovy.slovymovyapp.data.forms.configs.EnConjugationScheme
 import com.slovy.slovymovyapp.data.remote.*
 
 val isSenseFavoritePreview: (String) -> Boolean = { it.hashCode() % 2 == 0 }
 
-private fun resolvedEnNounFormsView(vararg taggedForms: Pair<List<String>, String>): FormsSchemeView {
-    val forms = taggedForms.map { (tags, form) -> LanguageCardForm(tags = tags, form = form) }
+private fun resolvedEnNounFormsView(
+    lemma: String,
+    vararg taggedForms: Pair<List<String>, String>
+): FormsSchemeView {
+    val forms = taggedForms.map { (tags, form) -> SchemeInputForm(tags = tags, form = form) }
     val scheme = EnConjugationScheme.EN_NOUN
     val view = scheme.views.first()
-    return FormsSchemeView(view, resolveSchemeView(forms, view, scheme.tagResolver))
+    return FormsSchemeView(view, resolveSchemeView(forms, view, scheme.tagResolver, lemma))
 }
 
 internal fun sampleAmazonCard(): LanguageCard {
@@ -21,7 +25,12 @@ internal fun sampleAmazonCard(): LanguageCard {
             // Noun entry with multiple meanings
             LanguageCardPosEntry(
                 pos = PartOfSpeech.NOUN,
-                formsViews = listOf(resolvedEnNounFormsView(listOf("plural") to "amazons")),
+                formsViews = listOf(
+                    resolvedEnNounFormsView(
+                        lemma = "amazon",
+                        listOf("plural") to "amazons"
+                    )
+                ),
                 senses = listOf(
                     LanguageCardResponseSense(
                         senseId = "000a2542-e328-4b25-ae77-27edac4d3796",

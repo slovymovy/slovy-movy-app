@@ -170,6 +170,6 @@ object EnConjugationScheme : ConjugationSchemeProvider {
     /** All English schemes for easy lookup. */
     val ALL: List<ConjugationScheme> = listOf(EN_VERB, EN_NOUN, EN_ADJECTIVE)
 
-    override fun schemesFor(pos: DictionaryPos, forms: List<SchemeInputForm>): List<ConjugationScheme> =
-        ALL.filter { it.pos == pos }
+    override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? =
+        ALL.firstOrNull { it.pos == pos }
 }

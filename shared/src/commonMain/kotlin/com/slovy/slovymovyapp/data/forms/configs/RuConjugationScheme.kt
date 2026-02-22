@@ -55,8 +55,8 @@ object RuConjugationScheme : ConjugationSchemeProvider {
         override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
             return candidates.minWithOrNull(
                 compareBy<SchemeCellCandidate> { it.missingRequiredTags }
-                    .thenBy { -it.matchedSupportingTags }
-                    .thenBy { it.extraMappedTags }
+                    .thenBy { -it.matchedPreferredTags }
+                    .thenBy { it.extraKnownTags }
                     .thenBy { it.form }
             )
         }
@@ -416,15 +416,15 @@ object RuConjugationScheme : ConjugationSchemeProvider {
      * - Only `"imperfective"` present → [RU_VERB_IMPERFECTIVE]
      * - Both or neither → [RU_VERB_IMPERFECTIVE] by predefined default order
      */
-    override fun schemesFor(pos: DictionaryPos, forms: List<SchemeInputForm>): List<ConjugationScheme> {
-        val byPos = ALL.filter { it.pos == pos }
+    override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? {
+        val byPos = ALL.firstOrNull { it.pos == pos }
         if (pos != DictionaryPos.VERB) return byPos
         val hasPerfective = forms.any { "perfective" in it.tags }
         val hasImperfective = forms.any { "imperfective" in it.tags }
         return when {
-            hasPerfective && !hasImperfective -> listOf(RU_VERB_PERFECTIVE)
-            hasImperfective && !hasPerfective -> listOf(RU_VERB_IMPERFECTIVE)
-            else -> listOf(RU_VERB_IMPERFECTIVE)
+            hasPerfective && !hasImperfective -> RU_VERB_PERFECTIVE
+            hasImperfective && !hasPerfective -> RU_VERB_IMPERFECTIVE
+            else -> RU_VERB_IMPERFECTIVE
         }
     }
 }

@@ -32,8 +32,8 @@ object NlConjugationScheme : ConjugationSchemeProvider {
         override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
             return candidates.minWithOrNull(
                 compareBy<SchemeCellCandidate> { it.missingRequiredTags }
-                    .thenBy { -it.matchedSupportingTags }
-                    .thenBy { it.extraMappedTags }
+                    .thenBy { -it.matchedPreferredTags }
+                    .thenBy { it.extraKnownTags }
                     .thenBy { it.form }
             )
         }
@@ -296,6 +296,6 @@ object NlConjugationScheme : ConjugationSchemeProvider {
     /** All Dutch schemes for easy lookup. */
     val ALL: List<ConjugationScheme> = listOf(NL_VERB, NL_NOUN, NL_ADJECTIVE)
 
-    override fun schemesFor(pos: DictionaryPos, forms: List<SchemeInputForm>): List<ConjugationScheme> =
-        ALL.filter { it.pos == pos }
+    override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? =
+        ALL.firstOrNull { it.pos == pos }
 }

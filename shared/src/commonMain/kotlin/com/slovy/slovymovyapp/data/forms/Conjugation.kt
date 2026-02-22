@@ -40,8 +40,8 @@ sealed class GridCell {
     ) : GridCell()
 
     data class Data(
-        val tags: FormTags,
-        val supportingTags: FormTags = emptyMap(),
+        val requiredTags: FormTags,
+        val preferredTags: FormTags = emptyMap(),
         override val rowspan: Int = 1,
         override val colspan: Int = 1,
     ) : GridCell()
@@ -105,8 +105,8 @@ class RowBuilder {
         supporting: Set<FormTag> = emptySet(),
     ) {
         cells += GridCell.Data(
-            tags = tags.associate { it.key to it.value },
-            supportingTags = supporting.associate { it.key to it.value },
+            requiredTags = tags.associate { it.key to it.value },
+            preferredTags = supporting.associate { it.key to it.value },
             rowspan = rowspan,
             colspan = colspan
         )
@@ -133,7 +133,7 @@ fun interface ConjugationSchemeProvider {
      * [forms] are provided *before* any preprocessing, as raw DB tag strings, so
      * implementations can check for aspect, animacy, or other discriminating markers.
      */
-    fun schemesFor(pos: DictionaryPos, forms: List<SchemeInputForm>): List<ConjugationScheme>
+    fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme?
 }
 
 /**
@@ -148,8 +148,8 @@ data class SchemeInputForm(
 
 data class SchemeCellCandidate(
     val missingRequiredTags: Int,
-    val matchedSupportingTags: Int,
-    val extraMappedTags: Int,
+    val matchedPreferredTags: Int,
+    val extraKnownTags: Int,
     val form: String
 )
 
