@@ -77,7 +77,7 @@ If it cannot be clearly determined, set it to "no".
 
 If a sense definition states that the sense is a grammatical or morphological form of another word (e.g., comparative, superlative, past tense, past participle, plural, diminutive, etc.), and the base word appears in the definition, enclose only that base word in <w> </w> tags (the word ONLY) within the sense definition. Tag only the base word — do not tag surrounding text, affixes, or punctuation. Tag only when a clear form-of phrase is present, not when it merely repeats or identifies the input word.
 
-For every word, if possible, add a list of morphological derivations - related words that belong to the same word family (nouns, verbs, adjectives, adverbs, etc. formed from the same root). Every entry must be a single word. Every word must share a clear, visible phonetic or orthographic root with the target word.
+For every word, if possible, add a list of morphological derivations - related words that belong to the same word family (nouns, verbs, adjectives, adverbs, etc. formed from the same root). Every entry must be a single word (hyphenated forms are allowed). Every word must share a clear, visible phonetic or orthographic root with the target word.
 - Strictly Exclude: the input word itself.
 - Strictly Exclude: all grammatical inflections or conjugated forms (e.g., plurals, past tense, -ing forms, diminutives).
 - Strictly Exclude: thematic associates.
