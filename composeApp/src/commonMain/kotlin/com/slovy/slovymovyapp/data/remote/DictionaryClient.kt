@@ -305,7 +305,7 @@ class DictionaryClient(
 
         // Read line-by-line, parse each as WordStreamChunk
         while (!channel.isClosedForRead) {
-            val line = channel.readLineStrict() ?: break
+            val line = channel.readLine() ?: break
             if (line.isBlank()) continue
 
             val chunk = json.decodeFromString(WordStreamChunk.serializer(), line)

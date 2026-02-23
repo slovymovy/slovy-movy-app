@@ -35,6 +35,8 @@ dependencies {
 
     // GitHub client
     api(libs.github.api)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
 
     // Google Cloud
     implementation(libs.google.cloud.tasks)

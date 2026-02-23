@@ -190,7 +190,9 @@ private fun SpannedFormsGrid(
             preferredHeights[index] = max(minRowHeightPx, preferredHeight)
         }
 
-        repeat(2) {
+        var changed = true
+        while (changed) {
+            changed = false
             anchors.forEachIndexed { index, placed ->
                 val startRow = placed.anchorRow
                 val endRowExclusive = min(rowCount, startRow + placed.cell.rowspan)
@@ -199,6 +201,7 @@ private fun SpannedFormsGrid(
                 val spanHeight = (startRow until endRowExclusive).sumOf { rowHeights[it] }
                 val required = preferredHeights[index]
                 if (required > spanHeight) {
+                    changed = true
                     val deficit = required - spanHeight
                     val rowsSpanned = endRowExclusive - startRow
                     val base = deficit / rowsSpanned
