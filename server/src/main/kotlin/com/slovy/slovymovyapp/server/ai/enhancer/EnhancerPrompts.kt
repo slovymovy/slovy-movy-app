@@ -36,6 +36,7 @@ For synonyms and antonyms:
 * If a `sense_definition` has no synonyms or antonyms, leave the corresponding field blank.
 * If there is any uncertainty about whether a synonym or antonym precisely fits the sense_definition, don't add it rather than guessing.
 * Only include synonyms that are interchangeable in typical contexts for this sense.
+* Never include the word itself or any of its inflected forms as a synonym or antonym.
 
 Provide common_phrases that must include the target word. 
 Semantic Filtering: Every phrase must directly correlate to the specific sense_definition.
@@ -52,7 +53,8 @@ Examples must:
 - Never duplicate common_phrases as a standalone line.
 - If the input examples are too complex for the assigned level, replace them with simpler ones.
 - If no examples exist in the input, generate new ones following all rules.
-- Wrap only the relevant form of the learned word in <w></w> tags (the word only, not surrounding text).
+- Examples should sound like natural, real-world usage, not textbook constructions.
+- Wrap only the relevant form(s) of the learned word in <w></w> tags. Each tag must wrap a single word only — never a phrase or surrounding text. For separable verbs, tag each part separately (e.g., <w>bel</w> hem <w>op</w>).
 
 Assign semantic_group_id to group semantically close senses; leave blank if unique. Name the group according to its sense.
 
@@ -75,9 +77,9 @@ If it cannot be clearly determined, set it to "no".
 
 If a sense definition states that the sense is a grammatical or morphological form of another word (e.g., comparative, superlative, past tense, past participle, plural, diminutive, etc.), and the base word appears in the definition, enclose only that base word in <w> </w> tags (the word ONLY) within the sense definition. Tag only the base word — do not tag surrounding text, affixes, or punctuation. Tag only when a clear form-of phrase is present, not when it merely repeats or identifies the input word.
 
-For every word, if possible, add a list of morphological derivations - related words that belong to the same word family (nouns, verbs, adjectives, adverbs, etc. formed from the same root). Every word must share a clear, visible phonetic or orthographic root with the target word.
+For every word, if possible, add a list of morphological derivations - related words that belong to the same word family (nouns, verbs, adjectives, adverbs, etc. formed from the same root). Every entry must be a single word. Every word must share a clear, visible phonetic or orthographic root with the target word.
 - Strictly Exclude: the input word itself.
-- Strictly Exclude: all grammatical inflections or conjugated forms (e.g., plurals, past tense, -ing forms).
+- Strictly Exclude: all grammatical inflections or conjugated forms (e.g., plurals, past tense, -ing forms, diminutives).
 - Strictly Exclude: thematic associates.
 - Strictly Exclude: words that share a prefix but have different roots.
         """.trimIndent()
