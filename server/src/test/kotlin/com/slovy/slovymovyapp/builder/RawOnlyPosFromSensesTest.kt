@@ -23,7 +23,7 @@ class RawOnlyPosFromSensesTest {
               "word": "$word",
               "lang_code": "$lang",
               "source_file_to_entries": {
-                "en-extract.jsonl": [
+                "raw-wiktextract-data.jsonl": [
                   {
                     "entry_id": "11111111-1111-1111-1111-111111111111",
                     "word": "$word",

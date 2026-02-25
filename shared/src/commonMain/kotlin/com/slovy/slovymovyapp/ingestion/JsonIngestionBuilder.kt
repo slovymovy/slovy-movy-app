@@ -2,6 +2,7 @@
 
 package com.slovy.slovymovyapp.ingestion
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
 import com.slovy.slovymovyapp.data.dictionary.NameType
@@ -220,8 +221,6 @@ class JsonIngestionBuilder(
 
         val lemmaNormalized = stripAccents(lemmaWord)
         val entriesSelection = selectEntries(raw)
-        val allEntries = entriesSelection.allEntries
-        val entriesForForms = entriesSelection.entriesForForms
 
         val baseLemmaId = generateLemmaId(lemmaWord, lemmaNormalized)
 
@@ -250,7 +249,7 @@ class JsonIngestionBuilder(
             )
         }
 
-        val lemmaPosIdToForms = buildLemmaPosIdToForms(entriesForForms, posToEntryId)
+        val lemmaPosIdToForms = buildLemmaPosIdToForms(entriesSelection.entriesForForms, posToEntryId)
         insertForms(dictQ, lemmaPosIdToForms)
     }
 
@@ -274,7 +273,7 @@ class JsonIngestionBuilder(
         allEntries.forEach { entry ->
             entry.senses.forEach { s ->
                 val sid = uuidParse(s.senseId.toString())
-                if (senseIdToRawEntry.contains(sid)) {
+                if (sid in senseIdToRawEntry) {
                     throw IllegalArgumentException("Duplicate sense_id: $sid")
                 }
                 senseIdToRawEntry[sid] = entry
@@ -288,7 +287,7 @@ class JsonIngestionBuilder(
                 val sid = uuidParse(s.senseId)
                 val rawEntry = senseIdToRawEntry[sid]
                 if (rawEntry != null && mapPos(rawEntry.pos) == pPos) {
-                    if (!posToEntryId.containsKey(pPos)) {
+                    if (pPos !in posToEntryId) {
                         posToEntryId[pPos] = uuidParse(rawEntry.entryId.toString())
                     }
                     return@forEach
@@ -298,7 +297,7 @@ class JsonIngestionBuilder(
 
         processed.entries.forEach { entry ->
             val key = mapPos(entry.pos)
-            if (!posToEntryId.containsKey(key)) {
+            if (key !in posToEntryId) {
                 val hash = md5("${lemmaWord}_${lemmaNormalized}_${key!!.name}".encodeToByteArray())
                 posToEntryId[key] = Uuid.fromByteArray(hash.sliceArray(0..15))
             }
@@ -687,6 +686,7 @@ class JsonIngestionBuilder(
 
     private data class EntriesSelection(
         val nativeEntries: List<ExtractedWordEntry>,
+        val enWiktionaryEntries: List<ExtractedWordEntry>,
         val allEntries: List<ExtractedWordEntry>,
         val entriesForForms: List<ExtractedWordEntry>
     )
@@ -694,12 +694,19 @@ class JsonIngestionBuilder(
     private data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
 
     private fun selectEntries(raw: ExtractedWordData): EntriesSelection {
-        val nativeKey = LANG_TO_SOURCE_FILE[raw.langCode]
-        val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+        val nativeKey = LANG_TO_SOURCE_FILE[raw.langCode]!!
+        val enWiktionarySourceKeys = LANG_TO_SOURCE_FILE[Language.ENGLISH.code]!!
+
+        val nativeEntries = raw.sourceFileToEntries[nativeKey] ?: emptyList()
+        val enWiktionaryEntries = raw.sourceFileToEntries[enWiktionarySourceKeys] ?: emptyList()
+
         val allEntries = raw.sourceFileToEntries.values.flatten()
-        val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
+
+        val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else enWiktionaryEntries
+
         return EntriesSelection(
             nativeEntries = nativeEntries,
+            enWiktionaryEntries = enWiktionaryEntries,
             allEntries = allEntries,
             entriesForForms = entriesForForms
         )
