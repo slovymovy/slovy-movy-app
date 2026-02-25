@@ -224,7 +224,8 @@ fun SearchScreen(
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToTextReader: (Language) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     // restore after process death
@@ -273,7 +274,8 @@ fun SearchScreen(
         wordDetailLabel = wordDetailLabel,
         onNavigateToWordDetail = onNavigateToWordDetail,
         onNavigateToFavorites = onNavigateToFavorites,
-        onNavigateToSettings = onNavigateToSettings
+        onNavigateToSettings = onNavigateToSettings,
+        onNavigateToTextReader = { viewModel.state.selectedLanguage?.let { onNavigateToTextReader(it) } }
     )
 }
 
@@ -290,7 +292,8 @@ fun SearchScreenContent(
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToTextReader: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val searchFocusRequester = remember { FocusRequester() }
@@ -423,8 +426,9 @@ fun SearchScreenContent(
                             EmptySearchState(
                                 wordSuggestions = state.wordSuggestions,
                                 favoriteLemmas = state.favoriteLemmas,
-                            onWordClick = onSuggestionSelected,
-                                showPullToRefreshHint = state.showPullToRefreshHint && !state.isSuggestionsRefreshing
+                                onWordClick = onSuggestionSelected,
+                                showPullToRefreshHint = state.showPullToRefreshHint && !state.isSuggestionsRefreshing,
+                                onNavigateToTextReader = onNavigateToTextReader
                             )
                         }
                     }
@@ -531,7 +535,8 @@ private fun EmptySearchState(
     wordSuggestions: List<String>,
     favoriteLemmas: List<String>,
     onWordClick: (String) -> Unit,
-    showPullToRefreshHint: Boolean = true
+    showPullToRefreshHint: Boolean = true,
+    onNavigateToTextReader: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -573,6 +578,12 @@ private fun EmptySearchState(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
+        FilledTonalButton(onClick = onNavigateToTextReader) {
+            Text("Paste your text")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
@@ -705,6 +716,27 @@ private fun SearchScreenPreviewEmptyQuery(
                 wordSuggestions = listOf("the", "be", "to", "of", "and"),
                 favoriteLemmas = listOf("world", "time", "love")
             ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewWithAnalyzeButton(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                query = "",
+                results = emptyList(),
+                showNoResults = false,
+                availableLanguages = listOf(Language.DUTCH),
+                selectedLanguage = Language.DUTCH,
+                wordSuggestions = listOf("lopen", "kijken", "mooi"),
+                favoriteLemmas = listOf("huis", "water")
+            ),
+            onNavigateToTextReader = {}
         )
     }
 }

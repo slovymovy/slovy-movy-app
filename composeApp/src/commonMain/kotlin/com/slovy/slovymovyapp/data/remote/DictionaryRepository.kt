@@ -1044,6 +1044,91 @@ class DictionaryRepository(
         return allRelatedWords
     }
 
+    data class TokenResult(
+        val lemma: String,
+        val lemmaId: Uuid,
+        val level: LearnerLevel?,
+        val isFavorite: Boolean
+    )
+
+    /**
+     * Batch-looks up normalized word forms against the dictionary DB for the given language.
+     * Returns a map of normalizedForm → TokenResult for all matched forms.
+     *
+     * Two-pass strategy:
+     * 1. Form lookup: finds the best lemma for each inflected form.
+     * 2. Direct lemma lookup: overrides pass-1 results when the input form itself is a lemma.
+     *    This fixes cases where a high-frequency word happens to share a form with the target
+     *    lemma (e.g. "wat" being resolved to "wats").
+     *
+     * Favorites are flagged using [FavoritesRepository].
+     */
+    suspend fun lookupTokensBatch(
+        forms: List<String>,
+        language: Language
+    ): Map<String, TokenResult> = withContext(Dispatchers.IO) {
+        if (forms.isEmpty()) return@withContext emptyMap()
+
+        val databases = openDictionaryDatabases(language)
+        val allFavorites = favoritesRepository.getAll()
+        val favoriteLemmas = allFavorites
+            .filter { it.language == language }
+            .map { it.lemma.lowercase() }
+            .toSet()
+
+        val result = mutableMapOf<String, TokenResult>()
+
+        for (db in databases) {
+            val q = db.dictionaryQueries
+
+            // Pass 1: form-based lookup (handles inflected forms like "liepen" → "lopen")
+            forms.chunked(999).forEach { chunk ->
+                q.selectTokenDataByForms(language.code, chunk)
+                    .executeAsList()
+                    .forEach { row ->
+                        if (!result.containsKey(row.form_normalized)) {
+                            val level = row.min_level?.let { rawValue ->
+                                com.slovy.slovymovyapp.data.dictionary.LearnerLevel.from(rawValue)
+                                    .let { dbLevel -> LearnerLevel.valueOf(dbLevel.name) }
+                            }
+                            result[row.form_normalized] = TokenResult(
+                                lemma = row.lemma,
+                                lemmaId = row.lemma_id,
+                                level = level,
+                                isFavorite = row.lemma.lowercase() in favoriteLemmas
+                            )
+                        }
+                    }
+            }
+
+            // Pass 2: direct lemma lookup — overrides pass-1 when the token itself is a lemma.
+            // Function words (e.g. "wat") may not have form-table entries and would otherwise
+            // resolve to a wrong high-frequency word that shares the same inflected form.
+            val directResults = mutableMapOf<String, TokenResult>()
+            forms.chunked(999).forEach { chunk ->
+                q.selectTokenDataByLemmas(language.code, chunk)
+                    .executeAsList()
+                    .forEach { row ->
+                        if (!directResults.containsKey(row.lemma_normalized)) {
+                            val level = row.min_level?.let { rawValue ->
+                                com.slovy.slovymovyapp.data.dictionary.LearnerLevel.from(rawValue)
+                                    .let { dbLevel -> LearnerLevel.valueOf(dbLevel.name) }
+                            }
+                            directResults[row.lemma_normalized] = TokenResult(
+                                lemma = row.lemma,
+                                lemmaId = row.lemma_id,
+                                level = level,
+                                isFavorite = row.lemma.lowercase() in favoriteLemmas
+                            )
+                        }
+                    }
+            }
+            result.putAll(directResults)
+        }
+
+        result
+    }
+
     private suspend fun finalizeSearchResults(
         out: List<SearchItem>,
         maxItems: Int
