@@ -244,7 +244,7 @@ internal fun SenseCard(
                         val (synonymBg, synonymText) = colorsForSynonyms()
                         EntryList(
                             "Synonyms",
-                            sense.synonyms,
+                            sense.synonyms.filter { !it.equals(data.lemma, ignoreCase = true) },
                             synonymBg,
                             synonymText,
                             relatedWords = relatedWords,
@@ -254,7 +254,7 @@ internal fun SenseCard(
                         val (antonymBg, antonymText) = colorsForAntonyms()
                         EntryList(
                             "Antonyms",
-                            sense.antonyms,
+                            sense.antonyms.filter { !it.equals(data.lemma, ignoreCase = true) },
                             antonymBg,
                             antonymText,
                             relatedWords = relatedWords,
