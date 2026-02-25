@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.word.preview
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.forms.SchemeInputForm
 import com.slovy.slovymovyapp.data.forms.configs.EnConjugationScheme
 import com.slovy.slovymovyapp.data.remote.*
@@ -11,7 +12,7 @@ private fun resolvedEnNounFormsView(
     lemma: String,
     vararg taggedForms: Pair<List<String>, String>
 ): FormsSchemeView {
-    val forms = taggedForms.map { (tags, form) -> SchemeInputForm(tags = tags, form = form) }
+    val forms = taggedForms.map { (tags, form) -> SchemeInputForm(tags = tags, form = form, FormSource.NATIVE) }
     val scheme = EnConjugationScheme.EN_NOUN
     val view = scheme.views.first()
     return FormsSchemeView(view, resolveSchemeView(forms, view, scheme.tagResolver, lemma))

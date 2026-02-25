@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.data.forms
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 
 /** Resolved key→value map stored inside [GridCell.Data]; built from [FormTag] enum values. */
 typealias FormTags = Map<String, String>
@@ -44,6 +45,7 @@ sealed class GridCell {
         val preferredTags: FormTags = emptyMap(),
         override val rowspan: Int = 1,
         override val colspan: Int = 1,
+        val allowedSources: Set<FormSource>? = null,
     ) : GridCell()
 
     data class Empty(
@@ -103,12 +105,14 @@ class RowBuilder {
         rowspan: Int = 1,
         colspan: Int = 1,
         supporting: Set<FormTag> = emptySet(),
+        allowedSources: Set<FormSource>? = null,
     ) {
         cells += GridCell.Data(
             requiredTags = tags.associate { it.key to it.value },
             preferredTags = supporting.associate { it.key to it.value },
             rowspan = rowspan,
-            colspan = colspan
+            colspan = colspan,
+            allowedSources = allowedSources
         )
     }
 
@@ -142,26 +146,22 @@ fun interface ConjugationSchemeProvider {
  * This allows language-specific normalization rules while keeping grid matching logic generic.
  */
 data class SchemeInputForm(
-    val tags: List<String> = emptyList(),
-    val form: String
+    val tags: List<String>,
+    val form: String,
+    val source: FormSource,
 )
 
 data class SchemeCellCandidate(
-    val missingRequiredTags: Int,
     val matchedPreferredTags: Int,
     val extraKnownTags: Int,
     val form: String
 )
 
-fun interface SchemeTagResolver {
-    fun resolve(dbTags: Iterable<String>): List<FormTag>
-
+interface SchemeTagResolver {
     fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> = forms
 
     fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? =
         candidates.firstOrNull()
 }
 
-object DefaultSchemeTagResolver : SchemeTagResolver {
-    override fun resolve(dbTags: Iterable<String>): List<FormTag> = TagMapping.resolve(dbTags)
-}
+object DefaultSchemeTagResolver : SchemeTagResolver

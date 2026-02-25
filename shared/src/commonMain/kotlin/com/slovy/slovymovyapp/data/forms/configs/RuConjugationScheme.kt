@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.data.forms.configs
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.forms.*
 import com.slovy.slovymovyapp.data.forms.configs.RuConjugationScheme.RU_VERB_IMPERFECTIVE
 import com.slovy.slovymovyapp.data.forms.configs.RuConjugationScheme.RU_VERB_PERFECTIVE
@@ -9,53 +10,52 @@ import com.slovy.slovymovyapp.util.stripAccents
 
 object RuConjugationScheme : ConjugationSchemeProvider {
 
-    private fun russianCanonicalTagsForPos(pos: DictionaryPos): List<FormTag> = when (pos) {
-        DictionaryPos.NOUN -> listOf(Case.NOMINATIVE, Num.SG)
-        DictionaryPos.VERB -> listOf(VerbForm.INFINITIVE)
-        DictionaryPos.ADJECTIVE -> listOf(Case.NOMINATIVE, Gender.MASC, Num.SG)
+    private fun russianCanonicalRawTags(pos: DictionaryPos): List<String> = when (pos) {
+        DictionaryPos.NOUN -> listOf("nominative", "singular")
+        DictionaryPos.VERB -> listOf("infinitive")
+        DictionaryPos.ADJECTIVE -> listOf("nominative", "masculine", "singular")
         else -> emptyList()
     }
 
     private fun russianTagResolver(pos: DictionaryPos): SchemeTagResolver = object : SchemeTagResolver {
-        override fun resolve(dbTags: Iterable<String>): List<FormTag> {
-            return dbTags
-                .asSequence()
-                .flatMap { dbTag ->
-                    if (dbTag == "canonical") {
-                        russianCanonicalTagsForPos(pos).asSequence()
-                    } else {
-                        TagMapping.resolve(dbTag)?.let { sequenceOf(it) } ?: emptySequence()
-                    }
-                }
-                .distinctBy { it.key to it.value }
-                .toList()
-        }
-
         override fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> {
             val cleanedForms = forms.filterNot { it.form.trim() == "*" }
-            if (pos != DictionaryPos.VERB) return cleanedForms
+
+            // Wiktionary marks the headword form with a "canonical" tag instead of
+            // explicit case/number/gender tags. Expand it into POS-specific tags so
+            // the scheme can match the form to the correct cell.
+            val canonicalRawTags = russianCanonicalRawTags(pos)
+            val withCanonical = cleanedForms + cleanedForms.mapNotNull { form ->
+                if ("canonical" !in form.tags || forms.size < 3) return@mapNotNull null
+                form.copy(
+                    tags = form.tags.filter { it != "canonical" } + canonicalRawTags,
+                    source = FormSource.HEURISTIC
+                )
+            }
+
+            if (pos != DictionaryPos.VERB) return withCanonical
 
             val normalizedLemma = lemma
                 ?.trim()
                 ?.takeIf { it.isNotEmpty() }
                 ?.let(::stripAccents)
-                ?: return cleanedForms
+                ?: return withCanonical
 
-            val hasLemmaAsForm = cleanedForms.any { form ->
+            val hasLemmaAsForm = withCanonical.any { form ->
                 stripAccents(form.form.trim()) == normalizedLemma
             }
-            if (hasLemmaAsForm) return cleanedForms
+            if (hasLemmaAsForm) return withCanonical
 
-            return cleanedForms + SchemeInputForm(
+            return withCanonical + SchemeInputForm(
                 tags = listOf("infinitive"),
-                form = lemma.trim()
+                form = lemma.trim(),
+                FormSource.HEURISTIC
             )
         }
 
         override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
             return candidates.minWithOrNull(
-                compareBy<SchemeCellCandidate> { it.missingRequiredTags }
-                    .thenBy { -it.matchedPreferredTags }
+                compareBy<SchemeCellCandidate> { -it.matchedPreferredTags }
                     .thenBy { it.extraKnownTags }
                     .thenBy { it.form }
             )
@@ -419,8 +419,9 @@ object RuConjugationScheme : ConjugationSchemeProvider {
     override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? {
         val byPos = ALL.firstOrNull { it.pos == pos }
         if (pos != DictionaryPos.VERB) return byPos
-        val hasPerfective = forms.any { "perfective" in it.tags }
-        val hasImperfective = forms.any { "imperfective" in it.tags }
+        val hasPerfective = forms.any { "perfective" in it.tags && "canonical" in it.tags }
+        val hasImperfective = forms.any { "imperfective" in it.tags && "canonical" in it.tags }
+
         return when {
             hasPerfective && !hasImperfective -> RU_VERB_PERFECTIVE
             hasImperfective && !hasPerfective -> RU_VERB_IMPERFECTIVE

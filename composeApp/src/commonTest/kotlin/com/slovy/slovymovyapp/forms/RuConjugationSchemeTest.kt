@@ -27,12 +27,11 @@ class RuConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.RUSSIAN, "читать", DictionaryPos.VERB),
                 "Resolved RU verb views for 'читать' changed"
             )
-            /* TODO
-              assertEquals(
+            assertEquals(
                 expectedRuVerbSkazat,
                 resolveFormsSnapshot(repo, Language.RUSSIAN, "сказать", DictionaryPos.VERB),
                 "Resolved RU verb views for 'сказать' changed"
-            )*/
+            )
             assertEquals(
                 expectedRuAdjectiveKrasivyj,
                 resolveFormsSnapshot(repo, Language.RUSSIAN, "красивый", DictionaryPos.ADJECTIVE),
@@ -47,7 +46,7 @@ class RuConjugationSchemeTest : BaseTest() {
         "ru_noun:full" to listOf(
             listOf(null, null, null),
             listOf(null, "кни́га", "кни́ги"),
-            listOf(null, "кни́ги", "книг"),
+            listOf(null, "кни́ги", "кни́г"),
             listOf(null, "кни́ге", "кни́гам"),
             listOf(null, "кни́гу", "кни́ги"),
             listOf(null, "кни́гой", "кни́гами"),
@@ -57,22 +56,22 @@ class RuConjugationSchemeTest : BaseTest() {
 
     private val expectedRuVerbCitat = mapOf(
         "ru_verb_imperfective:full" to listOf(
-            listOf(null, "читать"),
+            listOf(null, "чита́ть"),
             listOf(null, null, null),
             listOf(null, "чита́ющий", "чита́вший"),
             listOf(null, "чита́емый", "чи́танный"),
             listOf(null, "чита́я", "чита́в"),
             listOf(null, null, null),
-            listOf(null, "чита́ю", null),
-            listOf(null, "чита́ешь", null),
-            listOf(null, "чита́ет", null),
-            listOf(null, "чита́ем", null),
-            listOf(null, "чита́ете", null),
-            listOf(null, "чита́ют", null),
+            listOf(null, "чита́ю", "бу́ду чита́ть"),
+            listOf(null, "чита́ешь", "бу́дешь чита́ть"),
+            listOf(null, "чита́ет", "бу́дет чита́ть"),
+            listOf(null, "чита́ем", "бу́дем чита́ть"),
+            listOf(null, "чита́ете", "бу́дете чита́ть"),
+            listOf(null, "чита́ют", "бу́дут чита́ть"),
             listOf(null, null, null),
+            listOf(null, "чита́й", "чита́йте"),
             listOf(null, null, null),
-            listOf(null, null, null),
-            listOf(null, "чита́л", null),
+            listOf(null, "чита́л", "чита́ли"),
             listOf(null, "чита́ла"),
             listOf(null, "чита́ло")
         ),
@@ -80,7 +79,7 @@ class RuConjugationSchemeTest : BaseTest() {
 
     private val expectedRuVerbSkazat = mapOf(
         "ru_verb_perfective:full" to listOf(
-            listOf(null, null),
+            listOf(null, "сказа́ть"),
             listOf(null, null, null),
             listOf(null, "сказа́вший", "ска́занный"),
             listOf(null, "сказа́в"),
@@ -92,9 +91,9 @@ class RuConjugationSchemeTest : BaseTest() {
             listOf(null, "ска́жете"),
             listOf(null, "ска́жут"),
             listOf(null, null, null),
+            listOf(null, "скажи́", "скажи́те"),
             listOf(null, null, null),
-            listOf(null, null, null),
-            listOf(null, "сказа́л", null),
+            listOf(null, "сказа́л", "сказа́ли"),
             listOf(null, "сказа́ла"),
             listOf(null, "сказа́ло")
         )

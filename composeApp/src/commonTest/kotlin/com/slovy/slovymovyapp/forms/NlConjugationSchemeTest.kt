@@ -47,15 +47,15 @@ class NlConjugationSchemeTest : BaseTest() {
         ),
         "nl_verb:full" to listOf(
             listOf(null, "te zeggen"),
-            listOf(null, null),
+            listOf(null, "zeggen"),
             listOf(null, "gezegd"),
             listOf(null, "zeggend", null),
             listOf(null, null, null, null, null),
-            listOf(null, "zeg", "zegt", "zegt", "worden gezegd"),
+            listOf(null, "zeg", "zegt", "zegt", "zeggen"),
             listOf(null, "zal zeggen", "zal zeggen", "zal zeggen", "zegden\nzeiden"),
             listOf(null, "zou gezegd worden", "zou gezegd worden", "zouden gezegd worden", "zou gezegd worden"),
             listOf(null, "zal zeggen", "zal zeggen", "zal zeggen", "zullen zeggen"),
-            listOf(null, "ev.\n zeg", null, null),
+            listOf(null, "zeg", null),
             listOf(null, null, null, null, null),
             listOf(null, "ben gezegd", "bent gezegd", "hebben gezegd", null),
             listOf(null, "zou gezegd hebben", "zou gezegd hebben", "zou gezegd hebben", null),
@@ -83,10 +83,9 @@ class NlConjugationSchemeTest : BaseTest() {
 
     private val expectedNlNounKwartier = mapOf(
         "nl_noun:short" to listOf(
-            listOf(null, "kwartiertje"),
-            listOf(null, "kwartieren"),
-            listOf(null, "kwartiertje"),
-            listOf(null, "kwartiertjes")
+            listOf(null, null, null),
+            listOf(null, "kwartiertje", "kwartiertje"),
+            listOf(null, "kwartieren", "kwartiertjes")
         )
     )
 }

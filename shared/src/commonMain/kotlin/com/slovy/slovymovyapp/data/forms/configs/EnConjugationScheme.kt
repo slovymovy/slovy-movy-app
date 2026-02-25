@@ -2,21 +2,12 @@ package com.slovy.slovymovyapp.data.forms.configs
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.forms.*
 
 object EnConjugationScheme : ConjugationSchemeProvider {
 
     private fun englishTagResolver(pos: DictionaryPos): SchemeTagResolver = object : SchemeTagResolver {
-        override fun resolve(dbTags: Iterable<String>): List<FormTag> {
-            return dbTags
-                .asSequence()
-                .flatMap { dbTag ->
-                    TagMapping.resolve(dbTag)?.let { sequenceOf(it) } ?: emptySequence()
-                }
-                .distinctBy { it.key to it.value }
-                .toList()
-        }
-
         override fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> {
             fun SchemeInputForm.hasTag(tag: String): Boolean = tags.any { it.equals(tag, ignoreCase = true) }
 
@@ -33,7 +24,7 @@ object EnConjugationScheme : ConjugationSchemeProvider {
                 }
                 if (shouldSkipInfinitiveInference) return forms
 
-                return forms + SchemeInputForm(tags = listOf("infinitive"), form = baseWord)
+                return forms + SchemeInputForm(tags = listOf("infinitive"), form = baseWord, FormSource.HEURISTIC)
             }
 
             if (pos != DictionaryPos.NOUN) return forms
@@ -67,7 +58,7 @@ object EnConjugationScheme : ConjugationSchemeProvider {
                 }
                 if (singularAlreadyPresent) return forms
 
-                return forms + SchemeInputForm(tags = listOf("singular"), form = expectedSingular)
+                return forms + SchemeInputForm(tags = listOf("singular"), form = expectedSingular, FormSource.HEURISTIC)
             }
 
             val hasBaseSingular = forms.any { form ->
@@ -80,7 +71,7 @@ object EnConjugationScheme : ConjugationSchemeProvider {
             }
             if (pluralAlreadyPresent) return forms
 
-            return forms + SchemeInputForm(tags = listOf("plural"), form = expectedPlural)
+            return forms + SchemeInputForm(tags = listOf("plural"), form = expectedPlural, FormSource.HEURISTIC)
         }
     }
 
@@ -98,24 +89,27 @@ object EnConjugationScheme : ConjugationSchemeProvider {
     ) {
         view("short", "Principal parts") {
             row {
-                rowHeader("infinitive")
-                data(VerbForm.INFINITIVE)
+                colHeader("Category")
+                colHeader("Form")
+                colHeader("Category")
+                colHeader("Form")
             }
             row {
-                rowHeader("3rd person singular present")
+                rowHeader("infinitive")
+                data(VerbForm.INFINITIVE)
+                rowHeader("3rd sg. present")
                 data(Person.THIRD, Tense.PRESENT, Num.SG)
             }
             row {
                 rowHeader("simple past")
                 data(Tense.PAST, supporting = setOf(VerbForm.FINITE))
-            }
-            row {
                 rowHeader("past participle")
                 data(VerbForm.PARTICIPLE, Tense.PAST)
             }
             row {
-                rowHeader("present participle / gerund")
+                rowHeader("pres. participle / gerund")
                 data(VerbForm.PARTICIPLE, Tense.PRESENT)
+                empty(colspan = 2)
             }
         }
     }

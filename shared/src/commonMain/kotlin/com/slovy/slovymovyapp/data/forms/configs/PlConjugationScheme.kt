@@ -2,17 +2,41 @@ package com.slovy.slovymovyapp.data.forms.configs
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.forms.*
 
 object PlConjugationScheme : ConjugationSchemeProvider {
 
     private object PolishSchemeTagResolver : SchemeTagResolver {
-        override fun resolve(dbTags: Iterable<String>): List<FormTag> = TagMapping.resolve(dbTags)
+        override fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> {
+            val extras = forms.flatMap { form ->
+                val tags = form.tags
+                val result = mutableListOf<SchemeInputForm>()
+
+                // Wiktionary tags virile (masculine-personal) plural forms as "masculine"
+                // rather than "virile". Add a heuristic copy with "virile" so scheme
+                // cells matching Gender.VIRILE can resolve these forms.
+                if ("plural" in tags && "masculine" in tags && "virile" !in tags && "nonvirile" !in tags) {
+                    result += form.copy(tags = tags.map { if (it == "masculine") "virile" else it }, source = FormSource.HEURISTIC)
+                }
+
+                // Wiktionary tags non-virile plural forms as "feminine,neuter" rather
+                // than "nonvirile". Add a heuristic copy with "nonvirile" so scheme
+                // cells matching Gender.NONVIRILE can resolve these forms.
+                if ("plural" in tags && "feminine" in tags && "neuter" in tags
+                    && "masculine" !in tags && "virile" !in tags && "nonvirile" !in tags
+                ) {
+                    result += form.copy(tags = tags + "nonvirile", source = FormSource.HEURISTIC)
+                }
+
+                result
+            }
+            return if (extras.isEmpty()) forms else forms + extras
+        }
 
         override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
             return candidates.minWithOrNull(
-                compareBy<SchemeCellCandidate> { it.missingRequiredTags }
-                    .thenBy { -it.matchedPreferredTags }
+                compareBy<SchemeCellCandidate> { -it.matchedPreferredTags }
                     .thenBy { it.extraKnownTags }
                     .thenBy { it.form }
             )
@@ -78,11 +102,9 @@ object PlConjugationScheme : ConjugationSchemeProvider {
     /**
      * Polish verb conjugation (imperfective, e.g. czytać).
      *
-     * Polish past tense is gendered, so columns split by gender for sg and
-     * virile/non-virile for pl. Sections: present, past, future, conditional,
-     * imperative, and non-finite forms (participles + verbal noun).
-     *
-     * Column layout: masc.sg | fem.sg | neut.sg | virile.pl | non-virile.pl
+     * Present tense is not gendered (one form per person/number).
+     * Past, future, and conditional are gendered: masc/fem sg per person,
+     * neut sg for 3rd person only, virile/non-virile pl for all persons.
      */
     val PL_VERB: ConjugationScheme = conjugationScheme(
         "pl_verb",
@@ -96,10 +118,36 @@ object PlConjugationScheme : ConjugationSchemeProvider {
                 data(VerbForm.INFINITIVE, colspan = 5)
             }
 
-            // ── Present tense ────────────────────────────────────────────────
+            // ── Present tense (not gendered) ─────────────────────────────────
             row {
                 rowHeader("present tense", colspan = 6)
             }
+            row {
+                empty()
+                colHeader("singular", colspan = 3)
+                colHeader("plural", colspan = 2)
+            }
+            row {
+                rowHeader("1st person")
+                data(Tense.PRESENT, Person.FIRST, Num.SG, colspan = 3)
+                data(Tense.PRESENT, Person.FIRST, Num.PL, colspan = 2)
+            }
+            row {
+                rowHeader("2nd person")
+                data(Tense.PRESENT, Person.SECOND, Num.SG, colspan = 3)
+                data(Tense.PRESENT, Person.SECOND, Num.PL, colspan = 2)
+            }
+            row {
+                rowHeader("3rd person")
+                data(Tense.PRESENT, Person.THIRD, Num.SG, colspan = 3)
+                data(Tense.PRESENT, Person.THIRD, Num.PL, colspan = 2)
+            }
+            row {
+                rowHeader("impersonal")
+                data(Tense.PRESENT, Mood.IMPERSONAL, colspan = 5)
+            }
+
+            // ── Shared gendered column headers ────────────────────────────────
             row {
                 empty()
                 colHeader("masc. sg")
@@ -108,34 +156,6 @@ object PlConjugationScheme : ConjugationSchemeProvider {
                 colHeader("virile pl")
                 colHeader("non-virile pl")
             }
-            row {
-                rowHeader("1st person")
-                data(VerbForm.FINITE, Tense.PRESENT, Person.FIRST, Num.SG, Gender.MASC)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.FIRST, Num.SG, Gender.FEM)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.FIRST, Num.SG, Gender.NEUT)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.FIRST, Num.PL, Gender.VIRILE)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.FIRST, Num.PL, Gender.NONVIRILE)
-            }
-            row {
-                rowHeader("2nd person")
-                data(VerbForm.FINITE, Tense.PRESENT, Person.SECOND, Num.SG, Gender.MASC)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.SECOND, Num.SG, Gender.FEM)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.SECOND, Num.SG, Gender.NEUT)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.SECOND, Num.PL, Gender.VIRILE)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.SECOND, Num.PL, Gender.NONVIRILE)
-            }
-            row {
-                rowHeader("3rd person")
-                data(VerbForm.FINITE, Tense.PRESENT, Person.THIRD, Num.SG, Gender.MASC)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.THIRD, Num.SG, Gender.FEM)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.THIRD, Num.SG, Gender.NEUT)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.THIRD, Num.PL, Gender.VIRILE)
-                data(VerbForm.FINITE, Tense.PRESENT, Person.THIRD, Num.PL, Gender.NONVIRILE)
-            }
-            row {
-                rowHeader("impersonal")
-                data(VerbForm.FINITE, Tense.PRESENT, Mood.IMPERSONAL, colspan = 5)
-            }
 
             // ── Past tense ───────────────────────────────────────────────────
             row {
@@ -143,31 +163,31 @@ object PlConjugationScheme : ConjugationSchemeProvider {
             }
             row {
                 rowHeader("1st person")
-                data(VerbForm.FINITE, Tense.PAST, Person.FIRST, Num.SG, Gender.MASC)
-                data(VerbForm.FINITE, Tense.PAST, Person.FIRST, Num.SG, Gender.FEM)
-                data(VerbForm.FINITE, Tense.PAST, Person.FIRST, Num.SG, Gender.NEUT)
-                data(VerbForm.FINITE, Tense.PAST, Person.FIRST, Num.PL, Gender.VIRILE)
-                data(VerbForm.FINITE, Tense.PAST, Person.FIRST, Num.PL, Gender.NONVIRILE)
+                data(Tense.PAST, Person.FIRST, Num.SG, Gender.MASC)
+                data(Tense.PAST, Person.FIRST, Num.SG, Gender.FEM)
+                empty()
+                data(Tense.PAST, Person.FIRST, Num.PL, Gender.VIRILE)
+                data(Tense.PAST, Person.FIRST, Num.PL, Gender.NONVIRILE)
             }
             row {
                 rowHeader("2nd person")
-                data(VerbForm.FINITE, Tense.PAST, Person.SECOND, Num.SG, Gender.MASC)
-                data(VerbForm.FINITE, Tense.PAST, Person.SECOND, Num.SG, Gender.FEM)
-                data(VerbForm.FINITE, Tense.PAST, Person.SECOND, Num.SG, Gender.NEUT)
-                data(VerbForm.FINITE, Tense.PAST, Person.SECOND, Num.PL, Gender.VIRILE)
-                data(VerbForm.FINITE, Tense.PAST, Person.SECOND, Num.PL, Gender.NONVIRILE)
+                data(Tense.PAST, Person.SECOND, Num.SG, Gender.MASC)
+                data(Tense.PAST, Person.SECOND, Num.SG, Gender.FEM)
+                empty()
+                data(Tense.PAST, Person.SECOND, Num.PL, Gender.VIRILE)
+                data(Tense.PAST, Person.SECOND, Num.PL, Gender.NONVIRILE)
             }
             row {
                 rowHeader("3rd person")
-                data(VerbForm.FINITE, Tense.PAST, Person.THIRD, Num.SG, Gender.MASC)
-                data(VerbForm.FINITE, Tense.PAST, Person.THIRD, Num.SG, Gender.FEM)
-                data(VerbForm.FINITE, Tense.PAST, Person.THIRD, Num.SG, Gender.NEUT)
-                data(VerbForm.FINITE, Tense.PAST, Person.THIRD, Num.PL, Gender.VIRILE)
-                data(VerbForm.FINITE, Tense.PAST, Person.THIRD, Num.PL, Gender.NONVIRILE)
+                data(Tense.PAST, Person.THIRD, Num.SG, Gender.MASC)
+                data(Tense.PAST, Person.THIRD, Num.SG, Gender.FEM)
+                data(Tense.PAST, Person.THIRD, Num.SG, Gender.NEUT)
+                data(Tense.PAST, Person.THIRD, Num.PL, Gender.VIRILE)
+                data(Tense.PAST, Person.THIRD, Num.PL, Gender.NONVIRILE)
             }
             row {
                 rowHeader("impersonal")
-                data(VerbForm.FINITE, Tense.PAST, Mood.IMPERSONAL, colspan = 5)
+                data(Tense.PAST, Mood.IMPERSONAL, colspan = 5)
             }
 
             // ── Future tense ─────────────────────────────────────────────────
@@ -176,31 +196,27 @@ object PlConjugationScheme : ConjugationSchemeProvider {
             }
             row {
                 rowHeader("1st person")
-                data(VerbForm.FINITE, Tense.FUTURE, Person.FIRST, Num.SG, Gender.MASC)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.FIRST, Num.SG, Gender.FEM)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.FIRST, Num.SG, Gender.NEUT)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.FIRST, Num.PL, Gender.VIRILE)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.FIRST, Num.PL, Gender.NONVIRILE)
+                data(Tense.FUTURE, Person.FIRST, Num.SG, Gender.MASC)
+                data(Tense.FUTURE, Person.FIRST, Num.SG, Gender.FEM)
+                empty()
+                data(Tense.FUTURE, Person.FIRST, Num.PL, Gender.VIRILE)
+                data(Tense.FUTURE, Person.FIRST, Num.PL, Gender.NONVIRILE)
             }
             row {
                 rowHeader("2nd person")
-                data(VerbForm.FINITE, Tense.FUTURE, Person.SECOND, Num.SG, Gender.MASC)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.SECOND, Num.SG, Gender.FEM)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.SECOND, Num.SG, Gender.NEUT)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.SECOND, Num.PL, Gender.VIRILE)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.SECOND, Num.PL, Gender.NONVIRILE)
+                data(Tense.FUTURE, Person.SECOND, Num.SG, Gender.MASC)
+                data(Tense.FUTURE, Person.SECOND, Num.SG, Gender.FEM)
+                empty()
+                data(Tense.FUTURE, Person.SECOND, Num.PL, Gender.VIRILE)
+                data(Tense.FUTURE, Person.SECOND, Num.PL, Gender.NONVIRILE)
             }
             row {
                 rowHeader("3rd person")
-                data(VerbForm.FINITE, Tense.FUTURE, Person.THIRD, Num.SG, Gender.MASC)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.THIRD, Num.SG, Gender.FEM)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.THIRD, Num.SG, Gender.NEUT)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.THIRD, Num.PL, Gender.VIRILE)
-                data(VerbForm.FINITE, Tense.FUTURE, Person.THIRD, Num.PL, Gender.NONVIRILE)
-            }
-            row {
-                rowHeader("impersonal")
-                data(VerbForm.FINITE, Tense.FUTURE, Mood.IMPERSONAL, colspan = 5)
+                data(Tense.FUTURE, Person.THIRD, Num.SG, Gender.MASC)
+                data(Tense.FUTURE, Person.THIRD, Num.SG, Gender.FEM)
+                data(Tense.FUTURE, Person.THIRD, Num.SG, Gender.NEUT)
+                data(Tense.FUTURE, Person.THIRD, Num.PL, Gender.VIRILE)
+                data(Tense.FUTURE, Person.THIRD, Num.PL, Gender.NONVIRILE)
             }
 
             // ── Conditional ──────────────────────────────────────────────────
@@ -211,7 +227,7 @@ object PlConjugationScheme : ConjugationSchemeProvider {
                 rowHeader("1st person")
                 data(Mood.CONDITIONAL, Person.FIRST, Num.SG, Gender.MASC)
                 data(Mood.CONDITIONAL, Person.FIRST, Num.SG, Gender.FEM)
-                data(Mood.CONDITIONAL, Person.FIRST, Num.SG, Gender.NEUT)
+                empty()
                 data(Mood.CONDITIONAL, Person.FIRST, Num.PL, Gender.VIRILE)
                 data(Mood.CONDITIONAL, Person.FIRST, Num.PL, Gender.NONVIRILE)
             }
@@ -219,7 +235,7 @@ object PlConjugationScheme : ConjugationSchemeProvider {
                 rowHeader("2nd person")
                 data(Mood.CONDITIONAL, Person.SECOND, Num.SG, Gender.MASC)
                 data(Mood.CONDITIONAL, Person.SECOND, Num.SG, Gender.FEM)
-                data(Mood.CONDITIONAL, Person.SECOND, Num.SG, Gender.NEUT)
+                empty()
                 data(Mood.CONDITIONAL, Person.SECOND, Num.PL, Gender.VIRILE)
                 data(Mood.CONDITIONAL, Person.SECOND, Num.PL, Gender.NONVIRILE)
             }
@@ -241,18 +257,24 @@ object PlConjugationScheme : ConjugationSchemeProvider {
                 rowHeader("imperative", colspan = 6)
             }
             row {
+                empty()
+                colHeader("singular", colspan = 3)
+                colHeader("plural", colspan = 2)
+            }
+            row {
                 rowHeader("1st person")
-                data(VerbForm.FINITE, Mood.IMPERATIVE, Person.FIRST, Num.SG, colspan = 5)
+                empty(colspan = 3)
+                data(Mood.IMPERATIVE, Person.FIRST, Num.PL, colspan = 2)
             }
             row {
                 rowHeader("2nd person")
-                data(VerbForm.FINITE, Mood.IMPERATIVE, Person.SECOND, Num.SG)
-                empty(colspan = 2)
-                data(VerbForm.FINITE, Mood.IMPERATIVE, Person.SECOND, Num.PL, colspan = 2)
+                data(Mood.IMPERATIVE, Person.SECOND, Num.SG, colspan = 3)
+                data(Mood.IMPERATIVE, Person.SECOND, Num.PL, colspan = 2)
             }
             row {
                 rowHeader("3rd person")
-                data(VerbForm.FINITE, Mood.IMPERATIVE, Person.THIRD, Num.SG, colspan = 5)
+                data(Mood.IMPERATIVE, Person.THIRD, Num.SG, colspan = 3)
+                data(Mood.IMPERATIVE, Person.THIRD, Num.PL, colspan = 2)
             }
 
             // ── Non-finite forms ─────────────────────────────────────────────
@@ -274,7 +296,7 @@ object PlConjugationScheme : ConjugationSchemeProvider {
             }
             row {
                 rowHeader("contemporary adverbial participle")
-                data(VerbForm.ADVERBIAL, Tense.PRESENT, colspan = 5)
+                data(VerbForm.ADVERBIAL, colspan = 5, supporting = setOf(Tense.PRESENT))
             }
             row {
                 rowHeader("verbal noun")

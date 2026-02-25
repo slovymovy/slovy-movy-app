@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.ui.word.preview
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.forms.ConjugationScheme
 import com.slovy.slovymovyapp.data.forms.SchemeInputForm
 import com.slovy.slovymovyapp.data.forms.configs.EnConjugationScheme
@@ -32,7 +33,7 @@ private fun resolveFormsViews(
     scheme: ConjugationScheme,
     taggedForms: List<Pair<List<String>, String>>
 ): List<FormsSchemeView> {
-    val forms = taggedForms.map { (tags, form) -> SchemeInputForm(tags = tags, form = form) }
+    val forms = taggedForms.map { (tags, form) -> SchemeInputForm(tags = tags, form = form, FormSource.NATIVE) }
     return scheme.views.map { view ->
         FormsSchemeView(
             view = view,

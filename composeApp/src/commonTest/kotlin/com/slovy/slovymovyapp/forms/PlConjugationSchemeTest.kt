@@ -18,9 +18,9 @@ class PlConjugationSchemeTest : BaseTest() {
             mgr.ensureDictionary(Language.POLISH)
 
             assertEquals(
-                expectedPlNounTestowanie,
-                resolveFormsSnapshot(repo, Language.POLISH, "testowanie", DictionaryPos.NOUN),
-                "Resolved PL noun views for 'testowanie' changed"
+                expectedPlNounDom,
+                resolveFormsSnapshot(repo, Language.POLISH, "dom", DictionaryPos.NOUN),
+                "Resolved PL noun views for 'dom' changed"
             )
             assertEquals(
                 expectedPlVerbPodawac,
@@ -37,50 +37,51 @@ class PlConjugationSchemeTest : BaseTest() {
         }
     }
 
-    private val expectedPlNounTestowanie = mapOf(
+    private val expectedPlNounDom = mapOf(
         "pl_noun:full" to listOf(
             listOf(null, null, null),
-            listOf(null, null, null),
-            listOf(null, "testowania", null),
-            listOf(null, "testowaniu", null),
-            listOf(null, null, null),
-            listOf(null, "testowaniem", null),
-            listOf(null, "testowaniu", null),
-            listOf(null, null, null)
+            listOf(null, "dom", "domy"),
+            listOf(null, "domu", "domów"),
+            listOf(null, "domowi", "domom"),
+            listOf(null, "dom", "domy"),
+            listOf(null, "domem", "domami"),
+            listOf(null, "domie", "domach"),
+            listOf(null, "domie", "domy")
         )
     )
 
     private val expectedPlVerbPodawac = mapOf(
         "pl_verb:full" to listOf(
-            listOf(null, "podawać się"),
+            listOf(null, "podawać"),
             listOf(null),
+            listOf(null, null, null),
+            listOf(null, "podaję", "podajemy"),
+            listOf(null, "podajesz", "podajecie"),
+            listOf(null, "podaje", "podają"),
+            listOf(null, "podaje się"),
             listOf(null, null, null, null, null, null),
-            listOf(null, null, null, null, null, null),
-            listOf(null, null, null, null, null, null),
-            listOf(null, null, null, null, null, null),
-            listOf(null, null),
             listOf(null),
-            listOf(null, null, null, null, null, null),
-            listOf(null, null, null, null, null, null),
-            listOf(null, null, null, null, null, null),
-            listOf(null, null),
+            listOf(null, "podawałem", "podawałam", null, "podawaliśmy", "podawałyśmy"),
+            listOf(null, "podawałeś", "podawałaś", null, "podawaliście", "podawałyście"),
+            listOf(null, "podawał", "podawała", "podawało", "podawali", "podawały"),
+            listOf(null, "podawano"),
             listOf(null),
-            listOf(null, null, null, null, null, null),
-            listOf(null, null, null, null, null, null),
-            listOf(null, null, null, null, null, null),
-            listOf(null, null),
+            listOf(null, "będę podawać", "będę podawać", null, "będziemy podawali", "będziemy podawać"),
+            listOf(null, "będziesz podawać", "będziesz podawać", null, "będziecie podawali", "będziecie podawać"),
+            listOf(null, "będzie podawać", "będzie podawać", "będzie podawać", "będą podawali", "będą podawać"),
             listOf(null),
-            listOf(null, "byłbym podawał", "byłabym podawała", "byłobym podawało", null, null),
-            listOf(null, "byłbyś podawał", "byłabyś podawała", "byłobyś podawało", null, null),
-            listOf(null, "byłby podawał", "byłaby podawała", "byłoby podawało", null, null),
-            listOf(null, "byliby podawali"),
+            listOf(null, "byłbym podawał", "byłabym podawała", null, "bylibyśmy podawali", "byłybyśmy podawały"),
+            listOf(null, "byłbyś podawał", "byłabyś podawała", null, "bylibyście podawali", "byłybyście podawały"),
+            listOf(null, "by podawał", "by podawała", "by podawało", "by podawali", "by podawały"),
+            listOf(null, "podawano by"),
             listOf(null),
-            listOf(null, null),
-            listOf(null, null, null, null),
-            listOf(null, null),
-            listOf(null, "niepodający", "niepodająca", "niepodające", null, null),
-            listOf(null, "niepodawani", "niepodawana", "niepodawane", null, null),
-            listOf(null, null),
+            listOf(null, null, null),
+            listOf(null, null, "podawajmy"),
+            listOf(null, "podawaj", "podawajcie"),
+            listOf(null, "niech podaje", "niech podają"),
+            listOf(null, "podający", "podająca", "podające", "podający", "podające"),
+            listOf(null, "podawany", "podawana", "podawane", "podawani", "podawane"),
+            listOf(null, "nie podając"),
             listOf(null, "niepodawanie")
         )
     )
@@ -91,7 +92,7 @@ class PlConjugationSchemeTest : BaseTest() {
             listOf(null, null, null, "ostatnia", "ostatnie", null, "ostatnie"),
             listOf(null, "ostatniego", "ostatniej", "ostatniego", "ostatnich"),
             listOf(null, "ostatniemu", "ostatniej", "ostatniemu", "ostatnim"),
-            listOf(null, "ostatniego", null, "ostatnią", "ostatnie", null, "ostatnie"),
+            listOf(null, "ostatniego", "ostatni", "ostatnią", "ostatnie", "ostatnich", "ostatnie"),
             listOf(null, "ostatnim", "ostatnią", "ostatnim", "ostatnimi"),
             listOf(null, "ostatnim", "ostatniej", "ostatnim", "ostatnich")
         )

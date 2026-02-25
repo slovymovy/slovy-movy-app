@@ -2,37 +2,43 @@ package com.slovy.slovymovyapp.data.forms.configs
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.forms.*
 
 object NlConjugationScheme : ConjugationSchemeProvider {
 
     private object DutchSchemeTagResolver : SchemeTagResolver {
-        override fun resolve(dbTags: Iterable<String>): List<FormTag> {
-            val rawTags = dbTags.toList()
-            val hasNonFinite = rawTags.any { it in setOf("infinitive", "gerund", "participle", "adverbial") }
-            val resolved = rawTags.mapNotNull { dbTag ->
-                if (dbTag == "imperfect" && hasNonFinite) {
-                    // For non-finite Dutch forms, treat "imperfect" as an aspect-like signal
-                    // so infinitive ranking can prefer the basic "te <verb>" form.
-                    Aspect.IMPERFECTIVE
-                } else {
-                    TagMapping.resolve(dbTag)
+        override fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> {
+            val nonFiniteTags = setOf("infinitive", "gerund", "participle", "adverbial")
+            val extras = forms.flatMap { form ->
+                val tags = form.tags
+                val result = mutableListOf<SchemeInputForm>()
+
+                // Wiktionary tags some Dutch common-gender forms with both "masculine" and
+                // "feminine" instead of "common". Add a heuristic copy with "common" so
+                // scheme cells matching Gender.COMMON can resolve them.
+                if ("masculine" in tags && "feminine" in tags && "common" !in tags) {
+                    result += form.copy(tags = tags + "common", source = FormSource.HEURISTIC)
                 }
+
+                // "imperfect" on non-finite forms signals imperfective aspect, not past tense.
+                // Add a heuristic copy with "imperfective" so infinitive ranking prefers the
+                // basic "te <verb>" form over the imperfect stem.
+                if ("imperfect" in tags && tags.any { it in nonFiniteTags }) {
+                    result += form.copy(
+                        tags = tags.map { if (it == "imperfect") "imperfective" else it },
+                        source = FormSource.HEURISTIC
+                    )
+                }
+
+                result
             }
-            val hasMasculine = rawTags.any { it == "masculine" }
-            val hasFeminine = rawTags.any { it == "feminine" }
-            val hasCommon = rawTags.any { it == "common" }
-            return if (hasMasculine && hasFeminine && !hasCommon) {
-                resolved + Gender.COMMON
-            } else {
-                resolved
-            }
+            return if (extras.isEmpty()) forms else forms + extras
         }
 
         override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
             return candidates.minWithOrNull(
-                compareBy<SchemeCellCandidate> { it.missingRequiredTags }
-                    .thenBy { -it.matchedPreferredTags }
+                compareBy<SchemeCellCandidate> { -it.matchedPreferredTags }
                     .thenBy { it.extraKnownTags }
                     .thenBy { it.form }
             )
@@ -142,8 +148,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             row {
                 rowHeader("imperative")
                 data(Mood.IMPERATIVE, supporting = setOf(Num.SG))
-                data(Mood.IMPERATIVE, Num.PL)
-                empty(colspan = 2)
+                empty(colspan = 3)
             }
             row {
                 empty()
@@ -189,19 +194,18 @@ object NlConjugationScheme : ConjugationSchemeProvider {
     ) {
         view("short", "Number and diminutive") {
             row {
+                empty()
+                colHeader("base")
+                colHeader("diminutive")
+            }
+            row {
                 rowHeader("singular")
                 data(Num.SG)
+                data(Num.SG, VerbForm.DIMINUTIVE)
             }
             row {
                 rowHeader("plural")
                 data(Num.PL)
-            }
-            row {
-                rowHeader("diminutive singular")
-                data(Num.SG, VerbForm.DIMINUTIVE)
-            }
-            row {
-                rowHeader("diminutive plural")
                 data(Num.PL, VerbForm.DIMINUTIVE)
             }
         }

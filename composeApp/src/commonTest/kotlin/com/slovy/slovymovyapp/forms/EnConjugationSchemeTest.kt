@@ -46,11 +46,10 @@ class EnConjugationSchemeTest : BaseTest() {
 
     private val expectedEnVerbTest = mapOf(
         "en_verb:short" to listOf(
-            listOf(null, "test"),
-            listOf(null, "tests"),
-            listOf(null, "tested"),
-            listOf(null, "tested"),
-            listOf(null, "testing")
+            listOf(null, null, null, null),
+            listOf(null, "test", null, "tests"),
+            listOf(null, "tested", null, "tested"),
+            listOf(null, "testing", null)
         )
     )
 
