@@ -454,6 +454,7 @@ fun SearchScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToTextReader: (Language) -> Unit = {},
     hasFavoritesToReview: Boolean = false,
     onListClick: (WordList) -> Unit = {},
 ) {
@@ -521,6 +522,7 @@ fun SearchScreen(
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
         onNavigateToSettings = onNavigateToSettings,
+        onNavigateToTextReader = { viewModel.state.selectedLanguage?.let { onNavigateToTextReader(it) } },
         hasFavoritesToReview = hasFavoritesToReview,
     )
 }
@@ -545,6 +547,7 @@ fun SearchScreenContent(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToTextReader: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
 ) {
     val focusManager = LocalFocusManager.current
@@ -679,7 +682,8 @@ fun SearchScreenContent(
                                     isLoading = state.isEmptyStateLoading,
                                     onWordClick = onSuggestionSelected,
                                     onListClick = onListClick,
-                                    onSuggestListClick = onSuggestListClick
+                                    onSuggestListClick = onSuggestListClick,
+                                    onNavigateToTextReader = onNavigateToTextReader
                                 )
                             }
                         }
@@ -807,7 +811,8 @@ private fun EmptySearchState(
     isLoading: Boolean,
     onWordClick: (String) -> Unit,
     onListClick: (WordList) -> Unit,
-    onSuggestListClick: () -> Unit
+    onSuggestListClick: () -> Unit,
+    onNavigateToTextReader: () -> Unit = {}
 ) {
     if (isLoading) {
         Box(
@@ -954,6 +959,12 @@ private fun EmptySearchState(
                 textAlign = TextAlign.Center
             )
         }
+
+        FilledTonalButton(onClick = onNavigateToTextReader) {
+            Text("Paste your text")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 

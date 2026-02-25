@@ -42,6 +42,8 @@ import com.slovy.slovymovyapp.data.lists.WordListsRepository
 import com.slovy.slovymovyapp.data.recovery.RecoverableSense
 import com.slovy.slovymovyapp.ui.study.StudySessionScreen
 import com.slovy.slovymovyapp.ui.study.StudySessionViewModel
+import com.slovy.slovymovyapp.ui.reader.TextReaderScreen
+import com.slovy.slovymovyapp.ui.reader.TextReaderViewModel
 import com.slovy.slovymovyapp.ui.theme.AppTheme
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
@@ -260,6 +262,9 @@ private sealed interface AppDestination {
 
     @Serializable
     data object Developer : AppDestination
+
+    @Serializable
+    data class TextReader(val languageCode: String) : AppDestination
 
     @Serializable
     data class Error(val message: String) : AppDestination
@@ -834,6 +839,9 @@ fun App(
                             if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
                                 navController.navigate(AppDestination.Settings)
                         },
+                        onNavigateToTextReader = { language ->
+                            navController.navigate(AppDestination.TextReader(language.code))
+                        },
                         hasFavoritesToReview = hasFavoritesToReview,
                         onListClick = { list ->
                             val lang = viewModel.state.selectedLanguage
@@ -1146,6 +1154,33 @@ fun App(
                             navController.navigate(destination)
                         },
                         hasFavoritesToReview = hasFavoritesToReview,
+                    )
+                }
+                composable<AppDestination.TextReader> { backStackEntry ->
+                    val args = backStackEntry.toRoute<AppDestination.TextReader>()
+                    val language = Language.fromCodeOrNull(args.languageCode) ?: run {
+                        LaunchedEffect(Unit) {
+                            navController.navigate(AppDestination.Error("Unknown language: ${args.languageCode}")) {
+                                popUpTo<AppDestination.TextReader> { inclusive = true }
+                            }
+                        }
+                        return@composable
+                    }
+                    val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
+                        TextReaderViewModel(dictionaryRepository, language)
+                    }
+                    TextReaderScreen(
+                        viewModel = viewModel,
+                        onWordClick = { wordLanguage, lemma ->
+                            val translationCodes = nativeLanguages.filter { it != wordLanguage }.map { it.code }
+                            val destination = AppDestination.WordDetail(
+                                dictionaryLanguageCode = wordLanguage.code,
+                                lemma = lemma,
+                                translationLanguageCodes = translationCodes
+                            )
+                            navController.navigate(destination)
+                        },
+                        onBack = { navController.popBackStack() }
                     )
                 }
                 composable<AppDestination.DataVersionMismatch> {

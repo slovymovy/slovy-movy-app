@@ -403,3 +403,28 @@ FROM sense s
 JOIN lemma_pos lp ON lp.id = s.lemma_pos_id
 JOIN lemma l ON l.id = lp.lemma_id
 WHERE s.sense_id IN ?;
+
+-- Batch lookup of lemma + min learner level by normalized forms (for text reader feature).
+-- Exact lemma matches (form == lemma) are ranked first, then by frequency.
+selectTokenDataByForms:
+SELECT f.form_normalized, l.id AS lemma_id, l.lemma, MIN(CAST(s.learner_level AS INTEGER)) AS min_level
+FROM form f
+JOIN lemma_pos lp ON lp.id = f.lemma_pos_id
+JOIN lemma l ON l.id = lp.lemma_id
+LEFT JOIN sense s ON s.lemma_pos_id = lp.id
+WHERE l.lang_code = ? AND f.form_normalized IN ?
+GROUP BY f.form_normalized, l.id, l.lemma
+ORDER BY (CASE WHEN l.lemma_normalized = f.form_normalized THEN 1 ELSE 0 END) DESC,
+         l.zipf_frequency DESC;
+
+-- Direct lemma batch lookup (text reader: exact lemma match overrides form-based match).
+-- Used as a second pass so that e.g. "wat" resolves to lemma "wat", not a higher-freq word
+-- that happens to have "wat" as an inflected form.
+selectTokenDataByLemmas:
+SELECT l.lemma_normalized, l.id AS lemma_id, l.lemma, MIN(CAST(s.learner_level AS INTEGER)) AS min_level
+FROM lemma l
+JOIN lemma_pos lp ON lp.lemma_id = l.id
+LEFT JOIN sense s ON s.lemma_pos_id = lp.id
+WHERE l.lang_code = ? AND l.lemma_normalized IN ?
+GROUP BY l.lemma_normalized, l.id, l.lemma
+ORDER BY l.zipf_frequency DESC;
