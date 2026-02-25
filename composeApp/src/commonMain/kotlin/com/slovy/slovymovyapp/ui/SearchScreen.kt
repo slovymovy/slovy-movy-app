@@ -961,7 +961,7 @@ private fun EmptySearchState(
         }
 
         FilledTonalButton(onClick = onNavigateToTextReader) {
-            Text("Paste your text")
+            Text("Add your text")
         }
 
         Spacer(modifier = Modifier.height(8.dp))

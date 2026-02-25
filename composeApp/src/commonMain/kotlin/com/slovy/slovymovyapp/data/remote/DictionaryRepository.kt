@@ -1531,4 +1531,7 @@ class DictionaryRepository(
             }
         }
     }
+
+    suspend fun getFavoriteLemmasByLang(language: Language): Set<String> =
+        favoritesRepository.getDistinctLemmasByLang(language)
 }
