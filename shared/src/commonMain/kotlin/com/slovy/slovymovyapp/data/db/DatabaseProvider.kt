@@ -172,6 +172,6 @@ class FormSourceIntColumnAdapter : ColumnAdapter<FormSource, Long> {
     }
 
     override fun encode(value: FormSource): Long {
-        return value.ordinal.toLong()
+        return value.i.toLong()
     }
 }
