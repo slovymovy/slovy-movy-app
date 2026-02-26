@@ -978,8 +978,7 @@ private fun WordDetailContent(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         // Display word family if available
-        val filteredWordFamily = card.wordFamily.filter { !it.equals(card.lemma, ignoreCase = true) }
-        if (filteredWordFamily.isNotEmpty()) {
+        if (card.wordFamily.isNotEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -988,7 +987,7 @@ private fun WordDetailContent(
             ) {
                 EntryList(
                     label = "Word Family",
-                    values = filteredWordFamily,
+                    values = card.wordFamily,
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     relatedWords = card.relatedWords,

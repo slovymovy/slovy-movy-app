@@ -322,9 +322,11 @@ class JsonIngestionBuilder(
             online_only = false
         )
 
-        // Insert word family
+        // Insert word family (excluding the lemma itself)
         processed.wordFamily?.forEach { familyWord ->
-            dictQ.insertLemmaWordFamily(lemma_id = baseLemmaId, word = familyWord)
+            if (!familyWord.equals(lemmaWord, ignoreCase = true)) {
+                dictQ.insertLemmaWordFamily(lemma_id = baseLemmaId, word = familyWord)
+            }
         }
 
         // Insert lemma_pos entries for all POSes
@@ -345,7 +347,7 @@ class JsonIngestionBuilder(
         val lemmaPosIdToForms = buildLemmaPosIdToForms(entriesForForms, posToEntryId)
         insertForms(dictQ, lemmaPosIdToForms)
 
-        insertSensesAndRelatedData(processed, posToEntryId, dictQ)
+        insertSensesAndRelatedData(processed, posToEntryId, dictQ, lemmaWord)
 
         return buildTranslationOperations(processed, posToEntryId, baseLemmaId, langCode)
     }
@@ -377,13 +379,15 @@ class JsonIngestionBuilder(
         // Update online_only to false
         dictQ.updateLemmaOnlineOnly(online_only = false, id = baseLemmaId)
 
-        // Insert word family (if present)
+        // Insert word family (excluding the lemma itself)
         processed.wordFamily?.forEach { familyWord ->
-            dictQ.insertLemmaWordFamily(lemma_id = baseLemmaId, word = familyWord)
+            if (!familyWord.equals(word, ignoreCase = true)) {
+                dictQ.insertLemmaWordFamily(lemma_id = baseLemmaId, word = familyWord)
+            }
         }
 
         // Insert senses and related data, skipping missing POS
-        val skippedPos = insertSensesAndRelatedData(processed, posToEntryId, dictQ, skipMissingPos = true)
+        val skippedPos = insertSensesAndRelatedData(processed, posToEntryId, dictQ, word, skipMissingPos = true)
         if (skippedPos.isNotEmpty()) {
             println("Warning: Skipped POS entries for lemma '$word': ${skippedPos.joinToString()}")
         }
@@ -500,6 +504,7 @@ class JsonIngestionBuilder(
         processed: LanguageCardResponse,
         posToEntryId: Map<DictionaryPos, Uuid>,
         dictQ: DictionaryQueries,
+        lemmaWord: String,
         skipMissingPos: Boolean = false
     ): List<String> {
         val skippedPos = mutableListOf<String>()
@@ -535,13 +540,17 @@ class JsonIngestionBuilder(
                         comment = t.comment
                     )
                 }
-                // synonyms
+                // synonyms (excluding the lemma itself)
                 sense.synonyms.forEach { syn ->
-                    dictQ.insertSenseSynonym(sense_id = senseId, synonym = syn)
+                    if (!syn.equals(lemmaWord, ignoreCase = true)) {
+                        dictQ.insertSenseSynonym(sense_id = senseId, synonym = syn)
+                    }
                 }
-                // antonyms
+                // antonyms (excluding the lemma itself)
                 sense.antonyms.forEach { ant ->
-                    dictQ.insertSenseAntonym(sense_id = senseId, antonym = ant)
+                    if (!ant.equals(lemmaWord, ignoreCase = true)) {
+                        dictQ.insertSenseAntonym(sense_id = senseId, antonym = ant)
+                    }
                 }
                 // common phrases
                 sense.commonPhrases.forEach { phrase ->
