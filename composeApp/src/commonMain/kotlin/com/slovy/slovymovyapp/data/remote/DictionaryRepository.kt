@@ -1047,8 +1047,7 @@ class DictionaryRepository(
     data class TokenResult(
         val lemma: String,
         val lemmaId: Uuid,
-        val level: LearnerLevel?,
-        val isFavorite: Boolean
+        val level: LearnerLevel?
     )
 
     /**
@@ -1070,36 +1069,32 @@ class DictionaryRepository(
         if (forms.isEmpty()) return@withContext emptyMap()
 
         val databases = openDictionaryDatabases(language)
-        val allFavorites = favoritesRepository.getAll()
-        val favoriteLemmas = allFavorites
-            .filter { it.language == language }
-            .map { it.lemma.lowercase() }
-            .toSet()
-
         val result = mutableMapOf<String, TokenResult>()
 
         for (db in databases) {
             val q = db.dictionaryQueries
 
-            // Pass 1: form-based lookup (handles inflected forms like "liepen" → "lopen")
+            // Pass 1: form-based lookup (handles inflected forms like "liepen" → "lopen").
+            // Collect per-DB first so that local DB results can override RO DB results.
+            val dbPass1 = mutableMapOf<String, TokenResult>()
             forms.chunked(999).forEach { chunk ->
                 q.selectTokenDataByForms(language.code, chunk)
                     .executeAsList()
                     .forEach { row ->
-                        if (!result.containsKey(row.form_normalized)) {
+                        if (!dbPass1.containsKey(row.form_normalized)) {
                             val level = row.min_level?.let { rawValue ->
                                 com.slovy.slovymovyapp.data.dictionary.LearnerLevel.from(rawValue)
                                     .let { dbLevel -> LearnerLevel.valueOf(dbLevel.name) }
                             }
-                            result[row.form_normalized] = TokenResult(
+                            dbPass1[row.form_normalized] = TokenResult(
                                 lemma = row.lemma,
                                 lemmaId = row.lemma_id,
-                                level = level,
-                                isFavorite = row.lemma.lowercase() in favoriteLemmas
+                                level = level
                             )
                         }
                     }
             }
+            result.putAll(dbPass1)
 
             // Pass 2: direct lemma lookup — overrides pass-1 when the token itself is a lemma.
             // Function words (e.g. "wat") may not have form-table entries and would otherwise
@@ -1117,8 +1112,7 @@ class DictionaryRepository(
                             directResults[row.lemma_normalized] = TokenResult(
                                 lemma = row.lemma,
                                 lemmaId = row.lemma_id,
-                                level = level,
-                                isFavorite = row.lemma.lowercase() in favoriteLemmas
+                                level = level
                             )
                         }
                     }
@@ -1172,5 +1166,5 @@ class DictionaryRepository(
     }
 
     suspend fun getFavoriteLemmasByLang(language: Language): Set<String> =
-        favoritesRepository.getDistinctLemmasByLang(language)
+        favoritesRepository.getDistinctLemmasByLang(language).mapTo(mutableSetOf()) { it.lowercase() }
 }
