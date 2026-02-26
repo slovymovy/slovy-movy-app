@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.db
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
@@ -95,12 +96,12 @@ class DataDbManagerTest : BaseTest() {
             q.insertLemmaPos(cafeIdPost, cafeId, DictionaryPos.NOUN)
 
             // Insert forms (mixed case to test COLLATE NOCASE)
-            q.insertForm(Uuid.random(), beIdPos, "am", "am")
-            q.insertForm(Uuid.random(), beIdPos, "ARE", "are")
-            q.insertForm(Uuid.random(), beIdPos, "being", "being")
-            q.insertForm(Uuid.random(), loveIdPos, "loved", "loved")
-            q.insertForm(Uuid.random(), loveIdPos, "loving", "loving")
-            q.insertForm(Uuid.random(), cafeIdPost, "CAFÉS", "cafes")
+            q.insertForm(Uuid.random(), beIdPos, "am", "am", FormSource.NATIVE)
+            q.insertForm(Uuid.random(), beIdPos, "ARE", "are", FormSource.NATIVE)
+            q.insertForm(Uuid.random(), beIdPos, "being", "being", FormSource.NATIVE)
+            q.insertForm(Uuid.random(), loveIdPos, "loved", "loved", FormSource.NATIVE)
+            q.insertForm(Uuid.random(), loveIdPos, "loving", "loving", FormSource.NATIVE)
+            q.insertForm(Uuid.random(), cafeIdPost, "CAFÉS", "cafes", FormSource.NATIVE)
 
             // normalized prefix range
             val (loStart, loEnd) = prefixRange("lo*")

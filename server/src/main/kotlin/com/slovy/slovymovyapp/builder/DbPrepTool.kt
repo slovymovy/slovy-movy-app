@@ -92,7 +92,7 @@ fun main(args: Array<String>) {
             .orEmpty()
         val processedByName = processedFiles.associateBy { it.name }
 
-        var rawFiles = rawDir.listFiles()
+        val allRawFiles = rawDir.listFiles()
             ?.filter { it.isFile && it.extension.equals("json", ignoreCase = true) }
             ?.sortedBy { it ->
                 if (params.testMode && (it.name.startsWith("simul") || it.name.startsWith("concur"))) {
@@ -103,7 +103,30 @@ fun main(args: Array<String>) {
 
             }
             .orEmpty()
-            .let { files -> if (params.testMode) files.take(500) else files }
+
+        val rawFiles = if (params.testMode) {
+            val curatedRawFiles = selectTestModeCuratedRawFiles(
+                lang = lang,
+                rawDir = rawDir,
+                processedDir = procDir
+            )
+            val curatedNames = curatedRawFiles.map { it.name }.toSet()
+            val remainingQuota = (500 - curatedRawFiles.size).coerceAtLeast(0)
+            val additionalRawFiles = allRawFiles
+                .asSequence()
+                .filterNot { it.name in curatedNames }
+                .take(remainingQuota)
+                .toList()
+
+            println(
+                "[TEST MODE][$lang] selected ${curatedRawFiles.size} curated words + " +
+                    "${additionalRawFiles.size} deterministic words"
+            )
+
+            curatedRawFiles + additionalRawFiles
+        } else {
+            allRawFiles
+        }
 
         try {
             rawFiles.chunked(5000).forEach { batch ->
@@ -206,4 +229,127 @@ private fun sha256HexLower(inputName: String): String {
         hexChars[i++] = hexArray[v and 0x0F]
     }
     return String(hexChars)
+}
+
+private data class PosWordSeed(
+    val pos: String,
+    val candidates: List<String>
+)
+
+private val TEST_MODE_POS_SEEDS_BY_LANG: Map<String, List<PosWordSeed>> = mapOf(
+    "en" to listOf(
+        PosWordSeed("article", listOf("the", "a", "an")),
+        PosWordSeed("noun", listOf("book", "state", "amazon")),
+        PosWordSeed("name", listOf("amazon", "john", "anna")),
+        PosWordSeed("verb", listOf("test", "double", "state")),
+        PosWordSeed("adjective", listOf("double", "last", "state")),
+        PosWordSeed("adverb", listOf("well", "there", "in")),
+        PosWordSeed("pronoun", listOf("he", "she", "it")),
+        PosWordSeed("preposition", listOf("in", "on", "at")),
+        PosWordSeed("conjunction", listOf("and", "or", "but")),
+        PosWordSeed("interjection", listOf("wow", "oh", "ah")),
+        PosWordSeed("determiner", listOf("this", "that", "these")),
+        PosWordSeed("numeral", listOf("one", "two", "three"))
+    ),
+    "nl" to listOf(
+        PosWordSeed("article", listOf("de", "het", "een")),
+        PosWordSeed("noun", listOf("kwartier", "stempel", "boek")),
+        PosWordSeed("name", listOf("amsterdam", "jan", "anna")),
+        PosWordSeed("verb", listOf("zeggen", "afspreken", "zijn")),
+        PosWordSeed("adjective", listOf("volslagen", "blauw", "laatste")),
+        PosWordSeed("adverb", listOf("wel", "niet", "hier")),
+        PosWordSeed("pronoun", listOf("ik", "jij", "hij")),
+        PosWordSeed("preposition", listOf("in", "op", "voor")),
+        PosWordSeed("conjunction", listOf("en", "of", "maar")),
+        PosWordSeed("interjection", listOf("hoi", "oh", "ach")),
+        PosWordSeed("determiner", listOf("deze", "die", "dit")),
+        PosWordSeed("numeral", listOf("één", "twee", "drie"))
+    ),
+    "pl" to listOf(
+        PosWordSeed("article", listOf("ten", "ta", "to")),
+        PosWordSeed("noun", listOf("testowanie", "dom", "książka")),
+        PosWordSeed("name", listOf("warszawa", "jan", "adam")),
+        PosWordSeed("verb", listOf("podawać", "być", "mieć")),
+        PosWordSeed("adjective", listOf("dobry", "ostatni", "polski")),
+        PosWordSeed("adverb", listOf("dobrze", "szybko", "tu")),
+        PosWordSeed("pronoun", listOf("on", "ja", "to")),
+        PosWordSeed("preposition", listOf("w", "na", "o")),
+        PosWordSeed("conjunction", listOf("i", "albo", "ale")),
+        PosWordSeed("interjection", listOf("o", "hej", "ach")),
+        PosWordSeed("determiner", listOf("ten", "ta", "to")),
+        PosWordSeed("numeral", listOf("jeden", "dwa", "trzy"))
+    ),
+    "ru" to listOf(
+        PosWordSeed("article", listOf("это", "тот", "этот")),
+        PosWordSeed("noun", listOf("книга", "дом", "человек")),
+        PosWordSeed("name", listOf("иван", "анна", "москва")),
+        PosWordSeed("verb", listOf("читать", "сказать", "быть")),
+        PosWordSeed("adjective", listOf("красивый", "русский", "последний")),
+        PosWordSeed("adverb", listOf("хорошо", "быстро", "там")),
+        PosWordSeed("pronoun", listOf("он", "она", "это")),
+        PosWordSeed("preposition", listOf("в", "на", "о")),
+        PosWordSeed("conjunction", listOf("и", "или", "но")),
+        PosWordSeed("interjection", listOf("о", "ах", "эй")),
+        PosWordSeed("determiner", listOf("этот", "тот", "это")),
+        PosWordSeed("numeral", listOf("один", "два", "три"))
+    )
+)
+
+private fun fileContainsPos(file: File, pos: String): Boolean {
+    if (!file.exists() || !file.isFile) return false
+    val marker = "\"pos\": \"$pos\""
+    return try {
+        file.useLines { lines -> lines.any { marker in it } }
+    } catch (_: Throwable) {
+        false
+    }
+}
+
+private fun selectTestModeCuratedRawFiles(
+    lang: String,
+    rawDir: File,
+    processedDir: File
+): List<File> {
+    val seeds = TEST_MODE_POS_SEEDS_BY_LANG[lang].orEmpty()
+    if (seeds.isEmpty()) return emptyList()
+
+    val selected = mutableListOf<File>()
+    val selectedNames = mutableSetOf<String>()
+
+    seeds.forEach { seed ->
+        val preferredWords = seed.candidates.filter { word ->
+            val fileName = "$word.json"
+            if (fileName in selectedNames) return@filter false
+            val rawFile = File(rawDir, fileName)
+            if (!rawFile.exists()) return@filter false
+            val processedFile = File(processedDir, fileName)
+            fileContainsPos(processedFile, seed.pos) || fileContainsPos(rawFile, seed.pos)
+        }
+
+        if (preferredWords.isNotEmpty()) {
+            preferredWords.forEach { chosenWord ->
+                val fileName = "$chosenWord.json"
+                selectedNames += fileName
+                selected += File(rawDir, fileName)
+            }
+            return@forEach
+        }
+
+        val fallbackWord = seed.candidates.firstOrNull { word ->
+            val fileName = "$word.json"
+            fileName !in selectedNames && File(rawDir, fileName).exists()
+        }
+
+        if (fallbackWord == null) {
+            println("[TEST MODE][$lang] No curated candidate found for POS '${seed.pos}'")
+            return@forEach
+        }
+
+        println("[TEST MODE][$lang] Using fallback word '$fallbackWord' for POS '${seed.pos}'")
+        val fileName = "$fallbackWord.json"
+        selectedNames += fileName
+        selected += File(rawDir, fileName)
+    }
+
+    return selected
 }

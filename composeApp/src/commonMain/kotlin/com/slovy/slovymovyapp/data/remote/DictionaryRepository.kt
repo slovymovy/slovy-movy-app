@@ -2,8 +2,11 @@ package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.forms.*
+import com.slovy.slovymovyapp.data.forms.configs.SchemeRegistry
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
@@ -15,6 +18,98 @@ import kotlin.uuid.Uuid
 
 internal fun DictionaryPos.toPartOfSpeech(): PartOfSpeech {
     return PartOfSpeech.valueOf(this.name)
+}
+
+private fun hasAnyResolvedForm(resolved: List<List<String?>>): Boolean =
+    resolved.any { row -> row.any { it != null } }
+
+fun resolveSchemeView(
+    forms: List<SchemeInputForm>,
+    view: SchemeView,
+    tagResolver: SchemeTagResolver = DefaultSchemeTagResolver,
+    lemma: String
+): List<List<String?>> {
+
+    data class ResolvedFormTags(
+        val form: String,
+        val tagsByKey: Map<String, Set<String>>,
+        val mappedTagCount: Int,
+        val source: FormSource,
+    )
+
+    val preprocessedForms = tagResolver.preprocessForms(forms = forms, lemma = lemma)
+
+    val resolvedForms = preprocessedForms.map { form ->
+        val mappedTags = TagMapping.resolve(form.tags)
+        ResolvedFormTags(
+            form = form.form,
+            tagsByKey = mappedTags
+                .groupBy { it.key }
+                .mapValues { (_, tags) -> tags.map { it.value }.toSet() },
+            mappedTagCount = mappedTags.size,
+            source = form.source
+        )
+    }
+    return view.grid.map { row ->
+        row.map { cell ->
+            when (cell) {
+                is GridCell.Data -> resolvedForms
+                    .asSequence()
+                    .mapNotNull { resolvedForm ->
+                        val matchedRequiredTags = cell.requiredTags.count { (key, expectedValue) ->
+                            resolvedForm.tagsByKey[key]?.contains(expectedValue) == true
+                        }
+                        if (matchedRequiredTags != cell.requiredTags.size) return@mapNotNull null
+
+                        // Source filter: skip this form if it doesn't match the cell's allowed sources.
+                        // A null form source fails the filter when sources are restricted.
+                        val allowedSources = cell.allowedSources
+                        if (allowedSources != null && resolvedForm.source !in allowedSources) {
+                            return@mapNotNull null
+                        }
+
+                        val matchedPreferredTags = cell.preferredTags.count { (key, supportingValue) ->
+                            resolvedForm.tagsByKey[key]?.contains(supportingValue) == true
+                        }
+                        val extraKnownTags = resolvedForm.mappedTagCount - matchedRequiredTags
+                        SchemeCellCandidate(
+                            matchedPreferredTags = matchedPreferredTags,
+                            extraKnownTags = extraKnownTags,
+                            form = resolvedForm.form
+                        )
+                    }
+                    .toList()
+                    .let(tagResolver::selectCandidate)
+                    ?.form
+
+                else -> null
+            }
+        }
+    }
+}
+
+private fun resolveNonEmptyFormsViews(
+    language: Language,
+    pos: DictionaryPos,
+    forms: List<SchemeInputForm>,
+    lemma: String
+): List<FormsSchemeView> {
+    val selectedScheme = SchemeRegistry.findScheme(language, pos, forms) ?: return emptyList()
+    return selectedScheme.views.mapNotNull { view ->
+        val resolved = resolveSchemeView(
+            forms = forms,
+            view = view,
+            tagResolver = selectedScheme.tagResolver,
+            lemma = lemma
+        )
+
+        if (!hasAnyResolvedForm(resolved)) return@mapNotNull null
+
+        FormsSchemeView(
+            view = view.copy(viewId = "${selectedScheme.templateId}:${view.viewId}"),
+            forms = resolved
+        )
+    }
 }
 
 // Repository that provides search across installed dictionaries and builds LanguageCard by lemma ID,
@@ -451,7 +546,7 @@ class DictionaryRepository(
         )
 
         // Data class for form data we need
-        data class FormData(val formId: Uuid, val form: String)
+        data class FormData(val formId: Uuid, val form: String, val source: FormSource)
 
         // Per-POS collected data
         data class PosData(
@@ -469,7 +564,7 @@ class DictionaryRepository(
             val lemmaPosRow = q.selectLemmaPosFullById(lemmaPosId).executeAsList().firstOrNull() ?: continue
             zipfFrequency = lemmaPosRow.zipf_frequency.toFloat()
             val formsWithId = q.selectFormsWithIdByLemmaPosId(lemmaPosId).executeAsList()
-            val forms = formsWithId.map { FormData(it.form_id, it.form) }
+            val forms = formsWithId.map { FormData(it.form_id, it.form, it.source) }
             allFormIds.addAll(forms.map { it.formId })
 
             val sensesRows = q.selectSensesByLemmaPosId(lemmaPosId).executeAsList()
@@ -596,11 +691,15 @@ class DictionaryRepository(
         // Build entries
         val entries = posDataList.map { posData ->
             val forms = posData.forms.map { formData ->
-                LanguageCardForm(
+                SchemeInputForm(
                     tags = formTagsMap[formData.formId] ?: emptyList(),
-                    form = formData.form
+                    form = formData.form,
+                    source = formData.source
                 )
             }
+
+            val dictionaryPos = DictionaryPos.valueOf(posData.pos.name)
+            val formsViews = resolveNonEmptyFormsViews(language, dictionaryPos, forms, lemma)
 
             val senses = posData.senseRows.map { s ->
                 // Return cached sense if available
@@ -650,7 +749,7 @@ class DictionaryRepository(
 
             LanguageCardPosEntry(
                 pos = posData.pos,
-                forms = forms,
+                formsViews = formsViews,
                 senses = senses
             )
         }

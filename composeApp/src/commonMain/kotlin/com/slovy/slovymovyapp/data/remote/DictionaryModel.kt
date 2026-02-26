@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.forms.SchemeView
 
 data class LanguageCard(
     val lemma: String,
@@ -13,15 +14,15 @@ data class LanguageCard(
 
 data class RelatedWord(val lemma: String, val zipfFrequency: Float, val online: Boolean)
 
-data class LanguageCardPosEntry(
-    val pos: PartOfSpeech,
-    val forms: List<LanguageCardForm>,
-    val senses: List<LanguageCardResponseSense>,
+data class FormsSchemeView(
+    val view: SchemeView,
+    val forms: List<List<String?>>
 )
 
-data class LanguageCardForm(
-    val tags: List<String> = emptyList(),
-    val form: String
+data class LanguageCardPosEntry(
+    val pos: PartOfSpeech,
+    val formsViews: List<FormsSchemeView>,
+    val senses: List<LanguageCardResponseSense>,
 )
 
 enum class LearnerLevel {

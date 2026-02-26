@@ -60,6 +60,7 @@ object DatabaseProvider {
         formAdapter = Form.Adapter(
             lemma_pos_idAdapter = UuidByteArrayColumnAdapter(),
             form_idAdapter = UuidByteArrayColumnAdapter(),
+            sourceAdapter = FormSourceIntColumnAdapter(),
         ),
         form_tagAdapter = Form_tag.Adapter(
             form_idAdapter = UuidByteArrayColumnAdapter(),
@@ -161,6 +162,16 @@ class TraitTypeIntColumnAdapter : ColumnAdapter<TraitType, Long> {
     }
 
     override fun encode(value: TraitType): Long {
+        return value.i.toLong()
+    }
+}
+
+class FormSourceIntColumnAdapter : ColumnAdapter<FormSource, Long> {
+    override fun decode(databaseValue: Long): FormSource {
+        return FormSource.from(databaseValue)
+    }
+
+    override fun encode(value: FormSource): Long {
         return value.i.toLong()
     }
 }

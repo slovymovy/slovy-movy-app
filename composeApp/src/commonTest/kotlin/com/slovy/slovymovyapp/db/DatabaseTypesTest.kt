@@ -65,6 +65,7 @@ class DatabaseTypesTest : BaseTest() {
                     lemma_pos_id = lemmaPosId,
                     form = formText,
                     form_normalized = formNormalized,
+                    source = FormSource.NATIVE,
                 )
                 val formsByNorm = q.selectFormsByNormalized(formNormalized).executeAsList()
                 val senseId = Uuid.random()

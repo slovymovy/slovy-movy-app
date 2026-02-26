@@ -107,6 +107,20 @@ class GitHubClientTest {
     }
 
     @Test
+    fun loadDbExtractContent_loadsRuCyrillicFile() {
+        // Verifies that Cyrillic filenames in download URLs are correctly percent-encoded
+        // (e.g. "в" → "%D0%B2") so the HTTP request succeeds.
+        val content = GitHubClient.loadDbExtractContent("ru", "в.json")
+
+        assertNotNull(content)
+        assertTrue(content.isNotBlank(), "Content should not be blank")
+        assertTrue(
+            content.trimStart().startsWith("{") || content.trimStart().startsWith("["),
+            "Content should be valid JSON"
+        )
+    }
+
+    @Test
     fun loadDbExtractContent_throwsForNonExistentFile() {
         assertFailsWith<Exception> {
             GitHubClient.loadDbExtractContent("en", "nonexistent-file-12345.json")

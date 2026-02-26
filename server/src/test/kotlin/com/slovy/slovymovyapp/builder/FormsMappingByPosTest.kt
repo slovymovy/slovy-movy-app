@@ -3,6 +3,7 @@
 package com.slovy.slovymovyapp.builder
 
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.ingestion.*
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -15,6 +16,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class FormsMappingByPosTest {
+
+    private data class EntryWithSource(val entry: ExtractedWordEntry, val source: FormSource)
 
     @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
@@ -36,13 +39,10 @@ class FormsMappingByPosTest {
         val raw = json.decodeFromString(ExtractedWordData.serializer(), rawFile.readText())
         val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedFile.readText())
 
-        val nativeKey = LANG_TO_SOURCE_FILE[lang]
-        val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
-        val allEntries = raw.sourceFileToEntries.values.flatten()
-        val entriesForForms = if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else allEntries
+        val entriesForForms = selectEntriesForForms(raw, lang)
 
         val expectedNativeCount = countUniqueForms(entriesForForms, "verb")
-        val mappedBySenseCount = countUniqueForms(mappedEntriesBySense(raw, processed), "verb")
+        val mappedBySenseCount = countUniqueForms(mappedEntriesBySense(entriesForForms, processed), "verb")
 
         val builder = JsonIngestionBuilder(
             translationDbProvider = { from, to -> serverDbManager.openTranslation(from, to) },
@@ -64,13 +64,13 @@ class FormsMappingByPosTest {
         val formsInDb = dictQ.selectFormsWithIdByLemmaPosId(verbLemmaPos.id).executeAsList()
         val dbFormKeys = formsInDb.map { form ->
             val tags = dictQ.selectFormTagsByFormId(form.form_id).executeAsList().map { it.tag }.toSet()
-            FormKey(form.form, stripAccents(form.form), tags)
+            FormKey(form.form, stripAccents(form.form), tags, form.source)
         }.toSet()
 
         assertEquals(
             expectedNativeCount,
             dbFormKeys.size,
-            "Should ingest native forms for '$word' (POS mapping only)"
+            "Should ingest source-aware forms for '$word' (POS mapping only)"
         )
         assertTrue(
             expectedNativeCount > mappedBySenseCount,
@@ -78,13 +78,18 @@ class FormsMappingByPosTest {
         )
     }
 
-    private data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+    private data class FormKey(
+        val form: String,
+        val formNormalized: String,
+        val tags: Set<String>,
+        val source: FormSource
+    )
 
-    private fun countUniqueForms(entries: List<ExtractedWordEntry>, pos: String): Int {
+    private fun countUniqueForms(entries: List<EntryWithSource>, pos: String): Int {
         val forms = linkedMapOf<FormKey, ExtractedWordForm>()
-        entries.filter { it.pos == pos }.forEach { entry ->
+        entries.filter { it.entry.pos == pos }.forEach { (entry, source) ->
             entry.forms.forEach { f ->
-                val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet())
+                val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet(), source)
                 if (!forms.containsKey(key)) {
                     forms[key] = f
                 }
@@ -94,16 +99,32 @@ class FormsMappingByPosTest {
     }
 
     private fun mappedEntriesBySense(
-        raw: ExtractedWordData,
+        entries: List<EntryWithSource>,
         processed: LanguageCardResponse
-    ): List<ExtractedWordEntry> {
+    ): List<EntryWithSource> {
         val processedSenseIds = processed.entries
             .flatMap { it.senses }
             .map { it.senseId }
             .toSet()
-        val allEntries = raw.sourceFileToEntries.values.flatten()
-        return allEntries.filter { entry ->
-            entry.senses.any { s -> processedSenseIds.contains(s.senseId.toString()) }
+        return entries.filter { (entry, _) ->
+            entry.senses.any { sense -> processedSenseIds.contains(sense.senseId.toString()) }
+        }
+    }
+
+    private fun selectEntriesForForms(raw: ExtractedWordData, lang: String): List<EntryWithSource> {
+        val nativeKey = LANG_TO_SOURCE_FILE[lang]
+        val enKey = LANG_TO_SOURCE_FILE["en"]
+
+        val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+        val enEntries = if (lang == "en") {
+            emptyList()
+        } else {
+            enKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+        }
+
+        return buildList {
+            nativeEntries.forEach { add(EntryWithSource(it, FormSource.NATIVE)) }
+            enEntries.forEach { add(EntryWithSource(it, FormSource.EN)) }
         }
     }
 

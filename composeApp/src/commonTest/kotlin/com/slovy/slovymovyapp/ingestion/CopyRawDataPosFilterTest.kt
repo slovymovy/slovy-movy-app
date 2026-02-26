@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.ingestion
 import app.cash.sqldelight.db.SqlDriver
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
@@ -54,9 +55,9 @@ class CopyRawDataPosFilterTest : BaseTest() {
             val nounFormId = Uuid.random()
             val verbFormId = Uuid.random()
             val adjFormId = Uuid.random()
-            sourceQ.insertForm(nounFormId, nounPosId, "tests", "tests")
-            sourceQ.insertForm(verbFormId, verbPosId, "testing", "testing")
-            sourceQ.insertForm(adjFormId, adjPosId, "testy", "testy")
+            sourceQ.insertForm(nounFormId, nounPosId, "tests", "tests", FormSource.NATIVE)
+            sourceQ.insertForm(verbFormId, verbPosId, "testing", "testing", FormSource.NATIVE)
+            sourceQ.insertForm(adjFormId, adjPosId, "testy", "testy", FormSource.NATIVE)
 
             // Create target DB (separate from source)
             val targetDb = mgr.openLocalDictionary()

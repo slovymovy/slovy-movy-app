@@ -1,12 +1,16 @@
 package com.slovy.slovymovyapp.server.github
 
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import org.kohsuke.github.*
 import java.io.File
 import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 
 /**
  * GitHub client provider for accessing private repository content.
@@ -52,6 +56,12 @@ object GitHubClient {
         GitHubBuilder()
             .withOAuthToken(token)
             .build()
+    }
+
+    private val httpClient by lazy {
+        HttpClient(CIO) {
+            install(HttpRedirect)
+        }
     }
 
     /**
@@ -464,8 +474,6 @@ object GitHubClient {
         }
     }
 
-    private val httpClient: HttpClient by lazy { HttpClient.newHttpClient() }
-
     @Volatile
     private var cachedDiscussionIds: Pair<String, String>? = null
 
@@ -475,19 +483,20 @@ object GitHubClient {
             if (variables != null) put("variables", variables)
         }
 
-        val request = HttpRequest.newBuilder()
-            .uri(URI.create(GRAPHQL_ENDPOINT))
-            .header("Authorization", "bearer ${getToken()}")
-            .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
-            .build()
+        val (statusCode, responseBody) = runBlocking {
+            val response = httpClient.post(GRAPHQL_ENDPOINT) {
+                header("Authorization", "bearer ${getToken()}")
+                contentType(ContentType.Application.Json)
+                setBody(requestBody.toString())
+            }
+            response.status.value to response.bodyAsText()
+        }
 
-        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-        val parsed = Json.parseToJsonElement(response.body())
+        val parsed = Json.parseToJsonElement(responseBody)
 
-        if (response.statusCode() != 200) {
+        if (statusCode != 200) {
             throw IllegalStateException(
-                "GraphQL request failed with status ${response.statusCode()}: ${response.body()}"
+                "GraphQL request failed with status $statusCode: $responseBody"
             )
         }
 
@@ -551,13 +560,33 @@ object GitHubClient {
         }
     }
 
+    /**
+     * Percent-encodes non-ASCII characters in a URL (e.g. Cyrillic filenames → %D0%B2).
+     * [java.net.URL] parses the raw string leniently; [URI]'s 5-arg constructor then
+     * re-encodes the decoded path to ASCII while leaving the query string untouched.
+     */
+    @Suppress("DEPRECATION")
+    private fun encodeUrl(rawUrl: String): String {
+        val url = java.net.URL(rawUrl)
+        return URI(url.protocol, url.authority, url.path, url.query, null).toASCIIString()
+    }
+
     private fun readContentText(content: GHContent): String {
         val encoding = content.encoding
         // GitHub returns encoding "none" (empty content) for larger files; use downloadUrl to fetch raw bytes.
         if (encoding == null || encoding == "none") {
             val downloadUrl = content.downloadUrl
                 ?: throw IllegalStateException("Missing download URL for content with encoding '$encoding'")
-            return URI.create(downloadUrl).toURL().openStream().bufferedReader().use { it.readText() }
+            // Percent-encode the URL using URI's 5-arg constructor, which takes a decoded path
+            // and produces proper RFC 3986 encoding (e.g. Cyrillic filenames → %D0%B2.json).
+            val safeUrl = encodeUrl(downloadUrl)
+            return runBlocking {
+                val response = httpClient.get(safeUrl)
+                if (!response.status.isSuccess()) {
+                    throw IllegalStateException("Failed to download $safeUrl: HTTP ${response.status.value}")
+                }
+                response.bodyAsText()
+            }
         }
         return content.read().bufferedReader().use { it.readText() }
     }

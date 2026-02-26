@@ -1,5 +1,6 @@
 
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos;
+import com.slovy.slovymovyapp.data.dictionary.FormSource;
 import com.slovy.slovymovyapp.data.dictionary.LearnerLevel;
 import com.slovy.slovymovyapp.data.dictionary.NameType;
 import com.slovy.slovymovyapp.data.dictionary.SenseFrequency;
@@ -38,6 +39,7 @@ CREATE TABLE form (
   form_id BLOB AS Uuid NOT NULL,
   form TEXT NOT NULL,
   form_normalized TEXT NOT NULL,
+  source INTEGER AS FormSource NOT NULL,
   PRIMARY KEY (form_id)
 );
 
@@ -130,8 +132,8 @@ JOIN lemma l ON l.id = lp.lemma_id
 WHERE lp.id = ?;
 
 insertForm:
-INSERT INTO form(form_id, lemma_pos_id, form, form_normalized)
-VALUES (?, ?, ?, ?);
+INSERT INTO form(form_id, lemma_pos_id, form, form_normalized, source)
+VALUES (?, ?, ?, ?, ?);
 
 insertFormTag:
 INSERT OR IGNORE INTO form_tag(form_id, tag)
@@ -179,7 +181,7 @@ WHERE f.lemma_pos_id = ?;
 
 -- Forms with IDs for tag lookups
 selectFormsWithIdByLemmaPosId:
-SELECT f.form_id, f.form
+SELECT f.form_id, f.form, f.source
 FROM form f
 WHERE f.lemma_pos_id = ?;
 
