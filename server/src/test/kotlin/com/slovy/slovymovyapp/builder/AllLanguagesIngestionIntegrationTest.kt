@@ -3,6 +3,7 @@
 package com.slovy.slovymovyapp.builder
 
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.ingestion.*
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -15,6 +16,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class AllLanguagesIngestionIntegrationTest {
+
+    private data class EntryWithSource(val entry: ExtractedWordEntry, val source: FormSource)
 
     @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
@@ -54,26 +57,30 @@ class AllLanguagesIngestionIntegrationTest {
                 val lemmas = dictQ.selectLemmasByWord(lang, word.lowercase()).executeAsList()
                 assertTrue(lemmas.isNotEmpty(), "Lemma should exist for '$word' in $lang from ${pFile.name}")
 
-                // Determine native entries and forms to check
-                val nativeKey = LANG_TO_SOURCE_FILE[lang]
-                val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
-                val entriesCandidates =
-                    if (nativeEntries.any { it.forms.isNotEmpty() }) nativeEntries else raw.sourceFileToEntries.values.flatten()
+                // Determine entries and forms to check using ingestion's source-aware selection.
+                val entriesForForms = selectEntriesForForms(raw)
                 // Only keep entries whose POS exists in processed entries (forms map by POS)
                 val processedPosSet = processed.entries.mapNotNull { mapPos(it.pos) }.toSet()
-                val entriesUsedByProcessedPos = entriesCandidates.filter { e ->
-                    val pos = mapPos(e.pos)
+                val entriesUsedByProcessedPos = entriesForForms.filter { (entry, _) ->
+                    val pos = mapPos(entry.pos)
                     pos != null && processedPosSet.contains(pos)
                 }
 
                 // Validate presence of all UNIQUE forms per POS from entries used by processed
-                data class FormKey(val form: String, val formNormalized: String, val tags: Set<String>)
+                data class FormKey(
+                    val form: String,
+                    val formNormalized: String,
+                    val tags: Set<String>,
+                    val source: FormSource
+                )
 
                 val expectedFormsByPos = entriesUsedByProcessedPos
-                    .groupBy { it.pos.lowercase() }
+                    .groupBy { it.entry.pos.lowercase() }
                     .mapValues { (_, entries) ->
-                        entries.flatMap { it.forms }.map { f ->
-                            FormKey(f.form, stripAccents(f.form), f.tags.toSet())
+                        entries.flatMap { (entry, source) ->
+                            entry.forms.map { f ->
+                                FormKey(f.form, stripAccents(f.form), f.tags.toSet(), source)
+                            }
                         }.toSet()
                     }
 
@@ -90,7 +97,7 @@ class AllLanguagesIngestionIntegrationTest {
                             val formsInDb = dictQ.selectFormsWithIdByLemmaPosId(lemmaPos.id).executeAsList()
                             val actualFormKeys = formsInDb.map { form ->
                                 val tags = dictQ.selectFormTagsByFormId(form.form_id).executeAsList().map { it.tag }.toSet()
-                                FormKey(form.form, stripAccents(form.form), tags)
+                                FormKey(form.form, stripAccents(form.form), tags, form.source)
                             }.toSet()
 
                             assertEquals(
@@ -237,6 +244,23 @@ class AllLanguagesIngestionIntegrationTest {
                 "NUM" -> DictionaryPos.NUMERAL
                 else -> null
             }
+        }
+    }
+
+    private fun selectEntriesForForms(raw: ExtractedWordData): List<EntryWithSource> {
+        val nativeKey = LANG_TO_SOURCE_FILE[raw.langCode]
+        val enKey = LANG_TO_SOURCE_FILE["en"]
+
+        val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+        val enEntries = if (raw.langCode == "en") {
+            emptyList()
+        } else {
+            enKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+        }
+
+        return buildList {
+            nativeEntries.forEach { add(EntryWithSource(it, FormSource.NATIVE)) }
+            enEntries.forEach { add(EntryWithSource(it, FormSource.EN)) }
         }
     }
 

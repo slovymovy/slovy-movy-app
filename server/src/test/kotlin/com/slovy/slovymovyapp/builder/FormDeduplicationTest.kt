@@ -2,9 +2,12 @@
 
 package com.slovy.slovymovyapp.builder
 
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.ingestion.ExtractedWordData
-import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
+import com.slovy.slovymovyapp.ingestion.ExtractedWordEntry
 import com.slovy.slovymovyapp.ingestion.LANG_TO_SOURCE_FILE
+import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
+import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -23,6 +26,14 @@ import kotlin.test.assertTrue
  * - stempeltjes (diminutive, plural)
  */
 class FormDeduplicationTest {
+
+    private data class EntryWithSource(val entry: ExtractedWordEntry, val source: FormSource)
+    private data class FormKey(
+        val form: String,
+        val formNormalized: String,
+        val tags: Set<String>,
+        val source: FormSource
+    )
 
     @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
@@ -60,13 +71,18 @@ class FormDeduplicationTest {
             "Raw data should have duplicate forms. Found: ${formTexts.sorted()}"
         )
 
-        // Expected unique forms for stempel (from nl-extract)
-        val expectedUniqueForms = setOf("stempels", "stempeltje", "stempeltjes")
-        assertEquals(
-            expectedUniqueForms,
-            formTexts.toSet(),
-            "Expected forms: $expectedUniqueForms"
-        )
+        val expectedNativeForms = setOf("stempels", "stempeltje", "stempeltjes")
+        assertEquals(expectedNativeForms, formTexts.toSet(), "Unexpected native forms in test data")
+
+        val entriesForForms = selectEntriesForForms(raw, lang)
+        val expectedFormKeys = entriesForForms
+            .filter { it.entry.pos == "noun" }
+            .flatMap { (entry, source) ->
+                entry.forms.map { form ->
+                    FormKey(form.form, stripAccents(form.form), form.tags.toSet(), source)
+                }
+            }
+            .toSet()
 
         // Ingest the data
         val dictDb = serverDbManager.openDictionary(lang)
@@ -77,7 +93,7 @@ class FormDeduplicationTest {
             rawFile.readText(),
             dictDb)
 
-        // Verify forms are deduplicated in database
+        // Verify forms are deduplicated in database.
         // Get the lemma
         val lemmas = dictQ.selectLemmasByWord(lang, word.lowercase()).executeAsList()
         assertEquals(1, lemmas.size, "Should have exactly one lemma for '$word'")
@@ -90,40 +106,45 @@ class FormDeduplicationTest {
         // Get all forms for this lemma_pos (with IDs for tag lookup)
         val formsInDb = dictQ.selectFormsWithIdByLemmaPosId(lemmaPosIds.first()).executeAsList()
 
-        // Verify we have exactly 3 forms (deduplicated)
-        assertEquals(
-            expectedUniqueForms.size,
-            formsInDb.size,
-            "Should have exactly ${expectedUniqueForms.size} deduplicated forms. Found: ${formsInDb.map { it.form }}"
-        )
-
-        // Verify all expected forms are present
-        val actualFormTexts = formsInDb.map { it.form }.toSet()
-        assertEquals(
-            expectedUniqueForms,
-            actualFormTexts,
-            "Form texts should match expected unique forms"
-        )
-
-        // Verify each form has the correct tags
-        formsInDb.forEach { form ->
+        val actualFormKeys = formsInDb.map { form ->
             val tags = dictQ.selectFormTagsByFormId(form.form_id).executeAsList().map { it.tag }
-            when (form.form) {
-                "stempels" -> assertTrue(
-                    tags.contains("plural"),
-                    "Form 'stempels' should have 'plural' tag. Found: $tags"
-                )
+            FormKey(form.form, stripAccents(form.form), tags.toSet(), form.source)
+        }
+        val actualFormKeySet = actualFormKeys.toSet()
 
-                "stempeltje" -> assertTrue(
-                    tags.containsAll(listOf("diminutive", "singular")),
-                    "Form 'stempeltje' should have 'diminutive' and 'singular' tags. Found: $tags"
-                )
+        // No duplicate forms by (form, normalized, tags, source).
+        assertEquals(
+            actualFormKeySet.size,
+            actualFormKeys.size,
+            "Found duplicate forms by (form, normalized, tags, source): ${formsInDb.map { it.form }}"
+        )
+        assertEquals(
+            expectedFormKeys,
+            actualFormKeySet,
+            "Form keys in DB should match source-aware expected forms"
+        )
 
-                "stempeltjes" -> assertTrue(
-                    tags.containsAll(listOf("diminutive", "plural")),
-                    "Form 'stempeltjes' should have 'diminutive' and 'plural' tags. Found: $tags"
-                )
-            }
+        val actualFormTexts = formsInDb.map { it.form }.toSet()
+        assertTrue(
+            expectedNativeForms.all { actualFormTexts.contains(it) },
+            "Expected native forms missing. Expected: $expectedNativeForms, actual: $actualFormTexts"
+        )
+    }
+
+    private fun selectEntriesForForms(raw: ExtractedWordData, lang: String): List<EntryWithSource> {
+        val nativeKey = LANG_TO_SOURCE_FILE[lang]
+        val enKey = LANG_TO_SOURCE_FILE["en"]
+
+        val nativeEntries = nativeKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+        val enEntries = if (lang == "en") {
+            emptyList()
+        } else {
+            enKey?.let { raw.sourceFileToEntries[it] }.orEmpty()
+        }
+
+        return buildList {
+            nativeEntries.forEach { add(EntryWithSource(it, FormSource.NATIVE)) }
+            enEntries.forEach { add(EntryWithSource(it, FormSource.EN)) }
         }
     }
 
