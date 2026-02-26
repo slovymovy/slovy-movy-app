@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.uuid.Uuid
 
-private val TOKEN_REGEX = Regex("[\\p{L}\\p{M}\\-']+|[^\\p{L}\\p{M}\\-']+")
+private val TOKEN_REGEX = Regex("[\\p{L}\\p{M}\\-']+|\\s+|[^\\p{L}\\p{M}\\-'\\s]+")
 private val PillShape = RoundedCornerShape(6.dp)
 private val HeartColor = Color(0xFFC46060)
 
@@ -117,6 +117,30 @@ private fun tokenize(text: String): List<TextToken> {
         val value = match.value
         TextToken(text = value, isWord = value.any { it.isLetter() })
     }.toList()
+}
+
+// Groups tokens so that each word stays with its immediately surrounding punctuation,
+// but groups never span more than one word. This prevents long runs of non-whitespace
+// tokens (e.g. URLs) from forming a single oversized FlowRow item.
+private fun groupTokensForRendering(tokens: List<TextToken>): List<List<TextToken>> {
+    val result = mutableListOf<List<TextToken>>()
+    val current = mutableListOf<TextToken>()
+    for (token in tokens) {
+        when {
+            !token.isWord && token.text.all { it.isWhitespace() } -> {
+                if (current.isNotEmpty()) { result.add(current.toList()); current.clear() }
+                result.add(listOf(token))
+            }
+            token.isWord && current.any { it.isWord } -> {
+                // Second word in the same run — flush and start a new group
+                result.add(current.toList()); current.clear()
+                current.add(token)
+            }
+            else -> current.add(token)
+        }
+    }
+    if (current.isNotEmpty()) result.add(current.toList())
+    return result
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -295,63 +319,88 @@ private fun ResultView(
             horizontalArrangement = Arrangement.spacedBy(1.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            state.tokens.forEach { token ->
-                if (token.text.contains('\n')) {
-                    // Force a new row for each newline
-                    repeat(token.text.count { it == '\n' }) {
-                        Spacer(modifier = Modifier.fillMaxWidth())
+            val groups = remember(state.tokens) { groupTokensForRendering(state.tokens) }
+            groups.forEach { group ->
+                val single = group.singleOrNull()
+                if (single != null && !single.isWord && single.text.all { it.isWhitespace() }) {
+                    // Whitespace/newline group
+                    if (single.text.contains('\n')) {
+                        repeat(single.text.count { it == '\n' }) {
+                            Spacer(modifier = Modifier.fillMaxWidth())
+                        }
+                    } else {
+                        Text(
+                            text = single.text,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        )
                     }
-                } else if (!token.isWord) {
-                    // Spaces, punctuation, numbers — plain text, no pill
-                    // Vertical padding matches pill padding so baselines stay aligned
-                    Text(
-                        text = token.text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    )
+                } else if (group.none { it.isWord }) {
+                    // Pure punctuation/number group — render directly as FlowRow items (no Row wrapper)
+                    group.forEach { token ->
+                        Text(
+                            text = token.text,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        )
+                    }
                 } else {
-                    // Every word token gets a pill
-                    val (bgColor, textColor) = levelColors[token.level] ?: (neutralBg to neutralText)
-                    val lemmaCapture = token.lemma
-                    val isFavorite = lemmaCapture != null &&
-                            state.favoriteLemmas.contains(lemmaCapture.lowercase())
-
-                    val semanticDescription = buildString {
-                        if (isFavorite) append("Saved, ")
-                        append(token.text)
-                        token.level?.let { append(", ${it.name} level") }
-                    }
-                    Box(
-                        modifier = Modifier
-                            .semantics { contentDescription = semanticDescription }
-                            .clip(PillShape)
-                            .background(bgColor)
-                            .then(
-                                if (lemmaCapture != null) Modifier.clickable(
-                                    onClickLabel = "Look up",
-                                    role = Role.Button
-                                ) { onWordClick(language, lemmaCapture) }
-                                else Modifier
-                            )
-                            .padding(horizontal = 4.dp, vertical = 2.dp)
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(3.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (isFavorite) {
+                    // Word + adjacent punctuation group — wrap in Row so FlowRow never splits them
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        group.forEach { token ->
+                            if (!token.isWord) {
                                 Text(
-                                    text = "\u2665",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = HeartColor,
-                                    modifier = Modifier.clearAndSetSemantics {}
+                                    text = token.text,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(vertical = 2.dp)
                                 )
+                            } else if (token.lemma == null) {
+                                // Word not found in dictionary — plain text, no pill
+                                Text(
+                                    text = token.text,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(vertical = 2.dp)
+                                )
+                            } else {
+                                val (bgColor, textColor) = levelColors[token.level] ?: (neutralBg to neutralText)
+                                val lemmaCapture = token.lemma
+                                val isFavorite = state.favoriteLemmas.contains(lemmaCapture.lowercase())
+                                val semanticDescription = buildString {
+                                    if (isFavorite) append("Saved, ")
+                                    append(token.text)
+                                    token.level?.let { append(", ${it.name} level") }
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .semantics { contentDescription = semanticDescription }
+                                        .clip(PillShape)
+                                        .background(bgColor)
+                                        .clickable(
+                                            onClickLabel = "Look up",
+                                            role = Role.Button
+                                        ) { onWordClick(language, lemmaCapture) }
+                                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        if (isFavorite) {
+                                            Text(
+                                                text = "\u2665",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = HeartColor,
+                                                modifier = Modifier.clearAndSetSemantics {}
+                                            )
+                                        }
+                                        Text(
+                                            text = token.text,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = textColor
+                                        )
+                                    }
+                                }
                             }
-                            Text(
-                                text = token.text,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = textColor
-                            )
                         }
                     }
                 }
