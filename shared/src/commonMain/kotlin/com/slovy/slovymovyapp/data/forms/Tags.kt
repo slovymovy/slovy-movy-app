@@ -133,6 +133,23 @@ enum class Pronoun(override val value: String) : FormTag {
     override val key = "pronoun"
 }
 
+/** Grammatical function of a personal pronoun form (subjective, objective, or reflexive). */
+enum class PronounForm(override val value: String) : FormTag {
+    SUBJECTIVE("subjective"),
+    OBJECTIVE("objective"),
+    REFLEXIVE("reflexive");
+
+    override val key = "pronoun_form"
+}
+
+/** Distinguishes possessive determiner ("my dog") from independent possessive pronoun ("mine"). */
+enum class PossessiveType(override val value: String) : FormTag {
+    DEPENDENT("dependent"),
+    INDEPENDENT("independent");
+
+    override val key = "possessive_type"
+}
+
 /**
  * Maps raw form-tag strings (as stored in the `form_tag` DB table) to typed [FormTag] enum values.
  *
@@ -224,6 +241,17 @@ object TagMapping {
         "jij" to Pronoun.JIJ,
         "u" to Pronoun.U,
         "gij" to Pronoun.GIJ,
+
+        // ── PronounForm (en) ─────────────────────────────────────────────────
+        "subjective" to PronounForm.SUBJECTIVE,
+        "objective" to PronounForm.OBJECTIVE,
+        "oblique" to PronounForm.OBJECTIVE,   // he/she use "oblique" instead of "objective"
+        "reflexive" to PronounForm.REFLEXIVE,
+
+        // ── PossessiveType (en) ──────────────────────────────────────────────
+        "possessive" to PossessiveType.DEPENDENT,
+        "without-noun" to PossessiveType.INDEPENDENT,  // mine, ours, yours
+        "noun" to PossessiveType.INDEPENDENT,           // theirs = "noun possessive"
 
         // Unmapped (documented here for reference):
         // "perfect"       — nl compound past (hebben/zijn + past participle); no enum yet
