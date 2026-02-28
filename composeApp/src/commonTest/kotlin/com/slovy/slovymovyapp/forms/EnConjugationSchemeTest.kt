@@ -66,10 +66,12 @@ class EnConjugationSchemeTest : BaseTest() {
 
     private val expectedEnVerbTest = mapOf(
         "en_verb:short" to listOf(
-            listOf(null, null, null, null),
-            listOf(null, "test", null, "tests"),
-            listOf(null, "tested", null, "tested"),
-            listOf(null, "testing", null)
+            listOf(null, "test"),    // infinitive
+            listOf(null, "test"),    // present (I)
+            listOf(null, "tests"),   // present (he/she/it)
+            listOf(null, "testing"), // present participle
+            listOf(null, "tested"),  // past simple
+            listOf(null, "tested"),  // past participle
         )
     )
 
