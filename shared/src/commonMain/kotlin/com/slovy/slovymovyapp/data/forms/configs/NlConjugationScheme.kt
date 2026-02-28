@@ -62,6 +62,15 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                     )
                 }
 
+                // Dutch conditional simple forms (zou/zouden + infinitive) are tagged
+                // "conditional + imperfect + indicative" with no "past" tag.
+                // Inject a heuristic "past" so they match scheme cells using
+                // Mood.CONDITIONAL + Tense.PAST (which distinguishes conditional simple from
+                // conditional perfect, whose "perfect" tag has no tense mapping).
+                if ("conditional" in tags && "imperfect" in tags && "past" !in tags && "perfect" !in tags) {
+                    result += form.copy(tags = tags + "past", source = FormSource.HEURISTIC)
+                }
+
                 result
             }
             return if (extras.isEmpty()) correctedForms else correctedForms + extras
@@ -71,6 +80,9 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             return candidates.minWithOrNull(
                 compareBy<SchemeCellCandidate> { -it.matchedPreferredTags }
                     .thenBy { it.extraKnownTags }
+                    // Prefer shorter forms: archaic "gij" forms (kwaamt, laast, naamt, zaagt)
+                    // share identical tags with modern forms but are longer due to the -t suffix.
+                    .thenBy { it.form.length }
                     .thenBy { it.form }
             )
         }
@@ -122,7 +134,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             }
         }
 
-        view("full", "Full table") {
+        view("full", "Conjugation table") {
             row {
                 empty()
                 colHeader("1st singular")
@@ -146,10 +158,10 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             }
             row {
                 rowHeader("Conditional")
-                data(Mood.CONDITIONAL, Tense.PAST, Person.FIRST, Num.SG)
-                data(Mood.CONDITIONAL, Tense.PAST, Person.SECOND, Num.SG)
-                data(Mood.CONDITIONAL, Tense.PAST, Person.THIRD, Num.SG)
-                data(Mood.CONDITIONAL, Tense.PAST, Num.PL)
+                data(Mood.CONDITIONAL, Tense.PAST, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Tense.PAST, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Tense.PAST, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Tense.PAST, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
                 rowHeader("Future")
