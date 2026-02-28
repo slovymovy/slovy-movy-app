@@ -195,7 +195,9 @@ object TagMapping {
         "present" to Tense.PRESENT,
         "past" to Tense.PAST,
         "future" to Tense.FUTURE,
-        "imperfect" to Tense.PAST,   // nl: simple past = imperfect
+        // "imperfect" is intentionally NOT mapped to Tense.PAST: in Dutch wiktionary it means
+        // "onvoltooid" (non-compound aspect), so present-tense forms also carry this tag and
+        // would otherwise match past-tense scheme cells. All Dutch past forms already have "past".
 
         // ── Aspect ───────────────────────────────────────────────────────────
         "imperfective" to Aspect.IMPERFECTIVE,
