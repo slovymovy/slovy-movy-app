@@ -36,7 +36,7 @@ class DictionaryClientTest : BaseTest() {
 
     private fun createClient(baseUrl: String? = null): DictionaryClient {
         val url = baseUrl ?: run {
-            val port = TestContext.getCiEnv("TEST_SERVER_PORT") ?: "8081"
+            val port = TestContext.getCiEnv("TEST_SERVER_PORT") ?: "9090"
             val host = TestContext.testServerHost()
             "http://$host:$port"
         }

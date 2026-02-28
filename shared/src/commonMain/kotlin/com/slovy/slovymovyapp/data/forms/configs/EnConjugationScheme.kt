@@ -11,6 +11,15 @@ object EnConjugationScheme : ConjugationSchemeProvider {
         override fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> {
             fun SchemeInputForm.hasTag(tag: String): Boolean = tags.any { it.equals(tag, ignoreCase = true) }
 
+            if (pos == DictionaryPos.PRONOUN) {
+                val baseWord = lemma?.trim().orEmpty()
+                if (baseWord.isEmpty()) return forms
+                if (forms.isEmpty()) return forms
+                val hasSubjective = forms.any { it.hasTag("subjective") }
+                if (hasSubjective) return forms
+                return forms + SchemeInputForm(tags = listOf("subjective"), form = baseWord, FormSource.HEURISTIC)
+            }
+
             if (pos == DictionaryPos.VERB) {
                 val baseWord = lemma?.trim().orEmpty()
                 if (baseWord.isEmpty()) return forms
@@ -92,6 +101,20 @@ object EnConjugationScheme : ConjugationSchemeProvider {
 
             return forms + SchemeInputForm(tags = listOf("plural"), form = expectedPlural, FormSource.HEURISTIC)
         }
+
+        override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
+            if (pos != DictionaryPos.PRONOUN) return candidates.firstOrNull()
+            // Pronouns have capitalized duplicates (Him/him) and overlapping forms (her = objective + possessive).
+            // Prefer lowercase, then most preferred-tag matches, then fewest extra known tags.
+            val prioritized = candidates.filter { it.form.isNotEmpty() && it.form[0].isLowerCase() }
+                .ifEmpty { candidates }
+            return prioritized
+                .sortedWith(
+                    compareByDescending<SchemeCellCandidate> { it.matchedPreferredTags }
+                        .thenBy { it.extraKnownTags }
+                )
+                .firstOrNull()
+        }
     }
 
     /**
@@ -171,19 +194,94 @@ object EnConjugationScheme : ConjugationSchemeProvider {
     ) {
         view("short", "Degrees of comparison") {
             row {
-                colHeader("comparative")
-                colHeader("superlative")
+                rowHeader("comparative")
+                data(Degree.COMPARATIVE)
             }
             row {
-                data(Degree.COMPARATIVE)
+                rowHeader("superlative")
                 data(Degree.SUPERLATIVE)
             }
         }
     }
 
-    /** All English schemes for easy lookup. */
-    val ALL: List<ConjugationScheme> = listOf(EN_VERB, EN_NOUN, EN_ADJECTIVE)
+    /**
+     * English adverb paradigm.
+     *
+     * Gradable adverbs form comparative and superlative degrees.
+     */
+    val EN_ADVERB: ConjugationScheme = conjugationScheme(
+        "en_adverb",
+        Language.ENGLISH,
+        DictionaryPos.ADVERB,
+        tagResolver = englishTagResolver(DictionaryPos.ADVERB)
+    ) {
+        view("short", "Degrees of comparison") {
+            row {
+                rowHeader("comparative")
+                data(Degree.COMPARATIVE)
+            }
+            row {
+                rowHeader("superlative")
+                data(Degree.SUPERLATIVE)
+            }
+        }
+    }
 
-    override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? =
-        ALL.firstOrNull { it.pos == pos }
+    /**
+     * English pronoun paradigm.
+     *
+     * Personal pronouns inflect for case (subjective, objective, possessive, reflexive).
+     * The subjective form is the lemma itself, injected by preprocessForms.
+     * Two possessive rows distinguish the determiner ("my dog") from the independent pronoun ("mine").
+     * Two reflexive rows show both singular and plural forms where both exist (e.g. yourself / yourselves).
+     *
+     * Known data gaps: "hers" and "theirs" lack the tags needed to appear in the possessive pronoun row.
+     */
+    val EN_PRONOUN: ConjugationScheme = conjugationScheme(
+        "en_pronoun",
+        Language.ENGLISH,
+        DictionaryPos.PRONOUN,
+        tagResolver = englishTagResolver(DictionaryPos.PRONOUN)
+    ) {
+        view("short", "Cases") {
+            row {
+                rowHeader("subject")
+                data(PronounForm.SUBJECTIVE)
+            }
+            row {
+                rowHeader("object")
+                data(PronounForm.OBJECTIVE)
+            }
+            row {
+                rowHeader("possessive adjective")
+                // supporting=OBJECTIVE makes "her" (oblique+possessive) preferred over "hers" (possessive only)
+                data(PossessiveType.DEPENDENT, supporting = setOf(PronounForm.OBJECTIVE))
+            }
+            row {
+                rowHeader("possessive pronoun")
+                data(PossessiveType.INDEPENDENT)
+            }
+            row {
+                rowHeader("reflexive")
+                data(PronounForm.REFLEXIVE)
+            }
+        }
+    }
+
+    /** All English schemes for easy lookup. */
+    val ALL: List<ConjugationScheme> = listOf(EN_VERB, EN_NOUN, EN_ADJECTIVE, EN_ADVERB, EN_PRONOUN)
+
+    override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? {
+        if (pos == DictionaryPos.PRONOUN) {
+            // Only show the paradigm table for head pronouns (i, he, she, we, you, they).
+            // Possessive-only lemmas like "his" or "their" are forms of other pronouns, not paradigm heads.
+            val hasFullParadigm = forms.any { form ->
+                form.tags.any { it.equals("objective", ignoreCase = true)
+                        || it.equals("oblique", ignoreCase = true)
+                        || it.equals("reflexive", ignoreCase = true) }
+            }
+            return if (hasFullParadigm) EN_PRONOUN else null
+        }
+        return ALL.firstOrNull { it.pos == pos }
+    }
 }

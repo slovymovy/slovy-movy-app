@@ -367,11 +367,6 @@ private fun GrammarSection(
                         onFormsViewSelect = onFormsViewSelect
                     )
                 }
-                Text(
-                    text = selectedFormsView.view.description,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
                 FormsGrid(selectedFormsView)
             }
         }

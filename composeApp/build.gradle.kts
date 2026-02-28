@@ -14,7 +14,7 @@ plugins {
     alias(libs.plugins.valkyrie)
 }
 
-val testServerPort = 8081
+val testServerPort = 9090
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
