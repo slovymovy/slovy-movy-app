@@ -41,6 +41,42 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             }
 
             val nonFiniteTags = setOf("infinitive", "gerund", "participle", "adverbial")
+
+            // Strip "imperfect" from forms that do NOT carry "past": Dutch wiktionary uses
+            // "imperfect" to mean "onvoltooid" (non-compound aspect) and attaches it to
+            // present-tense and non-finite forms too. Removing it here keeps the global
+            // TagMapping "imperfect" → Tense.PAST correct while preventing false past-tense
+            // matches for Dutch present/non-finite forms.
+            val processedForms = correctedForms.map { form ->
+                if ("imperfect" in form.tags && "past" !in form.tags)
+                    form.copy(tags = form.tags.filter { it != "imperfect" }, source = FormSource.HEURISTIC)
+                else form
+            }
+
+            // Inject the "gij" tag into archaic 2nd-person singular past forms so they score
+            // higher extraKnownTags and lose to the modern equivalents. Archaic forms end in
+            // "-t" (e.g. kwaamt, laast, naamt, zaagt) while modern forms don't (kwamen, las,
+            // nam, zag). We only apply this when both kinds are present in the same word.
+            val pastSecondSg = processedForms.filter { form ->
+                "past" in form.tags && "second-person" in form.tags && "singular" in form.tags
+            }
+            val archaicForms: Set<SchemeInputForm> = if (pastSecondSg.size > 1 &&
+                pastSecondSg.any { !it.form.endsWith("t") }
+            ) {
+                pastSecondSg.filter { it.form.endsWith("t") }.toSet()
+            } else emptySet()
+
+            val markedForms = if (archaicForms.isEmpty()) processedForms else {
+                processedForms.map { form ->
+                    if (form in archaicForms)
+                        form.copy(tags = form.tags + "gij", source = FormSource.HEURISTIC)
+                    else form
+                }
+            }
+
+            // Build extras from correctedForms (before imperfect stripping) so that the
+            // imperfect-based heuristics below can still detect the original tag on
+            // non-finite and conditional forms.
             val extras = correctedForms.flatMap { form ->
                 val tags = form.tags
                 val result = mutableListOf<SchemeInputForm>()
@@ -73,16 +109,13 @@ object NlConjugationScheme : ConjugationSchemeProvider {
 
                 result
             }
-            return if (extras.isEmpty()) correctedForms else correctedForms + extras
+            return if (extras.isEmpty()) markedForms else markedForms + extras
         }
 
         override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
             return candidates.minWithOrNull(
                 compareBy<SchemeCellCandidate> { -it.matchedPreferredTags }
                     .thenBy { it.extraKnownTags }
-                    // Prefer shorter forms: archaic "gij" forms (kwaamt, laast, naamt, zaagt)
-                    // share identical tags with modern forms but are longer due to the -t suffix.
-                    .thenBy { it.form.length }
                     .thenBy { it.form }
             )
         }

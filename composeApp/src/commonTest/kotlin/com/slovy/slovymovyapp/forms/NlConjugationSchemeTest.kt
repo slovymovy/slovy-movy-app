@@ -95,9 +95,9 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, "zal zeggen", "zal zeggen", "zal zeggen", "zullen zeggen"),
             listOf(null, "zeg", null),
             listOf(null, null, null, null, null),
-            listOf(null, "ben gezegd", "is gezegd", "is gezegd", null),
-            listOf(null, "zou gezegd zijn", "zou gezegd zijn", "zou gezegd zijn", null),
-            listOf(null, "zal gezegd zijn", "zult gezegd zijn", "zal gezegd zijn", null)
+            listOf(null, "ben gezegd", "bent gezegd", "hebben gezegd", null),
+            listOf(null, "zou gezegd hebben", "zou gezegd hebben", "zou gezegd hebben", null),
+            listOf(null, "zal gezegd hebben", "zal gezegd hebben", "zal gezegd hebben", null)
         )
     )
 
