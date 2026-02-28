@@ -78,27 +78,26 @@ class NlConjugationSchemeTest : BaseTest() {
 
     private val expectedNlVerbZeggen = mapOf(
         "nl_verb:category_summary" to listOf(
-            listOf(null, null, null, null),
-            listOf(null, "te zeggen", null, "zeg"),
-            listOf(null, "zegt", null, "zal zeggen"),
-            listOf(null, "zegden\nzeiden", null, "gezegd"),
-            listOf(null, "zeggend", null)
+            listOf(null, null),
+            listOf(null, "te zeggen"),    // infinitive
+            listOf(null, "zeg"),           // present (ik)
+            listOf(null, "zegt"),          // present (jij/hij/u)
+            listOf(null, "zegde\nzei"),    // past singular
+            listOf(null, "zegden\nzeiden"), // past plural
+            listOf(null, "gezegd"),        // past participle
+            listOf(null, "zeggend")        // present participle
         ),
         "nl_verb:full" to listOf(
-            listOf(null, "te zeggen"),
-            listOf(null, "zeggen"),
-            listOf(null, "gezegd"),
-            listOf(null, "zeggend", null),
             listOf(null, null, null, null, null),
             listOf(null, "zeg", "zegt", "zegt", "zeggen"),
-            listOf(null, "zal zeggen", "zal zeggen", "zal zeggen", "zegden\nzeiden"),
-            listOf(null, "zou gezegd worden", "zou gezegd worden", "zouden gezegd worden", "zou gezegd worden"),
+            listOf(null, "zegde\nzei", "zegde\nzei", "zegde\nzei", "zegden\nzeiden"),
+            listOf(null, "zou zeggen", "zou zeggen", "zou zeggen", "zouden zeggen"),
             listOf(null, "zal zeggen", "zal zeggen", "zal zeggen", "zullen zeggen"),
             listOf(null, "zeg", null),
             listOf(null, null, null, null, null),
-            listOf(null, "ben gezegd", "bent gezegd", "hebben gezegd", null),
-            listOf(null, "zou gezegd hebben", "zou gezegd hebben", "zou gezegd hebben", null),
-            listOf(null, "zal gezegd hebben", "zal gezegd hebben", "zal gezegd hebben", null)
+            listOf(null, "ben gezegd", "is gezegd", "is gezegd", null),
+            listOf(null, "zou gezegd zijn", "zou gezegd zijn", "zou gezegd zijn", null),
+            listOf(null, "zal gezegd zijn", "zult gezegd zijn", "zal gezegd zijn", null)
         )
     )
 
