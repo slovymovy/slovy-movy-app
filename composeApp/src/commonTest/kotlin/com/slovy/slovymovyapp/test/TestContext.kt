@@ -62,6 +62,14 @@ abstract class BaseTestImpl {
 
 expect abstract class BaseTest() : BaseTestImpl
 
+/**
+ * Marks the current test as skipped/assumed when [condition] is false.
+ * On JVM targets this delegates to [org.junit.Assume.assumeTrue] so the test
+ * appears as "skipped" (not "failed") in reports.  On iOS the test is already
+ * suppressed by [@IgnoreIos], so this is a no-op.
+ */
+expect fun testAssume(condition: Boolean, message: String)
+
 
 fun testPlatformDbSupport(): PlatformDbSupport = PlatformDbSupport(TestContext.androidContext())
 

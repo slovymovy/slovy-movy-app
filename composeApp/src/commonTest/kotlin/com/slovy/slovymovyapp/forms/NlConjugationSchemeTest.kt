@@ -70,11 +70,20 @@ class NlConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.DUTCH, "kwartier", DictionaryPos.NOUN),
                 "Resolved NL noun views for 'kwartier' changed"
             )
-            // Archaic gij collision: wrongt uit (archaic, ends in -t) must lose to wrong uit (modern)
+            // Archaic gij collision (non-separable): wrongt uit finite-token "wrongt" ends in -t,
+            // must lose to wrong uit (modern).
             assertEquals(
                 expectedNlVerbUitwringen,
                 resolveFormsSnapshot(repo, Language.DUTCH, "uitwringen", DictionaryPos.VERB),
                 "Resolved NL verb views for 'uitwringen' changed"
+            )
+            // Separable-verb archaic gij: "spraakt af" has finite token "spraakt" ending in -t.
+            // Without finite-token detection the form ends in particle "af" and is not marked
+            // archaic, so it would win alphabetically over "sprak af" (position 4: 'a' < 'k').
+            assertEquals(
+                expectedNlVerbAfspreken,
+                resolveFormsSnapshot(repo, Language.DUTCH, "afspreken", DictionaryPos.VERB),
+                "Resolved NL verb views for 'afspreken' changed"
             )
         } finally {
             mgr.deleteDictionary(Language.DUTCH)
@@ -153,6 +162,35 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, "ben uitgewrongen", "bent uitgewrongen", "hebben uitgewrongen", null),
             listOf(null, "zou uitgewrongen hebben", "zou uitgewrongen hebben", "zou uitgewrongen hebben", null),
             listOf(null, "zal uitgewrongen hebben", "zal uitgewrongen hebben", "zal uitgewrongen hebben", null)
+        )
+    )
+
+    // afspreken has "spraakt af" (archaic 2nd-sg-past) vs "sprak af" (modern).
+    // The whole string ends in particle "af", not "t", so finite-token detection
+    // ("spraakt".endsWith("t")) is required for the gij heuristic to fire.
+    // Without it "spraakt af" would win alphabetically (position 4: 'a' < 'k').
+    private val expectedNlVerbAfspreken = mapOf(
+        "nl_verb:category_summary" to listOf(
+            listOf(null, null),
+            listOf(null, "af te spreken"),     // infinitive
+            listOf(null, "spreek af"),          // present (ik)
+            listOf(null, "spreekt af"),         // present (jij/hij/u)
+            listOf(null, "sprak af"),           // past singular — modern form wins over archaic spraakt af
+            listOf(null, "spraken af"),         // past plural
+            listOf(null, "afgesproken"),        // past participle
+            listOf(null, "afsprekend")          // present participle
+        ),
+        "nl_verb:full" to listOf(
+            listOf(null, null, null, null, null),
+            listOf(null, "spreek af", "spreekt af", "spreekt af", "spreken af"),
+            listOf(null, "sprak af", "sprak af", "sprak af", "spraken af"),
+            listOf(null, "zou afspreken", "zou afspreken", "zou afspreken", "zouden afspreken"),
+            listOf(null, "zal afspreken", "zal afspreken", "zal afspreken", "zullen afspreken"),
+            listOf(null, "spreek af", null),
+            listOf(null, null, null, null, null),
+            listOf(null, "ben afgesproken", "bent afgesproken", "hebben afgesproken", null),
+            listOf(null, "zou afgesproken hebben", "zou afgesproken hebben", "zou afgesproken hebben", null),
+            listOf(null, "zal afgesproken hebben", "zal afgesproken hebben", "zal afgesproken hebben", null)
         )
     )
 

@@ -4,6 +4,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
+import com.slovy.slovymovyapp.test.testAssume
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -37,25 +38,35 @@ class EnConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.ENGLISH, "well", DictionaryPos.ADVERB),
                 "Resolved EN adverb views for 'well' changed"
             )
-            // Pronoun tests require pronouns in the English DB. The compact test DB used
-            // locally only has a subset of words; full pronoun coverage runs in CI.
-            if (repo.getLanguageCard(Language.ENGLISH, "i") != null) {
-                assertEquals(
-                    expectedEnPronounI,
-                    resolveFormsSnapshot(repo, Language.ENGLISH, "i", DictionaryPos.PRONOUN),
-                    "Resolved EN pronoun views for 'i' changed"
-                )
-                assertEquals(
-                    expectedEnPronounWe,
-                    resolveFormsSnapshot(repo, Language.ENGLISH, "we", DictionaryPos.PRONOUN),
-                    "Resolved EN pronoun views for 'we' changed"
-                )
-                assertEquals(
-                    expectedEnPronounYou,
-                    resolveFormsSnapshot(repo, Language.ENGLISH, "you", DictionaryPos.PRONOUN),
-                    "Resolved EN pronoun views for 'you' changed"
-                )
-            }
+        } finally {
+            mgr.deleteDictionary(Language.ENGLISH)
+        }
+    }
+
+    @Test
+    fun englishPronounSnapshots_matchExpectedTables() = runBlocking {
+        val (mgr, repo) = createSnapshotRepository()
+        try {
+            mgr.ensureDictionary(Language.ENGLISH)
+            testAssume(
+                repo.getLanguageCard(Language.ENGLISH, "i") != null,
+                "EN pronoun 'i' not in test DB — pronoun snapshot tests skipped; run with full EN DB for coverage"
+            )
+            assertEquals(
+                expectedEnPronounI,
+                resolveFormsSnapshot(repo, Language.ENGLISH, "i", DictionaryPos.PRONOUN),
+                "Resolved EN pronoun views for 'i' changed"
+            )
+            assertEquals(
+                expectedEnPronounWe,
+                resolveFormsSnapshot(repo, Language.ENGLISH, "we", DictionaryPos.PRONOUN),
+                "Resolved EN pronoun views for 'we' changed"
+            )
+            assertEquals(
+                expectedEnPronounYou,
+                resolveFormsSnapshot(repo, Language.ENGLISH, "you", DictionaryPos.PRONOUN),
+                "Resolved EN pronoun views for 'you' changed"
+            )
         } finally {
             mgr.deleteDictionary(Language.ENGLISH)
         }

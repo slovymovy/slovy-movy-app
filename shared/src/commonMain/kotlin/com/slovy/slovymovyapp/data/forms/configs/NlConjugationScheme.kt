@@ -56,16 +56,19 @@ object NlConjugationScheme : ConjugationSchemeProvider {
 
             // Inject the "gij" tag into archaic 2nd-person singular past forms so they score
             // higher extraKnownTags and lose to the modern equivalents. Archaic forms end in
-            // "-t" (e.g. kwaamt, laast, naamt, zaagt) while modern forms don't (kwamen, las,
-            // nam, zag). We only apply this when both kinds are present in the same word.
+            // "-t" on the finite verb token (e.g. kwaamt, laast, spraakt af, wrongt uit)
+            // while modern forms don't (kwamen, las, sprak af, wrong uit). We only apply this
+            // when both kinds are present for the same word.
             // Source is preserved — the form string is unchanged, only the tag set is annotated.
+            // For separable verbs the finite token is the part before the first space.
+            fun SchemeInputForm.finiteToken() = form.substringBefore(' ')
             val pastSecondSg = processedForms.filter { form ->
                 "past" in form.tags && "second-person" in form.tags && "singular" in form.tags
             }
             val archaicForms: Set<SchemeInputForm> = if (pastSecondSg.size > 1 &&
-                pastSecondSg.any { !it.form.endsWith("t") }
+                pastSecondSg.any { !it.finiteToken().endsWith("t") }
             ) {
-                pastSecondSg.filter { it.form.endsWith("t") }.toSet()
+                pastSecondSg.filter { it.finiteToken().endsWith("t") }.toSet()
             } else emptySet()
 
             val markedForms = if (archaicForms.isEmpty()) processedForms else {
