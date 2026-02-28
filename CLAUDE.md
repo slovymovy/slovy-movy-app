@@ -63,7 +63,7 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **Android SDK**: compileSdk=36, minSdk=24, targetSdk=36
 - **Java version**: Use Java 21 (via sdkman: `sdk use java 21.0.9-amzn`). Java 25+ may cause Kotlin compatibility
   issues.
-- **Data version**: `DataDbManager.VERSION = "v7"`; when bumping, upload DBs under the new prefix in the GCS bucket and
+- **Data version**: `DataDbManager.VERSION = "v10"`; when bumping, upload DBs under the new prefix in the GCS bucket and
   keep the version in sync.
 
 ## Code Structure
@@ -92,7 +92,7 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - All `@Preview` functions must support both light and dark themes using the themed preview pattern.
 - Use `@PreviewParameter(ThemePreviewProvider::class) isDark: Boolean` to receive theme parameter.
 - Wrap preview content with `ThemedPreview(darkTheme = isDark) { ... }` to apply the theme.
-- Import required types: `PreviewParameter` from `org.jetbrains.compose.ui.tooling.preview.PreviewParameter`.
+- Import required types: `PreviewParameter` from `androidx.compose.ui.tooling.preview.PreviewParameter`.
 - The `ThemePreviewProvider` and `ThemedPreview` are defined in
   `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/ui/Preview.kt`.
 
