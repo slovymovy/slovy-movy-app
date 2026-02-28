@@ -37,17 +37,20 @@ class EnConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.ENGLISH, "well", DictionaryPos.ADVERB),
                 "Resolved EN adverb views for 'well' changed"
             )
-            kotlin.test.assertNull(
-                repo.getLanguageCard(Language.ENGLISH, "i"),
-                "Expected card for 'i' to be null in current state"
+            assertEquals(
+                expectedEnPronounI,
+                resolveFormsSnapshot(repo, Language.ENGLISH, "i", DictionaryPos.PRONOUN),
+                "Resolved EN pronoun views for 'i' changed"
             )
-            kotlin.test.assertNull(
-                repo.getLanguageCard(Language.ENGLISH, "we"),
-                "Expected card for 'we' to be null in current state"
+            assertEquals(
+                expectedEnPronounWe,
+                resolveFormsSnapshot(repo, Language.ENGLISH, "we", DictionaryPos.PRONOUN),
+                "Resolved EN pronoun views for 'we' changed"
             )
-            kotlin.test.assertNull(
-                repo.getLanguageCard(Language.ENGLISH, "you"),
-                "Expected card for 'you' to be null in current state"
+            assertEquals(
+                expectedEnPronounYou,
+                resolveFormsSnapshot(repo, Language.ENGLISH, "you", DictionaryPos.PRONOUN),
+                "Resolved EN pronoun views for 'you' changed"
             )
         } finally {
             mgr.deleteDictionary(Language.ENGLISH)
