@@ -97,7 +97,7 @@ fun testDataDbManagerHolder(): TestDataDbManagerHolder {
 }
 
 fun testRemoteDataProvider(): RemoteDataProvider {
-    val port = TestContext.getCiEnv("TEST_SERVER_PORT") ?: 8081
+    val port = TestContext.getCiEnv("TEST_SERVER_PORT") ?: 9090
     val host = TestContext.testServerHost()
     return TestServerDataProvider(baseUrl = "http://$host:$port")
 }
