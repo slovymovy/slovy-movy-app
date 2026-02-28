@@ -84,10 +84,8 @@ object NlConjugationScheme : ConjugationSchemeProvider {
         tagResolver = DutchSchemeTagResolver
     ) {
 
-        view("category_summary", "Compact") {
+        view("category_summary", "Essentials") {
             row {
-                colHeader("Category")
-                colHeader("Form")
                 colHeader("Category")
                 colHeader("Form")
             }
@@ -97,50 +95,34 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                     VerbForm.INFINITIVE,
                     supporting = setOf(Voice.ACTIVE, VerbForm.LONG, Tense.PRESENT, Aspect.IMPERFECTIVE)
                 )
+            }
+            row {
                 rowHeader("Present (ik)")
                 data(Tense.PRESENT, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("Present (jij/hij)")
+                rowHeader("Present (jij/hij/u)")
                 data(Tense.PRESENT, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
-                rowHeader("Past Singular")
+            }
+            row {
+                rowHeader("Past singular")
                 data(Tense.PAST, Num.SG, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("Past Plural")
+                rowHeader("Past plural")
                 data(Tense.PAST, Num.PL, supporting = setOf(Mood.INDICATIVE))
-                rowHeader("Past Participle")
+            }
+            row {
+                rowHeader("Past participle")
                 data(VerbForm.PARTICIPLE, Tense.PAST)
             }
             row {
-                rowHeader("Pres. Participle")
+                rowHeader("Present participle")
                 data(VerbForm.PARTICIPLE, supporting = setOf(Tense.PRESENT, Aspect.IMPERFECTIVE))
-                empty(colspan = 2)
             }
         }
 
-        view("full", "Full conjugation table") {
-            row {
-                rowHeader("infinitive")
-                data(
-                    VerbForm.INFINITIVE,
-                    colspan = 4,
-                    supporting = setOf(Voice.ACTIVE, VerbForm.LONG, Aspect.IMPERFECTIVE)
-                )
-            }
-            row {
-                rowHeader("gerund")
-                data(VerbForm.GERUND, supporting = setOf(Gender.NEUT), colspan = 4)
-            }
-            row {
-                rowHeader("past participle")
-                data(VerbForm.PARTICIPLE, Tense.PAST, colspan = 4)
-            }
-            row {
-                rowHeader("present participle")
-                data(VerbForm.PARTICIPLE, supporting = setOf(Tense.PRESENT, Aspect.IMPERFECTIVE))
-                empty(colspan = 3)
-            }
+        view("full", "Full table") {
             row {
                 empty()
                 colHeader("1st singular")
@@ -149,35 +131,35 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 colHeader("plural")
             }
             row {
-                rowHeader("indicative present")
+                rowHeader("Present")
                 data(Tense.PRESENT, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PRESENT, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PRESENT, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PRESENT, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("indicative past")
+                rowHeader("Past")
                 data(Tense.PAST, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PAST, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PAST, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PAST, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("conditional")
+                rowHeader("Conditional")
                 data(Mood.CONDITIONAL, Tense.PAST, Person.FIRST, Num.SG)
                 data(Mood.CONDITIONAL, Tense.PAST, Person.SECOND, Num.SG)
                 data(Mood.CONDITIONAL, Tense.PAST, Person.THIRD, Num.SG)
                 data(Mood.CONDITIONAL, Tense.PAST, Num.PL)
             }
             row {
-                rowHeader("future")
+                rowHeader("Future")
                 data(Tense.FUTURE, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.FUTURE, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.FUTURE, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.FUTURE, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("imperative")
+                rowHeader("Imperative")
                 data(Mood.IMPERATIVE, supporting = setOf(Num.SG))
                 empty(colspan = 3)
             }
@@ -189,21 +171,21 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 empty()
             }
             row {
-                rowHeader("present perfect")
+                rowHeader("Present perfect")
                 data(Tense.PRESENT, Person.FIRST)
                 data(Tense.PRESENT, Person.SECOND)
                 data(Tense.PRESENT, Person.THIRD)
                 empty()
             }
             row {
-                rowHeader("conditional perfect")
+                rowHeader("Conditional perfect")
                 data(Mood.CONDITIONAL, Person.FIRST)
                 data(Mood.CONDITIONAL, Person.SECOND)
                 data(Mood.CONDITIONAL, Person.THIRD)
                 empty()
             }
             row {
-                rowHeader("future perfect")
+                rowHeader("Future perfect")
                 data(Tense.FUTURE, Person.FIRST)
                 data(Tense.FUTURE, Person.SECOND)
                 data(Tense.FUTURE, Person.THIRD)
