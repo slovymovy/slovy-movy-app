@@ -47,9 +47,10 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             // present-tense and non-finite forms too. Removing it here keeps the global
             // TagMapping "imperfect" → Tense.PAST correct while preventing false past-tense
             // matches for Dutch present/non-finite forms.
+            // Source is preserved — this is in-place tag normalization, not a synthetic copy.
             val processedForms = correctedForms.map { form ->
                 if ("imperfect" in form.tags && "past" !in form.tags)
-                    form.copy(tags = form.tags.filter { it != "imperfect" }, source = FormSource.HEURISTIC)
+                    form.copy(tags = form.tags.filter { it != "imperfect" })
                 else form
             }
 
@@ -57,6 +58,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             // higher extraKnownTags and lose to the modern equivalents. Archaic forms end in
             // "-t" (e.g. kwaamt, laast, naamt, zaagt) while modern forms don't (kwamen, las,
             // nam, zag). We only apply this when both kinds are present in the same word.
+            // Source is preserved — the form string is unchanged, only the tag set is annotated.
             val pastSecondSg = processedForms.filter { form ->
                 "past" in form.tags && "second-person" in form.tags && "singular" in form.tags
             }
@@ -68,8 +70,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
 
             val markedForms = if (archaicForms.isEmpty()) processedForms else {
                 processedForms.map { form ->
-                    if (form in archaicForms)
-                        form.copy(tags = form.tags + "gij", source = FormSource.HEURISTIC)
+                    if (form in archaicForms) form.copy(tags = form.tags + "gij")
                     else form
                 }
             }
@@ -88,23 +89,18 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                     result += form.copy(tags = tags + "common", source = FormSource.HEURISTIC)
                 }
 
-                // "imperfect" on non-finite forms signals imperfective aspect, not past tense.
-                // Add a heuristic copy with "imperfective" so infinitive ranking prefers the
-                // basic "te <verb>" form over the imperfect stem.
-                if ("imperfect" in tags && tags.any { it in nonFiniteTags }) {
+                // "imperfect" on non-finite or conditional forms signals imperfective aspect.
+                // Add a heuristic copy with "imperfective" so:
+                //  - infinitive cells prefer the basic "te <verb>" form over the imperfect stem.
+                //  - conditional-simple cells (using Aspect.IMPERFECTIVE) can match the form
+                //    without leaking into indicative past cells (which require Tense.PAST).
+                if ("imperfect" in tags && (tags.any { it in nonFiniteTags } ||
+                            ("conditional" in tags && "perfect" !in tags))
+                ) {
                     result += form.copy(
                         tags = tags.map { if (it == "imperfect") "imperfective" else it },
                         source = FormSource.HEURISTIC
                     )
-                }
-
-                // Dutch conditional simple forms (zou/zouden + infinitive) are tagged
-                // "conditional + imperfect + indicative" with no "past" tag.
-                // Inject a heuristic "past" so they match scheme cells using
-                // Mood.CONDITIONAL + Tense.PAST (which distinguishes conditional simple from
-                // conditional perfect, whose "perfect" tag has no tense mapping).
-                if ("conditional" in tags && "imperfect" in tags && "past" !in tags && "perfect" !in tags) {
-                    result += form.copy(tags = tags + "past", source = FormSource.HEURISTIC)
                 }
 
                 result
@@ -191,10 +187,10 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             }
             row {
                 rowHeader("Conditional")
-                data(Mood.CONDITIONAL, Tense.PAST, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
-                data(Mood.CONDITIONAL, Tense.PAST, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
-                data(Mood.CONDITIONAL, Tense.PAST, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
-                data(Mood.CONDITIONAL, Tense.PAST, Num.PL, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
                 rowHeader("Future")

@@ -70,7 +70,12 @@ class NlConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.DUTCH, "kwartier", DictionaryPos.NOUN),
                 "Resolved NL noun views for 'kwartier' changed"
             )
-
+            // Archaic gij collision: wrongt uit (archaic, ends in -t) must lose to wrong uit (modern)
+            assertEquals(
+                expectedNlVerbUitwringen,
+                resolveFormsSnapshot(repo, Language.DUTCH, "uitwringen", DictionaryPos.VERB),
+                "Resolved NL verb views for 'uitwringen' changed"
+            )
         } finally {
             mgr.deleteDictionary(Language.DUTCH)
         }
@@ -120,6 +125,34 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, "volslagen", "volslagener", "volslagenste"),
             listOf(null, "volslagen", "volslagener", "volslagenste"),
             listOf(null, "volslagens", "volslageners", null)
+        )
+    )
+
+    // uitwringen has "wrongt uit" (archaic 2nd-sg-past, ends in -t) alongside "wrong uit" (modern).
+    // The gij heuristic must inject "gij" into the archaic form so it loses to the modern one.
+    // The conditional perfect must show active voice (zou uitgewrongen hebben) not passive (zou uitgewrongen zijn).
+    private val expectedNlVerbUitwringen = mapOf(
+        "nl_verb:category_summary" to listOf(
+            listOf(null, null),
+            listOf(null, "uit te wringen"),    // infinitive
+            listOf(null, "wring uit"),          // present (ik)
+            listOf(null, "wringt uit"),         // present (jij/hij/u)
+            listOf(null, "wrong uit"),          // past singular — modern form wins over archaic wrongt uit
+            listOf(null, "wrongen uit"),        // past plural
+            listOf(null, "uitgewrongen"),       // past participle
+            listOf(null, "uitwringend")         // present participle
+        ),
+        "nl_verb:full" to listOf(
+            listOf(null, null, null, null, null),
+            listOf(null, "wring uit", "wringt uit", "wringt uit", "wringen uit"),
+            listOf(null, "wrong uit", "wrong uit", "wrong uit", "wrongen uit"),
+            listOf(null, "zou uitwringen", "zou uitwringen", "zou uitwringen", "zouden uitwringen"),
+            listOf(null, "zal uitwringen", "zal uitwringen", "zal uitwringen", "zullen uitwringen"),
+            listOf(null, "wring uit", null),
+            listOf(null, null, null, null, null),
+            listOf(null, "ben uitgewrongen", "bent uitgewrongen", "hebben uitgewrongen", null),
+            listOf(null, "zou uitgewrongen hebben", "zou uitgewrongen hebben", "zou uitgewrongen hebben", null),
+            listOf(null, "zal uitgewrongen hebben", "zal uitgewrongen hebben", "zal uitgewrongen hebben", null)
         )
     )
 
