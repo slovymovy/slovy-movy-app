@@ -16,15 +16,34 @@ object EnConjugationScheme : ConjugationSchemeProvider {
                 if (baseWord.isEmpty()) return forms
                 if (forms.isEmpty()) return forms
 
-                val hasInfinitive = forms.any { it.hasTag("infinitive") }
-                if (hasInfinitive) return forms
-
-                val shouldSkipInfinitiveInference = forms.any { form ->
+                val shouldSkipInference = forms.any { form ->
                     form.hasTag("form-of") || form.hasTag("gerund")
                 }
-                if (shouldSkipInfinitiveInference) return forms
+                if (shouldSkipInference) return forms
 
-                return forms + SchemeInputForm(tags = listOf("infinitive"), form = baseWord, FormSource.HEURISTIC)
+                val result = forms.toMutableList()
+
+                val hasInfinitive = forms.any { it.hasTag("infinitive") }
+                if (!hasInfinitive) {
+                    result += SchemeInputForm(tags = listOf("infinitive"), form = baseWord, FormSource.HEURISTIC)
+                }
+
+                val hasFirstPersonPresent = forms.any {
+                    it.hasTag("first-person") && it.hasTag("present") && it.hasTag("singular")
+                }
+                if (!hasFirstPersonPresent) {
+                    val presentSingularNonThird = forms.firstOrNull { form ->
+                        form.hasTag("present") && form.hasTag("singular") && !form.hasTag("third-person")
+                    }
+                    val inferredForm = presentSingularNonThird?.form ?: baseWord
+                    result += SchemeInputForm(
+                        tags = listOf("first-person", "present", "singular"),
+                        form = inferredForm,
+                        FormSource.HEURISTIC
+                    )
+                }
+
+                return result
             }
 
             if (pos != DictionaryPos.NOUN) return forms
@@ -89,27 +108,28 @@ object EnConjugationScheme : ConjugationSchemeProvider {
     ) {
         view("short", "Principal parts") {
             row {
-                colHeader("Category")
-                colHeader("Form")
-                colHeader("Category")
-                colHeader("Form")
-            }
-            row {
                 rowHeader("infinitive")
                 data(VerbForm.INFINITIVE)
-                rowHeader("3rd sg. present")
+            }
+            row {
+                rowHeader("present (I)")
+                data(Person.FIRST, Tense.PRESENT, Num.SG)
+            }
+            row {
+                rowHeader("present (he/she/it)")
                 data(Person.THIRD, Tense.PRESENT, Num.SG)
             }
             row {
-                rowHeader("simple past")
-                data(Tense.PAST, supporting = setOf(VerbForm.FINITE))
-                rowHeader("past participle")
-                data(VerbForm.PARTICIPLE, Tense.PAST)
+                rowHeader("present participle")
+                data(VerbForm.PARTICIPLE, Tense.PRESENT)
             }
             row {
-                rowHeader("pres. participle / gerund")
-                data(VerbForm.PARTICIPLE, Tense.PRESENT)
-                empty(colspan = 2)
+                rowHeader("past simple")
+                data(Tense.PAST, supporting = setOf(VerbForm.FINITE))
+            }
+            row {
+                rowHeader("past participle")
+                data(VerbForm.PARTICIPLE, Tense.PAST)
             }
         }
     }
