@@ -29,7 +29,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         testInstrumentationRunnerArguments[TestEnvironment.IS_TEST] = "true"
-        testInstrumentationRunnerArguments[TestEnvironment.TEST_SERVER_PORT] = "8081"
+        testInstrumentationRunnerArguments[TestEnvironment.TEST_SERVER_PORT] = "9090"
     }
 
     buildTypes {
