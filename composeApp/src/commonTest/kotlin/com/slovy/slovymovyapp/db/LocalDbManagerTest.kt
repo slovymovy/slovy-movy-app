@@ -118,4 +118,51 @@ class LocalDbManagerTest : BaseTest() {
             platform.deleteFile(dictPath)
         }
     }
+
+    @Test
+    fun deleteAll_removes_local_db_files() {
+        val platform = testPlatformDbSupport()
+        val mgr = LocalDbManager(platform)
+
+        val dictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        val transPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+
+        // Ensure files don't exist
+        if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)
+        if (platform.fileExists(transPath)) platform.deleteFile(transPath)
+
+        try {
+            // Create databases and write to them to ensure file creation
+            val dictDb = mgr.openLocalDictionary()
+            val transDb = mgr.openLocalTranslation()
+            
+            dictDb.dictionaryQueries.insertLemma(Uuid.random(), "en", "Dummy", "dummy", 1.0, false)
+            transDb.translationQueries.insertSenseTranslation(
+                sense_id = Uuid.random(),
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                idx = 0,
+                target_lang_word = "Dummy",
+                target_lang_word_normalized = "dummy",
+                target_lang_sense_clarification = null,
+                lemma_id = Uuid.random(),
+                lemma_pos_id = Uuid.random()
+            )
+
+            // Verify they exist
+            kotlin.test.assertTrue(platform.fileExists(dictPath), "Dictionary DB should exist")
+            kotlin.test.assertTrue(platform.fileExists(transPath), "Translation DB should exist")
+
+            // Delete all
+            mgr.deleteAll()
+
+            // Verify they are deleted
+            kotlin.test.assertFalse(platform.fileExists(dictPath), "Dictionary DB should be deleted")
+            kotlin.test.assertFalse(platform.fileExists(transPath), "Translation DB should be deleted")
+        } finally {
+            mgr.closeAll()
+            if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)
+            if (platform.fileExists(transPath)) platform.deleteFile(transPath)
+        }
+    }
 }

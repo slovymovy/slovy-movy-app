@@ -647,6 +647,7 @@ fun App(
                     onOkay = {
                         coroutineScope.launch {
                             dataManager.deleteAllDownloadedData()
+                            localDbManager.deleteAll()
                             dictionaryRepository.clearSenseCache()
                             val target = selectInitialDestination()
                             navController.navigate(target) {

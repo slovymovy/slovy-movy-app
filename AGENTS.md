@@ -63,7 +63,7 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **Android SDK**: compileSdk=36, minSdk=24, targetSdk=36
 - **Java version**: Use Java 21 (via sdkman: `sdk use java 21.0.9-amzn`). Java 25+ may cause Kotlin compatibility
   issues.
-- **Data version**: `DataDbManager.VERSION = "v10"`; when bumping, upload DBs under the new prefix in the GCS bucket and
+- **Data version**: `DataDbManager.VERSION = "v11"`; when bumping, upload DBs under the new prefix in the GCS bucket and
   keep the version in sync.
 
 ## Code Structure

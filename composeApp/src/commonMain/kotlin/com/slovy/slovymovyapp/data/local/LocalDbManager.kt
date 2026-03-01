@@ -46,6 +46,20 @@ class LocalDbManager(private val platform: PlatformDbSupport) {
         translationHolder?.driver?.close()
         translationHolder = null
     }
+
+    fun deleteAll() {
+        closeAll()
+        
+        val dictPath = platform.getDatabasePath(LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(dictPath)) {
+            platform.deleteFile(dictPath)
+        }
+        
+        val transPath = platform.getDatabasePath(LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(transPath)) {
+            platform.deleteFile(transPath)
+        }
+    }
 }
 
 private class LocalDatabaseHolder<T>(
