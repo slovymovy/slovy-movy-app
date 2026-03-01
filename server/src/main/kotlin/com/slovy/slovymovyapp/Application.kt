@@ -69,7 +69,7 @@ private data class GeneralFeedbackResponse(
 
 fun main() {
     val port = System.getenv(SERVER_PORT_ENV)?.toIntOrNull() ?: SERVER_PORT
-    embeddedServer(Netty, port = port, host = "127.0.0.1", module = Application::module)
+    embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 
