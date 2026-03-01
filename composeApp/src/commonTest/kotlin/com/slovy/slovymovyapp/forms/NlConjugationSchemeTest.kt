@@ -83,9 +83,10 @@ class NlConjugationSchemeTest : BaseTest() {
 
     private val expectedNlNounKwartier = mapOf(
         "nl_noun:short" to listOf(
-            listOf(null, null, null),
-            listOf(null, "kwartiertje", "kwartiertje"),
-            listOf(null, "kwartieren", "kwartiertjes")
+            listOf(null, null),
+            listOf(null, "kwartieren"),
+            listOf(null, "kwartiertje"),
+            listOf(null, "kwartiertjes")
         )
     )
 }

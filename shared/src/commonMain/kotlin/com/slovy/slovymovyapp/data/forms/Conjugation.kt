@@ -43,6 +43,7 @@ sealed class GridCell {
     data class Data(
         val requiredTags: FormTags,
         val preferredTags: FormTags = emptyMap(),
+        val forbiddenTags: FormTags = emptyMap(),
         override val rowspan: Int = 1,
         override val colspan: Int = 1,
         val allowedSources: Set<FormSource>? = null,
@@ -105,11 +106,13 @@ class RowBuilder {
         rowspan: Int = 1,
         colspan: Int = 1,
         supporting: Set<FormTag> = emptySet(),
+        forbidden: Set<FormTag> = emptySet(),
         allowedSources: Set<FormSource>? = null,
     ) {
         cells += GridCell.Data(
             requiredTags = tags.associate { it.key to it.value },
             preferredTags = supporting.associate { it.key to it.value },
+            forbiddenTags = forbidden.associate { it.key to it.value },
             rowspan = rowspan,
             colspan = colspan,
             allowedSources = allowedSources
