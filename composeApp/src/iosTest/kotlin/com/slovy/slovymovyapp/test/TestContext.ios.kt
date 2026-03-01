@@ -24,6 +24,3 @@ actual typealias IgnoreIos = kotlin.test.Ignore
 
 @Target(allowedTargets = [AnnotationTarget.CLASS, AnnotationTarget.FUNCTION])
 actual annotation class IgnoreRobolectric actual constructor()
-
-// @IgnoreIos on the enclosing class already prevents this from running on iOS.
-actual fun testAssume(condition: Boolean, message: String) = Unit

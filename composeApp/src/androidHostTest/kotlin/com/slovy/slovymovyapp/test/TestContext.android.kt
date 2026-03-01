@@ -33,7 +33,3 @@ actual abstract class BaseTest actual constructor() : BaseTestImpl()
 actual annotation class IgnoreIos actual constructor()
 
 actual typealias IgnoreRobolectric = org.junit.Ignore
-
-actual fun testAssume(condition: Boolean, message: String) {
-    org.junit.Assume.assumeTrue(message, condition)
-}

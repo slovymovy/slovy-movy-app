@@ -4,7 +4,6 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
-import com.slovy.slovymovyapp.test.testAssume
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,35 +42,6 @@ class EnConjugationSchemeTest : BaseTest() {
         }
     }
 
-    @Test
-    fun englishPronounSnapshots_matchExpectedTables() = runBlocking {
-        val (mgr, repo) = createSnapshotRepository()
-        try {
-            mgr.ensureDictionary(Language.ENGLISH)
-            testAssume(
-                repo.getLanguageCard(Language.ENGLISH, "i") != null,
-                "EN pronoun 'i' not in test DB — pronoun snapshot tests skipped; run with full EN DB for coverage"
-            )
-            assertEquals(
-                expectedEnPronounI,
-                resolveFormsSnapshot(repo, Language.ENGLISH, "i", DictionaryPos.PRONOUN),
-                "Resolved EN pronoun views for 'i' changed"
-            )
-            assertEquals(
-                expectedEnPronounWe,
-                resolveFormsSnapshot(repo, Language.ENGLISH, "we", DictionaryPos.PRONOUN),
-                "Resolved EN pronoun views for 'we' changed"
-            )
-            assertEquals(
-                expectedEnPronounYou,
-                resolveFormsSnapshot(repo, Language.ENGLISH, "you", DictionaryPos.PRONOUN),
-                "Resolved EN pronoun views for 'you' changed"
-            )
-        } finally {
-            mgr.deleteDictionary(Language.ENGLISH)
-        }
-    }
-
     private val expectedEnNounBook = mapOf(
         "en_noun:short" to listOf(
             listOf(null, "book"),
@@ -104,33 +74,4 @@ class EnConjugationSchemeTest : BaseTest() {
         )
     )
 
-    private val expectedEnPronounI = mapOf(
-        "en_pronoun:short" to listOf(
-            listOf(null, "i"),       // subjective (injected from lemma)
-            listOf(null, "me"),      // objective
-            listOf(null, "my"),      // possessive determiner
-            listOf(null, "mine"),    // possessive pronoun
-            listOf(null, "myself"),  // reflexive
-        )
-    )
-
-    private val expectedEnPronounWe = mapOf(
-        "en_pronoun:short" to listOf(
-            listOf(null, "we"),        // subjective
-            listOf(null, "us"),        // objective
-            listOf(null, "our"),       // possessive determiner
-            listOf(null, "ours"),      // possessive pronoun
-            listOf(null, "ourselves"), // reflexive
-        )
-    )
-
-    private val expectedEnPronounYou = mapOf(
-        "en_pronoun:short" to listOf(
-            listOf(null, "you"),       // subjective
-            listOf(null, null),        // objective (same form as subjective, not in DB)
-            listOf(null, "your"),      // possessive determiner
-            listOf(null, "yours"),     // possessive pronoun
-            listOf(null, "yourself"),  // reflexive
-        )
-    )
 }

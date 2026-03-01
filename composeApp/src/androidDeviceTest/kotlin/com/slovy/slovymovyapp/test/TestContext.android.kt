@@ -26,7 +26,3 @@ actual annotation class IgnoreIos actual constructor()
 
 @Target(allowedTargets = [AnnotationTarget.CLASS, AnnotationTarget.FUNCTION])
 actual annotation class IgnoreRobolectric actual constructor()
-
-actual fun testAssume(condition: Boolean, message: String) {
-    org.junit.Assume.assumeTrue(message, condition)
-}
