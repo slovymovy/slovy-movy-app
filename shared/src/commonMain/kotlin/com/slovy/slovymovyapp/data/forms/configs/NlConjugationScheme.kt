@@ -321,8 +321,30 @@ object NlConjugationScheme : ConjugationSchemeProvider {
         }
     }
 
+    val NL_ADVERB: ConjugationScheme = conjugationScheme(
+        "nl_adverb",
+        Language.DUTCH,
+        DictionaryPos.ADVERB,
+        tagResolver = DutchSchemeTagResolver
+    ) {
+        view("short", "Forms") {
+            row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+            row {
+                rowHeader("Comparative")
+                data(Degree.COMPARATIVE)
+            }
+            row {
+                rowHeader("Superlative")
+                data(Degree.SUPERLATIVE)
+            }
+        }
+    }
+
     /** All Dutch schemes for easy lookup. */
-    val ALL: List<ConjugationScheme> = listOf(NL_VERB, NL_NOUN, NL_ADJECTIVE)
+    val ALL: List<ConjugationScheme> = listOf(NL_VERB, NL_NOUN, NL_ADJECTIVE, NL_ADVERB)
 
     override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? =
         ALL.firstOrNull { it.pos == pos }
