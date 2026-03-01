@@ -19,10 +19,11 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 .map { form ->
                     if ('(' in form.form && "diminutive" in form.tags)
                         form.copy(form = form.form.substringBefore('(').trim(), source = FormSource.HEURISTIC)
-                    else form
+                    else
+                        form.copy(form = form.form.trim())
                 }
                 .filter { form ->
-                    !form.form.isEmpty() && !form.form.startsWith('(') && !form.form.endsWith(',')
+                    form.form.isNotEmpty() && !form.form.startsWith('(') && !form.form.endsWith(',')
                 }
 
             // Canonicalize diminutive number tags using Dutch morphology (-je = singular, -jes = plural).
@@ -263,7 +264,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             }
             row {
                 rowHeader("Positive (Base)")
-                data(Degree.POSITIVE, supporting = setOf(Mood.PREDICATIVE))
+                data(Degree.POSITIVE, supporting = setOf(Mood.PREDICATIVE), forbidden = setOf(Mood.PARTITIVE))
             }
             row {
                 rowHeader("Inflected (+e)")
