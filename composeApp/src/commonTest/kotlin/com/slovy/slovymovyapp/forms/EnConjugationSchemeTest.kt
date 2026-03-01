@@ -5,6 +5,7 @@ import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.forms.SchemeInputForm
 import com.slovy.slovymovyapp.data.forms.configs.EnConjugationScheme
+import com.slovy.slovymovyapp.data.remote.resolveSchemeView
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
 import kotlinx.coroutines.runBlocking
@@ -15,6 +16,30 @@ import kotlin.test.assertNull
 
 @IgnoreIos
 class EnConjugationSchemeTest : BaseTest() {
+
+    @Test
+    fun pronounCellResolution_mapsWiktionaryTagsToCorrectRows() {
+        // Synthetic forms matching real Wiktionary tag strings for "he"
+        val forms = listOf(
+            SchemeInputForm(tags = listOf("nominative"), form = "he", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("oblique"), form = "him", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("possessive"), form = "his", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("without-noun", "possessive"), form = "his", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("reflexive"), form = "himself", source = FormSource.NATIVE),
+        )
+        val scheme = EnConjugationScheme.EN_PRONOUN
+        val view = scheme.views.first { it.viewId == "short" }
+        val resolved = resolveSchemeView(forms, view, scheme.tagResolver, lemma = "he")
+
+        // Row 0 = col headers; rows 1-5 = subject / object / possAdj / possPron / reflexive
+        val dataRows = resolved.filter { row -> row.any { it != null } }
+        assertEquals(5, dataRows.size, "EN pronoun 'short' view must have 5 data rows")
+        assertEquals("he",      dataRows[0][1], "subjective row")
+        assertEquals("him",     dataRows[1][1], "objective row")
+        assertEquals("his",     dataRows[2][1], "possessive adjective row")
+        assertEquals("his",     dataRows[3][1], "possessive pronoun row")
+        assertEquals("himself", dataRows[4][1], "reflexive row")
+    }
 
     @Test
     fun pronounScheme_selectedForFullParadigm_nullForPossessiveOnly() {
