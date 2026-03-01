@@ -16,11 +16,13 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             // stripping the parenthetical part rather than dropped, so the cell isn't left empty
             // when no non-parenthetical variant exists.
             val cleanForms = forms
-                .filter { form -> !form.form.startsWith('(') && !form.form.endsWith(',') }
                 .map { form ->
                     if ('(' in form.form && "diminutive" in form.tags)
                         form.copy(form = form.form.substringBefore('(').trim(), source = FormSource.HEURISTIC)
                     else form
+                }
+                .filter { form ->
+                    !form.form.isEmpty() && !form.form.startsWith('(') && !form.form.endsWith(',')
                 }
 
             // Canonicalize diminutive number tags using Dutch morphology (-je = singular, -jes = plural).

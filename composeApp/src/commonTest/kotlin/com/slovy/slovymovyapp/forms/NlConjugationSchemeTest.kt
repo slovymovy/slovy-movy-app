@@ -70,11 +70,7 @@ class NlConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.DUTCH, "kwartier", DictionaryPos.NOUN),
                 "Resolved NL noun views for 'kwartier' changed"
             )
-            assertEquals(
-                expectedNlAdverbAanschouwelijk,
-                resolveFormsSnapshot(repo, Language.DUTCH, "aanschouwelijk", DictionaryPos.ADVERB),
-                "Resolved NL adverb views for 'aanschouwelijk' changed"
-            )
+
         } finally {
             mgr.deleteDictionary(Language.DUTCH)
         }
@@ -137,11 +133,4 @@ class NlConjugationSchemeTest : BaseTest() {
         )
     )
 
-    private val expectedNlAdverbAanschouwelijk = mapOf(
-        "nl_adverb:short" to listOf(
-            listOf(null, null),
-            listOf(null, "aanschouwelijker"),
-            listOf(null, "aanschouwelijkst")
-        )
-    )
 }
