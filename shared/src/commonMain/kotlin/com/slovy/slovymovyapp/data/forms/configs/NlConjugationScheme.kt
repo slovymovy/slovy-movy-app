@@ -252,25 +252,26 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             row {
                 colHeader("Category")
                 colHeader("Form")
-                colHeader("Category")
-                colHeader("Form")
             }
             row {
                 rowHeader("Positive (Base)")
-                data(Degree.POSITIVE, Mood.PREDICATIVE)
+                data(Degree.POSITIVE, supporting = setOf(Mood.PREDICATIVE))
+            }
+            row {
                 rowHeader("Inflected (+e)")
                 data(Degree.POSITIVE, Definiteness.DEFINITE)
             }
             row {
                 rowHeader("Comparative")
                 data(Degree.COMPARATIVE)
+            }
+            row {
                 rowHeader("Superlative")
                 data(Degree.SUPERLATIVE)
             }
             row {
                 rowHeader("Partitive")
                 data(Mood.PARTITIVE, Degree.POSITIVE)
-                empty(colspan = 2)
             }
         }
 

@@ -65,10 +65,12 @@ class NlConjugationSchemeTest : BaseTest() {
 
     private val expectedNlAdjectiveVolslagen = mapOf(
         "nl_adjective:category_summary" to listOf(
-            listOf(null, null, null, null),
-            listOf(null, "volslagen", null, "volslagen"),
-            listOf(null, "volslagener", null, "volslagenst"),
-            listOf(null, "volslagens", null)
+            listOf(null, null),
+            listOf(null, "volslagen"),
+            listOf(null, "volslagen"),
+            listOf(null, "volslagener"),
+            listOf(null, "volslagenst"),
+            listOf(null, "volslagens")
         ),
         "nl_adjective:full" to listOf(
             listOf(null, null, null, null),
