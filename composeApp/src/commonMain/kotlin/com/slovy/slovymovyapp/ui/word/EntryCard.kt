@@ -159,10 +159,11 @@ internal data class ColumnWidthInput(
  * Computes per-column pixel widths from measured cell intrinsic widths.
  *
  * Pass 1 – single-column cells: each column is at least as wide as its widest cell.
- * Pass 2 – multi-column spans: if the span's intrinsic width exceeds the sum of its
- *   columns' current widths, the deficit is distributed evenly across columns that still
- *   have room below [maxColWidthPx]. When a column is capped, its overflow is
- *   redistributed to the remaining uncapped columns rather than being dropped.
+ * Pass 2 – multi-column spans: spans are processed in canonical order (shorter before
+ *   longer, ties broken left-to-right by anchorColumn) so results are independent of
+ *   declaration order in the grid. Within each span, deficit is distributed evenly
+ *   across columns with room; when a column hits [maxColWidthPx] its overflow is
+ *   redistributed to remaining uncapped columns rather than being dropped.
  */
 internal fun computeColumnWidths(
     maxColumns: Int,
@@ -182,9 +183,11 @@ internal fun computeColumnWidths(
         }
     }
 
-    // Pass 2: multi-column spans with iterative deficit redistribution
-    for (input in inputs) {
-        if (input.colspan > 1) {
+    // Pass 2: multi-column spans — canonical order removes declaration-order dependence.
+    // Shorter spans run before longer ones; equal-length spans run left-to-right.
+    val spans = inputs.filter { it.colspan > 1 }
+        .sortedWith(compareBy({ it.colspan }, { it.anchorColumn }))
+    for (input in spans) {
             val spanCols = input.anchorColumn until input.anchorColumn + input.colspan
             var remaining = input.intrinsicWidthPx - spanCols.sumOf { colWidths[it] }
             if (remaining > 0) {
@@ -209,7 +212,6 @@ internal fun computeColumnWidths(
                     remaining = overflow
                 }
             }
-        }
     }
 
     return colWidths
@@ -234,12 +236,15 @@ private fun SpannedFormsGrid(
     val maxColumns = matrix.maxOfOrNull { it.size } ?: 0
 
     // Cache column widths so the layout hot-path skips intrinsic measurement on every pass.
-    // A new stamp object is allocated only when inputs that affect column widths change
-    // (different word, different dp bounds, or density/font-scale change). During
-    // AnimatedVisibility expand/collapse the height constraint changes each frame but these
-    // inputs don't, so the layout lambda just reads the cached IntArray.
+    // A new stamp object is allocated only when inputs that affect column widths change.
+    // LocalDensity covers system font-scale changes; typography styles cover any runtime
+    // theme or ProvideTextStyle changes that alter header/data text metrics.
     val colWidthsCache = remember { ColWidthsCache() }
-    val colWidthsStamp = remember(formsView, minColWidth, maxColWidth, LocalDensity.current) { Any() }
+    val headerStyle = MaterialTheme.typography.labelSmall
+    val dataStyle = MaterialTheme.typography.bodySmall
+    val colWidthsStamp = remember(
+        formsView, minColWidth, maxColWidth, LocalDensity.current, headerStyle, dataStyle
+    ) { Any() }
 
     val anchors = buildList {
         matrix.forEachIndexed { rowIndex, row ->

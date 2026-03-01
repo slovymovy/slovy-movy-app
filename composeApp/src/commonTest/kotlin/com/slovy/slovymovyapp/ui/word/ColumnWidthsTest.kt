@@ -110,24 +110,27 @@ class ColumnWidthsTest {
     }
 
     @Test
-    fun spanDeficit_overlappingSpans_laterSpanSeesEarlierResult() {
-        // Span 0-1 (intrinsic=100) is processed first: col0 and col1 each grow to 50.
-        // Span 1-2 (intrinsic=200) then sees col1=50 (already widened), col2=10 (min).
+    fun spanDeficit_overlappingSpans_canonicalOrderShortBeforeLong() {
+        // Both spans have colspan=2; canonical order is by anchorColumn: span 0-1 before span 1-2.
+        // Span 0-1 (intrinsic=100) runs first: col0 and col1 each grow to 50.
+        // Span 1-2 (intrinsic=200) then sees col1=50, col2=10 (min).
         //   deficit=140; round1: col1→120 capped to 100 (overflow=20), col2→80
         //   round2: remaining=20 → col2→100.
         // Final: col0=50, col1=100, col2=100.
-        // This test documents the order-dependent behavior so that future refactors
-        // don't silently change it.
-        val result = computeColumnWidths(
+        // Declaring the spans in reverse order in `inputs` must produce the same result
+        // because computeColumnWidths sorts spans canonically before processing.
+        val forwardResult = computeColumnWidths(
             maxColumns = 3, minColWidthPx = 10, maxColWidthPx = 100,
-            inputs = listOf(
-                col(0, colspan = 2, width = 100),
-                col(1, colspan = 2, width = 200),
-            )
+            inputs = listOf(col(0, colspan = 2, width = 100), col(1, colspan = 2, width = 200)),
         )
-        assertEquals(50,  result[0], "col 0 set only by span 0-1")
-        assertEquals(100, result[1], "col 1 widened first by span 0-1, then by span 1-2")
-        assertEquals(100, result[2], "col 2 widened by span 1-2 with redistributed overflow")
+        val reverseResult = computeColumnWidths(
+            maxColumns = 3, minColWidthPx = 10, maxColWidthPx = 100,
+            inputs = listOf(col(1, colspan = 2, width = 200), col(0, colspan = 2, width = 100)),
+        )
+        assertEquals(50,  forwardResult[0], "col 0 set only by span 0-1")
+        assertEquals(100, forwardResult[1], "col 1 widened first by span 0-1, then by span 1-2")
+        assertEquals(100, forwardResult[2], "col 2 widened by span 1-2 with redistributed overflow")
+        assertTrue(forwardResult.contentEquals(reverseResult), "declaration order must not affect result")
     }
 
     @Test
