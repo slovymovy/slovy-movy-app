@@ -23,7 +23,13 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                         form.copy(form = form.form.trim())
                 }
                 .filter { form ->
-                    form.form.isNotEmpty() && !form.form.startsWith('(') && !form.form.endsWith(',')
+                    // Also drop forms that end with ')' but have no '(': they are the orphaned
+                    // second half of a split parenthetical annotation (e.g. "attributief)" from
+                    // a DB entry that stored "(alleen attributief)" as two broken rows).
+                    form.form.isNotEmpty()
+                        && !form.form.startsWith('(')
+                        && !form.form.endsWith(',')
+                        && (!form.form.endsWith(')') || '(' in form.form)
                 }
 
             // Canonicalize diminutive number tags using Dutch morphology (-je = singular, -jes = plural).
