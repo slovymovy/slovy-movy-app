@@ -9,8 +9,39 @@ object NlConjugationScheme : ConjugationSchemeProvider {
 
     private object DutchSchemeTagResolver : SchemeTagResolver {
         override fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> {
+            // Drop forms that are purely parenthetical (e.g. "(kindeke)") or trailing-comma data
+            // errors (e.g. "kindjes,").  ASCII '(' = 40 sorts before all letters, so parenthetical-
+            // only forms incorrectly win the alphabetical tiebreaker over standard modern forms.
+            // Diminutive forms with optional-suffix notation (e.g. "manneke(n)") are normalized by
+            // stripping the parenthetical part rather than dropped, so the cell isn't left empty
+            // when no non-parenthetical variant exists.
+            val cleanForms = forms
+                .map { form ->
+                    if ('(' in form.form && "diminutive" in form.tags)
+                        form.copy(form = form.form.substringBefore('(').trim(), source = FormSource.HEURISTIC)
+                    else
+                        form.copy(form = form.form.trim())
+                }
+                .filter { form ->
+                    form.form.isNotEmpty() && !form.form.startsWith('(') && !form.form.endsWith(',')
+                }
+
+            // Canonicalize diminutive number tags using Dutch morphology (-je = singular, -jes = plural).
+            // Always strip both number tags first and re-add the canonical one, so conflicting
+            // combinations (e.g. -je + plural, or -jes + singular + plural) are fully corrected.
+            val correctedForms = cleanForms.map { form ->
+                val tags = form.tags
+                when {
+                    "diminutive" in tags && form.form.endsWith("jes") ->
+                        form.copy(tags = (tags - "singular" - "plural") + "plural", source = FormSource.HEURISTIC)
+                    "diminutive" in tags && form.form.endsWith("je") ->
+                        form.copy(tags = (tags - "singular" - "plural") + "singular", source = FormSource.HEURISTIC)
+                    else -> form
+                }
+            }
+
             val nonFiniteTags = setOf("infinitive", "gerund", "participle", "adverbial")
-            val extras = forms.flatMap { form ->
+            val extras = correctedForms.flatMap { form ->
                 val tags = form.tags
                 val result = mutableListOf<SchemeInputForm>()
 
@@ -33,7 +64,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
 
                 result
             }
-            return if (extras.isEmpty()) forms else forms + extras
+            return if (extras.isEmpty()) correctedForms else correctedForms + extras
         }
 
         override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
@@ -192,20 +223,21 @@ object NlConjugationScheme : ConjugationSchemeProvider {
         DictionaryPos.NOUN,
         tagResolver = DutchSchemeTagResolver
     ) {
-        view("short", "Number and diminutive") {
+        view("short", "Forms") {
             row {
-                empty()
-                colHeader("base")
-                colHeader("diminutive")
+                colHeader("Category")
+                colHeader("Form")
             }
             row {
-                rowHeader("singular")
-                data(Num.SG)
+                rowHeader("Plural")
+                data(Num.PL, forbidden = setOf(VerbForm.DIMINUTIVE))
+            }
+            row {
+                rowHeader("Diminutive")
                 data(Num.SG, VerbForm.DIMINUTIVE)
             }
             row {
-                rowHeader("plural")
-                data(Num.PL)
+                rowHeader("Diminutive plural")
                 data(Num.PL, VerbForm.DIMINUTIVE)
             }
         }
@@ -229,25 +261,26 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             row {
                 colHeader("Category")
                 colHeader("Form")
-                colHeader("Category")
-                colHeader("Form")
             }
             row {
                 rowHeader("Positive (Base)")
-                data(Degree.POSITIVE, Mood.PREDICATIVE)
+                data(Degree.POSITIVE, supporting = setOf(Mood.PREDICATIVE), forbidden = setOf(Mood.PARTITIVE))
+            }
+            row {
                 rowHeader("Inflected (+e)")
                 data(Degree.POSITIVE, Definiteness.DEFINITE)
             }
             row {
                 rowHeader("Comparative")
                 data(Degree.COMPARATIVE)
+            }
+            row {
                 rowHeader("Superlative")
                 data(Degree.SUPERLATIVE)
             }
             row {
                 rowHeader("Partitive")
                 data(Mood.PARTITIVE, Degree.POSITIVE)
-                empty(colspan = 2)
             }
         }
 
@@ -297,8 +330,30 @@ object NlConjugationScheme : ConjugationSchemeProvider {
         }
     }
 
+    val NL_ADVERB: ConjugationScheme = conjugationScheme(
+        "nl_adverb",
+        Language.DUTCH,
+        DictionaryPos.ADVERB,
+        tagResolver = DutchSchemeTagResolver
+    ) {
+        view("short", "Forms") {
+            row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+            row {
+                rowHeader("Comparative")
+                data(Degree.COMPARATIVE)
+            }
+            row {
+                rowHeader("Superlative")
+                data(Degree.SUPERLATIVE)
+            }
+        }
+    }
+
     /** All Dutch schemes for easy lookup. */
-    val ALL: List<ConjugationScheme> = listOf(NL_VERB, NL_NOUN, NL_ADJECTIVE)
+    val ALL: List<ConjugationScheme> = listOf(NL_VERB, NL_NOUN, NL_ADJECTIVE, NL_ADVERB)
 
     override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? =
         ALL.firstOrNull { it.pos == pos }
