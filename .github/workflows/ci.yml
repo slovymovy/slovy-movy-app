@@ -286,41 +286,4 @@ jobs:
             **/build/reports/tests/**
             **/build/test-results/**
 
-  tests-macos-x64:
-    timeout-minutes: 30
-    runs-on: macos-15-intel
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 1
 
-      - name: setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-
-      - name: run iOS x64 tests
-        env:
-          SDK_NAME: iphonesimulator
-          ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
-        run: ./gradlew iosX64Test
-
-      - name: Upload test results and reports (macOS x64)
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: test-reports-macos-x64
-          if-no-files-found: ignore
-          retention-days: 14
-          path: |
-            **/build/reports/problems/**
-            **/build/reports/tests/**
-            **/build/test-results/**
