@@ -2,14 +2,51 @@ package com.slovy.slovymovyapp.forms
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
+import com.slovy.slovymovyapp.data.forms.SchemeInputForm
+import com.slovy.slovymovyapp.data.forms.configs.NlConjugationScheme
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @IgnoreIos
 class NlConjugationSchemeTest : BaseTest() {
+
+    @Test
+    fun preprocessForms_parentheticalDiminutives_strippedAndTrimmed() {
+        val resolver = NlConjugationScheme.NL_NOUN.tagResolver
+
+        // "kindjes (rare)" has a space before "(": substringBefore strips to "kindjes " —
+        // trim() must remove the trailing space so -jes suffix check still fires.
+        val spacedParen = SchemeInputForm(
+            tags = listOf("diminutive", "singular"),
+            form = "kindjes (rare)",
+            source = FormSource.NATIVE,
+        )
+        val result = resolver.preprocessForms(listOf(spacedParen), null)
+            .first { "diminutive" in it.tags }
+        assertEquals("kindjes", result.form, "Trailing space must be trimmed after stripping parenthetical")
+        assertTrue("plural" in result.tags, "Trimmed -jes form must get plural tag")
+        assertFalse("singular" in result.tags, "Wrong singular tag must be removed from -jes form")
+
+        // "kindeke(dialectal)" → "kindeke" after strip+trim. The -ke suffix does NOT trigger
+        // the -je/-jes canonicalization, so no number tag is added. The form therefore cannot
+        // win cells that require both DIMINUTIVE and a number tag.
+        val dialectal = SchemeInputForm(
+            tags = listOf("diminutive", "neuter"),
+            form = "kindeke(dialectal)",
+            source = FormSource.NATIVE,
+        )
+        val resultDialectal = resolver.preprocessForms(listOf(dialectal), null)
+            .first { "diminutive" in it.tags }
+        assertEquals("kindeke", resultDialectal.form, "Embedded parenthetical must be stripped")
+        assertFalse("singular" in resultDialectal.tags, "Non -je/-jes suffix must not gain a number tag")
+        assertFalse("plural" in resultDialectal.tags, "Non -je/-jes suffix must not gain a number tag")
+    }
 
     @Test
     fun dutchSnapshots_matchExpectedTables() = runBlocking {

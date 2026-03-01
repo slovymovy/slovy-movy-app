@@ -19,7 +19,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 .filter { form -> !form.form.startsWith('(') && !form.form.endsWith(',') }
                 .map { form ->
                     if ('(' in form.form && "diminutive" in form.tags)
-                        form.copy(form = form.form.substringBefore('('), source = FormSource.HEURISTIC)
+                        form.copy(form = form.form.substringBefore('(').trim(), source = FormSource.HEURISTIC)
                     else form
                 }
 
