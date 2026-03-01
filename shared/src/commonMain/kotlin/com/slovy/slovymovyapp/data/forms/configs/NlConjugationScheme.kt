@@ -9,24 +9,29 @@ object NlConjugationScheme : ConjugationSchemeProvider {
 
     private object DutchSchemeTagResolver : SchemeTagResolver {
         override fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> {
-            // Drop parenthetical/dialectal forms (e.g. "(kindeke)", "manneke(n)") and forms with
-            // trailing punctuation that are data errors (e.g. "kindjes,", "kinderen,").
-            // Parenthetical forms sort before all letters in the alphabetical tiebreaker (ASCII '(' = 40),
-            // so without this filter they incorrectly win over the standard modern forms.
-            val cleanForms = forms.filter { '(' !in it.form && !it.form.endsWith(',') }
+            // Drop parenthetical/dialectal forms and forms with trailing punctuation data errors
+            // (e.g. "kindjes,", "kinderen,").
+            // – Forms starting with "(" (e.g. "(kindeke)") are purely dialectal/archaic entries;
+            //   ASCII '(' = 40 sorts before all letters so they incorrectly win the alphabetical
+            //   tiebreaker over standard modern forms.
+            // – Diminutive forms with embedded parentheses (e.g. "manneke(n)") are optional-suffix
+            //   dialectal variants; scoped to diminutive so verb forms like "zou(dt)" are preserved.
+            val cleanForms = forms.filter { form ->
+                !form.form.startsWith('(') &&
+                !form.form.endsWith(',') &&
+                !('(' in form.form && "diminutive" in form.tags)
+            }
 
-            // Fix Wiktionary diminutive number-tag errors:
-            // – "-jes" forms (always plural) sometimes carry a wrong "singular" tag: strip it, add "plural".
-            // – "-je" forms (always singular) often have no number tag at all: add "singular".
-            // Dutch grammar guarantees the -je/-jes split, so the inference is always safe.
+            // Canonicalize diminutive number tags using Dutch morphology (-je = singular, -jes = plural).
+            // Always strip both number tags first and re-add the canonical one, so conflicting
+            // combinations (e.g. -je + plural, or -jes + singular + plural) are fully corrected.
             val correctedForms = cleanForms.map { form ->
                 val tags = form.tags
                 when {
-                    "diminutive" in tags && form.form.endsWith("jes") && "plural" !in tags ->
-                        form.copy(tags = (tags - "singular") + "plural", source = FormSource.HEURISTIC)
-                    "diminutive" in tags && form.form.endsWith("je")
-                            && "singular" !in tags && "plural" !in tags ->
-                        form.copy(tags = tags + "singular", source = FormSource.HEURISTIC)
+                    "diminutive" in tags && form.form.endsWith("jes") ->
+                        form.copy(tags = (tags - "singular" - "plural") + "plural", source = FormSource.HEURISTIC)
+                    "diminutive" in tags && form.form.endsWith("je") ->
+                        form.copy(tags = (tags - "singular" - "plural") + "singular", source = FormSource.HEURISTIC)
                     else -> form
                 }
             }

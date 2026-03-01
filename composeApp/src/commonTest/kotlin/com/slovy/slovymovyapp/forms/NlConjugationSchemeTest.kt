@@ -32,6 +32,16 @@ class NlConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.DUTCH, "kwartier", DictionaryPos.NOUN),
                 "Resolved NL noun views for 'kwartier' changed"
             )
+            assertEquals(
+                expectedNlNounBoom,
+                resolveFormsSnapshot(repo, Language.DUTCH, "boom", DictionaryPos.NOUN),
+                "Resolved NL noun views for 'boom' changed"
+            )
+            assertEquals(
+                expectedNlAdverbAanschouwelijk,
+                resolveFormsSnapshot(repo, Language.DUTCH, "aanschouwelijk", DictionaryPos.ADVERB),
+                "Resolved NL adverb views for 'aanschouwelijk' changed"
+            )
         } finally {
             mgr.deleteDictionary(Language.DUTCH)
         }
@@ -89,6 +99,25 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, "kwartieren"),
             listOf(null, "kwartiertje"),
             listOf(null, "kwartiertjes")
+        )
+    )
+
+    // "boom" verifies that diminutive plurals (boompjes) are excluded from the Plural cell
+    // and appear only in the Diminutive plural cell, not the regular Plural cell.
+    private val expectedNlNounBoom = mapOf(
+        "nl_noun:short" to listOf(
+            listOf(null, null),
+            listOf(null, "bomen"),
+            listOf(null, "boompje"),
+            listOf(null, "boompjes")
+        )
+    )
+
+    private val expectedNlAdverbAanschouwelijk = mapOf(
+        "nl_adverb:short" to listOf(
+            listOf(null, null),
+            listOf(null, "aanschouwelijker"),
+            listOf(null, "aanschouwelijkst")
         )
     )
 }
