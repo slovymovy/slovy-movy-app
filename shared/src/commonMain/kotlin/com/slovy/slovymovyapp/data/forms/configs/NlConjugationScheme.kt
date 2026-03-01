@@ -9,18 +9,19 @@ object NlConjugationScheme : ConjugationSchemeProvider {
 
     private object DutchSchemeTagResolver : SchemeTagResolver {
         override fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> {
-            // Drop parenthetical/dialectal forms and forms with trailing punctuation data errors
-            // (e.g. "kindjes,", "kinderen,").
-            // – Forms starting with "(" (e.g. "(kindeke)") are purely dialectal/archaic entries;
-            //   ASCII '(' = 40 sorts before all letters so they incorrectly win the alphabetical
-            //   tiebreaker over standard modern forms.
-            // – Diminutive forms with embedded parentheses (e.g. "manneke(n)") are optional-suffix
-            //   dialectal variants; scoped to diminutive so verb forms like "zou(dt)" are preserved.
-            val cleanForms = forms.filter { form ->
-                !form.form.startsWith('(') &&
-                !form.form.endsWith(',') &&
-                !('(' in form.form && "diminutive" in form.tags)
-            }
+            // Drop forms that are purely parenthetical (e.g. "(kindeke)") or trailing-comma data
+            // errors (e.g. "kindjes,").  ASCII '(' = 40 sorts before all letters, so parenthetical-
+            // only forms incorrectly win the alphabetical tiebreaker over standard modern forms.
+            // Diminutive forms with optional-suffix notation (e.g. "manneke(n)") are normalized by
+            // stripping the parenthetical part rather than dropped, so the cell isn't left empty
+            // when no non-parenthetical variant exists.
+            val cleanForms = forms
+                .filter { form -> !form.form.startsWith('(') && !form.form.endsWith(',') }
+                .map { form ->
+                    if ('(' in form.form && "diminutive" in form.tags)
+                        form.copy(form = form.form.substringBefore('('), source = FormSource.HEURISTIC)
+                    else form
+                }
 
             // Canonicalize diminutive number tags using Dutch morphology (-je = singular, -jes = plural).
             // Always strip both number tags first and re-add the canonical one, so conflicting

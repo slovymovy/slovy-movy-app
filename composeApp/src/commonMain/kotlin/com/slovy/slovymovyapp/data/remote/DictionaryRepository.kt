@@ -62,8 +62,8 @@ fun resolveSchemeView(
                         if (matchedRequiredTags != cell.requiredTags.size) return@mapNotNull null
 
                         // Forbidden tags: exclude forms that carry any of the forbidden tag values.
-                        if (cell.forbiddenTags.any { (key, forbiddenValue) ->
-                                resolvedForm.tagsByKey[key]?.contains(forbiddenValue) == true
+                        if (cell.forbiddenTags.any { (key, forbiddenValues) ->
+                                resolvedForm.tagsByKey[key]?.any { it in forbiddenValues } == true
                             }) return@mapNotNull null
 
                         // Source filter: skip this form if it doesn't match the cell's allowed sources.

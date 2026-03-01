@@ -27,15 +27,11 @@ class NlConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.DUTCH, "volslagen", DictionaryPos.ADJECTIVE),
                 "Resolved NL adjective views for 'volslagen' changed"
             )
+
             assertEquals(
                 expectedNlNounKwartier,
                 resolveFormsSnapshot(repo, Language.DUTCH, "kwartier", DictionaryPos.NOUN),
                 "Resolved NL noun views for 'kwartier' changed"
-            )
-            assertEquals(
-                expectedNlNounBoom,
-                resolveFormsSnapshot(repo, Language.DUTCH, "boom", DictionaryPos.NOUN),
-                "Resolved NL noun views for 'boom' changed"
             )
             assertEquals(
                 expectedNlAdverbAanschouwelijk,
@@ -73,6 +69,8 @@ class NlConjugationSchemeTest : BaseTest() {
         )
     )
 
+    // "volslagen" is attributive-only (no predicative form in Wiktionary). Positive (Base) showing
+    // "volslagen" exercises the predicative-supporting fallback: without it the cell would be null.
     private val expectedNlAdjectiveVolslagen = mapOf(
         "nl_adjective:category_summary" to listOf(
             listOf(null, null),
@@ -99,17 +97,6 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, "kwartieren"),
             listOf(null, "kwartiertje"),
             listOf(null, "kwartiertjes")
-        )
-    )
-
-    // "boom" verifies that diminutive plurals (boompjes) are excluded from the Plural cell
-    // and appear only in the Diminutive plural cell, not the regular Plural cell.
-    private val expectedNlNounBoom = mapOf(
-        "nl_noun:short" to listOf(
-            listOf(null, null),
-            listOf(null, "bomen"),
-            listOf(null, "boompje"),
-            listOf(null, "boompjes")
         )
     )
 

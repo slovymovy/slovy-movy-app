@@ -43,7 +43,8 @@ sealed class GridCell {
     data class Data(
         val requiredTags: FormTags,
         val preferredTags: FormTags = emptyMap(),
-        val forbiddenTags: FormTags = emptyMap(),
+        /** Keys map to the set of forbidden values for that tag dimension. */
+        val forbiddenTags: Map<String, Set<String>> = emptyMap(),
         override val rowspan: Int = 1,
         override val colspan: Int = 1,
         val allowedSources: Set<FormSource>? = null,
@@ -112,7 +113,8 @@ class RowBuilder {
         cells += GridCell.Data(
             requiredTags = tags.associate { it.key to it.value },
             preferredTags = supporting.associate { it.key to it.value },
-            forbiddenTags = forbidden.associate { it.key to it.value },
+            forbiddenTags = forbidden.groupBy({ it.key }, { it.value })
+                .mapValues { (_, values) -> values.toSet() },
             rowspan = rowspan,
             colspan = colspan,
             allowedSources = allowedSources
