@@ -41,6 +41,46 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             }
 
             val nonFiniteTags = setOf("infinitive", "gerund", "participle", "adverbial")
+
+            // Strip "imperfect" from forms that do NOT carry "past": Dutch wiktionary uses
+            // "imperfect" to mean "onvoltooid" (non-compound aspect) and attaches it to
+            // present-tense and non-finite forms too. Removing it here keeps the global
+            // TagMapping "imperfect" → Tense.PAST correct while preventing false past-tense
+            // matches for Dutch present/non-finite forms.
+            // Source is preserved — this is in-place tag normalization, not a synthetic copy.
+            val processedForms = correctedForms.map { form ->
+                if ("imperfect" in form.tags && "past" !in form.tags)
+                    form.copy(tags = form.tags.filter { it != "imperfect" })
+                else form
+            }
+
+            // Inject the "gij" tag into archaic 2nd-person singular past forms so they score
+            // higher extraKnownTags and lose to the modern equivalents. Archaic forms end in
+            // "-t" on the finite verb token (e.g. kwaamt, laast, spraakt af, wrongt uit)
+            // while modern forms don't (kwamen, las, sprak af, wrong uit). We only apply this
+            // when both kinds are present for the same word.
+            // Source is preserved — the form string is unchanged, only the tag set is annotated.
+            // For separable verbs the finite token is the part before the first space.
+            fun SchemeInputForm.finiteToken() = form.substringBefore(' ')
+            val pastSecondSg = processedForms.filter { form ->
+                "past" in form.tags && "second-person" in form.tags && "singular" in form.tags
+            }
+            val archaicForms: Set<SchemeInputForm> = if (pastSecondSg.size > 1 &&
+                pastSecondSg.any { !it.finiteToken().endsWith("t") }
+            ) {
+                pastSecondSg.filter { it.finiteToken().endsWith("t") }.toSet()
+            } else emptySet()
+
+            val markedForms = if (archaicForms.isEmpty()) processedForms else {
+                processedForms.map { form ->
+                    if (form in archaicForms) form.copy(tags = form.tags + "gij")
+                    else form
+                }
+            }
+
+            // Build extras from correctedForms (before imperfect stripping) so that the
+            // imperfect-based heuristics below can still detect the original tag on
+            // non-finite and conditional forms.
             val extras = correctedForms.flatMap { form ->
                 val tags = form.tags
                 val result = mutableListOf<SchemeInputForm>()
@@ -52,10 +92,14 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                     result += form.copy(tags = tags + "common", source = FormSource.HEURISTIC)
                 }
 
-                // "imperfect" on non-finite forms signals imperfective aspect, not past tense.
-                // Add a heuristic copy with "imperfective" so infinitive ranking prefers the
-                // basic "te <verb>" form over the imperfect stem.
-                if ("imperfect" in tags && tags.any { it in nonFiniteTags }) {
+                // "imperfect" on non-finite or conditional forms signals imperfective aspect.
+                // Add a heuristic copy with "imperfective" so:
+                //  - infinitive cells prefer the basic "te <verb>" form over the imperfect stem.
+                //  - conditional-simple cells (using Aspect.IMPERFECTIVE) can match the form
+                //    without leaking into indicative past cells (which require Tense.PAST).
+                if ("imperfect" in tags && (tags.any { it in nonFiniteTags } ||
+                            ("conditional" in tags && "perfect" !in tags))
+                ) {
                     result += form.copy(
                         tags = tags.map { if (it == "imperfect") "imperfective" else it },
                         source = FormSource.HEURISTIC
@@ -64,7 +108,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
 
                 result
             }
-            return if (extras.isEmpty()) correctedForms else correctedForms + extras
+            return if (extras.isEmpty()) markedForms else markedForms + extras
         }
 
         override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
@@ -84,10 +128,8 @@ object NlConjugationScheme : ConjugationSchemeProvider {
         tagResolver = DutchSchemeTagResolver
     ) {
 
-        view("category_summary", "Compact") {
+        view("category_summary", "Essentials") {
             row {
-                colHeader("Category")
-                colHeader("Form")
                 colHeader("Category")
                 colHeader("Form")
             }
@@ -97,50 +139,34 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                     VerbForm.INFINITIVE,
                     supporting = setOf(Voice.ACTIVE, VerbForm.LONG, Tense.PRESENT, Aspect.IMPERFECTIVE)
                 )
+            }
+            row {
                 rowHeader("Present (ik)")
                 data(Tense.PRESENT, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("Present (jij/hij)")
+                rowHeader("Present (jij/hij/u)")
                 data(Tense.PRESENT, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
-                rowHeader("Past Singular")
+            }
+            row {
+                rowHeader("Past singular")
                 data(Tense.PAST, Num.SG, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("Past Plural")
+                rowHeader("Past plural")
                 data(Tense.PAST, Num.PL, supporting = setOf(Mood.INDICATIVE))
-                rowHeader("Past Participle")
+            }
+            row {
+                rowHeader("Past participle")
                 data(VerbForm.PARTICIPLE, Tense.PAST)
             }
             row {
-                rowHeader("Pres. Participle")
+                rowHeader("Present participle")
                 data(VerbForm.PARTICIPLE, supporting = setOf(Tense.PRESENT, Aspect.IMPERFECTIVE))
-                empty(colspan = 2)
             }
         }
 
-        view("full", "Full conjugation table") {
-            row {
-                rowHeader("infinitive")
-                data(
-                    VerbForm.INFINITIVE,
-                    colspan = 4,
-                    supporting = setOf(Voice.ACTIVE, VerbForm.LONG, Aspect.IMPERFECTIVE)
-                )
-            }
-            row {
-                rowHeader("gerund")
-                data(VerbForm.GERUND, supporting = setOf(Gender.NEUT), colspan = 4)
-            }
-            row {
-                rowHeader("past participle")
-                data(VerbForm.PARTICIPLE, Tense.PAST, colspan = 4)
-            }
-            row {
-                rowHeader("present participle")
-                data(VerbForm.PARTICIPLE, supporting = setOf(Tense.PRESENT, Aspect.IMPERFECTIVE))
-                empty(colspan = 3)
-            }
+        view("full", "Conjugation table") {
             row {
                 empty()
                 colHeader("1st singular")
@@ -149,35 +175,35 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 colHeader("plural")
             }
             row {
-                rowHeader("indicative present")
+                rowHeader("Present")
                 data(Tense.PRESENT, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PRESENT, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PRESENT, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PRESENT, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("indicative past")
+                rowHeader("Past")
                 data(Tense.PAST, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PAST, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PAST, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PAST, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("conditional")
-                data(Mood.CONDITIONAL, Tense.PAST, Person.FIRST, Num.SG)
-                data(Mood.CONDITIONAL, Tense.PAST, Person.SECOND, Num.SG)
-                data(Mood.CONDITIONAL, Tense.PAST, Person.THIRD, Num.SG)
-                data(Mood.CONDITIONAL, Tense.PAST, Num.PL)
+                rowHeader("Conditional")
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("future")
+                rowHeader("Future")
                 data(Tense.FUTURE, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.FUTURE, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.FUTURE, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.FUTURE, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("imperative")
+                rowHeader("Imperative")
                 data(Mood.IMPERATIVE, supporting = setOf(Num.SG))
                 empty(colspan = 3)
             }
@@ -189,21 +215,21 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 empty()
             }
             row {
-                rowHeader("present perfect")
+                rowHeader("Present perfect")
                 data(Tense.PRESENT, Person.FIRST)
                 data(Tense.PRESENT, Person.SECOND)
                 data(Tense.PRESENT, Person.THIRD)
                 empty()
             }
             row {
-                rowHeader("conditional perfect")
+                rowHeader("Conditional perfect")
                 data(Mood.CONDITIONAL, Person.FIRST)
                 data(Mood.CONDITIONAL, Person.SECOND)
                 data(Mood.CONDITIONAL, Person.THIRD)
                 empty()
             }
             row {
-                rowHeader("future perfect")
+                rowHeader("Future perfect")
                 data(Tense.FUTURE, Person.FIRST)
                 data(Tense.FUTURE, Person.SECOND)
                 data(Tense.FUTURE, Person.THIRD)

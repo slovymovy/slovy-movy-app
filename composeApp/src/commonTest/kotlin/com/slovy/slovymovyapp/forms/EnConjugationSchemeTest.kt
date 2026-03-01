@@ -2,14 +2,67 @@ package com.slovy.slovymovyapp.forms
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
+import com.slovy.slovymovyapp.data.forms.SchemeInputForm
+import com.slovy.slovymovyapp.data.forms.configs.EnConjugationScheme
+import com.slovy.slovymovyapp.data.remote.resolveSchemeView
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 @IgnoreIos
 class EnConjugationSchemeTest : BaseTest() {
+
+    @Test
+    fun pronounCellResolution_mapsWiktionaryTagsToCorrectRows() {
+        // Synthetic forms matching real Wiktionary tag strings for "he"
+        val forms = listOf(
+            SchemeInputForm(tags = listOf("nominative"), form = "he", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("oblique"), form = "him", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("possessive"), form = "his", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("without-noun", "possessive"), form = "his", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("reflexive"), form = "himself", source = FormSource.NATIVE),
+        )
+        val scheme = EnConjugationScheme.EN_PRONOUN
+        val view = scheme.views.first { it.viewId == "short" }
+        val resolved = resolveSchemeView(forms, view, scheme.tagResolver, lemma = "he")
+
+        // Row 0 = col headers; rows 1-5 = subject / object / possAdj / possPron / reflexive
+        val dataRows = resolved.filter { row -> row.any { it != null } }
+        assertEquals(5, dataRows.size, "EN pronoun 'short' view must have 5 data rows")
+        assertEquals("he",      dataRows[0][1], "subjective row")
+        assertEquals("him",     dataRows[1][1], "objective row")
+        assertEquals("his",     dataRows[2][1], "possessive adjective row")
+        assertEquals("his",     dataRows[3][1], "possessive pronoun row")
+        assertEquals("himself", dataRows[4][1], "reflexive row")
+    }
+
+    @Test
+    fun pronounScheme_selectedForFullParadigm_nullForPossessiveOnly() {
+        // A head pronoun (e.g. "he") has objective/reflexive forms → scheme is selected.
+        val headForms = listOf(
+            SchemeInputForm(tags = listOf("nominative"), form = "he", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("objective"), form = "him", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("reflexive"), form = "himself", source = FormSource.NATIVE),
+        )
+        assertNotNull(
+            EnConjugationScheme.schemeFor(DictionaryPos.PRONOUN, headForms),
+            "Head pronoun with objective/reflexive forms must get a pronoun scheme"
+        )
+
+        // A possessive-only lemma (e.g. "his") has no objective/oblique/reflexive forms → no scheme.
+        val possessiveForms = listOf(
+            SchemeInputForm(tags = listOf("possessive", "singular"), form = "his", source = FormSource.NATIVE),
+        )
+        assertNull(
+            EnConjugationScheme.schemeFor(DictionaryPos.PRONOUN, possessiveForms),
+            "Possessive-only lemma must not get a pronoun scheme"
+        )
+    }
 
     @Test
     fun englishSnapshots_matchExpectedTables() = runBlocking {
@@ -36,18 +89,6 @@ class EnConjugationSchemeTest : BaseTest() {
                 expectedEnAdverbWell,
                 resolveFormsSnapshot(repo, Language.ENGLISH, "well", DictionaryPos.ADVERB),
                 "Resolved EN adverb views for 'well' changed"
-            )
-            kotlin.test.assertNull(
-                repo.getLanguageCard(Language.ENGLISH, "i"),
-                "Expected card for 'i' to be null in current state"
-            )
-            kotlin.test.assertNull(
-                repo.getLanguageCard(Language.ENGLISH, "we"),
-                "Expected card for 'we' to be null in current state"
-            )
-            kotlin.test.assertNull(
-                repo.getLanguageCard(Language.ENGLISH, "you"),
-                "Expected card for 'you' to be null in current state"
             )
         } finally {
             mgr.deleteDictionary(Language.ENGLISH)
@@ -86,33 +127,4 @@ class EnConjugationSchemeTest : BaseTest() {
         )
     )
 
-    private val expectedEnPronounI = mapOf(
-        "en_pronoun:short" to listOf(
-            listOf(null, "i"),       // subjective (injected from lemma)
-            listOf(null, "me"),      // objective
-            listOf(null, "my"),      // possessive determiner
-            listOf(null, "mine"),    // possessive pronoun
-            listOf(null, "myself"),  // reflexive
-        )
-    )
-
-    private val expectedEnPronounWe = mapOf(
-        "en_pronoun:short" to listOf(
-            listOf(null, "we"),        // subjective
-            listOf(null, "us"),        // objective
-            listOf(null, "our"),       // possessive determiner
-            listOf(null, "ours"),      // possessive pronoun
-            listOf(null, "ourselves"), // reflexive
-        )
-    )
-
-    private val expectedEnPronounYou = mapOf(
-        "en_pronoun:short" to listOf(
-            listOf(null, "you"),       // subjective
-            listOf(null, null),        // objective (same form as subjective, not in DB)
-            listOf(null, "your"),      // possessive determiner
-            listOf(null, "yours"),     // possessive pronoun
-            listOf(null, "yourself"),  // reflexive
-        )
-    )
 }

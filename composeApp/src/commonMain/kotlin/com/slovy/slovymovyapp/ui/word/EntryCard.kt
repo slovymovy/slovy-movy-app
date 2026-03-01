@@ -12,6 +12,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -95,22 +98,20 @@ private fun FormsGridCell(cell: GridCell, value: String?) {
         is GridCell.Data -> value ?: "?"
         is GridCell.Empty -> ""
     }
-    val backgroundColor = when (cell) {
-        is GridCell.RowHeader,
-        is GridCell.ColHeader -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-
-        is GridCell.Data -> MaterialTheme.colorScheme.surface
-        is GridCell.Empty -> MaterialTheme.colorScheme.surface
-    }
+    val isHeader = cell is GridCell.RowHeader || cell is GridCell.ColHeader
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant
+    val headerBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     val textColor = when {
         cell is GridCell.Data && value == null -> MaterialTheme.colorScheme.error
-        cell is GridCell.Empty -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0f)
+        cell is GridCell.Empty -> Color.Transparent
+        isHeader -> MaterialTheme.colorScheme.onSurfaceVariant
         else -> MaterialTheme.colorScheme.onSurface
     }
-    val fontStyle = if (cell is GridCell.Data && value?.endsWith("?") == true) {
-        FontStyle.Italic
-    } else {
-        FontStyle.Normal
+    val textStyle = when {
+        isHeader -> MaterialTheme.typography.labelSmall
+        else -> MaterialTheme.typography.bodySmall.copy(
+            fontStyle = if (cell is GridCell.Data && value?.endsWith("?") == true) FontStyle.Italic else FontStyle.Normal
+        )
     }
     val contentAlignment = if (cell is GridCell.ColHeader || cell is GridCell.Data) {
         Alignment.Center
@@ -126,17 +127,21 @@ private fun FormsGridCell(cell: GridCell, value: String?) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundColor)
-            .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
-            .padding(horizontal = 8.dp, vertical = 6.dp)
-            .defaultMinSize(minHeight = 36.dp),
+            .background(if (isHeader) headerBackground else Color.Transparent)
+            .drawBehind {
+                val stroke = 0.5.dp.toPx()
+                val color = dividerColor
+                drawLine(color, Offset(0f, size.height), Offset(size.width, size.height), stroke)
+                drawLine(color, Offset(size.width, 0f), Offset(size.width, size.height), stroke)
+            }
+            .padding(horizontal = 8.dp, vertical = 3.dp),
         contentAlignment = contentAlignment
     ) {
         if (text.isNotEmpty()) {
             Text(
                 text = text,
                 textAlign = textAlign,
-                style = MaterialTheme.typography.bodySmall.copy(fontStyle = fontStyle),
+                style = textStyle,
                 color = textColor
             )
         }
@@ -277,10 +282,11 @@ private fun FormsGrid(formsView: FormsSchemeView) {
     val maxColumns = matrix.maxOfOrNull { it.size } ?: 0
     if (maxColumns == 0) return
 
-    val cellWidth = 108.dp
-    val minCellHeight = 36.dp
+    val cellWidth = 88.dp
+    val minCellHeight = 28.dp
     val tableWidth = cellWidth * maxColumns
     val tableShape = RoundedCornerShape(10.dp)
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant
     val horizontalScrollState = rememberScrollState()
 
     Box(
@@ -288,17 +294,17 @@ private fun FormsGrid(formsView: FormsSchemeView) {
             .fillMaxWidth()
             .horizontalScroll(horizontalScrollState)
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .requiredWidth(tableWidth)
                 .clip(tableShape)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, tableShape)
+                .border(1.dp, dividerColor, tableShape)
         ) {
             SpannedFormsGrid(
                 formsView = formsView,
                 matrix = matrix,
                 cellWidth = cellWidth,
-                minCellHeight = minCellHeight
+                minCellHeight = minCellHeight,
             )
         }
     }

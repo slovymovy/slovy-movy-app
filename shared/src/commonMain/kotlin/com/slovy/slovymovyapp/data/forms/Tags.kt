@@ -195,7 +195,10 @@ object TagMapping {
         "present" to Tense.PRESENT,
         "past" to Tense.PAST,
         "future" to Tense.FUTURE,
-        "imperfect" to Tense.PAST,   // nl: simple past = imperfect
+        // Dutch wiktionary uses "imperfect" to mean "onvoltooid" (non-compound aspect); Dutch present
+        // forms carry it too. NlConjugationScheme.preprocessForms strips "imperfect" from non-past
+        // Dutch forms before the global mapping runs, so the global Tense.PAST mapping is safe.
+        "imperfect" to Tense.PAST,
 
         // ── Aspect ───────────────────────────────────────────────────────────
         "imperfective" to Aspect.IMPERFECTIVE,

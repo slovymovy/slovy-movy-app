@@ -62,7 +62,6 @@ abstract class BaseTestImpl {
 
 expect abstract class BaseTest() : BaseTestImpl
 
-
 fun testPlatformDbSupport(): PlatformDbSupport = PlatformDbSupport(TestContext.androidContext())
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
