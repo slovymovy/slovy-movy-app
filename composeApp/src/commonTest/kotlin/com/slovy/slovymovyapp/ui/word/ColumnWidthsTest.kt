@@ -110,6 +110,27 @@ class ColumnWidthsTest {
     }
 
     @Test
+    fun spanDeficit_overlappingSpans_laterSpanSeesEarlierResult() {
+        // Span 0-1 (intrinsic=100) is processed first: col0 and col1 each grow to 50.
+        // Span 1-2 (intrinsic=200) then sees col1=50 (already widened), col2=10 (min).
+        //   deficit=140; round1: col1→120 capped to 100 (overflow=20), col2→80
+        //   round2: remaining=20 → col2→100.
+        // Final: col0=50, col1=100, col2=100.
+        // This test documents the order-dependent behavior so that future refactors
+        // don't silently change it.
+        val result = computeColumnWidths(
+            maxColumns = 3, minColWidthPx = 10, maxColWidthPx = 100,
+            inputs = listOf(
+                col(0, colspan = 2, width = 100),
+                col(1, colspan = 2, width = 200),
+            )
+        )
+        assertEquals(50,  result[0], "col 0 set only by span 0-1")
+        assertEquals(100, result[1], "col 1 widened first by span 0-1, then by span 1-2")
+        assertEquals(100, result[2], "col 2 widened by span 1-2 with redistributed overflow")
+    }
+
+    @Test
     fun spanDeficit_droppedOnlyWhenAllColumnsAtMax() {
         // All columns already at max — deficit cannot be absorbed anywhere.
         val result = computeColumnWidths(

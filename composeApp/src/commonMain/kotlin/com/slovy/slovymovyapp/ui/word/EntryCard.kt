@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -214,6 +215,12 @@ internal fun computeColumnWidths(
     return colWidths
 }
 
+/** Non-observable holder so that writing from the layout lambda doesn't trigger recomposition. */
+private class ColWidthsCache {
+    var stamp: Any? = null
+    var widths: IntArray? = null
+}
+
 @Composable
 private fun SpannedFormsGrid(
     formsView: FormsSchemeView,
@@ -225,6 +232,14 @@ private fun SpannedFormsGrid(
     val rowCount = matrix.size
     if (rowCount == 0) return
     val maxColumns = matrix.maxOfOrNull { it.size } ?: 0
+
+    // Cache column widths so the layout hot-path skips intrinsic measurement on every pass.
+    // A new stamp object is allocated only when inputs that affect column widths change
+    // (different word, different dp bounds, or density/font-scale change). During
+    // AnimatedVisibility expand/collapse the height constraint changes each frame but these
+    // inputs don't, so the layout lambda just reads the cached IntArray.
+    val colWidthsCache = remember { ColWidthsCache() }
+    val colWidthsStamp = remember(formsView, minColWidth, maxColWidth, LocalDensity.current) { Any() }
 
     val anchors = buildList {
         matrix.forEachIndexed { rowIndex, row ->
@@ -250,17 +265,25 @@ private fun SpannedFormsGrid(
             return@Layout layout(0, 0) {}
         }
 
-        // Header cells use maxIntrinsicWidth (label on one line); data cells use
-        // minIntrinsicWidth (wide enough for the longest word, multi-word forms can wrap).
-        val inputs = anchors.mapIndexed { index, placed ->
-            val intrinsic = if (placed.cell is GridCell.Data) {
-                measurables[index].minIntrinsicWidth(Constraints.Infinity)
-            } else {
-                measurables[index].maxIntrinsicWidth(Constraints.Infinity)
+        // Column widths are derived from intrinsic text measurements and cached: recomputed only
+        // when formsView/bounds/density change, not on every layout pass during animation.
+        val colWidths = if (colWidthsCache.stamp === colWidthsStamp) {
+            colWidthsCache.widths!!
+        } else {
+            // Header cells: maxIntrinsicWidth so labels fit on one line.
+            // Data cells: minIntrinsicWidth so individual words never break, but multi-word
+            // forms (e.g. "zou uitgewrongen hebben") can wrap at spaces.
+            val inputs = anchors.mapIndexed { index, placed ->
+                val intrinsic = if (placed.cell is GridCell.Data) {
+                    measurables[index].minIntrinsicWidth(Constraints.Infinity)
+                } else {
+                    measurables[index].maxIntrinsicWidth(Constraints.Infinity)
+                }
+                ColumnWidthInput(placed.anchorColumn, placed.cell.colspan, intrinsic)
             }
-            ColumnWidthInput(placed.anchorColumn, placed.cell.colspan, intrinsic)
+            computeColumnWidths(maxColumns, minColWidth.roundToPx(), maxColWidth.roundToPx(), inputs)
+                .also { colWidthsCache.stamp = colWidthsStamp; colWidthsCache.widths = it }
         }
-        val colWidths = computeColumnWidths(maxColumns, minColWidth.roundToPx(), maxColWidth.roundToPx(), inputs)
 
         val colOffsets = IntArray(maxColumns + 1)
         for (col in 0 until maxColumns) colOffsets[col + 1] = colOffsets[col] + colWidths[col]
