@@ -2,14 +2,42 @@ package com.slovy.slovymovyapp.forms
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
+import com.slovy.slovymovyapp.data.forms.SchemeInputForm
+import com.slovy.slovymovyapp.data.forms.configs.EnConjugationScheme
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 @IgnoreIos
 class EnConjugationSchemeTest : BaseTest() {
+
+    @Test
+    fun pronounScheme_selectedForFullParadigm_nullForPossessiveOnly() {
+        // A head pronoun (e.g. "he") has objective/reflexive forms → scheme is selected.
+        val headForms = listOf(
+            SchemeInputForm(tags = listOf("nominative"), form = "he", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("objective"), form = "him", source = FormSource.NATIVE),
+            SchemeInputForm(tags = listOf("reflexive"), form = "himself", source = FormSource.NATIVE),
+        )
+        assertNotNull(
+            EnConjugationScheme.schemeFor(DictionaryPos.PRONOUN, headForms),
+            "Head pronoun with objective/reflexive forms must get a pronoun scheme"
+        )
+
+        // A possessive-only lemma (e.g. "his") has no objective/oblique/reflexive forms → no scheme.
+        val possessiveForms = listOf(
+            SchemeInputForm(tags = listOf("possessive", "singular"), form = "his", source = FormSource.NATIVE),
+        )
+        assertNull(
+            EnConjugationScheme.schemeFor(DictionaryPos.PRONOUN, possessiveForms),
+            "Possessive-only lemma must not get a pronoun scheme"
+        )
+    }
 
     @Test
     fun englishSnapshots_matchExpectedTables() = runBlocking {
