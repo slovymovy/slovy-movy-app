@@ -112,7 +112,7 @@ object PlConjugationScheme : ConjugationSchemeProvider {
         DictionaryPos.VERB,
         tagResolver = PolishSchemeTagResolver
     ) {
-        view("full", "Conjugation") {
+        view("essentials", "Essentials") {
             row {
                 rowHeader("infinitive")
                 data(VerbForm.INFINITIVE, colspan = 5)
@@ -120,12 +120,12 @@ object PlConjugationScheme : ConjugationSchemeProvider {
 
             // ── Present tense (not gendered) ─────────────────────────────────
             row {
-                rowHeader("present tense", colspan = 6)
-            }
-            row {
                 empty()
                 colHeader("singular", colspan = 3)
                 colHeader("plural", colspan = 2)
+            }
+            row {
+                rowHeader("present tense", colspan = 6)
             }
             row {
                 rowHeader("1st person")
@@ -147,7 +147,7 @@ object PlConjugationScheme : ConjugationSchemeProvider {
                 data(Tense.PRESENT, Mood.IMPERSONAL, colspan = 5)
             }
 
-            // ── Shared gendered column headers ────────────────────────────────
+            // ── Gendered column headers (shared by past and future) ───────────
             row {
                 empty()
                 colHeader("masc. sg")
@@ -219,6 +219,43 @@ object PlConjugationScheme : ConjugationSchemeProvider {
                 data(Tense.FUTURE, Person.THIRD, Num.PL, Gender.NONVIRILE)
             }
 
+            // ── Imperative ───────────────────────────────────────────────────
+            row {
+                empty()
+                colHeader("singular", colspan = 3)
+                colHeader("plural", colspan = 2)
+            }
+            row {
+                rowHeader("imperative", colspan = 6)
+            }
+            row {
+                rowHeader("1st person")
+                empty(colspan = 3)
+                data(Mood.IMPERATIVE, Person.FIRST, Num.PL, colspan = 2)
+            }
+            row {
+                rowHeader("2nd person")
+                data(Mood.IMPERATIVE, Person.SECOND, Num.SG, colspan = 3)
+                data(Mood.IMPERATIVE, Person.SECOND, Num.PL, colspan = 2)
+            }
+            row {
+                rowHeader("3rd person")
+                data(Mood.IMPERATIVE, Person.THIRD, Num.SG, colspan = 3)
+                data(Mood.IMPERATIVE, Person.THIRD, Num.PL, colspan = 2)
+            }
+        }
+
+        view("advanced", "Advanced") {
+            // ── Gendered column headers (shared by conditional and participles) ─
+            row {
+                empty()
+                colHeader("masc. sg")
+                colHeader("fem. sg")
+                colHeader("neut. sg")
+                colHeader("virile pl")
+                colHeader("non-virile pl")
+            }
+
             // ── Conditional ──────────────────────────────────────────────────
             row {
                 rowHeader("conditional", colspan = 6)
@@ -250,31 +287,6 @@ object PlConjugationScheme : ConjugationSchemeProvider {
             row {
                 rowHeader("impersonal")
                 data(Mood.CONDITIONAL, colspan = 5)
-            }
-
-            // ── Imperative ───────────────────────────────────────────────────
-            row {
-                rowHeader("imperative", colspan = 6)
-            }
-            row {
-                empty()
-                colHeader("singular", colspan = 3)
-                colHeader("plural", colspan = 2)
-            }
-            row {
-                rowHeader("1st person")
-                empty(colspan = 3)
-                data(Mood.IMPERATIVE, Person.FIRST, Num.PL, colspan = 2)
-            }
-            row {
-                rowHeader("2nd person")
-                data(Mood.IMPERATIVE, Person.SECOND, Num.SG, colspan = 3)
-                data(Mood.IMPERATIVE, Person.SECOND, Num.PL, colspan = 2)
-            }
-            row {
-                rowHeader("3rd person")
-                data(Mood.IMPERATIVE, Person.THIRD, Num.SG, colspan = 3)
-                data(Mood.IMPERATIVE, Person.THIRD, Num.PL, colspan = 2)
             }
 
             // ── Non-finite forms ─────────────────────────────────────────────
@@ -376,8 +388,88 @@ object PlConjugationScheme : ConjugationSchemeProvider {
         }
     }
 
+    /**
+     * Polish personal pronoun declension.
+     *
+     * Seven cases × two numbers, matching standard pronoun paradigms
+     * (e.g. ja, ty, on, ona, my, wy). Third-person forms (on/ona/ono/one)
+     * may resolve partially until source data is cleaned up.
+     */
+    val PL_PRONOUN: ConjugationScheme = conjugationScheme(
+        "pl_pronoun",
+        Language.POLISH,
+        DictionaryPos.PRONOUN,
+        tagResolver = PolishSchemeTagResolver
+    ) {
+        view("full", "Declension") {
+            row {
+                empty()
+                colHeader("singular")
+                colHeader("plural")
+            }
+            row {
+                rowHeader("nominative")
+                data(Case.NOMINATIVE, Num.SG)
+                data(Case.NOMINATIVE, Num.PL)
+            }
+            row {
+                rowHeader("genitive")
+                data(Case.GENITIVE, Num.SG)
+                data(Case.GENITIVE, Num.PL)
+            }
+            row {
+                rowHeader("dative")
+                data(Case.DATIVE, Num.SG)
+                data(Case.DATIVE, Num.PL)
+            }
+            row {
+                rowHeader("accusative")
+                data(Case.ACCUSATIVE, Num.SG)
+                data(Case.ACCUSATIVE, Num.PL)
+            }
+            row {
+                rowHeader("instrumental")
+                data(Case.INSTRUMENTAL, Num.SG)
+                data(Case.INSTRUMENTAL, Num.PL)
+            }
+            row {
+                rowHeader("locative")
+                data(Case.LOCATIVE, Num.SG)
+                data(Case.LOCATIVE, Num.PL)
+            }
+            row {
+                rowHeader("vocative")
+                data(Case.VOCATIVE, Num.SG)
+                data(Case.VOCATIVE, Num.PL)
+            }
+        }
+    }
+
+    /**
+     * Polish adverb paradigm.
+     *
+     * Gradable adverbs form comparative and superlative degrees.
+     */
+    val PL_ADVERB: ConjugationScheme = conjugationScheme(
+        "pl_adverb",
+        Language.POLISH,
+        DictionaryPos.ADVERB,
+        tagResolver = PolishSchemeTagResolver
+    ) {
+        view("short", "Degrees of comparison") {
+            row {
+                rowHeader("comparative")
+                data(Degree.COMPARATIVE)
+            }
+            row {
+                rowHeader("superlative")
+                data(Degree.SUPERLATIVE)
+            }
+        }
+    }
+
     /** All Polish schemes for easy lookup. */
-    val ALL: List<ConjugationScheme> = listOf(PL_NOUN, PL_VERB, PL_ADJECTIVE)
+    val ALL: List<ConjugationScheme> = listOf(PL_NOUN, PL_VERB, PL_ADJECTIVE, PL_ADVERB, PL_PRONOUN)
 
     override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? =
         ALL.firstOrNull { it.pos == pos }
