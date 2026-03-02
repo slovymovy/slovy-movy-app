@@ -52,7 +52,7 @@ jobs:
 
       - name: Upload test results and reports (Linux host)
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports-linux-host
           if-no-files-found: ignore
@@ -92,7 +92,7 @@ jobs:
 
       - name: Upload test results and reports (desktop JVM)
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports-desktop-jvm
           if-no-files-found: ignore
@@ -130,7 +130,7 @@ jobs:
 
       - name: Upload test results and reports (server)
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports-server
           if-no-files-found: ignore
@@ -235,7 +235,7 @@ jobs:
 
       - name: Upload test results and reports (Android connected)
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports-android-connected-api-${{ matrix.api-level }}
           if-no-files-found: ignore
@@ -276,7 +276,7 @@ jobs:
 
       - name: Upload test results and reports (macOS arm64)
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports-macos-arm64
           if-no-files-found: ignore
