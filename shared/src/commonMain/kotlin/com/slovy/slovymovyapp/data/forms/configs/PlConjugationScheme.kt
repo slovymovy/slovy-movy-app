@@ -471,6 +471,18 @@ object PlConjugationScheme : ConjugationSchemeProvider {
     /** All Polish schemes for easy lookup. */
     val ALL: List<ConjugationScheme> = listOf(PL_NOUN, PL_VERB, PL_ADJECTIVE, PL_ADVERB, PL_PRONOUN)
 
-    override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? =
-        ALL.firstOrNull { it.pos == pos }
+    override fun schemeFor(pos: DictionaryPos, forms: List<SchemeInputForm>): ConjugationScheme? {
+        if (pos == DictionaryPos.PRONOUN) {
+            // Only apply the case × number paradigm for pronouns whose forms are not
+            // gender-differentiated. Pronouns like "ten" carry masculine/feminine/neuter/
+            // virile/nonvirile tags and would produce ambiguous cell resolution in a flat
+            // singular/plural table (multiple gendered candidates collapse to alphabetical
+            // tie-break). Returning null is preferable to a misleading partial table.
+            val hasGenderedForms = forms.any { form ->
+                form.tags.any { it in setOf("masculine", "feminine", "neuter", "virile", "nonvirile") }
+            }
+            return if (!hasGenderedForms) PL_PRONOUN else null
+        }
+        return ALL.firstOrNull { it.pos == pos }
+    }
 }
