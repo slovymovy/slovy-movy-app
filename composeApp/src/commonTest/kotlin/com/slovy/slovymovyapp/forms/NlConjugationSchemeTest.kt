@@ -49,6 +49,31 @@ class NlConjugationSchemeTest : BaseTest() {
     }
 
     @Test
+    fun preprocessForms_orphanClosingParen_droppedBalancedRetained() {
+        val resolver = NlConjugationScheme.NL_ADJECTIVE.tagResolver
+
+        // "attributief)" is the orphaned second half of a split "(alleen attributief)"
+        // DB entry. It has no opening '(' so it must be dropped entirely.
+        val orphan = SchemeInputForm(
+            tags = listOf("positive", "uninflected"),
+            form = "attributief)",
+            source = FormSource.NATIVE,
+        )
+        val orphanResult = resolver.preprocessForms(listOf(orphan), null)
+        assertTrue(orphanResult.isEmpty(), "Orphaned closing-paren form must be filtered out")
+
+        // "iets (formeel)" has balanced parentheses and must survive.
+        val balanced = SchemeInputForm(
+            tags = listOf("positive", "uninflected"),
+            form = "iets (formeel)",
+            source = FormSource.NATIVE,
+        )
+        val balancedResult = resolver.preprocessForms(listOf(balanced), null)
+        assertEquals(1, balancedResult.size, "Balanced parenthetical form must be retained")
+        assertEquals("iets (formeel)", balancedResult.first().form)
+    }
+
+    @Test
     fun dutchSnapshots_matchExpectedTables() = runBlocking {
         val (mgr, repo) = createSnapshotRepository()
         try {
