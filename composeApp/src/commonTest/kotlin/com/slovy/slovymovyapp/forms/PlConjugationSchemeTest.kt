@@ -32,6 +32,21 @@ class PlConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.POLISH, "ostatni", DictionaryPos.ADJECTIVE),
                 "Resolved PL adjective views for 'ostatni' changed"
             )
+            assertEquals(
+                expectedPlAdverbDobrze,
+                resolveFormsSnapshot(repo, Language.POLISH, "dobrze", DictionaryPos.ADVERB),
+                "Resolved PL adverb views for 'dobrze' changed"
+            )
+            assertEquals(
+                expectedPlPronounJa,
+                resolveFormsSnapshot(repo, Language.POLISH, "ja", DictionaryPos.PRONOUN),
+                "Resolved PL pronoun views for 'ja' changed"
+            )
+            assertEquals(
+                expectedPlPronounTa,
+                resolveFormsSnapshot(repo, Language.POLISH, "ta", DictionaryPos.PRONOUN),
+                "Resolved PL pronoun views for 'ta' changed"
+            )
         } finally {
             mgr.deleteDictionary(Language.POLISH)
         }
@@ -51,38 +66,76 @@ class PlConjugationSchemeTest : BaseTest() {
     )
 
     private val expectedPlVerbPodawac = mapOf(
-        "pl_verb:full" to listOf(
-            listOf(null, "podawać"),
-            listOf(null),
-            listOf(null, null, null),
-            listOf(null, "podaję", "podajemy"),
-            listOf(null, "podajesz", "podajecie"),
-            listOf(null, "podaje", "podają"),
-            listOf(null, "podaje się"),
-            listOf(null, null, null, null, null, null),
-            listOf(null),
-            listOf(null, "podawałem", "podawałam", null, "podawaliśmy", "podawałyśmy"),
-            listOf(null, "podawałeś", "podawałaś", null, "podawaliście", "podawałyście"),
-            listOf(null, "podawał", "podawała", "podawało", "podawali", "podawały"),
-            listOf(null, "podawano"),
-            listOf(null),
-            listOf(null, "będę podawać", "będę podawać", null, "będziemy podawali", "będziemy podawać"),
-            listOf(null, "będziesz podawać", "będziesz podawać", null, "będziecie podawali", "będziecie podawać"),
-            listOf(null, "będzie podawać", "będzie podawać", "będzie podawać", "będą podawali", "będą podawać"),
-            listOf(null),
-            listOf(null, "byłbym podawał", "byłabym podawała", null, "bylibyśmy podawali", "byłybyśmy podawały"),
-            listOf(null, "byłbyś podawał", "byłabyś podawała", null, "bylibyście podawali", "byłybyście podawały"),
-            listOf(null, "by podawał", "by podawała", "by podawało", "by podawali", "by podawały"),
-            listOf(null, "podawano by"),
-            listOf(null),
-            listOf(null, null, null),
-            listOf(null, null, "podawajmy"),
-            listOf(null, "podawaj", "podawajcie"),
-            listOf(null, "niech podaje", "niech podają"),
-            listOf(null, "podający", "podająca", "podające", "podający", "podające"),
-            listOf(null, "podawany", "podawana", "podawane", "podawani", "podawane"),
-            listOf(null, "nie podając"),
-            listOf(null, "niepodawanie")
+        "pl_verb:essentials" to listOf(
+            listOf(null, "podawać"),                                                                          // infinitive
+            listOf(null, null, null),                                                                         // singular / plural col headers
+            listOf(null),                                                                                     // "present tense" header
+            listOf(null, "podaję", "podajemy"),                                                               // 1st person present
+            listOf(null, "podajesz", "podajecie"),                                                            // 2nd person present
+            listOf(null, "podaje", "podają"),                                                                 // 3rd person present
+            listOf(null, "podaje się"),                                                                       // impersonal present
+            listOf(null, null, null, null, null, null),                                                       // gendered col headers
+            listOf(null),                                                                                     // "past tense" header
+            listOf(null, "podawałem", "podawałam", null, "podawaliśmy", "podawałyśmy"),                      // 1st person past
+            listOf(null, "podawałeś", "podawałaś", null, "podawaliście", "podawałyście"),                    // 2nd person past
+            listOf(null, "podawał", "podawała", "podawało", "podawali", "podawały"),                         // 3rd person past
+            listOf(null, "podawano"),                                                                         // impersonal past
+            listOf(null),                                                                                     // "future tense" header
+            listOf(null, "będę podawać", "będę podawać", null, "będziemy podawali", "będziemy podawać"),     // 1st person future
+            listOf(null, "będziesz podawać", "będziesz podawać", null, "będziecie podawali", "będziecie podawać"), // 2nd person future
+            listOf(null, "będzie podawać", "będzie podawać", "będzie podawać", "będą podawali", "będą podawać"),   // 3rd person future
+            listOf(null, null, null),                                                                         // singular / plural col headers
+            listOf(null),                                                                                     // "imperative" header
+            listOf(null, null, "podawajmy"),                                                                  // 1st person imperative
+            listOf(null, "podawaj", "podawajcie"),                                                            // 2nd person imperative
+            listOf(null, "niech podaje", "niech podają")                                                      // 3rd person imperative
+        ),
+        "pl_verb:advanced" to listOf(
+            listOf(null, null, null, null, null, null),                                                       // gendered col headers
+            listOf(null),                                                                                     // "conditional" header
+            listOf(null, "byłbym podawał", "byłabym podawała", null, "bylibyśmy podawali", "byłybyśmy podawały"),   // 1st person conditional
+            listOf(null, "byłbyś podawał", "byłabyś podawała", null, "bylibyście podawali", "byłybyście podawały"), // 2nd person conditional
+            listOf(null, "by podawał", "by podawała", "by podawało", "by podawali", "by podawały"),                 // 3rd person conditional
+            listOf(null, "podawano by"),                                                                      // impersonal conditional
+            listOf(null, "podający", "podająca", "podające", "podający", "podające"),                        // active adjectival participle
+            listOf(null, "podawany", "podawana", "podawane", "podawani", "podawane"),                        // passive adjectival participle
+            listOf(null, "nie podając"),                                                                      // contemporary adverbial participle
+            listOf(null, "niepodawanie")                                                                      // verbal noun
+        )
+    )
+
+    // "ta" has no vocative forms — both vocative cells resolve to null,
+    // guarding against regressions in absent-cell handling.
+    private val expectedPlPronounTa = mapOf(
+        "pl_pronoun:full" to listOf(
+            listOf(null, null, null),        // col headers
+            listOf(null, "ta", "te"),        // nominative
+            listOf(null, "tej", "tych"),     // genitive
+            listOf(null, "tej", "tym"),      // dative
+            listOf(null, "tę", "te"),        // accusative
+            listOf(null, "tą", "tymi"),      // instrumental
+            listOf(null, "tej", "tych"),     // locative
+            listOf(null, null, null)         // vocative — legitimately absent
+        )
+    )
+
+    private val expectedPlPronounJa = mapOf(
+        "pl_pronoun:full" to listOf(
+            listOf(null, null, null),          // col headers
+            listOf(null, "ja", "my"),          // nominative
+            listOf(null, "mię", "nas"),        // genitive
+            listOf(null, "akcentowane mnie\nnieakcentowane mi", "nam"), // dative (data artifact; clean up later)
+            listOf(null, "mię", "nas"),        // accusative
+            listOf(null, "mną", "nami"),       // instrumental
+            listOf(null, "mnie", "nas"),       // locative
+            listOf(null, "—", null)            // vocative
+        )
+    )
+
+    private val expectedPlAdverbDobrze = mapOf(
+        "pl_adverb:short" to listOf(
+            listOf(null, "lepiej"),    // comparative
+            listOf(null, "najlepiej") // superlative
         )
     )
 
