@@ -2,11 +2,15 @@ package com.slovy.slovymovyapp.forms
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
+import com.slovy.slovymovyapp.data.forms.SchemeInputForm
+import com.slovy.slovymovyapp.data.forms.configs.RuConjugationScheme
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 @IgnoreIos
 class RuConjugationSchemeTest : BaseTest() {
@@ -37,6 +41,18 @@ class RuConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.RUSSIAN, "красивый", DictionaryPos.ADJECTIVE),
                 "Resolved RU adjective views for 'красивый' changed"
             )
+            assertEquals(
+                expectedRuAdverbBystro,
+                resolveFormsSnapshot(repo, Language.RUSSIAN, "быстро", DictionaryPos.ADVERB),
+                "Resolved RU adverb views for 'быстро' changed"
+            )
+            assertNull(
+                RuConjugationScheme.schemeFor(
+                    DictionaryPos.ADVERB,
+                    listOf(SchemeInputForm(listOf("canonical"), "абсолю́тно", FormSource.NATIVE))
+                ),
+                "Non-gradable RU adverb with no comparative tag should produce no scheme"
+            )
         } finally {
             mgr.deleteDictionary(Language.RUSSIAN)
         }
@@ -56,60 +72,72 @@ class RuConjugationSchemeTest : BaseTest() {
 
     private val expectedRuVerbCitat = mapOf(
         "ru_verb_imperfective:full" to listOf(
-            listOf(null, "чита́ть"),
-            listOf(null, null, null),
-            listOf(null, "чита́ющий", "чита́вший"),
-            listOf(null, "чита́емый", "чи́танный"),
-            listOf(null, "чита́я", "чита́в"),
-            listOf(null, null, null),
-            listOf(null, "чита́ю", "бу́ду чита́ть"),
-            listOf(null, "чита́ешь", "бу́дешь чита́ть"),
-            listOf(null, "чита́ет", "бу́дет чита́ть"),
-            listOf(null, "чита́ем", "бу́дем чита́ть"),
-            listOf(null, "чита́ете", "бу́дете чита́ть"),
-            listOf(null, "чита́ют", "бу́дут чита́ть"),
-            listOf(null, null, null),
-            listOf(null, "чита́й", "чита́йте"),
-            listOf(null, null, null),
-            listOf(null, "чита́л", "чита́ли"),
-            listOf(null, "чита́ла"),
-            listOf(null, "чита́ло")
+            listOf(null, "чита́ть"),                              // infinitive
+            listOf(null, null, null),                              // col headers: singular | plural
+            listOf(null),                                          // present tense
+            listOf(null, "чита́ю", "чита́ем"),                    // 1st person
+            listOf(null, "чита́ешь", "чита́ете"),                  // 2nd person
+            listOf(null, "чита́ет", "чита́ют"),                    // 3rd person
+            listOf(null),                                          // past tense
+            listOf(null, "чита́л", "чита́ли"),                    // masculine (plural rowspan)
+            listOf(null, "чита́ла"),                               // feminine
+            listOf(null, "чита́ло"),                               // neuter
+            listOf(null),                                          // future tense
+            listOf(null, "бу́ду чита́ть", "бу́дем чита́ть"),      // 1st person
+            listOf(null, "бу́дешь чита́ть", "бу́дете чита́ть"),   // 2nd person
+            listOf(null, "бу́дет чита́ть", "бу́дут чита́ть"),     // 3rd person
+            listOf(null),                                          // imperative
+            listOf(null, "чита́й", "чита́йте"),                   // 2nd person
+            listOf(null, null, null),                              // col headers: present | past
+            listOf(null, "чита́ющий", "чита́вший"),               // active participle
+            listOf(null, "чита́емый", "чи́танный"),               // passive participle
+            listOf(null, "чита́я", "чита́в")                      // adverbial participle
         ),
     )
 
     private val expectedRuVerbSkazat = mapOf(
         "ru_verb_perfective:full" to listOf(
-            listOf(null, "сказа́ть"),
-            listOf(null, null, null),
-            listOf(null, "сказа́вший", "ска́занный"),
-            listOf(null, "сказа́в"),
-            listOf(null),
-            listOf(null, "скажу́"),
-            listOf(null, "ска́жешь"),
-            listOf(null, "ска́жет"),
-            listOf(null, "ска́жем"),
-            listOf(null, "ска́жете"),
-            listOf(null, "ска́жут"),
-            listOf(null, null, null),
-            listOf(null, "скажи́", "скажи́те"),
-            listOf(null, null, null),
-            listOf(null, "сказа́л", "сказа́ли"),
-            listOf(null, "сказа́ла"),
-            listOf(null, "сказа́ло")
+            listOf(null, "сказа́ть"),                             // infinitive
+            listOf(null, null, null),                              // col headers: singular | plural
+            listOf(null),                                          // future tense
+            listOf(null, "скажу́", "ска́жем"),                    // 1st person
+            listOf(null, "ска́жешь", "ска́жете"),                 // 2nd person
+            listOf(null, "ска́жет", "ска́жут"),                   // 3rd person
+            listOf(null),                                          // past tense
+            listOf(null, "сказа́л", "сказа́ли"),                  // masculine (plural rowspan)
+            listOf(null, "сказа́ла"),                              // feminine
+            listOf(null, "сказа́ло"),                              // neuter
+            listOf(null),                                          // imperative
+            listOf(null, "скажи́", "скажи́те"),                   // 2nd person
+            listOf(null, null, null),                              // col headers: active | passive
+            listOf(null, "сказа́вший", "ска́занный"),             // past participle
+            listOf(null, "сказа́в")                               // adverbial participle (colspan=2)
+        )
+    )
+
+    private val expectedRuAdverbBystro = mapOf(
+        "ru_adverb:short" to listOf(
+            listOf(null, "(по)быстре́е") // comparative
         )
     )
 
     private val expectedRuAdjectiveKrasivyj = mapOf(
+        "ru_adjective:essentials" to listOf(
+            listOf(null, "краси́вый"),  // masculine
+            listOf(null, "краси́вая"),  // feminine
+            listOf(null, "краси́вое"),  // neuter
+            listOf(null, "краси́вые")   // plural
+        ),
         "ru_adjective:full" to listOf(
-            listOf(null, null, null, null, null),
-            listOf(null, "краси́вый", "краси́вое", "краси́вая", "краси́вые"),
-            listOf(null, "краси́вого", "краси́вого", "краси́вой", "краси́вых"),
-            listOf(null, "краси́вому", "краси́вой", "краси́вым"),
-            listOf(null, null, "краси́вого", "краси́вое", "краси́вую", "краси́вых"),
-            listOf(null, "краси́вый", "краси́вые"),
-            listOf(null, "краси́вым", "краси́вым", "краси́вой", "краси́выми"),
-            listOf(null, "краси́вом", "краси́вой", "краси́вых"),
-            listOf(null, "краси́в", "краси́во", "краси́ва", "краси́вы")
+            listOf(null, null, null, null, null),                                    // col headers: masculine | feminine | neuter | plural
+            listOf(null, "краси́вый", "краси́вая", "краси́вое", "краси́вые"),        // nominative
+            listOf(null, "краси́вого", "краси́вой", "краси́вого", "краси́вых"),      // genitive (neuter rowspan=2)
+            listOf(null, "краси́вому", "краси́вой", "краси́вым"),                    // dative (neuter covered)
+            listOf(null, null, "краси́вого", "краси́вую", "краси́вое", "краси́вых"), // accusative animate (fem+neuter rowspan=2)
+            listOf(null, "краси́вый", "краси́вые"),                                  // accusative inanimate (fem+neuter covered)
+            listOf(null, "краси́вым", "краси́вой", "краси́вым", "краси́выми"),       // instrumental (neuter rowspan=2)
+            listOf(null, "краси́вом", "краси́вой", "краси́вых"),                     // prepositional (neuter covered)
+            listOf(null, "краси́в", "краси́ва", "краси́во", "краси́вы")              // short form
         )
     )
 }

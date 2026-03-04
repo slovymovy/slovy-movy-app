@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -148,15 +149,102 @@ private fun FormsGridCell(cell: GridCell, value: String?) {
     }
 }
 
+internal data class ColumnWidthInput(
+    val anchorColumn: Int,
+    val colspan: Int,
+    val intrinsicWidthPx: Int,
+)
+
+/**
+ * Computes per-column pixel widths from measured cell intrinsic widths.
+ *
+ * Pass 1 – single-column cells: each column is at least as wide as its widest cell.
+ * Pass 2 – multi-column spans: spans are processed in canonical order (shorter before
+ *   longer, ties broken left-to-right by anchorColumn) so results are independent of
+ *   declaration order in the grid. Within each span, deficit is distributed evenly
+ *   across columns with room; when a column hits [maxColWidthPx] its overflow is
+ *   redistributed to remaining uncapped columns rather than being dropped.
+ */
+internal fun computeColumnWidths(
+    maxColumns: Int,
+    minColWidthPx: Int,
+    maxColWidthPx: Int,
+    inputs: List<ColumnWidthInput>,
+): IntArray {
+    val colWidths = IntArray(maxColumns) { minColWidthPx }
+
+    // Pass 1: single-column cells
+    for (input in inputs) {
+        if (input.colspan == 1) {
+            colWidths[input.anchorColumn] = minOf(
+                maxColWidthPx,
+                maxOf(colWidths[input.anchorColumn], input.intrinsicWidthPx)
+            )
+        }
+    }
+
+    // Pass 2: multi-column spans — canonical order removes declaration-order dependence.
+    // Shorter spans run before longer ones; equal-length spans run left-to-right.
+    val spans = inputs.filter { it.colspan > 1 }
+        .sortedWith(compareBy({ it.colspan }, { it.anchorColumn }))
+    for (input in spans) {
+            val spanCols = input.anchorColumn until input.anchorColumn + input.colspan
+            var remaining = input.intrinsicWidthPx - spanCols.sumOf { colWidths[it] }
+            if (remaining > 0) {
+                val growable = spanCols.toMutableList()
+                while (remaining > 0 && growable.isNotEmpty()) {
+                    val share = remaining / growable.size
+                    var leftover = remaining % growable.size
+                    var overflow = 0
+                    val iter = growable.iterator()
+                    while (iter.hasNext()) {
+                        val col = iter.next()
+                        val add = share + if (leftover > 0) { leftover--; 1 } else 0
+                        val proposed = colWidths[col] + add
+                        if (proposed >= maxColWidthPx) {
+                            overflow += proposed - maxColWidthPx
+                            colWidths[col] = maxColWidthPx
+                            iter.remove()
+                        } else {
+                            colWidths[col] = proposed
+                        }
+                    }
+                    remaining = overflow
+                }
+            }
+    }
+
+    return colWidths
+}
+
+/** Non-observable holder so that writing from the layout lambda doesn't trigger recomposition. */
+private class ColWidthsCache {
+    var stamp: Any? = null
+    var widths: IntArray? = null
+}
+
 @Composable
 private fun SpannedFormsGrid(
     formsView: FormsSchemeView,
     matrix: List<List<PlacedGridCell?>>,
-    cellWidth: androidx.compose.ui.unit.Dp,
+    minColWidth: androidx.compose.ui.unit.Dp,
+    maxColWidth: androidx.compose.ui.unit.Dp,
     minCellHeight: androidx.compose.ui.unit.Dp,
 ) {
     val rowCount = matrix.size
     if (rowCount == 0) return
+    val maxColumns = matrix.maxOfOrNull { it.size } ?: 0
+
+    // Cache column widths so the layout hot-path skips intrinsic measurement on every pass.
+    // A new stamp object is allocated only when inputs that affect column widths change.
+    // LocalDensity covers system font-scale changes; typography styles cover any runtime
+    // theme or ProvideTextStyle changes that alter header/data text metrics.
+    val colWidthsCache = remember { ColWidthsCache() }
+    val headerStyle = MaterialTheme.typography.labelSmall
+    val dataStyle = MaterialTheme.typography.bodySmall
+    val colWidthsStamp = remember(
+        formsView, minColWidth, maxColWidth, LocalDensity.current, headerStyle, dataStyle
+    ) { Any() }
 
     val anchors = buildList {
         matrix.forEachIndexed { rowIndex, row ->
@@ -182,15 +270,37 @@ private fun SpannedFormsGrid(
             return@Layout layout(0, 0) {}
         }
 
-        val maxColumns = matrix.maxOfOrNull { it.size } ?: 0
-        val colWidthPx = cellWidth.roundToPx()
+        // Column widths are derived from intrinsic text measurements and cached: recomputed only
+        // when formsView/bounds/density change, not on every layout pass during animation.
+        val colWidths = if (colWidthsCache.stamp === colWidthsStamp) {
+            colWidthsCache.widths!!
+        } else {
+            // Header cells: maxIntrinsicWidth so labels fit on one line.
+            // Data cells: minIntrinsicWidth so individual words never break, but multi-word
+            // forms (e.g. "zou uitgewrongen hebben") can wrap at spaces.
+            val inputs = anchors.mapIndexed { index, placed ->
+                val intrinsic = if (placed.cell is GridCell.Data) {
+                    measurables[index].minIntrinsicWidth(Constraints.Infinity)
+                } else {
+                    measurables[index].maxIntrinsicWidth(Constraints.Infinity)
+                }
+                ColumnWidthInput(placed.anchorColumn, placed.cell.colspan, intrinsic)
+            }
+            computeColumnWidths(maxColumns, minColWidth.roundToPx(), maxColWidth.roundToPx(), inputs)
+                .also { colWidthsCache.stamp = colWidthsStamp; colWidthsCache.widths = it }
+        }
+
+        val colOffsets = IntArray(maxColumns + 1)
+        for (col in 0 until maxColumns) colOffsets[col + 1] = colOffsets[col] + colWidths[col]
+
         val minRowHeightPx = minCellHeight.roundToPx()
         val rowHeights = IntArray(rowCount) { minRowHeightPx }
         val preferredHeights = IntArray(measurables.size)
 
         measurables.forEachIndexed { index, measurable ->
             val placed = anchors[index]
-            val widthPx = colWidthPx * placed.cell.colspan
+            val widthPx = (placed.anchorColumn until placed.anchorColumn + placed.cell.colspan)
+                .sumOf { colWidths[it] }
             val preferredHeight = measurable.maxIntrinsicHeight(widthPx)
             preferredHeights[index] = max(minRowHeightPx, preferredHeight)
         }
@@ -229,21 +339,17 @@ private fun SpannedFormsGrid(
 
         val placeables = measurables.mapIndexed { index, measurable ->
             val placed = anchors[index]
-            val widthPx = colWidthPx * placed.cell.colspan
+            val widthPx = (placed.anchorColumn until placed.anchorColumn + placed.cell.colspan)
+                .sumOf { colWidths[it] }
             val endRowExclusive = min(rowCount, placed.anchorRow + placed.cell.rowspan)
             val heightPx = rowOffsets[endRowExclusive] - rowOffsets[placed.anchorRow]
             measurable.measure(Constraints.fixed(widthPx, heightPx))
         }
 
-        val tableWidthPx = colWidthPx * maxColumns
-        val tableHeightPx = rowOffsets[rowCount]
-
-        layout(tableWidthPx, tableHeightPx) {
+        layout(colOffsets[maxColumns], rowOffsets[rowCount]) {
             placeables.forEachIndexed { index, placeable ->
                 val placed = anchors[index]
-                val x = placed.anchorColumn * colWidthPx
-                val y = rowOffsets[placed.anchorRow]
-                placeable.placeRelative(x, y)
+                placeable.placeRelative(colOffsets[placed.anchorColumn], rowOffsets[placed.anchorRow])
             }
         }
     }
@@ -279,12 +385,8 @@ private fun FormsModeSelector(
 @Composable
 private fun FormsGrid(formsView: FormsSchemeView) {
     val matrix = remember(formsView) { buildPlacedGrid(formsView) }
-    val maxColumns = matrix.maxOfOrNull { it.size } ?: 0
-    if (maxColumns == 0) return
+    if (matrix.maxOfOrNull { it.size } == 0) return
 
-    val cellWidth = 88.dp
-    val minCellHeight = 28.dp
-    val tableWidth = cellWidth * maxColumns
     val tableShape = RoundedCornerShape(10.dp)
     val dividerColor = MaterialTheme.colorScheme.outlineVariant
     val horizontalScrollState = rememberScrollState()
@@ -296,15 +398,15 @@ private fun FormsGrid(formsView: FormsSchemeView) {
     ) {
         Box(
             modifier = Modifier
-                .requiredWidth(tableWidth)
                 .clip(tableShape)
                 .border(1.dp, dividerColor, tableShape)
         ) {
             SpannedFormsGrid(
                 formsView = formsView,
                 matrix = matrix,
-                cellWidth = cellWidth,
-                minCellHeight = minCellHeight,
+                minColWidth = 16.dp,  // just the horizontal padding — content drives width
+                maxColWidth = 240.dp, // guard against pathological single-line text
+                minCellHeight = 28.dp,
             )
         }
     }
