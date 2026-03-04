@@ -257,7 +257,9 @@ object TagMapping {
         "noun" to PossessiveType.INDEPENDENT,           // theirs = "noun possessive"
 
         // Unmapped (documented here for reference):
-        // "perfect"       — nl compound past (hebben/zijn + past participle); no enum yet
+        // "perfect"       — nl compound past (hebben/zijn + past participle); mapped to "perfective"
+        //                   in NlConjugationScheme.preprocessForms so Aspect.PERFECTIVE can be used
+        //                   to select compound-tense cells; intentionally absent from this global map.
         // "inflected" / "uninflected" — nl adjective; no enum yet
         // "pluperfect", "anterior", "potential" — pl rare tenses; no enum yet
         // "adjectival"    — pl participial; overlaps with VerbForm.PARTICIPLE contextually

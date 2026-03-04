@@ -95,6 +95,14 @@ class NlConjugationSchemeTest : BaseTest() {
                 resolveFormsSnapshot(repo, Language.DUTCH, "kwartier", DictionaryPos.NOUN),
                 "Resolved NL noun views for 'kwartier' changed"
             )
+            // Pure zijn-verb (only zijn-auxiliary compound perfect forms in Wiktionary).
+            // The dutchAuxiliaryPriority tiebreaker must prefer "bent" (priority 1) over
+            // "is" (priority 2) for the 2nd-person present-perfect cell.
+            assertEquals(
+                expectedNlVerbOnderstromen,
+                resolveFormsSnapshot(repo, Language.DUTCH, "onderstromen", DictionaryPos.VERB),
+                "Resolved NL verb views for 'onderstromen' changed"
+            )
             // Archaic gij collision (non-separable): wrongt uit finite-token "wrongt" ends in -t,
             // must lose to wrong uit (modern).
             assertEquals(
@@ -130,13 +138,12 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, null, null, null, null),
             listOf(null, "zeg", "zegt", "zegt", "zeggen"),
             listOf(null, "zegde\nzei", "zegde\nzei", "zegde\nzei", "zegden\nzeiden"),
-            listOf(null, "zou zeggen", "zou zeggen", "zou zeggen", "zouden zeggen"),
             listOf(null, "zal zeggen", "zal zeggen", "zal zeggen", "zullen zeggen"),
+            listOf(null, "zou zeggen", "zou zeggen", "zou zeggen", "zouden zeggen"),
             listOf(null, "zeg", null),
-            listOf(null, null, null, null, null),
-            listOf(null, "ben gezegd", "bent gezegd", "hebben gezegd", null),
-            listOf(null, "zou gezegd hebben", "zou gezegd hebben", "zou gezegd hebben", null),
-            listOf(null, "zal gezegd hebben", "zal gezegd hebben", "zal gezegd hebben", null)
+            listOf(null, "heb gezegd", "hebt gezegd", "heeft gezegd", null),
+            listOf(null, "zal gezegd hebben", "zal gezegd hebben", "zal gezegd hebben", null),
+            listOf(null, "zou gezegd hebben", "zou gezegd hebben", "zou gezegd hebben", null)
         )
     )
 
@@ -164,7 +171,7 @@ class NlConjugationSchemeTest : BaseTest() {
 
     // uitwringen has "wrongt uit" (archaic 2nd-sg-past, ends in -t) alongside "wrong uit" (modern).
     // The gij heuristic must inject "gij" into the archaic form so it loses to the modern one.
-    // The conditional perfect must show active voice (zou uitgewrongen hebben) not passive (zou uitgewrongen zijn).
+    // Present/conditional/future perfect must show active hebben-auxiliary forms, not zijn-based ones.
     private val expectedNlVerbUitwringen = mapOf(
         "nl_verb:category_summary" to listOf(
             listOf(null, null),
@@ -180,13 +187,12 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, null, null, null, null),
             listOf(null, "wring uit", "wringt uit", "wringt uit", "wringen uit"),
             listOf(null, "wrong uit", "wrong uit", "wrong uit", "wrongen uit"),
-            listOf(null, "zou uitwringen", "zou uitwringen", "zou uitwringen", "zouden uitwringen"),
             listOf(null, "zal uitwringen", "zal uitwringen", "zal uitwringen", "zullen uitwringen"),
+            listOf(null, "zou uitwringen", "zou uitwringen", "zou uitwringen", "zouden uitwringen"),
             listOf(null, "wring uit", null),
-            listOf(null, null, null, null, null),
-            listOf(null, "ben uitgewrongen", "bent uitgewrongen", "hebben uitgewrongen", null),
-            listOf(null, "zou uitgewrongen hebben", "zou uitgewrongen hebben", "zou uitgewrongen hebben", null),
-            listOf(null, "zal uitgewrongen hebben", "zal uitgewrongen hebben", "zal uitgewrongen hebben", null)
+            listOf(null, "heb uitgewrongen", "hebt uitgewrongen", "heeft uitgewrongen", null),
+            listOf(null, "zal uitgewrongen hebben", "zal uitgewrongen hebben", "zal uitgewrongen hebben", null),
+            listOf(null, "zou uitgewrongen hebben", "zou uitgewrongen hebben", "zou uitgewrongen hebben", null)
         )
     )
 
@@ -209,13 +215,12 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, null, null, null, null),
             listOf(null, "spreek af", "spreekt af", "spreekt af", "spreken af"),
             listOf(null, "sprak af", "sprak af", "sprak af", "spraken af"),
-            listOf(null, "zou afspreken", "zou afspreken", "zou afspreken", "zouden afspreken"),
             listOf(null, "zal afspreken", "zal afspreken", "zal afspreken", "zullen afspreken"),
+            listOf(null, "zou afspreken", "zou afspreken", "zou afspreken", "zouden afspreken"),
             listOf(null, "spreek af", null),
-            listOf(null, null, null, null, null),
-            listOf(null, "ben afgesproken", "bent afgesproken", "hebben afgesproken", null),
-            listOf(null, "zou afgesproken hebben", "zou afgesproken hebben", "zou afgesproken hebben", null),
-            listOf(null, "zal afgesproken hebben", "zal afgesproken hebben", "zal afgesproken hebben", null)
+            listOf(null, "heb afgesproken", "hebt afgesproken", "heeft afgesproken", null),
+            listOf(null, "zal afgesproken hebben", "zal afgesproken hebben", "zal afgesproken hebben", null),
+            listOf(null, "zou afgesproken hebben", "zou afgesproken hebben", "zou afgesproken hebben", null)
         )
     )
 
@@ -225,6 +230,35 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, "kwartieren"),
             listOf(null, "kwartiertje"),
             listOf(null, "kwartiertjes")
+        )
+    )
+
+    // onderstromen is a pure zijn-verb: Wiktionary lists only zijn-auxiliary compound perfect
+    // forms (no "heb/hebt/heeft" counterpart). The zijn-passive heuristic therefore does NOT
+    // fire, and the dutchAuxiliaryPriority tiebreaker must pick "bent" (priority 1) over
+    // "is" (priority 2) for the 2nd-person present-perfect cell.
+    private val expectedNlVerbOnderstromen = mapOf(
+        "nl_verb:category_summary" to listOf(
+            listOf(null, null),
+            listOf(null, "onder te stromen"),  // infinitive (long-form te-infinitive wins)
+            listOf(null, "stroom onder"),      // present (ik) — main-clause form
+            listOf(null, "stroomt onder"),     // present (jij/hij/u)
+            listOf(null, "stroomde onder"),    // past singular
+            listOf(null, "stroomden onder"),   // past plural
+            listOf(null, "ondergestroomd"),    // past participle
+            listOf(null, "onderstromend")      // present participle
+        ),
+        "nl_verb:full" to listOf(
+            listOf(null, null, null, null, null),
+            listOf(null, "stroom onder", "stroomt onder", "stroomt onder", "stromen onder"),
+            listOf(null, "stroomde onder", "stroomde onder", "stroomde onder", "stroomden onder"),
+            listOf(null, "zal onderstromen", "zal onderstromen", "zal onderstromen", "zullen onderstromen"),
+            listOf(null, "zou onderstromen", "zou onderstromen", "zou onderstromen", "zouden onderstromen"),
+            listOf(null, "onderstroom", null),
+            // zijn-verb: heuristic does not fire; dutchAuxiliaryPriority selects ben/bent/is
+            listOf(null, "ben ondergestroomd", "bent ondergestroomd", "is ondergestroomd", null),
+            listOf(null, "zal ondergestroomd zijn", "zal ondergestroomd zijn", "zal ondergestroomd zijn", null),
+            listOf(null, "zou ondergestroomd zijn", "zou ondergestroomd zijn", "zou ondergestroomd zijn", null)
         )
     )
 

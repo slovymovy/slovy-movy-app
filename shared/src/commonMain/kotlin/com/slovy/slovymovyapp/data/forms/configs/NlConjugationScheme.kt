@@ -32,10 +32,20 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                         && (!form.form.endsWith(')') || '(' in form.form)
                 }
 
+            // Map "perfect" → "perfective" so compound tense forms (hebben/zijn + past participle)
+            // expose Aspect.PERFECTIVE to scheme cells. This lets present/conditional/future
+            // perfect cells *require* PERFECTIVE rather than merely *forbidding* indicative,
+            // which is more robust when forms lack the "indicative" tag in the source data.
+            val perfectedForms = cleanForms.map { form ->
+                if ("perfect" in form.tags && "perfective" !in form.tags)
+                    form.copy(tags = form.tags + "perfective")
+                else form
+            }
+
             // Canonicalize diminutive number tags using Dutch morphology (-je = singular, -jes = plural).
             // Always strip both number tags first and re-add the canonical one, so conflicting
             // combinations (e.g. -je + plural, or -jes + singular + plural) are fully corrected.
-            val correctedForms = cleanForms.map { form ->
+            val correctedForms = perfectedForms.map { form ->
                 val tags = form.tags
                 when {
                     "diminutive" in tags && form.form.endsWith("jes") ->
@@ -84,6 +94,36 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 }
             }
 
+            // Inject "passive" into zijn-auxiliary compound present-perfect forms when the same
+            // participle also has hebben-auxiliary forms. Dutch Wiktionary lists archaic/literary
+            // zijn-based compound forms alongside the standard hebben-based active forms for many
+            // hebben-verbs (e.g. "ben gedacht" alongside "heb gedacht" for "denken"). When both
+            // auxiliaries appear for the same participle, the zijn forms are lower-register and
+            // should lose to the standard hebben forms in scheme cells that forbid passive voice.
+            // Note: for pure zijn-verbs (gaan, komen) only zijn auxiliaries exist, so the
+            // heuristic never fires and "ben gegaan" is correctly left unmarked.
+            val zijnAuxiliaries = setOf("ben", "bent", "is", "zijn", "zijt")
+            val hebbenAuxiliaries = setOf("heb", "hebt", "heeft", "hebben")
+            val presentPerfectForms = markedForms.filter { form ->
+                "perfect" in form.tags && "present" in form.tags && ' ' in form.form
+            }
+            val participlesWithHebben = presentPerfectForms
+                .filter { it.form.substringBefore(' ') in hebbenAuxiliaries }
+                .map { it.form.substringAfter(' ') }
+                .toSet()
+            val archaicZijnForms = presentPerfectForms.filter { form ->
+                form.form.substringBefore(' ') in zijnAuxiliaries &&
+                    form.form.substringAfter(' ') in participlesWithHebben &&
+                    "passive" !in form.tags
+            }.toSet()
+            val finalForms = if (archaicZijnForms.isEmpty()) markedForms else {
+                markedForms.map { form ->
+                    if (form in archaicZijnForms)
+                        form.copy(tags = form.tags + "passive", source = FormSource.HEURISTIC)
+                    else form
+                }
+            }
+
             // Build extras from correctedForms (before imperfect stripping) so that the
             // imperfect-based heuristics below can still detect the original tag on
             // non-finite and conditional forms.
@@ -114,15 +154,29 @@ object NlConjugationScheme : ConjugationSchemeProvider {
 
                 result
             }
-            return if (extras.isEmpty()) markedForms else markedForms + extras
+            return if (extras.isEmpty()) finalForms else finalForms + extras
         }
 
         override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
             return candidates.minWithOrNull(
                 compareBy<SchemeCellCandidate> { -it.matchedPreferredTags }
                     .thenBy { it.extraKnownTags }
+                    // For compound perfect forms, prefer the person-specific auxiliary over
+                    // generic plural forms. Priority: 1st-sg (heb/ben) < 2nd-sg (hebt/bent) <
+                    // 3rd-sg (heeft/is) < plural/unknown (hebben/zijn/other). This makes "bent"
+                    // beat "is" for 2nd-person cells of zijn-verbs, and "hebt"/"heeft" beat
+                    // "hebben" for hebben-verbs. Single-word forms are unaffected (they resolve
+                    // to the same unknown bucket and fall through to the alphabetical tiebreaker).
+                    .thenBy { dutchAuxiliaryPriority(it.form.substringBefore(' ')) }
                     .thenBy { it.form }
             )
+        }
+
+        private fun dutchAuxiliaryPriority(auxiliary: String): Int = when (auxiliary) {
+            "heb", "ben" -> 0
+            "hebt", "bent", "zijt" -> 1
+            "heeft", "is" -> 2
+            else -> 3  // hebben, zijn, or any non-auxiliary (single-word forms)
         }
 
     }
@@ -195,13 +249,6 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 data(Tense.PAST, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("Conditional")
-                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
-                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
-                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
-                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Num.PL, supporting = setOf(Mood.INDICATIVE))
-            }
-            row {
                 rowHeader("Future")
                 data(Tense.FUTURE, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.FUTURE, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
@@ -209,36 +256,41 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 data(Tense.FUTURE, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }
             row {
+                rowHeader("Conditional")
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Mood.CONDITIONAL, Aspect.IMPERFECTIVE, Num.PL, supporting = setOf(Mood.INDICATIVE))
+            }
+            row {
                 rowHeader("Imperative")
                 data(Mood.IMPERATIVE, supporting = setOf(Num.SG))
                 empty(colspan = 3)
             }
             row {
-                empty()
-                colHeader("1st person")
-                colHeader("2nd person")
-                colHeader("3rd person")
-                empty()
-            }
-            row {
                 rowHeader("Present perfect")
-                data(Tense.PRESENT, Person.FIRST)
-                data(Tense.PRESENT, Person.SECOND)
-                data(Tense.PRESENT, Person.THIRD)
-                empty()
-            }
-            row {
-                rowHeader("Conditional perfect")
-                data(Mood.CONDITIONAL, Person.FIRST)
-                data(Mood.CONDITIONAL, Person.SECOND)
-                data(Mood.CONDITIONAL, Person.THIRD)
+                // Require PERFECTIVE (mapped from "perfect" in preprocessing) so only compound
+                // tense forms match; simple present forms lack "perfect" and are excluded even
+                // when "indicative" is absent from the DB data (e.g. verspringen).
+                // Forbid passive to exclude zijn-auxiliary forms that the preprocessing heuristic
+                // marks passive for hebben-verbs (e.g. "ben gedacht" for denken).
+                data(Tense.PRESENT, Person.FIRST, Aspect.PERFECTIVE, forbidden = setOf(Voice.PASSIVE))
+                data(Tense.PRESENT, Person.SECOND, Aspect.PERFECTIVE, forbidden = setOf(Voice.PASSIVE))
+                data(Tense.PRESENT, Person.THIRD, Aspect.PERFECTIVE, forbidden = setOf(Voice.PASSIVE))
                 empty()
             }
             row {
                 rowHeader("Future perfect")
-                data(Tense.FUTURE, Person.FIRST)
-                data(Tense.FUTURE, Person.SECOND)
-                data(Tense.FUTURE, Person.THIRD)
+                data(Tense.FUTURE, Aspect.PERFECTIVE, Person.FIRST, forbidden = setOf(Voice.PASSIVE))
+                data(Tense.FUTURE, Aspect.PERFECTIVE, Person.SECOND, forbidden = setOf(Voice.PASSIVE))
+                data(Tense.FUTURE, Aspect.PERFECTIVE, Person.THIRD, forbidden = setOf(Voice.PASSIVE))
+                empty()
+            }
+            row {
+                rowHeader("Conditional perfect")
+                data(Mood.CONDITIONAL, Aspect.PERFECTIVE, Person.FIRST, forbidden = setOf(Voice.PASSIVE))
+                data(Mood.CONDITIONAL, Aspect.PERFECTIVE, Person.SECOND, forbidden = setOf(Voice.PASSIVE))
+                data(Mood.CONDITIONAL, Aspect.PERFECTIVE, Person.THIRD, forbidden = setOf(Voice.PASSIVE))
                 empty()
             }
         }
