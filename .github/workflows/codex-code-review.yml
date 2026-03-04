@@ -34,7 +34,6 @@ jobs:
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           model: gpt-5.3-codex
-          effort: high
           prompt: |
             This is PR #${{ github.event.pull_request.number }} for ${{ github.repository }}.
 
