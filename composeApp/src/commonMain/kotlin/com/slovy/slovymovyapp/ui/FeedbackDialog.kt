@@ -4,11 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -88,10 +89,15 @@ fun FeedbackDialog(
                     focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                // Local TextFieldValue state preserves cursor position across recompositions.
+                // Plain String → TextField causes cursor jumps on iOS due to the UIKit bridge
+                // recreating cursor state on every recomposition triggered by ViewModel updates.
+                var commentValue by remember { mutableStateOf(TextFieldValue(comment)) }
+                var emailValue by remember { mutableStateOf(TextFieldValue(email)) }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
-                        value = comment,
-                        onValueChange = onCommentChange,
+                        value = commentValue,
+                        onValueChange = { commentValue = it; onCommentChange(it.text) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 3,
                         maxLines = 6,
@@ -109,8 +115,8 @@ fun FeedbackDialog(
                         isError = error != null
                     )
                     OutlinedTextField(
-                        value = email,
-                        onValueChange = onEmailChange,
+                        value = emailValue,
+                        onValueChange = { emailValue = it; onEmailChange(it.text) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         enabled = !isSending,
