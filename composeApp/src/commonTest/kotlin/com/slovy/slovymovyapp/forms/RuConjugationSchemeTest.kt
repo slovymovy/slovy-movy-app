@@ -117,12 +117,14 @@ class RuConjugationSchemeTest : BaseTest() {
 
     private val expectedRuAdverbBystro = mapOf(
         "ru_adverb:short" to listOf(
+            listOf(null, null),           // header row
             listOf(null, "(по)быстре́е") // comparative
         )
     )
 
     private val expectedRuAdjectiveKrasivyj = mapOf(
         "ru_adjective:essentials" to listOf(
+            listOf(null, null),            // header row
             listOf(null, "краси́вый"),  // masculine
             listOf(null, "краси́вая"),  // feminine
             listOf(null, "краси́вое"),  // neuter

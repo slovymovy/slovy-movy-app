@@ -9,6 +9,15 @@ object PlConjugationScheme : ConjugationSchemeProvider {
 
     private object PolishSchemeTagResolver : SchemeTagResolver {
         override fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> {
+            // Detect gradable adjectives: any form carries "comparative" or "superlative".
+            // Used below to gate the adjective-specific nominative heuristic.
+            val hasGradedForms = forms.any { "comparative" in it.tags || "superlative" in it.tags }
+
+            val comparativeBase = forms.firstOrNull { "comparative" in it.tags }?.form
+            val superlativeBase = forms.firstOrNull { "superlative" in it.tags }?.form
+            val comparativeStem = comparativeBase?.takeIf { it.length > 3 }?.dropLast(2)
+            val superlativeStem = superlativeBase?.takeIf { it.length > 3 }?.dropLast(2)
+
             val extras = forms.flatMap { form ->
                 val tags = form.tags
                 val result = mutableListOf<SchemeInputForm>()
@@ -27,6 +36,72 @@ object PlConjugationScheme : ConjugationSchemeProvider {
                     && "masculine" !in tags && "virile" !in tags && "nonvirile" !in tags
                 ) {
                     result += form.copy(tags = tags + "nonvirile", source = FormSource.HEURISTIC)
+                }
+
+                // Polish adjective degree-tagging heuristic.
+                //
+                // Wiktionary only marks the nominative masculine form of the comparative and
+                // superlative with a "comparative"/"superlative" tag; all other declined forms
+                // (feminine, genitive, dative, etc.) carry no degree marker and are
+                // indistinguishable from positive forms by tags alone.  When multiple degrees
+                // are present the alphabetical tiebreaker picks the superlative ("najX..." < "X")
+                // for every nominative cell.
+                //
+                // Fix: identify each form's degree from its form STRING using the comparative and
+                // superlative base stems.  Add a heuristic copy that carries the degree tag so
+                // cells with supporting=Degree.POSITIVE can prefer positive forms.
+                //
+                // Stem extraction: drop the final character (the -y/-i nominative ending) from the
+                // base form.  All declined forms of that degree begin with this stem (e.g.
+                // "staranniejszy" → stem "staranniejsz"; "staranniejsza/ego/emu…" all start
+                // with "staranniejsz").  Standard Polish comparative morphology guarantees the stem
+                // never overlaps with positive forms.
+                if (hasGradedForms && "comparative" !in tags && "superlative" !in tags
+                    && "positive" !in tags
+                ) {
+                    val degree = when {
+                        superlativeStem != null && form.form.startsWith(superlativeStem) -> "superlative"
+                        comparativeStem != null && form.form.startsWith(comparativeStem) -> "comparative"
+                        else -> "positive"
+                    }
+                    result += form.copy(tags = tags + degree, source = FormSource.HEURISTIC)
+
+                    // Generate virile+degree combo for masculine plural forms.
+                    // The virile heuristic and degree heuristic run independently, so without
+                    // an explicit combo copy the virile cell has no degree-tagged form to prefer.
+                    if ("plural" in tags && "masculine" in tags
+                        && "virile" !in tags && "nonvirile" !in tags
+                    ) {
+                        result += form.copy(
+                            tags = tags.map { if (it == "masculine") "virile" else it } + degree,
+                            source = FormSource.HEURISTIC
+                        )
+                    }
+                    // Same for nonvirile plural (feminine+neuter plural in Wiktionary).
+                    if ("plural" in tags && "feminine" in tags && "neuter" in tags
+                        && "masculine" !in tags && "virile" !in tags && "nonvirile" !in tags
+                    ) {
+                        result += form.copy(
+                            tags = tags + listOf("nonvirile", degree),
+                            source = FormSource.HEURISTIC
+                        )
+                    }
+
+                    // For positive masculine singular: nominative = accusative inanimate (same form),
+                    // but wiktionary stores it only under accusative+inanimate — no "nominative" tag.
+                    // Create an explicit nominative heuristic so this form competes in nominative
+                    // cells (and wins via the "positive" tag + supporting=Degree.POSITIVE).
+                    if (degree == "positive"
+                        && "accusative" in tags && "inanimate" in tags && "animate" !in tags
+                        && "masculine" in tags && "singular" in tags
+                        && "nominative" !in tags
+                    ) {
+                        result += form.copy(
+                            tags = (tags - "accusative" - "inanimate") +
+                                listOf("nominative", "animate", "inanimate", "positive"),
+                            source = FormSource.HEURISTIC
+                        )
+                    }
                 }
 
                 result
@@ -329,6 +404,33 @@ object PlConjugationScheme : ConjugationSchemeProvider {
         DictionaryPos.ADJECTIVE,
         tagResolver = PolishSchemeTagResolver
     ) {
+        view("essentials", "Essentials") {
+            row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+            row {
+                rowHeader("masculine")
+                data(Case.NOMINATIVE, Gender.MASC, Num.SG, supporting = setOf(Degree.POSITIVE))
+            }
+            row {
+                rowHeader("feminine")
+                data(Case.NOMINATIVE, Gender.FEM, Num.SG, supporting = setOf(Degree.POSITIVE))
+            }
+            row {
+                rowHeader("neuter")
+                data(Case.NOMINATIVE, Gender.NEUT, Num.SG, supporting = setOf(Degree.POSITIVE))
+            }
+            row {
+                rowHeader("virile plural")
+                data(Case.NOMINATIVE, Gender.VIRILE, Num.PL, supporting = setOf(Degree.POSITIVE))
+            }
+            row {
+                rowHeader("non-virile plural")
+                data(Case.NOMINATIVE, Gender.NONVIRILE, Num.PL, supporting = setOf(Degree.POSITIVE))
+            }
+        }
+
         view("full", "Declension") {
             row {
                 empty()
@@ -341,49 +443,49 @@ object PlConjugationScheme : ConjugationSchemeProvider {
             }
             row {
                 rowHeader("nominative / vocative")
-                data(Case.NOMINATIVE, Gender.MASC, Animacy.ANIM, Num.SG)
-                data(Case.NOMINATIVE, Gender.MASC, Animacy.INANIM, Num.SG)
-                data(Case.NOMINATIVE, Gender.FEM, Num.SG)
-                data(Case.NOMINATIVE, Gender.NEUT, Num.SG)
-                data(Case.NOMINATIVE, Gender.VIRILE, Num.PL)
-                data(Case.NOMINATIVE, Gender.NONVIRILE, Num.PL)
+                data(Case.NOMINATIVE, Gender.MASC, Animacy.ANIM, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.NOMINATIVE, Gender.MASC, Animacy.INANIM, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.NOMINATIVE, Gender.FEM, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.NOMINATIVE, Gender.NEUT, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.NOMINATIVE, Gender.VIRILE, Num.PL, supporting = setOf(Degree.POSITIVE))
+                data(Case.NOMINATIVE, Gender.NONVIRILE, Num.PL, supporting = setOf(Degree.POSITIVE))
             }
             row {
                 rowHeader("genitive")
-                data(Case.GENITIVE, Gender.MASC, Num.SG, colspan = 2)
-                data(Case.GENITIVE, Gender.FEM, Num.SG)
-                data(Case.GENITIVE, Gender.NEUT, Num.SG)
-                data(Case.GENITIVE, Num.PL, colspan = 2)
+                data(Case.GENITIVE, Gender.MASC, Num.SG, colspan = 2, supporting = setOf(Degree.POSITIVE))
+                data(Case.GENITIVE, Gender.FEM, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.GENITIVE, Gender.NEUT, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.GENITIVE, Num.PL, colspan = 2, supporting = setOf(Degree.POSITIVE))
             }
             row {
                 rowHeader("dative")
-                data(Case.DATIVE, Gender.MASC, Num.SG, colspan = 2)
-                data(Case.DATIVE, Gender.FEM, Num.SG)
-                data(Case.DATIVE, Gender.NEUT, Num.SG)
-                data(Case.DATIVE, Num.PL, colspan = 2)
+                data(Case.DATIVE, Gender.MASC, Num.SG, colspan = 2, supporting = setOf(Degree.POSITIVE))
+                data(Case.DATIVE, Gender.FEM, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.DATIVE, Gender.NEUT, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.DATIVE, Num.PL, colspan = 2, supporting = setOf(Degree.POSITIVE))
             }
             row {
                 rowHeader("accusative")
-                data(Case.ACCUSATIVE, Gender.MASC, Animacy.ANIM, Num.SG)
-                data(Case.ACCUSATIVE, Gender.MASC, Animacy.INANIM, Num.SG)
-                data(Case.ACCUSATIVE, Gender.FEM, Num.SG)
-                data(Case.ACCUSATIVE, Gender.NEUT, Num.SG)
-                data(Case.ACCUSATIVE, Gender.VIRILE, Num.PL)
-                data(Case.ACCUSATIVE, Gender.NONVIRILE, Num.PL)
+                data(Case.ACCUSATIVE, Gender.MASC, Animacy.ANIM, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.ACCUSATIVE, Gender.MASC, Animacy.INANIM, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.ACCUSATIVE, Gender.FEM, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.ACCUSATIVE, Gender.NEUT, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.ACCUSATIVE, Gender.VIRILE, Num.PL, supporting = setOf(Degree.POSITIVE))
+                data(Case.ACCUSATIVE, Gender.NONVIRILE, Num.PL, supporting = setOf(Degree.POSITIVE))
             }
             row {
                 rowHeader("instrumental")
-                data(Case.INSTRUMENTAL, Gender.MASC, Num.SG, colspan = 2)
-                data(Case.INSTRUMENTAL, Gender.FEM, Num.SG)
-                data(Case.INSTRUMENTAL, Gender.NEUT, Num.SG)
-                data(Case.INSTRUMENTAL, Num.PL, colspan = 2)
+                data(Case.INSTRUMENTAL, Gender.MASC, Num.SG, colspan = 2, supporting = setOf(Degree.POSITIVE))
+                data(Case.INSTRUMENTAL, Gender.FEM, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.INSTRUMENTAL, Gender.NEUT, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.INSTRUMENTAL, Num.PL, colspan = 2, supporting = setOf(Degree.POSITIVE))
             }
             row {
                 rowHeader("locative")
-                data(Case.LOCATIVE, Gender.MASC, Num.SG, colspan = 2)
-                data(Case.LOCATIVE, Gender.FEM, Num.SG)
-                data(Case.LOCATIVE, Gender.NEUT, Num.SG)
-                data(Case.LOCATIVE, Num.PL, colspan = 2)
+                data(Case.LOCATIVE, Gender.MASC, Num.SG, colspan = 2, supporting = setOf(Degree.POSITIVE))
+                data(Case.LOCATIVE, Gender.FEM, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.LOCATIVE, Gender.NEUT, Num.SG, supporting = setOf(Degree.POSITIVE))
+                data(Case.LOCATIVE, Num.PL, colspan = 2, supporting = setOf(Degree.POSITIVE))
             }
         }
     }
@@ -457,6 +559,11 @@ object PlConjugationScheme : ConjugationSchemeProvider {
         tagResolver = PolishSchemeTagResolver
     ) {
         view("short", "Degrees of comparison") {
+            row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+
             row {
                 rowHeader("comparative")
                 data(Degree.COMPARATIVE)

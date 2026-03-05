@@ -192,7 +192,7 @@ private fun WordDetailScreenPreviewFormsDutchCategorySummary(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        WordDetailScreenContent(state = formsFocusedState(dutchVerbGridCard(), selectedViewId = "category_summary"))
+        WordDetailScreenContent(state = formsFocusedState(dutchVerbGridCard(), selectedViewId = "essentials"))
     }
 }
 

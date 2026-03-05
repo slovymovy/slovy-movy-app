@@ -131,6 +131,11 @@ object EnConjugationScheme : ConjugationSchemeProvider {
     ) {
         view("short", "Principal parts") {
             row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+
+            row {
                 rowHeader("infinitive")
                 data(VerbForm.INFINITIVE)
             }
@@ -170,6 +175,11 @@ object EnConjugationScheme : ConjugationSchemeProvider {
     ) {
         view("short", "Number") {
             row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+
+            row {
                 rowHeader("singular")
                 data(Num.SG)
             }
@@ -194,6 +204,11 @@ object EnConjugationScheme : ConjugationSchemeProvider {
     ) {
         view("short", "Degrees of comparison") {
             row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+
+            row {
                 rowHeader("comparative")
                 data(Degree.COMPARATIVE)
             }
@@ -216,6 +231,11 @@ object EnConjugationScheme : ConjugationSchemeProvider {
         tagResolver = englishTagResolver(DictionaryPos.ADVERB)
     ) {
         view("short", "Degrees of comparison") {
+            row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+
             row {
                 rowHeader("comparative")
                 data(Degree.COMPARATIVE)
@@ -244,6 +264,11 @@ object EnConjugationScheme : ConjugationSchemeProvider {
         tagResolver = englishTagResolver(DictionaryPos.PRONOUN)
     ) {
         view("short", "Cases") {
+            row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+
             row {
                 rowHeader("subject")
                 data(PronounForm.SUBJECTIVE)

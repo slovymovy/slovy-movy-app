@@ -124,7 +124,7 @@ class NlConjugationSchemeTest : BaseTest() {
     }
 
     private val expectedNlVerbZeggen = mapOf(
-        "nl_verb:category_summary" to listOf(
+        "nl_verb:essentials" to listOf(
             listOf(null, null),
             listOf(null, "te zeggen"),    // infinitive
             listOf(null, "zeg"),           // present (ik)
@@ -150,7 +150,7 @@ class NlConjugationSchemeTest : BaseTest() {
     // "volslagen" is attributive-only (no predicative form in Wiktionary). Positive (Base) showing
     // "volslagen" exercises the predicative-supporting fallback: without it the cell would be null.
     private val expectedNlAdjectiveVolslagen = mapOf(
-        "nl_adjective:category_summary" to listOf(
+        "nl_adjective:essentials" to listOf(
             listOf(null, null),
             listOf(null, "volslagen"),
             listOf(null, "volslagen"),
@@ -173,7 +173,7 @@ class NlConjugationSchemeTest : BaseTest() {
     // The gij heuristic must inject "gij" into the archaic form so it loses to the modern one.
     // Present/conditional/future perfect must show active hebben-auxiliary forms, not zijn-based ones.
     private val expectedNlVerbUitwringen = mapOf(
-        "nl_verb:category_summary" to listOf(
+        "nl_verb:essentials" to listOf(
             listOf(null, null),
             listOf(null, "uit te wringen"),    // infinitive
             listOf(null, "wring uit"),          // present (ik)
@@ -201,7 +201,7 @@ class NlConjugationSchemeTest : BaseTest() {
     // ("spraakt".endsWith("t")) is required for the gij heuristic to fire.
     // Without it "spraakt af" would win alphabetically (position 4: 'a' < 'k').
     private val expectedNlVerbAfspreken = mapOf(
-        "nl_verb:category_summary" to listOf(
+        "nl_verb:essentials" to listOf(
             listOf(null, null),
             listOf(null, "af te spreken"),     // infinitive
             listOf(null, "spreek af"),          // present (ik)
@@ -238,7 +238,7 @@ class NlConjugationSchemeTest : BaseTest() {
     // fire, and the dutchAuxiliaryPriority tiebreaker must pick "bent" (priority 1) over
     // "is" (priority 2) for the 2nd-person present-perfect cell.
     private val expectedNlVerbOnderstromen = mapOf(
-        "nl_verb:category_summary" to listOf(
+        "nl_verb:essentials" to listOf(
             listOf(null, null),
             listOf(null, "onder te stromen"),  // infinitive (long-form te-infinitive wins)
             listOf(null, "stroom onder"),      // present (ik) — main-clause form

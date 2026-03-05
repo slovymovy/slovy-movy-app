@@ -188,7 +188,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
         tagResolver = DutchSchemeTagResolver
     ) {
 
-        view("category_summary", "Essentials") {
+        view("essentials", "Essentials") {
             row {
                 colHeader("Category")
                 colHeader("Form")
@@ -341,7 +341,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
         DictionaryPos.ADJECTIVE,
         tagResolver = DutchSchemeTagResolver
     ) {
-        view("category_summary", "Compact") {
+        view("essentials", "Essentials") {
             row {
                 colHeader("Category")
                 colHeader("Form")
