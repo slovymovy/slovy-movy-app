@@ -145,7 +145,7 @@ fun FeedbackDialog(
             confirmButton = {
                 TextButton(
                     onClick = onSend,
-                    enabled = !isSending && comment.isNotBlank()
+                    enabled = !isSending && commentValue.text.isNotBlank()
                 ) {
                     if (isSending) {
                         CircularProgressIndicator(
