@@ -72,6 +72,12 @@ fun FeedbackDialog(
             }
         )
     } else {
+        // Local TextFieldValue state preserves cursor position across recompositions.
+        // Plain String → TextField causes cursor jumps on iOS due to the UIKit bridge
+        // recreating cursor state on every recomposition triggered by ViewModel updates.
+        // Hoisted outside AlertDialog so confirmButton can read commentValue.text.
+        var commentValue by remember { mutableStateOf(TextFieldValue(comment)) }
+        var emailValue by remember { mutableStateOf(TextFieldValue(email)) }
         AlertDialog(
             onDismissRequest = {
                 if (!isSending) onDismiss()
@@ -89,11 +95,6 @@ fun FeedbackDialog(
                     focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                // Local TextFieldValue state preserves cursor position across recompositions.
-                // Plain String → TextField causes cursor jumps on iOS due to the UIKit bridge
-                // recreating cursor state on every recomposition triggered by ViewModel updates.
-                var commentValue by remember { mutableStateOf(TextFieldValue(comment)) }
-                var emailValue by remember { mutableStateOf(TextFieldValue(email)) }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = commentValue,

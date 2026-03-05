@@ -133,6 +133,7 @@ fun AppSearchBar(
                 {
                     IconButton(onClick = {
                         textFieldValue = TextFieldValue("", TextRange(0))
+                        lastSentQuery.value = ""
                         onQueryChange("")
                     }) {
                         Icon(
