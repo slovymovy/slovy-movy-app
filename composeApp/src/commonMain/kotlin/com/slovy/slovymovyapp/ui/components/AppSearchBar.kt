@@ -72,12 +72,20 @@ fun AppSearchBar(
         label = "searchBarElevation"
     )
 
-    // Use TextFieldValue to control cursor position
     var textFieldValue by remember { mutableStateOf(TextFieldValue(query, TextRange(query.length))) }
+    // Plain (non-observable) ref updated synchronously in onValueChange before onQueryChange
+    // is called. LaunchedEffect reads it on the main thread after the event fires, so it
+    // always sees the up-to-date value. Using a non-State holder avoids the extra
+    // recomposition that a mutableStateOf write would trigger, which on iOS caused
+    // the UIKit text bridge to drop characters mid-keystroke.
+    val lastSentQuery = remember { object { var value = query } }
 
-    // Sync external query changes and place cursor at end
     LaunchedEffect(query) {
-        if (textFieldValue.text != query) {
+        // Only sync when query was changed from outside (not as a round-trip echo of our
+        // own onValueChange call). This preserves cursor position during normal typing
+        // while still handling external resets such as restore-after-process-death.
+        if (query != lastSentQuery.value) {
+            lastSentQuery.value = query
             textFieldValue = TextFieldValue(query, TextRange(query.length))
         }
     }
@@ -97,6 +105,7 @@ fun AppSearchBar(
             value = textFieldValue,
             onValueChange = { newValue ->
                 textFieldValue = newValue
+                lastSentQuery.value = newValue.text
                 onQueryChange(newValue.text)
             },
             modifier = Modifier
@@ -124,6 +133,7 @@ fun AppSearchBar(
                 {
                     IconButton(onClick = {
                         textFieldValue = TextFieldValue("", TextRange(0))
+                        lastSentQuery.value = ""
                         onQueryChange("")
                     }) {
                         Icon(
