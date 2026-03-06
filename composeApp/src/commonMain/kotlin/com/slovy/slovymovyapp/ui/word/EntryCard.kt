@@ -83,14 +83,6 @@ private fun resolvedFormValue(view: FormsSchemeView, sourceRow: Int, sourceColum
     return view.forms.getOrNull(sourceRow)?.getOrNull(sourceColumn)
 }
 
-private fun resolvedDataCount(view: FormsSchemeView): Int =
-    view.view.grid.mapIndexed { rowIndex, row ->
-        row.mapIndexed { sourceColumn, cell ->
-            cell is GridCell.Data && resolvedFormValue(view, rowIndex, sourceColumn) != null
-        }
-            .count { it }
-    }.sum()
-
 @Composable
 private fun FormsGridCell(cell: GridCell, value: String?) {
     val text = when (cell) {
@@ -103,7 +95,7 @@ private fun FormsGridCell(cell: GridCell, value: String?) {
     val dividerColor = MaterialTheme.colorScheme.outlineVariant
     val headerBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     val textColor = when {
-        cell is GridCell.Data && value == null -> MaterialTheme.colorScheme.error
+        cell is GridCell.Data && value == null -> MaterialTheme.colorScheme.onSurface
         cell is GridCell.Empty -> Color.Transparent
         isHeader -> MaterialTheme.colorScheme.onSurfaceVariant
         else -> MaterialTheme.colorScheme.onSurface
@@ -135,7 +127,7 @@ private fun FormsGridCell(cell: GridCell, value: String?) {
                 drawLine(color, Offset(0f, size.height), Offset(size.width, size.height), stroke)
                 drawLine(color, Offset(size.width, 0f), Offset(size.width, size.height), stroke)
             }
-            .padding(horizontal = 8.dp, vertical = 3.dp),
+            .padding(horizontal = 8.dp, vertical = 5.dp),
         contentAlignment = contentAlignment
     ) {
         if (text.isNotEmpty()) {
@@ -387,7 +379,7 @@ private fun FormsGrid(formsView: FormsSchemeView) {
     val matrix = remember(formsView) { buildPlacedGrid(formsView) }
     if (matrix.maxOfOrNull { it.size } == 0) return
 
-    val tableShape = RoundedCornerShape(10.dp)
+    val tableShape = RoundedCornerShape(4.dp)
     val dividerColor = MaterialTheme.colorScheme.outlineVariant
     val horizontalScrollState = rememberScrollState()
 
@@ -423,7 +415,6 @@ private fun GrammarSection(
 ) {
     val selectedFormsView = formsViews.firstOrNull { it.view.viewId == selectedViewId } ?: formsViews.first()
     val selectedViewIdResolved = selectedFormsView.view.viewId
-    val formCount = resolvedDataCount(selectedFormsView)
     val shape = RoundedCornerShape(14.dp)
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -446,7 +437,7 @@ private fun GrammarSection(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "$formCount form${pluralEnding(formCount)}",
+                    text = "Grammar forms",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

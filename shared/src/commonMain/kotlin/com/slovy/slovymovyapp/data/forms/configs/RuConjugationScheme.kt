@@ -326,6 +326,11 @@ object RuConjugationScheme : ConjugationSchemeProvider {
     ) {
         view("essentials", "Essentials") {
             row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+
+            row {
                 rowHeader("masculine")
                 data(Case.NOMINATIVE, Gender.MASC)
             }
@@ -423,6 +428,11 @@ object RuConjugationScheme : ConjugationSchemeProvider {
         tagResolver = russianTagResolver(DictionaryPos.ADVERB)
     ) {
         view("short", "Degrees of comparison") {
+            row {
+                colHeader("Category")
+                colHeader("Form")
+            }
+
             row {
                 rowHeader("comparative")
                 data(Degree.COMPARATIVE)

@@ -33,6 +33,11 @@ class PlConjugationSchemeTest : BaseTest() {
                 "Resolved PL adjective views for 'ostatni' changed"
             )
             assertEquals(
+                expectedPlAdjectiveStaranny,
+                resolveFormsSnapshot(repo, Language.POLISH, "staranny", DictionaryPos.ADJECTIVE),
+                "Resolved PL adjective views for 'staranny' changed"
+            )
+            assertEquals(
                 expectedPlAdverbDobrze,
                 resolveFormsSnapshot(repo, Language.POLISH, "dobrze", DictionaryPos.ADVERB),
                 "Resolved PL adverb views for 'dobrze' changed"
@@ -134,12 +139,41 @@ class PlConjugationSchemeTest : BaseTest() {
 
     private val expectedPlAdverbDobrze = mapOf(
         "pl_adverb:short" to listOf(
+            listOf(null, null),        // header row
             listOf(null, "lepiej"),    // comparative
             listOf(null, "najlepiej") // superlative
         )
     )
 
+    private val expectedPlAdjectiveStaranny = mapOf(
+        "pl_adjective:essentials" to listOf(
+            listOf(null, null),
+            listOf(null, "staranny"),   // masculine
+            listOf(null, "staranna"),   // feminine
+            listOf(null, "staranne"),   // neuter
+            listOf(null, "staranni"),   // virile plural
+            listOf(null, "staranne")    // non-virile plural
+        ),
+        "pl_adjective:full" to listOf(
+            listOf(null, null, null, null, null, null, null),
+            listOf(null, "staranny", "staranny", "staranna", "staranne", "staranni", "staranne"),
+            listOf(null, "starannego", "starannej", "starannego", "starannych"),
+            listOf(null, "starannemu", "starannej", "starannemu", "starannym"),
+            listOf(null, "starannego", "staranny", "staranną", "staranne", "starannych", "staranne"),
+            listOf(null, "starannym", "staranną", "starannym", "starannymi"),
+            listOf(null, "starannym", "starannej", "starannym", "starannych")
+        )
+    )
+
     private val expectedPlAdjectiveOstatni = mapOf(
+        "pl_adjective:essentials" to listOf(
+            listOf(null, null),
+            listOf(null, null),          // masculine — absent in DB for ostatni
+            listOf(null, "ostatnia"),    // feminine
+            listOf(null, "ostatnie"),    // neuter
+            listOf(null, null),          // virile plural — absent in DB for ostatni
+            listOf(null, "ostatnie")     // non-virile plural
+        ),
         "pl_adjective:full" to listOf(
             listOf(null, null, null, null, null, null, null),
             listOf(null, null, null, "ostatnia", "ostatnie", null, "ostatnie"),

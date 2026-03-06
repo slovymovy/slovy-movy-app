@@ -97,6 +97,7 @@ class EnConjugationSchemeTest : BaseTest() {
 
     private val expectedEnNounBook = mapOf(
         "en_noun:short" to listOf(
+            listOf(null, null),      // header row
             listOf(null, "book"),
             listOf(null, "books")
         )
@@ -104,6 +105,7 @@ class EnConjugationSchemeTest : BaseTest() {
 
     private val expectedEnVerbTest = mapOf(
         "en_verb:short" to listOf(
+            listOf(null, null),      // header row
             listOf(null, "test"),    // infinitive
             listOf(null, "test"),    // present (I)
             listOf(null, "tests"),   // present (he/she/it)
@@ -115,6 +117,7 @@ class EnConjugationSchemeTest : BaseTest() {
 
     private val expectedEnAdjectiveIrrelevant = mapOf(
         "en_adjective:short" to listOf(
+            listOf(null, null),      // header row
             listOf(null, "more irrelevant"), // comparative
             listOf(null, "most irrelevant"), // superlative
         )
@@ -122,6 +125,7 @@ class EnConjugationSchemeTest : BaseTest() {
 
     private val expectedEnAdverbWell = mapOf(
         "en_adverb:short" to listOf(
+            listOf(null, null),      // header row
             listOf(null, "better"), // comparative
             listOf(null, "best"),   // superlative
         )
