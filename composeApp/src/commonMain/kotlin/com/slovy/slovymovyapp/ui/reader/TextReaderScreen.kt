@@ -113,10 +113,25 @@ class TextReaderViewModel(
 }
 
 private fun tokenize(text: String): List<TextToken> {
-    return TOKEN_REGEX.findAll(text).map { match ->
+    val result = mutableListOf<TextToken>()
+    for (match in TOKEN_REGEX.findAll(text)) {
         val value = match.value
-        TextToken(text = value, isWord = value.any { it.isLetter() })
-    }.toList()
+        if (!value.any { it.isLetter() }) {
+            result.add(TextToken(text = value, isWord = false))
+            continue
+        }
+        // Strip leading/trailing hyphens and apostrophes so that bullet-style
+        // "-word" and quoted "'rijk'" are looked up without the surrounding symbol.
+        // Mid-word occurrences (you're, arm-rijk) are preserved unchanged.
+        val trimmedStart = value.trimStart('-', '\'')
+        val leading = value.length - trimmedStart.length
+        val core = trimmedStart.trimEnd('-', '\'')
+        val trailing = trimmedStart.length - core.length
+        if (leading > 0) result.add(TextToken(text = value.take(leading), isWord = false))
+        result.add(TextToken(text = core, isWord = core.any { it.isLetter() }))
+        if (trailing > 0) result.add(TextToken(text = trimmedStart.takeLast(trailing), isWord = false))
+    }
+    return result
 }
 
 // Groups tokens so that each word stays with its immediately surrounding punctuation,
