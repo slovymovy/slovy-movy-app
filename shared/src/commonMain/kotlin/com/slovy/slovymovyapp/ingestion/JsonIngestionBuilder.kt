@@ -237,6 +237,9 @@ class JsonIngestionBuilder(
     ) {
         fun primaryIdForPos(pos: DictionaryPos): Uuid? =
             entries.firstOrNull { it.first == pos }?.second
+
+        fun clusterCountForPos(pos: DictionaryPos): Int =
+            entries.count { it.first == pos }
     }
 
     /** Carries an entry together with its source-file key from source_file_to_entries. */
@@ -595,8 +598,14 @@ class JsonIngestionBuilder(
                 }
                 posEntry.senses.forEach { sense ->
                     val senseId = uuidParse(sense.senseId)
-                    val lemmaPosIdForSense = senseIdToLemmaPosId[senseId] ?: defaultLemmaPosId
-                        ?: error("POS ${posEntry.pos} not found in lemmaPosMapping")
+                    val lemmaPosIdForSense = resolveLemmaPosIdForSense(
+                        senseId = senseId,
+                        posLabel = posEntry.pos,
+                        pos = pos,
+                        defaultLemmaPosId = defaultLemmaPosId,
+                        senseIdToLemmaPosId = senseIdToLemmaPosId,
+                        lemmaPosMapping = lemmaPosMapping
+                    )
                     val def = sense.targetLangDefinitions[trg]
                     if (def != null) {
                         opsForTarget += {
@@ -648,8 +657,8 @@ class JsonIngestionBuilder(
      * Inserts senses and all related data (traits, synonyms, antonyms, phrases, examples).
      *
      * @param processed The processed JSON data
-     * @param senseIdToLemmaPosId Per-sense lemma_pos routing; falls back to POS primary when absent
-     * @param lemmaPosMapping Provides fallback primaryIdForPos when sense is not in senseIdToLemmaPosId
+     * @param senseIdToLemmaPosId Per-sense lemma_pos routing; falls back to POS primary only for single-cluster POS
+     * @param lemmaPosMapping Provides primaryIdForPos and cluster counts used when sense is not in senseIdToLemmaPosId
      * @param dictQ Dictionary queries
      * @param skipMissingPos If true, skip entries where POS has no lemma_pos; if false, throw
      * @return List of POS entries that were skipped (only when skipMissingPos is true)
@@ -674,8 +683,14 @@ class JsonIngestionBuilder(
 
             posEntry.senses.forEach { sense ->
                 val senseId = uuidParse(sense.senseId)
-                val lemmaPosIdForSense = senseIdToLemmaPosId[senseId] ?: defaultLemmaPosId
-                    ?: error("POS ${posEntry.pos} not found in lemmaPosMapping")
+                val lemmaPosIdForSense = resolveLemmaPosIdForSense(
+                    senseId = senseId,
+                    posLabel = posEntry.pos,
+                    pos = pos,
+                    defaultLemmaPosId = defaultLemmaPosId,
+                    senseIdToLemmaPosId = senseIdToLemmaPosId,
+                    lemmaPosMapping = lemmaPosMapping
+                )
                 dictQ.insertSense(
                     sense_id = senseId,
                     lemma_pos_id = lemmaPosIdForSense,
@@ -720,6 +735,23 @@ class JsonIngestionBuilder(
         }
 
         return skippedPos
+    }
+
+    private fun resolveLemmaPosIdForSense(
+        senseId: Uuid,
+        posLabel: String,
+        pos: DictionaryPos?,
+        defaultLemmaPosId: Uuid?,
+        senseIdToLemmaPosId: Map<Uuid, Uuid>,
+        lemmaPosMapping: LemmaPosMapping
+    ): Uuid {
+        senseIdToLemmaPosId[senseId]?.let { return it }
+        val resolvedPos = pos ?: error("POS $posLabel not found in lemmaPosMapping")
+        val fallbackLemmaPosId = defaultLemmaPosId ?: error("POS $posLabel not found in lemmaPosMapping")
+        if (lemmaPosMapping.clusterCountForPos(resolvedPos) > 1) {
+            error("Missing lemma_pos hint for sense $senseId in multi-cluster POS $posLabel")
+        }
+        return fallbackLemmaPosId
     }
 
     /**

@@ -2,6 +2,7 @@
 
 package com.slovy.slovymovyapp.builder
 
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import java.io.File
@@ -523,9 +524,137 @@ class ProcessedOverRawIngestionTest {
         assertEquals(preventLemmaPosId, preventTranslations.single().lemma_pos_id)
     }
 
+    @Test
+    fun processed_over_raw_fails_when_multi_cluster_sense_hint_is_missing() {
+        val outDir = Files.createTempDirectory("processed_over_raw_missing_hint_test").toFile()
+        val serverDbManager = ServerDbManager(outDir)
+
+        val lang = "nl"
+        val word = "voorkomen"
+        val builder = JsonIngestionBuilder({ from, to -> serverDbManager.openTranslation(from, to) }, mapOf(word to 3.0))
+
+        val processedFile = resourceFile("processed_json_files/$lang/$word.json")
+        val rawFile = resourceFile("db_extract/$lang/$word.json")
+
+        builder.ingestRawOnly(
+            rawFile.readText(),
+            serverDbManager.openDictionary(lang)
+        )
+
+        val occurSenseId = com.slovy.slovymovyapp.ingestion.uuidParse("9a1a8666-81d1-3048-b400-08710a782d3f")
+        deleteLemmaPosHint(serverDbManager, lang, occurSenseId)
+
+        val exception = assertFailsWith<IllegalStateException> {
+            builder.ingestProcessedOverRaw(
+                processedFile.readText(),
+                word,
+                lang,
+                serverDbManager.openDictionary(lang)
+            )
+        }
+
+        assertEquals(
+            true,
+            exception.message?.contains("Missing lemma_pos hint") == true,
+            "Error should explain that the multi-cluster sense hint is missing"
+        )
+    }
+
+    @Test
+    fun translations_only_fails_when_multi_cluster_sense_hint_is_missing() {
+        val outDir = Files.createTempDirectory("translations_only_missing_hint_test").toFile()
+        val serverDbManager = ServerDbManager(outDir)
+
+        val lang = "nl"
+        val word = "voorkomen"
+        val builder = JsonIngestionBuilder({ from, to -> serverDbManager.openTranslation(from, to) }, mapOf(word to 3.0))
+
+        val processedFile = resourceFile("processed_json_files/$lang/$word.json")
+        val rawFile = resourceFile("db_extract/$lang/$word.json")
+        val dictDb = serverDbManager.openDictionary(lang)
+
+        builder.ingest(processedFile.readText(), rawFile.readText(), dictDb)
+
+        val occurSenseId = com.slovy.slovymovyapp.ingestion.uuidParse("9a1a8666-81d1-3048-b400-08710a782d3f")
+        val preventSenseId = com.slovy.slovymovyapp.ingestion.uuidParse("8b8a7239-f048-3aa6-9f01-0db625accec2")
+        deleteLemmaPosHint(serverDbManager, lang, occurSenseId)
+
+        val exception = assertFailsWith<IllegalStateException> {
+            builder.ingestTranslationsOnly(
+                translationsOnlyJson(occurSenseId.toString(), preventSenseId.toString()),
+                word,
+                lang,
+                serverDbManager.openDictionary(lang)
+            )
+        }
+
+        assertEquals(
+            true,
+            exception.message?.contains("Missing lemma_pos hint") == true,
+            "Error should explain that the multi-cluster sense hint is missing"
+        )
+    }
+
     private fun resourceFile(path: String): File {
         val cl = Thread.currentThread().contextClassLoader
         val url = cl.getResource(path) ?: error("Resource not found: $path")
         return File(url.toURI())
     }
+
+    private fun deleteLemmaPosHint(serverDbManager: ServerDbManager, lang: String, senseId: kotlin.uuid.Uuid) {
+        val hexSenseId = senseId.toByteArray().joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }
+        JdbcSqliteDriver("jdbc:sqlite:${serverDbManager.dictionaryDbFile(lang).absolutePath}").use { driver ->
+            driver.execute(
+                identifier = null,
+                sql = "DELETE FROM lemma_pos_sense_hint WHERE sense_id = X'$hexSenseId'",
+                parameters = 0
+            )
+        }
+    }
+
+    private fun translationsOnlyJson(occurSenseId: String, preventSenseId: String): String = """
+        {
+          "entries": [
+            {
+              "pos": "verb",
+              "senses": [
+                {
+                  "sense_id": "$occurSenseId",
+                  "sense_definition": "test",
+                  "learner_level": "A1",
+                  "frequency": "High",
+                  "semantic_group_id": "occur",
+                  "target_lang_definitions": {
+                    "uk": "траплятися"
+                  },
+                  "translations": {
+                    "uk": [
+                      {
+                        "target_lang_word": "траплятися"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "sense_id": "$preventSenseId",
+                  "sense_definition": "test",
+                  "learner_level": "A1",
+                  "frequency": "High",
+                  "semantic_group_id": "prevent",
+                  "target_lang_definitions": {
+                    "uk": "запобігати"
+                  },
+                  "translations": {
+                    "uk": [
+                      {
+                        "target_lang_word": "запобігати"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+    """.trimIndent()
 }
