@@ -1,0 +1,350 @@
+{
+    "word_family": [
+        "строитель",
+        "строительство",
+        "стройка",
+        "устройство",
+        "настроение",
+        "построить",
+        "настроить",
+        "устроить"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "9349ffb8-9851-3f1f-bc6c-49a857f7bff8",
+                    "sense_definition": "Сооружать, возводить здания или иные конструкции.",
+                    "learner_level": "A1",
+                    "frequency": "High",
+                    "semantic_group_id": "physical_construction",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Рабочие начали <строить> новый дом в центре города.",
+                            "target_lang_translations": {
+                                "en": "The workers started to <build> a new house in the city center."
+                            }
+                        },
+                        {
+                            "text": "Мой дедушка умел <строить> красивые деревянные беседки.",
+                            "target_lang_translations": {
+                                "en": "My grandfather knew how to <build> beautiful wooden gazebos."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "сооружать",
+                        "возводить",
+                        "воздвигать"
+                    ],
+                    "antonyms": [
+                        "разрушать",
+                        "сносить",
+                        "ломать"
+                    ],
+                    "common_phrases": [
+                        "строить дом",
+                        "строить мост",
+                        "строить дорогу"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To construct or erect buildings or other structures."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "build",
+                                "target_lang_sense_clarification": "general construction of buildings or structures"
+                            },
+                            {
+                                "target_lang_word": "construct",
+                                "target_lang_sense_clarification": "formal; to assemble from parts"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "b97b4f91-e04e-3ff2-aec3-0b406b3e6bdb",
+                    "sense_definition": "Созидать, создавать что-либо важное и долгосрочное (семью, жизнь, отношения).",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "abstract_creation",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Молодым людям нужно учиться <строить> крепкие отношения.",
+                            "target_lang_translations": {
+                                "en": "Young people need to learn to <build> strong relationships."
+                            }
+                        },
+                        {
+                            "text": "Он уехал в столицу, чтобы <строить> свою карьеру с нуля.",
+                            "target_lang_translations": {
+                                "en": "He left for the capital to <build> his career from scratch."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "создавать",
+                        "созидать"
+                    ],
+                    "antonyms": [
+                        "разрушать"
+                    ],
+                    "common_phrases": [
+                        "строить семью",
+                        "строить карьеру",
+                        "строить отношения",
+                        "строить жизнь"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To create or develop something important and long-lasting (family, life, relationships)."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "build",
+                                "target_lang_sense_clarification": "to develop relationships, career, or life over time"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "ac2f5bbe-d3d6-3e71-abfd-c2661392313e",
+                    "sense_definition": "Мысленно намечать, создавать в уме планы, проекты или догадки.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "abstract_creation",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Мы любим <строить> планы на летний отпуск заранее.",
+                            "target_lang_translations": {
+                                "en": "We love to <make> plans for our summer vacation in advance."
+                            }
+                        },
+                        {
+                            "text": "Не стоит <строить> пустые иллюзии по этому поводу.",
+                            "target_lang_translations": {
+                                "en": "You shouldn't <harbor> empty illusions about this."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "планировать",
+                        "намечать"
+                    ],
+                    "common_phrases": [
+                        "строить планы",
+                        "строить иллюзии",
+                        "строить догадки",
+                        "строить козни"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To mentally outline or create plans, projects, or conjectures."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "make",
+                                "target_lang_sense_clarification": "used with plans (make plans)"
+                            },
+                            {
+                                "target_lang_word": "formulate",
+                                "target_lang_sense_clarification": "to develop a theory, plan, or strategy"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "c4446758-9680-3ba9-a9e5-48a2848d657d",
+                    "sense_definition": "Вычерчивать геометрические фигуры или графики на основании заданных данных.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "technical_drawing",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "На уроке геометрии мы учились <строить> равнобедренный треугольник.",
+                            "target_lang_translations": {
+                                "en": "In geometry class, we learned to <construct> an isosceles triangle."
+                            }
+                        },
+                        {
+                            "text": "Компьютерная программа помогает быстро <строить> сложные графики функций.",
+                            "target_lang_translations": {
+                                "en": "The computer program helps to quickly <plot> complex function graphs."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "черти́ть",
+                        "вычерчивать"
+                    ],
+                    "common_phrases": [
+                        "строить график",
+                        "строить треугольник",
+                        "строить угол"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To draw geometric figures or graphs based on given data."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "construct",
+                                "target_lang_sense_clarification": "to draw a geometric figure using instruments"
+                            },
+                            {
+                                "target_lang_word": "plot",
+                                "target_lang_sense_clarification": "to draw a graph or curve"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "369bc11d-d0c0-3d62-b8a7-be4e7e91d6f3",
+                    "sense_definition": "Составлять предложения или текст, организуя слова в правильном порядке.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "linguistic_structure",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Иностранцам часто трудно правильно <строить> длинные фразы на русском языке.",
+                            "target_lang_translations": {
+                                "en": "Foreigners often find it difficult to correctly <construct> long phrases in Russian."
+                            }
+                        },
+                        {
+                            "text": "Учитель объяснил нам, как грамотно <строить> сложные предложения.",
+                            "target_lang_translations": {
+                                "en": "The teacher explained to us how to grammatically <construct> complex sentences."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "составлять"
+                    ],
+                    "common_phrases": [
+                        "строить фразы",
+                        "строить предложения",
+                        "строить речь"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To compose sentences or text by organizing words in the correct order."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "construct",
+                                "target_lang_sense_clarification": "to form sentences or arguments grammatically"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "a758ec33-29ef-3d7f-b6ff-229172ad8357",
+                    "sense_definition": "Изображать из себя кого-либо, притворяться кем-либо или делать гримасы.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "behavioral",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Хватит <строить> из себя обиженного, давай поговорим серьезно.",
+                            "target_lang_translations": {
+                                "en": "Stop <playing> the victim, let's talk seriously."
+                            }
+                        },
+                        {
+                            "text": "Маленькая девочка любила <строить> смешные рожи перед зеркалом.",
+                            "target_lang_translations": {
+                                "en": "The little girl loved to <make> funny faces in front of the mirror."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "изображать",
+                        "прикидываться"
+                    ],
+                    "common_phrases": [
+                        "строить из себя",
+                        "строить глазки",
+                        "строить рожи",
+                        "строить дурака"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "used in informal speech"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To pretend to be someone, act like someone, or make grimaces."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "play",
+                                "target_lang_sense_clarification": "to act the part of (e.g., play the victim)"
+                            },
+                            {
+                                "target_lang_word": "make",
+                                "target_lang_sense_clarification": "used with faces (make faces)"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "d697f6e6-0974-3152-b8df-bcab0ff2a3b1",
+                    "sense_definition": "Ставить людей в строй, шеренгу или колонну (обычно в военном контексте).",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "military",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Командир приказал <строить> солдат на плацу для проверки.",
+                            "target_lang_translations": {
+                                "en": "The commander ordered to <line up> the soldiers on the parade ground for inspection."
+                            }
+                        },
+                        {
+                            "text": "Учитель физкультуры начал <строить> детей по росту перед началом урока.",
+                            "target_lang_translations": {
+                                "en": "The PE teacher started to <line up> the children by height before the beginning of the lesson."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "выстраивать",
+                        "ставить"
+                    ],
+                    "common_phrases": [
+                        "строить солдат",
+                        "строить в колонну",
+                        "строить в шеренгу"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To arrange people in a line, rank, or column (usually in a military context)."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "line up",
+                                "target_lang_sense_clarification": "to arrange in a row"
+                            },
+                            {
+                                "target_lang_word": "form up",
+                                "target_lang_sense_clarification": "military formation"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

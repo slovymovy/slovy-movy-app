@@ -577,6 +577,10 @@ class DictionaryRepository(
                 sensesRows.filter { filter.contains(it.sense_id.toString()) }
             } ?: sensesRows
 
+            // Skip clusters with no matching senses for processed words. Raw-only words
+            // (onlineOnly=true) may have clusters without senses and should still be returned.
+            if (!onlineOnly && filteredSenses.isEmpty()) continue
+
             val pos = PartOfSpeech.valueOf(lemmaPosRow.pos.name)
 
             // Separate cached from uncached senses, convert to our data class

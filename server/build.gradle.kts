@@ -46,3 +46,10 @@ dependencies {
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.test)
 }
+
+tasks.register<JavaExec>("runDbPrepTool") {
+    group = "application"
+    description = "Run DbPrepTool CLI to build/rebuild SQLite DB files from db-extract + processed JSON"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.slovy.slovymovyapp.builder.DbPrepToolKt")
+}

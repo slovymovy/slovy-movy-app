@@ -59,6 +59,14 @@ class CopyRawDataPosFilterTest : BaseTest() {
             sourceQ.insertForm(verbFormId, verbPosId, "testing", "testing", FormSource.NATIVE)
             sourceQ.insertForm(adjFormId, adjPosId, "testy", "testy", FormSource.NATIVE)
 
+            // Insert sense routing hints for each POS
+            val nounSenseId = Uuid.random()
+            val verbSenseId = Uuid.random()
+            val adjSenseId = Uuid.random()
+            sourceQ.insertLemmaPosHint(nounSenseId, nounPosId)
+            sourceQ.insertLemmaPosHint(verbSenseId, verbPosId)
+            sourceQ.insertLemmaPosHint(adjSenseId, adjPosId)
+
             // Create target DB (separate from source)
             val targetDb = mgr.openLocalDictionary()
             val targetQ = targetDb.dictionaryQueries
@@ -100,6 +108,15 @@ class CopyRawDataPosFilterTest : BaseTest() {
             assertEquals(1, nounForms.size, "Should have NOUN forms")
             assertEquals(1, verbForms.size, "Should have VERB forms")
             assertEquals(0, adjForms.size, "Should NOT have ADJECTIVE forms")
+
+            // Verify: sense hints should only exist for copied POS
+            val nounHints = targetQ.selectLemmaPosHintsByLemmaPosId(nounPosId).executeAsList()
+            val verbHints = targetQ.selectLemmaPosHintsByLemmaPosId(verbPosId).executeAsList()
+            val adjHints = targetQ.selectLemmaPosHintsByLemmaPosId(adjPosId).executeAsList()
+
+            assertEquals(1, nounHints.size, "NOUN sense hint should be copied")
+            assertEquals(1, verbHints.size, "VERB sense hint should be copied")
+            assertEquals(0, adjHints.size, "ADJECTIVE sense hint should NOT be copied (filtered)")
         } finally {
             sourceDriver?.close()
             mgr.closeAll()

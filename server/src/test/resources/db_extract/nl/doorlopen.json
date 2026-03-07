@@ -1,0 +1,1156 @@
+{
+    "word": "doorlopen",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                "word": "doorlopen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "1876fda0-b022-4d1f-a62e-449f2dcc8c9a",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "infinitive"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "f84b9e25-a22b-43db-907c-49ebadda31b4",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "gerund",
+                            "neuter"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "f50aee55-26ca-4958-be07-e3b692bbb924",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "first-person",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "doorloop"
+                    },
+                    {
+                        "form_id": "f08d13d9-09f1-4a25-81b3-d2c9ac9aa3ad",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "first-person",
+                            "past",
+                            "singular"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "a01aeeba-2fec-4f0c-a901-5ba333fbebb7",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "doorloopt"
+                    },
+                    {
+                        "form_id": "b13d00d1-549a-4c94-a43b-cfc2954a49ac",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "doorloop"
+                    },
+                    {
+                        "form_id": "f91861d0-cb74-445f-9e35-be7c336913af",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "63d0d203-bf10-407b-b2c9-7ced9cc12942",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "formal",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "doorloopt"
+                    },
+                    {
+                        "form_id": "61bd2a91-4476-4411-849e-707d6041c98c",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "formal",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "fed7222a-9e3d-4739-a5f1-e4d7afc83991",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "doorloopt"
+                    },
+                    {
+                        "form_id": "308027c8-dfa0-4ce1-bbbc-4dda43e65eb0",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "e72f3e92-15dc-47e5-8e3a-7d2d9e8cc3e5",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "plural",
+                            "present"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "4478116c-09ef-4f0e-b8f5-0370178530eb",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "past",
+                            "plural"
+                        ],
+                        "form": "doorliepen"
+                    },
+                    {
+                        "form_id": "fa710042-0363-4710-9f52-d2de1c87fcb0",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "imperative",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "doorloop"
+                    },
+                    {
+                        "form_id": "445451dc-edfd-447a-98b3-30dade2c622b",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "doorlopend"
+                    },
+                    {
+                        "form_id": "9921f120-c301-4360-a467-e0ec8776a743",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "tags": [
+                            "participle",
+                            "past"
+                        ],
+                        "form": "doorlopen"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "716d4c11-6d01-3413-918c-60937cbbfd64",
+                        "entry_id": "1a9c09eb-922c-3f5d-8886-e74fa432f5ff",
+                        "glosses": [
+                            "to go through, to go from start to end"
+                        ],
+                        "tags": [
+                            "transitive"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                "word": "doorlopen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "22a4f32d-ba64-4a24-a83d-e765e8262faf",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "infinitive"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "76634d80-4a4a-4c13-b3fd-60c9163bc430",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "gerund",
+                            "neuter"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "7287f7f7-de99-4ab0-a34f-d5918bb958e2",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "loop door"
+                    },
+                    {
+                        "form_id": "32cedc36-69d5-4bf7-abe3-f05a96577f84",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "past",
+                            "singular"
+                        ],
+                        "form": "liep door"
+                    },
+                    {
+                        "form_id": "c16c4774-aa2a-42f9-8513-521341b91807",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "first-person",
+                            "present",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "doorloop"
+                    },
+                    {
+                        "form_id": "c4df1d14-b42f-47ff-b407-d4b493167009",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "first-person",
+                            "past",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "34e574da-6eac-430e-be4b-d9ecefcea1ec",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "loopt door"
+                    },
+                    {
+                        "form_id": "7dbbc54c-a76d-494e-b893-5b435a7dc930",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "loop door"
+                    },
+                    {
+                        "form_id": "e717fd70-b5c3-4f35-9673-0d90aa909501",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "liep door"
+                    },
+                    {
+                        "form_id": "d0510986-2a61-4271-bdf7-056fb252cd90",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "doorloopt"
+                    },
+                    {
+                        "form_id": "0723f79b-5640-470a-9ee4-a55afd84909a",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "7ea39485-258a-4682-a516-dcc0c272e2f2",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "loopt door"
+                    },
+                    {
+                        "form_id": "9536b017-a9f8-4dc3-94a6-f1393711dc2f",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "liep door"
+                    },
+                    {
+                        "form_id": "8ab7d44d-8df7-4e91-bca5-206df28d1cf3",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "formal",
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "doorloopt"
+                    },
+                    {
+                        "form_id": "d9af27eb-d808-4220-a9ec-fb2a025f3d76",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "formal",
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "4fc4b1e2-9a09-4950-87f0-027cacc0de97",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "loopt door"
+                    },
+                    {
+                        "form_id": "28799996-5b77-49fe-937b-2a36d62ce6b7",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "liep door"
+                    },
+                    {
+                        "form_id": "f48f8e6d-d95d-4336-a5b0-922b106e7fa8",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "doorloopt"
+                    },
+                    {
+                        "form_id": "e0d9d9b4-44ed-4bd7-b444-b9d27a78cfb8",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "past",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "3c266929-dd31-49e3-b664-c074094f9991",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "main-clause",
+                            "plural",
+                            "present"
+                        ],
+                        "form": "lopen door"
+                    },
+                    {
+                        "form_id": "dde45f78-42a8-451b-9c30-c99187bba0b8",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "plural"
+                        ],
+                        "form": "liepen door"
+                    },
+                    {
+                        "form_id": "65fe997f-0719-4819-9944-7860b9308e50",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "plural",
+                            "present",
+                            "subordinate-clause"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "373a0ed0-d5a4-429a-8c20-d606967ab68d",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "past",
+                            "plural",
+                            "subordinate-clause"
+                        ],
+                        "form": "doorliepen"
+                    },
+                    {
+                        "form_id": "1b7655ac-1e6d-4698-a025-e51d6836a0fe",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "imperative",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "loop door"
+                    },
+                    {
+                        "form_id": "28cc4069-9a14-41ec-8028-f214dfead28f",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "present"
+                        ],
+                        "form": "doorlopend"
+                    },
+                    {
+                        "form_id": "47fbf80a-0cce-41e5-9205-24f2a57a5d25",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "past"
+                        ],
+                        "form": "doorgelopen"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "cee3e4ea-bc4d-3c15-b427-355122f90e81",
+                        "entry_id": "dc86d819-67c1-3bd3-ab89-0641da31c77b",
+                        "glosses": [
+                            "to keep going, to move on, to carry on, to continue"
+                        ],
+                        "tags": [
+                            "intransitive"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "a9c05278-ff2e-3667-8a27-f8db5cba9e7d",
+                "word": "doorlopen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "67f5dc35-9243-42b9-aefd-d62f638201f6",
+                        "entry_id": "a9c05278-ff2e-3667-8a27-f8db5cba9e7d",
+                        "tags": [
+                            "adverbial",
+                            "predicative"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "5884c0eb-74aa-402d-80a9-5a3a61ccccbe",
+                        "entry_id": "a9c05278-ff2e-3667-8a27-f8db5cba9e7d",
+                        "tags": [
+                            "feminine",
+                            "indefinite",
+                            "masculine",
+                            "singular"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "9ea3edc4-757f-4a79-94b0-134e46ebb3a6",
+                        "entry_id": "a9c05278-ff2e-3667-8a27-f8db5cba9e7d",
+                        "tags": [
+                            "indefinite",
+                            "neuter",
+                            "singular"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "03502be8-bfe2-4a63-8605-eab3a4909c1d",
+                        "entry_id": "a9c05278-ff2e-3667-8a27-f8db5cba9e7d",
+                        "tags": [
+                            "indefinite",
+                            "plural"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "ce2b88f7-1291-4a84-88b8-6cc335a1c700",
+                        "entry_id": "a9c05278-ff2e-3667-8a27-f8db5cba9e7d",
+                        "tags": [
+                            "definite"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "5b28be34-0f07-442a-a612-2d5c6e1a5a76",
+                        "entry_id": "a9c05278-ff2e-3667-8a27-f8db5cba9e7d",
+                        "tags": [
+                            "partitive"
+                        ],
+                        "form": "doorlopens"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "4b22d55c-cb98-3373-aae7-ce550f7f83b3",
+                        "entry_id": "a9c05278-ff2e-3667-8a27-f8db5cba9e7d",
+                        "glosses": [
+                            "past participle of doorlopen"
+                        ],
+                        "tags": [
+                            "form-of",
+                            "participle",
+                            "past"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "f426f951-d260-3319-99fa-21ae10dfbdf7",
+                "word": "doorlopen",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "1e4d8307-39fb-3b71-bfa3-957e215fd1aa",
+                        "entry_id": "f426f951-d260-3319-99fa-21ae10dfbdf7",
+                        "glosses": [
+                            "meervoud van het zelfstandig naamwoord doorloop"
+                        ],
+                        "tags": [
+                            "form-of",
+                            "plural"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "83203dde-c32a-3850-bd06-e6f09e5d8fcf",
+                "word": "doorlopen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "d5cb723c-e238-4cd2-b902-62816723853d",
+                        "entry_id": "83203dde-c32a-3850-bd06-e6f09e5d8fcf",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "liep door"
+                    },
+                    {
+                        "form_id": "bc109593-e25a-44cc-8348-1c52f855579a",
+                        "entry_id": "83203dde-c32a-3850-bd06-e6f09e5d8fcf",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "doorgelopen"
+                    },
+                    {
+                        "form_id": "c89f0433-00a4-4f4d-a509-185222a45626",
+                        "entry_id": "83203dde-c32a-3850-bd06-e6f09e5d8fcf",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "[A] dóórlopen"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "afaeb941-de6a-30ed-abf6-b97a3e656776",
+                        "entry_id": "83203dde-c32a-3850-bd06-e6f09e5d8fcf",
+                        "glosses": [
+                            "lopen tot men ergens doorheen is"
+                        ],
+                        "tags": [
+                            "intransitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "90fc28f5-ae76-4c71-b7bd-51836492e7fa",
+                                "sense_id": "afaeb941-de6a-30ed-abf6-b97a3e656776",
+                                "text": "Ik liep door de tunnel tot ik aan het andere einde was gekomen."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "2c6f51b6-b524-35cf-a56b-cca2de570d07",
+                        "entry_id": "83203dde-c32a-3850-bd06-e6f09e5d8fcf",
+                        "glosses": [
+                            "voortgaan met lopen, in een wat hoger tempo dan normaal"
+                        ],
+                        "tags": [
+                            "intransitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "d9197a34-b8db-488b-864d-dcd044e3b84f",
+                                "sense_id": "2c6f51b6-b524-35cf-a56b-cca2de570d07",
+                                "text": "Wij moesten hard doorlopen om de trein te kunnen halen."
+                            },
+                            {
+                                "example_id": "a472c4fc-1b54-4c96-a6b9-c030c42fd3b1",
+                                "sense_id": "2c6f51b6-b524-35cf-a56b-cca2de570d07",
+                                "text": "De rest van de nacht was Kleine Woord doorgelopen zonder zich ook maar een enkel ogenblik moe te voelen of zelfs te rusten."
+                            },
+                            {
+                                "example_id": "a980ad3c-b692-4a9b-a540-3c685cc0e84a",
+                                "sense_id": "2c6f51b6-b524-35cf-a56b-cca2de570d07",
+                                "text": "Terwijl ik dagenlang alleen doorliep richting Canada vroeg ik me steeds vaker af wat er zou gebeuren als ik morgen dood zou gaan. Wat zou ik mijn kinderen dan nalaten?"
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "3afc329a-11a1-3e7c-bd94-c85ea657c3c8",
+                        "entry_id": "83203dde-c32a-3850-bd06-e6f09e5d8fcf",
+                        "glosses": [
+                            "met elkaar vermengd raken"
+                        ],
+                        "tags": [
+                            "intransitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "dc1b7f77-56aa-433c-be9a-bfb64a1bdb21",
+                                "sense_id": "3afc329a-11a1-3e7c-bd94-c85ea657c3c8",
+                                "text": "Na het wassen op een te warme temperatuur waren de kleuren doorgelopen."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "76b81dc7-a7c7-3d9d-9647-589e7942ea1b",
+                "word": "doorlopen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "2624bb18-8d8d-4780-8cbd-7655919c6dec",
+                        "entry_id": "76b81dc7-a7c7-3d9d-9647-589e7942ea1b",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "106157e2-1072-4398-8361-17c62d6baff9",
+                        "entry_id": "76b81dc7-a7c7-3d9d-9647-589e7942ea1b",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "doorlopen"
+                    },
+                    {
+                        "form_id": "d381af62-6966-4868-ba9f-a60864ff6c60",
+                        "entry_id": "76b81dc7-a7c7-3d9d-9647-589e7942ea1b",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "[B] doorlópen"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "50c0b0d1-2200-308b-ac94-c5a691310ea4",
+                        "entry_id": "76b81dc7-a7c7-3d9d-9647-589e7942ea1b",
+                        "glosses": [
+                            "iets als een een cursus, opleiding e.d. stapsgewijs voltooien"
+                        ],
+                        "tags": [
+                            "form-of",
+                            "transitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "2402c05c-317b-4937-9aee-6bdabd755315",
+                                "sense_id": "50c0b0d1-2200-308b-ac94-c5a691310ea4",
+                                "text": "Hij moest een heel traject doorlopen."
+                            },
+                            {
+                                "example_id": "6f8c4a9a-70d0-4973-a499-4c9fb018c187",
+                                "sense_id": "50c0b0d1-2200-308b-ac94-c5a691310ea4",
+                                "text": "Nadat ik de opleiding had doorlopen, kon ik voor de nieuwe baan solliciteren."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "46891d2c-dd5f-3d46-946e-dc72a8606e45",
+                        "entry_id": "76b81dc7-a7c7-3d9d-9647-589e7942ea1b",
+                        "glosses": [
+                            "voltooid deelwoord van doorlopen"
+                        ],
+                        "tags": [
+                            "form-of"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": [],
+        "fr-extract.jsonl": [
+            {
+                "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                "word": "doorlopen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "0140cf4d-90de-40e5-8a0b-47bb3191d12c",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "singular"
+                        ],
+                        "form": "loop door"
+                    },
+                    {
+                        "form_id": "c6789805-8647-446d-b296-5e4819d12cda",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "singular",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "liep door"
+                    },
+                    {
+                        "form_id": "18474584-75bd-4a3b-b292-57dbf488e9b3",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "informal"
+                        ],
+                        "form": "loopt door"
+                    },
+                    {
+                        "form_id": "dba9ac3e-6e02-49ea-97e0-114a8d3014df",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "loopt door"
+                    },
+                    {
+                        "form_id": "0f70cb93-94cc-4498-8fce-48093e0cae38",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "plural"
+                        ],
+                        "form": "lopen door"
+                    },
+                    {
+                        "form_id": "2e079f6f-9437-4a27-b021-e80ae18d8260",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "plural",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "liepen door"
+                    },
+                    {
+                        "form_id": "a13608e9-9273-402a-b32b-f1554d651b6c",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "plural",
+                            "informal"
+                        ],
+                        "form": "lopen door"
+                    },
+                    {
+                        "form_id": "6837b3da-99e3-4909-91d1-1af24c897b56",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "present",
+                            "third-person",
+                            "plural"
+                        ],
+                        "form": "lopen door"
+                    },
+                    {
+                        "form_id": "b4f5263d-a502-495a-a2eb-1115b09f0f35",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "loopt door"
+                    },
+                    {
+                        "form_id": "554275e1-f3e9-4c08-a8c0-801d252e78da",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "preterite",
+                            "second-person"
+                        ],
+                        "form": "liep door"
+                    },
+                    {
+                        "form_id": "aa6065c6-a0d8-4dce-aa7d-ceca0fa45083",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "auxiliary"
+                        ],
+                        "form": "zijn, hebben"
+                    },
+                    {
+                        "form_id": "d6a23574-ae1a-4af9-870e-76bc8b53e15f",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "lopen doord"
+                    },
+                    {
+                        "form_id": "9fb5ab25-4e62-4e01-9858-5b870a03d1a2",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "participle",
+                            "past"
+                        ],
+                        "form": "doorgelopen"
+                    },
+                    {
+                        "form_id": "d4d3d439-9d43-4b15-8d77-7ee29862de26",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "dóórlopen"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "1d1c3000-6af3-39a6-be62-378684ec0f6b",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "glosses": [
+                            "Sillonner."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "776aa44b-b296-32f4-bbd6-03634be5e92e",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "glosses": [
+                            "Traverser."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "9c0227b8-eaaa-3828-adee-4c1e9b0d34d3",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "glosses": [
+                            "Continuer, circuler."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "c1bef74b-0a92-3ff2-9283-34b02c0b6660",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "glosses": [
+                            "Se mêler (en parlant de couleurs)."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "b8c1c20f-ed36-3bc1-b523-95f311138a3d",
+                        "entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "glosses": [
+                            "Parcourir."
+                        ],
+                        "tags": [
+                            "transitive"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "071123ba-9f3e-47c4-82b6-6deacc2e493c",
+                        "source_entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "source_sense_ids": [],
+                        "source_sense_description": "traverser, parcourir",
+                        "linkage_type": "synonyms",
+                        "word": "doorkruisen"
+                    },
+                    {
+                        "linkage_id": "0902c7ea-3fb8-44f9-ab7d-05b2a8b2eb3b",
+                        "source_entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "source_sense_ids": [],
+                        "source_sense_description": "traverser, parcourir",
+                        "linkage_type": "synonyms",
+                        "word": "doorstappen"
+                    },
+                    {
+                        "linkage_id": "f00da369-3f0b-42b9-a1fe-81f43c3e3710",
+                        "source_entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "source_sense_ids": [],
+                        "source_sense_description": "traverser, parcourir",
+                        "linkage_type": "synonyms",
+                        "word": "bestendigen"
+                    },
+                    {
+                        "linkage_id": "243ea698-9b20-48a6-82fe-d17a85f4e202",
+                        "source_entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "source_sense_ids": [],
+                        "source_sense_description": "continuer",
+                        "linkage_type": "synonyms",
+                        "word": "continueren"
+                    },
+                    {
+                        "linkage_id": "7646c829-d6b0-45ef-a853-7933396335e0",
+                        "source_entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "source_sense_ids": [],
+                        "source_sense_description": "continuer",
+                        "linkage_type": "synonyms",
+                        "word": "voortduren"
+                    },
+                    {
+                        "linkage_id": "6a07d244-611d-4260-a423-9fed4af4356d",
+                        "source_entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "source_sense_ids": [],
+                        "source_sense_description": "se mêler",
+                        "linkage_type": "synonyms",
+                        "word": "zich vermengen"
+                    },
+                    {
+                        "linkage_id": "67d00511-0cf0-482a-865b-9e695c0aa2c3",
+                        "source_entry_id": "87128588-8b84-344b-a58c-a1dbc48fb24c",
+                        "source_sense_ids": [],
+                        "source_sense_description": "parcourir",
+                        "linkage_type": "antonyms",
+                        "word": "slenteren"
+                    }
+                ]
+            },
+            {
+                "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                "word": "doorlopen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "368041e7-ea9a-4f1d-a5ff-f0ee672266e7",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "singular"
+                        ],
+                        "form": "doorloop"
+                    },
+                    {
+                        "form_id": "c393a56f-dfe9-4eda-955a-364fcb875880",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "singular",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "9fd4ef42-f5c9-44c8-a12d-88211ce66dc1",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "informal"
+                        ],
+                        "form": "doorloopt"
+                    },
+                    {
+                        "form_id": "fd8876e1-a243-4efb-b906-7deab7f1a613",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "tags": [
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "doorloopt"
+                    },
+                    {
+                        "form_id": "7a12a0f7-a374-4f6e-969b-3c243b29f367",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "plural",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "doorliepen"
+                    },
+                    {
+                        "form_id": "1c4c145b-374b-485e-a99f-13c749c13118",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "tags": [
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "doorloopt"
+                    },
+                    {
+                        "form_id": "4be447fd-7552-459f-9455-64ea15e8144d",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "tags": [
+                            "preterite",
+                            "second-person"
+                        ],
+                        "form": "doorliep"
+                    },
+                    {
+                        "form_id": "2e31529c-d806-4dbc-83ea-53aa3d5aa159",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "tags": [
+                            "auxiliary"
+                        ],
+                        "form": "hebben"
+                    },
+                    {
+                        "form_id": "1559a7af-f8e5-4be3-ac02-15adc580b41a",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "doorlopend"
+                    },
+                    {
+                        "form_id": "1b9bd738-ef6e-4900-aec9-814a3b1a575c",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "doorlópen"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "2e7e9bac-09ef-37c1-8446-66a95858f8ff",
+                        "entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "glosses": [
+                            "Obtenir un diplôme, terminer ses études."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "3a9161a7-e2d6-4b4d-a6e4-fddb2a764a8a",
+                        "source_entry_id": "5624905d-f548-351c-8352-e422d4556b61",
+                        "source_sense_ids": [
+                            "2e7e9bac-09ef-37c1-8446-66a95858f8ff"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "volgen"
+                    }
+                ]
+            }
+        ],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": []
+    }
+}

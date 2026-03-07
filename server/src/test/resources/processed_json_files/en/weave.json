@@ -1,0 +1,321 @@
+{
+    "word_family": [
+        "weaver",
+        "interweave",
+        "unweave",
+        "weaving",
+        "interwoven"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "1b2bb3f2-39e0-3060-8ee5-5982c7e19263",
+                    "sense_definition": "To make cloth, a carpet, or a basket by crossing threads or strips of material over and under each other.",
+                    "learner_level": "B2",
+                    "frequency": "High",
+                    "semantic_group_id": "textile_creation",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "My grandmother taught me how to <w>weave</w> wool into warm blankets.",
+                            "target_lang_translations": {
+                                "ru": "Моя бабушка научила меня <w>ткать</w> тёплые одеяла из шерсти."
+                            }
+                        },
+                        {
+                            "text": "The machine <w>weaves</w> cotton threads together to create the fabric.",
+                            "target_lang_translations": {
+                                "ru": "Машина <w>переплетает</w> хлопковые нити, создавая ткань."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "braid",
+                        "entwine",
+                        "plait",
+                        "interlace"
+                    ],
+                    "antonyms": [
+                        "unravel",
+                        "unpick"
+                    ],
+                    "common_phrases": [
+                        "weave a basket",
+                        "weave a rug",
+                        "weave fabric",
+                        "hand-woven"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "Past: wove; Past participle: woven"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Изготавливать ткань, ковёр или корзину, переплетая нити или полоски материала."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "ткать",
+                                "target_lang_sense_clarification": "ткань, ковры"
+                            },
+                            {
+                                "target_lang_word": "плести",
+                                "target_lang_sense_clarification": "корзины, косы"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "4e1eeb7e-776e-391d-a0f9-732403cdab18",
+                    "sense_definition": "To move somewhere by turning and changing direction frequently to avoid obstacles.",
+                    "learner_level": "B2",
+                    "frequency": "High",
+                    "semantic_group_id": "movement",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The motorcycle <w>weaved</w> through the heavy traffic to get ahead.",
+                            "target_lang_translations": {
+                                "ru": "Мотоцикл <w>петлял</w> в плотном потоке машин, чтобы проехать вперёд."
+                            }
+                        },
+                        {
+                            "text": "He managed to <w>weave</w> past three defenders and score a goal.",
+                            "target_lang_translations": {
+                                "ru": "Ему удалось <w>проскользнуть</w> мимо трёх защитников, петляя, и забить гол."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "zigzag",
+                        "swerve",
+                        "wind",
+                        "snake"
+                    ],
+                    "common_phrases": [
+                        "weave through traffic",
+                        "weave in and out",
+                        "weave one's way"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "Past and participle: weaved"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Двигаться, часто меняя направление, чтобы избежать препятствий."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "петлять",
+                                "target_lang_sense_clarification": "двигаться зигзагами"
+                            },
+                            {
+                                "target_lang_word": "лавировать",
+                                "target_lang_sense_clarification": "между препятствиями"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "c5e4c3cf-c183-323e-a410-3bc057333578",
+                    "sense_definition": "To make a web or cocoon by producing threads from the body (used of spiders or insects).",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "textile_creation",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The spider <w>wove</w> a complex web between the branches of the tree.",
+                            "target_lang_translations": {
+                                "ru": "Паук <w>сплёл</w> сложную паутину между ветвями дерева."
+                            }
+                        },
+                        {
+                            "text": "Silkworms <w>weave</w> cocoons before they transform into moths.",
+                            "target_lang_translations": {
+                                "ru": "Шелкопряды <w>вьют</w> коконы перед превращением в мотыльков."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "spin"
+                    ],
+                    "common_phrases": [
+                        "weave a web",
+                        "weave a cocoon"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Создавать паутину или кокон, выделяя нити из тела (о пауках или насекомых)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "плести",
+                                "target_lang_sense_clarification": "паутину"
+                            },
+                            {
+                                "target_lang_word": "вить",
+                                "target_lang_sense_clarification": "кокон, гнездо"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "e61bf2f7-8937-3407-bc74-139096b65c90",
+                    "sense_definition": "To combine different elements or details into a complex story or pattern.",
+                    "learner_level": "C1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "figurative_creation",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The author <w>wove</w> historical facts into the fictional narrative.",
+                            "target_lang_translations": {
+                                "ru": "Автор <w>вплёл</w> исторические факты в вымышленное повествование."
+                            }
+                        },
+                        {
+                            "text": "She knows how to <w>weave</w> a compelling tale of mystery and romance.",
+                            "target_lang_translations": {
+                                "ru": "Она умеет <w>сплести</w> захватывающую историю из тайны и романтики."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "compose",
+                        "fabricate",
+                        "construct",
+                        "blend"
+                    ],
+                    "antonyms": [
+                        "separate"
+                    ],
+                    "common_phrases": [
+                        "weave a story",
+                        "weave a plot",
+                        "weave together",
+                        "weave magic"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Объединять различные элементы или детали в сложную историю или узор."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "сплетать",
+                                "target_lang_sense_clarification": "соединять воедино"
+                            },
+                            {
+                                "target_lang_word": "вплетать",
+                                "target_lang_sense_clarification": "добавлять элементы в целое"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "10e5b6e4-5abf-3a13-a08a-0aa6c0780b47",
+                    "sense_definition": "An artificial hairpiece or extensions attached to natural hair to change its appearance.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "hair_fashion",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "She went to the salon to get a new <w>weave</w> for the wedding.",
+                            "target_lang_translations": {
+                                "ru": "Она пошла в салон, чтобы сделать новые <w>накладные пряди</w> к свадьбе."
+                            }
+                        },
+                        {
+                            "text": "Her <w>weave</w> looked so natural that no one realized it wasn't her real hair.",
+                            "target_lang_translations": {
+                                "ru": "Её <w>накладные волосы</w> выглядели так естественно, что никто не понял, что это не её настоящие волосы."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "hair extension",
+                        "hairpiece"
+                    ],
+                    "common_phrases": [
+                        "wear a weave",
+                        "get a weave"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Искусственные пряди или накладка, прикрепляемые к натуральным волосам."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "накладные волосы",
+                                "target_lang_sense_clarification": "общий термин"
+                            },
+                            {
+                                "target_lang_word": "наращивание",
+                                "target_lang_sense_clarification": "процедура или результат"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "fa39a850-6137-3645-b36b-d254191791fe",
+                    "sense_definition": "The pattern or style in which threads are crossed to make fabric.",
+                    "learner_level": "C2",
+                    "frequency": "Low",
+                    "semantic_group_id": "textile_creation",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "This shirt has a very loose <w>weave</w>, making it breathable for summer.",
+                            "target_lang_translations": {
+                                "ru": "У этой рубашки очень свободное <w>переплетение</w>, что делает её дышащей для лета."
+                            }
+                        },
+                        {
+                            "text": "You can identify the quality of the rug by looking closely at its <w>weave</w>.",
+                            "target_lang_translations": {
+                                "ru": "Качество ковра можно определить, внимательно рассмотрев его <w>плетение</w>."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "texture",
+                        "pattern"
+                    ],
+                    "common_phrases": [
+                        "tight weave",
+                        "loose weave",
+                        "plain weave"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Узор или способ переплетения нитей при создании ткани."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "переплетение",
+                                "target_lang_sense_clarification": "способ соединения нитей"
+                            },
+                            {
+                                "target_lang_word": "плетение",
+                                "target_lang_sense_clarification": "структура ткани"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

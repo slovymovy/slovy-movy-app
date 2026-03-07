@@ -2,6 +2,7 @@
 
 package com.slovy.slovymovyapp.builder
 
+import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.ingestion.ExtractedWordData
 import com.slovy.slovymovyapp.ingestion.ExtractedWordEntry
@@ -99,12 +100,15 @@ class FormDeduplicationTest {
         assertEquals(1, lemmas.size, "Should have exactly one lemma for '$word'")
         val lemmaId = lemmas.first().id
 
-        // Get all lemma_pos entries (should be just NOUN)
-        val lemmaPosIds = dictQ.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
-        assertEquals(1, lemmaPosIds.size, "Should have exactly one POS entry for '$word'")
+        // The two-step path creates an extra verb cluster from the raw verb entry (no senses, filtered at read time).
+        // We verify 2 POS in DB and check forms for the noun entry specifically.
+        val lemmaPosEntries = dictQ.selectLemmaPosByLemmaId(lemmaId).executeAsList()
+        assertEquals(2, lemmaPosEntries.size, "Should have 2 POS entries for '$word' (noun + verb from raw)")
 
-        // Get all forms for this lemma_pos (with IDs for tag lookup)
-        val formsInDb = dictQ.selectFormsWithIdByLemmaPosId(lemmaPosIds.first()).executeAsList()
+        val nounLemmaPosId = lemmaPosEntries.first { it.pos == DictionaryPos.NOUN }.id
+
+        // Get all forms for the noun lemma_pos (with IDs for tag lookup)
+        val formsInDb = dictQ.selectFormsWithIdByLemmaPosId(nounLemmaPosId).executeAsList()
 
         val actualFormKeys = formsInDb.map { form ->
             val tags = dictQ.selectFormTagsByFormId(form.form_id).executeAsList().map { it.tag }

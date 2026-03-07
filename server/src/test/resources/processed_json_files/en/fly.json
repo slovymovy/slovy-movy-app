@@ -1,0 +1,617 @@
+{
+    "word_family": [
+        "flight",
+        "flyer",
+        "flier",
+        "flying",
+        "overfly",
+        "outfly",
+        "gadfly",
+        "dragonfly",
+        "firefly",
+        "horsefly"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "9c4bd976-cf08-33f3-b4ce-411d0bdfa77c",
+                    "sense_definition": "To travel through the air using wings or an aircraft.",
+                    "learner_level": "A1",
+                    "frequency": "High",
+                    "semantic_group_id": "motion_air",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Birds <w>fly</w> south to warmer regions during the winter.",
+                            "target_lang_translations": {
+                                "ru": "Зимой птицы <w>летят</w> на юг, в теплые края."
+                            }
+                        },
+                        {
+                            "text": "We plan to <w>fly</w> to Paris for our summer vacation.",
+                            "target_lang_translations": {
+                                "ru": "Мы планируем <w>полететь</w> в Париж в летний отпуск."
+                            }
+                        },
+                        {
+                            "text": "Penguins are birds, but they cannot <w>fly</w> in the air.",
+                            "target_lang_translations": {
+                                "ru": "Пингвины — это птицы, но они не умеют <w>летать</w> по воздуху."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "soar",
+                        "glide"
+                    ],
+                    "antonyms": [
+                        "walk"
+                    ],
+                    "common_phrases": [
+                        "fly away",
+                        "fly high",
+                        "learn to fly"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Перемещаться по воздуху с помощью крыльев или на летательном аппарате."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "летать",
+                                "target_lang_sense_clarification": "способность или повторяющееся действие"
+                            },
+                            {
+                                "target_lang_word": "лететь",
+                                "target_lang_sense_clarification": "однократное действие или направление"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "88ca5a0e-85a6-3054-bca4-5dac0c3920f0",
+                    "sense_definition": "To move or pass very quickly.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "motion_speed",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Time seems to <w>fly</w> when you are having fun with friends.",
+                            "target_lang_translations": {
+                                "ru": "Кажется, что время <w>летит</w>, когда весело проводишь время с друзьями."
+                            }
+                        },
+                        {
+                            "text": "He <w>flew</w> out of the house to catch the bus on time.",
+                            "target_lang_translations": {
+                                "ru": "Он <w>вылетел</w> из дома, чтобы успеть на автобус."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "rush",
+                        "dart",
+                        "zoom",
+                        "hurry",
+                        "move quickly",
+                        "flit",
+                        "speed",
+                        "race"
+                    ],
+                    "common_phrases": [
+                        "time flies",
+                        "fly by"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Двигаться или проходить очень быстро."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "лететь",
+                                "target_lang_sense_clarification": "быстро двигаться, мчаться"
+                            },
+                            {
+                                "target_lang_word": "пролетать",
+                                "target_lang_sense_clarification": "о времени"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "df3def11-7dc0-3cf5-a235-1eb9af3188f4",
+                    "sense_definition": "To transport people or goods by aircraft, or to pilot an aircraft.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "motion_air",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The pilot <w>flew</w> the plane safely through the heavy storm.",
+                            "target_lang_translations": {
+                                "ru": "Пилот благополучно <w>вел</w> самолет сквозь сильный шторм."
+                            }
+                        },
+                        {
+                            "text": "They <w>fly</w> fresh vegetables from South America to the markets every day.",
+                            "target_lang_translations": {
+                                "ru": "Они ежедневно <w>перевозят</w> свежие овощи из Южной Америки на рынки самолетом."
+                            }
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Перевозить людей или грузы по воздуху или управлять летательным аппаратом."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "управлять",
+                                "target_lang_sense_clarification": "самолетом (пилотировать)"
+                            },
+                            {
+                                "target_lang_word": "перевозить",
+                                "target_lang_sense_clarification": "по воздуху"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "ede00630-24ed-3f29-92bd-68529d2a6cb5",
+                    "sense_definition": "To be accepted, effective, or successful (often used in the negative).",
+                    "learner_level": "C1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "success",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "That excuse will not <w>fly</w> with the teacher because she knows the truth.",
+                            "target_lang_translations": {
+                                "ru": "Эта отговорка не <w>пройдет</w> с учителем, потому что она знает правду."
+                            }
+                        },
+                        {
+                            "text": "I do not think this new business plan is going to <w>fly</w>.",
+                            "target_lang_translations": {
+                                "ru": "Я не думаю, что этот новый бизнес-план <w>сработает</w>."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "Used to indicate if an idea or excuse is acceptable."
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Быть принятым, убедительным или успешным (часто в отрицании)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "проходить",
+                                "target_lang_sense_clarification": "быть принятым (об отговорках, идеях)"
+                            },
+                            {
+                                "target_lang_word": "сработать",
+                                "target_lang_sense_clarification": "иметь успех"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "6eaca3da-a7a6-3157-ae9e-70fcaabf8143",
+                    "sense_definition": "To run away or escape from danger.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "escape",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The villagers had to <w>fly</w> from their homes when the war started.",
+                            "target_lang_translations": {
+                                "ru": "Жителям деревни пришлось <w>бежать</w> из своих домов, когда началась война."
+                            }
+                        },
+                        {
+                            "text": "He advised them to <w>fly</w> for their lives before the enemy arrived.",
+                            "target_lang_translations": {
+                                "ru": "Он посоветовал им <w>бежать</w>, спасая свои жизни, пока не прибыл враг."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "flee",
+                        "escape",
+                        "abscond"
+                    ],
+                    "antonyms": [
+                        "stay",
+                        "remain"
+                    ],
+                    "common_phrases": [
+                        "fly the coop"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "dated",
+                            "comment": "Often found in literary or older contexts."
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Убегать или спасаться бегством от опасности."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "бежать",
+                                "target_lang_sense_clarification": "спасаться бегством"
+                            },
+                            {
+                                "target_lang_word": "спасаться",
+                                "target_lang_sense_clarification": "уходить от опасности"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "0c861176-caff-3170-86d8-f7eab25bb597",
+                    "sense_definition": "To display a flag on a flagpole.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "display",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The ship <w>flies</w> the national flag while in the harbor.",
+                            "target_lang_translations": {
+                                "ru": "Корабль <w>вывешивает</w> национальный флаг, находясь в гавани."
+                            }
+                        },
+                        {
+                            "text": "On royal birthdays, the castle <w>flies</w> a special banner.",
+                            "target_lang_translations": {
+                                "ru": "В дни рождения членов королевской семьи замок <w>поднимает</w> особое знамя."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "fly the flag"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Поднимать флаг на флагштоке или (о флаге) развеваться."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "развеваться",
+                                "target_lang_sense_clarification": "о флаге"
+                            },
+                            {
+                                "target_lang_word": "вывешивать",
+                                "target_lang_sense_clarification": "флаг"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "6704878b-aaa5-325e-8496-a68b89fcf3a6",
+                    "sense_definition": "To hit a ball high into the air in baseball.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "sport",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The batter <w>flied</w> out to center field in the ninth inning.",
+                            "target_lang_translations": {
+                                "ru": "В девятом иннинге бьющий <w>отбил</w> мяч в центр поля и выбыл."
+                            }
+                        },
+                        {
+                            "text": "He <w>flied</w> to right field, allowing the runner to advance.",
+                            "target_lang_translations": {
+                                "ru": "Он <w>отбил</w> мяч на правое поле, позволив бегущему продвинуться вперед."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "The past tense for this baseball sense is 'flied', not 'flew'."
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Отбить мяч высоко в воздух (в бейсболе)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "отбивать мяч",
+                                "target_lang_sense_clarification": "высоко в воздух"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "affa9b57-c724-3ba0-a906-cff5629722f2",
+                    "sense_definition": "A small insect with two wings, especially the common housefly.",
+                    "learner_level": "A1",
+                    "frequency": "High",
+                    "semantic_group_id": "insect",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "There is a <w>fly</w> buzzing around the kitchen.",
+                            "target_lang_translations": {
+                                "ru": "На кухне жужжит <w>муха</w>."
+                            }
+                        },
+                        {
+                            "text": "He tried to swat the <w>fly</w> with a rolled-up newspaper.",
+                            "target_lang_translations": {
+                                "ru": "Он попытался прихлопнуть <w>муху</w> свернутой газетой."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "fly on the wall",
+                        "would not hurt a fly"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Небольшое насекомое с двумя крыльями, особенно комнатная муха."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "муха",
+                                "target_lang_sense_clarification": "насекомое"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "cdfdca11-4dd8-35a0-8396-56fa13a7bf50",
+                    "sense_definition": "The opening at the front of a pair of trousers, usually closed with a zipper or buttons.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "clothing",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "He realized his <w>fly</w> was unzipped just before the meeting.",
+                            "target_lang_translations": {
+                                "ru": "Перед самым собранием он понял, что его <w>ширинка</w> расстегнута."
+                            }
+                        },
+                        {
+                            "text": "These vintage jeans have a button <w>fly</w> instead of a zipper.",
+                            "target_lang_translations": {
+                                "ru": "У этих винтажных джинсов <w>ширинка</w> на пуговицах, а не на молнии."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "your fly is open"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Разрез спереди на брюках, обычно застегивающийся на молнию или пуговицы."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "ширинка",
+                                "target_lang_sense_clarification": "деталь брюк"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "914a423d-abdb-3b10-b5d1-c8d151bf1c8c",
+                    "sense_definition": "A lightweight fishing lure designed to resemble an insect.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "fishing",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "He tied a colorful <w>fly</w> to the end of his fishing line.",
+                            "target_lang_translations": {
+                                "ru": "Он привязал пеструю <w>мушку</w> к концу лески."
+                            }
+                        },
+                        {
+                            "text": "The trout rose to the surface to take the artificial <w>fly</w>.",
+                            "target_lang_translations": {
+                                "ru": "Форель поднялась к поверхности, чтобы схватить искусственную <w>мушку</w>."
+                            }
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Легкая рыболовная приманка, имитирующая насекомое."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "мушка",
+                                "target_lang_sense_clarification": "рыболовная приманка"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "d56834ab-5e6e-3fa2-b735-8d6bf302f9be",
+                    "sense_definition": "A piece of canvas used as an outer covering for a tent to protect it from rain.",
+                    "learner_level": "C2",
+                    "frequency": "Low",
+                    "semantic_group_id": "camping",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "We set up the <w>fly</w> over the tent when the rain started.",
+                            "target_lang_translations": {
+                                "ru": "Когда начался дождь, мы натянули <w>тент</w> над палаткой."
+                            }
+                        },
+                        {
+                            "text": "Make sure the <w>fly</w> is secure so the wind does not blow it away.",
+                            "target_lang_translations": {
+                                "ru": "Убедитесь, что <w>тент</w> надежно закреплен, чтобы ветер его не сдул."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "rain fly"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Кусок брезента, используемый как внешнее покрытие палатки для защиты от дождя."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "тент",
+                                "target_lang_sense_clarification": "навес от дождя"
+                            },
+                            {
+                                "target_lang_word": "полог",
+                                "target_lang_sense_clarification": "покрытие"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "adjective",
+            "senses": [
+                {
+                    "sense_id": "14734787-3f57-3ad0-bc42-a6467091dabd",
+                    "sense_definition": "Stylish, fashionable, or attractive.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "style",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "He thinks he looks pretty <w>fly</w> in his new sunglasses.",
+                            "target_lang_translations": {
+                                "ru": "Он думает, что выглядит довольно <w>круто</w> в своих новых солнечных очках."
+                            }
+                        },
+                        {
+                            "text": "That is a <w>fly</w> jacket you are wearing today.",
+                            "target_lang_translations": {
+                                "ru": "На тебе сегодня <w>клевая</w> куртка."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "slang",
+                            "comment": "Used to describe someone or something as cool or stylish."
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Стильный, модный или привлекательный (слэнг)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "крутой",
+                                "target_lang_sense_clarification": "сленг"
+                            },
+                            {
+                                "target_lang_word": "стильный",
+                                "target_lang_sense_clarification": "модный"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "name",
+            "senses": [
+                {
+                    "sense_id": "324adab2-8ce3-354f-9f71-63e00cfd099d",
+                    "sense_definition": "A river in Papua New Guinea.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "geography",
+                    "name_type": "geographical_feature",
+                    "examples": [
+                        {
+                            "text": "The <w>Fly</w> River is one of the longest rivers in the country.",
+                            "target_lang_translations": {
+                                "ru": "Река <w>Флай</w> — одна из самых длинных рек в стране."
+                            }
+                        },
+                        {
+                            "text": "Explorers traveled up the <w>Fly</w> to map the interior region.",
+                            "target_lang_translations": {
+                                "ru": "Исследователи поднялись вверх по <w>Флаю</w>, чтобы нанести на карту внутренние районы."
+                            }
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Река в Папуа — Новой Гвинее."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "Флай",
+                                "target_lang_sense_clarification": "река"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "1dc16a66-2135-3e58-b10c-6dda594fc817",
+                    "sense_definition": "A surname.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "person",
+                    "name_type": "person_name",
+                    "examples": [
+                        {
+                            "text": "Mr. <w>Fly</w> has lived in this town for many years.",
+                            "target_lang_translations": {
+                                "ru": "Мистер <w>Флай</w> живет в этом городе уже много лет."
+                            }
+                        },
+                        {
+                            "text": "I met a woman named Sarah <w>Fly</w> at the conference.",
+                            "target_lang_translations": {
+                                "ru": "На конференции я встретил женщину по имени Сара <w>Флай</w>."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "surname",
+                            "comment": ""
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Фамилия."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "Флай",
+                                "target_lang_sense_clarification": "фамилия"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

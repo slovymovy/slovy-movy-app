@@ -1,0 +1,167 @@
+{
+    "word_family": [
+        "overzicht",
+        "overzichtelijk",
+        "zien",
+        "voorzien",
+        "omzien"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "3363d30d-4574-3c13-8549-d204662ad1ef",
+                    "sense_definition": "het vermogen om een geheel te bekijken en de samenhang of gevolgen ervan te begrijpen",
+                    "learner_level": "B2",
+                    "frequency": "High",
+                    "semantic_group_id": "begrijpen",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Hij <w>overzag</w> alle gevaren in één oogopslag en nam direct een besluit.",
+                            "target_lang_translations": {
+                                "en": "He <w>grasped</w> all the dangers at a glance and made a decision immediately."
+                            }
+                        },
+                        {
+                            "text": "Het is voor een beginner lastig om de <w>gevolgen te overzien</w> van zo'n grote investering.",
+                            "target_lang_translations": {
+                                "en": "It is difficult for a beginner to <w>foresee the consequences</w> of such a large investment."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "doorzien",
+                        "bevatten",
+                        "begrijpen"
+                    ],
+                    "common_phrases": [
+                        "gevolgen te overzien",
+                        "situatie overzien",
+                        "geheel overzien"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "the ability to view a whole and understand its coherence or consequences"
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "foresee",
+                                "target_lang_sense_clarification": "to predict or understand consequences"
+                            },
+                            {
+                                "target_lang_word": "grasp",
+                                "target_lang_sense_clarification": "to understand the full scope of a situation"
+                            },
+                            {
+                                "target_lang_word": "survey",
+                                "target_lang_sense_clarification": "to take a general view of a situation"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "e6750d49-df65-379f-80c9-922e41ae7a13",
+                    "sense_definition": "vanaf een hoog punt een volledig beeld hebben van een gebied of ruimte",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "waarnemen",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Vanaf de top van de kerktoren kun je de hele <w>stad overzien</w>.",
+                            "target_lang_translations": {
+                                "en": "From the top of the church tower, you can <w>look out over</w> the entire city."
+                            }
+                        },
+                        {
+                            "text": "Als je het plein zo <w>overziet</w>, lijkt het veel kleiner dan op de kaart.",
+                            "target_lang_translations": {
+                                "en": "When you <w>survey</w> the square like this, it seems much smaller than on the map."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "overkijken",
+                        "uitkijken over",
+                        "overblikken"
+                    ],
+                    "common_phrases": [
+                        "stad overzien",
+                        "terrein overzien",
+                        "veld overzien"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "to have a complete view of an area or space from a high point"
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "overlook",
+                                "target_lang_sense_clarification": "to have a view from above"
+                            },
+                            {
+                                "target_lang_word": "survey",
+                                "target_lang_sense_clarification": "to view from a high place"
+                            },
+                            {
+                                "target_lang_word": "look out over",
+                                "target_lang_sense_clarification": "to have a view of an area"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "19a09f5d-7618-32f0-b04b-fb170bdf01b0",
+                    "sense_definition": "iets vluchtig of globaal met de ogen doornemen om een indruk te krijgen",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "waarnemen",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Zij <w>overzag</w> de lijst met namen om te kijken of ze bekenden zag.",
+                            "target_lang_translations": {
+                                "en": "She <w>scanned</w> the list of names to see if she recognized anyone."
+                            }
+                        },
+                        {
+                            "text": "Voordat hij begon met lezen, wilde hij eerst de <w>tekst overzien</w>.",
+                            "target_lang_translations": {
+                                "en": "Before he started reading, he first wanted to <w>skim</w> the text."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "overlezen",
+                        "scannen"
+                    ],
+                    "common_phrases": [
+                        "tekst overzien",
+                        "lijst overzien"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "to go through something briefly or globally with the eyes to get an impression"
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "scan",
+                                "target_lang_sense_clarification": "to look through quickly"
+                            },
+                            {
+                                "target_lang_word": "skim",
+                                "target_lang_sense_clarification": "to read or look through rapidly"
+                            },
+                            {
+                                "target_lang_word": "glance over",
+                                "target_lang_sense_clarification": "to look at something briefly"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

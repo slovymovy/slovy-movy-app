@@ -1,0 +1,1714 @@
+{
+    "word": "overstappen",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                "word": "overstappen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "ea0c3c53-754f-468c-a161-e2ccca0beb0d",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "infinitive"
+                        ],
+                        "form": "overstappen"
+                    },
+                    {
+                        "form_id": "23904b2c-d34f-44db-971a-ac2548c63216",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "gerund",
+                            "neuter"
+                        ],
+                        "form": "overstappen"
+                    },
+                    {
+                        "form_id": "9685b05b-80bb-4d18-994a-96eb48e472ab",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "stap over"
+                    },
+                    {
+                        "form_id": "d2de3e0a-fdba-406d-9db5-36f3b3affc50",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "past",
+                            "singular"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "bad68e93-6cc6-43eb-b078-b36522eaee2c",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "first-person",
+                            "present",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overstap"
+                    },
+                    {
+                        "form_id": "868dafeb-fc4f-47bb-b269-159c7bda0ee4",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "first-person",
+                            "past",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overstapte"
+                    },
+                    {
+                        "form_id": "2e83f43d-f38e-4e4c-9b01-84f465bec88d",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "stapt over"
+                    },
+                    {
+                        "form_id": "2c0ff75e-f11e-42a8-b50c-4baec6d7ecf3",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "stap over"
+                    },
+                    {
+                        "form_id": "892e0c89-7e6f-4930-98ec-29cce610a410",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "a95104e8-afcc-4ccd-a951-d24543b3b3e9",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overstapt"
+                    },
+                    {
+                        "form_id": "2766bdf0-2955-4903-8331-771e4cc06d24",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overstapte"
+                    },
+                    {
+                        "form_id": "9c124f8b-f3ce-416a-88df-4ef790872783",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "stapt over"
+                    },
+                    {
+                        "form_id": "5ff29b43-6f2a-42d6-87ce-889633657311",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "60a27f56-4217-4bfb-81b5-d4c0dfe7f983",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "formal",
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overstapt"
+                    },
+                    {
+                        "form_id": "b6c5188f-0a46-4864-8318-1c92cd1b3d3a",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "formal",
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overstapte"
+                    },
+                    {
+                        "form_id": "89e21a9a-8f6f-4af8-83c5-ea4436ccbf53",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "stapt over"
+                    },
+                    {
+                        "form_id": "c1b64b9b-01ae-4acf-a198-6f9dec9beebc",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "786fce4a-e981-44f1-a3bb-ac10d38f611e",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "overstapt"
+                    },
+                    {
+                        "form_id": "bdb0c87c-6303-439c-87d6-41188adfac00",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "past",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "overstapte"
+                    },
+                    {
+                        "form_id": "99e744d5-b629-44a0-be53-e9eb65d9e3cd",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "main-clause",
+                            "plural",
+                            "present"
+                        ],
+                        "form": "stappen over"
+                    },
+                    {
+                        "form_id": "81375aba-0007-4d20-8ef7-441fb9cc6b76",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "plural"
+                        ],
+                        "form": "stapten over"
+                    },
+                    {
+                        "form_id": "62efa6c9-5015-482d-92e3-dedda2d95a8a",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "plural",
+                            "present",
+                            "subordinate-clause"
+                        ],
+                        "form": "overstappen"
+                    },
+                    {
+                        "form_id": "253e28ec-1e9f-496b-8239-71c3e4591b0a",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "past",
+                            "plural",
+                            "subordinate-clause"
+                        ],
+                        "form": "overstapten"
+                    },
+                    {
+                        "form_id": "ca35420b-fec8-4a1d-ae77-0f1de372f61f",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "imperative",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "stap over"
+                    },
+                    {
+                        "form_id": "220ba9cc-1271-4d4a-87cf-939f513997f9",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "present"
+                        ],
+                        "form": "overstappend"
+                    },
+                    {
+                        "form_id": "65830451-bde6-4c6d-99c5-8c2802a6b371",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "past"
+                        ],
+                        "form": "overgestapt"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "2d3f69d7-8690-3497-960d-19f2f192ad6b",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "glosses": [
+                            "to transfer (to a different bus or train)"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "0ce26340-e1f8-3f38-9e13-6761182d2769",
+                        "entry_id": "ab8d35be-728d-33a4-a2a5-deac1e0b4c2c",
+                        "glosses": [
+                            "to change (subject, brand name, opinion, etc.)"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [
+            {
+                "entry_id": "b4171b77-cf2a-3240-b9c7-6b13ec2b1a43",
+                "word": "overstappen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "b59a9865-1de8-4d3c-a3a5-34255975019c",
+                        "entry_id": "b4171b77-cf2a-3240-b9c7-6b13ec2b1a43",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "6746f3d8-0ae3-4d04-8f2f-1273ced4733d",
+                        "entry_id": "b4171b77-cf2a-3240-b9c7-6b13ec2b1a43",
+                        "tags": [
+                            "прич. сов."
+                        ],
+                        "form": "overgestapt"
+                    },
+                    {
+                        "form_id": "c8a7042c-ae0b-48fd-bc90-c67eb78f1187",
+                        "entry_id": "b4171b77-cf2a-3240-b9c7-6b13ec2b1a43",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "спряжение"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "d1e543bb-ceb8-3c45-87f7-83eeb23f92ac",
+                        "entry_id": "b4171b77-cf2a-3240-b9c7-6b13ec2b1a43",
+                        "glosses": [
+                            "пересаживаться (на транспорте)"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "4641d066-9740-3410-aeb6-f51a13794d25",
+                "word": "overstappen",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "1e0c9fea-8b49-3133-989b-afd75f3b227b",
+                        "entry_id": "4641d066-9740-3410-aeb6-f51a13794d25",
+                        "glosses": [
+                            "meervoud van het zelfstandig naamwoord overstap"
+                        ],
+                        "tags": [
+                            "form-of",
+                            "plural"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                "word": "overstappen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "13cea693-df58-4db0-8233-274298f795b8",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "0be4f69e-9de3-4936-a761-b665b050893e",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "overgestapt"
+                    },
+                    {
+                        "form_id": "75225893-0177-48a0-a706-81d88d9aa0c8",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "imperfect",
+                            "present",
+                            "long-form"
+                        ],
+                        "form": "over te stappen"
+                    },
+                    {
+                        "form_id": "a4158c28-0abe-47b8-b918-dc37686b0231",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "imperfect",
+                            "future",
+                            "short-form"
+                        ],
+                        "form": "zullen overstappen\nover zullen stappen"
+                    },
+                    {
+                        "form_id": "8a71fc8c-6f65-4421-81f5-002a4433d8d8",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "imperfect",
+                            "future",
+                            "long-form"
+                        ],
+                        "form": "te zullen overstappen\nover te zullen stappen"
+                    },
+                    {
+                        "form_id": "5ecdd821-a2ce-4e62-83a1-af14c4d1676b",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "present",
+                            "short-form"
+                        ],
+                        "form": "zijn overgestapt"
+                    },
+                    {
+                        "form_id": "8bce8541-5305-47ad-986a-205085468981",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "present",
+                            "long-form"
+                        ],
+                        "form": "te zijn overgestapt"
+                    },
+                    {
+                        "form_id": "82e2645b-7079-4c1d-973a-d91d4abf6ac6",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "future",
+                            "short-form"
+                        ],
+                        "form": "overgestapt zullen zijn"
+                    },
+                    {
+                        "form_id": "e071aa03-c36a-483c-ad76-5c6d12e29175",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "future",
+                            "long-form"
+                        ],
+                        "form": "overgestapt te zullen zijn"
+                    },
+                    {
+                        "form_id": "e83beead-e446-4db1-89fc-e485501ed099",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "imperfect",
+                            "participle"
+                        ],
+                        "form": "overstappend"
+                    },
+                    {
+                        "form_id": "becdc9f2-a219-491a-ad65-8f40fb423210",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "overgestapt"
+                    },
+                    {
+                        "form_id": "980fa9e7-08e0-431d-9ab3-17f54a14c30f",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "imperative"
+                        ],
+                        "form": "ev.\n stap over"
+                    },
+                    {
+                        "form_id": "5b12c00b-41d9-4b38-9e20-aa66f1178342",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "stap over"
+                    },
+                    {
+                        "form_id": "3027a3c5-59f8-4ff2-8de3-61f7a6b5e66a",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "stapt over"
+                    },
+                    {
+                        "form_id": "67588565-bb12-43e0-ac97-34cda27db388",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "stapt over"
+                    },
+                    {
+                        "form_id": "4799edba-9d1c-4f56-a108-1ba05c87b185",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "stapt over"
+                    },
+                    {
+                        "form_id": "ae60b121-4932-4b52-9206-3784a08c1e61",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "stapt over"
+                    },
+                    {
+                        "form_id": "c1f809e4-9531-4d38-9dc3-4c41e77383db",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "stappen over"
+                    },
+                    {
+                        "form_id": "2e07ab13-188f-4d74-9a6d-1dd5d56f1842",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "stappen over"
+                    },
+                    {
+                        "form_id": "5139fe79-8653-4c60-aa3c-d07e74fecc71",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "present",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "stappen over"
+                    },
+                    {
+                        "form_id": "28c51e12-1c7a-47c6-b1bd-f906845ed49e",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "6f578cfe-d1c3-47df-8ada-a02344b48e9e",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "5fb690d7-a8be-4042-b6e9-17999a771ed2",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "f5c3ac2d-cb57-4a4b-b45d-2571afc526d8",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "f1d6db86-b648-4ea4-9c02-6e715b393e19",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "stapte over"
+                    },
+                    {
+                        "form_id": "e7251ed2-851d-4792-84e1-dc4d06cc6e34",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "stapten over"
+                    },
+                    {
+                        "form_id": "a825a03d-e923-437d-921a-7262c3558a6c",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "stapten over"
+                    },
+                    {
+                        "form_id": "cd7cb086-3f2e-460e-94a7-4d9ca765925a",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "past",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "stapten over"
+                    },
+                    {
+                        "form_id": "3d05c835-f9f9-456f-ad97-7f85f50dc747",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "zal overstappen"
+                    },
+                    {
+                        "form_id": "b2aacb9f-401f-4922-a270-e61f8df15620",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zult overstappen"
+                    },
+                    {
+                        "form_id": "58c74fc9-c04b-403a-bbfa-6d93acddaf36",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zal overstappen"
+                    },
+                    {
+                        "form_id": "1838cae5-5258-4bea-b0e7-7c13e1c861cf",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zult overstappen"
+                    },
+                    {
+                        "form_id": "37037f69-8022-43d8-bfc2-73eacb56f3a4",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zal overstappen"
+                    },
+                    {
+                        "form_id": "85c783c6-ba1e-4dd7-8cc7-1bc37203beda",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zult overstappen"
+                    },
+                    {
+                        "form_id": "2ff731f7-a385-4859-af2f-b6c54b527bcf",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "zal overstappen"
+                    },
+                    {
+                        "form_id": "dfa8c440-ec2e-43f5-b144-bcd651fd2cd3",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "zullen overstappen"
+                    },
+                    {
+                        "form_id": "a9b44b57-cc57-4d19-97ef-e9be42daaa35",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "zullen overstappen"
+                    },
+                    {
+                        "form_id": "ea62b771-9271-4248-b8fc-09bfc3c693a3",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "future",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "zullen overstappen"
+                    },
+                    {
+                        "form_id": "8aff0ca4-0f73-467b-b2e6-97e7ea916291",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "zou overstappen"
+                    },
+                    {
+                        "form_id": "c4427d34-512b-43d5-ba2a-83cd19788ae1",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zou overstappen"
+                    },
+                    {
+                        "form_id": "7d255b57-d6f4-4c9f-abbf-19cc1d5245e6",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zou(dt) overstappen"
+                    },
+                    {
+                        "form_id": "6cd73d42-ba22-4bed-8ea8-a56ea38e26b1",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zoudt overstappen"
+                    },
+                    {
+                        "form_id": "183d58d1-d8e2-4bca-8d0c-9bf6804e8b96",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "zou overstappen"
+                    },
+                    {
+                        "form_id": "8f07aa4a-7c0d-4ef0-b0eb-0b655e8cdf66",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "zouden overstappen"
+                    },
+                    {
+                        "form_id": "0349698b-fd99-4f09-8c6a-dd858d1e6387",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "zouden overstappen"
+                    },
+                    {
+                        "form_id": "7b1c4e4a-f3e5-402c-9cad-09498d2ad9d6",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "main-clause",
+                            "conditional",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "zouden overstappen"
+                    },
+                    {
+                        "form_id": "c519af47-a080-404a-be25-92b77340267b",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "present"
+                        ],
+                        "form": "overstap"
+                    },
+                    {
+                        "form_id": "d67d1528-1af5-4d83-80dc-9bf80970cba5",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "present"
+                        ],
+                        "form": "overstapt"
+                    },
+                    {
+                        "form_id": "feadd524-c0ad-40d9-a180-5c1e447caa4c",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "present"
+                        ],
+                        "form": "overstapt"
+                    },
+                    {
+                        "form_id": "c3a1f0e2-0334-43ef-9e14-d31d7b29fdc9",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "present"
+                        ],
+                        "form": "overstapt"
+                    },
+                    {
+                        "form_id": "d9adee32-daf4-46b9-ac58-4ee4a803e61e",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "present"
+                        ],
+                        "form": "overstapt"
+                    },
+                    {
+                        "form_id": "678e2fb4-b1d2-43fa-90e0-ee177af8babd",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "overstapte"
+                    },
+                    {
+                        "form_id": "cd1fdd09-e7f5-467a-a359-1356786a2d5a",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "overstapte"
+                    },
+                    {
+                        "form_id": "d7b70105-e01d-4dca-bbd8-dfb570d28aec",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "overstapte"
+                    },
+                    {
+                        "form_id": "27e695fc-e6b7-43d2-a70b-68b5ae39ba4e",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "overstapte"
+                    },
+                    {
+                        "form_id": "f6b6d209-4b19-42f3-8034-d5c71f3307ae",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "overstapte"
+                    },
+                    {
+                        "form_id": "03abf620-d126-439e-8b1c-68e578d1e04b",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "overstapten"
+                    },
+                    {
+                        "form_id": "ed54d37f-2fda-4f64-b1ba-500c61defd06",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "overstapten"
+                    },
+                    {
+                        "form_id": "02dd85e1-4678-4632-90c7-1a8c9e330bd3",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "past"
+                        ],
+                        "form": "overstapten"
+                    },
+                    {
+                        "form_id": "cd421695-669f-47ef-a425-3757f7d0021c",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zal overstappen\nover zal stappen"
+                    },
+                    {
+                        "form_id": "7dae309e-6596-4bd3-b404-144639b6b3b9",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zult overstappen\nover zult/zal stappen"
+                    },
+                    {
+                        "form_id": "5e4891a3-c5ac-4678-9e68-8b08bddfacb5",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zal overstappen\nover zult/zal stappen"
+                    },
+                    {
+                        "form_id": "967238ab-9145-4fc2-906f-ae0703fbc440",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zult overstappen\nover zult/zal stappen"
+                    },
+                    {
+                        "form_id": "34e31f5e-2ffc-4326-b3eb-45fb0e45507f",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zal overstappen\nover zult/zal stappen"
+                    },
+                    {
+                        "form_id": "4ac7371d-3a86-4315-b146-01ecf0ae3d64",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zult overstappen\nover zult stappen"
+                    },
+                    {
+                        "form_id": "d3590b2a-f348-4bb9-86d8-602dba18e50d",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zal overstappen\nover zal stappen"
+                    },
+                    {
+                        "form_id": "876b0c05-8d33-47d8-9aeb-4a1be1db16f6",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zullen overstappen\nover zullen stappen"
+                    },
+                    {
+                        "form_id": "a48ba5da-1d8c-4421-b1b9-df04036c9913",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zullen overstappen\nover zullen stappen"
+                    },
+                    {
+                        "form_id": "e5b76125-ecb9-4674-a3bd-ed4cfd5aeff8",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "future"
+                        ],
+                        "form": "zullen overstappen\nover zullen stappen"
+                    },
+                    {
+                        "form_id": "4970f7be-8d4c-4957-b785-9fd5ac201832",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zou overstappen\nover zou stappen"
+                    },
+                    {
+                        "form_id": "ff1c52ff-7e9a-4904-9e7a-18652aececff",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zou overstappen\nover zou stappen"
+                    },
+                    {
+                        "form_id": "25f775c8-eccb-49b8-bda7-c94daf365c7a",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zou(dt) overstappen\nover zou(dt) stappen"
+                    },
+                    {
+                        "form_id": "cc35808b-48aa-4939-aa65-84313953bc7e",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zoudt overstappen\nover zoudt stappen"
+                    },
+                    {
+                        "form_id": "7e03a69d-5a78-48e1-8db7-6db93fe43c92",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zou overstappen\nover zou stappen"
+                    },
+                    {
+                        "form_id": "1f9c28de-c34b-4c42-874a-bc620903afc1",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zouden overstappen\nover zouden stappen"
+                    },
+                    {
+                        "form_id": "74cbe02f-5197-4229-ad8d-6ddace51bf57",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zouden overstappen\nover zouden stappen"
+                    },
+                    {
+                        "form_id": "c5165980-8217-4f65-ab78-c16a07b40dad",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "subordinate-clause",
+                            "conditional"
+                        ],
+                        "form": "zouden overstappen\nover zouden stappen"
+                    },
+                    {
+                        "form_id": "a3ac6f47-17ff-4686-bdea-8a7e15280ce7",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "ben overgestapt"
+                    },
+                    {
+                        "form_id": "095e5c4a-658c-4963-abeb-09c9bc13f913",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "bent overgestapt"
+                    },
+                    {
+                        "form_id": "0dd18b3b-025b-4b08-853b-3d12c5b2fb62",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "bent overgestapt"
+                    },
+                    {
+                        "form_id": "ade2f2f1-73be-4df2-a827-56ad019de489",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "is overgestapt"
+                    },
+                    {
+                        "form_id": "7ae1fe4a-761c-4688-a788-8b649f9a73e2",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "zijt overgestapt"
+                    },
+                    {
+                        "form_id": "6b5bdaf8-4ac7-4627-b367-e7aee7d0b391",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "is overgestapt"
+                    },
+                    {
+                        "form_id": "bf3f615c-3978-4543-80ee-241ce56cc2fd",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "zijn overgestapt"
+                    },
+                    {
+                        "form_id": "933de8fa-8256-40af-9e4b-2257475a54e2",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "zijn overgestapt"
+                    },
+                    {
+                        "form_id": "19a824e8-f975-4fd1-978f-48b974fe482c",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "zijn overgestapt"
+                    },
+                    {
+                        "form_id": "b6250a2a-a9eb-4561-af0e-57e41b0ae1d9",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "was overgestapt"
+                    },
+                    {
+                        "form_id": "5e5fe519-52d5-4a47-83cc-de38b98837d5",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "was overgestapt"
+                    },
+                    {
+                        "form_id": "f2302784-7922-4207-a775-4e64f522ffbe",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "was overgestapt"
+                    },
+                    {
+                        "form_id": "3890862f-2eb5-42af-a209-211bb3f9525e",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "waart overgestapt"
+                    },
+                    {
+                        "form_id": "56067f7a-7702-4d56-a10c-93b782cc524e",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "was overgestapt"
+                    },
+                    {
+                        "form_id": "8957bc95-8428-40ed-88e6-7badef29a8f9",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "waren overgestapt"
+                    },
+                    {
+                        "form_id": "c11d5cb1-9cfa-428e-8c98-f0cb3048d65d",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "waren overgestapt"
+                    },
+                    {
+                        "form_id": "5a1d9fcb-507c-4bb0-a951-3b487e9f48ec",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "waren overgestapt"
+                    },
+                    {
+                        "form_id": "92bc67d1-0e96-4274-83c5-1bfd1f5ea95c",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zal overgestapt zijn"
+                    },
+                    {
+                        "form_id": "fc8fdb1e-4205-4aef-aa27-1c02e09c06cb",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zal overgestapt zijn"
+                    },
+                    {
+                        "form_id": "5f1ab1a8-f3b8-4c48-b37a-7ea71fcd9e32",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult overgestapt zijn"
+                    },
+                    {
+                        "form_id": "bdd366b2-80ed-4435-9dcd-e598427fb053",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult overgestapt zijn"
+                    },
+                    {
+                        "form_id": "b4051999-d172-4de7-afff-9a5482354350",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zal overgestapt zijn"
+                    },
+                    {
+                        "form_id": "00ce7a0a-b9bf-4454-892a-a9b4127251f5",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult overgestapt zijn"
+                    },
+                    {
+                        "form_id": "dde0a6a1-870a-40db-8e9f-a398c4d642f7",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zal overgestapt zijn"
+                    },
+                    {
+                        "form_id": "6b29ff14-0757-4988-b613-8c7f04b26e5c",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zullen overgestapt zijn"
+                    },
+                    {
+                        "form_id": "c0e0553a-4939-4fae-89db-090dc587b155",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zullen overgestapt zijn"
+                    },
+                    {
+                        "form_id": "0df0f3b7-c104-427b-bb8e-21298e61e567",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zullen overgestapt zijn"
+                    },
+                    {
+                        "form_id": "697d326c-7e81-4b43-9066-f22ca7d3464c",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zou overgestapt zijn"
+                    },
+                    {
+                        "form_id": "56f55ff7-faae-4fe5-8afa-d58e95fb92e9",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou overgestapt zijn"
+                    },
+                    {
+                        "form_id": "a9d2b44e-2849-4ee0-91c7-a67b8fa855b8",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou overgestapt zijn"
+                    },
+                    {
+                        "form_id": "5d6099b7-a937-45ee-a82e-e74cf99a80d9",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt overgestapt zijn"
+                    },
+                    {
+                        "form_id": "600e7b64-c03c-4686-867e-dd234651858c",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt overgestapt zijn"
+                    },
+                    {
+                        "form_id": "577dc193-cc89-4f1b-b3d0-f74d10dc3894",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zou overgestapt zijn"
+                    },
+                    {
+                        "form_id": "96372643-a957-484f-a0db-e17040ef880e",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zouden overgestapt zijn"
+                    },
+                    {
+                        "form_id": "1e93d96d-790c-4d9f-8635-321a64a42926",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zouden overgestapt zijn"
+                    },
+                    {
+                        "form_id": "367abc5b-95c5-46fe-a418-9b2cf8d05687",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zouden overgestapt zijn"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "7feb7576-ec78-33a7-a4fb-7dab33371856",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "glosses": [
+                            "met een ander (openbaar) vervoermiddel de reis vervolgen"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "0368ea21-a1db-490a-a9ca-bd785c86ad30",
+                                "sense_id": "7feb7576-ec78-33a7-a4fb-7dab33371856",
+                                "text": "Als je van Almelo naar Arnhem wilt reizen, moet je in Deventer overstappen."
+                            },
+                            {
+                                "example_id": "e2e1acbd-48dd-4a2f-919f-a03a2ea584a6",
+                                "sense_id": "7feb7576-ec78-33a7-a4fb-7dab33371856",
+                                "text": "Het station wordt compleet vernieuwd: er komt een voetgangerstunnel, er worden sporen vernieuwd en verlegd en het busstation wordt verplaatst. Volgens ProRail kunnen reizigers daardoor straks sneller en makkelijker overstappen."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "8e6914de-7bd3-38b7-80ec-78f231d9f9e0",
+                        "entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "glosses": [
+                            "veranderen van studie, werk, politieke partij"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "f9931fb6-0dfa-4c29-aaf7-c0a6985e92a9",
+                                "sense_id": "8e6914de-7bd3-38b7-80ec-78f231d9f9e0",
+                                "text": "Daar moet meer geld naar het compenseren van scholen die te maken hebben met veel ‘switchers’; leerlingen die stoppen en overstappen naar een andere hogeschool."
+                            },
+                            {
+                                "example_id": "b333d558-21ec-41aa-ae8a-5ab559008854",
+                                "sense_id": "8e6914de-7bd3-38b7-80ec-78f231d9f9e0",
+                                "text": "Borne, 61 jaar, was lang lid van de sociaaldemocratische Parti socialiste, tot ze in 2017 overstapte naar Macrons La République en Marche."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "f8a664b5-863f-400c-9bff-4f9cc856dd35",
+                        "source_entry_id": "ab0dd269-99ae-374c-80fb-b72e25be21ae",
+                        "source_sense_id": "7feb7576-ec78-33a7-a4fb-7dab33371856",
+                        "source_sense_description": "met een ander (openbaar) vervoermiddel de reis vervolgen",
+                        "target_lang_word": "transbordar",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "transbordar",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "baf093c5-e5eb-3819-bda6-e83d7aa35408",
+                                        "entry_id": "cec8bf22-da90-36fe-9c1e-069c7b04d5c5",
+                                        "glosses": [
+                                            "Cambiar de vehículo en el trayecto hacia un destino, sobre todo cuando se trata de transporte público."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": [],
+        "fr-extract.jsonl": [
+            {
+                "entry_id": "7ce6f5d0-2504-3621-ade1-5b2579f68fa4",
+                "word": "overstappen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "94f71fde-1969-3ad4-8137-4348655ffaaf",
+                        "entry_id": "7ce6f5d0-2504-3621-ade1-5b2579f68fa4",
+                        "glosses": [
+                            "Passer par-dessus, enjamber."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "bd8c06cb-55f8-3c26-a927-8e4b7d36f7e2",
+                        "entry_id": "7ce6f5d0-2504-3621-ade1-5b2579f68fa4",
+                        "glosses": [
+                            "Changer (de train, etc.), changer de ligne, prendre la correspondance."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": []
+    }
+}
