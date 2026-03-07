@@ -1,4 +1,4 @@
-PRAGMA foreign_keys=OFF;
+PRAGMA foreign_keys=0;
 
 DROP INDEX IF EXISTS idx_lemma_pos_lemma_id;
 
@@ -23,4 +23,4 @@ CREATE TABLE lemma_pos_sense_hint (
   lemma_pos_id BLOB NOT NULL REFERENCES lemma_pos(id) ON DELETE CASCADE
 );
 
-PRAGMA foreign_keys=ON;
+PRAGMA foreign_keys=1;
