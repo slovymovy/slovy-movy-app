@@ -63,6 +63,19 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     @OptIn(ExperimentalForeignApi::class)
+    actual fun copyFile(from: Path, to: Path): Boolean {
+        val fm = NSFileManager.defaultManager
+        val targetParent = Path(to.toString()).parent?.toString()
+        if (targetParent != null && !fm.fileExistsAtPath(targetParent)) {
+            fm.createDirectoryAtPath(targetParent, true, null, null)
+        }
+        if (fm.fileExistsAtPath(to.toString())) {
+            fm.removeItemAtPath(to.toString(), error = null)
+        }
+        return fm.copyItemAtPath(from.toString(), toPath = to.toString(), error = null)
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
     actual fun deleteFile(path: Path) {
         NSFileManager.defaultManager.removeItemAtPath(path.toString(), error = null)
     }

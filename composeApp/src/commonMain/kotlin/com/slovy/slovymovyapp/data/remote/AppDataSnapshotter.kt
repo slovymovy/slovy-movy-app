@@ -70,11 +70,18 @@ private fun createDatabaseSnapshot(
 ) {
     val driver = openExportDriver(platform, fileName, sourcePath)
     try {
-        driver.execute(
-            identifier = null,
-            sql = "VACUUM INTO ${snapshotPath.toSqliteStringLiteral()}",
-            parameters = 0
-        )
+        try {
+            driver.execute(
+                identifier = null,
+                sql = "VACUUM INTO ${snapshotPath.toSqliteStringLiteral()}",
+                parameters = 0
+            )
+        } catch (t: Throwable) {
+            if (!isVacuumIntoUnsupported(t)) {
+                throw t
+            }
+            createCheckpointCopySnapshot(driver, platform, sourcePath, snapshotPath)
+        }
     } catch (t: Throwable) {
         platform.deleteFile(snapshotPath)
         throw t
@@ -96,3 +103,30 @@ private fun openExportDriver(
 
 private fun Path.toSqliteStringLiteral(): String =
     "'${toString().replace("'", "''")}'"
+
+private fun createCheckpointCopySnapshot(
+    driver: SqlDriver,
+    platform: PlatformDbSupport,
+    sourcePath: Path,
+    snapshotPath: Path
+) {
+    try {
+        driver.execute(
+            identifier = null,
+            sql = "PRAGMA wal_checkpoint(FULL)",
+            parameters = 0
+        )
+    } catch (_: Throwable) {
+        // best effort; continue with a direct file copy
+    }
+    if (!platform.copyFile(sourcePath, snapshotPath)) {
+        error("Failed to copy database snapshot to temporary export file.")
+    }
+}
+
+private fun isVacuumIntoUnsupported(error: Throwable): Boolean {
+    val message = error.message?.lowercase() ?: return false
+    return ("vacuum into" in message) ||
+        ("near \"into\"" in message && "syntax error" in message) ||
+        ("near 'into'" in message && "syntax error" in message)
+}
