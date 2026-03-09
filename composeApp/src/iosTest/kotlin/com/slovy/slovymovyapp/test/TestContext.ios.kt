@@ -1,7 +1,7 @@
 package com.slovy.slovymovyapp.test
 
 import com.slovy.slovymovyapp.data.export.AppDataExportResult
-import com.slovy.slovymovyapp.data.export.standardAppDataFileNamesWithSidecars
+import com.slovy.slovymovyapp.data.remote.standardAppDataFileNamesWithSidecars
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.toKString
 import platform.Foundation.*

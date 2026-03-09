@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.slovy.slovymovyapp.data.export.standardAppDataDatabaseFileNames
+import com.slovy.slovymovyapp.data.remote.standardAppDataDatabaseFileNames
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 
 @Composable

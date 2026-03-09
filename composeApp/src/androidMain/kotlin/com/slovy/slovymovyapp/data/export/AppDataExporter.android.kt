@@ -10,8 +10,10 @@ import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import com.slovy.slovymovyapp.data.remote.AppDataSnapshot
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.PlatformFileOutput
+import com.slovy.slovymovyapp.data.remote.withAppDataSnapshots
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
@@ -32,22 +34,20 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
     actual suspend fun exportAppData(): AppDataExportResult = withContext(Dispatchers.IO) {
         val timestamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
         val fileName = "slovymovy-db-export-$timestamp.tar"
-        val dbDir = context.getDatabasePath("app.db").parentFile
-            ?: error("Cannot resolve databases directory")
-        val exportFiles = databaseFiles(dbDir)
-        require(exportFiles.isNotEmpty()) { "No database files found to export." }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            exportToDownloads(fileName, exportFiles)
-        } else {
-            exportToAppExternalFiles(fileName, exportFiles)
+        withAppDataSnapshots(platform) { snapshots ->
+            require(snapshots.isNotEmpty()) { "No database files found to export." }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                exportToDownloads(fileName, snapshots)
+            } else {
+                exportToAppExternalFiles(fileName, snapshots)
+            }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun exportToDownloads(
         fileName: String,
-        files: List<File>
+        snapshots: List<AppDataSnapshot>
     ): AppDataExportResult {
         var writeSucceeded = false
         val values = ContentValues().apply {
@@ -63,7 +63,7 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
             ?: error("Failed to create export file in Downloads")
         try {
             context.contentResolver.openOutputStream(uri)?.use { output ->
-                writeTarArchive(output, files)
+                writeTarArchive(output, snapshots)
             } ?: error("Failed to open export file in Downloads")
             context.contentResolver.update(
                 uri,
@@ -86,7 +86,7 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
 
     private fun exportToAppExternalFiles(
         fileName: String,
-        files: List<File>
+        snapshots: List<AppDataSnapshot>
     ): AppDataExportResult {
         val downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
             ?: error("Failed to access external downloads directory")
@@ -98,7 +98,7 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
         writeTarArchiveToPath(
             platform = platform,
             destinationPath = Path(outputFile.absolutePath),
-            entries = archiveEntries(files),
+            entries = archiveEntries(snapshots),
             lastModifiedEpochSeconds = System.currentTimeMillis() / 1000
         )
         return AppDataExportResult(
@@ -132,24 +132,19 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
 
     private fun writeTarArchive(
         output: OutputStream,
-        files: List<File>
+        snapshots: List<AppDataSnapshot>
     ) {
         writeTarArchive(
             output = output.asPlatformFileOutput(),
-            entries = archiveEntries(files),
+            entries = archiveEntries(snapshots),
             lastModifiedEpochSeconds = System.currentTimeMillis() / 1000
         )
     }
 
-    private fun databaseFiles(dbDir: File): List<File> {
-        return standardAppDataFileNamesWithSidecars
-            .map { name -> File(dbDir, name) }
-            .filter { it.exists() && it.isFile }
-    }
-
-    private fun archiveEntries(files: List<File>): List<AppDataArchiveEntry> = files.map { file ->
+    private fun archiveEntries(snapshots: List<AppDataSnapshot>): List<AppDataArchiveEntry> = snapshots.map { snapshot ->
+        val file = File(snapshot.path.toString())
         AppDataArchiveEntry(
-            name = file.name,
+            name = snapshot.archiveName,
             sizeBytes = file.length(),
             writeContentsTo = { output ->
                 file.inputStream().use { input ->

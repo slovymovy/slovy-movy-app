@@ -1,14 +1,15 @@
 package com.slovy.slovymovyapp.data.export
 
+import com.slovy.slovymovyapp.data.remote.AppDataSnapshot
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.PlatformFileOutput
+import com.slovy.slovymovyapp.data.remote.withAppDataSnapshots
 import kotlinx.cinterop.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import platform.Foundation.*
-import platform.UIKit.UIActivityViewController
-import platform.UIKit.UIApplication
-import platform.UIKit.UIViewController
-import platform.UIKit.popoverPresentationController
+import platform.UIKit.*
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 actual class AppDataExporter actual constructor(androidContext: Any?) {
@@ -31,35 +32,36 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
     actual val destinationDescription: String = "Documents/SlovyMovy"
     actual val canShareExport: Boolean = true
 
-    actual suspend fun exportAppData(): AppDataExportResult {
+    actual suspend fun exportAppData(): AppDataExportResult = withContext(Dispatchers.Default) {
         val formatter = NSDateFormatter().apply {
             dateFormat = "yyyyMMdd-HHmmss"
         }
         val fileName = "slovymovy-db-export-${formatter.stringFromDate(NSDate())}.tar"
         val outputPath = "$exportsRoot/$fileName"
-        val exportFiles = databaseFiles()
-        require(exportFiles.isNotEmpty()) { "No database files found to export." }
+        withAppDataSnapshots(platformDbSupport) { snapshots ->
+            require(snapshots.isNotEmpty()) { "No database files found to export." }
 
-        var writeSucceeded = false
-        try {
-            writeTarArchiveToPath(
-                platform = platformDbSupport,
-                destinationPath = Path(outputPath),
-                entries = archiveEntries(exportFiles),
-                lastModifiedEpochSeconds = NSDate().timeIntervalSince1970.toLong()
-            )
-            writeSucceeded = true
-        } finally {
-            if (!writeSucceeded) {
-                fileManager.removeItemAtPath(outputPath, error = null)
+            var writeSucceeded = false
+            try {
+                writeTarArchiveToPath(
+                    platform = platformDbSupport,
+                    destinationPath = Path(outputPath),
+                    entries = archiveEntries(snapshots),
+                    lastModifiedEpochSeconds = NSDate().timeIntervalSince1970.toLong()
+                )
+                writeSucceeded = true
+            } finally {
+                if (!writeSucceeded) {
+                    fileManager.removeItemAtPath(outputPath, error = null)
+                }
             }
-        }
 
-        return AppDataExportResult(
-            artifactName = fileName,
-            destinationLabel = "Documents/SlovyMovy/$fileName",
-            shareReference = outputPath
-        )
+            AppDataExportResult(
+                artifactName = fileName,
+                destinationLabel = "Documents/SlovyMovy/$fileName",
+                shareReference = outputPath
+            )
+        }
     }
 
     actual fun shareExport(result: AppDataExportResult) {
@@ -74,22 +76,17 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
         presenter.presentViewController(shareSheet, animated = true, completion = null)
     }
 
-    private fun databaseFiles(): List<String> {
-        return standardAppDataFileNamesWithSidecars.filter { fileName ->
-            fileManager.fileExistsAtPath("$databasesDir/$fileName")
+    private fun archiveEntries(snapshots: List<AppDataSnapshot>): List<AppDataArchiveEntry> =
+        snapshots.map { snapshot ->
+            val sourcePath = snapshot.path.toString()
+            AppDataArchiveEntry(
+                name = snapshot.archiveName,
+                sizeBytes = fileSize(sourcePath) ?: error("Failed to determine size for ${snapshot.archiveName}"),
+                writeContentsTo = { output ->
+                    copyFileToOutput(sourcePath, output)
+                }
+            )
         }
-    }
-
-    private fun archiveEntries(fileNames: List<String>): List<AppDataArchiveEntry> = fileNames.map { fileName ->
-        val sourcePath = "$databasesDir/$fileName"
-        AppDataArchiveEntry(
-            name = fileName,
-            sizeBytes = fileSize(sourcePath) ?: error("Failed to determine size for $fileName"),
-            writeContentsTo = { output ->
-                copyFileToOutput(sourcePath, output)
-            }
-        )
-    }
 
     private fun fileSize(path: String): Long? {
         val attrs = fileManager.attributesOfItemAtPath(path, error = null)
@@ -130,10 +127,25 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
     }
 
     private fun topViewController(): UIViewController? {
-        var controller = UIApplication.sharedApplication.keyWindow?.rootViewController
-        while (controller?.presentedViewController != null) {
-            controller = controller.presentedViewController
+        val controller = activeWindow()
+            ?.rootViewController
+            ?: UIApplication.sharedApplication.keyWindow?.rootViewController
+        var current = controller
+        while (current?.presentedViewController != null) {
+            current = current.presentedViewController
         }
-        return controller
+        return current
+    }
+
+    private fun activeWindow(): UIWindow? {
+        val scenes = UIApplication.sharedApplication.connectedScenes
+            .mapNotNull { it as? UIWindowScene }
+        val foregroundScenes = scenes.filter { scene ->
+            scene.activationState == UISceneActivationStateForegroundActive
+        }
+        val windows = (foregroundScenes.ifEmpty { scenes }).flatMap { scene ->
+            scene.windows.mapNotNull { it as? UIWindow }
+        }
+        return windows.firstOrNull { window -> window.isKeyWindow() } ?: windows.firstOrNull()
     }
 }

@@ -1,7 +1,9 @@
 package com.slovy.slovymovyapp.data.export
 
+import com.slovy.slovymovyapp.data.remote.AppDataSnapshot
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.PlatformFileOutput
+import com.slovy.slovymovyapp.data.remote.withAppDataSnapshots
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
@@ -12,7 +14,6 @@ import java.util.*
 actual class AppDataExporter actual constructor(androidContext: Any?) {
     private val platform = PlatformDbSupport()
     private val homeDir = File(System.getProperty("user.home") ?: ".")
-    private val databasesDir = File(homeDir, ".slovymovyapp/databases")
     private val exportsDir = File(homeDir, "Downloads/SlovyMovy")
 
     actual val isSupported: Boolean = true
@@ -22,38 +23,34 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
     actual suspend fun exportAppData(): AppDataExportResult = withContext(Dispatchers.IO) {
         val timestamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
         val fileName = "slovymovy-db-export-$timestamp.tar"
-        val exportFiles = databaseFiles()
-        require(exportFiles.isNotEmpty()) { "No database files found to export." }
+        withAppDataSnapshots(platform) { snapshots ->
+            require(snapshots.isNotEmpty()) { "No database files found to export." }
 
-        exportsDir.mkdirs()
-        val outputFile = File(exportsDir, fileName)
-        writeTarArchiveToPath(
-            platform = platform,
-            destinationPath = Path(outputFile.absolutePath),
-            entries = archiveEntries(exportFiles),
-            lastModifiedEpochSeconds = System.currentTimeMillis() / 1000
-        )
+            exportsDir.mkdirs()
+            val outputFile = File(exportsDir, fileName)
+            writeTarArchiveToPath(
+                platform = platform,
+                destinationPath = Path(outputFile.absolutePath),
+                entries = archiveEntries(snapshots),
+                lastModifiedEpochSeconds = System.currentTimeMillis() / 1000
+            )
 
-        AppDataExportResult(
-            artifactName = fileName,
-            destinationLabel = outputFile.absolutePath,
-            shareReference = outputFile.absolutePath
-        )
+            AppDataExportResult(
+                artifactName = fileName,
+                destinationLabel = outputFile.absolutePath,
+                shareReference = outputFile.absolutePath
+            )
+        }
     }
 
     actual fun shareExport(result: AppDataExportResult) {
         // Desktop export currently stops after writing the file.
     }
 
-    private fun databaseFiles(): List<File> {
-        return standardAppDataFileNamesWithSidecars
-            .map { name -> File(databasesDir, name) }
-            .filter { it.exists() && it.isFile }
-    }
-
-    private fun archiveEntries(files: List<File>): List<AppDataArchiveEntry> = files.map { file ->
+    private fun archiveEntries(snapshots: List<AppDataSnapshot>): List<AppDataArchiveEntry> = snapshots.map { snapshot ->
+        val file = File(snapshot.path.toString())
         AppDataArchiveEntry(
-            name = file.name,
+            name = snapshot.archiveName,
             sizeBytes = file.length(),
             writeContentsTo = { output ->
                 file.inputStream().use { input ->

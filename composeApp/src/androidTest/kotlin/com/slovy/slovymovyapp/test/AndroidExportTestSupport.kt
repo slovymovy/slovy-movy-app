@@ -5,7 +5,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import com.slovy.slovymovyapp.data.export.AppDataExportResult
-import com.slovy.slovymovyapp.data.export.standardAppDataFileNamesWithSidecars
+import com.slovy.slovymovyapp.data.remote.standardAppDataFileNamesWithSidecars
 import java.io.File
 
 internal object AndroidExportTestSupport {

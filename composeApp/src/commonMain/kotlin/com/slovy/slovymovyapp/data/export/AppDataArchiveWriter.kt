@@ -1,6 +1,5 @@
 package com.slovy.slovymovyapp.data.export
 
-import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.PlatformFileOutput
 import kotlinx.io.files.Path
@@ -10,17 +9,6 @@ internal data class AppDataArchiveEntry(
     val sizeBytes: Long,
     val writeContentsTo: (PlatformFileOutput) -> Unit
 )
-
-internal val standardAppDataDatabaseFileNames: List<String> = listOf(
-    "app.db",
-    LocalDbManager.LOCAL_DICTIONARY_FILENAME,
-    LocalDbManager.LOCAL_TRANSLATION_FILENAME
-)
-
-internal val standardAppDataFileNamesWithSidecars: List<String> =
-    standardAppDataDatabaseFileNames.flatMap { name ->
-        listOf(name, "$name-wal", "$name-shm")
-    }
 
 internal fun writeTarArchive(
     output: PlatformFileOutput,
