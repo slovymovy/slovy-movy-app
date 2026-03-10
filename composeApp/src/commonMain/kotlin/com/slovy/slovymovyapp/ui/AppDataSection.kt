@@ -37,7 +37,7 @@ fun AppDataSection(
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "Exports your saved words to an archive. Useful for keeping a copy or moving to a new device.",
+                text = "Exports your saved words and app settings to an archive. Useful for keeping a copy or moving to a new device.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
