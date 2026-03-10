@@ -10,12 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.slovy.slovymovyapp.data.remote.standardAppDataDatabaseFileNames
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 
 @Composable
 fun AppDataSection(
-    destinationDescription: String,
     isExporting: Boolean,
     onExport: () -> Unit,
     modifier: Modifier = Modifier
@@ -35,17 +33,15 @@ fun AppDataSection(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             Text(
-                text = "Export app databases",
+                text = "Back up your saved words",
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "Creates a tar archive with ${
-                    standardAppDataDatabaseFileNames.joinToString()
-                } in $destinationDescription.",
+                text = "Exports your saved words to an archive. Useful for keeping a copy or moving to a new device.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Button(
+            FilledTonalButton(
                 onClick = onExport,
                 enabled = !isExporting
             ) {
@@ -78,7 +74,6 @@ private fun AppDataSectionPreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         AppDataSection(
-            destinationDescription = "Downloads/SlovyMovy",
             isExporting = false,
             onExport = {}
         )
@@ -92,7 +87,6 @@ private fun AppDataSectionExportingPreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         AppDataSection(
-            destinationDescription = "Downloads/SlovyMovy",
             isExporting = true,
             onExport = {}
         )

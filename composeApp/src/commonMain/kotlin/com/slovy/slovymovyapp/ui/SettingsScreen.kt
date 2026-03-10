@@ -1041,14 +1041,13 @@ fun SettingsScreenContent(
                             if (state.isAppDataExportSupported) {
                                 item {
                                     SectionHeader(
-                                        title = "Data",
+                                        title = "Your data",
                                         modifier = Modifier.padding(top = AppSpacing.sm)
                                     )
                                 }
 
                                 item {
                                     AppDataSection(
-                                        destinationDescription = state.appDataExportDestinationDescription,
                                         isExporting = state.isExportingAppData,
                                         onExport = onExportAppData
                                     )
