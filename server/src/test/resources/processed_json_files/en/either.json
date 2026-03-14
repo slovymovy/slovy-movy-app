@@ -1,0 +1,325 @@
+{
+    "word_family": [
+        "neither"
+    ],
+    "entries": [
+        {
+            "pos": "conjunction",
+            "senses": [
+                {
+                    "sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                    "sense_definition": "Used to introduce the first of two or more choices or possibilities, followed by 'or'.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "choice_option",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "You can <w>either</w> have the soup or the salad for your starter.",
+                            "target_lang_translations": {
+                                "ru": "На закуску вы можете взять <w>или</w> суп, или салат."
+                            }
+                        },
+                        {
+                            "text": "<w>Either</w> you finish your homework now, or you cannot watch TV later.",
+                            "target_lang_translations": {
+                                "ru": "<w>Либо</w> ты закончишь домашнюю работу сейчас, либо не сможешь посмотреть телевизор позже."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "either ... or"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Используется для введения первого из двух или более вариантов выбора, за которым следует союз «или»."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "или",
+                                "target_lang_sense_clarification": "в конструкции «или ... или»"
+                            },
+                            {
+                                "target_lang_word": "либо",
+                                "target_lang_sense_clarification": "в конструкции «либо ... либо»"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "determiner",
+            "senses": [
+                {
+                    "sense_id": "706dd508-9cf3-3006-8ebe-adb9b0e1f4af",
+                    "sense_definition": "One or the other of two people or things.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "choice_option",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "You may choose <w>either</w> book to read for the assignment.",
+                            "target_lang_translations": {
+                                "ru": "Ты можешь выбрать <w>любую</w> книгу для выполнения задания."
+                            }
+                        },
+                        {
+                            "text": "In <w>either</w> case, we must make a decision by tomorrow.",
+                            "target_lang_translations": {
+                                "ru": "В <w>любом</w> случае, мы должны принять решение до завтра."
+                            }
+                        }
+                    ],
+                    "antonyms": [
+                        "neither",
+                        "both"
+                    ],
+                    "common_phrases": [
+                        "in either case",
+                        "either way"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Тот или другой из двух людей или предметов; любой из двух."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "любой",
+                                "target_lang_sense_clarification": "один из двух"
+                            },
+                            {
+                                "target_lang_word": "тот или другой",
+                                "target_lang_sense_clarification": "выбор из двух вариантов"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "ded1c13b-f1c7-3835-b105-69078b07b68c",
+                    "sense_definition": "Both of two things, especially when describing the position of something on two sides.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "both_each",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "There were tall trees planted on <w>either</w> side of the long driveway.",
+                            "target_lang_translations": {
+                                "ru": "Высокие деревья были посажены с <w>обеих</w> сторон длинной подъездной аллеи."
+                            }
+                        },
+                        {
+                            "text": "He sat in the middle with a friend on <w>either</w> hand.",
+                            "target_lang_translations": {
+                                "ru": "Он сидел посередине, а с <w>каждой</w> стороны от него было по другу."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "both",
+                        "each"
+                    ],
+                    "common_phrases": [
+                        "on either side",
+                        "at either end"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Оба предмета; каждый из двух (особенно при описании расположения чего-либо с двух сторон)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "каждый",
+                                "target_lang_sense_clarification": "с каждой стороны"
+                            },
+                            {
+                                "target_lang_word": "оба",
+                                "target_lang_sense_clarification": "с обеих сторон"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "ea4e2b35-3dc0-3a5e-a4b8-63118ccf4a50",
+                    "sense_definition": "Any one of more than two options.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "choice_option",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "He presented three arguments, but <w>either</w> of them seemed flawed to the judge.",
+                            "target_lang_translations": {
+                                "ru": "Он представил три аргумента, но <w>любой</w> из них казался судье ошибочным."
+                            }
+                        },
+                        {
+                            "text": "They entreat that you will make no scruple to go to <w>either</w> of your three uncles.",
+                            "target_lang_translations": {
+                                "ru": "Они умоляют, чтобы вы без колебаний пошли к <w>любому</w> из трех ваших дядей."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "any"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "dated",
+                            "comment": "modern usage typically restricts 'either' to two options"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Любой из более чем двух вариантов (устаревшее использование)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "любой",
+                                "target_lang_sense_clarification": "из нескольких вариантов"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "adverb",
+            "senses": [
+                {
+                    "sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                    "sense_definition": "Used in negative sentences to mean 'also' or 'as well'.",
+                    "learner_level": "A1",
+                    "frequency": "High",
+                    "semantic_group_id": "negative_addition",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "I do not like apples, and I do not like oranges <w>either</w>.",
+                            "target_lang_translations": {
+                                "ru": "Я не люблю яблоки, и апельсины я <w>тоже</w> не люблю."
+                            }
+                        },
+                        {
+                            "text": "If you are not going to the party, I won't go <w>either</w>.",
+                            "target_lang_translations": {
+                                "ru": "Если ты не идешь на вечеринку, я <w>тоже</w> не пойду."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "not ... either"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Используется в отрицательных предложениях в значении «также» или «тоже»."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "тоже",
+                                "target_lang_sense_clarification": "в значении «тоже не»"
+                            },
+                            {
+                                "target_lang_word": "также",
+                                "target_lang_sense_clarification": "в значении «также не»"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "pronoun",
+            "senses": [
+                {
+                    "sense_id": "e6e06770-87c4-3f22-b061-748e35aab2f8",
+                    "sense_definition": "One or the other of two people or things.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "choice_option",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "I have two pens here, so you can use <w>either</w>.",
+                            "target_lang_translations": {
+                                "ru": "У меня здесь две ручки, так что можешь взять <w>любую</w>."
+                            }
+                        },
+                        {
+                            "text": "He made me two offers, but I did not accept <w>either</w>.",
+                            "target_lang_translations": {
+                                "ru": "Он сделал мне два предложения, но я не принял <w>ни одного</w>."
+                            }
+                        }
+                    ],
+                    "antonyms": [
+                        "neither"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Тот или другой из двух людей или предметов."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "любой",
+                                "target_lang_sense_clarification": "любой из двух"
+                            },
+                            {
+                                "target_lang_word": "тот или другой",
+                                "target_lang_sense_clarification": "один из двух"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "9ffd67a9-06dc-3008-a32f-890bc51f1ec6",
+                    "sense_definition": "Both; each of two or more.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "both_each",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Scarce a palm of ground could be gotten by <w>either</w> of the three.",
+                            "target_lang_translations": {
+                                "ru": "Едва ли пядь земли могла достаться <w>каждому</w> из троих."
+                            }
+                        },
+                        {
+                            "text": "There have been three famous talkers in Great Britain, <w>either</w> of whom would illustrate my point.",
+                            "target_lang_translations": {
+                                "ru": "В Великобритании было три знаменитых оратора, <w>любой</w> из которых мог бы проиллюстрировать мою мысль."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "each"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "archaic",
+                            "comment": "modern English uses 'each' or 'any' for more than two"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "И тот и другой; каждый из двух или более (устаревшее)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "каждый",
+                                "target_lang_sense_clarification": "каждый из перечисленных"
+                            },
+                            {
+                                "target_lang_word": "любой",
+                                "target_lang_sense_clarification": "любой из перечисленных"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

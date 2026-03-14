@@ -436,5 +436,18 @@ class MultiLemmaPosIngestionTest {
         assertEquals(1, nonShoneClusters.size, "Exactly one lemma_pos should lack 'shone'")
     }
 
+    @Test
+    fun either_determiner_pos_is_ingested() {
+        val outDir = Files.createTempDirectory("multi_lemma_pos_either").toFile()
+        val infos = ingestAndQuery("en", "either", outDir)
+
+        val detEntries = lemmaPosForPos(infos, DictionaryPos.DETERMINER)
+        assertEquals(1, detEntries.size, "Expected 1 DETERMINER lemma_pos for 'either'")
+
+        assertTrue(lemmaPosForPos(infos, DictionaryPos.CONJUNCTION).size == 1, "Expected 1 CONJUNCTION lemma_pos for 'either'")
+        assertTrue(lemmaPosForPos(infos, DictionaryPos.ADVERB).size == 1, "Expected 1 ADVERB lemma_pos for 'either'")
+        assertTrue(lemmaPosForPos(infos, DictionaryPos.PRONOUN).size == 1, "Expected 1 PRONOUN lemma_pos for 'either'")
+    }
+
     private fun uuidParse(s: String) = com.slovy.slovymovyapp.ingestion.uuidParse(s)
 }

@@ -1,0 +1,3164 @@
+{
+    "word": "either",
+    "lang_code": "en",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                "word": "either",
+                "pos": "adv",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "glosses": [
+                            "As well."
+                        ],
+                        "tags": [
+                            "conjunctive",
+                            "not-comparable"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "ee3aecd4-315f-44b0-b63e-bcf6408c2b21",
+                                "sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                                "text": "I don't like him, and I don't like her either."
+                            },
+                            {
+                                "example_id": "7112e750-0890-4132-af49-1eef06facb25",
+                                "sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                                "text": "I know a cheap Spanish restaurant. It's not far from here, either."
+                            },
+                            {
+                                "example_id": "4bbf3bf4-cd60-4ecb-83b4-a153fb0ff39b",
+                                "sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                                "text": "But Richmond[…]appeared to lose himself in his own reflections. Some pickled crab, which he had not touched, had been removed with a damson pie; and his sister saw[…]that he had eaten no more than a spoonful of that either."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "21ffdb58-5097-4525-951c-7607bdf1e79e",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "ook (niet)",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "8b505840-c75d-4363-9ace-cd8c1007772b",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "non plus",
+                        "target_lang_code": "fr",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "non plus",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "0d1caa56-e034-33b8-9ceb-a4a62c7464ae",
+                                        "entry_id": "76c9b627-0358-31a7-a2b7-7ceaa3493d00",
+                                        "glosses": [
+                                            "Également négatif."
+                                        ],
+                                        "tags": [],
+                                        "note": "Généralement utilisé avec ne",
+                                        "examples": [
+                                            {
+                                                "example_id": "86900909-7d92-4c69-9969-ead1553f3d90",
+                                                "sense_id": "0d1caa56-e034-33b8-9ceb-a4a62c7464ae",
+                                                "text": "On ne peut pas vivre sans pain ; On ne peut pas non plus vivre sans la patrie."
+                                            },
+                                            {
+                                                "example_id": "1f993a73-1f12-4e4e-887e-81d6c4f7655e",
+                                                "sense_id": "0d1caa56-e034-33b8-9ceb-a4a62c7464ae",
+                                                "text": "Et dame ! ce jour là, si on n’y va pas en chantant, on n’ira pas en pleurant non plus."
+                                            },
+                                            {
+                                                "example_id": "68510890-6ac1-47b5-a8e9-fc287e96a6c7",
+                                                "sense_id": "0d1caa56-e034-33b8-9ceb-a4a62c7464ae",
+                                                "text": "Les gazelles et les outardes ne manquent pas non plus, mais il faudrait organiser des battues pour s’en emparer."
+                                            },
+                                            {
+                                                "example_id": "a19b9bd2-cbf2-4560-ac57-d0f298be38da",
+                                                "sense_id": "0d1caa56-e034-33b8-9ceb-a4a62c7464ae",
+                                                "text": "Les Chasseurs n’étaient peut-être pas non plus étrangers à cette manigance."
+                                            },
+                                            {
+                                                "example_id": "0e35abf0-c56a-4543-8e03-58c8a688a36c",
+                                                "sense_id": "0d1caa56-e034-33b8-9ceb-a4a62c7464ae",
+                                                "text": "Si Christophe Colomb avait calculé sa position avec une montre à quartz, il n’aurait pas raté les Indes mais il n’aurait pas non plus découvert l’Amérique. Donc exit l’aventure ?"
+                                            },
+                                            {
+                                                "example_id": "922be08d-466e-42a4-894e-70f57530c7f6",
+                                                "sense_id": "0d1caa56-e034-33b8-9ceb-a4a62c7464ae",
+                                                "text": "[…] : la plaque tectonique de droite qui recouvre la télé depuis 1995 au moins s’est effondrée. Enfin presque, pasque faut pas déconner non plus."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "b8b17d36-4d8f-3b31-adae-ebdc50f3b939",
+                                        "entry_id": "76c9b627-0358-31a7-a2b7-7ceaa3493d00",
+                                        "glosses": [
+                                            "Également négatif."
+                                        ],
+                                        "tags": [],
+                                        "note": "Utilisé avec le sujet sans verbe",
+                                        "examples": [
+                                            {
+                                                "example_id": "200ad21d-32e3-4125-b04e-fa783cff44ee",
+                                                "sense_id": "b8b17d36-4d8f-3b31-adae-ebdc50f3b939",
+                                                "text": "J'allai de ce pas voir Émile l’aubergiste, ma darne de requin à la main. L’événement que m'avait rapporté le poissonnier ne pouvait attendre. La darne non plus."
+                                            },
+                                            {
+                                                "example_id": "aecb6623-20e4-45fb-a289-dbc4cf3d9c6e",
+                                                "sense_id": "b8b17d36-4d8f-3b31-adae-ebdc50f3b939",
+                                                "text": "Vous ne pourriez pas. Moi non plus."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "a900f792-c487-3f21-a259-64f7508324d1",
+                                        "entry_id": "76c9b627-0358-31a7-a2b7-7ceaa3493d00",
+                                        "glosses": [
+                                            "Qui était mais qui n’est plus."
+                                        ],
+                                        "tags": [],
+                                        "note": "Utilisé avec un adjectif épithète",
+                                        "examples": [
+                                            {
+                                                "example_id": "aa2154cd-b568-490d-ba7a-6a58d75b901c",
+                                                "sense_id": "a900f792-c487-3f21-a259-64f7508324d1",
+                                                "text": "Alors, chaque être étant libre à sa façon et concourant de toutes ses forces à la fois, de concert avec les autres êtres, au but commun, la nature serait belle ; et le rêve que l’art nous propose, qu’il réalise par fragments, serait la réalité universelle : un art non plus superficiel, mais profond, gouvernerait l’univers."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f8bb9130-1fc2-3cba-83de-06e4cb6f3dec",
+                                        "entry_id": "76c9b627-0358-31a7-a2b7-7ceaa3493d00",
+                                        "glosses": [
+                                            "Pas plus."
+                                        ],
+                                        "tags": [
+                                            "dated"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "f848dbbf-1dd7-4a50-b50b-abc164c12bac",
+                                                "sense_id": "f8bb9130-1fc2-3cba-83de-06e4cb6f3dec",
+                                                "text": "Il n’en fut non plus ému que s’il eût été innocent."
+                                            },
+                                            {
+                                                "example_id": "a8dbfe89-5b86-4785-8adc-f67eeefac822",
+                                                "sense_id": "f8bb9130-1fc2-3cba-83de-06e4cb6f3dec",
+                                                "text": "On n’en parle non plus que s’il n’eût jamais existé."
+                                            },
+                                            {
+                                                "example_id": "831a2988-d3f7-4d9d-9954-9af67ce63ec3",
+                                                "sense_id": "f8bb9130-1fc2-3cba-83de-06e4cb6f3dec",
+                                                "text": "Je n’en sais rien, non plus que vous."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "non plus",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "972ccb84-7c99-34c2-8bb6-613b80bf0a1c",
+                                        "entry_id": "e56f002a-bb62-3267-a54e-679e948ce02c",
+                                        "glosses": [
+                                            "Ni."
+                                        ],
+                                        "tags": [],
+                                        "note": "Nie également le mot suivant",
+                                        "examples": [
+                                            {
+                                                "example_id": "435771eb-9aa6-469c-bd1b-756460aad7ef",
+                                                "sense_id": "972ccb84-7c99-34c2-8bb6-613b80bf0a1c",
+                                                "text": "En un certain sens, Euripide ne fut, lui aussi, qu’un masque : la divinité qui parlait par sa bouche n’était pas Dionysos, non plus Apol­lon, mais un démon qui venait d’apparaître, appelé Socrate."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "6108783e-835f-4240-8258-5bb3ab602e14",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "auch",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "auch",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "66259a00-c070-3d70-9889-78a3420e906c",
+                                        "entry_id": "5bbf1b0b-206b-3fc9-9bcc-b2dbcc439657",
+                                        "glosses": [
+                                            "und ferner"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "2dfd8f24-9642-437c-b7d1-6ea03605cb82",
+                                                "sense_id": "66259a00-c070-3d70-9889-78a3420e906c",
+                                                "text": "Er machte es auch so wie die Anderen."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "91302428-f0c2-47d7-8c08-0df9dddc0746",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "ebenso",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "ebenso",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "793ee477-db5c-3d35-9e37-6744a5e4bdc6",
+                                        "entry_id": "77c4a961-ea97-3c95-b1f1-e1c1ff0ba1ba",
+                                        "glosses": [
+                                            "im gleichen Maße, auf die gleiche Weise"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "9508349e-ddf9-43d0-b877-af038db46093",
+                                                "sense_id": "793ee477-db5c-3d35-9e37-6744a5e4bdc6",
+                                                "text": "Wir sind wegen des Unwetters ebenso schockiert wie ihr."
+                                            },
+                                            {
+                                                "example_id": "8c15e5a1-db8b-4363-9684-6fbc372bf93d",
+                                                "sense_id": "793ee477-db5c-3d35-9e37-6744a5e4bdc6",
+                                                "text": "„Drachenfliegen ist heute mindestens ebenso sicher wie Segelfliegen – dank enormer technischer Entwicklungen.“"
+                                            },
+                                            {
+                                                "example_id": "174908e9-2080-49cf-9132-cecac3bccbad",
+                                                "sense_id": "793ee477-db5c-3d35-9e37-6744a5e4bdc6",
+                                                "text": "„Aber nicht nur der See führt diesen Namen, auch der Wald, der ihn umschließt. Und Stechlin heißt ebenso das langgestreckte Dorf, das sich, den Windungen des Sees folgend, um seine Südspitze herumzieht.“"
+                                            },
+                                            {
+                                                "example_id": "6716b1f6-2ca0-46a7-99c5-30961549fea2",
+                                                "sense_id": "793ee477-db5c-3d35-9e37-6744a5e4bdc6",
+                                                "text": "„Der osmanische Sultan Selim I., der Grausame, bezwang damit die Mameluken-Sultanate von Syrien und Ägypten und führte die Artillerie kurz darauf auch gegen Shah Ismail, den Gründer der Safawiden-Dynastie, ins Feld, doch dieser war bereits ebenso gerüstete und konnte sich gegenüber dem Osmanen behaupten.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "ccb08d6d-15d3-42aa-bc5d-cf490c82a269",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "ebenfalls",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "ebenfalls",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "af99534f-63a9-3ddb-862a-5e19bb758e66",
+                                        "entry_id": "b96ceba8-315f-30be-9215-0011d7ba61d3",
+                                        "glosses": [
+                                            "auch"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ad6644c1-09a4-4ae4-b62c-9281950ff1e9",
+                                                "sense_id": "af99534f-63a9-3ddb-862a-5e19bb758e66",
+                                                "text": "Ich werde ebenfalls nach Hause gehen."
+                                            },
+                                            {
+                                                "example_id": "c37064aa-4cf4-4829-876a-4827c5468cf9",
+                                                "sense_id": "af99534f-63a9-3ddb-862a-5e19bb758e66",
+                                                "text": "„Auf gestickte Monogramme sollte man ebenfalls verzichten, denn künftige Lebensabschnittsgefährten schlafen nicht gerne in Bettbezügen mit den Initialen ihrer Vorgänger.“"
+                                            },
+                                            {
+                                                "example_id": "e85277e6-b63f-4c86-9eb1-461818595294",
+                                                "sense_id": "af99534f-63a9-3ddb-862a-5e19bb758e66",
+                                                "text": "„Er stellte sich dann ebenfalls neben das Pult, schlug die Hacken zusammen und verbeugte sich leicht.“"
+                                            },
+                                            {
+                                                "example_id": "e13ef2df-7f78-4e98-a25c-f82dd39db29f",
+                                                "sense_id": "af99534f-63a9-3ddb-862a-5e19bb758e66",
+                                                "text": "„Ähnliches deutet sich für das Obereichsfeld an, das nach dem Willen der Erfurter Landesregierung ebenfalls mit den Nachbarkreisen fusionieren soll.“"
+                                            },
+                                            {
+                                                "example_id": "c39b3b98-f3da-47eb-bb1e-653e9a3330c5",
+                                                "sense_id": "af99534f-63a9-3ddb-862a-5e19bb758e66",
+                                                "text": "„Im geistlichen Kurfürstentum Köln hatten inzwischen ebenfalls die Hexenprozesse sich zu häufen begonnen.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "a5dc32b1-a15c-451e-a47a-3ae621f300e0",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "neanche",
+                        "target_lang_code": "it",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "neanche",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "7b302b6a-797f-31bb-8bf3-299bd8083414",
+                                        "entry_id": "b7b289d5-8589-3a48-8d3f-370d2252607a",
+                                        "glosses": [
+                                            "no in modo assoluto"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "neanche",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "1b2b7344-699a-310c-9d4b-76d9466bf333",
+                                        "entry_id": "b7604428-a08c-3bc1-a8bf-0b5d20c0e3a8",
+                                        "glosses": [
+                                            "nemmeno"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "3996f6a2-dcaf-4644-a391-58d6114e0aa5",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "nemmeno",
+                        "target_lang_code": "it",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "nemmeno",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "83a47f9e-3173-3ae0-bd6b-81acce77b287",
+                                        "entry_id": "afebd03a-d42d-3a5a-9bd8-10b997100885",
+                                        "glosses": [
+                                            "in nessun caso"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "a600d2a2-05d1-4c96-9cb0-187296cd9018",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "neppure",
+                        "target_lang_code": "it",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "neppure",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "9fb38976-6529-3fa4-9700-d0c2996511bc",
+                                        "entry_id": "fbcd9401-4350-30c2-a69c-14231a6e63d1",
+                                        "glosses": [
+                                            "senz'alcun dubbio"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "92c0f047-e452-46a6-b25c-aedf26c8f8dd",
+                                                "sense_id": "9fb38976-6529-3fa4-9700-d0c2996511bc",
+                                                "text": "non guardò neppure cos'era scritto"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "neppure",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "89162ffe-9f06-3199-9113-3e87e4572384",
+                                        "entry_id": "5734427f-72be-331c-acd8-f8705038e4fc",
+                                        "glosses": [
+                                            "definizione mancante; se vuoi, aggiungila tu"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "9efb058f-35eb-4fd5-ad5a-23a02a4b3825",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "też nie",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "483380c0-3634-4b4c-95eb-77c46cabffce",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "та́кже не",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "d538b8be-cb9b-4be6-8fa1-54fc56601087",
+                        "source_entry_id": "a246dea0-ed0f-3fb6-83d3-ddd9cb6eb0ca",
+                        "source_sense_id": "f4fafd59-bece-35bd-9200-2350052a92d0",
+                        "source_sense_description": "(after a negative) as well",
+                        "target_lang_word": "tampoco",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "tampoco",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "d2e8b042-6543-3211-98e9-f2218a959f94",
+                                        "entry_id": "304add9a-64c1-3bea-b29f-f8a264658051",
+                                        "glosses": [
+                                            "Úsase para indicar la similitud de un estado de cosas negativo con otro ya mentado, de manera análoga a la de también para las afirmaciones."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "d384c159-e384-4884-83bb-cfe17556381e",
+                                                "sense_id": "d2e8b042-6543-3211-98e9-f2218a959f94",
+                                                "text": "Porque usted, por ejemplo, ha hecho una afirmación que también a mí me gusta. Dice: 'para que de una vez se demuestre que el monte no es de Icona'. Es verdad. Pero el monte tampoco es de la Consejería, ni es del ingeniero correspondiente."
+                                            },
+                                            {
+                                                "example_id": "b0362eea-d9e7-4d64-938b-58ebe7dc9f32",
+                                                "sense_id": "d2e8b042-6543-3211-98e9-f2218a959f94",
+                                                "text": "'Estoy sorprendida que Italo haya declarado en mi biografía. Él y yo nunca hemos sido amigos, ni tampoco fue amigo de María Eugenia', declaró indignada la cantante."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                "word": "either",
+                "pos": "conj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "glosses": [
+                            "Introduces the first of two (or occasionally more) options or possibilities, the second (or last) of which is introduced by “or”."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "a2b0663e-6e51-47ea-b48b-0e7fc34bf7e0",
+                                "sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                                "text": "Either you eat your dinner or you go to your room."
+                            },
+                            {
+                                "example_id": "1a78de30-9c16-4c4a-a8c9-aba3384da756",
+                                "sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                                "text": "You can have either potatoes or rice with that, but not both."
+                            },
+                            {
+                                "example_id": "72287f95-2a1d-450f-9a19-3c28248d6fe8",
+                                "sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                                "text": "You'll be either early, late, or on time."
+                            },
+                            {
+                                "example_id": "ab288b9c-a0e8-4b45-8992-bc9ce058b37b",
+                                "sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                                "text": "Either you'll finish your homework or you'll be grounded you home."
+                            },
+                            {
+                                "example_id": "e9fc4c54-71c6-4588-9b90-73d74f0ab236",
+                                "sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                                "text": "You can't be a table and a chair. You're either a Jew or a gentile."
+                            },
+                            {
+                                "example_id": "1f24e23a-a03b-4cfd-aa3a-f014746078ed",
+                                "sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                                "text": "Thus, when he drew up instructions in lawyer language[…]his clerks[…]understood him very well. If he had written a love letter, or a farce, or a ballade, or a story, no one, either clerks, or friends, or compositors, would have understood anything but a word here and a word there."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "5a1effe6-85d0-42b4-ad8c-d15fa07e9b26",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "buď ... nebo",
+                        "target_lang_code": "cs",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "d1d830f5-2192-4f44-b2c8-2a38853979b7",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "buď ... anebo",
+                        "target_lang_code": "cs",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "a555ce1a-d530-456f-ad36-ec859c3eb17a",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "of",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "of",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "69d203c4-49e2-3b5e-b6a0-62658e13ed70",
+                                        "entry_id": "0887a899-6373-32e5-bd64-d8449a70f956",
+                                        "glosses": [
+                                            "en anders : gebruikt om een keuze aan te geven, waarbij alle keuzemogelijkheden expliciet worden genoemd"
+                                        ],
+                                        "tags": [
+                                            "nevenschikkend"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "9688ecfd-3cb9-4ffc-ae7e-bc506d22f085",
+                                                "sense_id": "69d203c4-49e2-3b5e-b6a0-62658e13ed70",
+                                                "text": "Hij loopt (of) over straat, of hij zit in de kroeg."
+                                            },
+                                            {
+                                                "example_id": "2290b2a2-9434-4140-b240-db7a8df906d0",
+                                                "sense_id": "69d203c4-49e2-3b5e-b6a0-62658e13ed70",
+                                                "text": "Waarom had ik geen donder gehoord of bliksem gezien tijdens mijn tocht omhoog? Wat had ik nu spijt van het plan om de zonsondergang en zonsopkomst vanaf de top te willen gaan bekijken."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "c8a37fb9-a17f-314a-83ef-a3d7a40897fd",
+                                        "entry_id": "0887a899-6373-32e5-bd64-d8449a70f956",
+                                        "glosses": [
+                                            "dat wel of niet : inleiding van een bijzin om onzekerheid aan te geven"
+                                        ],
+                                        "tags": [
+                                            "onderschikkend"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "4862e74b-1b13-4b95-a265-e14ea798c717",
+                                                "sense_id": "c8a37fb9-a17f-314a-83ef-a3d7a40897fd",
+                                                "text": "Ik weet niet of Jan wel komt."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "58710e86-4f4f-3137-8972-9c29a570fd5d",
+                                        "entry_id": "0887a899-6373-32e5-bd64-d8449a70f956",
+                                        "glosses": [
+                                            "anders gezegd"
+                                        ],
+                                        "tags": [
+                                            "verklarend"
+                                        ],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "01ff3ca0-10b1-3e8e-8787-c1d3ef0bc05c",
+                                        "entry_id": "0887a899-6373-32e5-bd64-d8449a70f956",
+                                        "glosses": [
+                                            "bij benadering"
+                                        ],
+                                        "tags": [
+                                            "schattend"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "f5901d03-c1a7-4224-b0a5-60e06e9e61c8",
+                                                "sense_id": "01ff3ca0-10b1-3e8e-8787-c1d3ef0bc05c",
+                                                "text": "Een keer of drie."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "77f8536c-f3bc-4a41-8800-31d728c85ce0",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "ofwel",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "ofwel",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "a958247e-beb8-3982-8e27-c0e06b2bc380",
+                                        "entry_id": "a6b105d5-7a42-3caa-af1d-0f47e3036b75",
+                                        "glosses": [
+                                            "geeft een keuze aan tussen de ene mogelijkheid en de andere"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "77553f5e-d2bb-443c-8a31-f8c5b622e430",
+                                                "sense_id": "a958247e-beb8-3982-8e27-c0e06b2bc380",
+                                                "text": "Hij is ofwel erg slim, ofwel een enorme geluksvogel."
+                                            },
+                                            {
+                                                "example_id": "007629f9-689a-4a88-8e19-45258ce65ea0",
+                                                "sense_id": "a958247e-beb8-3982-8e27-c0e06b2bc380",
+                                                "text": "Ze zijn ofwel supermooi met botox en nepborsten, of enorm dik en luidruchtig."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "3a0ccc45-1a52-4a7d-994f-bb90405075c1",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "hetzij",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "hetzij",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "9caa7a31-ab6a-35da-a055-a30a1ddeb4d9",
+                                        "entry_id": "de1364cf-3a93-3bfe-b9e9-a0a7a1934a5f",
+                                        "glosses": [
+                                            "of ............ of ................."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "55962d07-c23c-4cae-92f9-a98134903b25",
+                                                "sense_id": "9caa7a31-ab6a-35da-a055-a30a1ddeb4d9",
+                                                "text": "Afhankelijk van het aantal mensen dat komt gaan we hetzij wandelen hetzij rennen."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "8b9145d8-9a4d-4dd3-bbc5-62e6e811e451",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "ou",
+                        "target_lang_code": "fr",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "ou",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "0f3ad4c6-bca6-3540-a514-35cf31bb883e",
+                                        "entry_id": "984ea18e-edb8-3182-8699-3c76c07d0884",
+                                        "glosses": [
+                                            "Indique une disjonction inclusive sur plusieurs concepts quand la cohabitation des concepts est envisageable : un ou plus dans la liste sont envisageables à la fois."
+                                        ],
+                                        "tags": [],
+                                        "note": "Quand le sujet comprend un ou de ce sens, le verbe se met au pluriel",
+                                        "examples": [
+                                            {
+                                                "example_id": "d77354a2-5218-4ebd-8353-6fa6226c8cb2",
+                                                "sense_id": "0f3ad4c6-bca6-3540-a514-35cf31bb883e",
+                                                "text": "L’enclouure sera grave, si le pus, après avoir long-temps séjourné dans le pied, a carié l'os, ou si, après avoir fusé dessous la chair de la couronne, il a gâté, ou le tendon extenseur, ou le cartilage latéral, ou l'articulation."
+                                            },
+                                            {
+                                                "example_id": "383639e0-18c8-45df-8f9e-01070b4c8eab",
+                                                "sense_id": "0f3ad4c6-bca6-3540-a514-35cf31bb883e",
+                                                "text": "La peur ou la misère ont fait commettre bien des fautes."
+                                            },
+                                            {
+                                                "example_id": "c8846b3a-cb78-4c7b-a86a-3365cd8b4894",
+                                                "sense_id": "0f3ad4c6-bca6-3540-a514-35cf31bb883e",
+                                                "text": "Vous ou moi, nous ferons telle chose."
+                                            },
+                                            {
+                                                "example_id": "29f521a0-fc1e-4775-80eb-3e018676f9ec",
+                                                "sense_id": "0f3ad4c6-bca6-3540-a514-35cf31bb883e",
+                                                "text": "J’irais à la piscine lundi ou mercredi. (ambigu : voir ci-dessous)"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "821eec73-3adc-3e3c-affe-2a7323aeaf7d",
+                                        "entry_id": "984ea18e-edb8-3182-8699-3c76c07d0884",
+                                        "glosses": [
+                                            "Indique une disjonction exclusive : un seul dans la liste est envisageable à la fois. Quand le sujet comprend un ou de ce sens, le verbe s’accorde en nombre avec la dernière option. La première option peut être précédée par soit ou ou."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "3804e21a-166f-4cf2-a303-8bd931ed24e4",
+                                                "sense_id": "821eec73-3adc-3e3c-affe-2a7323aeaf7d",
+                                                "text": "Lui ou elle viendra avec moi."
+                                            },
+                                            {
+                                                "example_id": "5a64fcde-bbe8-4ae4-ae06-1dc0acab4457",
+                                                "sense_id": "821eec73-3adc-3e3c-affe-2a7323aeaf7d",
+                                                "text": "La douceur ou la violence en viendra à bout."
+                                            },
+                                            {
+                                                "example_id": "6782ae29-d029-4678-abab-96448eabd0a5",
+                                                "sense_id": "821eec73-3adc-3e3c-affe-2a7323aeaf7d",
+                                                "text": "J’irai à la piscine lundi ou mercredi. (ambigu : voir ci-dessus)"
+                                            },
+                                            {
+                                                "example_id": "5e0c5b7d-de9b-457f-8582-4ab36043c931",
+                                                "sense_id": "821eec73-3adc-3e3c-affe-2a7323aeaf7d",
+                                                "text": "Soit qu’il s’en aille, ou qu’il demeure."
+                                            },
+                                            {
+                                                "example_id": "af396439-0f26-4000-8a50-54b11a5ea6f2",
+                                                "sense_id": "821eec73-3adc-3e3c-affe-2a7323aeaf7d",
+                                                "text": "Or, il est évident que l’un ou l’autre est dans votre destinée."
+                                            },
+                                            {
+                                                "example_id": "a8750b82-fb91-4355-8f4d-e274c2a89a91",
+                                                "sense_id": "821eec73-3adc-3e3c-affe-2a7323aeaf7d",
+                                                "text": "Pour rien au monde, dit Emma, en souriant avec grâce, je ne voudrais vous conseiller de dire oui ou non."
+                                            },
+                                            {
+                                                "example_id": "57e57d45-69f2-4314-a1d4-1ff5d3b245d0",
+                                                "sense_id": "821eec73-3adc-3e3c-affe-2a7323aeaf7d",
+                                                "text": "J’irai, Dit-il, et reviendrai vainqueur ou mort."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "0e683d30-ccfd-3a85-bf13-87b4981dd72b",
+                                        "entry_id": "984ea18e-edb8-3182-8699-3c76c07d0884",
+                                        "glosses": [
+                                            "Indique une expression alternative de la même chose."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "f8691424-3465-4c25-8d1f-4ace1617f2ec",
+                                                "sense_id": "0e683d30-ccfd-3a85-bf13-87b4981dd72b",
+                                                "text": "Son beau-frère ou le mari de sa sœur."
+                                            },
+                                            {
+                                                "example_id": "51a5d1a6-f796-4a3f-84b5-5e3c9c6e869a",
+                                                "sense_id": "0e683d30-ccfd-3a85-bf13-87b4981dd72b",
+                                                "text": "Byzance ou Constantinople."
+                                            },
+                                            {
+                                                "example_id": "5dba4019-6453-4d23-89cb-177134c5a2e0",
+                                                "sense_id": "0e683d30-ccfd-3a85-bf13-87b4981dd72b",
+                                                "text": "Mécanique, physique, physiologie, biologie, qu’est-ce que tout cela, sinon la connaissance de la nature et de l’homme, ou plus précisément la connaissance des rapports de l’homme avec la nature et des conditions mêmes de la vie ?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "046bff71-12fb-3faa-8bb0-8a1b6f732eb4",
+                                        "entry_id": "984ea18e-edb8-3182-8699-3c76c07d0884",
+                                        "glosses": [
+                                            "Indique le sous-titre d’un livre."
+                                        ],
+                                        "tags": [
+                                            "obsolete"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "d121e6fb-d3a0-473b-b2dc-eca8cb39c92b",
+                                                "sense_id": "046bff71-12fb-3faa-8bb0-8a1b6f732eb4",
+                                                "text": "Encyclopédie, ou Dictionnaire raisonné des sciences, des arts et des métiers"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "ou",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "e7afbb0e-819b-34ce-8b1b-3a1880a88e06",
+                                        "entry_id": "095cf473-d678-3615-afbe-8c33d40d7d27",
+                                        "glosses": [
+                                            "Vingt-et-unième lettre de l’alphabet cyrillique, у."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "5e811e0c-15b6-42fc-81aa-95a8c4cee936",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "soit",
+                        "target_lang_code": "fr",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "soit",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "9ba64688-8d73-3fe4-bb98-bcbc7722db48",
+                                        "entry_id": "dbd371db-854b-35b4-be85-ee9316b2ce0a",
+                                        "glosses": [
+                                            "Troisième personne du singulier du présent du subjonctif de être."
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "043ec2c9-e908-4ab7-b947-f6d94e8ece41",
+                                                "sense_id": "9ba64688-8d73-3fe4-bb98-bcbc7722db48",
+                                                "text": "Que le nombre important de naissances illégitimes soit une marque d’immoralité, je le veux bien ; encore est-il qu’il faut faire des distinctions et examiner si ce n’est pas plutôt un signe d’irrégularité que d’immoralité."
+                                            },
+                                            {
+                                                "example_id": "0d4bd795-3b81-4635-a267-c5f3f06081ff",
+                                                "sense_id": "9ba64688-8d73-3fe4-bb98-bcbc7722db48",
+                                                "text": "« Quel dommage qu’il soit – prononcer “soye” – pas là, Fred ! »"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "8c8793c4-0a10-3c1d-8722-7cc0b69392c2",
+                                        "entry_id": "dbd371db-854b-35b4-be85-ee9316b2ce0a",
+                                        "glosses": [
+                                            "Supposons que … soit. — Note d’usage : introduit ou pose un ou plusieurs nouveaux objets mathématiques."
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "4be9d232-8763-43d8-bd8d-dc354962df3b",
+                                                "sense_id": "8c8793c4-0a10-3c1d-8722-7cc0b69392c2",
+                                                "text": "Soit maintenant f une fonction continue à valeurs dans H et nulle en dehors d’un compact K."
+                                            },
+                                            {
+                                                "example_id": "87ce1436-4c40-4e9a-9edb-9b93156167d0",
+                                                "sense_id": "8c8793c4-0a10-3c1d-8722-7cc0b69392c2",
+                                                "text": "Soit E un espace métrique séparable et f une application arbitraire de E dans R."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "soit",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6d15810b-ba85-378b-9d5a-91dfe9cf0f05",
+                                        "entry_id": "5d466457-652a-3770-add2-8c6ab1becbf3",
+                                        "glosses": [
+                                            "(En corrélation avec soit ou ou : soit … soit, soit … ou) Ou. Marque l'un des termes d'une alternative ou de plus de deux choix."
+                                        ],
+                                        "tags": [],
+                                        "note": "Quelquefois, au lieu de répéter soit, on met ou",
+                                        "examples": [
+                                            {
+                                                "example_id": "bf903cbe-ed1b-4ddd-a464-f41590b785d2",
+                                                "sense_id": "6d15810b-ba85-378b-9d5a-91dfe9cf0f05",
+                                                "text": "On a donné plusieurs formules d’alunage, soit à l’aide de l’alun de potasse, soit à l’aide de l’alun de chrome : […]."
+                                            },
+                                            {
+                                                "example_id": "726c0c21-53e9-4784-b239-a6505395f423",
+                                                "sense_id": "6d15810b-ba85-378b-9d5a-91dfe9cf0f05",
+                                                "text": "Soit qu’on vogue au large, soit qu’on pénètre dans les fjords tortueux, partout on reconnaît les traces évidentes de l’action combinée des glaces et des volcans."
+                                            },
+                                            {
+                                                "example_id": "42057e9c-ad70-40e7-a031-2ffe9fbed0d3",
+                                                "sense_id": "6d15810b-ba85-378b-9d5a-91dfe9cf0f05",
+                                                "text": "Il ne restait donc que deux choix possibles : soit il la laissait tranquille — et il avait déjà prouvé qu’il en était incapable —, soit il prenait le taureau par les cornes et acceptait de chambouler sa vie."
+                                            },
+                                            {
+                                                "example_id": "99ae3e5c-0602-45a9-ae9c-10bccf3a48db",
+                                                "sense_id": "6d15810b-ba85-378b-9d5a-91dfe9cf0f05",
+                                                "text": "Tout oyselet soit masle ou soit femelle"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "5b5fce5d-6e51-3982-932f-5aaa87784ce7",
+                                        "entry_id": "5d466457-652a-3770-add2-8c6ab1becbf3",
+                                        "glosses": [
+                                            "C’est-à-dire, à savoir."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "e2bd06d9-7334-4ab1-82f9-2e58f721b50d",
+                                                "sense_id": "5b5fce5d-6e51-3982-932f-5aaa87784ce7",
+                                                "text": "Il aurait laissé une fortune de 30.000 pagodes, soit 10.000 livres sterling"
+                                            },
+                                            {
+                                                "example_id": "4cf4a9f0-3871-4129-b1af-7562c0335c20",
+                                                "sense_id": "5b5fce5d-6e51-3982-932f-5aaa87784ce7",
+                                                "text": "L’ancien joueur des « Blancs » a entraîné le club pendant seize ans, soit plus longtemps que tout autre entraîneur."
+                                            },
+                                            {
+                                                "example_id": "964e3643-4c9a-40b1-bbb7-5d1ac52749b2",
+                                                "sense_id": "5b5fce5d-6e51-3982-932f-5aaa87784ce7",
+                                                "text": "Barcola n'a plus été décisif depuis le 9 novembre, soit huit matchs sans but ni passe décisive avec Paris."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "soit",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "78ad7c22-4e64-34a2-b8ac-9eaab790e6cf",
+                                        "entry_id": "53df50cd-501b-33bd-9a9f-784beb84f025",
+                                        "glosses": [
+                                            "D’accord, admettons."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "1f0e492e-0404-458c-bc7a-1984098728c2",
+                                                "sense_id": "78ad7c22-4e64-34a2-b8ac-9eaab790e6cf",
+                                                "text": "Ces hommes sont des mouchards, comme vous les appelez. Soit, je n’ergote pas sur un vocable."
+                                            },
+                                            {
+                                                "example_id": "d7a09cff-7bd7-429e-bd7c-398bec180fc1",
+                                                "sense_id": "78ad7c22-4e64-34a2-b8ac-9eaab790e6cf",
+                                                "text": "Philippe le Bel souleva légèrement la tête et dit :\n« Mon frère, ce ne sont point des assemblées, mais des Templiers que, ce jour, nous nous occupons.\n— Soit, dit Valois, occupons-nous des Templiers."
+                                            },
+                                            {
+                                                "example_id": "700ea802-aeb6-46fc-945f-a5d0401c2011",
+                                                "sense_id": "78ad7c22-4e64-34a2-b8ac-9eaab790e6cf",
+                                                "text": "Nous, les rares rescapés, nous, les témoins, n'avions survécu que pour être rendus au silence. « Qu'ils vivent, soit, mais qu'ils se taisent », semblait nous dire le monde hors du camp."
+                                            },
+                                            {
+                                                "example_id": "167d7ddf-f007-4212-a4b5-c43971b0d8b4",
+                                                "sense_id": "78ad7c22-4e64-34a2-b8ac-9eaab790e6cf",
+                                                "text": "Elle souhaite que je la reconduise chez elle. Soit."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "651ed635-4d22-47ff-bff4-b6d237352e51",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "soit ... ou",
+                        "target_lang_code": "fr",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "55c2340b-9175-4041-81b7-77744a6f9d0e",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "entweder",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "entweder",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "abb9e3e6-65be-3a32-ab13-814089bd2d0c",
+                                        "entry_id": "7a82379e-c21d-320c-b45b-9e108a5d5fbd",
+                                        "glosses": [
+                                            "Konjunktion nur in Verbindung mit oder, die der Hervorhebung der ersten von zwei oder mehreren einander ausschließenden Möglichkeiten dient. Siehe hiezu den Eintrag: entweder … oder."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "eac4b9bf-0b9d-4b70-b161-1243e1a9f0bd",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "entweder ... oder",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "6eda236c-b762-41f2-99d1-9668331fef9f",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "o",
+                        "target_lang_code": "it",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "o",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "54ee1bb3-3a0c-39ea-9d93-1ebd6eb6e095",
+                                        "entry_id": "709f7a3c-62b5-3c72-8837-20ef367101f8",
+                                        "glosses": [
+                                            "oppure"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "d0033f45-17bd-4c48-a1dc-d974c3752173",
+                                                "sense_id": "54ee1bb3-3a0c-39ea-9d93-1ebd6eb6e095",
+                                                "text": "o è bianco o è nero"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "5cd11a85-b406-34c2-a9ed-12d27e7a1b25",
+                                        "entry_id": "709f7a3c-62b5-3c72-8837-20ef367101f8",
+                                        "glosses": [
+                                            "ovvero"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "o",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "338558c6-6445-3e32-9f90-fde52e1e7318",
+                                        "entry_id": "b67c10c2-dd85-32c8-b0b2-b34622f979ad",
+                                        "glosses": [
+                                            "variante, vedi oh:"
+                                        ],
+                                        "tags": [
+                                            "rare"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "5673d704-7c83-4bb1-8047-5acd15cc0dbd",
+                                                "sense_id": "338558c6-6445-3e32-9f90-fde52e1e7318",
+                                                "text": "liguorino o redentorista"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "o",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "2ce62e13-350f-3e0a-943f-d9c9ac350b1b",
+                                        "entry_id": "eb8df15b-bee5-3eec-9865-ec18ef137f24",
+                                        "glosses": [
+                                            "tredicesima lettera dell'alfabeto latino"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "o",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "684dc3ac-ba73-37fe-91b1-4094c805ec2b",
+                                        "entry_id": "d5d1c4a3-6530-3620-a2a2-7558f5d7d8ad",
+                                        "glosses": [
+                                            "introduce e rafforza il vocativo:"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "41308475-8c42-489f-addc-af76152bb40a",
+                                                "sense_id": "684dc3ac-ba73-37fe-91b1-4094c805ec2b",
+                                                "text": "o Piero, ascoltami"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "93ebe424-5bce-4c10-8513-5f81df90623c",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "oppure",
+                        "target_lang_code": "it",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "oppure",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6ae7127e-e06f-38b1-89bb-e1e89314522c",
+                                        "entry_id": "e3c53861-7dec-35bb-8996-2bd61d20bb70",
+                                        "glosses": [
+                                            "(disgiuntivo) o invece"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "5f93cc86-8299-357c-8f80-5c84c03c391b",
+                                        "entry_id": "e3c53861-7dec-35bb-8996-2bd61d20bb70",
+                                        "glosses": [
+                                            "in alternativa, in caso contrario"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "a286c2d9-49f0-4559-b29e-262031a7bdf2",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "albo... albo...",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "02a2a62f-72b8-4a4f-98cb-a874a4f4f866",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "ani ... ani...",
+                        "target_lang_code": "pl",
+                        "note": "with negative",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "e1488185-2330-4262-96f9-198ca3dead62",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "bądź",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "bądź",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "d2f8a384-3d3f-332e-ab15-35dbd6544e11",
+                                        "entry_id": "f853e637-7ec9-376d-8387-f82d005192cb",
+                                        "glosses": [
+                                            "łączy zdania współrzędne (lub równorzędne części zdań), wskazując na występującą możliwość wyboru/wystąpienia jednego z wymienionych zdarzeń/przedmiotów"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "6a8db556-183f-4d45-a38c-0f7ff4dbb9ea",
+                                                "sense_id": "d2f8a384-3d3f-332e-ab15-35dbd6544e11",
+                                                "text": "Każdego dnia Damian pracował na farmie bądź przy wycince pobliskiego lasu."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    },
+                                    {
+                                        "sense_id": "03f836d8-1f54-3709-ae89-b92de389c1a1",
+                                        "entry_id": "f853e637-7ec9-376d-8387-f82d005192cb",
+                                        "glosses": [
+                                            "występuje w wyliczeniach w postaci bądź…, bądź… (poprzedza każdy element wyliczenia), wskazując na równorzędność elementów i możliwość wyboru/zaistnienia jednego z nich"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a6b5ec2f-5d18-4251-98ed-643b2eb52378",
+                                                "sense_id": "03f836d8-1f54-3709-ae89-b92de389c1a1",
+                                                "text": "Złodziej wszedł bądź zepsutymi drzwiami, bądź otwartym oknem."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.2\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "bądź",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "dc956940-5a53-3ecc-953c-736a7db61695",
+                                        "entry_id": "d8f78608-5933-38a7-b2ed-17d219134bfc",
+                                        "glosses": [
+                                            "łączy się z wyrazami kto, co, jak, gdzie, kiedy, dokąd, skąd, wskazując na nieokreśloność osoby, przedmiotu, sposobu, miejsca"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "9818e7a3-2fed-439c-ad62-e5b357e4e21f",
+                                                "sense_id": "dc956940-5a53-3ecc-953c-736a7db61695",
+                                                "text": "Taki szyfr może odgadnąć kto bądź!"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2.1\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "bądź",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "3e498e91-3566-3cb2-9b2e-1d065bb89326",
+                                        "entry_id": "66e63f17-29e4-336d-b581-fdd762ac4a81",
+                                        "glosses": [
+                                            "2. lp od: być"
+                                        ],
+                                        "tags": [
+                                            "imperative",
+                                            "person"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c6d2db51-f6dd-4d2d-8cc2-12200f4dbb41",
+                                                "sense_id": "3e498e91-3566-3cb2-9b2e-1d065bb89326",
+                                                "text": "Bądź tak miły i zrób mi kawę."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"3.1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "95cd8e5c-ef90-4352-adef-45283a74bedd",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "и́ли ... и́ли",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "0e8f9589-fa89-4ac1-a6d4-7c1226aba28b",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "ли́бо ... ли́бо",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "1cca893f-2f15-4892-a078-4232e3a094f1",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "o ... o",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "74c01138-d5d8-425e-8ed1-ba57884f9af7",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "ya sea...o",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "e5cae6a2-4754-431f-b494-57450c8a415c",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "bien... o",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "fa409dab-e464-405d-8051-cbac8e1940d9",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "o bien... o bien",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "5e8f7ba0-66c8-415b-b64b-9c1d8a875fae",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "bien... bien",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "08f71ad8-10cd-44db-b675-3559bcfd3424",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "bien... bien",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "30d9ff43-2905-4d99-ad64-19bec50f0447",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "ya ... ya",
+                        "target_lang_code": "tr",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "ya ... ya",
+                                "target_lang_code": "tr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "579a6fea-2008-3334-be20-b001b35bfdde",
+                                        "entry_id": "f2ab4aea-53cb-33b9-80c4-4ca152759047",
+                                        "glosses": [
+                                            "Birinden birinin olacağı sanılan iki iş için kullanılır"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "0651b56f-cfad-3054-abfd-6db045c4c8e3",
+                                        "entry_id": "f2ab4aea-53cb-33b9-80c4-4ca152759047",
+                                        "glosses": [
+                                            "Birinden birinin seçilmesi gereken durumlarda kullanılır"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    },
+                                    {
+                                        "sense_id": "8eef9b91-f1a4-3335-b495-dc3a26c80d30",
+                                        "entry_id": "f2ab4aea-53cb-33b9-80c4-4ca152759047",
+                                        "glosses": [
+                                            "Cümlede eş görevli öğeler arasında ya ... ya, ya ... ya da, ya ... yahut şeklinde tekrarlanarak kullanılır"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "68650bab-fb97-49de-b922-2112bab5acbc",
+                        "source_entry_id": "b0d2a4c5-2816-3f7f-8f91-1842d145ee40",
+                        "source_sense_id": "1937685b-bd93-3e2e-a703-8376925391cd",
+                        "source_sense_description": "introduces the first of two options",
+                        "target_lang_word": "ya ... ya da",
+                        "target_lang_code": "tr",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                "word": "either",
+                "pos": "det",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "706dd508-9cf3-3006-8ebe-adb9b0e1f4af",
+                        "entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "glosses": [
+                            "Any one (of two)."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "dd0951d4-88f3-4267-81e9-976ac405af63",
+                                "sense_id": "706dd508-9cf3-3006-8ebe-adb9b0e1f4af",
+                                "text": "You can have it in either colour."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "ded1c13b-f1c7-3835-b105-69078b07b68c",
+                        "entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "glosses": [
+                            "Each of two; both."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "1c057615-5bef-472c-af45-be7169ab6829",
+                                "sense_id": "ded1c13b-f1c7-3835-b105-69078b07b68c",
+                                "text": "There is a locomotive at either end of the train, one pulling and the other pushing."
+                            },
+                            {
+                                "example_id": "437b02c1-aeea-4ac3-9416-a985394b6420",
+                                "sense_id": "ded1c13b-f1c7-3835-b105-69078b07b68c",
+                                "text": "There are roses on either side of the garden."
+                            },
+                            {
+                                "example_id": "50952223-d4af-46e7-a8a3-94789250053e",
+                                "sense_id": "ded1c13b-f1c7-3835-b105-69078b07b68c",
+                                "text": "His flowing hair\n In curls on either cheek played."
+                            },
+                            {
+                                "example_id": "455a6e08-53c2-4383-9fca-99a865e8d81d",
+                                "sense_id": "ded1c13b-f1c7-3835-b105-69078b07b68c",
+                                "text": "Her hands, long and beautiful, lay on either side of her face."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "ea4e2b35-3dc0-3a5e-a4b8-63118ccf4a50",
+                        "entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "glosses": [
+                            "Any one (of more than two)."
+                        ],
+                        "tags": [
+                            "often",
+                            "proscribed"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "fb9f0dbf-b119-40c3-a4e3-47e82c9d44f1",
+                                "sense_id": "ea4e2b35-3dc0-3a5e-a4b8-63118ccf4a50",
+                                "text": "I hope you will be ready to own publicly, whenever you shall be called to it, that by your great and frequent urgency you prevailed on me to publish a very loose and uncorrect account of my travels, with directions to hire some young gentleman of either university to put them in order, and correct the style, as my cousin Dampier did, by my advice, in his book called “A Voyage round the world.”"
+                            },
+                            {
+                                "example_id": "1e006595-7e58-4045-afb5-28c90b86f3f4",
+                                "sense_id": "ea4e2b35-3dc0-3a5e-a4b8-63118ccf4a50",
+                                "text": "They entreat, they pray, they beg, they supplicate (will either of these do, Miss Clary?) that you will make no scruple to go to your uncle Antony's […]."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "5bf02dba-6f79-4045-9b0d-f967b8827957",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "beide",
+                        "target_lang_code": "nl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "beide",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "765756fb-8a61-3a6b-92eb-9cb3134bf5e0",
+                                        "entry_id": "5d176bee-3651-32ee-b851-3ae97433c549",
+                                        "glosses": [
+                                            "de een en de ander van twee, het tweetal"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "cdcde69f-5f02-49cc-b6d1-495f415ea0f8",
+                                                "sense_id": "765756fb-8a61-3a6b-92eb-9cb3134bf5e0",
+                                                "text": "‘Er zijn slechts twee antimateriehypernuclei ontdekt en beide in de afgelopen vijftien jaar’, zegt deeltjesfysicus Zhangbu Xu van de Kent State-universiteit in Ohio. ‘ALICE levert nu het bewijs voor de derde.’"
+                                            },
+                                            {
+                                                "example_id": "9eb1bd79-f929-450c-a138-900bde00c2c5",
+                                                "sense_id": "765756fb-8a61-3a6b-92eb-9cb3134bf5e0",
+                                                "text": "Wat een schattige foto van beide honden. Ze kijken beiden naar hetzelfde."
+                                            },
+                                            {
+                                                "example_id": "b1534468-baac-41fd-a1a7-87bf320d0945",
+                                                "sense_id": "765756fb-8a61-3a6b-92eb-9cb3134bf5e0",
+                                                "text": "Ik duwde de deur met beide handen open en zag dat er ’s nachts een dik pak sneeuw was gevallen, waarvan een stukje geel kleurde toen ik er mijn waterfles in leegde."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "beide",
+                                "target_lang_code": "nl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "ed7b8edd-7698-338e-99ee-9602bc8bd9a2",
+                                        "entry_id": "808f12a2-e812-310d-a4f9-5f6193763238",
+                                        "glosses": [
+                                            "aanvoegende wijs van beiden"
+                                        ],
+                                        "tags": [
+                                            "form-of"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "586561bc-2684-47b5-97d2-4988310f9213",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "chaque",
+                        "target_lang_code": "fr",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "chaque",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "70f30c46-f2b2-3255-90ed-5a71591a2eca",
+                                        "entry_id": "7232bf69-9f23-3cdd-b8e3-cad04bd43702",
+                                        "glosses": [
+                                            "Déterminant distributif, qui se place toujours avant le nom et n’a pas de pluriel. Se dit d’une personne, d’une chose qui fait partie d’un tout, d’un ensemble."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "0bfeba9c-6156-4cb6-a2b4-8241e0410e5b",
+                                                "sense_id": "70f30c46-f2b2-3255-90ed-5a71591a2eca",
+                                                "text": "Il ne devinait pas encore combien l’âme de la jeune fille, déjà, lui appartenait. Il habitait chaque seconde de ses heures, chaque rêve de ses nuits."
+                                            },
+                                            {
+                                                "example_id": "7ada43d0-cea4-4aa6-ae09-c16767edb309",
+                                                "sense_id": "70f30c46-f2b2-3255-90ed-5a71591a2eca",
+                                                "text": "Au midi, les Anglais et les Hollandais refoulent chaque jour davantage vers l’équateur les peuples de la Caffrerie."
+                                            },
+                                            {
+                                                "example_id": "e3b3a36a-7765-4485-807e-74163fb6a325",
+                                                "sense_id": "70f30c46-f2b2-3255-90ed-5a71591a2eca",
+                                                "text": "D’ailleurs, ce qui est particulier à la politique de l’histoire sainte, c’est que, chaque fois qu’un personnage marquant fait quelque chose de mal, c’est toujours le pauvre peuple qui écope."
+                                            },
+                                            {
+                                                "example_id": "da646f6e-61b4-4739-8b01-a4c8de8b4f9a",
+                                                "sense_id": "70f30c46-f2b2-3255-90ed-5a71591a2eca",
+                                                "text": "Il y a à cela deux raisons (dont chaque est suffisante seule, aurait pu ajouter Monsieur José Germain)."
+                                            },
+                                            {
+                                                "example_id": "0e8742d3-6753-402a-bf32-34429150f26b",
+                                                "sense_id": "70f30c46-f2b2-3255-90ed-5a71591a2eca",
+                                                "text": "Chaque jour, un membre de SOS MEDITERRANEE vous donne sa vision des opérations de sauvetage en mer et des événements. Retrouvez ces chroniques en son, images et vidéos."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "aa29756f-7861-4b20-9ed9-73d2716b6e7b",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "les deux",
+                        "target_lang_code": "fr",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "les deux",
+                                "target_lang_code": "fr",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "b1a02c8b-5b3c-3e64-a851-64bb12b8c7c8",
+                                        "entry_id": "b4819269-2a18-3010-b147-5d0712e8c018",
+                                        "glosses": [
+                                            "Deux personnes, objets ou êtres ensemble dont on a déjà parlé."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "e23c6c92-5430-4719-b930-d6549690a21b",
+                                                "sense_id": "b1a02c8b-5b3c-3e64-a851-64bb12b8c7c8",
+                                                "text": "Ton frère et ta sœur ? Les deux viendront demain."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "8cbe23db-8b43-4fba-ae14-739aca50c4fe",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "l'un ou l'autre",
+                        "target_lang_code": "fr",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "75d1c046-71e4-4716-8f98-7218b31f2c5a",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "beide",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "beide",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                        "entry_id": "e169753c-803f-3373-8119-4cb86374a6c1",
+                                        "glosses": [
+                                            "sowohl der/die/das eine als auch der/die/das andere; auch adverbial gebraucht"
+                                        ],
+                                        "tags": [
+                                            "Indefinitpronomen",
+                                            "zeigt an",
+                                            "dass es sich nicht nur um einen der zwei in Frage kommenden Gegenstände handelt"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "1d41b154-950e-43fe-8b0d-ca4214fe31d4",
+                                                "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                                "text": "Wie, ich kann statt Papas auch Mamas Auto benutzen, beide Autos sind kaputt!"
+                                            },
+                                            {
+                                                "example_id": "002ecbd5-9025-47fb-ae27-80d6a3c535af",
+                                                "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                                "text": "Die Eltern sind nicht zu Hause. Beide müssen arbeiten."
+                                            },
+                                            {
+                                                "example_id": "0a8f1004-1166-4559-a483-ef4bad737ecb",
+                                                "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                                "text": "„Frauen wird [in China] vermittelt: Entweder wollt ihr heiraten oder einen PhD, beides geht nicht. Ein Mann wird keine Frau heiraten, die erfolgreicher ist als er.“"
+                                            },
+                                            {
+                                                "example_id": "c1c143fb-0539-4f01-8e1a-6338d18131de",
+                                                "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                                "text": "(Adverb:) Ihr habt beide recht."
+                                            },
+                                            {
+                                                "example_id": "6782efc3-1712-4a06-9372-2316e8c171d9",
+                                                "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                                "text": "„Dieses beide in ihm, die Unendlichkeit, und die Endlichkeit sollen vereinigt werden.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "82e19a9d-4b5c-33c0-aa29-82340bc04650",
+                                        "entry_id": "e169753c-803f-3373-8119-4cb86374a6c1",
+                                        "glosses": [
+                                            "zwei"
+                                        ],
+                                        "tags": [
+                                            "Numerale",
+                                            "betont",
+                                            "dass die Zweizahl des Gezählten allgemein oder aus dem Vorhererwähnten bekannt ist",
+                                            "steht anstelle von"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "845da9f9-a833-463e-aa0b-f141e04ffa25",
+                                                "sense_id": "82e19a9d-4b5c-33c0-aa29-82340bc04650",
+                                                "text": "Ihr beiden habt recht."
+                                            },
+                                            {
+                                                "example_id": "9081bacf-c6a3-42be-b7af-af0a89b391ef",
+                                                "sense_id": "82e19a9d-4b5c-33c0-aa29-82340bc04650",
+                                                "text": "Kennst du diese beiden?"
+                                            },
+                                            {
+                                                "example_id": "60866636-dfde-4ae3-a213-8a4e1f9e4387",
+                                                "sense_id": "82e19a9d-4b5c-33c0-aa29-82340bc04650",
+                                                "text": "Ich kann mich nicht entscheiden, ob ich die beiden da möchte oder doch lieber die drei da."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "5905c66d-d28f-4426-ab1a-ea3aa5053755",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "ciascuno",
+                        "target_lang_code": "it",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "ciascuno",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "2f79708e-d033-368f-8570-49a256993f26",
+                                        "entry_id": "6aebdc51-a9dd-3bcc-9ba4-5ae652ae3987",
+                                        "glosses": [
+                                            "ognuno"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "ciascuno",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "b6b21694-089e-387b-b04a-00618e124667",
+                                        "entry_id": "a210c755-a66b-3161-bf7c-3f887e059405",
+                                        "glosses": [
+                                            "ogni"
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "8620fc28-dc0a-443c-b8f6-3d343db81c45",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "entrambi",
+                        "target_lang_code": "it",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "entrambi",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "a777161a-5807-3808-9893-4fcd12627743",
+                                        "entry_id": "615f52f8-2469-3764-ab6c-606f10436130",
+                                        "glosses": [
+                                            "tutti e due, sia l'uno che l'altro"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "e74a5a77-029b-4083-abc9-8cbbb85c4615",
+                                                "sense_id": "a777161a-5807-3808-9893-4fcd12627743",
+                                                "text": "chiuse entrambi gli occhi"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "entrambi",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "dc7b19cd-0a67-3fe1-91e2-43bab288773e",
+                                        "entry_id": "51d65edf-3846-3460-ad04-0e78f444f9ef",
+                                        "glosses": [
+                                            "tutte e due"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "e506ada9-c33e-43c9-bdef-485a589bd835",
+                                                "sense_id": "dc7b19cd-0a67-3fe1-91e2-43bab288773e",
+                                                "text": "si guardarono ma entrambi rimasero in silenzio"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "645805e9-83dd-4f23-88cd-80815f49f6cd",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "ogni",
+                        "target_lang_code": "it",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "ogni",
+                                "target_lang_code": "it",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "4c90b1c9-849d-35dd-b3d1-0814a6675f76",
+                                        "entry_id": "a463df81-f84b-386c-810a-8f1c9e5519f7",
+                                        "glosses": [
+                                            "tutte le volte"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "c600830a-72e8-499e-bd85-79c9f67d4d27",
+                                                "sense_id": "4c90b1c9-849d-35dd-b3d1-0814a6675f76",
+                                                "text": "a ogni battito del cuore, un getto di sangue viene pompato con forza nelle arterie"
+                                            },
+                                            {
+                                                "example_id": "93fac1dd-ebad-494a-91e2-f8082b002b31",
+                                                "sense_id": "4c90b1c9-849d-35dd-b3d1-0814a6675f76",
+                                                "text": "per combattere la costipazione bisogna assumere almeno una porzione di verdura ad ogni pasto, cotta o cruda"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "7eeb4254-27fb-4640-8a51-e2e6385cb6eb",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "oba",
+                        "target_lang_code": "pl",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "oba",
+                                "target_lang_code": "pl",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "d444ca1a-3ba3-3c1a-9827-6533ef7ba7ea",
+                                        "entry_id": "6e1acf55-9f2d-3cbd-be57-1e9729cfb724",
+                                        "glosses": [
+                                            "dwa konkretne przedmioty lub zwierzęta, określone rzeczownikiem rodzaju męskiego lub nijakiego; i jeden, i drugi"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "f0f82402-dd71-4019-ae80-834a1165e1fd",
+                                                "sense_id": "d444ca1a-3ba3-3c1a-9827-6533ef7ba7ea",
+                                                "text": "Z obu autobusów wysiadło mrowie ludzi."
+                                            },
+                                            {
+                                                "example_id": "31811069-bd3f-485d-a4b7-12131158e03c",
+                                                "sense_id": "d444ca1a-3ba3-3c1a-9827-6533ef7ba7ea",
+                                                "text": "Oba psy zawarczały groźnie."
+                                            },
+                                            {
+                                                "example_id": "b53d389c-81ba-4d02-940b-bbfca0a26909",
+                                                "sense_id": "d444ca1a-3ba3-3c1a-9827-6533ef7ba7ea",
+                                                "text": "Oba spotkania poszły źle."
+                                            },
+                                            {
+                                                "example_id": "6950b3d2-6a0f-4f52-ad43-51ae0d1d29ac",
+                                                "sense_id": "d444ca1a-3ba3-3c1a-9827-6533ef7ba7ea",
+                                                "text": "Oficjalne parafowanie kompletnych tekstów obu umów miało miejsce w Moskwie w dniu 4 kwietnia 2006 roku."
+                                            },
+                                            {
+                                                "example_id": "bdab8541-b107-4451-a72d-30ff5c117434",
+                                                "sense_id": "d444ca1a-3ba3-3c1a-9827-6533ef7ba7ea",
+                                                "text": "Z matematyki leżysz na obu łopatkach, język angielski zawaliłaś, chemia i fizyka stanowią dwie twoje achillesowe pięty, że tak powiem. Interesuje mnie, co zamierzasz przedsięwziąć, by wykaraskać się z tego gipsu."
+                                            },
+                                            {
+                                                "example_id": "5b66d45d-048c-4465-9321-dcfe3fa2eb03",
+                                                "sense_id": "d444ca1a-3ba3-3c1a-9827-6533ef7ba7ea",
+                                                "text": "Obaj kaliszanie pasją do ciężkich motorów zarazili się przed kilkoma laty."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1.1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "30a17240-9757-4f2a-b803-63e6dda39b57",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "ка́ждый",
+                        "target_lang_code": "ru",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "1f91d305-f7a0-4fe0-aaa5-8e49ba2e4d62",
+                        "source_entry_id": "452126e8-27b7-3341-95b4-c2bbedc54846",
+                        "source_sense_description": "each of two",
+                        "target_lang_word": "cada",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "cada",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "c2935979-4d8a-3e33-9d79-2dd4a9689ac7",
+                                        "entry_id": "c20318af-99e0-3850-a2f3-51ae627eda24",
+                                        "glosses": [
+                                            "Designa una cosa o persona entre varias o entre una serie de ellas."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "55503d58-8544-4bbd-badb-0a54c139ac99",
+                                                "sense_id": "c2935979-4d8a-3e33-9d79-2dd4a9689ac7",
+                                                "text": "Vengo cada lunes."
+                                            },
+                                            {
+                                                "example_id": "79cb817b-ebf9-4f7d-9676-def83c7caefc",
+                                                "sense_id": "c2935979-4d8a-3e33-9d79-2dd4a9689ac7",
+                                                "text": "Vengo cada tres días."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "f55001d3-7a56-378c-a8be-f56654dee090",
+                                        "entry_id": "c20318af-99e0-3850-a2f3-51ae627eda24",
+                                        "glosses": [
+                                            "Designa a todo elemento individualmente en una serie o un conjunto."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "e2c80a38-4570-4d02-9dc9-e2d4c7ca1f99",
+                                                "sense_id": "f55001d3-7a56-378c-a8be-f56654dee090",
+                                                "text": "A cada trabajador se le pagará según su trabajo."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    },
+                                    {
+                                        "sense_id": "8b977498-dde0-3fe2-8b04-c06c2086f625",
+                                        "entry_id": "c20318af-99e0-3850-a2f3-51ae627eda24",
+                                        "glosses": [
+                                            "Designa una correspondencia entre los elementos numerables de una serie con elementos de otra serie."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "405af5e2-375d-4dd7-9e9e-b1573eb10513",
+                                                "sense_id": "8b977498-dde0-3fe2-8b04-c06c2086f625",
+                                                "text": "Hay dos automóviles por cada casa."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"3\""
+                                    },
+                                    {
+                                        "sense_id": "e3a15c9d-7925-302a-8a6a-11f61b3b9f45",
+                                        "entry_id": "c20318af-99e0-3850-a2f3-51ae627eda24",
+                                        "glosses": [
+                                            "Designa un tiempo regular en que se hace u ocurre algo."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "e2423144-0451-45ed-91da-24e8d6f7caef",
+                                                "sense_id": "e3a15c9d-7925-302a-8a6a-11f61b3b9f45",
+                                                "text": "Tomar este medicamento cada ocho horas."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"4\""
+                                    },
+                                    {
+                                        "sense_id": "6aaf2837-9be3-3173-b696-4d40a1eae888",
+                                        "entry_id": "c20318af-99e0-3850-a2f3-51ae627eda24",
+                                        "glosses": [
+                                            "Se usa para ponderar negativa y enfáticamente una cosa."
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "4fb5daa0-a7cc-456f-99ba-3a113416baa7",
+                                                "sense_id": "6aaf2837-9be3-3173-b696-4d40a1eae888",
+                                                "text": "¡Hay cada tonto!"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"5\""
+                                    },
+                                    {
+                                        "sense_id": "b0e1ad83-4ba9-3788-aa4f-a5c1dff1821d",
+                                        "entry_id": "c20318af-99e0-3850-a2f3-51ae627eda24",
+                                        "glosses": [
+                                            "Se usa para ponderar con admiración o extrañeza algo que se considera exagerado."
+                                        ],
+                                        "tags": [
+                                            "colloquial"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "5158ae11-7efd-47dd-851e-e5088db6bcf4",
+                                                "sense_id": "b0e1ad83-4ba9-3788-aa4f-a5c1dff1821d",
+                                                "text": "¡Tiene cada respuesta!"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"6\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "cada",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "c1afa864-6bff-3925-8a03-e08e99ef1a97",
+                                        "entry_id": "0d21f147-4d39-3cba-a36f-c6f7eb5a2b56",
+                                        "glosses": [
+                                            "Cada clase o tipo."
+                                        ],
+                                        "tags": [
+                                            "se usa detrás de un numeral cardinal y la preposición de (de cada)",
+                                            "se usa referido a un sintagma nominal mencionado o sobrentendido"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "4a6b8d4b-9739-4ccc-a3d5-91e8d9f19ead",
+                                                "sense_id": "c1afa864-6bff-3925-8a03-e08e99ef1a97",
+                                                "text": "Tienes que comprar uno de cada."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"7\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "cada",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "9b167461-7289-306a-9c96-12c3221a0709",
+                                        "entry_id": "8affa293-b6d5-3b72-9e4b-574c1b415bb0",
+                                        "glosses": [
+                                            "(Juniperus oxycedrus) Arbusto que tiene dos bandas blancas en el envés de sus hojas aciculare, en vez de una como en el enebro común. Habita en la zona mediterránea. En medicina natural se usa su aceite para dolencias cutáneas."
+                                        ],
+                                        "tags": [
+                                            "Plantas"
+                                        ],
+                                        "examples": [],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "0a008d6e-4025-39d6-aa6b-417ed61c86c5",
+                "word": "either",
+                "pos": "pron",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "e6e06770-87c4-3f22-b061-748e35aab2f8",
+                        "entry_id": "0a008d6e-4025-39d6-aa6b-417ed61c86c5",
+                        "glosses": [
+                            "One or the other of two people or things."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "7f522b92-1936-4af4-b343-429ec8467800",
+                                "sense_id": "e6e06770-87c4-3f22-b061-748e35aab2f8",
+                                "text": "He made me two offers, but I did not accept either."
+                            },
+                            {
+                                "example_id": "ebfd17c7-4850-46d3-af73-50b0a42a34c7",
+                                "sense_id": "e6e06770-87c4-3f22-b061-748e35aab2f8",
+                                "text": "Hodgson may now have to bring in James Milner on the left and, on that basis, a certain amount of gloss was taken off a night on which Welbeck scored twice but barely celebrated either before leaving the pitch angrily complaining to the Slovakian referee."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "9ffd67a9-06dc-3008-a32f-890bc51f1ec6",
+                        "entry_id": "0a008d6e-4025-39d6-aa6b-417ed61c86c5",
+                        "glosses": [
+                            "Both, each of two or more."
+                        ],
+                        "tags": [
+                            "obsolete"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "11dccbb9-79a0-4251-8a9f-d246fa631880",
+                                "sense_id": "9ffd67a9-06dc-3008-a32f-890bc51f1ec6",
+                                "text": "Scarce a palm of ground could be gotten by either of the three."
+                            },
+                            {
+                                "example_id": "ad9760e5-433c-40e8-a85c-ead17d32d14a",
+                                "sense_id": "9ffd67a9-06dc-3008-a32f-890bc51f1ec6",
+                                "text": "And either vowd with all their power and wit, / To let not others honour be defaste […]"
+                            },
+                            {
+                                "example_id": "f16c6270-79a8-4946-846d-43f3a819863e",
+                                "sense_id": "9ffd67a9-06dc-3008-a32f-890bc51f1ec6",
+                                "text": "There have been three famous talkers in Great British, either of whom would illustrate what I say about dogmatists."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [
+            {
+                "entry_id": "dc40626a-94a4-3459-a595-bec4ec648850",
+                "word": "either",
+                "pos": "adj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "e154a98f-ed1b-3559-b5f8-27cf4be649b4",
+                        "entry_id": "dc40626a-94a4-3459-a595-bec4ec648850",
+                        "glosses": [
+                            "любой (из двух)"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "688368df-b15a-4b3c-bddf-756bec8fbe07",
+                                "sense_id": "e154a98f-ed1b-3559-b5f8-27cf4be649b4",
+                                "text": "It [the imitation game] is played with three people, a man (A), a woman (B), and an interrogator (C) who may be of either sex."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "a79d5cf3-ab5a-3584-ac7c-86c323684ea6",
+                        "entry_id": "dc40626a-94a4-3459-a595-bec4ec648850",
+                        "glosses": [
+                            "и тот и другой; оба"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "25caac3c-4905-4258-bf06-068ea5c414ed",
+                                "sense_id": "a79d5cf3-ab5a-3584-ac7c-86c323684ea6",
+                                "text": "\"I'd better go back.\" \"Oh, bother!\" said Pooh. \"I shall have to go on.\" \"I can't do either!\" said Pooh. \"Oh, help AND bother!\"",
+                                "translation": "Я лучше полезу назад! Еще потом он закричал: ― Ай, помогите! Нет, уж лучше вперед! И, наконец, он завопил отчаянным голосом: ― Ай-ай-ай, спасите-помогите! Не могу ни взад ни вперед!"
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "86eff12e-da21-3fa8-9bb2-d378c587b88f",
+                "word": "either",
+                "pos": "conj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "f936b70d-3b5b-31c3-ad14-6603846736c4",
+                        "entry_id": "86eff12e-da21-3fa8-9bb2-d378c587b88f",
+                        "glosses": [
+                            "ofwel"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "a6a06ced-40a0-4a83-a712-ba7c5476d6aa",
+                                "sense_id": "f936b70d-3b5b-31c3-ad14-6603846736c4",
+                                "text": "Either finish your plate or go to bed!",
+                                "translation": "Ofwel eet je je bord leeg ofwel ga je naar bed!"
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "7728a54d-7d87-3c06-9a67-b2d35048c332",
+                "word": "either",
+                "pos": "adv",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "dcf4c816-c3c1-38c9-aca2-1ac2bbeedb14",
+                        "entry_id": "7728a54d-7d87-3c06-9a67-b2d35048c332",
+                        "glosses": [
+                            "w przeczeniach: też nie"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "02b35d80-81d7-45b0-921a-74c95de6e259",
+                                "sense_id": "dcf4c816-c3c1-38c9-aca2-1ac2bbeedb14",
+                                "text": "I don't like him and I don't like her either.",
+                                "translation": "Nie lubię go i jej też nie lubię."
+                            }
+                        ],
+                        "sense_index_json": "\"3.1\""
+                    },
+                    {
+                        "sense_id": "2da71fbe-f42c-38ce-a3b6-69356ce895a6",
+                        "entry_id": "7728a54d-7d87-3c06-9a67-b2d35048c332",
+                        "glosses": [
+                            "też nie (po me)"
+                        ],
+                        "tags": [
+                            "US",
+                            "especially",
+                            "slang"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "12e9fa1d-a0d5-4a7e-830f-c16c311d82f8",
+                                "sense_id": "2da71fbe-f42c-38ce-a3b6-69356ce895a6",
+                                "text": "— I'm not hungry. — Me either.",
+                                "translation": "Nie jestem głodny. — Ja też nie."
+                            }
+                        ],
+                        "sense_index_json": "\"3.2\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "9157f8a4-c8b1-4ee2-9cec-b0b636f8927b",
+                        "source_entry_id": "7728a54d-7d87-3c06-9a67-b2d35048c332",
+                        "source_sense_ids": [
+                            "dcf4c816-c3c1-38c9-aca2-1ac2bbeedb14"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "as well"
+                    },
+                    {
+                        "linkage_id": "3c7090fe-e58d-4808-a0c9-d80630889c6d",
+                        "source_entry_id": "7728a54d-7d87-3c06-9a67-b2d35048c332",
+                        "source_sense_ids": [],
+                        "linkage_type": "antonyms",
+                        "word": "neither"
+                    }
+                ]
+            },
+            {
+                "entry_id": "50ad0f85-4d38-3189-9ed6-a3c5540a793b",
+                "word": "either",
+                "pos": "conj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "9f5e0a9f-3047-36e1-b02e-f7daa3c12a89",
+                        "entry_id": "50ad0f85-4d38-3189-9ed6-a3c5540a793b",
+                        "glosses": [
+                            "używany przed or: albo … albo …, w przeczeniach: ani … ani …"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "949cbc4e-ef86-43be-8aff-38c8005b7961",
+                                "sense_id": "9f5e0a9f-3047-36e1-b02e-f7daa3c12a89",
+                                "text": "Either you eat your dinner or you go to your room!",
+                                "translation": "Albo zjesz obiad, albo marsz do swojego pokoju."
+                            },
+                            {
+                                "example_id": "5ad4e7ad-59bd-458f-8049-37977e8810f1",
+                                "sense_id": "9f5e0a9f-3047-36e1-b02e-f7daa3c12a89",
+                                "text": "It isn't good either for you or me.",
+                                "translation": "To nie jest dobre ani dla mnie ani dla ciebie."
+                            }
+                        ],
+                        "sense_index_json": "\"4.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "d9a29dcb-d01c-4ea2-8ff7-cc23e237e979",
+                        "source_entry_id": "50ad0f85-4d38-3189-9ed6-a3c5540a793b",
+                        "source_sense_ids": [
+                            "9f5e0a9f-3047-36e1-b02e-f7daa3c12a89"
+                        ],
+                        "linkage_type": "antonyms",
+                        "word": "neither"
+                    }
+                ]
+            },
+            {
+                "entry_id": "3472b301-20f9-3039-a477-da2ebd5a1ad9",
+                "word": "either",
+                "pos": "det",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "de9cd0d9-207b-3195-aa0a-d70f2f9e7dfe",
+                        "entry_id": "3472b301-20f9-3039-a477-da2ebd5a1ad9",
+                        "glosses": [
+                            "którykolwiek (z dwóch), w przeczeniach: żaden (z dwóch)"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "3961d69d-da79-48f9-9a34-4399397c778c",
+                                "sense_id": "de9cd0d9-207b-3195-aa0a-d70f2f9e7dfe",
+                                "text": "I don't mind whether your mother or father attends - you can bring either parent.",
+                                "translation": "Nie ma dla mnie znaczenia, czy przyjdzie twoja matka, czy ojciec – możesz przyprowadzić któregokolwiek rodzica."
+                            }
+                        ],
+                        "sense_index_json": "\"2.1\""
+                    },
+                    {
+                        "sense_id": "10aad0da-2552-3e8b-b490-b385ab54d570",
+                        "entry_id": "3472b301-20f9-3039-a477-da2ebd5a1ad9",
+                        "glosses": [
+                            "przed side lub end: oba, obydwa, obaj, obydwaj, obie, obydwie, oboje, obydwoje"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "8692c81b-0eac-4963-8600-6b0d404e62b2",
+                                "sense_id": "10aad0da-2552-3e8b-b490-b385ab54d570",
+                                "text": "The room has a door at either end.",
+                                "translation": "Pokój ma drzwi na obydwu końcach."
+                            }
+                        ],
+                        "sense_index_json": "\"2.2\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "fdbbb5c8-5f78-4366-aaad-d42a8ad96d3a",
+                        "source_entry_id": "3472b301-20f9-3039-a477-da2ebd5a1ad9",
+                        "source_sense_ids": [
+                            "10aad0da-2552-3e8b-b490-b385ab54d570"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "both"
+                    },
+                    {
+                        "linkage_id": "a8ecd41a-28b6-4942-930b-16a5cf9603c6",
+                        "source_entry_id": "3472b301-20f9-3039-a477-da2ebd5a1ad9",
+                        "source_sense_ids": [
+                            "10aad0da-2552-3e8b-b490-b385ab54d570"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "each"
+                    },
+                    {
+                        "linkage_id": "ddc9fb99-372a-4244-bbfe-023325681a78",
+                        "source_entry_id": "3472b301-20f9-3039-a477-da2ebd5a1ad9",
+                        "source_sense_ids": [],
+                        "linkage_type": "antonyms",
+                        "word": "neither"
+                    }
+                ]
+            },
+            {
+                "entry_id": "1e488ed1-c228-3ff6-8a60-40aeab9e8ea8",
+                "word": "either",
+                "pos": "pron",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "72724909-34e9-3f37-ac4d-d1c927872c5b",
+                        "entry_id": "1e488ed1-c228-3ff6-8a60-40aeab9e8ea8",
+                        "glosses": [
+                            "którykolwiek (z dwóch), w przeczeniach: żaden (z dwóch)"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "58a2c804-52bb-4f54-bcc9-ccc177c3e6b0",
+                                "sense_id": "72724909-34e9-3f37-ac4d-d1c927872c5b",
+                                "text": "Either is good.",
+                                "translation": "Którykolwiek (z dwóch) jest dobry."
+                            }
+                        ],
+                        "sense_index_json": "\"1.1\""
+                    },
+                    {
+                        "sense_id": "5ee37fd7-0b70-369e-8998-398b73524a30",
+                        "entry_id": "1e488ed1-c228-3ff6-8a60-40aeab9e8ea8",
+                        "glosses": [
+                            "oba, obydwa, obaj, obydwaj, obie, obydwie, oboje, obydwoje"
+                        ],
+                        "tags": [
+                            "Old-English"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "65c9b5dd-aacf-4616-b598-a4f499514b21",
+                                "sense_id": "5ee37fd7-0b70-369e-8998-398b73524a30",
+                                "text": "And either vowd with all their power and wit, / To let not others honour be defaste.",
+                                "translation": "I obydwaj zaprzysięgli całą swą mocą i rozumem / Nie dopuścić do znieważenia czci drugiego."
+                            }
+                        ],
+                        "sense_index_json": "\"1.2\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "c36e6ce9-6a84-4eda-9cdf-8b6ff6b873d9",
+                        "source_entry_id": "1e488ed1-c228-3ff6-8a60-40aeab9e8ea8",
+                        "source_sense_ids": [],
+                        "linkage_type": "antonyms",
+                        "word": "neither"
+                    }
+                ]
+            }
+        ],
+        "fr-extract.jsonl": [
+            {
+                "entry_id": "5ba48cdd-3a82-3e5f-b020-0eee64526777",
+                "word": "either",
+                "pos": "adj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "56f2277c-c894-30d2-8979-24c874664c8e",
+                        "entry_id": "5ba48cdd-3a82-3e5f-b020-0eee64526777",
+                        "glosses": [
+                            "L’un ou l’autre. L’une ou l’autre."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "44362fe4-7044-3885-a817-0fb152b66385",
+                "word": "either",
+                "pos": "adv",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "1bb6fc85-b635-3ca8-a388-06e430bd8949",
+                        "entry_id": "44362fe4-7044-3885-a817-0fb152b66385",
+                        "glosses": [
+                            "Ne… non plus"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "43c4a3db-cf18-42e1-9d8b-4f95df7c72d4",
+                                "sense_id": "1bb6fc85-b635-3ca8-a388-06e430bd8949",
+                                "text": "I don’t want any cake either.",
+                                "translation": "Je ne veux pas de gâteau non plus."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "3bb4778d-9485-3fe5-ba5a-97408ee60229",
+                "word": "either",
+                "pos": "conj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "763ee8e2-f501-3539-b93b-e269b000b4f8",
+                        "entry_id": "3bb4778d-9485-3fe5-ba5a-97408ee60229",
+                        "glosses": [
+                            "(En corrélation avec or : either … or) Ou… ou, soit… soit, soit… ou."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "e4be0364-7e80-4ad4-9efa-a3413fe74d23",
+                                "sense_id": "763ee8e2-f501-3539-b93b-e269b000b4f8",
+                                "text": "Either you do it, or I do it.",
+                                "translation": "Soit tu le fais, soit je le fais."
+                            },
+                            {
+                                "example_id": "9c4fbe55-627f-493c-8c22-bf411c230be1",
+                                "sense_id": "763ee8e2-f501-3539-b93b-e269b000b4f8",
+                                "text": "It's either a bird or a plane."
+                            },
+                            {
+                                "example_id": "a948113d-955c-4c60-b749-0e64adcc5b5e",
+                                "sense_id": "763ee8e2-f501-3539-b93b-e269b000b4f8",
+                                "text": "In a nutshell, an object is iterable if it is either a physically stored sequence in memory, or an object that generates one item at a time in the context of an iteration operation—a sort of \"virtual\" sequence."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "7c3a6297-3468-4567-a3f1-e6a096027ea9",
+                        "source_entry_id": "3bb4778d-9485-3fe5-ba5a-97408ee60229",
+                        "source_sense_ids": [
+                            "763ee8e2-f501-3539-b93b-e269b000b4f8"
+                        ],
+                        "linkage_type": "antonyms",
+                        "word": "neither … nor …"
+                    }
+                ]
+            },
+            {
+                "entry_id": "7f3fa844-50ee-374e-861b-78cb00c3c6fa",
+                "word": "either",
+                "pos": "pron",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "4faac509-5934-36ab-b0d9-1a1f691bdf7e",
+                        "entry_id": "7f3fa844-50ee-374e-861b-78cb00c3c6fa",
+                        "glosses": [
+                            "L’un ou l’autre. L’une ou l’autre."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "it-extract.jsonl": [
+            {
+                "entry_id": "0d2c756b-a275-34ea-86aa-a991999e6f82",
+                "word": "either",
+                "pos": "conj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "a3a01030-09da-3d28-8c23-b559cef259a6",
+                        "entry_id": "0d2c756b-a275-34ea-86aa-a991999e6f82",
+                        "glosses": [
+                            "o"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "de-extract.jsonl": [
+            {
+                "entry_id": "02fc42ba-f77f-353f-a58a-23f24590c68e",
+                "word": "either",
+                "pos": "adj",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "8f59b1a7-3c17-4638-ae88-391c66714d86",
+                        "entry_id": "02fc42ba-f77f-353f-a58a-23f24590c68e",
+                        "tags": [
+                            "positive"
+                        ],
+                        "form": "either"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "9e1e2647-20e3-383b-8842-500de87256b8",
+                        "entry_id": "02fc42ba-f77f-353f-a58a-23f24590c68e",
+                        "glosses": [
+                            "beide"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "7915d6fa-a8a9-435f-8925-8131ba2d9ae6",
+                                "sense_id": "9e1e2647-20e3-383b-8842-500de87256b8",
+                                "text": "Either road leads to the destination.",
+                                "translation": "Beide Straßen führen zum Ziel."
+                            }
+                        ],
+                        "sense_index_json": "\"1\""
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "da173410-a42f-4c4d-b8fa-9371b8b06d65",
+                        "source_entry_id": "02fc42ba-f77f-353f-a58a-23f24590c68e",
+                        "source_sense_id": "9e1e2647-20e3-383b-8842-500de87256b8",
+                        "source_sense_description": "beide",
+                        "target_lang_word": "beide",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "beide",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                        "entry_id": "e169753c-803f-3373-8119-4cb86374a6c1",
+                                        "glosses": [
+                                            "sowohl der/die/das eine als auch der/die/das andere; auch adverbial gebraucht"
+                                        ],
+                                        "tags": [
+                                            "Indefinitpronomen",
+                                            "zeigt an",
+                                            "dass es sich nicht nur um einen der zwei in Frage kommenden Gegenstände handelt"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "1d41b154-950e-43fe-8b0d-ca4214fe31d4",
+                                                "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                                "text": "Wie, ich kann statt Papas auch Mamas Auto benutzen, beide Autos sind kaputt!"
+                                            },
+                                            {
+                                                "example_id": "002ecbd5-9025-47fb-ae27-80d6a3c535af",
+                                                "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                                "text": "Die Eltern sind nicht zu Hause. Beide müssen arbeiten."
+                                            },
+                                            {
+                                                "example_id": "0a8f1004-1166-4559-a483-ef4bad737ecb",
+                                                "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                                "text": "„Frauen wird [in China] vermittelt: Entweder wollt ihr heiraten oder einen PhD, beides geht nicht. Ein Mann wird keine Frau heiraten, die erfolgreicher ist als er.“"
+                                            },
+                                            {
+                                                "example_id": "c1c143fb-0539-4f01-8e1a-6338d18131de",
+                                                "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                                "text": "(Adverb:) Ihr habt beide recht."
+                                            },
+                                            {
+                                                "example_id": "6782efc3-1712-4a06-9372-2316e8c171d9",
+                                                "sense_id": "42a4cf01-880b-3583-8bcc-dcc8009b7058",
+                                                "text": "„Dieses beide in ihm, die Unendlichkeit, und die Endlichkeit sollen vereinigt werden.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "82e19a9d-4b5c-33c0-aa29-82340bc04650",
+                                        "entry_id": "e169753c-803f-3373-8119-4cb86374a6c1",
+                                        "glosses": [
+                                            "zwei"
+                                        ],
+                                        "tags": [
+                                            "Numerale",
+                                            "betont",
+                                            "dass die Zweizahl des Gezählten allgemein oder aus dem Vorhererwähnten bekannt ist",
+                                            "steht anstelle von"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "845da9f9-a833-463e-aa0b-f141e04ffa25",
+                                                "sense_id": "82e19a9d-4b5c-33c0-aa29-82340bc04650",
+                                                "text": "Ihr beiden habt recht."
+                                            },
+                                            {
+                                                "example_id": "9081bacf-c6a3-42be-b7af-af0a89b391ef",
+                                                "sense_id": "82e19a9d-4b5c-33c0-aa29-82340bc04650",
+                                                "text": "Kennst du diese beiden?"
+                                            },
+                                            {
+                                                "example_id": "60866636-dfde-4ae3-a213-8a4e1f9e4387",
+                                                "sense_id": "82e19a9d-4b5c-33c0-aa29-82340bc04650",
+                                                "text": "Ich kann mich nicht entscheiden, ob ich die beiden da möchte oder doch lieber die drei da."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": [
+                    {
+                        "linkage_id": "999b1cd6-d1a4-4250-8f5e-e05bfa75d496",
+                        "source_entry_id": "02fc42ba-f77f-353f-a58a-23f24590c68e",
+                        "source_sense_ids": [
+                            "9e1e2647-20e3-383b-8842-500de87256b8"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "each"
+                    }
+                ]
+            },
+            {
+                "entry_id": "8d6182c2-806b-3f9b-9690-9c028c6bd271",
+                "word": "either",
+                "pos": "adv",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "1f5472b7-488b-3500-a420-ae7c26358273",
+                        "entry_id": "8d6182c2-806b-3f9b-9690-9c028c6bd271",
+                        "glosses": [
+                            "ebenso, auch"
+                        ],
+                        "tags": [
+                            "in verneinten Sätzen"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "6646aeb2-6c48-4d86-8b98-8e1dac915329",
+                                "sense_id": "1f5472b7-488b-3500-a420-ae7c26358273",
+                                "text": "It won't do any harm, but won't really help either.",
+                                "translation": "Es schadet nicht, hilft aber auch nicht wirklich."
+                            }
+                        ],
+                        "sense_index_json": "\"1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "d2096bc8-bbec-3a2b-977e-32c6273bebd0",
+                "word": "either",
+                "pos": "conj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "6cf53973-9114-3d11-b121-b067db8aa918",
+                        "entry_id": "d2096bc8-bbec-3a2b-977e-32c6273bebd0",
+                        "glosses": [
+                            "entweder"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1\""
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "284d8169-bfa9-429a-8e29-54121fef4db4",
+                        "source_entry_id": "d2096bc8-bbec-3a2b-977e-32c6273bebd0",
+                        "source_sense_id": "6cf53973-9114-3d11-b121-b067db8aa918",
+                        "source_sense_description": "entweder",
+                        "target_lang_word": "entweder … oder",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "entweder … oder",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "3b35a858-6ded-342b-b3c9-6efc1e5488a9",
+                                        "entry_id": "eaa7f311-6d2c-3832-a2d6-8f79e0c07671",
+                                        "glosses": [
+                                            "das Eine oder das Andere; auf die eine Art und Weise oder auf die andere Art und Weise"
+                                        ],
+                                        "tags": [
+                                            "mehrteilige",
+                                            "kopulative Konjunktion"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "f534f9e9-ae61-4849-a0dc-751efa9c126a",
+                                                "sense_id": "3b35a858-6ded-342b-b3c9-6efc1e5488a9",
+                                                "text": "Entweder laufen wir, oder wir fahren mit dem Bus."
+                                            },
+                                            {
+                                                "example_id": "62fa41f3-040d-4d07-92d2-b7700087a729",
+                                                "sense_id": "3b35a858-6ded-342b-b3c9-6efc1e5488a9",
+                                                "text": "Entweder hältst du dich an die Spielregeln, oder aber wir beenden das Spiel."
+                                            },
+                                            {
+                                                "example_id": "6aa00132-8eac-44f5-bf38-177109f94dfc",
+                                                "sense_id": "3b35a858-6ded-342b-b3c9-6efc1e5488a9",
+                                                "text": "Du kommst jetzt entweder, oder ich fahre ohne dich los!"
+                                            },
+                                            {
+                                                "example_id": "eabcb996-8b99-4840-97b5-fa5dbbd05d24",
+                                                "sense_id": "3b35a858-6ded-342b-b3c9-6efc1e5488a9",
+                                                "text": "Entscheidet ihr euch bald? Was nu? Entweder mit oder ohne Ketchup."
+                                            },
+                                            {
+                                                "example_id": "aa9ab2c1-2e44-4e54-a4de-ea015b322e37",
+                                                "sense_id": "3b35a858-6ded-342b-b3c9-6efc1e5488a9",
+                                                "text": "Das geht dauerhaft nicht gut mit Ehefrau und Geliebter, das ist entweder - oder."
+                                            },
+                                            {
+                                                "example_id": "a180422f-d03e-4b3a-a24c-f8d89ca4afb5",
+                                                "sense_id": "3b35a858-6ded-342b-b3c9-6efc1e5488a9",
+                                                "text": "Das Leitmotiv dieser Kunden ist nicht „entweder oder“ (Diskontmarkt oder Feinkostgeschäft, Fast Food oder Haubenküche) sondern „sowohl als auch“."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "f1862ae9-ce62-3d24-984f-c58889e68173",
+                "word": "either",
+                "pos": "pron",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "e8bc932c-415e-36bb-aadf-17970b0ffafa",
+                        "entry_id": "f1862ae9-ce62-3d24-984f-c58889e68173",
+                        "glosses": [
+                            "eins der beiden"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "92d84a82-9649-49a7-b15f-63bd4da32f84",
+                                "sense_id": "e8bc932c-415e-36bb-aadf-17970b0ffafa",
+                                "text": "Both roads lead to the destination, so you may take either.",
+                                "translation": "Beide Straßen führen zum Ziel, also kannst du eine der beiden nehmen."
+                            },
+                            {
+                                "example_id": "c765406a-9d7d-4f69-8da9-cb04e73bbeae",
+                                "sense_id": "e8bc932c-415e-36bb-aadf-17970b0ffafa",
+                                "text": "You may take either of the roads.",
+                                "translation": "Du kannst eine der beiden Straßen nehmen."
+                            }
+                        ],
+                        "sense_index_json": "\"1\""
+                    },
+                    {
+                        "sense_id": "87b3caae-c1d4-34d0-af10-c68d922e6374",
+                        "entry_id": "f1862ae9-ce62-3d24-984f-c58889e68173",
+                        "glosses": [
+                            "beide"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "e4e36087-e288-411a-9ba5-5f8b5e3c693a",
+                                "sense_id": "87b3caae-c1d4-34d0-af10-c68d922e6374",
+                                "text": "It does not matter which road you choose: either leads to the destination.",
+                                "translation": "Egal welche Straße du wählst, beide führen zum Ziel."
+                            }
+                        ],
+                        "sense_index_json": "\"2\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "cs-extract.jsonl": [
+            {
+                "entry_id": "9c6ccb31-0b0c-366e-9b97-d3217e7991ed",
+                "word": "either",
+                "pos": "adj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "a273a2ee-6a82-3cbe-bbaf-07b741158c32",
+                        "entry_id": "9c6ccb31-0b0c-366e-9b97-d3217e7991ed",
+                        "glosses": [
+                            "každý, kterýkoliv, libovolný"
+                        ],
+                        "tags": [
+                            "ze dvou"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "b83fc851-d9d6-4098-b375-de5b3d9d869c",
+                                "sense_id": "a273a2ee-6a82-3cbe-bbaf-07b741158c32",
+                                "text": "You can park the car on either side of the road.",
+                                "translation": "Auto můžete zaparkovat na obou stranách ulice."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "c3fa0659-9cd4-30f2-bff2-dcab9c2057a8",
+                "word": "either",
+                "pos": "adv",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "fdb676c8-3399-32f7-90d1-d961ef60f20c",
+                        "entry_id": "c3fa0659-9cd4-30f2-bff2-dcab9c2057a8",
+                        "glosses": [
+                            "(ve spojení se záporem) také (ne), ani"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "2814e251-8166-4032-bbb9-164f32129fe6",
+                                "sense_id": "fdb676c8-3399-32f7-90d1-d961ef60f20c",
+                                "text": "I don't like this song either.",
+                                "translation": "Mně se ta písnička také nelíbí."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "d263259b-1b32-31bd-9abd-c88eb5263bc6",
+                "word": "either",
+                "pos": "conj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "6f1602c7-13b6-3fd5-8a0c-a7b787912569",
+                        "entry_id": "d263259b-1b32-31bd-9abd-c88eb5263bc6",
+                        "glosses": [
+                            "ve spojení either — or: buď — nebo"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "6b896112-17a9-47b1-9c50-14b13ff09cc9",
+                                "sense_id": "6f1602c7-13b6-3fd5-8a0c-a7b787912569",
+                                "text": "You can have either tea or milk.",
+                                "translation": "Můžete dostat buď čaj, nebo mléko."
+                            },
+                            {
+                                "example_id": "759a85a2-297f-464e-8b50-6d2b92179051",
+                                "sense_id": "6f1602c7-13b6-3fd5-8a0c-a7b787912569",
+                                "text": "A little sibling rivalry isn’t such a bad thing, especially between adopted boys. They either push each other to be the best versions of themselves, or one of them gets booted back to the orphanage.",
+                                "translation": "Malá řevnivost mezi sourozenci není zas tak špatná věc, zvláště pokud jde o adoptované kloučky. Buďto ze sebe navzájem vymáčknou to nejlepší, nebo to jednoho z nich vykopne zpátky do sirotčince."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "es-extract.jsonl": [
+            {
+                "entry_id": "f85fd6a0-2b1b-31f7-be8b-3f9c63fb138b",
+                "word": "either",
+                "pos": "adj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "6e0768cc-bf3f-383c-be45-29d4d39bd542",
+                        "entry_id": "f85fd6a0-2b1b-31f7-be8b-3f9c63fb138b",
+                        "glosses": [
+                            "Cualquiera."
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1\""
+                    },
+                    {
+                        "sense_id": "606399d3-53e0-3f57-ba14-6dc801433ebc",
+                        "entry_id": "f85fd6a0-2b1b-31f7-be8b-3f9c63fb138b",
+                        "glosses": [
+                            "Ambos."
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"2\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "882a97ac-9edc-38c8-85b0-6562f00996fc",
+                "word": "either",
+                "pos": "adv",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "924df0b0-f7fd-3b67-be42-d5430160f335",
+                        "entry_id": "882a97ac-9edc-38c8-85b0-6562f00996fc",
+                        "glosses": [
+                            "También."
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"4\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "a7f144ac-c4b3-33d7-959c-38c35089c931",
+                "word": "either",
+                "pos": "conj",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "7d09b91a-57b0-3e77-9f49-2bff4c11dea9",
+                        "entry_id": "a7f144ac-c4b3-33d7-959c-38c35089c931",
+                        "glosses": [
+                            "Introduce la primera de dos (u ocasionalmente más) opciones o posibilidades, la segunda (o última) de las cuales se introduce mediante or."
+                        ],
+                        "tags": [
+                            "se usa en correlación con or (either … or)"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "b876774a-d53b-48b7-90dc-a60f0532ae47",
+                                "sense_id": "7d09b91a-57b0-3e77-9f49-2bff4c11dea9",
+                                "text": "Either you eat your dinner or you go to your room."
+                            },
+                            {
+                                "example_id": "bb3d46ad-f87f-43b6-8fd7-426eea227d23",
+                                "sense_id": "7d09b91a-57b0-3e77-9f49-2bff4c11dea9",
+                                "text": "You can have either potatoes or rice with that, but not both."
+                            },
+                            {
+                                "example_id": "d6d89fd2-8f09-410a-89a3-3295680be37e",
+                                "sense_id": "7d09b91a-57b0-3e77-9f49-2bff4c11dea9",
+                                "text": "You'll be either early, late, or on time."
+                            }
+                        ],
+                        "sense_index_json": "\"5\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "0d5f7c9a-54fc-39ab-a14b-79406e25865f",
+                "word": "either",
+                "pos": "pron",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "248b1737-2ef1-302e-9209-735ca43459a6",
+                        "entry_id": "0d5f7c9a-54fc-39ab-a14b-79406e25865f",
+                        "glosses": [
+                            "Cualquiera."
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"3\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "tr-extract.jsonl": []
+    }
+}

@@ -9,6 +9,9 @@ import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import io.ktor.client.*
 import io.ktor.client.engine.darwin.*
+import kotlinx.atomicfu.locks.ReentrantLock
+import kotlinx.atomicfu.locks.reentrantLock
+import kotlinx.atomicfu.locks.synchronized
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
@@ -17,6 +20,7 @@ import kotlinx.io.files.Path
 import platform.Foundation.*
 
 actual class PlatformDbSupport actual constructor(androidContext: Any?) {
+    val lock: ReentrantLock = reentrantLock()
     private val baseDir: String by lazy {
         val paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, true)
         val dir = (paths as NSArray).objectAtIndex(0u) as? String ?: NSTemporaryDirectory()
@@ -120,40 +124,42 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         path: Path,
         readOnly: Boolean
     ): NativeSqliteDriver {
-        // SQLiter/NativeSqliteDriver expects a filename without path; provide basePath separately.
-        val name = NSURL.fileURLWithPath(path.toString()).lastPathComponent ?: path.toString()
+        synchronized(lock) {
+            // SQLiter/NativeSqliteDriver expects a filename without path; provide basePath separately.
+            val name = NSURL.fileURLWithPath(path.toString()).lastPathComponent ?: path.toString()
 
-        // When opening in read-only mode, avoid running schema create/migrate.
-        // We wrap the schema with a no-op implementation (same version) so the driver doesn't try
-        // to perform any migrations or DDL. Queries are still allowed via enforceQueryOnly.
-        val effectiveSchema = if (readOnly) object : SqlSchema<QueryResult.Value<Unit>> {
-            override val version: Long = schema.version
-            override fun create(driver: SqlDriver): QueryResult.Value<Unit> {
-                return QueryResult.Unit
-            }
+            // When opening in read-only mode, avoid running schema create/migrate.
+            // We wrap the schema with a no-op implementation (same version) so the driver doesn't try
+            // to perform any migrations or DDL. Queries are still allowed via enforceQueryOnly.
+            val effectiveSchema = if (readOnly) object : SqlSchema<QueryResult.Value<Unit>> {
+                override val version: Long = schema.version
+                override fun create(driver: SqlDriver): QueryResult.Value<Unit> {
+                    return QueryResult.Unit
+                }
 
-            override fun migrate(
-                driver: SqlDriver,
-                oldVersion: Long,
-                newVersion: Long,
-                vararg callbacks: app.cash.sqldelight.db.AfterVersion
-            ): QueryResult.Value<Unit> {
-                return QueryResult.Unit
-            }
-        } else schema
+                override fun migrate(
+                    driver: SqlDriver,
+                    oldVersion: Long,
+                    newVersion: Long,
+                    vararg callbacks: app.cash.sqldelight.db.AfterVersion
+                ): QueryResult.Value<Unit> {
+                    return QueryResult.Unit
+                }
+            } else schema
 
-        val result = NativeSqliteDriver(
-            schema = effectiveSchema,
-            name = name,
-            onConfiguration = { cfg ->
-                val ext = cfg.extendedConfig.copy(basePath = baseDir)
-                cfg.copy(extendedConfig = ext)
+            val result = NativeSqliteDriver(
+                schema = effectiveSchema,
+                name = name,
+                onConfiguration = { cfg ->
+                    val ext = cfg.extendedConfig.copy(basePath = baseDir)
+                    cfg.copy(extendedConfig = ext)
+                }
+            )
+            if (readOnly) {
+                enforceQueryOnly(result)
             }
-        )
-        if (readOnly) {
-            enforceQueryOnly(result)
+            return result
         }
-        return result
     }
 
     actual fun createHttpClient(): HttpClient {

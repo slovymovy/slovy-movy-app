@@ -855,6 +855,7 @@ class JsonIngestionBuilder(
                 "PRON" -> return DictionaryPos.PRONOUN
                 "INTJ" -> return DictionaryPos.INTERJECTION
                 "NUM" -> return DictionaryPos.NUMERAL
+                "DET" -> return DictionaryPos.DETERMINER
             }
             return null
         }

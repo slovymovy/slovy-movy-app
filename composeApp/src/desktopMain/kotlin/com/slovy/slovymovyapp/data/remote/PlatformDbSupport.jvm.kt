@@ -95,40 +95,42 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         readOnly: Boolean,
         schema: SqlSchema<QueryResult.Value<Unit>>
     ): JdbcSqliteDriver {
-        val url = jdbcConnectionString(path, readOnly)
-        val driver = JdbcSqliteDriver(url)
-        if (readOnly) {
+        synchronized(this) {
+            val url = jdbcConnectionString(path, readOnly)
+            val driver = JdbcSqliteDriver(url)
+            if (readOnly) {
+                return driver
+            }
+            val isNew = !fileExists(path)
+
+            if (isNew) {
+                schema.create(driver)
+                setVersion(driver, schema.version)
+            } else {
+                val currentVersion = driver.executeQuery(
+                    identifier = null,
+                    sql = "PRAGMA user_version",
+                    mapper = { cursor ->
+                        QueryResult.Value(cursor.getLong(0) ?: 0)
+                    },
+                    parameters = 0
+                ).value
+
+                schema.migrate(
+                    driver,
+                    currentVersion,
+                    schema.version,
+                    *(1..schema.version).map {
+                        AfterVersion(it) { d ->
+                            setVersion(d, it)
+                        }
+                    }.toTypedArray()
+                )
+
+                setVersion(driver, schema.version)
+            }
             return driver
         }
-        val isNew = !fileExists(path)
-
-        if (isNew) {
-            schema.create(driver)
-            setVersion(driver, schema.version)
-        } else {
-            val currentVersion = driver.executeQuery(
-                identifier = null,
-                sql = "PRAGMA user_version",
-                mapper = { cursor ->
-                    QueryResult.Value(cursor.getLong(0) ?: 0)
-                },
-                parameters = 0
-            ).value
-
-            schema.migrate(
-                driver,
-                currentVersion,
-                schema.version,
-                *(1..schema.version).map {
-                    AfterVersion(it) { d ->
-                        setVersion(d, it)
-                    }
-                }.toTypedArray()
-            )
-
-            setVersion(driver, schema.version)
-        }
-        return driver
     }
 
     private fun setVersion(driver: SqlDriver, version: Long) {

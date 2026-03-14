@@ -23,4 +23,6 @@ CREATE TABLE lemma_pos_sense_hint (
   lemma_pos_id BLOB NOT NULL REFERENCES lemma_pos(id) ON DELETE CASCADE
 );
 
+CREATE INDEX IF NOT EXISTS idx_lemma_pos_sense_hint_lemma_pos_id ON lemma_pos_sense_hint(lemma_pos_id);
+
 PRAGMA foreign_keys=1;
