@@ -449,5 +449,20 @@ class MultiLemmaPosIngestionTest {
         assertTrue(lemmaPosForPos(infos, DictionaryPos.PRONOUN).size == 1, "Expected 1 PRONOUN lemma_pos for 'either'")
     }
 
+    @Test
+    fun ned_noun_sense_without_hint_falls_back_to_primary_cluster() {
+        val outDir = Files.createTempDirectory("multi_lemma_pos_ned").toFile()
+        val infos = ingestAndQuery("en", "ned", outDir)
+
+        // ned has 2 native noun clusters (Scottish slang + acronym) and a processed sense
+        // (sense 72f1cb52 "no evidence of disease") that has no raw counterpart.
+        // The ingester must not throw and must assign it to the primary noun cluster.
+        val nounEntries = lemmaPosForPos(infos, DictionaryPos.NOUN)
+        assertTrue(nounEntries.isNotEmpty(), "Expected at least one NOUN lemma_pos for 'ned'")
+
+        val nameEntries = lemmaPosForPos(infos, DictionaryPos.NAME)
+        assertTrue(nameEntries.isNotEmpty(), "Expected at least one NAME lemma_pos for 'ned'")
+    }
+
     private fun uuidParse(s: String) = com.slovy.slovymovyapp.ingestion.uuidParse(s)
 }

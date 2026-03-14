@@ -237,9 +237,6 @@ class JsonIngestionBuilder(
     ) {
         fun primaryIdForPos(pos: DictionaryPos): Uuid? =
             entries.firstOrNull { it.first == pos }?.second
-
-        fun clusterCountForPos(pos: DictionaryPos): Int =
-            entries.count { it.first == pos }
     }
 
     /** Carries an entry together with its source-file key from source_file_to_entries. */
@@ -601,10 +598,8 @@ class JsonIngestionBuilder(
                     val lemmaPosIdForSense = resolveLemmaPosIdForSense(
                         senseId = senseId,
                         posLabel = posEntry.pos,
-                        pos = pos,
                         defaultLemmaPosId = defaultLemmaPosId,
-                        senseIdToLemmaPosId = senseIdToLemmaPosId,
-                        lemmaPosMapping = lemmaPosMapping
+                        senseIdToLemmaPosId = senseIdToLemmaPosId
                     )
                     val def = sense.targetLangDefinitions[trg]
                     if (def != null) {
@@ -686,10 +681,8 @@ class JsonIngestionBuilder(
                 val lemmaPosIdForSense = resolveLemmaPosIdForSense(
                     senseId = senseId,
                     posLabel = posEntry.pos,
-                    pos = pos,
                     defaultLemmaPosId = defaultLemmaPosId,
-                    senseIdToLemmaPosId = senseIdToLemmaPosId,
-                    lemmaPosMapping = lemmaPosMapping
+                    senseIdToLemmaPosId = senseIdToLemmaPosId
                 )
                 dictQ.insertSense(
                     sense_id = senseId,
@@ -740,18 +733,15 @@ class JsonIngestionBuilder(
     private fun resolveLemmaPosIdForSense(
         senseId: Uuid,
         posLabel: String,
-        pos: DictionaryPos?,
         defaultLemmaPosId: Uuid?,
-        senseIdToLemmaPosId: Map<Uuid, Uuid>,
-        lemmaPosMapping: LemmaPosMapping
+        senseIdToLemmaPosId: Map<Uuid, Uuid>
     ): Uuid {
         senseIdToLemmaPosId[senseId]?.let { return it }
-        val resolvedPos = pos ?: error("POS $posLabel not found in lemmaPosMapping")
-        val fallbackLemmaPosId = defaultLemmaPosId ?: error("POS $posLabel not found in lemmaPosMapping")
-        if (lemmaPosMapping.clusterCountForPos(resolvedPos) > 1) {
-            error("Missing lemma_pos hint for sense $senseId in multi-cluster POS $posLabel")
-        }
-        return fallbackLemmaPosId
+        // No hint found — fall back to the primary cluster for this POS.
+        // This can happen when a processed sense_id has no counterpart in the raw data
+        // (e.g. a new sense added only in the processed JSON). Using the primary cluster
+        // is a best-effort assignment; correctness requires matching sense_ids in raw data.
+        return defaultLemmaPosId ?: error("POS $posLabel not found in lemmaPosMapping")
     }
 
     /**

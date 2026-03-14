@@ -1,0 +1,444 @@
+{
+    "word": "ned",
+    "lang_code": "en",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "85c77737-bdbf-34b0-80e4-385da94b8778",
+                "word": "Ned",
+                "pos": "name",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "dd11017c-3673-3745-9473-4e1d68c63f35",
+                        "entry_id": "85c77737-bdbf-34b0-80e4-385da94b8778",
+                        "glosses": [
+                            "A medieval diminutive of the male given name Edward."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "0c67e74c-9aef-4373-8c39-9c1fa788cb6a",
+                                "sense_id": "dd11017c-3673-3745-9473-4e1d68c63f35",
+                                "text": "But, sweet Ned, - to sweeten the name of Ned, I give thee this pennyworth of sugar"
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "18cc6b72-28da-3683-a42f-54b80bef6542",
+                "word": "NED",
+                "pos": "name",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "4f756f6e-3d89-3374-b7f0-2a61793fa8d2",
+                        "entry_id": "18cc6b72-28da-3683-a42f-54b80bef6542",
+                        "glosses": [
+                            "Initialism of New English Dictionary."
+                        ],
+                        "tags": [
+                            "abbreviation",
+                            "alt-of",
+                            "initialism"
+                        ],
+                        "examples": []
+                    },
+                    {
+                        "sense_id": "7a9007a8-7938-3513-bcb8-ad41a731dee9",
+                        "entry_id": "18cc6b72-28da-3683-a42f-54b80bef6542",
+                        "glosses": [
+                            "Initialism of National Endowment for Democracy."
+                        ],
+                        "tags": [
+                            "abbreviation",
+                            "alt-of",
+                            "initialism"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                "word": "ned",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "0a28ae72-4df9-4dd5-9816-167fae151bce",
+                        "entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "neds"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "3055da48-5b88-3334-b251-c51becb9d8cf",
+                        "entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "glosses": [
+                            "A person, usually a youth, of low social standing and education, a violent disposition and with a particular style of dress (typically sportswear or Burberry), speech and behaviour."
+                        ],
+                        "tags": [
+                            "Scotland",
+                            "derogatory",
+                            "offensive",
+                            "slang"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "86c4a27e-dd34-4e74-8c19-863f4d269aa2",
+                                "sense_id": "3055da48-5b88-3334-b251-c51becb9d8cf",
+                                "text": "The mindless behaviour of drunken neds and nuisance neighbours brings misery to tens of thousands of honest folk."
+                            },
+                            {
+                                "example_id": "e74efb65-e2c4-4488-bf73-48724fcad7c8",
+                                "sense_id": "3055da48-5b88-3334-b251-c51becb9d8cf",
+                                "text": "You could live in a place for twenty years, you could clean up its streets and lock up its neds."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "41e50c85-088f-43a4-b1e9-1d31e4feab7d",
+                        "source_entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "source_sense_ids": [
+                            "3055da48-5b88-3334-b251-c51becb9d8cf"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "chav"
+                    },
+                    {
+                        "linkage_id": "82ec1dc9-d5d8-4654-b6f3-d0987d7818bd",
+                        "source_entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "source_sense_ids": [
+                            "3055da48-5b88-3334-b251-c51becb9d8cf"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "charva"
+                    },
+                    {
+                        "linkage_id": "15106ce0-dc88-432b-9bea-f4da7a9b83ab",
+                        "source_entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "source_sense_ids": [
+                            "3055da48-5b88-3334-b251-c51becb9d8cf"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "scally"
+                    },
+                    {
+                        "linkage_id": "a7e1b272-225c-4cd3-9f9e-b0a4537234bb",
+                        "source_entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "source_sense_ids": [
+                            "3055da48-5b88-3334-b251-c51becb9d8cf"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "scanger"
+                    },
+                    {
+                        "linkage_id": "f11fdaff-5ad4-48fb-ac95-c805b02e5a25",
+                        "source_entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "source_sense_ids": [
+                            "3055da48-5b88-3334-b251-c51becb9d8cf"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "schemie"
+                    },
+                    {
+                        "linkage_id": "2f2bf6f0-9193-4117-81d4-fa222a4900a9",
+                        "source_entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "source_sense_ids": [
+                            "3055da48-5b88-3334-b251-c51becb9d8cf"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "Senga"
+                    },
+                    {
+                        "linkage_id": "d47a788d-9fb3-4cc3-8aa8-942b24279ac8",
+                        "source_entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "source_sense_ids": [
+                            "3055da48-5b88-3334-b251-c51becb9d8cf"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "yob"
+                    },
+                    {
+                        "linkage_id": "4b4d3f60-4056-4439-9068-1d44ef38c0c1",
+                        "source_entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "source_sense_ids": [
+                            "3055da48-5b88-3334-b251-c51becb9d8cf"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "yobbo"
+                    },
+                    {
+                        "linkage_id": "96f8eac3-1d0e-4ce8-92e6-bc51c089dbd1",
+                        "source_entry_id": "bd6415b5-6200-3903-933e-83c09550b442",
+                        "source_sense_ids": [
+                            "3055da48-5b88-3334-b251-c51becb9d8cf"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "spide"
+                    }
+                ]
+            },
+            {
+                "entry_id": "3b759c39-4dcf-39c0-a8cb-4b02f1ddc50b",
+                "word": "NED",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "ac495ecc-9503-496a-adc9-336cb653a370",
+                        "entry_id": "3b759c39-4dcf-39c0-a8cb-4b02f1ddc50b",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "NEDs"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "f2804a6b-6943-35f9-9fd6-e3446ec98482",
+                        "entry_id": "3b759c39-4dcf-39c0-a8cb-4b02f1ddc50b",
+                        "glosses": [
+                            "Acronym of non-educated delinquent."
+                        ],
+                        "tags": [
+                            "abbreviation",
+                            "acronym",
+                            "alt-of",
+                            "derogatory"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "7f8e9d2d-7a21-3ee3-833a-b8f16256d649",
+                "word": "NED",
+                "pos": "phrase",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "72f1cb52-c394-3874-87f8-d3badd6293c6",
+                        "entry_id": "7f8e9d2d-7a21-3ee3-833a-b8f16256d649",
+                        "glosses": [
+                            "Initialism of no evidence of disease."
+                        ],
+                        "tags": [
+                            "abbreviation",
+                            "alt-of",
+                            "initialism"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [
+            {
+                "entry_id": "eb66a7cb-6a67-3c98-b3b8-b4ffbbaaebbb",
+                "word": "ned",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "feecda2d-ed3e-3cfc-88e4-3e15aca229b1",
+                        "entry_id": "eb66a7cb-6a67-3c98-b3b8-b4ffbbaaebbb",
+                        "glosses": [
+                            "жарг. «нед» (молодой хулиган)"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "ee84f844-5370-3f65-9406-5331a98b2d69",
+                "word": "Ned",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "f8faf275-4ca8-395e-b364-d37030f4b13a",
+                        "entry_id": "ee84f844-5370-3f65-9406-5331a98b2d69",
+                        "glosses": [
+                            "(мужское имя)"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "62993f1d-9f76-42bf-8e5e-5bda141b907c",
+                                "sense_id": "f8faf275-4ca8-395e-b364-d37030f4b13a",
+                                "text": "This is my boyfriend Ned.",
+                                "translation": "Это мой друг Ned."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "nl-extract.jsonl": [],
+        "pl-extract.jsonl": [
+            {
+                "entry_id": "65c5af81-5a4b-3b0c-bb47-718ec5d015c2",
+                "word": "Ned",
+                "pos": "name",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "19ae2933-fcd5-3ebc-a5eb-f6ae7c286d1a",
+                        "entry_id": "65c5af81-5a4b-3b0c-bb47-718ec5d015c2",
+                        "glosses": [
+                            "od imion męskich Edmund, Edward, Edwin i Theodore"
+                        ],
+                        "tags": [
+                            "diminutive"
+                        ],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "899dcb6a-16e8-3caf-96b4-d027ed798b22",
+                "word": "ned",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "dfa60142-ffee-3bc3-9a02-38e64877edba",
+                        "entry_id": "899dcb6a-16e8-3caf-96b4-d027ed798b22",
+                        "glosses": [
+                            "dresiarz"
+                        ],
+                        "tags": [
+                            "pejorative",
+                            "slang"
+                        ],
+                        "examples": [],
+                        "sense_index_json": "\"1.1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "444526a3-a42f-4129-b9a4-9cc0bbdfa83a",
+                        "source_entry_id": "899dcb6a-16e8-3caf-96b4-d027ed798b22",
+                        "source_sense_ids": [
+                            "dfa60142-ffee-3bc3-9a02-38e64877edba"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "chev"
+                    }
+                ]
+            }
+        ],
+        "fr-extract.jsonl": [
+            {
+                "entry_id": "9a89380e-e41f-3fdd-a1be-e41e4d8867a2",
+                "word": "Ned",
+                "pos": "name",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "05907ffc-8c5d-317f-90d7-17173bbd735e",
+                        "entry_id": "9a89380e-e41f-3fdd-a1be-e41e4d8867a2",
+                        "glosses": [
+                            "Diminutif de Edward."
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [
+            {
+                "entry_id": "e0672b8f-abde-3cf2-91e4-1c4ce13c6da3",
+                "word": "Ned",
+                "pos": "name",
+                "lang_code": "en",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "ac4a8d32-61b3-3853-8295-0f6e9bd42cc7",
+                        "entry_id": "e0672b8f-abde-3cf2-91e4-1c4ce13c6da3",
+                        "glosses": [
+                            "Hipocorístico de Edward."
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "537b1f15-1811-34c7-a048-4c56a7dae106",
+                "word": "ned",
+                "pos": "noun",
+                "lang_code": "en",
+                "forms": [
+                    {
+                        "form_id": "1afb78d2-66d1-49bf-907c-bdd73937b1bc",
+                        "entry_id": "537b1f15-1811-34c7-a048-4c56a7dae106",
+                        "tags": [
+                            "plural"
+                        ],
+                        "form": "neds"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "7ad9ad99-6aed-3335-a5c5-8272929efa90",
+                        "entry_id": "537b1f15-1811-34c7-a048-4c56a7dae106",
+                        "glosses": [
+                            "Joven de clase social baja que usa ropa deportiva de marca"
+                        ],
+                        "tags": [],
+                        "examples": [],
+                        "sense_index_json": "\"1\""
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "tr-extract.jsonl": []
+    }
+}
