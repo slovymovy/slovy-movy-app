@@ -443,6 +443,7 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun ensureDatabasesDir()
     fun fileExists(path: Path): Boolean
     fun openOutput(destPath: Path): PlatformFileOutput
+    fun copyFile(from: Path, to: Path): Boolean
     fun deleteFile(path: Path)
     fun moveFile(from: Path, to: Path): Boolean
     fun markNoBackup(path: Path)
