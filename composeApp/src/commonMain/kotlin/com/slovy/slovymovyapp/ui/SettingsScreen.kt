@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.AppBuildConfig
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
@@ -67,6 +68,10 @@ data class SettingsUiState(
     // Delete confirmation
     val deleteConfirmation: DeleteConfirmationState? = null,
 
+    // Data export
+    val isAppDataExportSupported: Boolean = false,
+    val isExportingAppData: Boolean = false,
+
     // About
     val buildConfig: AppBuildConfig = AppBuildConfig("compile", 42, true, "com.slovy.slovymovyapp"),
 
@@ -93,11 +98,17 @@ class SettingsViewModel(
     private val downloadCoordinator: DownloadCoordinator,
     private val dictionaryRepository: DictionaryRepository,
     private val dictionaryClient: DictionaryClient,
+    private val appDataExporter: AppDataExporter,
     private val settingsRepository: SettingsRepository,
     buildConfig: AppBuildConfig
 ) : ViewModel() {
 
-    var state by mutableStateOf(SettingsUiState(buildConfig = buildConfig))
+    var state by mutableStateOf(
+        SettingsUiState(
+            buildConfig = buildConfig,
+            isAppDataExportSupported = appDataExporter.isSupported
+        )
+    )
         private set
 
     val scrollState = LazyListState()
@@ -214,7 +225,13 @@ class SettingsViewModel(
                         Language.fromCodeOrNull(code)
                     }
                     .filter { it !in installedDicts && it !in addableLanguageCodes }
-                    .map { AvailableLanguageInfo(language = it, dictionarySizeBytes = null, availableTranslations = emptyList()) }
+                    .map {
+                        AvailableLanguageInfo(
+                            language = it,
+                            dictionarySizeBytes = null,
+                            availableTranslations = emptyList()
+                        )
+                    }
 
                 val addable = (addableFromRemote + activeDownloadEntries)
                     .sortedBy { it.language.ordinal }
@@ -543,6 +560,35 @@ class SettingsViewModel(
         ttsManager.openSettings()
     }
 
+    fun exportAppData() {
+        if (!state.isAppDataExportSupported || state.isExportingAppData) return
+
+        viewModelScope.launch {
+            state = state.copy(isExportingAppData = true)
+            try {
+                val result = appDataExporter.exportAppData()
+                viewModelScope.launch {
+                    snackbarHostState.showSnackbar(
+                        "Exported ${result.artifactName} to ${result.destinationLabel}"
+                    )
+                }
+                if (appDataExporter.canShareExport) {
+                    try {
+                        appDataExporter.shareExport(result)
+                    } catch (e: Exception) {
+                        state = state.copy(errorMessage = "Failed to open share dialog: ${e.message}")
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                state = state.copy(errorMessage = "Failed to export app data: ${e.message}")
+            } finally {
+                state = state.copy(isExportingAppData = false)
+            }
+        }
+    }
+
     fun dismissError() {
         state = state.copy(errorMessage = null)
     }
@@ -753,6 +799,7 @@ fun SettingsScreen(
         onTestVoice = { voice -> viewModel.testVoice(voice) },
         onToggleVoiceEnabled = { language, voiceId -> viewModel.toggleVoiceEnabled(language, voiceId) },
         onOpenSettings = { viewModel.openSystemSettings() },
+        onExportAppData = { viewModel.exportAppData() },
         onDismissError = { viewModel.dismissError() },
         onConfirmDelete = { viewModel.confirmDelete() },
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
@@ -786,6 +833,7 @@ fun SettingsScreenContent(
     onTestVoice: (Text2SpeechVoice) -> Unit = { _ -> },
     onToggleVoiceEnabled: (Text2SpeechLanguage, String) -> Unit = { _, _ -> },
     onOpenSettings: () -> Unit = {},
+    onExportAppData: () -> Unit = {},
     onDismissError: () -> Unit = {},
     onConfirmDelete: () -> Unit = {},
     onDismissDeleteConfirmation: () -> Unit = {},
@@ -985,6 +1033,22 @@ fun SettingsScreenContent(
 
                                 item {
                                     DownloadMoreVoicesCard(onOpenSettings = onOpenSettings)
+                                }
+                            }
+
+                            if (state.isAppDataExportSupported) {
+                                item {
+                                    SectionHeader(
+                                        title = "Your data",
+                                        modifier = Modifier.padding(top = AppSpacing.sm)
+                                    )
+                                }
+
+                                item {
+                                    AppDataSection(
+                                        isExporting = state.isExportingAppData,
+                                        onExport = onExportAppData
+                                    )
                                 }
                             }
 
@@ -1309,7 +1373,8 @@ private fun SettingsScreenPreviewWithMixedStates(
                 downloadingItems = mapOf(
                     "dict_ru" to DownloadProgress(5 * 1024 * 1024, 12 * 1024 * 1024),
                     "trans_en_pl" to DownloadProgress(2 * 1024 * 1024, 7 * 1024 * 1024)
-                )
+                ),
+                isAppDataExportSupported = true,
             )
         )
     }

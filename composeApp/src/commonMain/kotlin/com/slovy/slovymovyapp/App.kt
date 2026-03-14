@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.*
@@ -100,6 +101,7 @@ fun App(
     }
     val downloadCoordinator = remember { DownloadCoordinator() }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
+    val appDataExporter = remember(androidContext) { AppDataExporter(androidContext) }
     val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
 
     val navController = rememberNavController()
@@ -117,6 +119,7 @@ fun App(
                 downloadCoordinator,
                 dictionaryRepository,
                 dictionaryClient,
+                appDataExporter,
                 settingsRepository,
                 buildConfig
             )
@@ -639,7 +642,7 @@ fun App(
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
                 ) {
-                    ErrorViewModel("Data format has been updated. Your downloaded dictionaries will be deleted and need to be re-downloaded.")
+                    ErrorViewModel("We've updated the dictionary format. You'll need to re-download your dictionaries — your saved words are safe.")
                 }
 
                 ErrorScreen(

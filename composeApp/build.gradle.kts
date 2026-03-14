@@ -60,6 +60,7 @@ kotlin {
     jvm("desktop")
 
     sourceSets {
+        val sharedAndroidTestDir = "src/androidTest/kotlin"
         val desktopMain by getting
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
@@ -106,17 +107,23 @@ kotlin {
             implementation(libs.sqldelight.sqliteDriver)
             implementation(libs.ktor.client.cio)
         }
-        getByName("androidHostTest").dependencies {
-            implementation(libs.androidx.test.core)
-            implementation(libs.robolectric)
+        getByName("androidHostTest") {
+            kotlin.srcDir(sharedAndroidTestDir)
+            dependencies {
+                implementation(libs.androidx.test.core)
+                implementation(libs.robolectric)
+            }
         }
-        getByName("androidDeviceTest").dependencies {
-            implementation(libs.androidx.test.runner)
-            implementation(libs.androidx.test.core)
-            implementation(libs.androidx.testExt.junit)
-            implementation(libs.androidx.espresso.core)
-            implementation(libs.junit)
-            implementation(libs.sqldelight.androidDriver)
+        getByName("androidDeviceTest") {
+            kotlin.srcDir(sharedAndroidTestDir)
+            dependencies {
+                implementation(libs.androidx.test.runner)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.testExt.junit)
+                implementation(libs.androidx.espresso.core)
+                implementation(libs.junit)
+                implementation(libs.sqldelight.androidDriver)
+            }
         }
     }
 }

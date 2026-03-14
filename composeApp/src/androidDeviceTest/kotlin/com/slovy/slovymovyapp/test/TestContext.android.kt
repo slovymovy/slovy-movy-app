@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.test
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.slovy.slovymovyapp.data.export.AppDataExportResult
 import org.junit.runner.RunWith
 
 actual object TestContext {
@@ -16,6 +17,27 @@ actual object TestContext {
     }
 
     actual fun testServerHost(): String = "10.0.2.2"
+
+    actual suspend fun runInExportTestEnvironment(block: suspend () -> Unit) {
+        AndroidExportTestSupport.runInExportTestEnvironment(
+            ApplicationProvider.getApplicationContext(),
+            block
+        )
+    }
+
+    actual fun exportArtifactExists(result: AppDataExportResult): Boolean {
+        return AndroidExportTestSupport.exportArtifactExists(
+            ApplicationProvider.getApplicationContext(),
+            result
+        )
+    }
+
+    actual fun deleteExportArtifact(result: AppDataExportResult) {
+        AndroidExportTestSupport.deleteExportArtifact(
+            ApplicationProvider.getApplicationContext(),
+            result
+        )
+    }
 }
 
 @RunWith(AndroidJUnit4::class)

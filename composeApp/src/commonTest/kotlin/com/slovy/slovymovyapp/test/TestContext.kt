@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.test
 
+import com.slovy.slovymovyapp.data.export.AppDataExportResult
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.AppDatabaseHolder
 import com.slovy.slovymovyapp.data.remote.DataDbManager
@@ -12,6 +13,9 @@ expect object TestContext {
     fun androidContext(): Any?
     fun getCiEnv(name: String): String?
     fun testServerHost(): String
+    suspend fun runInExportTestEnvironment(block: suspend () -> Unit)
+    fun exportArtifactExists(result: AppDataExportResult): Boolean
+    fun deleteExportArtifact(result: AppDataExportResult)
 }
 
 /**

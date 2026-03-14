@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.test
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.slovy.slovymovyapp.data.export.AppDataExportResult
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -23,6 +24,27 @@ actual object TestContext {
     }
 
     actual fun testServerHost(): String = "127.0.0.1"
+
+    actual suspend fun runInExportTestEnvironment(block: suspend () -> Unit) {
+        AndroidExportTestSupport.runInExportTestEnvironment(
+            ApplicationProvider.getApplicationContext(),
+            block
+        )
+    }
+
+    actual fun exportArtifactExists(result: AppDataExportResult): Boolean {
+        return AndroidExportTestSupport.exportArtifactExists(
+            ApplicationProvider.getApplicationContext(),
+            result
+        )
+    }
+
+    actual fun deleteExportArtifact(result: AppDataExportResult) {
+        AndroidExportTestSupport.deleteExportArtifact(
+            ApplicationProvider.getApplicationContext(),
+            result
+        )
+    }
 }
 
 @RunWith(RobolectricTestRunner::class)

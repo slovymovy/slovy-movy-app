@@ -55,6 +55,22 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         }
     }
 
+    actual fun copyFile(from: Path, to: Path): Boolean {
+        return try {
+            val src = File(from.toString())
+            val dst = File(to.toString())
+            dst.parentFile?.mkdirs()
+            src.inputStream().use { input ->
+                dst.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            true
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
     actual fun deleteFile(path: Path) {
         File(path.toString()).delete()
     }
