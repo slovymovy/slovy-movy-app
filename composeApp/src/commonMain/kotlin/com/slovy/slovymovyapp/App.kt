@@ -642,7 +642,7 @@ fun App(
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
                 ) {
-                    ErrorViewModel("Data format has been updated. Your downloaded dictionaries will be deleted and need to be re-downloaded.")
+                    ErrorViewModel("We've updated the dictionary format. You'll need to re-download your dictionaries — your saved words are safe.")
                 }
 
                 ErrorScreen(

@@ -70,7 +70,6 @@ data class SettingsUiState(
 
     // Data export
     val isAppDataExportSupported: Boolean = false,
-    val appDataExportDestinationDescription: String = "",
     val isExportingAppData: Boolean = false,
 
     // About
@@ -107,8 +106,7 @@ class SettingsViewModel(
     var state by mutableStateOf(
         SettingsUiState(
             buildConfig = buildConfig,
-            isAppDataExportSupported = appDataExporter.isSupported,
-            appDataExportDestinationDescription = appDataExporter.destinationDescription
+            isAppDataExportSupported = appDataExporter.isSupported
         )
     )
         private set
@@ -1041,14 +1039,13 @@ fun SettingsScreenContent(
                             if (state.isAppDataExportSupported) {
                                 item {
                                     SectionHeader(
-                                        title = "Data",
+                                        title = "Your data",
                                         modifier = Modifier.padding(top = AppSpacing.sm)
                                     )
                                 }
 
                                 item {
                                     AppDataSection(
-                                        destinationDescription = state.appDataExportDestinationDescription,
                                         isExporting = state.isExportingAppData,
                                         onExport = onExportAppData
                                     )
@@ -1378,7 +1375,6 @@ private fun SettingsScreenPreviewWithMixedStates(
                     "trans_en_pl" to DownloadProgress(2 * 1024 * 1024, 7 * 1024 * 1024)
                 ),
                 isAppDataExportSupported = true,
-                appDataExportDestinationDescription = "Downloads/SlovyMovy"
             )
         )
     }
