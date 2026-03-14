@@ -1,0 +1,377 @@
+{
+    "word_family": [
+        "voorkomend",
+        "voorkomenheid",
+        "onvoorkomend"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "9a1a8666-81d1-3048-b400-08710a782d3f",
+                    "sense_definition": "bestaan of op een bepaalde plaats of in een bepaalde situatie aangetroffen worden",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "bestaan",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Deze zeldzame vogelsoort <w>komt</w> alleen in dit specifieke natuurgebied <w>voor</w>.",
+                            "target_lang_translations": {
+                                "en": "This rare bird species only <w>occurs</w> in this specific nature reserve.",
+                                "ru": "Этот редкий вид птиц <w>встречается</w> только в этом конкретном заповеднике."
+                            }
+                        },
+                        {
+                            "text": "Het is bekend dat dit chemische element in de vrije natuur <w>voorkomt</w>.",
+                            "target_lang_translations": {
+                                "en": "It is known that this chemical element <w>is found</w> in the wild.",
+                                "ru": "Известно, что этот химический элемент <w>встречается</w> в дикой природе."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "in de natuur voorkomen",
+                        "veelvuldig voorkomen"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "to exist or be found in a particular place or situation",
+                        "ru": "существовать или обнаруживаться в определенном месте или ситуации"
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "occur",
+                                "target_lang_sense_clarification": "to be present or found in a specific context"
+                            },
+                            {
+                                "target_lang_word": "be found",
+                                "target_lang_sense_clarification": "to exist in a certain location"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "встречаться",
+                                "target_lang_sense_clarification": "обнаруживаться в определенной среде или месте"
+                            },
+                            {
+                                "target_lang_word": "водиться",
+                                "target_lang_sense_clarification": "о животных или растениях в определенной местности"
+                            },
+                            {
+                                "target_lang_word": "иметься",
+                                "target_lang_sense_clarification": "присутствовать в наличии"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "8b8a7239-f048-3aa6-9f01-0db625accec2",
+                    "sense_definition": "ervoor zorgen dat iets ongewenst niet gebeurt",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "verhinderen",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "We moeten maatregelen nemen om te <w>voorkomen</w> dat het virus zich verder verspreidt.",
+                            "target_lang_translations": {
+                                "en": "We must take measures to <w>prevent</w> the virus from spreading further.",
+                                "ru": "Мы должны принять меры, чтобы <w>предотвратить</w> дальнейшее распространение вируса."
+                            }
+                        },
+                        {
+                            "text": "Een goede voorbereiding kan veel problemen <w>voorkomen</w> tijdens de reis.",
+                            "target_lang_translations": {
+                                "en": "Good preparation can <w>avoid</w> many problems during the trip.",
+                                "ru": "Хорошая подготовка может помочь <w>избежать</w> многих проблем во время поездки."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "preveniëren",
+                        "verhinderen",
+                        "tegengaan"
+                    ],
+                    "common_phrases": [
+                        "problemen voorkomen",
+                        "erger voorkomen"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "to ensure that something undesirable does not happen",
+                        "ru": "предотвращать нежелательное событие"
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "prevent",
+                                "target_lang_sense_clarification": "to stop an outcome from happening"
+                            },
+                            {
+                                "target_lang_word": "avoid",
+                                "target_lang_sense_clarification": "to keep away from or stop something from occurring"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "предотвращать",
+                                "target_lang_sense_clarification": "не допускать возникновения чего-либо"
+                            },
+                            {
+                                "target_lang_word": "предупреждать",
+                                "target_lang_sense_clarification": "заранее принимать меры против чего-либо"
+                            },
+                            {
+                                "target_lang_word": "избегать",
+                                "target_lang_sense_clarification": "уклоняться от неприятностей"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "9ae0a242-89eb-3d5e-988e-bf08bc05e6d7",
+                    "sense_definition": "gebeuren of plaatsvinden",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "gebeuren",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Het <w>komt</w> wel eens <w>voor</w> dat de trein een paar minuten vertraging heeft.",
+                            "target_lang_translations": {
+                                "en": "It sometimes <w>happens</w> that the train is delayed by a few minutes.",
+                                "ru": "Иногда <w>случается</w>, что поезд задерживается на несколько минут."
+                            }
+                        },
+                        {
+                            "text": "Dergelijke fouten <w>komen</w> helaas vaker <w>voor</w> dan we zouden willen.",
+                            "target_lang_translations": {
+                                "en": "Such errors unfortunately <w>occur</w> more often than we would like.",
+                                "ru": "Такие ошибки, к сожалению, <w>происходят</w> чаще, чем нам хотелось бы."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "het komt voor dat",
+                        "vaak voorkomen"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "to happen or take place",
+                        "ru": "случаться или происходить"
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "happen",
+                                "target_lang_sense_clarification": "to occur or take place"
+                            },
+                            {
+                                "target_lang_word": "occur",
+                                "target_lang_sense_clarification": "to take place, especially of events"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "случаться",
+                                "target_lang_sense_clarification": "происходить время от времени"
+                            },
+                            {
+                                "target_lang_word": "происходить",
+                                "target_lang_sense_clarification": "иметь место"
+                            },
+                            {
+                                "target_lang_word": "бывать",
+                                "target_lang_sense_clarification": "повторяться в опыте"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "0700f432-23ab-3b7e-9baf-14d223787173",
+                    "sense_definition": "een bepaalde indruk maken op iemand; lijken",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "indruk",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Het <w>kwam</w> mij nogal vreemd <w>voor</w> dat hij gisteren niet op het feestje was.",
+                            "target_lang_translations": {
+                                "en": "It <w>seemed</w> rather strange to me that he wasn't at the party yesterday.",
+                                "ru": "Мне <w>показалось</w> довольно странным, что его не было вчера на вечеринке."
+                            }
+                        },
+                        {
+                            "text": "Zijn gedrag <w>komt</w> nogal onbeleefd <w>voor</w> bij de rest van de groep.",
+                            "target_lang_translations": {
+                                "en": "His behavior <w>appears</w> quite rude to the rest of the group.",
+                                "ru": "Его поведение <w>кажется</w> довольно грубым остальным членам группы."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "vreemd voorkomen",
+                        "bekend voorkomen"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "to make a certain impression on someone; to seem",
+                        "ru": "производить определенное впечатление на кого-либо; казаться"
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "seem",
+                                "target_lang_sense_clarification": "to appear to be or give an impression"
+                            },
+                            {
+                                "target_lang_word": "appear",
+                                "target_lang_sense_clarification": "to look a certain way to someone"
+                            },
+                            {
+                                "target_lang_word": "strike",
+                                "target_lang_sense_clarification": "to create a specific impression (e.g., it strikes me as...)"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "казаться",
+                                "target_lang_sense_clarification": "производить впечатление"
+                            },
+                            {
+                                "target_lang_word": "представляться",
+                                "target_lang_sense_clarification": "выглядеть каким-либо в чьих-то глазах"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "6ac743e6-84f0-3d62-8a7d-743e25316a6e",
+                    "sense_definition": "officieel voor een rechter of rechtbank moeten verschijnen",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "juridisch",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De verdachte moet volgende week dinsdag voor de politierechter <w>voorkomen</w>.",
+                            "target_lang_translations": {
+                                "en": "The suspect must <w>appear</w> before the police magistrate next Tuesday.",
+                                "ru": "Подозреваемый должен <w>предстать</w> перед полицейским судьей в следующий вторник."
+                            }
+                        },
+                        {
+                            "text": "Zijn zaak <w>komt</w> pas over drie maanden <w>voor</w> bij de rechtbank.",
+                            "target_lang_translations": {
+                                "en": "His case will not <w>be heard</w> in court for another three months.",
+                                "ru": "Его дело будет <w>слушаться</w> в суде только через три месяца."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "voor de rechter voorkomen"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "juridische context"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "en": "to have to appear officially before a judge or court",
+                        "ru": "официально предстать перед судьей или судом"
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "appear",
+                                "target_lang_sense_clarification": "to stand before a court or authority"
+                            },
+                            {
+                                "target_lang_word": "be heard",
+                                "target_lang_sense_clarification": "of a legal case, to be presented in court"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "предстать",
+                                "target_lang_sense_clarification": "явиться перед судом"
+                            },
+                            {
+                                "target_lang_word": "слушаться",
+                                "target_lang_sense_clarification": "о судебном деле, рассматриваемом в суде"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "9053bacc-f877-3883-ac62-cd7bfc82ffe3",
+                    "sense_definition": "de uiterlijke verschijning of de manier waarop iemand zich presenteert",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "uiterlijk",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Zijn verzorgde <w>voorkomen</w> maakte direct een goede indruk tijdens het sollicitatiegesprek.",
+                            "target_lang_translations": {
+                                "en": "His well-groomed <w>appearance</w> immediately made a good impression during the job interview.",
+                                "ru": "Его ухоженная <w>внешность</w> сразу произвела хорошее впечатление во время собеседования."
+                            }
+                        },
+                        {
+                            "text": "Zij heeft een zeer gedistingeerd <w>voorkomen</w> dat respect afdwingt.",
+                            "target_lang_translations": {
+                                "en": "She has a very distinguished <w>presence</w> that commands respect.",
+                                "ru": "У неё очень изысканный <w>облик</w>, внушающий уважение."
+                            }
+                        }
+                    ],
+                    "common_phrases": [
+                        "een verzorgd voorkomen",
+                        "uiterlijk voorkomen"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "the outward appearance or the way someone presents themselves",
+                        "ru": "внешний вид или манера человека преподносить себя"
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "appearance",
+                                "target_lang_sense_clarification": "the way that someone or something looks"
+                            },
+                            {
+                                "target_lang_word": "presence",
+                                "target_lang_sense_clarification": "the impressive manner or appearance of a person"
+                            },
+                            {
+                                "target_lang_word": "demeanor",
+                                "target_lang_sense_clarification": "outward behavior or bearing"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "внешность",
+                                "target_lang_sense_clarification": "наружный облик человека"
+                            },
+                            {
+                                "target_lang_word": "облик",
+                                "target_lang_sense_clarification": "внешний вид и манеры"
+                            },
+                            {
+                                "target_lang_word": "наружность",
+                                "target_lang_sense_clarification": "внешние черты"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

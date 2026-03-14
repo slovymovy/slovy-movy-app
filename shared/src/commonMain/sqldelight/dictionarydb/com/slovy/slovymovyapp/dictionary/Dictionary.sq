@@ -29,8 +29,7 @@ CREATE TABLE lemma_word_family (
 CREATE TABLE lemma_pos (
   id BLOB AS Uuid NOT NULL PRIMARY KEY,
   lemma_id BLOB AS Uuid NOT NULL REFERENCES lemma(id) ON DELETE CASCADE,
-  pos INTEGER AS DictionaryPos NOT NULL,
-  UNIQUE(lemma_id, pos)
+  pos INTEGER AS DictionaryPos NOT NULL
 );
 
 -- Word forms belonging to a POS entry
@@ -98,6 +97,15 @@ CREATE TABLE sense_trait (
   PRIMARY KEY(sense_id, trait_type, comment)
 );
 
+
+-- Routing hints written during raw-only ingestion so that ingestProcessedOverRaw
+-- can correctly route senses to their cluster without needing the raw JSON.
+CREATE TABLE lemma_pos_sense_hint (
+  sense_id     BLOB AS Uuid NOT NULL PRIMARY KEY,
+  lemma_pos_id BLOB AS Uuid NOT NULL REFERENCES lemma_pos(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_lemma_pos_sense_hint_lemma_pos_id ON lemma_pos_sense_hint(lemma_pos_id);
 
 -- Indexes to speed up searches by lemma (lang_code as leading column for multi-language queries)
 CREATE INDEX IF NOT EXISTS idx_lemma_lang_lemma ON lemma(lang_code, lemma);
@@ -369,3 +377,13 @@ WHERE l.lang_code = ?
   )
 ORDER BY l.zipf_frequency DESC
 LIMIT ? OFFSET ?;
+
+insertLemmaPosHint:
+INSERT INTO lemma_pos_sense_hint(sense_id, lemma_pos_id)
+VALUES (?, ?);
+
+selectLemmaPosHintsBySenseIds:
+SELECT sense_id, lemma_pos_id FROM lemma_pos_sense_hint WHERE sense_id IN ?;
+
+selectLemmaPosHintsByLemmaPosId:
+SELECT sense_id, lemma_pos_id FROM lemma_pos_sense_hint WHERE lemma_pos_id = ?;

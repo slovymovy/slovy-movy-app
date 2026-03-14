@@ -1,0 +1,1287 @@
+{
+    "word": "overleggen",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                "word": "overleggen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "574e0c77-0e7f-47be-86e5-3b83a84b7cac",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "infinitive"
+                        ],
+                        "form": "overleggen"
+                    },
+                    {
+                        "form_id": "0b7849a1-9aa4-4f02-b0ec-9eb921556dc6",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "gerund",
+                            "neuter"
+                        ],
+                        "form": "overleggen"
+                    },
+                    {
+                        "form_id": "98f7817e-b2f3-42bb-8974-61abe57523e1",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "first-person",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "overleg"
+                    },
+                    {
+                        "form_id": "c2f54c5e-47b1-4fdd-af08-ab98cb8b1129",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "first-person",
+                            "past",
+                            "singular"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "89fb6913-4f42-41ca-8fdb-ce7e062fd64b",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "overlegt"
+                    },
+                    {
+                        "form_id": "7483706f-32ad-458c-aee0-e445a5198114",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "overleg"
+                    },
+                    {
+                        "form_id": "c65d1c11-b414-46e0-b764-88dc24417f61",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "48a14f52-ffed-48fd-914c-cd61bd89abe2",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "formal",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "overlegt"
+                    },
+                    {
+                        "form_id": "1fda3fa2-8976-47b7-b883-50c3d4f24fce",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "formal",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "74e48436-033b-4728-86b8-4c6259941b9a",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "overlegt"
+                    },
+                    {
+                        "form_id": "3d07800a-30cf-4c85-90e3-d3e620cd1f96",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "f6befff0-5266-4a2f-9952-ed5f5a8203e8",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "plural",
+                            "present"
+                        ],
+                        "form": "overleggen"
+                    },
+                    {
+                        "form_id": "7f40448c-5105-46bd-bab8-6d78c0b6a9f0",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "past",
+                            "plural"
+                        ],
+                        "form": "overlegden"
+                    },
+                    {
+                        "form_id": "eb971658-048d-4921-95b0-0bceb88e8ba0",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "imperative",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "overleg"
+                    },
+                    {
+                        "form_id": "21ea735b-578c-4cbf-bb38-6d97a730f519",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "overleggend"
+                    },
+                    {
+                        "form_id": "53b7e8c2-3eab-4013-a72a-7e96541d765a",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "tags": [
+                            "participle",
+                            "past"
+                        ],
+                        "form": "overlegd"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "06b806c9-7b3c-3762-b315-9c1bfe285e61",
+                        "entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "glosses": [
+                            "to talk over, discuss"
+                        ],
+                        "tags": [
+                            "intransitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "75bae0af-a780-40ca-a23a-896b63f18205",
+                                "sense_id": "06b806c9-7b3c-3762-b315-9c1bfe285e61",
+                                "text": "Laten we even overleggen voordat we een beslissing nemen.",
+                                "translation": "Let's talk over it before making a decision.",
+                                "english": "Let's talk over it before making a decision."
+                            },
+                            {
+                                "example_id": "d14f1ad2-5722-4165-b711-439df8fe5312",
+                                "sense_id": "06b806c9-7b3c-3762-b315-9c1bfe285e61",
+                                "text": "Ze hebben lang overlegd over de beste aanpak.",
+                                "translation": "They discussed at length the best approach.",
+                                "english": "They discussed at length the best approach."
+                            },
+                            {
+                                "example_id": "9d5a76dd-c050-4e64-8365-b44c73936249",
+                                "sense_id": "06b806c9-7b3c-3762-b315-9c1bfe285e61",
+                                "text": "We moeten dit probleem snel overleggen met de betrokken partijen.",
+                                "translation": "We need to discuss this problem quickly with the involved parties.",
+                                "english": "We need to discuss this problem quickly with the involved parties."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "eb50b67b-4e17-46e7-8783-4e132cbb772a",
+                        "source_entry_id": "5bedc70c-86a0-30b1-a547-ca7e5564992b",
+                        "source_sense_ids": [
+                            "06b806c9-7b3c-3762-b315-9c1bfe285e61"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "discussiëren"
+                    }
+                ]
+            },
+            {
+                "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                "word": "overleggen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "7ddc1fa8-978b-4c3b-8173-037c76c33117",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "infinitive"
+                        ],
+                        "form": "overleggen"
+                    },
+                    {
+                        "form_id": "3268bfea-1e62-416a-b1d5-56a3a9b00258",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "gerund",
+                            "neuter"
+                        ],
+                        "form": "overleggen"
+                    },
+                    {
+                        "form_id": "5b7b1a70-d660-40b6-bdaf-b88ba04ad1bd",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "leg over"
+                    },
+                    {
+                        "form_id": "803b8b65-2796-41f6-9b9e-f8dec0276ac7",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "past",
+                            "singular"
+                        ],
+                        "form": "legde over"
+                    },
+                    {
+                        "form_id": "0a7e30cd-879a-44cd-a1a3-49bbe167481c",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "first-person",
+                            "present",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overleg"
+                    },
+                    {
+                        "form_id": "0f268826-f0cc-41cc-925a-93efd8598da7",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "first-person",
+                            "past",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "00b082a6-a51e-44ca-aa8b-9ae29892853c",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "legt over"
+                    },
+                    {
+                        "form_id": "c5438bfc-15af-4804-91ef-ff70523bc23a",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "leg over"
+                    },
+                    {
+                        "form_id": "41b2632e-bb5e-449e-aa97-657a1299523e",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "legde over"
+                    },
+                    {
+                        "form_id": "c670f55f-b243-4a21-aff7-318cef40fed7",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overlegt"
+                    },
+                    {
+                        "form_id": "4af687dc-6d54-4dd5-a9e7-aea3d7e6452f",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "8dca2652-fc95-4308-a178-fe1c6f11c3fa",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "legt over"
+                    },
+                    {
+                        "form_id": "127de169-41cf-43ce-aea6-e2553f9e432a",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "legde over"
+                    },
+                    {
+                        "form_id": "abdfa0bb-f5c6-4d65-b65d-0e484a25e00f",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "formal",
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overlegt"
+                    },
+                    {
+                        "form_id": "46583efc-ae81-48a5-b482-bb98b82cefdd",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "formal",
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "52aa1e15-b430-4c4d-8f42-b7ab6ff43c41",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "legt over"
+                    },
+                    {
+                        "form_id": "fabbb0d3-b3b1-401a-91a2-507ce55e7291",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "legde over"
+                    },
+                    {
+                        "form_id": "2a09036a-d9ff-4c9d-b529-a679f8e0b408",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "overlegt"
+                    },
+                    {
+                        "form_id": "f0fbd1d4-ce42-45d0-a440-be0d18b1ddb9",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "past",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "348b4edd-f51a-4ecf-8e48-1069d19af0d1",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "main-clause",
+                            "plural",
+                            "present"
+                        ],
+                        "form": "leggen over"
+                    },
+                    {
+                        "form_id": "68b0657a-a5fe-429e-ad47-9c87c57caf96",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "plural"
+                        ],
+                        "form": "legden over"
+                    },
+                    {
+                        "form_id": "6e28e08c-061b-458e-a6dc-5d52be618921",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "plural",
+                            "present",
+                            "subordinate-clause"
+                        ],
+                        "form": "overleggen"
+                    },
+                    {
+                        "form_id": "328718ee-837f-451e-9e14-cd8663c05534",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "past",
+                            "plural",
+                            "subordinate-clause"
+                        ],
+                        "form": "overlegden"
+                    },
+                    {
+                        "form_id": "a5ca9649-8ff0-48fb-b6eb-61d15046af2f",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "imperative",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "leg over"
+                    },
+                    {
+                        "form_id": "f029a411-0565-402a-adbf-ce269b8f5e01",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "present"
+                        ],
+                        "form": "overleggend"
+                    },
+                    {
+                        "form_id": "c7096303-0cb3-4083-b649-fdde24613853",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "past"
+                        ],
+                        "form": "overgelegd"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "01d8ada0-3392-3b8c-bf32-2abe423f27b9",
+                        "entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "glosses": [
+                            "to show, display"
+                        ],
+                        "tags": [
+                            "Netherlands",
+                            "formal"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "69a720dc-7876-4b37-bc51-d04710297fdd",
+                        "source_entry_id": "2986ff1e-7d64-3490-a46e-f9c769cf81dd",
+                        "source_sense_ids": [
+                            "01d8ada0-3392-3b8c-bf32-2abe423f27b9"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "voorleggen"
+                    }
+                ]
+            }
+        ],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "d66890e4-1680-36c4-a6d4-94a9815ed28f",
+                "word": "overleggen",
+                "pos": "noun",
+                "lang_code": "nl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "18efb5a6-aa15-34a4-979e-308ee26a8fab",
+                        "entry_id": "d66890e4-1680-36c4-a6d4-94a9815ed28f",
+                        "glosses": [
+                            "meervoud van het zelfstandig naamwoord overleg"
+                        ],
+                        "tags": [
+                            "form-of",
+                            "plural"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "38dde43e-38bf-3e9f-a7cc-bb6829c91485",
+                "word": "overleggen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "30424a18-71a7-4b87-8da5-e79f7eed86ff",
+                        "entry_id": "38dde43e-38bf-3e9f-a7cc-bb6829c91485",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "26a250e4-dc6c-463e-aa61-f050f043352c",
+                        "entry_id": "38dde43e-38bf-3e9f-a7cc-bb6829c91485",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "overlegd"
+                    },
+                    {
+                        "form_id": "fc1fdc1b-05ac-4ba0-89ae-6b165c282749",
+                        "entry_id": "38dde43e-38bf-3e9f-a7cc-bb6829c91485",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "overléggen"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "ca07104b-3b57-3181-98ca-8b38ab7b78ec",
+                        "entry_id": "38dde43e-38bf-3e9f-a7cc-bb6829c91485",
+                        "glosses": [
+                            "gezamenlijk bespreken"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "d74fc2f7-d561-469e-8a08-73ecee7c8765",
+                                "sense_id": "ca07104b-3b57-3181-98ca-8b38ab7b78ec",
+                                "text": "Er moest druk worden overlegd om de zaken niet te laten escaleren."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "7ccbccda-8e2f-4d5e-9db6-50d77fd0df1c",
+                        "source_entry_id": "38dde43e-38bf-3e9f-a7cc-bb6829c91485",
+                        "source_sense_id": "ca07104b-3b57-3181-98ca-8b38ab7b78ec",
+                        "source_sense_description": "gezamenlijk bespreken",
+                        "target_lang_word": "beraten",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "beraten",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "32ac6137-510f-30f7-988e-79a6ea5f3028",
+                                        "entry_id": "98fe2b5f-a820-3525-901b-cf6653c5dbdc",
+                                        "glosses": [
+                                            "einen Vorschlag dazu machen, was eine Person tun oder lassen kann"
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "a1063573-d644-48fa-8570-b003f323d97f",
+                                                "sense_id": "32ac6137-510f-30f7-988e-79a6ea5f3028",
+                                                "text": "Du lässt dich einfach nicht angemessen beraten."
+                                            },
+                                            {
+                                                "example_id": "2bddc3ad-1cc4-4f3c-bbb2-c1b7ded99a53",
+                                                "sense_id": "32ac6137-510f-30f7-988e-79a6ea5f3028",
+                                                "text": "Gerne sind wir für Sie in beratender Funktion tätig."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "8b61cd33-5b65-366e-8f8a-f1df1a5d72d6",
+                                        "entry_id": "98fe2b5f-a820-3525-901b-cf6653c5dbdc",
+                                        "glosses": [
+                                            "mit anderen über ein Problem sprechen, mit dem Ziel zu einer Lösung zu kommen"
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c7da2cd3-52ab-45e6-873e-c492fb43c408",
+                                                "sense_id": "8b61cd33-5b65-366e-8f8a-f1df1a5d72d6",
+                                                "text": "Wir müssen unser Vorgehen genauestens beraten."
+                                            },
+                                            {
+                                                "example_id": "edeb251b-f696-452c-80a8-4eeca2086277",
+                                                "sense_id": "8b61cd33-5b65-366e-8f8a-f1df1a5d72d6",
+                                                "text": "„Am 17. April 1374 traf sich der Braunschweiger Stadtrat in der Brüdernkirche mit den Gildemeistern, um unter anderem über die finanziellen Probleme der Stadt zu beraten.“"
+                                            },
+                                            {
+                                                "example_id": "8f70596f-ef2c-4430-823a-956e758980cd",
+                                                "sense_id": "8b61cd33-5b65-366e-8f8a-f1df1a5d72d6",
+                                                "text": "„Im vergangenen Herbst haben die Bischöfe […] die Vorschläge einer Arbeitsgruppe beraten.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "8e028fc3-cd74-494a-862e-c6e0266f37a2",
+                        "source_entry_id": "38dde43e-38bf-3e9f-a7cc-bb6829c91485",
+                        "source_sense_id": "ca07104b-3b57-3181-98ca-8b38ab7b78ec",
+                        "source_sense_description": "gezamenlijk bespreken",
+                        "target_lang_word": "überlegen",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "überlegen",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "a8999e4f-88fa-3515-b7b1-2363ef03ab80",
+                                        "entry_id": "df00d274-0074-365d-88fb-13c8bf97c447",
+                                        "glosses": [
+                                            "deutlich besser oder stärker"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "d6c5f60c-61e8-4ca1-836a-7912e8225140",
+                                                "sense_id": "a8999e4f-88fa-3515-b7b1-2363ef03ab80",
+                                                "text": "Paul ist im Sport immer überlegen."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "überlegen",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "081ae0d4-c5b6-39fe-a27f-8d0547408258",
+                                        "entry_id": "53923b45-05b5-32d7-af1b-9895665cbf40",
+                                        "glosses": [
+                                            "jemanden/sich oder etwas mit einer Decke, einem Tuch oder dergleichen zudecken, bedecken; jemandem/sich etwas über die Schultern legen"
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "e0259853-fbb3-4440-81f2-28eeb4625185",
+                                                "sense_id": "081ae0d4-c5b6-39fe-a27f-8d0547408258",
+                                                "text": "Mit elegantem Schwung legte sie sich die Nerzstola über."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "eabadce4-39ee-39ec-ac88-849eee1339db",
+                                        "entry_id": "53923b45-05b5-32d7-af1b-9895665cbf40",
+                                        "glosses": [
+                                            "jemandem Schläge auf das Hinterteil geben, den Hintern versohlen"
+                                        ],
+                                        "tags": [
+                                            "colloquial",
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "3069258d-2d8d-41bf-aa57-2b796271b3c3",
+                                                "sense_id": "eabadce4-39ee-39ec-ac88-849eee1339db",
+                                                "text": "Die Zeiten sind vorbei, als Lehrer ungehorsame Schüler überlegten."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    },
+                                    {
+                                        "sense_id": "be3170bc-d691-3945-b354-f127868868bb",
+                                        "entry_id": "53923b45-05b5-32d7-af1b-9895665cbf40",
+                                        "glosses": [
+                                            "sich über etwas (zum Beispiel ein Geländer, eine Brüstung) lehnen"
+                                        ],
+                                        "tags": [
+                                            "reflexive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "bf3eadc6-d675-4603-ac3a-282fdf0a0908",
+                                                "sense_id": "be3170bc-d691-3945-b354-f127868868bb",
+                                                "text": "Leg dich nicht so weit über, sonst fällst du noch hinunter!"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"3\""
+                                    },
+                                    {
+                                        "sense_id": "2f2f103e-63d4-3454-bf1b-8541584b1e8b",
+                                        "entry_id": "53923b45-05b5-32d7-af1b-9895665cbf40",
+                                        "glosses": [
+                                            "sich zur Seite neigen"
+                                        ],
+                                        "tags": [
+                                            "reflexive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "7b81c0fb-b246-4074-b5d7-1504d5d74fb5",
+                                                "sense_id": "2f2f103e-63d4-3454-bf1b-8541584b1e8b",
+                                                "text": "Es wehte eine steife Brise, die die Santa Maria weit nach Backbord überlegen ließ."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"4\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "überlegen",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "893a46b4-8000-3443-a8e9-cc89b6f100dd",
+                                        "entry_id": "f7a5a421-0ea6-363b-939b-aa4bc0b84423",
+                                        "glosses": [
+                                            "mit einem bestimmten Ziel nachdenken, in Gedanken versinken, etwas überdenken"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "f4bb1a51-70d7-4f32-af0f-0a27ecd0fff9",
+                                                "sense_id": "893a46b4-8000-3443-a8e9-cc89b6f100dd",
+                                                "text": "Er überlegte eine Zeitlang, wie er aus dem Schlamassel herauskommen sollte."
+                                            },
+                                            {
+                                                "example_id": "d5e63e59-82a1-4f64-8f21-a0433a38dad8",
+                                                "sense_id": "893a46b4-8000-3443-a8e9-cc89b6f100dd",
+                                                "text": "Sie sagte: „Das möchte ich mir nochmal überlegen, bevor ich entscheide.“"
+                                            },
+                                            {
+                                                "example_id": "cd22b3b1-48c5-48e1-8f0e-c0535140e230",
+                                                "sense_id": "893a46b4-8000-3443-a8e9-cc89b6f100dd",
+                                                "text": "Sie fragte: „Was hältst du davon?“ Ich sagte: „Einverstanden, das hatte ich mir auch schon überlegt.“"
+                                            },
+                                            {
+                                                "example_id": "b11c7941-05a1-4c68-8471-62339f3d4335",
+                                                "sense_id": "893a46b4-8000-3443-a8e9-cc89b6f100dd",
+                                                "text": "„Es gibt diese Augenblicke, wo man in ein Loch der Sinnlosigkeit stürzt und überlegt, ob nicht alles vertan ist, ob das, was man macht, ein falscher Weg ist.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": [
+                    {
+                        "linkage_id": "efdbcf1e-5961-4e9c-adb2-6e94cd4c120e",
+                        "source_entry_id": "38dde43e-38bf-3e9f-a7cc-bb6829c91485",
+                        "source_sense_ids": [
+                            "ca07104b-3b57-3181-98ca-8b38ab7b78ec"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "discussiëren"
+                    },
+                    {
+                        "linkage_id": "2d5b9ce0-7439-4361-8603-1e67b2cf0fbc",
+                        "source_entry_id": "38dde43e-38bf-3e9f-a7cc-bb6829c91485",
+                        "source_sense_ids": [
+                            "ca07104b-3b57-3181-98ca-8b38ab7b78ec"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "praten"
+                    },
+                    {
+                        "linkage_id": "2fd9e822-09d7-464f-96d6-d9f910ee2cc3",
+                        "source_entry_id": "38dde43e-38bf-3e9f-a7cc-bb6829c91485",
+                        "source_sense_ids": [
+                            "ca07104b-3b57-3181-98ca-8b38ab7b78ec"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "bespreken"
+                    }
+                ]
+            },
+            {
+                "entry_id": "ff6e620c-68cf-30b4-849e-de65b33d2376",
+                "word": "overleggen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "1fe352f0-75cc-48c0-a00d-8dd0c4764abe",
+                        "entry_id": "ff6e620c-68cf-30b4-849e-de65b33d2376",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "legde over"
+                    },
+                    {
+                        "form_id": "0767969a-4d51-4721-9f37-cadb58c0be7f",
+                        "entry_id": "ff6e620c-68cf-30b4-849e-de65b33d2376",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "overgelegd"
+                    },
+                    {
+                        "form_id": "c0115a30-5c96-4d6e-9979-666724a40e44",
+                        "entry_id": "ff6e620c-68cf-30b4-849e-de65b33d2376",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "óverleggen"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "56e7a390-22b2-3dc3-8590-4e2e225e6f02",
+                        "entry_id": "ff6e620c-68cf-30b4-849e-de65b33d2376",
+                        "glosses": [
+                            "ter inzage geven van documenten aan bevoegde personen"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "4c885f97-d9bd-4ebc-93b3-79876595c032",
+                                "sense_id": "56e7a390-22b2-3dc3-8590-4e2e225e6f02",
+                                "text": "Hij was de gegevens, die bij de aanvraag moeten worden overgelegd, vergeten mee te nemen."
+                            },
+                            {
+                                "example_id": "746c4b5f-c4c0-4640-ae21-44d491f4bd40",
+                                "sense_id": "56e7a390-22b2-3dc3-8590-4e2e225e6f02",
+                                "text": "Bijna 20 miljoen euro wilde ze lenen. Ze kon een (vervalste) kredietbrief van de UBS Bank in Zwitserland overleggen en toonde rekeningoverzichten waarop haar ‘vermogen’ stond, staat in de aanklacht te lezen schrijft persbureau AP."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": [],
+        "fr-extract.jsonl": [
+            {
+                "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                "word": "overleggen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "29f23ade-cd9e-417e-971a-446838a2d914",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "singular"
+                        ],
+                        "form": "leg over"
+                    },
+                    {
+                        "form_id": "ffdd0a5b-ba10-4b8f-b369-1dd11491ac73",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "singular",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "legde over"
+                    },
+                    {
+                        "form_id": "2ab5ec3d-9b83-43b1-b442-8da91023dc02",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "informal"
+                        ],
+                        "form": "legt over"
+                    },
+                    {
+                        "form_id": "8268eba5-a6e6-4989-81b8-67ab4d502498",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "legt over"
+                    },
+                    {
+                        "form_id": "0f10dbae-b66c-4e81-837a-bc1b477d29b6",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "plural"
+                        ],
+                        "form": "leggen over"
+                    },
+                    {
+                        "form_id": "0bd38fc5-06aa-486b-b598-37ca733ca8e7",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "plural",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "legden over"
+                    },
+                    {
+                        "form_id": "5c2ec147-7f17-490c-abae-a84c04eaaaf0",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "plural",
+                            "informal"
+                        ],
+                        "form": "leggen over"
+                    },
+                    {
+                        "form_id": "487b7686-f259-4bd7-8e01-d3587b222492",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "present",
+                            "third-person",
+                            "plural"
+                        ],
+                        "form": "leggen over"
+                    },
+                    {
+                        "form_id": "79d7dfad-857b-4e67-9b89-5d82e409d722",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "legt over"
+                    },
+                    {
+                        "form_id": "3f8e319e-2ca6-4729-a56e-6d9858e03958",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "preterite",
+                            "second-person"
+                        ],
+                        "form": "legde over"
+                    },
+                    {
+                        "form_id": "9991d12f-32c9-4e90-9f9e-772f672228b1",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "auxiliary"
+                        ],
+                        "form": "hebben"
+                    },
+                    {
+                        "form_id": "0e0a6b86-11de-46a3-a3e0-ffe9e8019717",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "leggen overd"
+                    },
+                    {
+                        "form_id": "b6e21bd6-4474-4438-b9d1-95b03351171d",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "tags": [
+                            "participle",
+                            "past"
+                        ],
+                        "form": "overgelegd"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "1b938e70-7ad0-3146-9670-a693d99d62f6",
+                        "entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "glosses": [
+                            "Présenter, produire, montrer, exhiber."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "4c2913f8-bc84-4019-badb-9915b3e24dd3",
+                                "sense_id": "1b938e70-7ad0-3146-9670-a693d99d62f6",
+                                "text": "Documenten overleggen.",
+                                "translation": "Présenter des documents."
+                            },
+                            {
+                                "example_id": "ec601cf9-3afb-4be6-b476-1cbe09c6b62d",
+                                "sense_id": "1b938e70-7ad0-3146-9670-a693d99d62f6",
+                                "text": "Bewijzen overleggen.",
+                                "translation": "Produire des preuves."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "8220f1ff-3682-4a94-bdbc-e7b3f4f36887",
+                        "source_entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "source_sense_ids": [
+                            "1b938e70-7ad0-3146-9670-a693d99d62f6"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "tonen"
+                    },
+                    {
+                        "linkage_id": "811d1cff-8a0b-4c76-a316-38d4999ebdbe",
+                        "source_entry_id": "bc693280-7b0d-3020-a7f5-d2660cc3c035",
+                        "source_sense_ids": [
+                            "1b938e70-7ad0-3146-9670-a693d99d62f6"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "laten zien"
+                    }
+                ]
+            },
+            {
+                "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                "word": "overleggen",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "c5473130-160d-49c7-8fb2-d2a8ec6039fc",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "singular"
+                        ],
+                        "form": "overleg"
+                    },
+                    {
+                        "form_id": "c2a977e0-48bf-4662-b897-2912f6cc4524",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "singular",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "ca326c8e-110a-4d7d-bad1-1040170d43e8",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "informal"
+                        ],
+                        "form": "overlegt"
+                    },
+                    {
+                        "form_id": "8f47f76f-267f-492c-bbe4-e5d1a7106ab7",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "tags": [
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "overlegt"
+                    },
+                    {
+                        "form_id": "a14678d4-fb82-411a-980f-82574e8618c8",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "plural",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "overlegden"
+                    },
+                    {
+                        "form_id": "691aa991-7aa1-4c18-8bfa-9c050e8f6498",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "tags": [
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "overlegt"
+                    },
+                    {
+                        "form_id": "c5727f77-f5fe-4dd3-b6b1-853a97fa6662",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "tags": [
+                            "preterite",
+                            "second-person"
+                        ],
+                        "form": "overlegde"
+                    },
+                    {
+                        "form_id": "019b65b7-e57f-4264-9f8b-439272e35d6f",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "tags": [
+                            "auxiliary"
+                        ],
+                        "form": "hebben"
+                    },
+                    {
+                        "form_id": "619936bf-e3f8-4715-9ac7-b4c978b2ce8d",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "overleggend"
+                    },
+                    {
+                        "form_id": "d6459673-9cf1-447c-ba8d-d5c3bb07492d",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "tags": [
+                            "participle",
+                            "past"
+                        ],
+                        "form": "overlegd"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "720b9e56-ad7b-3d2f-acf0-1a81b52dfb1a",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "glosses": [
+                            "Réfléchir à."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "a3e92dbf-d3cc-4601-90c4-5b514b0294c5",
+                                "sense_id": "720b9e56-ad7b-3d2f-acf0-1a81b52dfb1a",
+                                "text": "Iets overleggen.",
+                                "translation": "Réfléchir à quelque chose."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "e4e6a1f3-45df-3a3f-a7b8-ce39021eb4f0",
+                        "entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "glosses": [
+                            "délibérer, tenir conseil"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "f0169a94-a2ce-46b5-a3d9-a7285a881f12",
+                                "sense_id": "e4e6a1f3-45df-3a3f-a7b8-ce39021eb4f0",
+                                "text": "Met iemand overleggen.",
+                                "translation": "Se consulter avec quelqu’un."
+                            },
+                            {
+                                "example_id": "ae97611d-8510-48fb-ba5f-1d300b01b638",
+                                "sense_id": "e4e6a1f3-45df-3a3f-a7b8-ce39021eb4f0",
+                                "text": "Iets met iemand overleggen.",
+                                "translation": "Se concerter avec quelqu’un sur quelque chose."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "93a67d7c-7d6e-49cc-bba5-9c21452e77fd",
+                        "source_entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "source_sense_ids": [],
+                        "source_sense_description": "réfléchir",
+                        "linkage_type": "synonyms",
+                        "word": "nadenken"
+                    },
+                    {
+                        "linkage_id": "f6974a1d-7ac1-4939-9575-c8829cc0698a",
+                        "source_entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "source_sense_ids": [],
+                        "source_sense_description": "délibérer",
+                        "linkage_type": "synonyms",
+                        "word": "beraadslagen"
+                    },
+                    {
+                        "linkage_id": "c90242fe-b5e5-4c4a-8c16-b94ebece0f2a",
+                        "source_entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "source_sense_ids": [],
+                        "source_sense_description": "délibérer",
+                        "linkage_type": "synonyms",
+                        "word": "zich beraden"
+                    },
+                    {
+                        "linkage_id": "b4cdd991-138b-49b1-912b-7bbfc8f315a0",
+                        "source_entry_id": "728b65aa-77eb-37f8-88fd-2c283ec526e8",
+                        "source_sense_ids": [],
+                        "source_sense_description": "délibérer",
+                        "linkage_type": "synonyms",
+                        "word": "ruggespraak houden"
+                    }
+                ]
+            }
+        ],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": []
+    }
+}

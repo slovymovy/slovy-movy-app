@@ -90,14 +90,17 @@ class AllLanguagesIngestionIntegrationTest {
                         dictQ.selectLemmaPosByLemmaId(lemmaId).executeAsList()
                     }
 
-                    lemmaPosRows.forEach { lemmaPos ->
-                        val posKey = lemmaPos.pos.name.lowercase()
+                    // Group lemma_pos rows by POS — a POS may have multiple rows for homographs
+                    val lemmaPosGroupedByPos = lemmaPosRows.groupBy { it.pos.name.lowercase() }
+                    lemmaPosGroupedByPos.forEach { (posKey, posRows) ->
                         val expectedForPos = expectedFormsByPos[posKey].orEmpty()
                         if (expectedForPos.isNotEmpty()) {
-                            val formsInDb = dictQ.selectFormsWithIdByLemmaPosId(lemmaPos.id).executeAsList()
-                            val actualFormKeys = formsInDb.map { form ->
-                                val tags = dictQ.selectFormTagsByFormId(form.form_id).executeAsList().map { it.tag }.toSet()
-                                FormKey(form.form, stripAccents(form.form), tags, form.source)
+                            // Combine forms from all lemma_pos rows for this POS
+                            val actualFormKeys = posRows.flatMap { lemmaPos ->
+                                dictQ.selectFormsWithIdByLemmaPosId(lemmaPos.id).executeAsList().map { form ->
+                                    val tags = dictQ.selectFormTagsByFormId(form.form_id).executeAsList().map { it.tag }.toSet()
+                                    FormKey(form.form, stripAccents(form.form), tags, form.source)
+                                }
                             }.toSet()
 
                             assertEquals(
@@ -112,14 +115,20 @@ class AllLanguagesIngestionIntegrationTest {
                     }
 
                     val expectedTotal = expectedFormsByPos.values.sumOf { it.size }
-                    val lemmaPosIds = lemmaPosRows.map { it.id }
-                    val allFormsForLemma = lemmaPosIds.flatMap { lemmaPosId ->
-                        dictQ.selectFormsByLemmaPosId(lemmaPosId).executeAsList()
+                    // Deduplicate across clusters per POS (same logic as per-POS check above),
+                    // then sum — forms may legitimately appear in multiple clusters for the same POS
+                    val actualTotal = lemmaPosGroupedByPos.values.sumOf { posRows ->
+                        posRows.flatMap { lemmaPos ->
+                            dictQ.selectFormsWithIdByLemmaPosId(lemmaPos.id).executeAsList().map { form ->
+                                val tags = dictQ.selectFormTagsByFormId(form.form_id).executeAsList().map { it.tag }.toSet()
+                                FormKey(form.form, stripAccents(form.form), tags, form.source)
+                            }
+                        }.toSet().size
                     }
                     assertEquals(
                         expectedTotal,
-                        allFormsForLemma.size,
-                        "Expected exactly $expectedTotal unique forms for '$word' in $lang, but found ${allFormsForLemma.size}."
+                        actualTotal,
+                        "Expected exactly $expectedTotal unique forms for '$word' in $lang, but found $actualTotal."
                     )
                 }
 
@@ -138,9 +147,16 @@ class AllLanguagesIngestionIntegrationTest {
                     )
                 }
 
-                // Validate translation DBs for each target language in processed
+                // Validate translation DBs for each target language in processed.
+                // Only validate senses for POS that are present in the DB; raw-only POS
+                // determines which clusters exist, so processed-only POS are skipped.
                 val targetLangs = collectTargetLanguages(processed)
+                val availableDbPosSet = lemmas.map { it.id }.flatMap { lemmaId ->
+                    dictQ.selectLemmaPosByLemmaId(lemmaId).executeAsList()
+                }.map { it.pos }.toSet()
                 processed.entries.forEach { entry ->
+                    val entryPos = mapPos(entry.pos) ?: return@forEach
+                    if (entryPos !in availableDbPosSet) return@forEach
                     entry.senses.forEach { sense ->
                         val senseId = uuidParse(sense.senseId)
                         targetLangs.forEach { trg ->

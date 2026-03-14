@@ -1,0 +1,28 @@
+PRAGMA foreign_keys=0;
+
+DROP INDEX IF EXISTS idx_lemma_pos_lemma_id;
+
+ALTER TABLE lemma_pos RENAME TO lemma_pos_old;
+
+CREATE TABLE lemma_pos (
+  id BLOB NOT NULL PRIMARY KEY,
+  lemma_id BLOB NOT NULL REFERENCES lemma(id) ON DELETE CASCADE,
+  pos INTEGER NOT NULL
+);
+
+INSERT INTO lemma_pos(id, lemma_id, pos)
+SELECT id, lemma_id, pos
+FROM lemma_pos_old;
+
+DROP TABLE lemma_pos_old;
+
+CREATE INDEX IF NOT EXISTS idx_lemma_pos_lemma_id ON lemma_pos(lemma_id);
+
+CREATE TABLE lemma_pos_sense_hint (
+  sense_id BLOB NOT NULL PRIMARY KEY,
+  lemma_pos_id BLOB NOT NULL REFERENCES lemma_pos(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_lemma_pos_sense_hint_lemma_pos_id ON lemma_pos_sense_hint(lemma_pos_id);
+
+PRAGMA foreign_keys=1;

@@ -1,0 +1,2834 @@
+{
+    "word": "omschrijven",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                "word": "omschrijven",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "94d33f2f-c9bd-454a-8c2f-5215f02dd62d",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "infinitive"
+                        ],
+                        "form": "omschrijven"
+                    },
+                    {
+                        "form_id": "f0e7288d-72b4-400d-a22f-8a78a63cfcbd",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "gerund",
+                            "neuter"
+                        ],
+                        "form": "omschrijven"
+                    },
+                    {
+                        "form_id": "02740d14-1946-4419-83f8-a44edb0c061d",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "first-person",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "omschrijf"
+                    },
+                    {
+                        "form_id": "bfdf7234-b774-47b5-9827-e4919d44057d",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "first-person",
+                            "past",
+                            "singular"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "8d85f98a-7dc3-4732-8080-04948c83e000",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "omschrijft"
+                    },
+                    {
+                        "form_id": "0d23bca0-9f20-4b66-ac08-7958cc1202ab",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "omschrijf"
+                    },
+                    {
+                        "form_id": "ce4d9cfe-5a9a-4471-bad9-3ab1fb761d89",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "cc108be1-cc05-41bc-93bb-36e49690c8a4",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "formal",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "omschrijft"
+                    },
+                    {
+                        "form_id": "c1eb04e7-dd79-4a6c-9e50-10f68d18d584",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "formal",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "bc6deb57-86f8-4643-9c70-c4b137f9241e",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "omschrijft"
+                    },
+                    {
+                        "form_id": "f1e2dd4c-4720-40e7-b73d-b96d5c53fd10",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "0aa6fea8-8e1f-4ad9-92ce-ea06351d96b0",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "plural",
+                            "present"
+                        ],
+                        "form": "omschrijven"
+                    },
+                    {
+                        "form_id": "9a470451-8c9f-47a3-be85-68163e245fe7",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "past",
+                            "plural"
+                        ],
+                        "form": "omschreven"
+                    },
+                    {
+                        "form_id": "1ec5d5b8-85f2-422f-b57f-1bc086e31459",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "imperative",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "omschrijf"
+                    },
+                    {
+                        "form_id": "3c2cc0b2-d7ce-467d-9e09-48c2a719a2e1",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "omschrijvend"
+                    },
+                    {
+                        "form_id": "da83f3f7-8da3-445b-9fc2-8f5628d2aac4",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "tags": [
+                            "participle",
+                            "past"
+                        ],
+                        "form": "omschreven"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "e2d64d8f-4035-3b02-8067-c76d863d5c04",
+                        "entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "glosses": [
+                            "to describe"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "5714f062-b384-4708-98f4-a282c7efd6c6",
+                        "source_entry_id": "968aa4df-338b-3dc7-a064-11dfbffe4a50",
+                        "source_sense_ids": [
+                            "e2d64d8f-4035-3b02-8067-c76d863d5c04"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "beschrijven"
+                    }
+                ]
+            },
+            {
+                "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                "word": "omschrijven",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "4a8720d9-1fdd-4f2c-8197-14e9ffc00165",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "infinitive"
+                        ],
+                        "form": "omschrijven"
+                    },
+                    {
+                        "form_id": "2848b31e-b908-47e3-ab7a-4aa9d14f7eca",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "gerund",
+                            "neuter"
+                        ],
+                        "form": "omschrijven"
+                    },
+                    {
+                        "form_id": "52690fa8-33b3-44db-96bf-e050023373ea",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "schrijf om"
+                    },
+                    {
+                        "form_id": "0fd601f2-b816-4eeb-8690-5d82768e5511",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "past",
+                            "singular"
+                        ],
+                        "form": "schreef om"
+                    },
+                    {
+                        "form_id": "52a5ebce-78ca-415b-a91c-54e612ab6e2f",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "first-person",
+                            "present",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "omschrijf"
+                    },
+                    {
+                        "form_id": "2d4652f5-64ad-424e-9d42-34adaef4ce16",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "first-person",
+                            "past",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "3899d809-dd0a-4bb7-a49d-dd6480632c5b",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "schrijft om"
+                    },
+                    {
+                        "form_id": "820d8a54-d148-406e-befa-9c01d1e573ba",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "schrijf om"
+                    },
+                    {
+                        "form_id": "ea0c263c-010a-4887-95ae-ba7ef62ab24d",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "schreef om"
+                    },
+                    {
+                        "form_id": "56a75045-a8f9-4b27-986d-606eb17c6d0a",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "omschrijft"
+                    },
+                    {
+                        "form_id": "26735f14-027f-42b0-bee6-43283ccff18f",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "a076b783-d40d-4df3-b847-d0b167fe8f79",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "schrijft om"
+                    },
+                    {
+                        "form_id": "4e485221-e772-4dfc-8959-26f5850a3e0a",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "schreef om"
+                    },
+                    {
+                        "form_id": "d9e2864c-e9f5-4390-b591-bd36554b2066",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "formal",
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "omschrijft"
+                    },
+                    {
+                        "form_id": "91d3e7c9-7f4e-4522-8ced-9ae92f54d8b6",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "formal",
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "4320fd6f-3fc6-43a3-a9fe-4015e96f0082",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "schrijft om"
+                    },
+                    {
+                        "form_id": "764a330c-cf6b-4d13-99c1-a050c5920c99",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "schreef om"
+                    },
+                    {
+                        "form_id": "30d069e5-a69a-4fd5-93f3-7b0ed6cdf4d2",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "omschrijft"
+                    },
+                    {
+                        "form_id": "79fb1b6b-9bcf-469e-98f5-59cd7dbc48eb",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "past",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "8f690575-8664-4788-8506-835c89d4ce1b",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "main-clause",
+                            "plural",
+                            "present"
+                        ],
+                        "form": "schrijven om"
+                    },
+                    {
+                        "form_id": "76978994-502f-4577-a877-80cdd3358861",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "plural"
+                        ],
+                        "form": "schreven om"
+                    },
+                    {
+                        "form_id": "ae02fe1f-ec34-4b3c-b0fc-eb97e5799794",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "plural",
+                            "present",
+                            "subordinate-clause"
+                        ],
+                        "form": "omschrijven"
+                    },
+                    {
+                        "form_id": "ad98f412-9902-4169-acec-3beb1da20f16",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "past",
+                            "plural",
+                            "subordinate-clause"
+                        ],
+                        "form": "omschreven"
+                    },
+                    {
+                        "form_id": "66e76936-a75f-43fb-b667-7c2ed80df64e",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "imperative",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "schrijf om"
+                    },
+                    {
+                        "form_id": "fa3a8bbc-89d6-492a-9608-3533dbc3f7e3",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "present"
+                        ],
+                        "form": "omschrijvend"
+                    },
+                    {
+                        "form_id": "9429ab8f-bd1d-47c4-91f0-cb761c58f610",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "past"
+                        ],
+                        "form": "omgeschreven"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "2eb74844-57b4-3a04-9e6f-f35884a852d9",
+                        "entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "glosses": [
+                            "to transliterate"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "8e05a8ce-f583-4c36-82b2-b929c7cfd8ae",
+                        "source_entry_id": "f530a59f-38a5-3bdc-a9ad-fea68d0d348c",
+                        "source_sense_ids": [
+                            "2eb74844-57b4-3a04-9e6f-f35884a852d9"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "translitereren"
+                    }
+                ]
+            }
+        ],
+        "ru-extract.jsonl": [
+            {
+                "entry_id": "3b38a1e8-bfe6-336c-b671-b24e117a7e66",
+                "word": "omschrijven",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "70455b81-78fb-301c-8df2-889c154bf9a5",
+                        "entry_id": "3b38a1e8-bfe6-336c-b671-b24e117a7e66",
+                        "glosses": [
+                            "описывать"
+                        ],
+                        "tags": [],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                "word": "omschrijven",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "b8b3f789-47fd-4810-b318-260d501346d8",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "5c24f5f0-4f46-4bd0-b645-97478025ee25",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "omschreven"
+                    },
+                    {
+                        "form_id": "da6bfd54-5251-4630-a336-40bffbee9fdb",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "imperfect",
+                            "present",
+                            "long-form"
+                        ],
+                        "form": "te omschrijven"
+                    },
+                    {
+                        "form_id": "786d2ebd-bf95-4594-9a5b-78086dfc99d9",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "imperfect",
+                            "future",
+                            "short-form"
+                        ],
+                        "form": "zullen omschrijven"
+                    },
+                    {
+                        "form_id": "2c8cbde7-543a-41c6-8c50-ac0bc4312818",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "imperfect",
+                            "future",
+                            "long-form"
+                        ],
+                        "form": "te zullen omschrijven"
+                    },
+                    {
+                        "form_id": "274b8c81-f59c-47a7-8f12-919a2baf4ccc",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "present",
+                            "short-form"
+                        ],
+                        "form": "hebben omschreven"
+                    },
+                    {
+                        "form_id": "b7e0d969-b1c7-4594-904e-6f440e1bbf87",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "present",
+                            "long-form"
+                        ],
+                        "form": "te hebben omschreven"
+                    },
+                    {
+                        "form_id": "7dacbd44-1036-4b5e-9ed8-f02c00c394ca",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "future",
+                            "short-form"
+                        ],
+                        "form": "omschreven zullen hebben"
+                    },
+                    {
+                        "form_id": "cca835d5-7761-4404-bdca-e3fa4c3f7ac2",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "active",
+                            "infinitive",
+                            "perfect",
+                            "future",
+                            "long-form"
+                        ],
+                        "form": "omschreven te zullen hebben"
+                    },
+                    {
+                        "form_id": "3c254c85-bad2-4fb5-ae0f-b46eae5c08b7",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "imperfect",
+                            "participle"
+                        ],
+                        "form": "omschrijvend"
+                    },
+                    {
+                        "form_id": "fe9a0fea-f592-446a-a326-0e9092792bf2",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "omschreven"
+                    },
+                    {
+                        "form_id": "957a0841-4bff-4625-9aca-35fb6bfd326e",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "imperative"
+                        ],
+                        "form": "ev.\n omschrijf"
+                    },
+                    {
+                        "form_id": "2b4fd8c9-c4a4-468a-87d4-a1b5bbd6e0eb",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "subjunctive"
+                        ],
+                        "form": "omschrijve"
+                    },
+                    {
+                        "form_id": "850a7339-d5ef-4a1f-a1b7-deeb6123d85e",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "present",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "omschrijf"
+                    },
+                    {
+                        "form_id": "e95c08ce-c661-473a-b898-7a73cdaa76b1",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "present",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "omschrijft"
+                    },
+                    {
+                        "form_id": "53ee0496-e8dc-42f9-913b-d1c60c88db6d",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "present",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "omschrijft"
+                    },
+                    {
+                        "form_id": "6263f295-c440-409e-bf10-ea46509567d0",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "present",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "omschrijft"
+                    },
+                    {
+                        "form_id": "045c7b33-f6d3-49d6-930d-a7dfc8b98535",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "omschrijft"
+                    },
+                    {
+                        "form_id": "47188dd7-d0dd-4aa8-a46f-97922621b2c6",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "past",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "a8ba75a6-c8e6-4864-bf44-205ab3ec7a40",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "past",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "f90fe8d3-0fc0-4da7-89e7-582882c7c802",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "past",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "879a04bf-1978-4a57-b697-da4d2fab54e7",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "past",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "omschreeft"
+                    },
+                    {
+                        "form_id": "275e48c6-21b9-4bb4-953f-71f94fa18ede",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "omschreef"
+                    },
+                    {
+                        "form_id": "aac3f6da-8e56-49f9-9e0a-da73531b1ea2",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "past",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "omschreven"
+                    },
+                    {
+                        "form_id": "fc2b0323-573d-4f5e-bf77-b257f829e97a",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "past",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "omschreven"
+                    },
+                    {
+                        "form_id": "0116d247-54b1-41d6-8c4d-aa891ab4b106",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "past",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "omschreven"
+                    },
+                    {
+                        "form_id": "c30d46b3-7775-45dd-b9d9-f6c47c5aa809",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "future",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "zal omschrijven"
+                    },
+                    {
+                        "form_id": "5ae49175-8a47-46f1-92b7-a8056baea288",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zult omschrijven"
+                    },
+                    {
+                        "form_id": "8c6e14ae-4ca0-405a-878d-57894771bda3",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zal omschrijven"
+                    },
+                    {
+                        "form_id": "790cf463-412b-4498-a4bb-35700b3b89f5",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zult omschrijven"
+                    },
+                    {
+                        "form_id": "e3cf1b3b-de3b-45f7-bf94-939d018185a1",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zal omschrijven"
+                    },
+                    {
+                        "form_id": "e73269e8-9d2d-46a3-a133-d5d2e294070b",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "future",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zult omschrijven"
+                    },
+                    {
+                        "form_id": "1e699e45-4fb9-4c5a-b88f-de45a3e4c272",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "future",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "zal omschrijven"
+                    },
+                    {
+                        "form_id": "fbd4e507-fc33-40a9-bf66-2e207b04dd3c",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "future",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "zullen omschrijven"
+                    },
+                    {
+                        "form_id": "8dd5efe6-bea2-4bb9-870a-4858c9932a22",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "future",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "zullen omschrijven"
+                    },
+                    {
+                        "form_id": "cb0eaa17-2960-4c10-a170-899db5a96956",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "future",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "zullen omschrijven"
+                    },
+                    {
+                        "form_id": "6e721fff-cf4d-47d8-b04d-ffe4d4929b49",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "conditional",
+                            "singular",
+                            "first-person"
+                        ],
+                        "form": "zou omschrijven"
+                    },
+                    {
+                        "form_id": "6935057a-3d97-45fc-8ba9-137cf121429c",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "conditional",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zou omschrijven"
+                    },
+                    {
+                        "form_id": "9ab65928-7fb9-44c7-b9cb-4765ba9a3395",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "conditional",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zou(dt) omschrijven"
+                    },
+                    {
+                        "form_id": "94e8987d-9686-42e5-97aa-cb4aab47071e",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "conditional",
+                            "singular",
+                            "second-person"
+                        ],
+                        "form": "zoudt omschrijven"
+                    },
+                    {
+                        "form_id": "410e3368-c15c-472c-b1d2-db31112a2b72",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "conditional",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "zou omschrijven"
+                    },
+                    {
+                        "form_id": "7c966fc8-6ae5-4a70-9b54-5759a475cc9c",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "conditional",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "zouden omschrijven"
+                    },
+                    {
+                        "form_id": "0bafe311-50bb-4916-ab93-dcec6dc78776",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "conditional",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "zouden omschrijven"
+                    },
+                    {
+                        "form_id": "3e5b22f8-0b24-4047-b0a7-ae898b9b95b8",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "indicative",
+                            "imperfect",
+                            "conditional",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "zouden omschrijven"
+                    },
+                    {
+                        "form_id": "a0a3f30a-b29a-4b4f-bad8-2d08b2112a21",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "heb omschreven"
+                    },
+                    {
+                        "form_id": "5bd210d9-b4b0-42a7-8d90-ee8596f634f9",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "hebt omschreven"
+                    },
+                    {
+                        "form_id": "02d20296-29d0-42b7-b6f4-2c661f6a0a33",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "hebt omschreven"
+                    },
+                    {
+                        "form_id": "4eabca24-dd31-4abb-8f50-dc9fb3aa775b",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "heeft omschreven"
+                    },
+                    {
+                        "form_id": "8c877df2-cef6-4ef5-8896-c76bf00320cd",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "hebt omschreven"
+                    },
+                    {
+                        "form_id": "7a7f40ce-6aba-46da-869a-35ab1074b090",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "heeft omschreven"
+                    },
+                    {
+                        "form_id": "32313b14-8e45-4670-a5c4-50082b99c7e7",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "hebben omschreven"
+                    },
+                    {
+                        "form_id": "d9ddca69-df15-4d09-9a1c-de97d2cdd20f",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "hebben omschreven"
+                    },
+                    {
+                        "form_id": "becee567-4bb2-4ed5-b81c-b37f9039d432",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "hebben omschreven"
+                    },
+                    {
+                        "form_id": "6d68effd-f8d8-4ce6-867a-5feedf290c8d",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "had omschreven"
+                    },
+                    {
+                        "form_id": "5e492887-fbf3-4c13-9300-13936eaa023e",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "had omschreven"
+                    },
+                    {
+                        "form_id": "c8a73686-de56-4736-944a-e98380708b06",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "had omschreven"
+                    },
+                    {
+                        "form_id": "24a250f9-fe60-430a-8ba4-b55ec478a7a1",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "hadt omschreven"
+                    },
+                    {
+                        "form_id": "576da002-7074-4cb0-9280-60f491eb0aac",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "had omschreven"
+                    },
+                    {
+                        "form_id": "f9a07701-5be8-4941-b9ab-451bebe06ce0",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "hadden omschreven"
+                    },
+                    {
+                        "form_id": "273e0602-52bb-49ff-8173-35685b0f5f05",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "hadden omschreven"
+                    },
+                    {
+                        "form_id": "38d0771a-c415-46ae-ad23-6f2bef83f553",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "hadden omschreven"
+                    },
+                    {
+                        "form_id": "ecaf6d9a-0a58-4626-ada2-7dc7d1c0ee6a",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zal omschreven hebben"
+                    },
+                    {
+                        "form_id": "ed76d5e2-81d3-41e2-8318-93d13e860268",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zal omschreven hebben"
+                    },
+                    {
+                        "form_id": "147c59e9-bcdf-4f22-be1c-70ea7be42b8e",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult omschreven hebben"
+                    },
+                    {
+                        "form_id": "7cdd42ea-4be7-49eb-8238-c727cb714021",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult omschreven hebben"
+                    },
+                    {
+                        "form_id": "bd5d4d64-a987-4af0-968c-9e42295170cf",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zal omschreven hebben"
+                    },
+                    {
+                        "form_id": "1b4809dd-80e1-47c6-92e6-7be1fdcbf796",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult omschreven hebben"
+                    },
+                    {
+                        "form_id": "d4895a61-c544-4446-b0b3-7aa099cf77d5",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zal omschreven hebben"
+                    },
+                    {
+                        "form_id": "2b106776-4efa-46d1-b90e-1968e6ede505",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zullen omschreven hebben"
+                    },
+                    {
+                        "form_id": "f05d5fb5-357d-4f65-a6b3-6b9f8141726a",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zullen omschreven hebben"
+                    },
+                    {
+                        "form_id": "4923aa29-d7ec-43e1-b1ac-121bfee23210",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zullen omschreven hebben"
+                    },
+                    {
+                        "form_id": "32a1614c-244d-4a7e-959f-b81c97176acd",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zou omschreven hebben"
+                    },
+                    {
+                        "form_id": "60fd663b-6c77-429b-8ba9-100e986f5db6",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou omschreven hebben"
+                    },
+                    {
+                        "form_id": "39baf100-a2c2-48ba-81c0-2ae7bf29b8f2",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou omschreven hebben"
+                    },
+                    {
+                        "form_id": "edc8c178-1315-48c1-80cf-d21fdab90855",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt omschreven hebben"
+                    },
+                    {
+                        "form_id": "7a276531-7818-4a57-bf08-6999cf24ad1d",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt omschreven hebben"
+                    },
+                    {
+                        "form_id": "803acec5-8ec4-41a1-a0a9-12327c0c0d42",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zou omschreven hebben"
+                    },
+                    {
+                        "form_id": "5614361e-3d06-4ecd-b9bc-62be52ca9f7b",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zouden omschreven hebben"
+                    },
+                    {
+                        "form_id": "e8633ec2-24fc-45e4-8138-4a505086fa80",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zouden omschreven hebben"
+                    },
+                    {
+                        "form_id": "963b98df-ce85-40a8-aa5f-18146643e661",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zouden omschreven hebben"
+                    },
+                    {
+                        "form_id": "6eb2f91c-20e5-4bed-b70c-7af2abdedad6",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "present",
+                            "imperfect"
+                        ],
+                        "form": "er wordt omschreven"
+                    },
+                    {
+                        "form_id": "c8b2dadb-4982-46b4-a875-db8f0f73daf6",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "present",
+                            "perfect"
+                        ],
+                        "form": "er is omschreven"
+                    },
+                    {
+                        "form_id": "3de12b64-d192-4661-aad6-7485b8c96628",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "past",
+                            "imperfect"
+                        ],
+                        "form": "er werd omschreven"
+                    },
+                    {
+                        "form_id": "e6debeac-7072-4fd5-8d1a-98aad839c92d",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "past",
+                            "perfect"
+                        ],
+                        "form": "er was omschreven"
+                    },
+                    {
+                        "form_id": "7253944a-8b91-475c-9775-83d6c848ff04",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "future",
+                            "imperfect"
+                        ],
+                        "form": "er zal omschreven worden"
+                    },
+                    {
+                        "form_id": "f72f3c6d-f911-4d66-b37e-195f35b9dd53",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "future",
+                            "perfect"
+                        ],
+                        "form": "er zal omschreven zijn"
+                    },
+                    {
+                        "form_id": "c89d1fb4-0e50-4044-a6b4-46f2c762356d",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "conditional",
+                            "imperfect"
+                        ],
+                        "form": "er zou omschreven worden"
+                    },
+                    {
+                        "form_id": "717af205-822b-4c4b-90cc-e21e1a5d7149",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "impersonal",
+                            "passive",
+                            "conditional",
+                            "perfect"
+                        ],
+                        "form": "er zou omschreven zijn"
+                    },
+                    {
+                        "form_id": "5cb143de-6620-4c3f-b1c8-2dd4d13ebc67",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "imperfect",
+                            "present",
+                            "short-form"
+                        ],
+                        "form": "omschreven worden"
+                    },
+                    {
+                        "form_id": "408687a5-5192-4c91-bdbd-5c502e1c19ba",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "imperfect",
+                            "present",
+                            "long-form"
+                        ],
+                        "form": "omschreven te worden"
+                    },
+                    {
+                        "form_id": "48ad2bbe-eae6-4cbf-a98e-42c726fad9c0",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "imperfect",
+                            "future",
+                            "short-form"
+                        ],
+                        "form": "omschreven zullen worden"
+                    },
+                    {
+                        "form_id": "f8e9aea5-de1f-4c90-ba72-35b605ebb286",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "imperfect",
+                            "future",
+                            "long-form"
+                        ],
+                        "form": "omschreven te zullen worden"
+                    },
+                    {
+                        "form_id": "22a07be2-60a2-4ed2-af7b-59ee08e0f656",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "perfect",
+                            "present",
+                            "short-form"
+                        ],
+                        "form": "omschreven zijn"
+                    },
+                    {
+                        "form_id": "82856731-bc49-4efa-a426-f6db3ab45625",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "perfect",
+                            "present",
+                            "long-form"
+                        ],
+                        "form": "omschreven te zijn"
+                    },
+                    {
+                        "form_id": "f8109753-6761-4f8f-9533-b963b48206ae",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "perfect",
+                            "future",
+                            "short-form"
+                        ],
+                        "form": "omschreven zullen zijn"
+                    },
+                    {
+                        "form_id": "9c4cb423-3d1d-4855-b645-07179fb3f181",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "passive",
+                            "infinitive",
+                            "perfect",
+                            "future",
+                            "long-form"
+                        ],
+                        "form": "omschreven te zullen zijn"
+                    },
+                    {
+                        "form_id": "078db00b-5563-4925-8922-f27a34f4febd",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "word omschreven"
+                    },
+                    {
+                        "form_id": "7b44bb2f-d3b0-445f-a44a-2424b8d05f64",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "wordt omschreven"
+                    },
+                    {
+                        "form_id": "9ea8aa3a-ce3e-4306-9100-6de29bbf042d",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "wordt omschreven"
+                    },
+                    {
+                        "form_id": "36a8fba9-1599-451e-b412-08d566d13703",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "wordt omschreven"
+                    },
+                    {
+                        "form_id": "2987c61a-ada1-4bdd-b8f3-5694bdbed29f",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "wordt omschreven"
+                    },
+                    {
+                        "form_id": "075393b8-9c8c-4e04-8cf5-abdaf50f4c60",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "worden omschreven"
+                    },
+                    {
+                        "form_id": "9478f6e3-968a-4194-ba27-e619db43ab06",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "worden omschreven"
+                    },
+                    {
+                        "form_id": "886ea904-9cda-4509-9a2b-7d91f8eef149",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "worden omschreven"
+                    },
+                    {
+                        "form_id": "76b86b33-ac0d-4893-8669-1d48b1312c90",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "werd omschreven"
+                    },
+                    {
+                        "form_id": "8a891a61-9b39-4ba1-b612-3f0f8bf3343b",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "werd omschreven"
+                    },
+                    {
+                        "form_id": "f9e7ce53-3b08-4351-9cde-6acf2b88ac44",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "werd omschreven"
+                    },
+                    {
+                        "form_id": "dedb70fe-e4bf-4080-87ad-9ac2dfef82a6",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "werdt omschreven"
+                    },
+                    {
+                        "form_id": "fb6d19d2-6899-4427-9d69-d5e06c47058c",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "werd omschreven"
+                    },
+                    {
+                        "form_id": "26c0ced2-565b-4d44-b65d-8b3abd596d33",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "werden omschreven"
+                    },
+                    {
+                        "form_id": "2a060806-d582-443d-bd64-18be5b0043ce",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "werden omschreven"
+                    },
+                    {
+                        "form_id": "b3e697b5-80ab-49e8-8685-dff1814521c6",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "werden omschreven"
+                    },
+                    {
+                        "form_id": "c9baa7cc-3e66-4ca0-b6e1-d61c54d08301",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zal omschreven worden"
+                    },
+                    {
+                        "form_id": "75d59432-61bd-42ac-98de-7d9d4853d44a",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult omschreven worden"
+                    },
+                    {
+                        "form_id": "f5988009-7826-4035-a28f-af741c905bf8",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult omschreven worden"
+                    },
+                    {
+                        "form_id": "a53626b6-bd28-4956-a9a6-6190cb1612b9",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult omschreven worden"
+                    },
+                    {
+                        "form_id": "ae3f26f4-6825-4bd0-ba8a-0a0fe3de161d",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "zal omschreven worden"
+                    },
+                    {
+                        "form_id": "8470551a-5cca-4dd5-b859-9e80e2a8c09a",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "zullen omschreven worden"
+                    },
+                    {
+                        "form_id": "b0201131-3c07-4ef5-a83d-b0a6bfe7a8b2",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "zullen omschreven worden"
+                    },
+                    {
+                        "form_id": "f6af8bc7-ce27-423f-ae3d-ef7f792edd5b",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zullen omschreven worden"
+                    },
+                    {
+                        "form_id": "b6bf460f-7157-4414-9b1e-ce4a9533682f",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zou omschreven worden"
+                    },
+                    {
+                        "form_id": "877d30f9-b5b3-4e2d-9edb-5b1bda135ab7",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou omschreven worden"
+                    },
+                    {
+                        "form_id": "45f568ef-0d96-46a9-90e6-a11252491ef0",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou omschreven worden"
+                    },
+                    {
+                        "form_id": "45dd0950-039d-4e56-b0ca-f3b22b35da1a",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt omschreven worden"
+                    },
+                    {
+                        "form_id": "2a2034a8-7169-4ba0-aa62-30f9aa7c82f7",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt omschreven worden"
+                    },
+                    {
+                        "form_id": "47337067-14aa-45e6-9fe0-5887fa46c8c9",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "plural",
+                            "third-person"
+                        ],
+                        "form": "zou omschreven worden"
+                    },
+                    {
+                        "form_id": "f0adb41b-0d80-47ed-800a-378b6a0e7c55",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "plural",
+                            "first-person"
+                        ],
+                        "form": "zouden omschreven worden"
+                    },
+                    {
+                        "form_id": "cde936b3-8f3b-4f88-adcb-fa664b1cdfab",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "plural",
+                            "second-person"
+                        ],
+                        "form": "zouden omschreven worden"
+                    },
+                    {
+                        "form_id": "694fcdb0-d89b-4b8b-80df-934c3771948a",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "singular",
+                            "imperfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zouden omschreven worden"
+                    },
+                    {
+                        "form_id": "1e267055-a5b3-44d7-b6c9-8e67dc2d66d9",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "ben omschreven"
+                    },
+                    {
+                        "form_id": "a4358155-d387-4c2a-8dcf-69ae95ae30e0",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "bent omschreven"
+                    },
+                    {
+                        "form_id": "c6063588-095c-4837-a7fb-44d5584dcc7d",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "bent omschreven"
+                    },
+                    {
+                        "form_id": "a47574b5-3457-40c6-823d-be9ad42c91cc",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "is omschreven"
+                    },
+                    {
+                        "form_id": "e4a2ac21-106d-423a-bdec-76cad7a667c9",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "zijt omschreven"
+                    },
+                    {
+                        "form_id": "46bd7cee-55e2-4ab7-93b7-a230dda84811",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "is omschreven"
+                    },
+                    {
+                        "form_id": "69abd767-e16b-4f7a-8405-06a99fef0195",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "first-person"
+                        ],
+                        "form": "zijn omschreven"
+                    },
+                    {
+                        "form_id": "b2d41b27-8042-4767-870d-e81dbe862848",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "zijn omschreven"
+                    },
+                    {
+                        "form_id": "bfe8499f-43c4-49c3-9bd3-b8a6a63a5411",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "zijn omschreven"
+                    },
+                    {
+                        "form_id": "ace671d6-22b6-4be0-b3a0-a9a7cc1c62a8",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "was omschreven"
+                    },
+                    {
+                        "form_id": "9d7f7db8-b382-4bd5-aa3c-f9ff2d34f5f4",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "was omschreven"
+                    },
+                    {
+                        "form_id": "c2c7c3ef-6992-416f-8bb4-f62e4033cf06",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "was omschreven"
+                    },
+                    {
+                        "form_id": "0a457489-fe5e-4124-94d0-b1b7559ccd2d",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "waart omschreven"
+                    },
+                    {
+                        "form_id": "d029e878-31ba-42a6-ace7-66b2364b6837",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "was omschreven"
+                    },
+                    {
+                        "form_id": "586c2d7d-c8e8-4b2b-8bab-ac34f28cad1b",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "first-person"
+                        ],
+                        "form": "waren omschreven"
+                    },
+                    {
+                        "form_id": "c48ccc14-da88-4de5-b8c3-b3c8261f9e2c",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "second-person"
+                        ],
+                        "form": "waren omschreven"
+                    },
+                    {
+                        "form_id": "f6b3f188-b067-489e-95b4-b2cee3aea571",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "past",
+                            "third-person"
+                        ],
+                        "form": "waren omschreven"
+                    },
+                    {
+                        "form_id": "b8f7490c-5b07-45b6-bb62-9795cf0d413d",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zal omschreven zijn"
+                    },
+                    {
+                        "form_id": "6d18029a-5929-404f-971f-6efc2f735946",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult omschreven zijn"
+                    },
+                    {
+                        "form_id": "f2b230d3-506e-4baf-94b5-6479223adb19",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult omschreven zijn"
+                    },
+                    {
+                        "form_id": "ce383aae-3043-45dd-8e02-ae4185fb9e01",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zult omschreven zijn"
+                    },
+                    {
+                        "form_id": "9418f4ee-0a2c-4bcb-9c39-0ed8faffc257",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zal omschreven zijn"
+                    },
+                    {
+                        "form_id": "dc52fd83-4057-4c25-a4fc-e02b63ef1456",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "first-person"
+                        ],
+                        "form": "zullen omschreven zijn"
+                    },
+                    {
+                        "form_id": "78dac458-d78d-4d1e-8bdf-09e12b672262",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "second-person"
+                        ],
+                        "form": "zullen omschreven zijn"
+                    },
+                    {
+                        "form_id": "dd680948-b91b-41f0-9654-e718cdf62f16",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "future",
+                            "third-person"
+                        ],
+                        "form": "zullen omschreven zijn"
+                    },
+                    {
+                        "form_id": "644b3309-f914-4881-bcbd-e3afdcfc575a",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zou omschreven zijn"
+                    },
+                    {
+                        "form_id": "46f66715-5f37-4927-b21e-8b4bcf24e75b",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou omschreven zijn"
+                    },
+                    {
+                        "form_id": "45058cdc-b9f1-47ba-8182-eeb00b52e3c2",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zou omschreven zijn"
+                    },
+                    {
+                        "form_id": "c076defd-db28-4ed8-9baf-976fbc925691",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt omschreven zijn"
+                    },
+                    {
+                        "form_id": "16eedc58-8a6c-4f77-a72a-c9e62d3a7cda",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zoudt omschreven zijn"
+                    },
+                    {
+                        "form_id": "fe642e8d-7257-466b-a30c-98d3708b0a89",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zou omschreven zijn"
+                    },
+                    {
+                        "form_id": "c9da28f4-e38c-471f-be19-92547cbe7d02",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "first-person"
+                        ],
+                        "form": "zouden omschreven zijn"
+                    },
+                    {
+                        "form_id": "799a3f59-0d45-44ac-97ac-ceb5dcf78112",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "second-person"
+                        ],
+                        "form": "zouden omschreven zijn"
+                    },
+                    {
+                        "form_id": "2d7c551e-c159-47ba-ac40-1a793e55d52a",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "tags": [
+                            "perfect",
+                            "conditional",
+                            "third-person"
+                        ],
+                        "form": "zouden omschreven zijn"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "b1be6079-4b28-3884-b735-65fc2e1a9de1",
+                        "entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "glosses": [
+                            "in enige woorden een definitie ergens van geven"
+                        ],
+                        "tags": [
+                            "transitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "d3980dea-49bf-4c09-b883-c6c437f27df4",
+                                "sense_id": "b1be6079-4b28-3884-b735-65fc2e1a9de1",
+                                "text": "Dat wordt zelden zo omschreven."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "14d26471-e5dd-4152-aff1-3f25daae57e3",
+                        "source_entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "source_sense_id": "b1be6079-4b28-3884-b735-65fc2e1a9de1",
+                        "source_sense_description": "in enige woorden een definitie ergens van geven",
+                        "target_lang_word": "define",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "define",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "66a4713c-0f11-3a00-a814-df02d5f0f6a0",
+                                        "entry_id": "1e69a070-8e85-3410-a19f-5be729a25f34",
+                                        "glosses": [
+                                            "To determine with precision; to mark out with distinctness; to ascertain or exhibit clearly."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "19ded137-4329-4625-a6e9-a7d012cda08a",
+                                                "sense_id": "66a4713c-0f11-3a00-a814-df02d5f0f6a0",
+                                                "text": "the defining power of an optical instrument"
+                                            },
+                                            {
+                                                "example_id": "604429ff-373a-4504-be1e-e86568ed80b7",
+                                                "sense_id": "66a4713c-0f11-3a00-a814-df02d5f0f6a0",
+                                                "text": "Rings[…]very distinct and well defined."
+                                            },
+                                            {
+                                                "example_id": "eff79875-ec8c-4083-944d-f37603030608",
+                                                "sense_id": "66a4713c-0f11-3a00-a814-df02d5f0f6a0",
+                                                "text": "Turbines have been around for a long time—windmills and water wheels are early examples. The name comes from the Latin turbo, meaning vortex, and thus the defining property of a turbine is that a fluid or gas turns the blades of a rotor, which is attached to a shaft that can perform useful work."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "508f6cf6-5274-39a5-81a1-c3b1387c649d",
+                                        "entry_id": "1e69a070-8e85-3410-a19f-5be729a25f34",
+                                        "glosses": [
+                                            "To settle, decide (an argument etc.)"
+                                        ],
+                                        "tags": [
+                                            "obsolete"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "b7fe6f62-9eea-44e6-87a6-d3c27419c5b1",
+                                                "sense_id": "508f6cf6-5274-39a5-81a1-c3b1387c649d",
+                                                "text": "These warlike Champions, all in armour shine, / Assembled were in field the chalenge to define."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "1de6ca78-ddc1-37a6-97bd-b615c1bf32a2",
+                                        "entry_id": "1e69a070-8e85-3410-a19f-5be729a25f34",
+                                        "glosses": [
+                                            "To express the essential nature of something."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "42d7fb94-b0f9-4ba9-a171-22967be3b50d",
+                                                "sense_id": "1de6ca78-ddc1-37a6-97bd-b615c1bf32a2",
+                                                "text": "I define myself as a techno-anarchist."
+                                            },
+                                            {
+                                                "example_id": "33a5b520-a5eb-4013-bc37-afaa7b2fe8d8",
+                                                "sense_id": "1de6ca78-ddc1-37a6-97bd-b615c1bf32a2",
+                                                "text": "Your past mistakes do not define who you are."
+                                            },
+                                            {
+                                                "example_id": "bf1df37d-8b66-4e46-92de-4551893f437a",
+                                                "sense_id": "1de6ca78-ddc1-37a6-97bd-b615c1bf32a2",
+                                                "text": "Cantor defined a one-to-one correspondence between the points of the square and the points of the line segment. Every point in the square was associated with a single point in the segment; every point in the segment was matched with a unique point in the square."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "47567b43-d6db-3946-bbf0-7bb86e2830b9",
+                                        "entry_id": "1e69a070-8e85-3410-a19f-5be729a25f34",
+                                        "glosses": [
+                                            "To state the meaning of a word, phrase, sign, or symbol."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "0b9e4f9c-aebc-4233-9c65-9b2c4e473f2b",
+                                                "sense_id": "47567b43-d6db-3946-bbf0-7bb86e2830b9",
+                                                "text": "The textbook defined speed as velocity divided by time."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "764a7345-2dd4-33e3-b588-057570163bf2",
+                                        "entry_id": "1e69a070-8e85-3410-a19f-5be729a25f34",
+                                        "glosses": [
+                                            "To describe, explain, or make definite and clear; used to request the listener or other person to elaborate or explain more clearly his or her intended meaning of a word or expression."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "104f038c-9b3b-42b7-bdf1-a9691465d391",
+                                                "sense_id": "764a7345-2dd4-33e3-b588-057570163bf2",
+                                                "text": "Person 1: Is she good at math?\nPerson 2: Define \"good.\" If you mean if she is faster than the average middle schooler at multiplication, then yes. If you mean if she is able to do multivariable calculus, then no."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "79221f1d-0a91-39e6-bacc-efb226916b5c",
+                                        "entry_id": "1e69a070-8e85-3410-a19f-5be729a25f34",
+                                        "glosses": [
+                                            "To demark sharply the outlines or limits of an area or concept."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ceb7ff30-af03-4fe2-b214-40c920b62f52",
+                                                "sense_id": "79221f1d-0a91-39e6-bacc-efb226916b5c",
+                                                "text": "to define the legal boundaries of a property"
+                                            },
+                                            {
+                                                "example_id": "32d54745-6fea-442a-b271-1165f55498da",
+                                                "sense_id": "79221f1d-0a91-39e6-bacc-efb226916b5c",
+                                                "text": "Few concepts are as emotionally charged as that of race. The word conjures up a mixture of associations—culture, ethnicity, genetics, subjugation, exclusion and persecution. But is the tragic history of efforts to define groups of people by race really a matter of the misuse of science, the abuse of a valid biological concept?"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "34f22d0d-489d-3ca1-952c-c5132a314e46",
+                                        "entry_id": "1e69a070-8e85-3410-a19f-5be729a25f34",
+                                        "glosses": [
+                                            "To establish the referent of a term or notation."
+                                        ],
+                                        "tags": [],
+                                        "examples": []
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "define",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "0aeb093e-49ba-33e8-a3a6-1103cd5fae63",
+                                        "entry_id": "205fb882-ecc5-3d55-ba38-b989f588f433",
+                                        "glosses": [
+                                            "A kind of macro in source code that replaces one text string with another wherever it occurs."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a835d84e-66a2-4f36-9443-0aa069278fdf",
+                                                "sense_id": "0aeb093e-49ba-33e8-a3a6-1103cd5fae63",
+                                                "text": "From the computer programming perspective, Java looks like C and C++ while discarding the overwhelming complexities of those languages, such as typedefs, defines, preprocessor, unions, pointers, and multiple inheritance."
+                                            },
+                                            {
+                                                "example_id": "996839c0-5f73-4bc8-bdb1-a92c34714733",
+                                                "sense_id": "0aeb093e-49ba-33e8-a3a6-1103cd5fae63",
+                                                "text": "Anyone who has attempted to do OO programming in a conventional language using defines will find out that it is impossible to realize the benefits easily, if at all, without compiler support."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "b289775b-069f-40fe-8915-9bd5de141fa0",
+                        "source_entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "source_sense_id": "b1be6079-4b28-3884-b735-65fc2e1a9de1",
+                        "source_sense_description": "in enige woorden een definitie ergens van geven",
+                        "target_lang_word": "describe",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "describe",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "904a72d9-40b5-3d37-a321-4d8b76a2e86b",
+                                        "entry_id": "f2d1f073-49a8-3486-8202-09b56692fa52",
+                                        "glosses": [
+                                            "To represent in words."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "a9555e3c-f7b6-42c8-9ab7-ea30f7d3e8ac",
+                                                "sense_id": "904a72d9-40b5-3d37-a321-4d8b76a2e86b",
+                                                "text": "The feeling is difficult to describe, but not unpleasant."
+                                            },
+                                            {
+                                                "example_id": "f1f58a8d-77fd-492c-9ba6-deb7cffe2f77",
+                                                "sense_id": "904a72d9-40b5-3d37-a321-4d8b76a2e86b",
+                                                "text": "The geographer describes countries and cities."
+                                            },
+                                            {
+                                                "example_id": "4bdb86a6-a5f3-4311-bbb6-1f661b271d12",
+                                                "sense_id": "904a72d9-40b5-3d37-a321-4d8b76a2e86b",
+                                                "text": "Several witnesses describe seeing lights in the sky that night."
+                                            },
+                                            {
+                                                "example_id": "046c4762-7a10-468b-9ecc-a4eb9131112b",
+                                                "sense_id": "904a72d9-40b5-3d37-a321-4d8b76a2e86b",
+                                                "text": "[…]his lordship was out of humour. That was the way Chollacombe described as knaggy an old gager as ever Charles had had the ill-fortune to serve. Stiff-rumped, that's what he was, always rubbing the rust, or riding grub, like he had been for months past."
+                                            },
+                                            {
+                                                "example_id": "ef7dd2b2-d57d-4d27-96fb-e9829d0d0720",
+                                                "sense_id": "904a72d9-40b5-3d37-a321-4d8b76a2e86b",
+                                                "text": "Yet the truth is that City would probably have been coasting by that point if the referee, Michael Oliver, had not turned down three separate penalties, at least two of which could be accurately described as certainties."
+                                            },
+                                            {
+                                                "example_id": "e1f94f34-8b74-42ef-a6aa-fe8450a60e10",
+                                                "sense_id": "904a72d9-40b5-3d37-a321-4d8b76a2e86b",
+                                                "text": "Mae, who describes herself on Patreon as a 20-year-old university student from Canada, holds several world records for Baldur’s Gate 3 speedruns already — including her insane 4:15 any% speedrun."
+                                            },
+                                            {
+                                                "example_id": "78af4e82-e24b-4ace-ace1-9989ab33d078",
+                                                "sense_id": "904a72d9-40b5-3d37-a321-4d8b76a2e86b",
+                                                "text": "Among the documents Donald Trump’s would-be-assassin studied while formulating his plans for an attack on the former president was a public document from the Department of Homeland Security, describing different kinds of improvised explosive devices and the number of explosives needed to inflict casualties over certain distances, a senior law enforcement official told CNN."
+                                            },
+                                            {
+                                                "example_id": "2492cebc-fac8-43fc-9ba5-9374742176ab",
+                                                "sense_id": "904a72d9-40b5-3d37-a321-4d8b76a2e86b",
+                                                "text": "Former President Donald Trump and Republican vice presidential nominee Sen. JD Vance continue to falsely describe how one of their major policy proposals, across-the-board tariffs, would work."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "f96d027a-fcfe-39ab-9f10-dd4ab0d06b0a",
+                                        "entry_id": "f2d1f073-49a8-3486-8202-09b56692fa52",
+                                        "glosses": [
+                                            "To represent by drawing; to draw a plan of; to delineate; to trace or mark out."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "1c9e80f1-4c26-4146-a107-3349ee7b7b53",
+                                                "sense_id": "f96d027a-fcfe-39ab-9f10-dd4ab0d06b0a",
+                                                "text": "to describe a circle by the compasses; a torch waved about the head in such a way as to describe a circle"
+                                            },
+                                            {
+                                                "example_id": "f1aee104-b678-4b61-9131-daa81490e85a",
+                                                "sense_id": "f96d027a-fcfe-39ab-9f10-dd4ab0d06b0a",
+                                                "text": "Uncas described an arc in the water with his own blade, and as the canoe passed swiftly on, Chingachgook recovered his paddle, and flourishing it on high, he gave the war-whoop of the Mohicans."
+                                            },
+                                            {
+                                                "example_id": "26b26f10-8f6d-40a9-ba1c-16f2bd8faabf",
+                                                "sense_id": "f96d027a-fcfe-39ab-9f10-dd4ab0d06b0a",
+                                                "text": "His body was contracted and bent towards them, and described an undulatory movement like that of a worm writhing."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "78df6766-0eaa-3fdf-97c7-f3d07460d9a9",
+                                        "entry_id": "f2d1f073-49a8-3486-8202-09b56692fa52",
+                                        "glosses": [
+                                            "To give rise to a geometrical structure."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "502b62f3-ec0f-46bb-ac22-458b24f45f80",
+                                                "sense_id": "78df6766-0eaa-3fdf-97c7-f3d07460d9a9",
+                                                "text": "The function describes a very complex surface."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "6966003e-eef9-331c-9273-a3446ba3237a",
+                                        "entry_id": "f2d1f073-49a8-3486-8202-09b56692fa52",
+                                        "glosses": [
+                                            "To introduce a new taxon to science by explaining its characteristics and particularly how it differs from other taxa."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "e743e2df-3f88-4e02-bcef-fdf466835bed",
+                                                "sense_id": "6966003e-eef9-331c-9273-a3446ba3237a",
+                                                "text": "The fungus was first described by a botanist."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "b2e6700f-13fb-3a5a-a2d4-e6b75ba06618",
+                                        "entry_id": "f2d1f073-49a8-3486-8202-09b56692fa52",
+                                        "glosses": [
+                                            "To distribute into parts, groups, or classes; to mark off; to class."
+                                        ],
+                                        "tags": [
+                                            "obsolete",
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "cf52d442-950c-4f7f-852e-1aaeee2b1512",
+                                                "sense_id": "b2e6700f-13fb-3a5a-a2d4-e6b75ba06618",
+                                                "text": "Passed through the land, and described it by cities into seven parts in a book."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "ea8c6beb-c2f6-44ef-912b-e4ed50f6d129",
+                        "source_entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "source_sense_id": "b1be6079-4b28-3884-b735-65fc2e1a9de1",
+                        "source_sense_description": "in enige woorden een definitie ergens van geven",
+                        "target_lang_word": "definir",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "definir",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "092db29c-9581-3e70-b2bc-ca7cd8335e7a",
+                                        "entry_id": "3541b888-b187-3f96-b9d3-b185b9d5ddb9",
+                                        "glosses": [
+                                            "Formular con claridad y exactitud el significado de algo."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "d2febf05-9e00-3238-a934-fef27cafbf3e",
+                                        "entry_id": "3541b888-b187-3f96-b9d3-b185b9d5ddb9",
+                                        "glosses": [
+                                            "Decidir o resolver algo sobre lo que había dudas."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"2\""
+                                    },
+                                    {
+                                        "sense_id": "cadd9b1f-e801-3140-be51-840465b16729",
+                                        "entry_id": "3541b888-b187-3f96-b9d3-b185b9d5ddb9",
+                                        "glosses": [
+                                            "Dar los toques finales con precisión para dejar concluida una obra."
+                                        ],
+                                        "tags": [
+                                            "Pintura"
+                                        ],
+                                        "examples": [],
+                                        "sense_index_json": "\"3\""
+                                    },
+                                    {
+                                        "sense_id": "14b71609-6a02-3cf8-b31f-033a2adef770",
+                                        "entry_id": "3541b888-b187-3f96-b9d3-b185b9d5ddb9",
+                                        "glosses": [
+                                            "Establecer los parámetros de un programa u operación."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"4\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "e14c4185-6b6a-44ed-99b2-d8336faf926f",
+                        "source_entry_id": "1c3358ce-428c-347b-b540-8acc86f01bd6",
+                        "source_sense_id": "b1be6079-4b28-3884-b735-65fc2e1a9de1",
+                        "source_sense_description": "in enige woorden een definitie ergens van geven",
+                        "target_lang_word": "describir",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "describir",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "709681a1-689f-378d-b23e-dfd84a26cb31",
+                                        "entry_id": "1282bb5b-c742-3323-9194-1b16ab8e8b50",
+                                        "glosses": [
+                                            "Decir las características de algo o alguien."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "964c5486-995a-320d-ab7c-fe09618e0d8d",
+                                        "entry_id": "1282bb5b-c742-3323-9194-1b16ab8e8b50",
+                                        "glosses": [
+                                            "Representar algo por medio de imágenes o dibujos para dar una idea de cómo es."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"2\""
+                                    },
+                                    {
+                                        "sense_id": "4ba7fb30-4e28-357d-bbb3-a7f375653c8e",
+                                        "entry_id": "1282bb5b-c742-3323-9194-1b16ab8e8b50",
+                                        "glosses": [
+                                            "Seguir una trayectoria, generalmente a lo largo de una línea geométrica."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "c5e3654b-fde4-42b5-8692-808c755e0e87",
+                                                "sense_id": "4ba7fb30-4e28-357d-bbb3-a7f375653c8e",
+                                                "text": "la traslación de la tierra describe una elipse"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"3\""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": [],
+        "fr-extract.jsonl": [
+            {
+                "entry_id": "1bd21c36-5e4a-3c08-8da2-279d37e6cb52",
+                "word": "omschrijven",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [],
+                "senses": [
+                    {
+                        "sense_id": "34303e70-f33c-392e-ba4c-e8f72acb6b65",
+                        "entry_id": "1bd21c36-5e4a-3c08-8da2-279d37e6cb52",
+                        "glosses": [
+                            "Définir, spécifier."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "0f00d91d-d037-42ec-9974-e1e12ca5b211",
+                                "sense_id": "34303e70-f33c-392e-ba4c-e8f72acb6b65",
+                                "text": "graag zien wij een nauwkeurigere omschrijving van de problemen",
+                                "translation": "merci de cerner de plus près les problèmes"
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "1a7d2b10-3d72-437a-94c4-5de0b5a955be",
+                        "source_entry_id": "1bd21c36-5e4a-3c08-8da2-279d37e6cb52",
+                        "source_sense_ids": [
+                            "34303e70-f33c-392e-ba4c-e8f72acb6b65"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "bepalen"
+                    },
+                    {
+                        "linkage_id": "95a89281-1c93-48f0-9cb7-51a4b9149d06",
+                        "source_entry_id": "1bd21c36-5e4a-3c08-8da2-279d37e6cb52",
+                        "source_sense_ids": [
+                            "34303e70-f33c-392e-ba4c-e8f72acb6b65"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "definiëren"
+                    },
+                    {
+                        "linkage_id": "2b7c3baa-a68e-4e4d-97a3-740c29dfd2c8",
+                        "source_entry_id": "1bd21c36-5e4a-3c08-8da2-279d37e6cb52",
+                        "source_sense_ids": [
+                            "34303e70-f33c-392e-ba4c-e8f72acb6b65"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "nader bepalen"
+                    },
+                    {
+                        "linkage_id": "a8eb7927-5283-414d-b528-d7d623cfcb2a",
+                        "source_entry_id": "1bd21c36-5e4a-3c08-8da2-279d37e6cb52",
+                        "source_sense_ids": [
+                            "34303e70-f33c-392e-ba4c-e8f72acb6b65"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "parafraseren"
+                    },
+                    {
+                        "linkage_id": "7f42cae9-d02d-4af6-b65a-c96742c444b9",
+                        "source_entry_id": "1bd21c36-5e4a-3c08-8da2-279d37e6cb52",
+                        "source_sense_ids": [
+                            "34303e70-f33c-392e-ba4c-e8f72acb6b65"
+                        ],
+                        "linkage_type": "synonyms",
+                        "word": "preciseren"
+                    }
+                ]
+            }
+        ],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": []
+    }
+}

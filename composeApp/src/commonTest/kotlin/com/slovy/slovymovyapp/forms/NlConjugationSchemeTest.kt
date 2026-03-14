@@ -254,7 +254,7 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, "stroomde onder", "stroomde onder", "stroomde onder", "stroomden onder"),
             listOf(null, "zal onderstromen", "zal onderstromen", "zal onderstromen", "zullen onderstromen"),
             listOf(null, "zou onderstromen", "zou onderstromen", "zou onderstromen", "zouden onderstromen"),
-            listOf(null, "onderstroom", null),
+            listOf(null, "stroom onder", null),
             // zijn-verb: heuristic does not fire; dutchAuxiliaryPriority selects ben/bent/is
             listOf(null, "ben ondergestroomd", "bent ondergestroomd", "is ondergestroomd", null),
             listOf(null, "zal ondergestroomd zijn", "zal ondergestroomd zijn", "zal ondergestroomd zijn", null),

@@ -1,0 +1,2031 @@
+{
+    "word": "ondergaan",
+    "lang_code": "nl",
+    "source_file_to_entries": {
+        "raw-wiktextract-data.jsonl": [
+            {
+                "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                "word": "ondergaan",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "03354270-1c4d-4aca-a137-7addb1848ecc",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "69cc65d9-9828-4dd9-831f-bcbf7ffa7ce7",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "ondergáán"
+                    },
+                    {
+                        "form_id": "2f14e34e-3b36-4c58-a319-9045d4c01297",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "infinitive"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "9d0cfb07-1c8e-4260-aa1b-8e15b2e9779b",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "gerund",
+                            "neuter"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "fcb41d7a-b612-45bb-a4d4-6aa7eb58613e",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "first-person",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "onderga"
+                    },
+                    {
+                        "form_id": "a6bcce71-7f05-43cb-823a-179eeb09c6be",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "first-person",
+                            "past",
+                            "singular"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "9fd6567c-638d-4847-aa80-483077eb9bab",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "ondergaat"
+                    },
+                    {
+                        "form_id": "11415a5a-1dce-4bd8-b546-decae6584cfe",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "onderga"
+                    },
+                    {
+                        "form_id": "a8782f82-e455-47e4-b99a-ffa62056f64d",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "a348afca-2c54-4246-a1c0-48f3f9e5aa2b",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "formal",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "ondergaat"
+                    },
+                    {
+                        "form_id": "6bbbe949-77ce-45d7-95e2-933ae484ca53",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "formal",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "c09e16ed-e4b3-4e7c-b1b4-1e87a0e63c55",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "ondergaat"
+                    },
+                    {
+                        "form_id": "5518d938-58fa-4999-a4ce-43a4c0fdfe3f",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "6530a501-7aac-4fe4-968c-39589f11a4c6",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "plural",
+                            "present"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "6dd3cc55-7a45-4a90-bdef-85b3ec55e35f",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "past",
+                            "plural"
+                        ],
+                        "form": "ondergingen"
+                    },
+                    {
+                        "form_id": "4ef086a2-975a-4340-8ba6-ee1a550b8040",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "imperative",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "onderga"
+                    },
+                    {
+                        "form_id": "9d513f3b-16c3-4a00-83c8-c8123ac1129e",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "ondergaand"
+                    },
+                    {
+                        "form_id": "7b70bc1b-0f0f-40cc-b8de-7117e80ff1f6",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "tags": [
+                            "participle",
+                            "past"
+                        ],
+                        "form": "ondergaan"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "6bcb762f-3ce2-374d-a217-3cf8955cf32d",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "glosses": [
+                            "to undergo, endure"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "6beaf223-390c-49e6-97b5-f49f010edd8d",
+                                "sense_id": "6bcb762f-3ce2-374d-a217-3cf8955cf32d",
+                                "text": "Hij onderging zijn straf.",
+                                "translation": "He underwent his punishment.",
+                                "english": "He underwent his punishment."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "2687c35f-a5a7-3530-a358-6a4615f863d5",
+                        "entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "glosses": [
+                            "to put up with"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "b8a596ba-9728-4945-9f58-fa10613f7cda",
+                                "sense_id": "2687c35f-a5a7-3530-a358-6a4615f863d5",
+                                "text": "Ik wil die herrie niet meer ondergaan.",
+                                "translation": "I don't want to put up with that noise.",
+                                "english": "I don't want to put up with that noise."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": [
+                    {
+                        "linkage_id": "db0835a4-ecab-4659-b838-1b7e59482f54",
+                        "source_entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "harden"
+                    },
+                    {
+                        "linkage_id": "a90c7ca1-3fc5-465a-82be-883c86fabc38",
+                        "source_entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "uithouden"
+                    },
+                    {
+                        "linkage_id": "5b73e9a9-c749-48c8-85bd-561c10176741",
+                        "source_entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "uitstaan"
+                    },
+                    {
+                        "linkage_id": "4a9e4f98-97bf-48fc-8c2e-2980f28ef40a",
+                        "source_entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "velen"
+                    },
+                    {
+                        "linkage_id": "3b308d5d-3155-4887-8bf1-2cbe8df7806b",
+                        "source_entry_id": "7dce8963-351d-38bb-96d3-f301707e8c2b",
+                        "source_sense_ids": [],
+                        "linkage_type": "synonyms",
+                        "word": "verdragen"
+                    }
+                ]
+            },
+            {
+                "entry_id": "7db84201-575e-3ade-b6fb-780233cdbbc5",
+                "word": "ondergaan",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "9e10f5ab-d2c0-4d1c-b8e6-5b49d4adb204",
+                        "entry_id": "7db84201-575e-3ade-b6fb-780233cdbbc5",
+                        "tags": [
+                            "adverbial",
+                            "predicative"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "57af895d-1cf6-4fac-bb54-44a8ab7a2015",
+                        "entry_id": "7db84201-575e-3ade-b6fb-780233cdbbc5",
+                        "tags": [
+                            "feminine",
+                            "indefinite",
+                            "masculine",
+                            "singular"
+                        ],
+                        "form": "ondergane"
+                    },
+                    {
+                        "form_id": "27450294-46a9-4f9d-b391-1f0e9ad13ee0",
+                        "entry_id": "7db84201-575e-3ade-b6fb-780233cdbbc5",
+                        "tags": [
+                            "indefinite",
+                            "neuter",
+                            "singular"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "78eb7591-eae8-498a-a4a5-4a665b7bd88c",
+                        "entry_id": "7db84201-575e-3ade-b6fb-780233cdbbc5",
+                        "tags": [
+                            "indefinite",
+                            "plural"
+                        ],
+                        "form": "ondergane"
+                    },
+                    {
+                        "form_id": "2c8be2c2-db6d-43c0-8163-688cccbce308",
+                        "entry_id": "7db84201-575e-3ade-b6fb-780233cdbbc5",
+                        "tags": [
+                            "definite"
+                        ],
+                        "form": "ondergane"
+                    },
+                    {
+                        "form_id": "d13b2355-810c-44c9-81f5-cb0120c40f93",
+                        "entry_id": "7db84201-575e-3ade-b6fb-780233cdbbc5",
+                        "tags": [
+                            "partitive"
+                        ],
+                        "form": "ondergaans"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "946b2faa-a95f-357a-bfbb-51d72faf11de",
+                        "entry_id": "7db84201-575e-3ade-b6fb-780233cdbbc5",
+                        "glosses": [
+                            "past participle of ondergaan"
+                        ],
+                        "tags": [
+                            "form-of",
+                            "participle",
+                            "past"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                "word": "ondergaan",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "422d13f7-765b-427f-9db2-87976bbc1b67",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "6e77cb52-76cb-4f25-bd9d-147a2fbbc766",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "óndergaan"
+                    },
+                    {
+                        "form_id": "658cdfc7-7412-4a58-86c0-3b5a28c7075d",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "infinitive"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "b6e63c7b-e979-4cd7-b958-1f9dfa58b310",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "gerund",
+                            "neuter"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "a9489840-e45e-4fb5-bc63-1a1f91394830",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "ga onder"
+                    },
+                    {
+                        "form_id": "55a51e83-3068-4097-9fba-7e5cc1312b78",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "first-person",
+                            "main-clause",
+                            "past",
+                            "singular"
+                        ],
+                        "form": "ging onder"
+                    },
+                    {
+                        "form_id": "309881eb-cea6-42a9-98cd-1c2cdac4eff2",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "first-person",
+                            "present",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "onderga"
+                    },
+                    {
+                        "form_id": "9794c467-d5c6-4ae6-bdf8-482a6e7cf483",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "first-person",
+                            "past",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "13db1851-a151-4132-ad24-07b98fbef4c1",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "gaat onder"
+                    },
+                    {
+                        "form_id": "d9b037b5-2ace-4548-82bd-83bb19d71e61",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "ga onder"
+                    },
+                    {
+                        "form_id": "1fcfab16-7e62-4943-984f-c7c060b36a33",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "ging onder"
+                    },
+                    {
+                        "form_id": "15a9763d-5c78-47ea-a882-33198ad04f2b",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "ondergaat"
+                    },
+                    {
+                        "form_id": "4e4b766f-36fb-4f0d-9748-6b8750f49803",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "d3ee2f8c-720a-41cb-8dc5-f233de915aa1",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "present",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "gaat onder"
+                    },
+                    {
+                        "form_id": "452eb0b0-6937-4d20-95b4-74db6a4c503b",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "formal",
+                            "main-clause",
+                            "past",
+                            "second-person",
+                            "singular"
+                        ],
+                        "form": "ging onder"
+                    },
+                    {
+                        "form_id": "ca1d6e1b-a053-4ce2-bcaf-36e8992a76a6",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "formal",
+                            "present",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "ondergaat"
+                    },
+                    {
+                        "form_id": "fd97d932-6dcb-413f-9ccc-86bcebf8c6dd",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "formal",
+                            "past",
+                            "second-person",
+                            "singular",
+                            "subordinate-clause"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "21ffbbcb-fdf9-40b1-851f-4349dd13a29b",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "main-clause",
+                            "present",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "gaat onder"
+                    },
+                    {
+                        "form_id": "6818a11d-b4d4-4412-91f1-8c520529f318",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "singular",
+                            "third-person"
+                        ],
+                        "form": "ging onder"
+                    },
+                    {
+                        "form_id": "bd92ad8b-0466-4464-89eb-22f18e3622d8",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "present",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "ondergaat"
+                    },
+                    {
+                        "form_id": "8e4d8897-fad4-4edd-ac17-6a3d6be27e34",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "past",
+                            "singular",
+                            "subordinate-clause",
+                            "third-person"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "813e54a1-ae02-40fe-9268-695dad575783",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "main-clause",
+                            "plural",
+                            "present"
+                        ],
+                        "form": "gaan onder"
+                    },
+                    {
+                        "form_id": "9a883430-7b14-49df-b295-f7b94caf4709",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "main-clause",
+                            "past",
+                            "plural"
+                        ],
+                        "form": "gingen onder"
+                    },
+                    {
+                        "form_id": "4f9c9497-55cf-4850-8ff5-9d64bb01f5e5",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "plural",
+                            "present",
+                            "subordinate-clause"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "820e80b1-478e-463b-b1bf-b40ca9090e59",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "past",
+                            "plural",
+                            "subordinate-clause"
+                        ],
+                        "form": "ondergingen"
+                    },
+                    {
+                        "form_id": "bbc8e1f3-81e4-4873-93ff-1af2b56fb3bc",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "imperative",
+                            "main-clause",
+                            "present",
+                            "singular"
+                        ],
+                        "form": "ga onder"
+                    },
+                    {
+                        "form_id": "fd4b6fe6-3a82-4ae8-89a3-35ce7811b2b0",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "present"
+                        ],
+                        "form": "ondergaand"
+                    },
+                    {
+                        "form_id": "b30dbbc5-40d9-458d-9754-4bfb21579d77",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "tags": [
+                            "main-clause",
+                            "participle",
+                            "past"
+                        ],
+                        "form": "ondergegaan"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "1f52401a-2cb2-37a4-a4fe-afa8abb77465",
+                        "entry_id": "1efc89b5-4d79-35ff-bf81-0d824bf634bc",
+                        "glosses": [
+                            "to go down; to set"
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "bcf68ee5-a3b9-4392-bf50-b7c8434774d4",
+                                "sense_id": "1f52401a-2cb2-37a4-a4fe-afa8abb77465",
+                                "text": "De zon ging onder.",
+                                "translation": "The sun went down.",
+                                "english": "The sun went down."
+                            },
+                            {
+                                "example_id": "e72a2e95-f075-42a7-9809-607af0dccfb6",
+                                "sense_id": "1f52401a-2cb2-37a4-a4fe-afa8abb77465",
+                                "text": "De ondergaande zon.",
+                                "translation": "The setting sun.",
+                                "english": "The setting sun."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "ru-extract.jsonl": [],
+        "nl-extract.jsonl": [
+            {
+                "entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                "word": "ondergaan",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "3003cb67-d9b6-45f0-af5e-4eeddc6f7d1d",
+                        "entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "3fffab68-b82f-40f9-9228-0e6048b2bdb8",
+                        "entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "ondergaan"
+                    },
+                    {
+                        "form_id": "8e5f10ea-ce5f-41dc-bcc4-49245504fb3c",
+                        "entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "ondergáán"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "glosses": [
+                            "onderhevig gemaakt worden"
+                        ],
+                        "tags": [
+                            "transitive"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "b974a4f3-6237-4cf9-b92d-2b87dedb6fd3",
+                                "sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                                "text": "Hij onderging een zware operatie."
+                            },
+                            {
+                                "example_id": "d87dd1e7-98ce-4fe4-a367-302356720dc1",
+                                "sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                                "text": "Voor alle andere aanwezigen op de Spelen geldt dat ze de eerste drie dagen na aankomst een dagelijkse test ondergaan. Daarna gebeurt dat minder vaak, afhankelijk van de functie en hoe nauw het contact is met de sporter. In principe moet iedereen die aanwezig is op de Spelen het vooraf ingediende activiteitenplan volgen en het contact met anderen, onder wie inwoners van Japan, zoveel mogelijk beperken."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "2ca82b55-ef06-4536-9ca5-5655f395c019",
+                        "source_entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "source_sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "source_sense_description": "onderhevig gemaakt worden",
+                        "target_lang_word": "unterziehen",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "unterziehen",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6af4f18d-1406-38a7-9f89-b765791b51eb",
+                                        "entry_id": "f4a6523c-f85c-33b0-9a51-7c4525d36298",
+                                        "glosses": [
+                                            "eine (notwendige aber unangenehme oder gefährliche) Maßnahme an oder mit sich durchführen lassen"
+                                        ],
+                                        "tags": [
+                                            "reflexive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "a117b03e-0812-473a-ab99-65d0a12a834d",
+                                                "sense_id": "6af4f18d-1406-38a7-9f89-b765791b51eb",
+                                                "text": "Ende des Jahres unterzog sie sich dann doch einer Chemotherapie."
+                                            },
+                                            {
+                                                "example_id": "106fd57d-37ed-4dde-a3a9-528f12e7a799",
+                                                "sense_id": "6af4f18d-1406-38a7-9f89-b765791b51eb",
+                                                "text": "„Bei jeder vierten Schwangeren, die sich einem medikamentösen Schwangerschaftsabbruch unterzieht, kann das länger als 24 Stunden dauern.“"
+                                            },
+                                            {
+                                                "example_id": "6269d0a8-9fd3-43ff-ad12-20eb55425c57",
+                                                "sense_id": "6af4f18d-1406-38a7-9f89-b765791b51eb",
+                                                "text": "Wohl oder übel musste sich die Parteispitze einer Neuwahl unterziehen."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "0696d135-ad53-31d3-9958-defbb07fdb9c",
+                                        "entry_id": "f4a6523c-f85c-33b0-9a51-7c4525d36298",
+                                        "glosses": [
+                                            "eine notwendige (aber unangenehme oder gefährliche) Handlung an etwas oder jemandem durchführen"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "23cf2c65-0d49-4ed2-927c-4ea82d9e5827",
+                                                "sense_id": "0696d135-ad53-31d3-9958-defbb07fdb9c",
+                                                "text": "Wir müssen die Unterlagen einer gründlichen Prüfung unterziehen."
+                                            },
+                                            {
+                                                "example_id": "5a7ea627-c928-4bd0-9456-9aaa333f261f",
+                                                "sense_id": "0696d135-ad53-31d3-9958-defbb07fdb9c",
+                                                "text": "Die dem Verhör unterzogenen Gefangenen wurden anschließend wieder in ihre Zellen gebracht."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "unterziehen",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "2c669d82-6ded-38ee-8160-b072b8a18b7a",
+                                        "entry_id": "5934f302-5d47-3e6a-80b0-fc2fbd9c1dd6",
+                                        "glosses": [
+                                            "ein zusätzliches Kleidungsstück anziehen, das unter der bisherigen Kleidung getragen wird"
+                                        ],
+                                        "tags": [
+                                            "reflexive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c8975af9-6496-482a-9001-c7cf19cc8b0c",
+                                                "sense_id": "2c669d82-6ded-38ee-8160-b072b8a18b7a",
+                                                "text": "Zieh einen Pulli unter, es ist kalt!"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "f9b093f3-552a-3ac6-8b0c-11e3cfc020c6",
+                                        "entry_id": "5934f302-5d47-3e6a-80b0-fc2fbd9c1dd6",
+                                        "glosses": [
+                                            "einen zusätzlichen Bestandteil einer Speise vorsichtig (mit Spatel oder Schneebesen) in die Masse einarbeiten"
+                                        ],
+                                        "tags": [
+                                            "Kochen"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "ee657f0c-2c35-45c0-a263-2f192cb662ca",
+                                                "sense_id": "f9b093f3-552a-3ac6-8b0c-11e3cfc020c6",
+                                                "text": "In die Creme ziehen Sie dann langsam und vorsichtig mit gleichmäßigen Bewegungen den Eischnee unter."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "fb46a536-7030-4d94-a1d7-4881ea583446",
+                        "source_entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "source_sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "source_sense_description": "onderhevig gemaakt worden",
+                        "target_lang_word": "erfahren",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "erfahren",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f797e0fd-e985-3500-a7a6-48d6c1c10259",
+                                        "entry_id": "96346fa5-aaf8-3926-aefb-bbaafbb2eca1",
+                                        "glosses": [
+                                            "durch eigenes Erleben kennen lernen"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "a498026b-5bc1-4049-a998-cf9526b91a5f",
+                                                "sense_id": "f797e0fd-e985-3500-a7a6-48d6c1c10259",
+                                                "text": "Ich habe im Leben viel Gutes und Böses erfahren."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "942895e9-53b0-3ccd-a127-19274c2aa0a8",
+                                        "entry_id": "96346fa5-aaf8-3926-aefb-bbaafbb2eca1",
+                                        "glosses": [
+                                            "zur Kenntnis bekommen, von etwas Kenntnis erhalten, etwas mitgeteilt bekommen"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "144c6817-a26e-46b6-b16b-53e0d50601b9",
+                                                "sense_id": "942895e9-53b0-3ccd-a127-19274c2aa0a8",
+                                                "text": "Ich habe aus der Zeitung von Helgas Tod erfahren."
+                                            },
+                                            {
+                                                "example_id": "a17c0a15-be24-4aca-b09f-60d6d21f8f68",
+                                                "sense_id": "942895e9-53b0-3ccd-a127-19274c2aa0a8",
+                                                "text": "„Wenn die Polizei erfuhr, dass Dragan tot war, würde sie nach dessen Mörder suchen.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "erfahren",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "3e198d38-8f26-3dbb-ace4-9f881bdea5c2",
+                                        "entry_id": "7444f81b-c172-317a-887d-e7507f16008b",
+                                        "glosses": [
+                                            "reich an den in der Praxis erworbenen Kenntnissen"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "8ce14207-ff3f-4362-ba7e-e6e2c697f494",
+                                                "sense_id": "3e198d38-8f26-3dbb-ace4-9f881bdea5c2",
+                                                "text": "„Der erfahrene Pilot besteigt sein Segelflugzeug mit nicht mehr Angst als der Autofahrer sein Auto.“"
+                                            },
+                                            {
+                                                "example_id": "11eee906-37b7-4da6-bf81-450e78267753",
+                                                "sense_id": "3e198d38-8f26-3dbb-ace4-9f881bdea5c2",
+                                                "text": "Er ist ein erfahrener Handwerker."
+                                            },
+                                            {
+                                                "example_id": "fc100ff9-3872-4c49-b049-f92ad93ff099",
+                                                "sense_id": "3e198d38-8f26-3dbb-ace4-9f881bdea5c2",
+                                                "text": "[Wikipedia:] „Erfahrene Nutzer […] nehmen die Neulinge bei der Hand und machen sie freundlich mit den Regeln vertraut.“"
+                                            },
+                                            {
+                                                "example_id": "cf55bc1c-1f46-4f24-b7a7-51e57b408ed3",
+                                                "sense_id": "3e198d38-8f26-3dbb-ace4-9f881bdea5c2",
+                                                "text": "„Erfahrene Paragleiter wie Jean-Pierre attestieren Jordanien zwar ideale Bedingungen für den im Haschemitischen Königreich bislang fast unbekannten Sport.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "8c44070e-3717-4c62-b0ef-4a34d97092f4",
+                        "source_entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "source_sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "source_sense_description": "onderhevig gemaakt worden",
+                        "target_lang_word": "erleiden",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "erleiden",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "967bd368-8565-38af-9ceb-5a64f2dcb0a3",
+                                        "entry_id": "6a7e6b97-85ca-3aba-bad4-034702edae9d",
+                                        "glosses": [
+                                            "etwas körperlich oder seelisch Unangenehmes erleben; eine unangenehme Erfahrung machen"
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "2f4c15e0-c91c-4821-a28e-589129248014",
+                                                "sense_id": "967bd368-8565-38af-9ceb-5a64f2dcb0a3",
+                                                "text": "Aufgrund des Todes ihrer Mutter musste sie große psychische Schmerzen erleiden."
+                                            },
+                                            {
+                                                "example_id": "87556a79-fbcb-4b8b-afa1-615ff0f1eb0b",
+                                                "sense_id": "967bd368-8565-38af-9ceb-5a64f2dcb0a3",
+                                                "text": "Der Geschäftsmann hatte wegen der Wirtschaftskrise große finanzielle Verluste zu erleiden."
+                                            },
+                                            {
+                                                "example_id": "ee994bc0-e1d1-4fc3-a1e1-eafea5f318ac",
+                                                "sense_id": "967bd368-8565-38af-9ceb-5a64f2dcb0a3",
+                                                "text": "„Russland hat im Krieg gegen die Ukraine hohe Verluste erlitten.“"
+                                            },
+                                            {
+                                                "example_id": "7a299a5b-5e39-4dcf-8c87-c8c482eb741b",
+                                                "sense_id": "967bd368-8565-38af-9ceb-5a64f2dcb0a3",
+                                                "text": "„Keltische Kriegerscharen fielen, von Gallien kommend, in Italien ein, die Römer stellten sich ihnen in der Schlacht an der Allia und erlitten eine katastrophale Niederlage.“"
+                                            },
+                                            {
+                                                "example_id": "82e0237e-4219-45c2-8bc7-afe2e374a184",
+                                                "sense_id": "967bd368-8565-38af-9ceb-5a64f2dcb0a3",
+                                                "text": "„Viele Ostdeutsche haben Rückschläge erlitten und sind wieder aufgestanden. Sie haben gelernt, dass andere auch nur mit Wasser kochen.“"
+                                            },
+                                            {
+                                                "example_id": "f04da703-9700-4394-a546-c4dc9e470e9c",
+                                                "sense_id": "967bd368-8565-38af-9ceb-5a64f2dcb0a3",
+                                                "text": "„Drei Sätze reichen Daniil Medwedew, um das Finale der US Open für sich zu entscheiden. Sein Kontrahent Novak Djokovic erleidet die wohl bitterste Niederlage seiner Karriere.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "f897e099-49a3-4476-842c-87aa9610a8db",
+                        "source_entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "source_sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "source_sense_description": "onderhevig gemaakt worden",
+                        "target_lang_word": "undergo",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "undergo",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "efe2e286-a084-3aaa-bfb9-1d89145022ea",
+                                        "entry_id": "b6aa06fd-c747-3853-b3ff-275ad8f3e497",
+                                        "glosses": [
+                                            "To experience; to pass through a phase."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "e62c1f15-2fca-4afb-9acd-89c81fe9b8e9",
+                                                "sense_id": "efe2e286-a084-3aaa-bfb9-1d89145022ea",
+                                                "text": "The project is undergoing great changes."
+                                            },
+                                            {
+                                                "example_id": "4458b633-3044-4704-8a4e-c26523a1f331",
+                                                "sense_id": "efe2e286-a084-3aaa-bfb9-1d89145022ea",
+                                                "text": "Many of these classic methods are still used, with some modern improvements. For example, with the aid of special microphones and automated sound detection software, ornithologists recently reported […] that pine siskins (Spinus pinus) undergo an irregular, nomadic type of nocturnal migration."
+                                            },
+                                            {
+                                                "example_id": "63cc6302-569d-4502-bbab-7d1e932b35d4",
+                                                "sense_id": "efe2e286-a084-3aaa-bfb9-1d89145022ea",
+                                                "text": "The women underwent functional magnetic resonance imaging (fMRI), which measures changes in blood flow that happen with brain activity, while being shown images of their grandchild, another child they didn’t know, an adult they didn’t know, and the same-sex parent of their grandchild."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "6862c77e-9432-34d0-8c9c-e82d40a867d1",
+                                        "entry_id": "b6aa06fd-c747-3853-b3ff-275ad8f3e497",
+                                        "glosses": [
+                                            "To suffer or endure; bear with."
+                                        ],
+                                        "tags": [
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "67754d3a-4905-4d0a-b067-ebea8d2d48b7",
+                                                "sense_id": "6862c77e-9432-34d0-8c9c-e82d40a867d1",
+                                                "text": "The victim underwent great trauma."
+                                            },
+                                            {
+                                                "example_id": "a1167633-8a1f-4cbe-954c-a00a8d2547ce",
+                                                "sense_id": "6862c77e-9432-34d0-8c9c-e82d40a867d1",
+                                                "text": "She had to undergo surgery because of her broken leg."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "dcbc141f-44be-3fb9-b513-d60211d3a18d",
+                                        "entry_id": "b6aa06fd-c747-3853-b3ff-275ad8f3e497",
+                                        "glosses": [
+                                            "To go or move under or beneath."
+                                        ],
+                                        "tags": [
+                                            "obsolete",
+                                            "transitive"
+                                        ],
+                                        "examples": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "a95a14f6-ef2b-4f0f-953c-54717d8fce2c",
+                        "source_entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "source_sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "source_sense_description": "onderhevig gemaakt worden",
+                        "target_lang_word": "padecer",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "padecer",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "bf4fcf2e-e816-3d6d-b82c-b75a7452794a",
+                                        "entry_id": "0ae67128-b368-3e04-ad27-e0838d38395c",
+                                        "glosses": [
+                                            "Sufrir un daño de cualquier clase, como una carga, un mal o una enfermedad"
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "cef28197-b6e9-3afe-8781-8ea197b4be78",
+                                        "entry_id": "0ae67128-b368-3e04-ad27-e0838d38395c",
+                                        "glosses": [
+                                            "En particular, sobrellevar con entereza un daño tal"
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "e1a02483-63ef-4e4a-a147-915a655224d6",
+                        "source_entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "source_sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "source_sense_description": "onderhevig gemaakt worden",
+                        "target_lang_word": "perecer",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "perecer",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "8b098faa-3fb9-3aac-950f-6b9af3706e44",
+                                        "entry_id": "6d2ad434-48e4-3772-b7de-e7af478d700f",
+                                        "glosses": [
+                                            "Morir, fenecer, dejar de existir."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "4172dad2-dc7f-3085-87e4-e56485d6cebc",
+                                        "entry_id": "6d2ad434-48e4-3772-b7de-e7af478d700f",
+                                        "glosses": [
+                                            "Acabar, acabarse, terminar o dejar de ser."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "f12c8aad-63ae-4ecc-b021-a3efcd3d0077",
+                        "source_entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "source_sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "source_sense_description": "onderhevig gemaakt worden",
+                        "target_lang_word": "sufrir",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "sufrir",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "37a565c4-f441-3050-ad32-e87eb1f7e503",
+                                        "entry_id": "50475704-ab40-352d-9c04-841bfb3083c4",
+                                        "glosses": [
+                                            "Sentir un malestar, un dolor, una pena, cualquier otra sensación o situación indeseada."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "c617a6a1-244b-36f7-9e57-7951f3275a71",
+                                        "entry_id": "50475704-ab40-352d-9c04-841bfb3083c4",
+                                        "glosses": [
+                                            "Soportar un daño físico o moral."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "7ed12448-b938-4915-961b-5c1523cf8167",
+                                                "sense_id": "c617a6a1-244b-36f7-9e57-7951f3275a71",
+                                                "text": "Sufre la pérdida de su madre; está muy amarrido."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    },
+                                    {
+                                        "sense_id": "9e082100-00db-3fac-930a-d1cd1d9b6638",
+                                        "entry_id": "50475704-ab40-352d-9c04-841bfb3083c4",
+                                        "glosses": [
+                                            "Resistir un daño físico o moral con resignación."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"3\""
+                                    },
+                                    {
+                                        "sense_id": "7c225da2-4939-395b-bbc0-968dda40a917",
+                                        "entry_id": "50475704-ab40-352d-9c04-841bfb3083c4",
+                                        "glosses": [
+                                            "Pasar o someterse a una prueba."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"4\""
+                                    },
+                                    {
+                                        "sense_id": "1013909a-64a6-3e24-9afe-add1a43319b6",
+                                        "entry_id": "50475704-ab40-352d-9c04-841bfb3083c4",
+                                        "glosses": [
+                                            "Resistir algún peso."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"5\""
+                                    },
+                                    {
+                                        "sense_id": "0237fbeb-2b49-38f7-af86-50fdfb7ff540",
+                                        "entry_id": "50475704-ab40-352d-9c04-841bfb3083c4",
+                                        "glosses": [
+                                            "Permitir."
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "ad02d012-8271-4fb9-b1ad-a84b1cdfec43",
+                                                "sense_id": "0237fbeb-2b49-38f7-af86-50fdfb7ff540",
+                                                "text": "Dejad en paz a estos animalitos; no sufriré que los molestéis."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"6\""
+                                    },
+                                    {
+                                        "sense_id": "0f3f54bc-5587-3d82-95e8-5131ca4e4f01",
+                                        "entry_id": "50475704-ab40-352d-9c04-841bfb3083c4",
+                                        "glosses": [
+                                            "Recibir el golpe por la parte opuesta de la tabla en que se clava."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"7\""
+                                    },
+                                    {
+                                        "sense_id": "8032e95c-85a9-3e64-bb39-976fb7b43597",
+                                        "entry_id": "50475704-ab40-352d-9c04-841bfb3083c4",
+                                        "glosses": [
+                                            "Sostener."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"8\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "sufrir",
+                                "target_lang_code": "es",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "9914a381-9cd9-3a05-9263-051c116c43eb",
+                                        "entry_id": "2f76840b-5179-3cd3-9dff-21603935d9ab",
+                                        "glosses": [
+                                            "Contenerse."
+                                        ],
+                                        "tags": [],
+                                        "examples": [],
+                                        "sense_index_json": "\"9\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "43f4e3ea-4c94-40d1-ba54-16a4044c6a13",
+                        "source_entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "source_sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "source_sense_description": "onderhevig gemaakt worden",
+                        "target_lang_word": "vivir un hecho",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "f9b9915b-5b8e-4705-84a3-a84c576928da",
+                        "source_entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "source_sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "source_sense_description": "onderhevig gemaakt worden",
+                        "target_lang_word": "vivir un suceso",
+                        "target_lang_code": "es",
+                        "target_sense_ids": [],
+                        "cross_references": []
+                    },
+                    {
+                        "translation_id": "418ef753-a92d-4056-a7f1-f671237cfb1c",
+                        "source_entry_id": "e0d6bda2-0395-3183-b27c-eb56e56f23cf",
+                        "source_sense_id": "1e7e1539-e2c7-35ff-99ba-62b5606c8a56",
+                        "source_sense_description": "iets ondergaan",
+                        "target_lang_word": "unterziehen",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "unterziehen",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "6af4f18d-1406-38a7-9f89-b765791b51eb",
+                                        "entry_id": "f4a6523c-f85c-33b0-9a51-7c4525d36298",
+                                        "glosses": [
+                                            "eine (notwendige aber unangenehme oder gefährliche) Maßnahme an oder mit sich durchführen lassen"
+                                        ],
+                                        "tags": [
+                                            "reflexive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "a117b03e-0812-473a-ab99-65d0a12a834d",
+                                                "sense_id": "6af4f18d-1406-38a7-9f89-b765791b51eb",
+                                                "text": "Ende des Jahres unterzog sie sich dann doch einer Chemotherapie."
+                                            },
+                                            {
+                                                "example_id": "106fd57d-37ed-4dde-a3a9-528f12e7a799",
+                                                "sense_id": "6af4f18d-1406-38a7-9f89-b765791b51eb",
+                                                "text": "„Bei jeder vierten Schwangeren, die sich einem medikamentösen Schwangerschaftsabbruch unterzieht, kann das länger als 24 Stunden dauern.“"
+                                            },
+                                            {
+                                                "example_id": "6269d0a8-9fd3-43ff-ad12-20eb55425c57",
+                                                "sense_id": "6af4f18d-1406-38a7-9f89-b765791b51eb",
+                                                "text": "Wohl oder übel musste sich die Parteispitze einer Neuwahl unterziehen."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "0696d135-ad53-31d3-9958-defbb07fdb9c",
+                                        "entry_id": "f4a6523c-f85c-33b0-9a51-7c4525d36298",
+                                        "glosses": [
+                                            "eine notwendige (aber unangenehme oder gefährliche) Handlung an etwas oder jemandem durchführen"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "23cf2c65-0d49-4ed2-927c-4ea82d9e5827",
+                                                "sense_id": "0696d135-ad53-31d3-9958-defbb07fdb9c",
+                                                "text": "Wir müssen die Unterlagen einer gründlichen Prüfung unterziehen."
+                                            },
+                                            {
+                                                "example_id": "5a7ea627-c928-4bd0-9456-9aaa333f261f",
+                                                "sense_id": "0696d135-ad53-31d3-9958-defbb07fdb9c",
+                                                "text": "Die dem Verhör unterzogenen Gefangenen wurden anschließend wieder in ihre Zellen gebracht."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            },
+                            {
+                                "target_word": "unterziehen",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "2c669d82-6ded-38ee-8160-b072b8a18b7a",
+                                        "entry_id": "5934f302-5d47-3e6a-80b0-fc2fbd9c1dd6",
+                                        "glosses": [
+                                            "ein zusätzliches Kleidungsstück anziehen, das unter der bisherigen Kleidung getragen wird"
+                                        ],
+                                        "tags": [
+                                            "reflexive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "c8975af9-6496-482a-9001-c7cf19cc8b0c",
+                                                "sense_id": "2c669d82-6ded-38ee-8160-b072b8a18b7a",
+                                                "text": "Zieh einen Pulli unter, es ist kalt!"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "f9b093f3-552a-3ac6-8b0c-11e3cfc020c6",
+                                        "entry_id": "5934f302-5d47-3e6a-80b0-fc2fbd9c1dd6",
+                                        "glosses": [
+                                            "einen zusätzlichen Bestandteil einer Speise vorsichtig (mit Spatel oder Schneebesen) in die Masse einarbeiten"
+                                        ],
+                                        "tags": [
+                                            "Kochen"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "ee657f0c-2c35-45c0-a263-2f192cb662ca",
+                                                "sense_id": "f9b093f3-552a-3ac6-8b0c-11e3cfc020c6",
+                                                "text": "In die Creme ziehen Sie dann langsam und vorsichtig mit gleichmäßigen Bewegungen den Eischnee unter."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "625886d1-8cc9-3342-83df-d57fdb22ebcf",
+                "word": "ondergaan",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "39001c69-499c-4fdc-bde6-bab421b74cd6",
+                        "entry_id": "625886d1-8cc9-3342-83df-d57fdb22ebcf",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "ging onder"
+                    },
+                    {
+                        "form_id": "21cd3747-fd20-4b59-9545-658ed1e9c80a",
+                        "entry_id": "625886d1-8cc9-3342-83df-d57fdb22ebcf",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "ondergegaan"
+                    },
+                    {
+                        "form_id": "56c6237a-5dcc-40d9-bfac-98f0bfcf64e6",
+                        "entry_id": "625886d1-8cc9-3342-83df-d57fdb22ebcf",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "óndergaan"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "d5f67bb9-82de-31f8-b4ff-784e2ee49fed",
+                        "entry_id": "625886d1-8cc9-3342-83df-d57fdb22ebcf",
+                        "glosses": [
+                            "onder een oppervlak verdwijnen"
+                        ],
+                        "tags": [
+                            "ergative"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "fbd35629-e364-45de-9ed5-0a5f3127a55a",
+                                "sense_id": "d5f67bb9-82de-31f8-b4ff-784e2ee49fed",
+                                "text": "De duiker gaat onder. Hij is niet langer deels of volledig boven het water, maar is nu volledig onder water."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "d49848f7-27f5-3f3c-8cc0-0d0a7332d447",
+                        "entry_id": "625886d1-8cc9-3342-83df-d57fdb22ebcf",
+                        "glosses": [
+                            "achter de horizon verdwijnen"
+                        ],
+                        "tags": [
+                            "ergative"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "fcf3a69e-ab02-4626-aa99-05ef5adb5a7b",
+                                "sense_id": "d49848f7-27f5-3f3c-8cc0-0d0a7332d447",
+                                "text": "De zon gaat onder, de avondschemering begint."
+                            },
+                            {
+                                "example_id": "7e55e4a4-1847-44fc-896b-29b40769f967",
+                                "sense_id": "d49848f7-27f5-3f3c-8cc0-0d0a7332d447",
+                                "text": "Tijdens het eten van mijn pastaprutje transformeerde de lucht tot een oranje vuurzee door de ondergaande zon."
+                            }
+                        ]
+                    },
+                    {
+                        "sense_id": "c457d041-36a3-3987-b23f-315a6467419f",
+                        "entry_id": "625886d1-8cc9-3342-83df-d57fdb22ebcf",
+                        "glosses": [
+                            "te gronde gaan"
+                        ],
+                        "tags": [
+                            "ergative"
+                        ],
+                        "examples": [
+                            {
+                                "example_id": "bea851fb-3893-4788-b721-5252954c1406",
+                                "sense_id": "c457d041-36a3-3987-b23f-315a6467419f",
+                                "text": "Verdwijnen de toeristen, zal de stad ondergaan."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [
+                    {
+                        "translation_id": "4f397fa3-14f5-408b-a65e-02027e777fb8",
+                        "source_entry_id": "625886d1-8cc9-3342-83df-d57fdb22ebcf",
+                        "source_sense_id": "d49848f7-27f5-3f3c-8cc0-0d0a7332d447",
+                        "source_sense_description": "te gronde gaan",
+                        "target_lang_word": "untergehen",
+                        "target_lang_code": "de",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "untergehen",
+                                "target_lang_code": "de",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "1805880a-936f-31e3-89a0-b6a58f7b7e55",
+                                        "entry_id": "5148af47-691f-3906-bfcf-2e704028f63d",
+                                        "glosses": [
+                                            "versinken, unter oder in etwas verschwinden; nicht mehr hörbar sein, weil durch andere Geräusche oder Lärm übertönt"
+                                        ],
+                                        "tags": [
+                                            "bei Geräuschen"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "32b731ca-5461-4874-9e6f-ad74e961ba6b",
+                                                "sense_id": "1805880a-936f-31e3-89a0-b6a58f7b7e55",
+                                                "text": "Die Sonne wird in zwei Stunden untergehen."
+                                            },
+                                            {
+                                                "example_id": "f96cce08-401b-4fbd-9940-76ebd3376fe3",
+                                                "sense_id": "1805880a-936f-31e3-89a0-b6a58f7b7e55",
+                                                "text": "Die wenigen kritischen Stimmen gingen im Jubel der Masse unter."
+                                            },
+                                            {
+                                                "example_id": "4ce7c8bc-f64c-414a-972b-d47716c09c79",
+                                                "sense_id": "1805880a-936f-31e3-89a0-b6a58f7b7e55",
+                                                "text": "Ich mache mir keine Sorgen um unsere Ressourcen, denn die zusätzlichen Belastungen werden im Rauschen untergehen."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"1\""
+                                    },
+                                    {
+                                        "sense_id": "29988204-3a99-36c0-a7b9-9f40c246967a",
+                                        "entry_id": "5148af47-691f-3906-bfcf-2e704028f63d",
+                                        "glosses": [
+                                            "im Wasser versinken, ertrinken, in einem See/Meer verschwinden"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "fb261c55-6c76-4acf-a653-0324b6f60f43",
+                                                "sense_id": "29988204-3a99-36c0-a7b9-9f40c246967a",
+                                                "text": "Als die Titanic einen Eisberg rammte, ging sie unter."
+                                            },
+                                            {
+                                                "example_id": "e29e2f7a-38f1-44e1-ad7d-525b0f2ed451",
+                                                "sense_id": "29988204-3a99-36c0-a7b9-9f40c246967a",
+                                                "text": "Du gehst unter, wenn Du betrunken in den See springst."
+                                            },
+                                            {
+                                                "example_id": "c614697f-5dc0-47c6-96eb-d68b41ab2bc0",
+                                                "sense_id": "29988204-3a99-36c0-a7b9-9f40c246967a",
+                                                "text": "Das Schiff ist mit 213 Menschen an Bord untergegangen."
+                                            },
+                                            {
+                                                "example_id": "828e62fa-ee29-4227-9993-6078f45b9127",
+                                                "sense_id": "29988204-3a99-36c0-a7b9-9f40c246967a",
+                                                "text": "„Venedig wird definitiv untergehen.“"
+                                            }
+                                        ],
+                                        "sense_index_json": "\"2\""
+                                    },
+                                    {
+                                        "sense_id": "85fe3a90-144a-3113-9516-ca18137f7a97",
+                                        "entry_id": "5148af47-691f-3906-bfcf-2e704028f63d",
+                                        "glosses": [
+                                            "aussterben, einer Katastrophe zum Opfer fallen"
+                                        ],
+                                        "tags": [],
+                                        "examples": [
+                                            {
+                                                "example_id": "7a200033-f7a4-4d23-8da2-fb4f2e947d5c",
+                                                "sense_id": "85fe3a90-144a-3113-9516-ca18137f7a97",
+                                                "text": "Die Kultur der Mayas ging unter, als die spanischen Eroberer mit ihrer Suche nach Gold begannen."
+                                            },
+                                            {
+                                                "example_id": "274957a6-5383-4086-90a6-76fa325f2f38",
+                                                "sense_id": "85fe3a90-144a-3113-9516-ca18137f7a97",
+                                                "text": "Wenn Blauland in diesem Konflikt Nuklearwaffen einsetzt, wird die Menschheit untergehen."
+                                            }
+                                        ],
+                                        "sense_index_json": "\"3\""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "translation_id": "1cc42e00-f71c-466b-a868-ef38cc5b330f",
+                        "source_entry_id": "625886d1-8cc9-3342-83df-d57fdb22ebcf",
+                        "source_sense_id": "d49848f7-27f5-3f3c-8cc0-0d0a7332d447",
+                        "source_sense_description": "te gronde gaan",
+                        "target_lang_word": "perish",
+                        "target_lang_code": "en",
+                        "target_sense_ids": [],
+                        "cross_references": [
+                            {
+                                "target_word": "perish",
+                                "target_lang_code": "en",
+                                "target_senses": [
+                                    {
+                                        "sense_id": "f50b3801-f7df-38e3-a4d4-6b09c921ba57",
+                                        "entry_id": "8846faea-b34d-3c87-afe0-e835c9f76ae9",
+                                        "glosses": [
+                                            "To decay and disappear; to waste away to nothing."
+                                        ],
+                                        "tags": [
+                                            "intransitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "2ed2a986-7d72-4d18-9216-c9ee0e5fb8cd",
+                                                "sense_id": "f50b3801-f7df-38e3-a4d4-6b09c921ba57",
+                                                "text": "1881, Tarafa, translated by W. A. Clouston, The Poem of Tarafa\nI consider time as a treasure decreasing every night; and that which every day diminishes soon perishes for ever."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "7e7fd8ff-23da-3388-9db5-98b87799da52",
+                                        "entry_id": "8846faea-b34d-3c87-afe0-e835c9f76ae9",
+                                        "glosses": [
+                                            "To decay in such a way that it cannot be used for its original purpose"
+                                        ],
+                                        "tags": [
+                                            "intransitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "e7d1ddb3-68c2-4a40-98a2-a79ad1b9daa5",
+                                                "sense_id": "7e7fd8ff-23da-3388-9db5-98b87799da52",
+                                                "text": "The difficulty is that fresh foods perish due to the multiplication in them of harmful bacteria."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "d07c9937-0436-3f0f-b34b-db30f68ca19d",
+                                        "entry_id": "8846faea-b34d-3c87-afe0-e835c9f76ae9",
+                                        "glosses": [
+                                            "To die; to cease to live."
+                                        ],
+                                        "tags": [
+                                            "intransitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "0079f8b7-7fcf-4823-99bd-7e412a8c289f",
+                                                "sense_id": "d07c9937-0436-3f0f-b34b-db30f68ca19d",
+                                                "text": "When it goeth well with the righteous, the citie reioyceth: and when the wicked perish, there is shouting."
+                                            },
+                                            {
+                                                "example_id": "35bbc1d9-3573-4095-8df5-7c32168c3248",
+                                                "sense_id": "d07c9937-0436-3f0f-b34b-db30f68ca19d",
+                                                "text": "[…]the ship struck upon a sand, and […] the sea broke over her in such a manner that we expected we should all have perished immediately; and we were immediately driven into our close quarters, to shelter us from the very foam and spray of the sea."
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "sense_id": "2d221f56-61e5-3cd4-b568-8025960c2875",
+                                        "entry_id": "8846faea-b34d-3c87-afe0-e835c9f76ae9",
+                                        "glosses": [
+                                            "To cause to perish."
+                                        ],
+                                        "tags": [
+                                            "obsolete",
+                                            "transitive"
+                                        ],
+                                        "examples": [
+                                            {
+                                                "example_id": "5e652a62-1d6d-484d-bfb8-7572382f1b07",
+                                                "sense_id": "2d221f56-61e5-3cd4-b568-8025960c2875",
+                                                "text": "that closeness did impair and a little perish his understanding"
+                                            },
+                                            {
+                                                "example_id": "f89c4e1a-c2ec-401a-9cc9-c0d5ffaba172",
+                                                "sense_id": "2d221f56-61e5-3cd4-b568-8025960c2875",
+                                                "text": "\"Leggo my shou'der, I tell you! Leggo!\" He struggled with her, and the customers came forward. \"Chrise! I'll perish you, if you ain't careful!\" He turned suddenly,..."
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "1c30d1f8-6e94-32a8-a676-767e131b52be",
+                "word": "ondergaan",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "54e5285c-2d8c-4680-b5e3-00f60666be16",
+                        "entry_id": "1c30d1f8-6e94-32a8-a676-767e131b52be",
+                        "tags": [
+                            "past"
+                        ],
+                        "form": "ging onder"
+                    },
+                    {
+                        "form_id": "5d7a2eec-b911-46e5-a311-744ed86d6d5e",
+                        "entry_id": "1c30d1f8-6e94-32a8-a676-767e131b52be",
+                        "tags": [
+                            "past",
+                            "participle"
+                        ],
+                        "form": "ondergegaan"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "2bb24034-1365-3e09-896a-5460afd5db31",
+                        "entry_id": "1c30d1f8-6e94-32a8-a676-767e131b52be",
+                        "glosses": [
+                            "voltooid deelwoord van ondergaan"
+                        ],
+                        "tags": [
+                            "form-of"
+                        ],
+                        "examples": []
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "pl-extract.jsonl": [],
+        "fr-extract.jsonl": [
+            {
+                "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                "word": "ondergaan",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "9b2c68a2-0d1f-4d14-a43e-98eb5ddc015f",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "singular"
+                        ],
+                        "form": "onderga"
+                    },
+                    {
+                        "form_id": "51316c5f-1219-4532-9567-b74cfbe3bec7",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "singular",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "21b97f55-e271-469e-ba6d-b990d0761a29",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "informal"
+                        ],
+                        "form": "ondergaat"
+                    },
+                    {
+                        "form_id": "e5a06d44-a976-44db-940f-13d47858aea1",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "tags": [
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "ondergaat"
+                    },
+                    {
+                        "form_id": "4d4aad3b-8fcb-4131-9b29-6f67ac161937",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "plural",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "ondergingen"
+                    },
+                    {
+                        "form_id": "91f23539-f566-487f-8128-b0a087571f6e",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "tags": [
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "ondergaat"
+                    },
+                    {
+                        "form_id": "9fb8ae46-cd5a-4c07-81f3-b1ff7308a4f6",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "tags": [
+                            "preterite",
+                            "second-person"
+                        ],
+                        "form": "onderging"
+                    },
+                    {
+                        "form_id": "be6e7605-cedd-4ac4-bfcf-08e250011c84",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "tags": [
+                            "auxiliary"
+                        ],
+                        "form": "hebben"
+                    },
+                    {
+                        "form_id": "a44b2fc2-b356-4b7f-a5a1-11b549cd6a9b",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "ondergaand"
+                    },
+                    {
+                        "form_id": "83d7fca4-8f89-4989-b889-062fa559d8a5",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "ondergáán"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "4f9078b4-6ebe-357b-b95c-eafc8f3965d8",
+                        "entry_id": "7dc761d3-82d3-3516-ae85-9f7c249ab7d6",
+                        "glosses": [
+                            "Endurer, souffrir, subir."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "be5207da-1d00-4a5a-8bd9-6f043ab0a20d",
+                                "sense_id": "4f9078b4-6ebe-357b-b95c-eafc8f3965d8",
+                                "text": "Hij onderging zijn straf. — Il a enduré sa peine."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            },
+            {
+                "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                "word": "ondergaan",
+                "pos": "verb",
+                "lang_code": "nl",
+                "forms": [
+                    {
+                        "form_id": "89b3c1ec-4f8a-4597-bde7-04a3eddf4f50",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "singular"
+                        ],
+                        "form": "ga onder"
+                    },
+                    {
+                        "form_id": "47a02798-91b2-4c89-87af-27692708331c",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "singular",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "ging onder"
+                    },
+                    {
+                        "form_id": "e4fda074-4887-4526-b680-0f2f892271e0",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "singular",
+                            "informal"
+                        ],
+                        "form": "gaat onder"
+                    },
+                    {
+                        "form_id": "a0695cb5-e55b-424b-bbad-dbc4ea004336",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "present",
+                            "third-person"
+                        ],
+                        "form": "gaat onder"
+                    },
+                    {
+                        "form_id": "a60e5a5e-1774-45a5-b157-6ebf1a0beb0b",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "present",
+                            "first-person",
+                            "plural"
+                        ],
+                        "form": "gaan onder"
+                    },
+                    {
+                        "form_id": "12246605-7cd5-436c-bccd-cbc3fa16082b",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "preterite",
+                            "first-person",
+                            "plural",
+                            "second-person",
+                            "informal",
+                            "third-person"
+                        ],
+                        "form": "gingen onder"
+                    },
+                    {
+                        "form_id": "928f4c3d-42be-425f-a7a5-ff2213cbf8ab",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "present",
+                            "second-person",
+                            "plural",
+                            "informal"
+                        ],
+                        "form": "gaan onder"
+                    },
+                    {
+                        "form_id": "dcb69102-8818-4ad4-a16b-9c5298895697",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "present",
+                            "third-person",
+                            "plural"
+                        ],
+                        "form": "gaan onder"
+                    },
+                    {
+                        "form_id": "1444d435-4a32-4a2a-b7b3-502587a1dd9d",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "present",
+                            "second-person"
+                        ],
+                        "form": "gaat onder"
+                    },
+                    {
+                        "form_id": "bd995836-900e-4ad3-b42b-108094328a23",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "preterite",
+                            "second-person"
+                        ],
+                        "form": "ging onder"
+                    },
+                    {
+                        "form_id": "f21575eb-8db1-4a4f-a5a9-3d3a08e11b63",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "auxiliary"
+                        ],
+                        "form": "zijn"
+                    },
+                    {
+                        "form_id": "c98bf54c-8191-4502-8c7b-ed9f2c216871",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "participle",
+                            "present"
+                        ],
+                        "form": "gaan onderd"
+                    },
+                    {
+                        "form_id": "83a974a0-44e2-4653-a44a-50b22e053cc8",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "participle",
+                            "past"
+                        ],
+                        "form": "ondergegaan"
+                    },
+                    {
+                        "form_id": "52d91f2f-3e2e-40d6-900b-603d5c15064d",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "tags": [
+                            "canonical"
+                        ],
+                        "form": "óndergaan"
+                    }
+                ],
+                "senses": [
+                    {
+                        "sense_id": "95f72ef2-5fc9-3271-b256-e6b96f8d1d7d",
+                        "entry_id": "2b6f7342-a3dd-3553-98af-59f13903c265",
+                        "glosses": [
+                            "Se coucher (disparaître sous l'horizon)."
+                        ],
+                        "tags": [],
+                        "examples": [
+                            {
+                                "example_id": "f8202513-a0ae-430c-ab14-2280ae53a15e",
+                                "sense_id": "95f72ef2-5fc9-3271-b256-e6b96f8d1d7d",
+                                "text": "De zon ging onder. — Le soleil s'est couché."
+                            },
+                            {
+                                "example_id": "4bdbf357-fed1-40cc-bc14-01d9b5b2e72e",
+                                "sense_id": "95f72ef2-5fc9-3271-b256-e6b96f8d1d7d",
+                                "text": "De ondergaande zon. — Le soleil couchant."
+                            }
+                        ]
+                    }
+                ],
+                "translations": [],
+                "word_linkages": []
+            }
+        ],
+        "it-extract.jsonl": [],
+        "de-extract.jsonl": [],
+        "cs-extract.jsonl": [],
+        "es-extract.jsonl": [],
+        "tr-extract.jsonl": []
+    }
+}

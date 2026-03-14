@@ -2,6 +2,8 @@
 
 package com.slovy.slovymovyapp.builder
 
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import java.io.File
 import java.nio.file.Files
@@ -415,9 +417,173 @@ class ProcessedOverRawIngestionTest {
         assertEquals(exception.message?.contains("not found"), true, "Error should mention word not found")
     }
 
+    @Test
+    fun translations_only_routes_multi_cluster_same_pos_senses_by_hint() {
+        val outDir = Files.createTempDirectory("translations_only_multi_cluster_test").toFile()
+        val serverDbManager = ServerDbManager(outDir)
+
+        val lang = "nl"
+        val word = "voorkomen"
+        val builder = JsonIngestionBuilder({ from, to -> serverDbManager.openTranslation(from, to) }, mapOf(word to 3.0))
+
+        val processedFile = resourceFile("processed_json_files/$lang/$word.json")
+        val rawFile = resourceFile("db_extract/$lang/$word.json")
+        val dictDb = serverDbManager.openDictionary(lang)
+        val dictQ = dictDb.dictionaryQueries
+
+        builder.ingest(processedFile.readText(), rawFile.readText(), dictDb)
+
+        val lemmaId = dictQ.selectLemmasByWord(lang, word).executeAsList().first().id
+        val verbLemmaPos = dictQ.selectLemmaPosByLemmaId(lemmaId).executeAsList()
+            .filter { it.pos == DictionaryPos.VERB }
+        assertEquals(2, verbLemmaPos.size, "Expected 2 verb lemma_pos rows for '$word'")
+
+        val occurLemmaPosId = verbLemmaPos.firstOrNull { lemmaPos ->
+            dictQ.selectFormsWithIdByLemmaPosId(lemmaPos.id).executeAsList().any { it.form == "vóórkomen" }
+        }?.id
+        val preventLemmaPosId = verbLemmaPos.firstOrNull { lemmaPos ->
+            dictQ.selectFormsWithIdByLemmaPosId(lemmaPos.id).executeAsList().any { it.form == "voorkómen" }
+        }?.id
+
+        assertNotNull(occurLemmaPosId, "Could not find the 'vóórkomen' verb cluster")
+        assertNotNull(preventLemmaPosId, "Could not find the 'voorkómen' verb cluster")
+
+        val occurSenseId = com.slovy.slovymovyapp.ingestion.uuidParse("9a1a8666-81d1-3048-b400-08710a782d3f")
+        val preventSenseId = com.slovy.slovymovyapp.ingestion.uuidParse("8b8a7239-f048-3aa6-9f01-0db625accec2")
+
+        assertTrue(
+            dictQ.selectSensesByLemmaPosId(occurLemmaPosId).executeAsList().any { it.sense_id == occurSenseId },
+            "Expected occur sense to belong to the 'vóórkomen' cluster"
+        )
+        assertTrue(
+            dictQ.selectSensesByLemmaPosId(preventLemmaPosId).executeAsList().any { it.sense_id == preventSenseId },
+            "Expected prevent sense to belong to the 'voorkómen' cluster"
+        )
+
+        val translationsOnlyJson = """
+        {
+          "entries": [
+            {
+              "pos": "verb",
+              "senses": [
+                {
+                  "sense_id": "$occurSenseId",
+                  "sense_definition": "test",
+                  "learner_level": "A1",
+                  "frequency": "High",
+                  "semantic_group_id": "occur",
+                  "target_lang_definitions": {
+                    "uk": "траплятися"
+                  },
+                  "translations": {
+                    "uk": [
+                      {
+                        "target_lang_word": "траплятися"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "sense_id": "$preventSenseId",
+                  "sense_definition": "test",
+                  "learner_level": "A1",
+                  "frequency": "High",
+                  "semantic_group_id": "prevent",
+                  "target_lang_definitions": {
+                    "uk": "запобігати"
+                  },
+                  "translations": {
+                    "uk": [
+                      {
+                        "target_lang_word": "запобігати"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        """.trimIndent()
+
+        builder.ingestTranslationsOnly(
+            translationsOnlyJson,
+            word,
+            lang,
+            serverDbManager.openDictionary(lang)
+        )
+
+        val trDbUk = serverDbManager.openTranslation(lang, "uk")
+        val trQUk = trDbUk.translationQueries
+        val occurTranslations = trQUk.selectSenseTranslationsBySense(occurSenseId, lang, "uk").executeAsList()
+        val preventTranslations = trQUk.selectSenseTranslationsBySense(preventSenseId, lang, "uk").executeAsList()
+
+        assertEquals(1, occurTranslations.size, "Expected one Ukrainian translation for occur sense")
+        assertEquals(1, preventTranslations.size, "Expected one Ukrainian translation for prevent sense")
+        assertEquals(occurLemmaPosId, occurTranslations.single().lemma_pos_id)
+        assertEquals(preventLemmaPosId, preventTranslations.single().lemma_pos_id)
+    }
+
     private fun resourceFile(path: String): File {
         val cl = Thread.currentThread().contextClassLoader
         val url = cl.getResource(path) ?: error("Resource not found: $path")
         return File(url.toURI())
     }
+
+    private fun deleteLemmaPosHint(serverDbManager: ServerDbManager, lang: String, senseId: kotlin.uuid.Uuid) {
+        val hexSenseId = senseId.toByteArray().joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }
+        JdbcSqliteDriver("jdbc:sqlite:${serverDbManager.dictionaryDbFile(lang).absolutePath}").use { driver ->
+            driver.execute(
+                identifier = null,
+                sql = "DELETE FROM lemma_pos_sense_hint WHERE sense_id = X'$hexSenseId'",
+                parameters = 0
+            )
+        }
+    }
+
+    private fun translationsOnlyJson(occurSenseId: String, preventSenseId: String): String = """
+        {
+          "entries": [
+            {
+              "pos": "verb",
+              "senses": [
+                {
+                  "sense_id": "$occurSenseId",
+                  "sense_definition": "test",
+                  "learner_level": "A1",
+                  "frequency": "High",
+                  "semantic_group_id": "occur",
+                  "target_lang_definitions": {
+                    "uk": "траплятися"
+                  },
+                  "translations": {
+                    "uk": [
+                      {
+                        "target_lang_word": "траплятися"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "sense_id": "$preventSenseId",
+                  "sense_definition": "test",
+                  "learner_level": "A1",
+                  "frequency": "High",
+                  "semantic_group_id": "prevent",
+                  "target_lang_definitions": {
+                    "uk": "запобігати"
+                  },
+                  "translations": {
+                    "uk": [
+                      {
+                        "target_lang_word": "запобігати"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+    """.trimIndent()
 }

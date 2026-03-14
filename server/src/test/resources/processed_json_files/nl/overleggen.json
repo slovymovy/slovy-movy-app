@@ -1,0 +1,209 @@
+{
+    "word_family": [
+        "overleg"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "06b806c9-7b3c-3762-b315-9c1bfe285e61",
+                    "sense_definition": "Met anderen praten om samen een besluit te nemen of een plan te maken.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "communication",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "We moeten even <overleggen> over de plannen voor het weekend.",
+                            "target_lang_translations": {
+                                "en": "We need to briefly <consult> about the plans for the weekend.",
+                                "ru": "Нам нужно <w>обсудить</w> планы на выходные."
+                            }
+                        },
+                        {
+                            "text": "Hij heeft dit besluit niet met zijn collega's <overlegd>.",
+                            "target_lang_translations": {
+                                "en": "He did not <consult> his colleagues about this decision.",
+                                "ru": "Он не <w>обсудил</w> это решение со своими коллегами."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "bespreken",
+                        "discussiëren",
+                        "praten"
+                    ],
+                    "common_phrases": [
+                        "even overleggen",
+                        "met iemand overleggen",
+                        "gezamenlijk overleggen"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To talk with others to make a joint decision or plan.",
+                        "ru": "Разговаривать с другими, чтобы принять совместное решение или составить план."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "consult",
+                                "target_lang_sense_clarification": "seek information or advice from someone"
+                            },
+                            {
+                                "target_lang_word": "confer",
+                                "target_lang_sense_clarification": "have discussions; exchange opinions"
+                            },
+                            {
+                                "target_lang_word": "deliberate",
+                                "target_lang_sense_clarification": "engage in long and careful consideration"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "советоваться",
+                                "target_lang_sense_clarification": "просить совета или мнения"
+                            },
+                            {
+                                "target_lang_word": "обсуждать",
+                                "target_lang_sense_clarification": "рассматривать вопрос совместно"
+                            },
+                            {
+                                "target_lang_word": "согласовывать",
+                                "target_lang_sense_clarification": "приходить к общему мнению"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "56e7a390-22b2-3dc3-8590-4e2e225e6f02",
+                    "sense_definition": "Officiële documenten of bewijsstukken laten zien of indienen ter controle.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "administration",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "U moet een geldig legitimatiebewijs kunnen <overleggen>.",
+                            "target_lang_translations": {
+                                "en": "You must be able to <produce> valid identification.",
+                                "ru": "Вы должны быть в состоянии <w>предъявить</w> действительное удостоверение личности."
+                            }
+                        },
+                        {
+                            "text": "De sollicitant kon geen diploma's <overleggen> tijdens het gesprek.",
+                            "target_lang_translations": {
+                                "en": "The applicant could not <produce> any diplomas during the interview.",
+                                "ru": "Соискатель не смог <w>предоставить</w> дипломы во время собеседования."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "voorleggen"
+                    ],
+                    "common_phrases": [
+                        "documenten overleggen",
+                        "bewijzen overleggen",
+                        "stukken overleggen"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "formal"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To show or submit official documents or evidence for inspection.",
+                        "ru": "Предъявлять или подавать официальные документы или доказательства для проверки."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "produce",
+                                "target_lang_sense_clarification": "show or provide something for consideration"
+                            },
+                            {
+                                "target_lang_word": "submit",
+                                "target_lang_sense_clarification": "present for review"
+                            },
+                            {
+                                "target_lang_word": "present",
+                                "target_lang_sense_clarification": "formally show"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "предъявлять",
+                                "target_lang_sense_clarification": "показывать документы"
+                            },
+                            {
+                                "target_lang_word": "предоставлять",
+                                "target_lang_sense_clarification": "давать для ознакомления"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "18efb5a6-aa15-34a4-979e-308ee26a8fab",
+                    "sense_definition": "Meervoudsvorm van <w>overleg</w>.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De vele <overleggen> leverden uiteindelijk geen resultaat op.",
+                            "target_lang_translations": {
+                                "en": "The many <consultations> ultimately yielded no result.",
+                                "ru": "Многочисленные <w>совещания</w> в итоге не дали никакого результата."
+                            }
+                        },
+                        {
+                            "text": "Tussen de <overleggen> door dronken we koffie.",
+                            "target_lang_translations": {
+                                "en": "Between the <meetings> we drank coffee.",
+                                "ru": "В перерывах между <w>совещаниями</w> мы пили кофе."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "plural"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "en": "Plural form of 'overleg' (consultation or meeting).",
+                        "ru": "Множественное число слова overleg (совещание, консультация)."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "consultations",
+                                "target_lang_sense_clarification": "formal meetings for discussion"
+                            },
+                            {
+                                "target_lang_word": "meetings",
+                                "target_lang_sense_clarification": "assemblies of people for discussion"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "совещания",
+                                "target_lang_sense_clarification": "встречи для обсуждения"
+                            },
+                            {
+                                "target_lang_word": "переговоры",
+                                "target_lang_sense_clarification": "обсуждение условий"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

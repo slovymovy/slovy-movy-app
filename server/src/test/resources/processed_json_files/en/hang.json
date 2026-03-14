@@ -1,0 +1,589 @@
+{
+    "word_family": [
+        "hanger",
+        "hanging",
+        "hangover",
+        "hangman",
+        "overhang",
+        "hangout"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "f31d454d-7dfa-3414-a5d0-1539315ea93d",
+                    "sense_definition": "To fasten or support something at the top leaving the other parts free to move.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "suspension",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Please <w>hang</w> your coat on the hook behind the door.",
+                            "target_lang_translations": {
+                                "ru": "Пожалуйста, <w>повесь</w> свое пальто на крючок за дверью."
+                            }
+                        },
+                        {
+                            "text": "She decided to <w>hang</w> the painting in the hallway.",
+                            "target_lang_translations": {
+                                "ru": "Она решила <w>повесить</w> картину в коридоре."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "suspend",
+                        "put up",
+                        "hook"
+                    ],
+                    "antonyms": [
+                        "take down"
+                    ],
+                    "common_phrases": [
+                        "hang a picture",
+                        "hang clothes",
+                        "hang the laundry"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Вешать или подвешивать что-либо за верхнюю часть, оставляя остальное свободным."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "вешать",
+                                "target_lang_sense_clarification": "несовершенный вид, процесс"
+                            },
+                            {
+                                "target_lang_word": "повесить",
+                                "target_lang_sense_clarification": "совершенный вид, результат"
+                            },
+                            {
+                                "target_lang_word": "подвешивать",
+                                "target_lang_sense_clarification": "крепить снизу к чему-либо"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "e0b2db4b-9be6-3f79-9461-6c091352b12b",
+                    "sense_definition": "To be supported from above so that the lower end is free.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "suspension",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "A heavy crystal chandelier <w>hung</w> in the center of the dining room.",
+                            "target_lang_translations": {
+                                "ru": "Тяжелая хрустальная люстра <w>висела</w> в центре столовой."
+                            }
+                        },
+                        {
+                            "text": "Thick curtains <w>hung</w> over the windows, blocking out the light.",
+                            "target_lang_translations": {
+                                "ru": "Плотные шторы <w>висели</w> на окнах, закрывая свет."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "dangle",
+                        "be suspended",
+                        "swing"
+                    ],
+                    "common_phrases": [
+                        "hang from the ceiling",
+                        "hang down",
+                        "hang loose"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Находиться в висячем положении, будучи прикрепленным сверху."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "висеть",
+                                "target_lang_sense_clarification": "находиться без опоры снизу"
+                            },
+                            {
+                                "target_lang_word": "свисать",
+                                "target_lang_sense_clarification": "опускаться вниз под своим весом"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "06f493f8-6fc0-3f7b-b8ba-a0f904dcfb91",
+                    "sense_definition": "To spend time relaxing or socializing informally.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "social",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "We used to <w>hang</w> out at the mall after school every day.",
+                            "target_lang_translations": {
+                                "ru": "Раньше мы каждый день <w>зависали</w> в торговом центре после школы."
+                            }
+                        },
+                        {
+                            "text": "I'm just going to <w>hang</w> around the house and watch movies.",
+                            "target_lang_translations": {
+                                "ru": "Я просто собираюсь <w>поторчать</w> дома и посмотреть фильмы."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "socialize",
+                        "chill",
+                        "spend time",
+                        "relax"
+                    ],
+                    "common_phrases": [
+                        "hang out",
+                        "hang around",
+                        "hang with friends"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": ""
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Проводить время, отдыхая или общаясь в неформальной обстановке."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "зависать",
+                                "target_lang_sense_clarification": "сленг, проводить время"
+                            },
+                            {
+                                "target_lang_word": "тусоваться",
+                                "target_lang_sense_clarification": "разговорное, общаться в компании"
+                            },
+                            {
+                                "target_lang_word": "болтаться",
+                                "target_lang_sense_clarification": "разговорное, быть без дела"
+                            },
+                            {
+                                "target_lang_word": "ошиваться",
+                                "target_lang_sense_clarification": "просторечное, находиться где-то без дела"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "3880067a-e809-3aa7-99b0-3e58d6eab217",
+                    "sense_definition": "To kill someone by suspending them from the neck with a rope.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "execution",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The prisoner was <w>hanged</w> for his crimes in the early morning.",
+                            "target_lang_translations": {
+                                "ru": "Заключенный был <w>повешен</w> за свои преступления рано утром."
+                            }
+                        },
+                        {
+                            "text": "In the past, pirates were often <w>hanged</w> at the docks.",
+                            "target_lang_translations": {
+                                "ru": "В прошлом пиратов часто <w>вешали</w> в доках."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "execute",
+                        "lynch",
+                        "string up"
+                    ],
+                    "common_phrases": [
+                        "hang by the neck"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "past tense and participle is usually 'hanged' for this sense"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Убить кого-то, подвесив за шею на веревке."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "вешать",
+                                "target_lang_sense_clarification": "казнить через повешение"
+                            },
+                            {
+                                "target_lang_word": "повесить",
+                                "target_lang_sense_clarification": "совершить казнь"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "c08cfacb-e0d1-3d8b-b133-eba2a1b56dba",
+                    "sense_definition": "To remain floating in the air, such as smoke, fog, or a smell.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "suspension",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "A thick layer of fog <w>hung</w> over the city all morning.",
+                            "target_lang_translations": {
+                                "ru": "Густой слой тумана <w>висел</w> над городом все утро."
+                            }
+                        },
+                        {
+                            "text": "The smell of burnt toast <w>hung</w> in the kitchen for hours.",
+                            "target_lang_translations": {
+                                "ru": "Запах горелого тоста <w>стоял</w> на кухне часами."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "hover",
+                        "float",
+                        "linger"
+                    ],
+                    "common_phrases": [
+                        "hang in the air",
+                        "hang over"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Оставаться в воздухе (о дыме, тумане или запахе)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "висеть",
+                                "target_lang_sense_clarification": "о тумане или запахе"
+                            },
+                            {
+                                "target_lang_word": "стоять",
+                                "target_lang_sense_clarification": "быть неподвижным (о воздухе, запахе)"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "fb1fcee9-44f1-3f23-9adc-eeb3d7750695",
+                    "sense_definition": "To let one's head fall forward, usually due to shame, sadness, or tiredness.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "suspension",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "He <w>hung</w> his head in shame when the teacher scolded him.",
+                            "target_lang_translations": {
+                                "ru": "Он <w>опустил</w> голову от стыда, когда учитель отругал его."
+                            }
+                        },
+                        {
+                            "text": "The tired dog <w>hung</w> its head and walked slowly to its bed.",
+                            "target_lang_translations": {
+                                "ru": "Уставшая собака <w>опустила</w> голову и медленно побрела к своей лежанке."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "lower",
+                        "drop",
+                        "bow"
+                    ],
+                    "antonyms": [
+                        "raise"
+                    ],
+                    "common_phrases": [
+                        "hang one's head"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Опустить голову вниз, обычно из-за стыда, грусти или усталости."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "опустить",
+                                "target_lang_sense_clarification": "наклонить вниз"
+                            },
+                            {
+                                "target_lang_word": "повесить",
+                                "target_lang_sense_clarification": "в идиомах: повесить голову/нос"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "231d95cb-7765-3967-a321-41ea9610b77e",
+                    "sense_definition": "To stop responding to user input (of a computer or program).",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "computing",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "My laptop <w>hangs</w> whenever I try to open this large file.",
+                            "target_lang_translations": {
+                                "ru": "Мой ноутбук <w>зависает</w> всякий раз, когда я пытаюсь открыть этот большой файл."
+                            }
+                        },
+                        {
+                            "text": "If the program <w>hangs</w>, you may need to restart the computer.",
+                            "target_lang_translations": {
+                                "ru": "Если программа <w>зависнет</w>, возможно, придется перезагрузить компьютер."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "freeze",
+                        "lock up"
+                    ],
+                    "common_phrases": [
+                        "system hangs",
+                        "application hangs"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Перестать реагировать на действия пользователя (о компьютере или программе)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "зависать",
+                                "target_lang_sense_clarification": "переставать работать"
+                            },
+                            {
+                                "target_lang_word": "виснуть",
+                                "target_lang_sense_clarification": "компьютерный сленг"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "9382964e-b62d-37a0-9365-7fe3d9d141dd",
+                    "sense_definition": "A specific skill or understanding of how to do something.",
+                    "learner_level": "B2",
+                    "frequency": "High",
+                    "semantic_group_id": "skill",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "It took me a while to get the <w>hang</w> of driving a manual car.",
+                            "target_lang_translations": {
+                                "ru": "Мне потребовалось время, чтобы понять <w>принцип</w> вождения машины на механике."
+                            }
+                        },
+                        {
+                            "text": "Don't worry, you will get the <w>hang</w> of the new software soon.",
+                            "target_lang_translations": {
+                                "ru": "Не волнуйся, ты скоро поймешь <w>суть</w> новой программы."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "knack",
+                        "grasp",
+                        "grip"
+                    ],
+                    "common_phrases": [
+                        "get the hang of"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Особый навык или понимание того, как что-то делать."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "суть",
+                                "target_lang_sense_clarification": "в выражении 'понять суть'"
+                            },
+                            {
+                                "target_lang_word": "сноровка",
+                                "target_lang_sense_clarification": "умение, навык"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "fd5e0321-cb76-3add-8f48-9c289743318a",
+                    "sense_definition": "The way in which a garment or fabric falls or drapes.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "suspension",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The <w>hang</w> of this silk dress is very elegant.",
+                            "target_lang_translations": {
+                                "ru": "<w>Драпировка</w> этого шелкового платья очень элегантна."
+                            }
+                        },
+                        {
+                            "text": "She adjusted the curtains to improve their <w>hang</w>.",
+                            "target_lang_translations": {
+                                "ru": "Она поправила шторы, чтобы улучшить их <w>вид</w>."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "drape"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "То, как падает или драпируется одежда или ткань."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "драпировка",
+                                "target_lang_sense_clarification": "способ укладки складок"
+                            },
+                            {
+                                "target_lang_word": "спадание",
+                                "target_lang_sense_clarification": "то, как ткань висит"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "c04ba2c9-9af9-31f7-bba5-8ae3da001e9f",
+                    "sense_definition": "An instance where a computer system stops responding.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "computing",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "We experienced a system <w>hang</w> during the database update.",
+                            "target_lang_translations": {
+                                "ru": "У нас произошло системное <w>зависание</w> во время обновления базы данных."
+                            }
+                        },
+                        {
+                            "text": "A sudden <w>hang</w> caused me to lose all my unsaved work.",
+                            "target_lang_translations": {
+                                "ru": "Внезапное <w>зависание</w> привело к потере всей моей несохраненной работы."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "freeze"
+                    ],
+                    "common_phrases": [
+                        "system hang"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Случай, когда компьютерная система перестает реагировать."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "зависание",
+                                "target_lang_sense_clarification": "сбой в работе программы"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "7d9ed49e-f96a-39bb-b5d0-a674d3e10c4d",
+                    "sense_definition": "A casual gathering or session of spending time together.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "social",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "It was a good <w>hang</w>, just listening to music and talking with friends.",
+                            "target_lang_translations": {
+                                "ru": "Это была хорошая <w>тусовка</w>: мы просто слушали музыку и болтали с друзьями."
+                            }
+                        },
+                        {
+                            "text": "He invited us over for a quick <w>hang</w> before the concert.",
+                            "target_lang_translations": {
+                                "ru": "Он пригласил нас на небольшие <w>посиделки</w> перед концертом."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "hangout"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "slang",
+                            "comment": ""
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Неформальная встреча или времяпрепровождение с кем-либо."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "тусовка",
+                                "target_lang_sense_clarification": "сленг, встреча друзей"
+                            },
+                            {
+                                "target_lang_word": "посиделки",
+                                "target_lang_sense_clarification": "разговорное, совместный отдых"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "name",
+            "senses": [
+                {
+                    "sense_id": "180dcbe2-e04b-3438-b771-2d7cc2564bfb",
+                    "sense_definition": "A melodic percussion instrument consisting of two metal half-shells.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "",
+                    "name_type": "brand_or_product_name",
+                    "examples": [
+                        {
+                            "text": "The street musician played a mesmerizing tune on his <w>Hang</w>.",
+                            "target_lang_translations": {
+                                "ru": "Уличный музыкант играл завораживающую мелодию на своем <w>ханге</w>."
+                            }
+                        },
+                        {
+                            "text": "A <w>Hang</w> produces a soft, ethereal sound similar to a steelpan.",
+                            "target_lang_translations": {
+                                "ru": "<w>Ханг</w> издает мягкий, неземной звук, похожий на стилпан."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "handpan"
+                    ],
+                    "common_phrases": [
+                        "Hang drum"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Мелодический ударный инструмент, состоящий из двух металлических полусфер."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "ханг",
+                                "target_lang_sense_clarification": "музыкальный инструмент"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

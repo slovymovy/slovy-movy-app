@@ -1,0 +1,144 @@
+{
+    "word_family": [
+        "omschrijving",
+        "onomschrijfbaar"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "b1be6079-4b28-3884-b735-65fc2e1a9de1",
+                    "sense_definition": "Iets in woorden uitbeelden of de kenmerken ervan weergeven; een definitie geven.",
+                    "learner_level": "B1",
+                    "frequency": "High",
+                    "semantic_group_id": "beschrijven",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Kun je de situatie kort en bondig <w>omschrijven</w>?",
+                            "target_lang_translations": {
+                                "ru": "Ты можешь кратко и лаконично <w>описать</w> ситуацию?",
+                                "en": "Can you briefly and concisely <w>describe</w> the situation?"
+                            }
+                        },
+                        {
+                            "text": "Dat wordt zelden zo <w>omschreven</w>.",
+                            "target_lang_translations": {
+                                "ru": "Это редко так <w>описывается</w>.",
+                                "en": "That is rarely <w>described</w> in that way."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "beschrijven",
+                        "definiëren"
+                    ],
+                    "common_phrases": [
+                        "nauwkeurig omschrijven",
+                        "duidelijk omschrijven",
+                        "nader omschrijven"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "onscheidbaar werkwoord"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Изображать что-либо словами или передавать характеристики; давать определение.",
+                        "en": "To portray something in words or indicate its characteristics; to give a definition."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "описывать",
+                                "target_lang_sense_clarification": "рассказывать о чем-то, передавать черты"
+                            },
+                            {
+                                "target_lang_word": "охарактеризовать",
+                                "target_lang_sense_clarification": "дать характеристику"
+                            },
+                            {
+                                "target_lang_word": "определять",
+                                "target_lang_sense_clarification": "давать определение понятию"
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "describe",
+                                "target_lang_sense_clarification": "to represent or explain in words"
+                            },
+                            {
+                                "target_lang_word": "define",
+                                "target_lang_sense_clarification": "to state the precise meaning or nature"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "2eb74844-57b4-3a04-9e6f-f35884a852d9",
+                    "sense_definition": "Een tekst of naam in een ander schrift of alfabet overzetten.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "omzetten",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De taalkundige heeft de hiërogliefen naar leesbare tekst <w>omgeschreven</w>.",
+                            "target_lang_translations": {
+                                "ru": "Лингвист <w>транскрибировал</w> иероглифы в читаемый текст.",
+                                "en": "The linguist <w>transcribed</w> the hieroglyphs into readable text."
+                            }
+                        },
+                        {
+                            "text": "Je kunt deze Cyrillische letters naar het Nederlands <w>omschrijven</w>.",
+                            "target_lang_translations": {
+                                "ru": "Ты можешь <w>транслитерировать</w> эти кириллические буквы на нидерландский.",
+                                "en": "You can <w>transliterate</w> these Cyrillic letters into Dutch."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "translitereren"
+                    ],
+                    "common_phrases": [
+                        "fonetisch omschrijven"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "scheidbaar werkwoord"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Переводить текст или имя в другую письменность или алфавит.",
+                        "en": "To transfer a text or name into another script or alphabet."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "транслитерировать",
+                                "target_lang_sense_clarification": "передавать знаки одной письменности знаками другой"
+                            },
+                            {
+                                "target_lang_word": "транскрибировать",
+                                "target_lang_sense_clarification": "записывать звучание или знаки в другой системе"
+                            }
+                        ],
+                        "en": [
+                            {
+                                "target_lang_word": "transliterate",
+                                "target_lang_sense_clarification": "to write words using characters of another alphabet"
+                            },
+                            {
+                                "target_lang_word": "transcribe",
+                                "target_lang_sense_clarification": "to represent speech or data in written form"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

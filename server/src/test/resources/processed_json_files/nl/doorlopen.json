@@ -1,0 +1,324 @@
+{
+    "word_family": [
+        "doorloop",
+        "lopen",
+        "aflopen",
+        "inlopen",
+        "meelopen",
+        "omlopen",
+        "oplopen",
+        "overlopen",
+        "uitlopen",
+        "verlopen"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "cee3e4ea-bc4d-3c15-b427-355122f90e81",
+                    "sense_definition": "Verder gaan met lopen, vaak zonder te stoppen of in een hoger tempo.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "movement_continue",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Wij moesten stevig <w>doorlopen</w> om de laatste trein nog te kunnen halen.",
+                            "target_lang_translations": {
+                                "en": "We had to <w>walk fast</w> to catch the last train.",
+                                "ru": "Нам пришлось <w>прибавить шагу</w>, чтобы успеть на последний поезд."
+                            }
+                        },
+                        {
+                            "text": "De wandelaars zijn de hele middag <w>doorgelopen</w> zonder pauze te nemen.",
+                            "target_lang_translations": {
+                                "en": "The hikers <w>kept walking</w> all afternoon without taking a break.",
+                                "ru": "Туристы <w>продолжали идти</w> весь день, не делая перерывов."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "verder lopen",
+                        "doorgaan"
+                    ],
+                    "antonyms": [
+                        "stoppen",
+                        "stilstaan"
+                    ],
+                    "common_phrases": [
+                        "stevig doorlopen",
+                        "snel doorlopen"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To continue walking, often without stopping or at a faster pace.",
+                        "ru": "Продолжать идти, часто не останавливаясь или ускоряя шаг."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "walk on",
+                                "target_lang_sense_clarification": "continue walking"
+                            },
+                            {
+                                "target_lang_word": "keep walking",
+                                "target_lang_sense_clarification": "continue without stopping"
+                            },
+                            {
+                                "target_lang_word": "walk fast",
+                                "target_lang_sense_clarification": "increase pace"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "продолжать идти",
+                                "target_lang_sense_clarification": "не останавливаться"
+                            },
+                            {
+                                "target_lang_word": "идти дальше",
+                                "target_lang_sense_clarification": "продолжать путь"
+                            },
+                            {
+                                "target_lang_word": "прибавить шагу",
+                                "target_lang_sense_clarification": "идти быстрее"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "afaeb941-de6a-30ed-abf6-b97a3e656776",
+                    "sense_definition": "Lopen tot men ergens helemaal doorheen of voorbij is.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "movement_through",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Je moet de lange gang helemaal <w>doorlopen</w> tot je bij de uitgang bent.",
+                            "target_lang_translations": {
+                                "en": "You have to <w>walk down</w> the entire hallway until you reach the exit.",
+                                "ru": "Тебе нужно <w>пройти</w> весь длинный коридор до самого выхода."
+                            }
+                        },
+                        {
+                            "text": "Toen we de tunnel waren <w>doorgelopen</w>, zagen we eindelijk weer daglicht.",
+                            "target_lang_translations": {
+                                "en": "When we had <w>walked through</w> the tunnel, we finally saw daylight again.",
+                                "ru": "Когда мы <w>прошли</w> туннель, мы наконец снова увидели дневной свет."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "passeren",
+                        "doorkruisen"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To walk until one has passed completely through or past something.",
+                        "ru": "Идти, пока не пройдешь что-то полностью или мимо чего-то."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "walk through",
+                                "target_lang_sense_clarification": "traverse a space"
+                            },
+                            {
+                                "target_lang_word": "walk down",
+                                "target_lang_sense_clarification": "follow a path/hallway to the end"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "пройти",
+                                "target_lang_sense_clarification": "преодолеть расстояние пешком"
+                            },
+                            {
+                                "target_lang_word": "пройти через",
+                                "target_lang_sense_clarification": "пересечь пространство"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "50c0b0d1-2200-308b-ac94-c5a691310ea4",
+                    "sense_definition": "Een proces, opleiding of tekst van begin tot eind volgen en voltooien.",
+                    "learner_level": "B2",
+                    "frequency": "High",
+                    "semantic_group_id": "abstract_process",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Alle nieuwe medewerkers moeten dit introductieprogramma <w>doorlopen</w>.",
+                            "target_lang_translations": {
+                                "en": "All new employees must <w>go through</w> this introduction program.",
+                                "ru": "Все новые сотрудники должны <w>пройти</w> эту вводную программу."
+                            }
+                        },
+                        {
+                            "text": "Hij <w>doorliep</w> de middelbare school zonder enige moeite.",
+                            "target_lang_translations": {
+                                "en": "He <w>completed</w> high school without any trouble.",
+                                "ru": "Он <w>окончил</w> среднюю школу без всякого труда."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "voltooien",
+                        "afwerken",
+                        "doornemen"
+                    ],
+                    "common_phrases": [
+                        "een procedure doorlopen",
+                        "een opleiding doorlopen",
+                        "een traject doorlopen"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "To follow and complete a process, education, or text from start to finish.",
+                        "ru": "Следовать процессу, обучению или тексту от начала до конца и завершать его."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "go through",
+                                "target_lang_sense_clarification": "experience a process/procedure"
+                            },
+                            {
+                                "target_lang_word": "complete",
+                                "target_lang_sense_clarification": "finish a course/schooling"
+                            },
+                            {
+                                "target_lang_word": "undergo",
+                                "target_lang_sense_clarification": "be subjected to a process"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "пройти",
+                                "target_lang_sense_clarification": "курс, процедуру или программу"
+                            },
+                            {
+                                "target_lang_word": "окончить",
+                                "target_lang_sense_clarification": "учебное заведение"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "3afc329a-11a1-3e7c-bd94-c85ea657c3c8",
+                    "sense_definition": "Het uitvloeien en vermengen van kleuren, meestal door vocht of wassen.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "material_change",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Mijn rode sokken zijn <w>doorgelopen</w> in de witte was.",
+                            "target_lang_translations": {
+                                "en": "My red socks <w>ran</w> into the white laundry.",
+                                "ru": "Мои красные носки <w>полиняли</w> на белое белье."
+                            }
+                        },
+                        {
+                            "text": "Door de regen is de inkt op het papier helemaal <w>doorgelopen</w>.",
+                            "target_lang_translations": {
+                                "en": "Due to the rain, the ink on the paper has completely <w>run</w>.",
+                                "ru": "Из-за дождя чернила на бумаге полностью <w>расплылись</w>."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "uitlopen",
+                        "vlekken"
+                    ],
+                    "target_lang_definitions": {
+                        "en": "The spreading and mixing of colors, usually caused by moisture or washing.",
+                        "ru": "Растекание и смешивание цветов, обычно из-за влаги или стирки."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "run",
+                                "target_lang_sense_clarification": "ink or dye spreading"
+                            },
+                            {
+                                "target_lang_word": "bleed",
+                                "target_lang_sense_clarification": "colors mixing in wash"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "полинять",
+                                "target_lang_sense_clarification": "об одежде при стирке"
+                            },
+                            {
+                                "target_lang_word": "потечь",
+                                "target_lang_sense_clarification": "о чернилах или краске"
+                            },
+                            {
+                                "target_lang_word": "расплыться",
+                                "target_lang_sense_clarification": "потерять четкость контуров"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "1e4d8307-39fb-3b71-bfa3-957e215fd1aa",
+                    "sense_definition": "Meervoud van het zelfstandig naamwoord <w>doorloop</w>.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "form_plural",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "De architect tekende verschillende <w>doorlopen</w> tussen de gebouwen.",
+                            "target_lang_translations": {
+                                "en": "The architect drew several <w>passages</w> between the buildings.",
+                                "ru": "Архитектор нарисовал несколько <w>проходов</w> между зданиями."
+                            }
+                        },
+                        {
+                            "text": "Deze smalle <w>doorlopen</w> zijn niet geschikt voor rolstoelgebruikers.",
+                            "target_lang_translations": {
+                                "en": "These narrow <w>walkways</w> are not suitable for wheelchair users.",
+                                "ru": "Эти узкие <w>проходы</w> не подходят для людей в инвалидных колясках."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "plural"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "en": "Plural of the noun 'doorloop' (passage or walkway).",
+                        "ru": "Множественное число существительного 'doorloop' (проход)."
+                    },
+                    "translations": {
+                        "en": [
+                            {
+                                "target_lang_word": "passages",
+                                "target_lang_sense_clarification": "corridors connecting areas"
+                            },
+                            {
+                                "target_lang_word": "walkways",
+                                "target_lang_sense_clarification": "paths for walking"
+                            }
+                        ],
+                        "ru": [
+                            {
+                                "target_lang_word": "проходы",
+                                "target_lang_sense_clarification": "места для прохода"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,202 @@
+{
+    "word_family": [
+        "Neddy"
+    ],
+    "entries": [
+        {
+            "pos": "name",
+            "senses": [
+                {
+                    "sense_id": "dd11017c-3673-3745-9473-4e1d68c63f35",
+                    "sense_definition": "A medieval diminutive of the male given name <w>Edward</w>.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "",
+                    "name_type": "person_name",
+                    "examples": [
+                        {
+                            "text": "My uncle <w>Ned</w> is coming to visit us this weekend.",
+                            "target_lang_translations": {
+                                "ru": "Мой дядя <w>Нед</w> приедет навестить нас в эти выходные."
+                            }
+                        },
+                        {
+                            "text": "They decided to name their newborn son <w>Ned</w> after his grandfather.",
+                            "target_lang_translations": {
+                                "ru": "Они решили назвать своего новорожденного сына <w>Нед</w> в честь его дедушки."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "diminutive"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Средневековое уменьшительное от мужского имени Эдвард."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "Нед",
+                                "target_lang_sense_clarification": "имя"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "4f756f6e-3d89-3374-b7f0-2a61793fa8d2",
+                    "sense_definition": "Initialism of New English Dictionary.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "",
+                    "name_type": "document_or_program_name",
+                    "examples": [
+                        {
+                            "text": "The <w>NED</w> was the original title given to what is now known as the Oxford English Dictionary.",
+                            "target_lang_translations": {
+                                "ru": "<w>НЭД</w> был первоначальным названием того, что сейчас известно как Оксфордский словарь английского языка."
+                            }
+                        },
+                        {
+                            "text": "Historical linguists sometimes still refer to the work as the <w>NED</w> in their citations.",
+                            "target_lang_translations": {
+                                "ru": "Исторические лингвисты иногда все еще называют эту работу <w>НЭД</w> в своих цитатах."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "initialism"
+                        },
+                        {
+                            "trait_type": "dated",
+                            "comment": "now usually OED"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Аббревиатура от New English Dictionary (Новый словарь английского языка)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "НЭД",
+                                "target_lang_sense_clarification": "аббревиатура названия словаря"
+                            },
+                            {
+                                "target_lang_word": "Новый словарь английского языка",
+                                "target_lang_sense_clarification": "полное название"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "3055da48-5b88-3334-b251-c51becb9d8cf",
+                    "sense_definition": "A person, usually a youth, of low social standing and education, often associated with aggressive behavior and a specific style of dress (typically sportswear).",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The residents complained about the noise caused by a group of <w>neds</w> in the park.",
+                            "target_lang_translations": {
+                                "ru": "Жители жаловались на шум, который производила группа <w>гопников</w> в парке."
+                            }
+                        },
+                        {
+                            "text": "He was afraid to walk past the <w>neds</w> gathering on the street corner at night.",
+                            "target_lang_translations": {
+                                "ru": "Он боялся проходить мимо <w>хулиганов</w>, собирающихся на углу улицы по ночам."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "chav",
+                        "yob",
+                        "schemie"
+                    ],
+                    "common_phrases": [
+                        "drunken neds",
+                        "local neds"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "regional",
+                            "comment": "Scotland"
+                        },
+                        {
+                            "trait_type": "slang",
+                            "comment": "pejorative"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Человек (обычно подросток) низкого социального статуса, часто агрессивный и одетый в спортивную одежду (шотландский сленг)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "гопник",
+                                "target_lang_sense_clarification": "культурный аналог"
+                            },
+                            {
+                                "target_lang_word": "хулиган",
+                                "target_lang_sense_clarification": "общее значение"
+                            },
+                            {
+                                "target_lang_word": "шпана",
+                                "target_lang_sense_clarification": "собирательное, разговорное"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "72f1cb52-c394-3874-87f8-d3badd6293c6",
+                    "sense_definition": "Initialism of no evidence of disease.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The patient was relieved when the doctor reported <w>NED</w> after the final scan.",
+                            "target_lang_translations": {
+                                "ru": "Пациент почувствовал облегчение, когда врач сообщил об <w>отсутствии признаков заболевания</w> после последнего обследования."
+                            }
+                        },
+                        {
+                            "text": "Achieving <w>NED</w> is the primary goal for patients undergoing this type of cancer therapy.",
+                            "target_lang_translations": {
+                                "ru": "Достижение <w>отсутствия признаков заболевания</w> является главной целью для пациентов, проходящих этот тип лечения рака."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "initialism"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Аббревиатура, означающая отсутствие признаков заболевания (медицинский термин)."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "отсутствие признаков заболевания",
+                                "target_lang_sense_clarification": "медицинский статус"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

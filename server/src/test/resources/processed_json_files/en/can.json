@@ -1,0 +1,646 @@
+{
+    "word_family": [
+        "cannot",
+        "cannery",
+        "canister"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "ddbf6869-acd5-3c96-b715-9b2d8e315139",
+                    "sense_definition": "To be able to do something or to have the skill to do it.",
+                    "learner_level": "A1",
+                    "frequency": "High",
+                    "semantic_group_id": "ability",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "She <w>can</w> speak three languages fluently.",
+                            "target_lang_translations": {
+                                "ru": "Она <w>умеет</w> свободно говорить на трех языках."
+                            }
+                        },
+                        {
+                            "text": "I <w>can</w> swim across the pool without stopping.",
+                            "target_lang_translations": {
+                                "ru": "Я <w>могу</w> переплыть бассейн без остановки."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "be able to"
+                    ],
+                    "antonyms": [
+                        "cannot",
+                        "can't"
+                    ],
+                    "common_phrases": [
+                        "as best I can",
+                        "can do"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Быть способным что-то сделать или обладать навыком для этого."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "мочь",
+                                "target_lang_sense_clarification": "физическая возможность"
+                            },
+                            {
+                                "target_lang_word": "уметь",
+                                "target_lang_sense_clarification": "навык, знание"
+                            },
+                            {
+                                "target_lang_word": "быть в состоянии",
+                                "target_lang_sense_clarification": "способность"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "6b632ccc-0c9f-3685-a6a4-4e7024211b58",
+                    "sense_definition": "Used to ask for or give permission to do something.",
+                    "learner_level": "A1",
+                    "frequency": "High",
+                    "semantic_group_id": "permission",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "You <w>can</w> go to the park after you finish your homework.",
+                            "target_lang_translations": {
+                                "ru": "Ты <w>можешь</w> пойти в парк, когда закончишь уроки."
+                            }
+                        },
+                        {
+                            "text": "<w>Can</w> I use your phone for a minute?",
+                            "target_lang_translations": {
+                                "ru": "<w>Можно</w> мне воспользоваться твоим телефоном на минутку?"
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "may"
+                    ],
+                    "antonyms": [
+                        "may not",
+                        "cannot",
+                        "can't"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Используется, чтобы спросить или дать разрешение что-то сделать."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "мочь",
+                                "target_lang_sense_clarification": "иметь разрешение"
+                            },
+                            {
+                                "target_lang_word": "можно",
+                                "target_lang_sense_clarification": "разрешение (предикатив)"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "ca6082e0-e818-36ca-85cc-e4bac8529186",
+                    "sense_definition": "Used to make a polite request or ask someone to help.",
+                    "learner_level": "A1",
+                    "frequency": "High",
+                    "semantic_group_id": "request",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "<w>Can</w> you please pass the salt?",
+                            "target_lang_translations": {
+                                "ru": "<w>Можете</w> передать соль, пожалуйста?"
+                            }
+                        },
+                        {
+                            "text": "<w>Can</w> you help me lift this heavy box?",
+                            "target_lang_translations": {
+                                "ru": "<w>Можешь</w> помочь мне поднять эту тяжелую коробку?"
+                            }
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Используется для вежливой просьбы или обращения за помощью."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "мочь",
+                                "target_lang_sense_clarification": "просьба"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "277cd4f2-7c4d-31cc-be84-93c06498b6a7",
+                    "sense_definition": "Used to show that something is possible or has the potential to happen.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "possibility",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "It <w>can</w> be very cold here in the winter.",
+                            "target_lang_translations": {
+                                "ru": "Зимой здесь <w>может</w> быть очень холодно."
+                            }
+                        },
+                        {
+                            "text": "Even the best players <w>can</w> make mistakes sometimes.",
+                            "target_lang_translations": {
+                                "ru": "Даже лучшие игроки иногда <w>могут</w> ошибаться."
+                            }
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Используется, чтобы показать, что что-то возможно или имеет потенциал произойти."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "мочь",
+                                "target_lang_sense_clarification": "вероятность"
+                            },
+                            {
+                                "target_lang_word": "быть возможным",
+                                "target_lang_sense_clarification": "потенциал"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "b7d68cfc-5e3f-34bd-b196-bd14bdec7baa",
+                    "sense_definition": "To preserve food by sealing it in a metal container or jar.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "preserve",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "My grandmother likes to <w>can</w> fresh peaches every summer.",
+                            "target_lang_translations": {
+                                "ru": "Моя бабушка любит <w>консервировать</w> свежие персики каждое лето."
+                            }
+                        },
+                        {
+                            "text": "They <w>canned</w> a lot of vegetables from the garden to eat later.",
+                            "target_lang_translations": {
+                                "ru": "Они <w>законсервировали</w> много овощей с огорода, чтобы съесть их позже."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "preserve"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Консервировать продукты, закрывая их в металлическую или стеклянную тару."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "консервировать",
+                                "target_lang_sense_clarification": "общий термин"
+                            },
+                            {
+                                "target_lang_word": "закатывать",
+                                "target_lang_sense_clarification": "разговорное, в банки"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "2cdbc8d2-d57e-3d98-97a3-22355544c45b",
+                    "sense_definition": "To dismiss someone from their job.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "dismiss",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The boss <w>canned</w> him for being late three times this week.",
+                            "target_lang_translations": {
+                                "ru": "Начальник <w>выгнал</w> его за то, что он трижды опоздал на этой неделе."
+                            }
+                        },
+                        {
+                            "text": "He was worried he might get <w>canned</w> after the merger.",
+                            "target_lang_translations": {
+                                "ru": "Он волновался, что его могут <w>выгнать</w> после слияния компаний."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "fire",
+                        "sack",
+                        "dismiss"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": ""
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Уволить кого-то с работы."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "выгнать",
+                                "target_lang_sense_clarification": "разговорное"
+                            },
+                            {
+                                "target_lang_word": "уволить",
+                                "target_lang_sense_clarification": "нейтральное"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "b7895c1a-3520-3df6-8287-f02aa9bbf7a3",
+                    "sense_definition": "To stop working on a project or idea; to discard something.",
+                    "learner_level": "C2",
+                    "frequency": "Low",
+                    "semantic_group_id": "discard",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "They decided to <w>can</w> the new software project due to lack of funds.",
+                            "target_lang_translations": {
+                                "ru": "Они решили <w>прикрыть</w> новый проект программного обеспечения из-за нехватки средств."
+                            }
+                        },
+                        {
+                            "text": "The director <w>canned</w> the scene because it didn't fit the movie.",
+                            "target_lang_translations": {
+                                "ru": "Режиссер <w>забраковал</w> эту сцену, потому что она не подходила к фильму."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "scrap",
+                        "ditch"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": ""
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Прекратить работу над проектом или идеей; отказаться от чего-либо."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "забраковать",
+                                "target_lang_sense_clarification": "отказаться"
+                            },
+                            {
+                                "target_lang_word": "прикрыть",
+                                "target_lang_sense_clarification": "остановить проект"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "8c132c51-6074-332e-ab84-2d893a177117",
+                    "sense_definition": "To stop talking or making noise.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "silence",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "He told them to <w>can</w> it and listen to the instructions.",
+                            "target_lang_translations": {
+                                "ru": "Он велел им <w>заткнуться</w> и слушать инструкции."
+                            }
+                        },
+                        {
+                            "text": "Just <w>can</w> the noise, I am trying to sleep!",
+                            "target_lang_translations": {
+                                "ru": "<w>Прекрати</w> шуметь, я пытаюсь уснуть!"
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "shut up"
+                    ],
+                    "common_phrases": [
+                        "can it"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "slang",
+                            "comment": ""
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Перестать говорить или шуметь."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "заткнуться",
+                                "target_lang_sense_clarification": "грубое"
+                            },
+                            {
+                                "target_lang_word": "прекратить",
+                                "target_lang_sense_clarification": "перестать делать"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "e95b4d35-28d9-3cc4-99a6-ace37aac9cb3",
+                    "sense_definition": "A sealed metal container used for preserving food or drink.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "container",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "He opened a <w>can</w> of soup for lunch.",
+                            "target_lang_translations": {
+                                "ru": "Он открыл <w>банку</w> супа на обед."
+                            }
+                        },
+                        {
+                            "text": "Please throw the empty soda <w>can</w> in the recycling bin.",
+                            "target_lang_translations": {
+                                "ru": "Пожалуйста, выбрось пустую <w>банку</w> из-под газировки в мусорный бак для переработки."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "tin"
+                    ],
+                    "common_phrases": [
+                        "can of worms",
+                        "kick the can"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Герметичный металлический контейнер для хранения еды или напитков."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "консервная банка",
+                                "target_lang_sense_clarification": "металлическая"
+                            },
+                            {
+                                "target_lang_word": "банка",
+                                "target_lang_sense_clarification": "общая емкость"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "bf6f255e-df30-3b49-bfd3-5ec8330b9e28",
+                    "sense_definition": "A toilet or bathroom.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "toilet",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "He has been in the <w>can</w> for twenty minutes.",
+                            "target_lang_translations": {
+                                "ru": "Он сидит в <w>сортире</w> уже двадцать минут."
+                            }
+                        },
+                        {
+                            "text": "I need to use the <w>can</w> before we leave the house.",
+                            "target_lang_translations": {
+                                "ru": "Мне нужно в <w>туалет</w> перед выходом из дома."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "toilet",
+                        "loo",
+                        "john"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "slang",
+                            "comment": ""
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Туалет или ванная комната."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "сортир",
+                                "target_lang_sense_clarification": "сленг"
+                            },
+                            {
+                                "target_lang_word": "туалет",
+                                "target_lang_sense_clarification": "нейтральное"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "344eccc4-ed90-3aa4-a44a-862d88471f9e",
+                    "sense_definition": "A prison or jail.",
+                    "learner_level": "C2",
+                    "frequency": "Low",
+                    "semantic_group_id": "prison",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The thief spent five years in the <w>can</w> for robbery.",
+                            "target_lang_translations": {
+                                "ru": "Вор провел пять лет в <w>тюряге</w> за ограбление."
+                            }
+                        },
+                        {
+                            "text": "He is afraid of going back to the <w>can</w> if he gets caught.",
+                            "target_lang_translations": {
+                                "ru": "Он боится снова попасть в <w>тюрьму</w>, если его поймают."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "jail",
+                        "prison",
+                        "slammer"
+                    ],
+                    "common_phrases": [
+                        "in the can"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "slang",
+                            "comment": ""
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Тюрьма."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "тюряга",
+                                "target_lang_sense_clarification": "сленг"
+                            },
+                            {
+                                "target_lang_word": "тюрьма",
+                                "target_lang_sense_clarification": "нейтральное"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "interjection",
+            "senses": [
+                {
+                    "sense_id": "923a628a-46a1-38b6-ab2b-95e115f7212b",
+                    "sense_definition": "Used to express agreement, approval, or reassurance; equivalent to 'OK'.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "agreement",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "We will meet at six o'clock, <w>can</w>?",
+                            "target_lang_translations": {
+                                "ru": "Мы встретимся в шесть часов, <w>ладно</w>?"
+                            }
+                        },
+                        {
+                            "text": "Don't worry about the details, <w>can</w>.",
+                            "target_lang_translations": {
+                                "ru": "Не волнуйся о деталях, <w>хорошо</w>."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "regional",
+                            "comment": "Singapore, Malaysia"
+                        },
+                        {
+                            "trait_type": "colloquial",
+                            "comment": ""
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Используется для выражения согласия, одобрения или утешения; эквивалент 'OK'."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "ладно",
+                                "target_lang_sense_clarification": "согласие"
+                            },
+                            {
+                                "target_lang_word": "хорошо",
+                                "target_lang_sense_clarification": "одобрение"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "name",
+            "senses": [
+                {
+                    "sense_id": "e52377ab-2fe6-3ea0-ac22-97c17e24897e",
+                    "sense_definition": "A river in Essex, England.",
+                    "learner_level": "C2",
+                    "frequency": "Low",
+                    "semantic_group_id": "river",
+                    "name_type": "geographical_feature",
+                    "examples": [
+                        {
+                            "text": "The River <w>Can</w> flows through the city of Chelmsford.",
+                            "target_lang_translations": {
+                                "ru": "Река <w>Кан</w> протекает через город Челмсфорд."
+                            }
+                        },
+                        {
+                            "text": "We walked along the banks of the <w>Can</w> on Sunday.",
+                            "target_lang_translations": {
+                                "ru": "В воскресенье мы гуляли по берегам <w>Кана</w>."
+                            }
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Река в Эссексе, Англия."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "Кан",
+                                "target_lang_sense_clarification": "река"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "2e27e4ca-f211-38e3-9641-5192812d1862",
+                    "sense_definition": "Controller Area Network; a standard for connecting computers and devices.",
+                    "learner_level": "C2",
+                    "frequency": "Low",
+                    "semantic_group_id": "tech",
+                    "name_type": "technology_or_software_name",
+                    "examples": [
+                        {
+                            "text": "The engineer checked the <w>CAN</w> bus for errors.",
+                            "target_lang_translations": {
+                                "ru": "Инженер проверил шину <w>CAN</w> на наличие ошибок."
+                            }
+                        },
+                        {
+                            "text": "Modern cars use a <w>CAN</w> system to communicate between sensors.",
+                            "target_lang_translations": {
+                                "ru": "Современные автомобили используют систему <w>CAN</w> для связи между датчиками."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "form",
+                            "comment": "abbreviation"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Controller Area Network; стандарт для соединения компьютеров и устройств."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "CAN",
+                                "target_lang_sense_clarification": "аббревиатура"
+                            },
+                            {
+                                "target_lang_word": "шина CAN",
+                                "target_lang_sense_clarification": "технический термин"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

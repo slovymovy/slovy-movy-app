@@ -1,0 +1,445 @@
+{
+    "word_family": [
+        "shiny",
+        "shiner",
+        "shininess",
+        "outshine",
+        "sunshine",
+        "moonshine",
+        "shoeshine",
+        "beshine"
+    ],
+    "entries": [
+        {
+            "pos": "verb",
+            "senses": [
+                {
+                    "sense_id": "9c3bbe63-1ab8-3b0b-b6ea-1ee070ee7a39",
+                    "sense_definition": "To give off or reflect bright light; to glow.",
+                    "learner_level": "A2",
+                    "frequency": "High",
+                    "semantic_group_id": "emit_light",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The sun <w>shines</w> brightly in the clear blue sky.",
+                            "target_lang_translations": {
+                                "ru": "Солнце ярко <w>светит</w> в чистом голубом небе."
+                            }
+                        },
+                        {
+                            "text": "The stars <w>shone</w> down on the quiet village.",
+                            "target_lang_translations": {
+                                "ru": "Звезды <w>сияли</w> над тихой деревней."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "glow",
+                        "beam",
+                        "gleam",
+                        "glisten",
+                        "sparkle",
+                        "radiate"
+                    ],
+                    "antonyms": [
+                        "darken"
+                    ],
+                    "common_phrases": [
+                        "shine bright",
+                        "sun shines",
+                        "rise and shine"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Излучать или отражать яркий свет; светиться."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "светить",
+                                "target_lang_sense_clarification": "излучать свет"
+                            },
+                            {
+                                "target_lang_word": "сиять",
+                                "target_lang_sense_clarification": "ярко светиться, излучать сияние"
+                            },
+                            {
+                                "target_lang_word": "блестеть",
+                                "target_lang_sense_clarification": "отражать свет, сверкать"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "296f8c36-5bf1-3b7d-b517-b89907240414",
+                    "sense_definition": "To make an object smooth and bright by rubbing it.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "polish",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "He <w>shined</w> his leather shoes until they looked brand new.",
+                            "target_lang_translations": {
+                                "ru": "Он <w>начистил</w> свои кожаные ботинки, пока они не стали выглядеть как новые."
+                            }
+                        },
+                        {
+                            "text": "You should <w>shine</w> the silverware before the guests arrive for dinner.",
+                            "target_lang_translations": {
+                                "ru": "Тебе следует <w>наполировать</w> столовое серебро до прихода гостей к ужину."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "polish",
+                        "buff",
+                        "wax",
+                        "furbish"
+                    ],
+                    "common_phrases": [
+                        "shine shoes"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Делать предмет гладким и блестящим путем трения."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "чистить",
+                                "target_lang_sense_clarification": "придавать блеск (обычно обуви)"
+                            },
+                            {
+                                "target_lang_word": "полировать",
+                                "target_lang_sense_clarification": "делать гладким и блестящим"
+                            },
+                            {
+                                "target_lang_word": "натирать",
+                                "target_lang_sense_clarification": "тереть до блеска"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "ada1e15d-8cfe-30fe-a160-a442a10e4057",
+                    "sense_definition": "To point a light source, such as a lamp or flashlight, in a specific direction.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "direct_light",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "Please <w>shine</w> the flashlight over here so I can see the path.",
+                            "target_lang_translations": {
+                                "ru": "Пожалуйста, <w>посвети</w> фонариком сюда, чтобы я мог видеть тропинку."
+                            }
+                        },
+                        {
+                            "text": "The police officer <w>shone</w> a bright light into the car.",
+                            "target_lang_translations": {
+                                "ru": "Полицейский <w>посветил</w> ярким светом в машину."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "beam",
+                        "aim",
+                        "direct"
+                    ],
+                    "common_phrases": [
+                        "shine a light",
+                        "shine a torch"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Направлять источник света в определенном направлении."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "светить",
+                                "target_lang_sense_clarification": "направлять луч света"
+                            },
+                            {
+                                "target_lang_word": "освещать",
+                                "target_lang_sense_clarification": "делать видимым с помощью света"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "14b024d8-0fc5-3b1f-adb2-31815dd2b1e2",
+                    "sense_definition": "To perform exceptionally well or distinguish oneself in a particular area or activity.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "excel",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "She really <w>shines</w> in mathematics and science classes.",
+                            "target_lang_translations": {
+                                "ru": "Она действительно <w>блистает</w> на уроках математики и естественных наук."
+                            }
+                        },
+                        {
+                            "text": "This is your moment to <w>shine</w> and show everyone your talent.",
+                            "target_lang_translations": {
+                                "ru": "Это твой момент <w>засиять</w> и показать всем свой талант."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "excel",
+                        "stand out"
+                    ],
+                    "common_phrases": [
+                        "time to shine",
+                        "chance to shine"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Исключительно хорошо проявлять себя или выделяться в какой-либо области."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "блистать",
+                                "target_lang_sense_clarification": "выделяться мастерством или талантом"
+                            },
+                            {
+                                "target_lang_word": "сиять",
+                                "target_lang_sense_clarification": "выделяться, иметь успех"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "noun",
+            "senses": [
+                {
+                    "sense_id": "5c1da632-c1b3-39bf-83f2-bb82f92daec2",
+                    "sense_definition": "The quality of brightness produced by emitting or reflecting light.",
+                    "learner_level": "B1",
+                    "frequency": "Middle",
+                    "semantic_group_id": "brightness",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "The <w>shine</w> of the polished wood floor was impressive.",
+                            "target_lang_translations": {
+                                "ru": "<w>Блеск</w> полированного деревянного пола был впечатляющим."
+                            }
+                        },
+                        {
+                            "text": "Her hair has a healthy and beautiful <w>shine</w>.",
+                            "target_lang_translations": {
+                                "ru": "У ее волос здоровый и красивый <w>блеск</w>."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "brightness",
+                        "radiance",
+                        "luster",
+                        "sheen",
+                        "gleam",
+                        "gloss",
+                        "glow",
+                        "sparkle"
+                    ],
+                    "common_phrases": [
+                        "lose its shine"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Качество яркости, создаваемое излучением или отражением света."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "блеск",
+                                "target_lang_sense_clarification": "яркость от отраженного света"
+                            },
+                            {
+                                "target_lang_word": "сияние",
+                                "target_lang_sense_clarification": "яркий излучаемый свет"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "d781b5f4-ab83-3c45-8e3a-13454c714cac",
+                    "sense_definition": "Sunny weather, often used in contrast with rain.",
+                    "learner_level": "B2",
+                    "frequency": "Middle",
+                    "semantic_group_id": "weather",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "We plan to hold the picnic tomorrow, come rain or <w>shine</w>.",
+                            "target_lang_translations": {
+                                "ru": "Мы планируем провести пикник завтра, будет ли дождь или <w>солнце</w>."
+                            }
+                        },
+                        {
+                            "text": "The event will happen regardless of rain or <w>shine</w>.",
+                            "target_lang_translations": {
+                                "ru": "Мероприятие состоится независимо от того, будет дождь или <w>солнце</w>."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "sunshine"
+                    ],
+                    "common_phrases": [
+                        "rain or shine",
+                        "come rain or shine"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Солнечная погода, часто используется в противопоставлении дождю."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "солнце",
+                                "target_lang_sense_clarification": "солнечная погода"
+                            },
+                            {
+                                "target_lang_word": "ясная погода",
+                                "target_lang_sense_clarification": "отсутствие дождя"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "c3317be5-ed06-3d8d-806f-c86ba72d678e",
+                    "sense_definition": "An act of polishing shoes.",
+                    "learner_level": "B2",
+                    "frequency": "Low",
+                    "semantic_group_id": "polishing_act",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "He stopped at the station to get a quick shoe <w>shine</w>.",
+                            "target_lang_translations": {
+                                "ru": "Он остановился на станции, чтобы быстро сделать <w>чистку</w> обуви."
+                            }
+                        },
+                        {
+                            "text": "Your boots could really use a good <w>shine</w> before the meeting.",
+                            "target_lang_translations": {
+                                "ru": "Твоим ботинкам не помешала бы хорошая <w>чистка</w> перед встречей."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "shoeshine"
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Действие по чистке и полировке обуви."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "чистка",
+                                "target_lang_sense_clarification": "процесс очищения обуви"
+                            },
+                            {
+                                "target_lang_word": "полировка",
+                                "target_lang_sense_clarification": "придание блеска"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "sense_id": "c7c78009-419c-3b2d-a6cf-6a65ce331f5e",
+                    "sense_definition": "A spontaneous feeling of liking or fancy for someone.",
+                    "learner_level": "C1",
+                    "frequency": "Low",
+                    "semantic_group_id": "liking",
+                    "name_type": "no",
+                    "examples": [
+                        {
+                            "text": "My grandmother took a <w>shine</w> to my new friend immediately.",
+                            "target_lang_translations": {
+                                "ru": "Моя бабушка сразу почувствовала <w>симпатию</w> к моему новому другу."
+                            }
+                        },
+                        {
+                            "text": "For some reason, the stray dog took a <w>shine</w> to him and followed him home.",
+                            "target_lang_translations": {
+                                "ru": "По какой-то причине бродячая собака прониклась к нему <w>симпатией</w> и пошла за ним домой."
+                            }
+                        }
+                    ],
+                    "synonyms": [
+                        "liking",
+                        "fancy",
+                        "preference"
+                    ],
+                    "common_phrases": [
+                        "take a shine to"
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "colloquial",
+                            "comment": "used in the phrase 'take a shine to'"
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Спонтанное чувство симпатии к кому-либо."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "симпатия",
+                                "target_lang_sense_clarification": "в выражении 'take a shine to'"
+                            },
+                            {
+                                "target_lang_word": "расположение",
+                                "target_lang_sense_clarification": "доброжелательное отношение"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pos": "name",
+            "senses": [
+                {
+                    "sense_id": "408c55b4-8fb3-3850-a633-a4aa034b5f59",
+                    "sense_definition": "A surname.",
+                    "learner_level": "C2",
+                    "frequency": "VeryLow",
+                    "semantic_group_id": "surname",
+                    "name_type": "person_name",
+                    "examples": [
+                        {
+                            "text": "Mr. <w>Shine</w> will see you in his office now.",
+                            "target_lang_translations": {
+                                "ru": "Мистер <w>Шайн</w> примет вас в своем кабинете сейчас."
+                            }
+                        }
+                    ],
+                    "traits": [
+                        {
+                            "trait_type": "surname",
+                            "comment": ""
+                        }
+                    ],
+                    "target_lang_definitions": {
+                        "ru": "Фамилия."
+                    },
+                    "translations": {
+                        "ru": [
+                            {
+                                "target_lang_word": "Шайн",
+                                "target_lang_sense_clarification": "фамилия"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
