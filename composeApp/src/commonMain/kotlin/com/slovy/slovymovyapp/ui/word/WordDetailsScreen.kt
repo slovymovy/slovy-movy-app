@@ -495,12 +495,6 @@ class WordDetailViewModel(
                         currentVoiceIndex = availableVoices.indices.random()
                     }
 
-                    // Show voice setup sheet once if no good/best quality voice is available
-                    // TODO: restore isVoiceSetupShown() check before release
-                    val hasHighQualityVoice = availableVoices.any { it.quality != VoiceQuality.MEDIUM }
-                    if (!hasHighQualityVoice) {
-                        showVoiceSetupSheet = true
-                    }
                 }
             } catch (_: Exception) {
                 // Failed to load voices, button will be disabled
@@ -510,7 +504,7 @@ class WordDetailViewModel(
     }
 
     fun dismissVoiceSetup() {
-        viewModelScope.launch { voiceFilterHelper.markVoiceSetupShown() }
+        viewModelScope.launch { voiceFilterHelper.markVoiceSetupShown(dictionaryLanguage) }
         showVoiceSetupSheet = false
     }
 
@@ -666,6 +660,22 @@ class WordDetailViewModel(
     fun playWord() {
         if (availableVoices.isEmpty()) return
 
+        val hasHighQualityVoice = availableVoices.any { it.quality != VoiceQuality.MEDIUM }
+        if (!hasHighQualityVoice) {
+            viewModelScope.launch {
+                if (!voiceFilterHelper.isVoiceSetupShown(dictionaryLanguage)) {
+                    showVoiceSetupSheet = true
+                    return@launch
+                }
+                doPlayWord()
+            }
+            return
+        }
+
+        doPlayWord()
+    }
+
+    private fun doPlayWord() {
         try {
             // Rotate to the next voice
             currentVoiceIndex = (currentVoiceIndex + 1) % availableVoices.size

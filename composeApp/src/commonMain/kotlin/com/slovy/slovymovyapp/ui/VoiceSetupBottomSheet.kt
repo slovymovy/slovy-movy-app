@@ -42,8 +42,8 @@ fun VoiceSetupBottomSheetContent(
     val isAndroid = platform.contains("Android", ignoreCase = true)
 
     val step1Instruction = when {
-        isAndroid -> "Open TTS settings and download a high-quality voice for ${language.selfName}."
-        isIos -> "Go to Settings → Accessibility → Spoken Content → Voices and download a voice for ${language.selfName}."
+        isAndroid -> "Open your phone's text-to-speech settings and download a high-quality voice for ${language.selfName}."
+        isIos -> "Go to your iPhone Settings → Accessibility → Read & Speak → Voices and download a voice for ${language.selfName}."
         else -> "Download a high-quality voice for ${language.selfName} from your system settings."
     }
 
@@ -79,7 +79,7 @@ fun VoiceSetupBottomSheetContent(
         Spacer(modifier = Modifier.height(AppSpacing.sm))
 
         StepRow(number = 1, text = step1Instruction)
-        StepRow(number = 2, text = "Come back to Settings → Voices and enable the new voice.")
+        StepRow(number = 2, text = "Come back to Open Words Settings → Voices and enable the new voice.")
 
         Spacer(modifier = Modifier.height(AppSpacing.sm))
 
@@ -88,7 +88,7 @@ fun VoiceSetupBottomSheetContent(
                 onClick = onOpenSettings,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Open Settings")
+                Text("Open System Settings")
             }
         }
 
@@ -102,7 +102,7 @@ fun VoiceSetupBottomSheetContent(
 }
 
 @Composable
-private fun StepRow(number: Int, text: String) {
+internal fun StepRow(number: Int, text: String) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
         modifier = Modifier.fillMaxWidth()

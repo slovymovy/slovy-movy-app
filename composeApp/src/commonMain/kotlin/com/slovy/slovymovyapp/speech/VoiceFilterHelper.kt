@@ -5,10 +5,10 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import com.slovy.slovymovyapp.data.Language
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 
 /**
@@ -70,15 +70,23 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         localVoices
     }
 
-    suspend fun isVoiceSetupShown(): Boolean = withContext(Dispatchers.IO) {
+    suspend fun isVoiceSetupShown(language: Language): Boolean = withContext(Dispatchers.IO) {
         val repo = settingsRepo ?: return@withContext true
         val setting = repo.getById(Setting.Name.VOICE_SETUP_SHOWN) ?: return@withContext false
-        (setting.value as? JsonPrimitive)?.booleanOrNull == true
+        val shownCodes = (setting.value as? JsonArray)
+            ?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+            ?.toSet() ?: emptySet()
+        language.code in shownCodes
     }
 
-    suspend fun markVoiceSetupShown() = withContext(Dispatchers.IO) {
+    suspend fun markVoiceSetupShown(language: Language) = withContext(Dispatchers.IO) {
         val repo = settingsRepo ?: return@withContext
-        repo.insert(Setting(Setting.Name.VOICE_SETUP_SHOWN, JsonPrimitive(true)))
+        val existing = repo.getById(Setting.Name.VOICE_SETUP_SHOWN)
+        val currentCodes = (existing?.value as? JsonArray)
+            ?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+            ?.toMutableSet() ?: mutableSetOf()
+        currentCodes.add(language.code)
+        repo.insert(Setting(Setting.Name.VOICE_SETUP_SHOWN, JsonArray(currentCodes.map { JsonPrimitive(it) })))
     }
 
     suspend fun filterVoicesByEnabled(
