@@ -548,6 +548,14 @@ internal fun EntryCard(
                 }
 
                 // Senses - edge-to-edge (no horizontal padding)
+                val ambiguousTranslations = remember(entry.senses) {
+                    val counts = mutableMapOf<String, Int>()
+                    entry.senses.forEach { sense ->
+                        sense.translations.values.flatten()
+                            .forEach { counts[it.targetLangWord] = (counts[it.targetLangWord] ?: 0) + 1 }
+                    }
+                    counts.filterValues { it > 1 }.keys
+                }
                 entry.senses.forEach { sense ->
                     val senseState = entryState.senses.find { it.senseId == sense.senseId }
                         ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
@@ -559,7 +567,8 @@ internal fun EntryCard(
                             sense = sense,
                             pos = entry.pos,
                             translationLoading = translationLoading || senseState.translationLoading,
-                            translationError = translationError ?: senseState.translationError
+                            translationError = translationError ?: senseState.translationError,
+                            ambiguousTranslations = ambiguousTranslations
                         ),
                         state = senseState,
                         onToggle = { onSenseToggle(sense.senseId) },

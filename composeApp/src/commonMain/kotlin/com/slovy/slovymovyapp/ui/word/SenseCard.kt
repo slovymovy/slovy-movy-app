@@ -39,7 +39,8 @@ data class SenseCardData(
     val error: String? = null,
     val translationLoading: Boolean = false,
     val translationError: String? = null,
-    val diagnosticInfoOnError: String? = null
+    val diagnosticInfoOnError: String? = null,
+    val ambiguousTranslations: Set<String> = emptySet()
 )
 
 @Composable
@@ -112,6 +113,11 @@ internal fun SenseCard(
                                 style = MaterialTheme.typography.titleMedium,
                                 clickableWords = relatedWords.keys,
                                 onWordClick = onWordClick
+                            )
+                        } else if (sense.hasAmbiguousClarifications(data.ambiguousTranslations)) {
+                            TranslationsHeaderWithClarifications(
+                                sense = sense,
+                                ambiguous = data.ambiguousTranslations,
                             )
                         } else {
                             HighlightedText(
@@ -190,6 +196,28 @@ internal fun SenseCard(
                             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        if (translationBasedHeader != null) {
+                            val withClarifications = sense.translationsWithClarifications()
+                            if (withClarifications.isNotEmpty()) {
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    withClarifications.forEach { translation ->
+                                        Text(
+                                            text = buildAnnotatedString {
+                                                withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
+                                                    append(translation.targetLangWord)
+                                                }
+                                                append(" → ")
+                                                append(translation.targetLangSenseClarification!!)
+                                            },
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            ),
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
                         if (sense.targetLangDefinitions.isNotEmpty()) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 SectionLabel("Definition")
@@ -439,6 +467,32 @@ internal fun LanguageCardResponseSense.collectLanguages(): List<Language> {
     return ordered.toList()
 }
 
+@Composable
+private fun TranslationsHeaderWithClarifications(
+    sense: LanguageCardResponseSense,
+    ambiguous: Set<String>,
+) {
+    val multiLang = sense.translations.keys.size > 1
+    val clarificationColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val style = MaterialTheme.typography.titleMedium
+    sense.translations.entries.sortedBy { it.key }.forEach { (_, langTranslations) ->
+        val annotated = buildAnnotatedString {
+            if (multiLang) append("$bullet ")
+            langTranslations.sortedBy { it.targetLangWord }.forEachIndexed { index, translation ->
+                if (index > 0) append(", ")
+                append(translation.targetLangWord)
+                val clarification = translation.targetLangSenseClarification
+                if (translation.targetLangWord in ambiguous && clarification != null) {
+                    withStyle(SpanStyle(color = clarificationColor)) {
+                        append(" $bullet $clarification")
+                    }
+                }
+            }
+        }
+        Text(text = annotated, style = style)
+    }
+}
+
 private fun LanguageCardResponseSense.translationsHeader(): String? {
     if (translations.isEmpty()) {
         return null
@@ -448,6 +502,16 @@ private fun LanguageCardResponseSense.translationsHeader(): String? {
         prefix + it.value.map { translation -> translation.targetLangWord }.sortedBy { text -> text }
             .joinToString(separator = ", ")
     }
+}
+
+private fun LanguageCardResponseSense.hasAmbiguousClarifications(ambiguous: Set<String>): Boolean {
+    return translations.values.flatten().any { it.targetLangWord in ambiguous && it.targetLangSenseClarification != null }
+}
+
+private fun LanguageCardResponseSense.translationsWithClarifications(): List<LanguageCardTranslation> {
+    return translations.entries.sortedBy { it.key }
+        .flatMap { it.value.sortedBy { t -> t.targetLangWord } }
+        .filter { it.targetLangSenseClarification != null }
 }
 
 internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
