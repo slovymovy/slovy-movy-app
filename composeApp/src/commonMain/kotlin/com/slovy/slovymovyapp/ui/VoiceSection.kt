@@ -192,8 +192,7 @@ fun DownloadMoreVoicesCard(onOpenSettings: () -> Unit) {
                 Spacer(modifier = Modifier.width(AppSpacing.md))
                 Text(
                     text = "Download more voices",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
 

@@ -508,7 +508,11 @@ class WordDetailViewModel(
         showVoiceSetupSheet = false
     }
 
-    fun openVoiceSettings() = ttsManager.openSettings()
+    fun openVoiceSettings() {
+        viewModelScope.launch { voiceFilterHelper.markVoiceSetupShown(dictionaryLanguage) }
+        showVoiceSetupSheet = false
+        ttsManager.openSettings()
+    }
 
     fun isSenseFavorite(senseId: String): Boolean {
         return senseId in favoriteSenses
@@ -969,7 +973,7 @@ fun WordDetailScreenContent(
     }
 
     if (showVoiceSetupSheet) {
-        com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet(
+        VoiceSetupBottomSheet(
             language = dictionaryLanguage,
             onOpenSettings = onOpenVoiceSettings,
             onDismiss = onDismissVoiceSetup

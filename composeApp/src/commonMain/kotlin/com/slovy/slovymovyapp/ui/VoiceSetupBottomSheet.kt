@@ -84,7 +84,7 @@ fun VoiceSetupBottomSheetContent(
         Spacer(modifier = Modifier.height(AppSpacing.sm))
 
         if (isAndroid || isIos) {
-            Button(
+            FilledTonalButton(
                 onClick = onOpenSettings,
                 modifier = Modifier.fillMaxWidth()
             ) {
