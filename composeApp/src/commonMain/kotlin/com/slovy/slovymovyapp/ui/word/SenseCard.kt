@@ -19,10 +19,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
@@ -118,6 +121,8 @@ internal fun SenseCard(
                             TranslationsHeaderWithClarifications(
                                 sense = sense,
                                 ambiguous = data.ambiguousTranslations,
+                                clickableWords = relatedWords.keys,
+                                onWordClick = onWordClick
                             )
                         } else {
                             HighlightedText(
@@ -449,18 +454,33 @@ internal fun LanguageCardResponseSense.collectLanguages(): List<Language> {
 private fun TranslationsHeaderWithClarifications(
     sense: LanguageCardResponseSense,
     ambiguous: Set<String>,
+    clickableWords: Set<String> = emptySet(),
+    onWordClick: (String) -> Unit = {}
 ) {
     val multiLang = sense.translations.keys.size > 1
     val clarificationColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val clickableStyle = SpanStyle(
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Medium,
+        textDecoration = TextDecoration.Underline
+    )
     val style = MaterialTheme.typography.titleMedium
     sense.translations.entries.sortedBy { it.key }.forEach { (_, langTranslations) ->
         val annotated = buildAnnotatedString {
             if (multiLang) append("$bullet ")
             langTranslations.sortedBy { it.targetLangWord }.forEachIndexed { index, translation ->
                 if (index > 0) append(", ")
-                append(translation.targetLangWord)
+                val word = translation.targetLangWord
+                val isClickable = clickableWords.any { it.equals(word, ignoreCase = true) }
+                if (isClickable) {
+                    withLink(LinkAnnotation.Clickable(tag = "CLICKABLE_WORD_$word", linkInteractionListener = { onWordClick(word) })) {
+                        withStyle(clickableStyle) { append(word) }
+                    }
+                } else {
+                    append(word)
+                }
                 val clarification = translation.targetLangSenseClarification
-                if (translation.targetLangWord in ambiguous && clarification != null) {
+                if (word in ambiguous && clarification != null) {
                     withStyle(SpanStyle(color = clarificationColor)) {
                         append(" $bullet $clarification")
                     }

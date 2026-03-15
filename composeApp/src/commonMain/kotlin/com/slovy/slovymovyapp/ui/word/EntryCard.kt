@@ -551,8 +551,8 @@ internal fun EntryCard(
                 // Senses - edge-to-edge (no horizontal padding)
                 val ambiguousTranslations = remember(entry.senses) {
                     val fingerprint = { sense: LanguageCardResponseSense ->
-                        sense.translations.values.flatten()
-                            .map { it.targetLangWord }
+                        sense.translations.entries
+                            .flatMap { (lang, translations) -> translations.map { "${lang}:${it.targetLangWord}" } }
                             .sorted()
                             .joinToString(",")
                     }
