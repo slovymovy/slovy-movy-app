@@ -550,26 +550,7 @@ internal fun EntryCard(
 
                 // Senses - edge-to-edge (no horizontal padding)
                 val ambiguousTranslations = remember(entry.senses) {
-                    val fingerprint = { sense: LanguageCardResponseSense ->
-                        sense.translations.entries
-                            .flatMap { (lang, translations) -> translations.map { "${lang}:${it.targetLangWord}" } }
-                            .sorted()
-                            .joinToString(",")
-                    }
-                    val counts = mutableMapOf<String, Int>()
-                    entry.senses.forEach { sense ->
-                        val fp = fingerprint(sense)
-                        if (fp.isNotEmpty()) counts[fp] = (counts[fp] ?: 0) + 1
-                    }
-                    val duplicated = counts.filterValues { it > 1 }.keys
-                    entry.senses
-                        .filter { fingerprint(it) in duplicated }
-                        .flatMap { sense ->
-                            sense.translations.values.flatten()
-                                .filter { !it.targetLangWord.contains(' ') }
-                                .map { it.targetLangWord }
-                        }
-                        .toSet()
+                    computeAmbiguousTranslations(entry.senses)
                 }
                 entry.senses.forEach { sense ->
                     val senseState = entryState.senses.find { it.senseId == sense.senseId }
@@ -597,6 +578,29 @@ internal fun EntryCard(
             }
         }
     }
+}
+
+internal fun computeAmbiguousTranslations(senses: List<LanguageCardResponseSense>): Set<String> {
+    val fingerprint = { sense: LanguageCardResponseSense ->
+        sense.translations.entries
+            .flatMap { (lang, translations) -> translations.map { "${lang}:${it.targetLangWord}" } }
+            .sorted()
+            .joinToString(",")
+    }
+    val counts = mutableMapOf<String, Int>()
+    senses.forEach { sense ->
+        val fp = fingerprint(sense)
+        if (fp.isNotEmpty()) counts[fp] = (counts[fp] ?: 0) + 1
+    }
+    val duplicated = counts.filterValues { it > 1 }.keys
+    return senses
+        .filter { fingerprint(it) in duplicated }
+        .flatMap { sense ->
+            sense.translations.values.flatten()
+                .filter { !it.targetLangWord.contains(' ') }
+                .map { it.targetLangWord }
+        }
+        .toSet()
 }
 
 fun pluralEnding(count: Int): String = if (count == 1) "" else "s"
