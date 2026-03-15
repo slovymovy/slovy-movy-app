@@ -196,28 +196,6 @@ internal fun SenseCard(
                             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        if (translationBasedHeader != null) {
-                            val withClarifications = sense.translationsWithClarifications()
-                            if (withClarifications.isNotEmpty()) {
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    withClarifications.forEach { translation ->
-                                        Text(
-                                            text = buildAnnotatedString {
-                                                withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
-                                                    append(translation.targetLangWord)
-                                                }
-                                                append(" → ")
-                                                append(translation.targetLangSenseClarification!!)
-                                            },
-                                            style = MaterialTheme.typography.bodySmall.copy(
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            ),
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
                         if (sense.targetLangDefinitions.isNotEmpty()) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 SectionLabel("Definition")
@@ -508,11 +486,6 @@ private fun LanguageCardResponseSense.hasAmbiguousClarifications(ambiguous: Set<
     return translations.values.flatten().any { it.targetLangWord in ambiguous && it.targetLangSenseClarification != null }
 }
 
-private fun LanguageCardResponseSense.translationsWithClarifications(): List<LanguageCardTranslation> {
-    return translations.entries.sortedBy { it.key }
-        .flatMap { it.value.sortedBy { t -> t.targetLangWord } }
-        .filter { it.targetLangSenseClarification != null }
-}
 
 internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
     if (lemma == null) return baseColor

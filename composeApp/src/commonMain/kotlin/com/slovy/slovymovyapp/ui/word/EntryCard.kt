@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.forms.GridCell
 import com.slovy.slovymovyapp.data.remote.FormsSchemeView
 import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
+import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.ui.components.PartOfSpeechIndicator
 import kotlin.math.max
@@ -549,12 +550,26 @@ internal fun EntryCard(
 
                 // Senses - edge-to-edge (no horizontal padding)
                 val ambiguousTranslations = remember(entry.senses) {
+                    val fingerprint = { sense: LanguageCardResponseSense ->
+                        sense.translations.values.flatten()
+                            .map { it.targetLangWord }
+                            .sorted()
+                            .joinToString(",")
+                    }
                     val counts = mutableMapOf<String, Int>()
                     entry.senses.forEach { sense ->
-                        sense.translations.values.flatten()
-                            .forEach { counts[it.targetLangWord] = (counts[it.targetLangWord] ?: 0) + 1 }
+                        val fp = fingerprint(sense)
+                        if (fp.isNotEmpty()) counts[fp] = (counts[fp] ?: 0) + 1
                     }
-                    counts.filterValues { it > 1 }.keys
+                    val duplicated = counts.filterValues { it > 1 }.keys
+                    entry.senses
+                        .filter { fingerprint(it) in duplicated }
+                        .flatMap { sense ->
+                            sense.translations.values.flatten()
+                                .filter { !it.targetLangWord.contains(' ') }
+                                .map { it.targetLangWord }
+                        }
+                        .toSet()
                 }
                 entry.senses.forEach { sense ->
                     val senseState = entryState.senses.find { it.senseId == sense.senseId }
