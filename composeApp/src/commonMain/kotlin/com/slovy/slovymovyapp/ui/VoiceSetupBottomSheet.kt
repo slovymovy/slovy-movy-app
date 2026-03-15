@@ -20,13 +20,14 @@ import com.slovy.slovymovyapp.ui.theme.AppSpacing
 fun VoiceSetupBottomSheet(
     language: Language,
     onOpenSettings: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onLater: () -> Unit
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         VoiceSetupBottomSheetContent(
             language = language,
             onOpenSettings = onOpenSettings,
-            onDismiss = onDismiss
+            onLater = onLater
         )
     }
 }
@@ -35,7 +36,7 @@ fun VoiceSetupBottomSheet(
 fun VoiceSetupBottomSheetContent(
     language: Language,
     onOpenSettings: () -> Unit,
-    onDismiss: () -> Unit
+    onLater: () -> Unit
 ) {
     val platform = getPlatform().name
     val isIos = platform.contains("iOS", ignoreCase = true)
@@ -93,7 +94,7 @@ fun VoiceSetupBottomSheetContent(
         }
 
         TextButton(
-            onClick = onDismiss,
+            onClick = onLater,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Later")
@@ -138,7 +139,7 @@ private fun VoiceSetupBottomSheetPreview(
             VoiceSetupBottomSheetContent(
                 language = Language.DUTCH,
                 onOpenSettings = {},
-                onDismiss = {}
+                onLater = {}
             )
         }
     }

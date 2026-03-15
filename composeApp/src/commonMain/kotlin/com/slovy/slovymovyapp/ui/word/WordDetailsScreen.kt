@@ -507,6 +507,10 @@ class WordDetailViewModel(
     fun dismissVoiceSetup() {
         viewModelScope.launch { voiceFilterHelper.markVoiceSetupShown(dictionaryLanguage) }
         showVoiceSetupSheet = false
+    }
+
+    fun dismissVoiceSetupAndPlay() {
+        dismissVoiceSetup()
         doPlayWord()
     }
 
@@ -776,6 +780,7 @@ fun WordDetailScreen(
         showVoiceSetupSheet = viewModel.showVoiceSetupSheet,
         onOpenVoiceSettings = { viewModel.openVoiceSettings() },
         onDismissVoiceSetup = { viewModel.dismissVoiceSetup() },
+        onLaterVoiceSetup = { viewModel.dismissVoiceSetupAndPlay() },
         onOpenFeedback = { viewModel.openFeedbackDialog() },
         onDismissFeedback = { viewModel.dismissFeedbackDialog() },
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
@@ -817,6 +822,7 @@ fun WordDetailScreenContent(
     showVoiceSetupSheet: Boolean = false,
     onOpenVoiceSettings: () -> Unit = {},
     onDismissVoiceSetup: () -> Unit = {},
+    onLaterVoiceSetup: () -> Unit = {},
     onOpenFeedback: () -> Unit = {},
     onDismissFeedback: () -> Unit = {},
     onFeedbackCommentChange: (String) -> Unit = {},
@@ -978,7 +984,8 @@ fun WordDetailScreenContent(
         VoiceSetupBottomSheet(
             language = dictionaryLanguage,
             onOpenSettings = onOpenVoiceSettings,
-            onDismiss = onDismissVoiceSetup
+            onDismiss = onDismissVoiceSetup,
+            onLater = onLaterVoiceSetup
         )
     }
 
