@@ -486,7 +486,6 @@ private fun LanguageCardResponseSense.hasAmbiguousClarifications(ambiguous: Set<
     return translations.values.flatten().any { it.targetLangWord in ambiguous && it.targetLangSenseClarification != null }
 }
 
-
 internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
     if (lemma == null) return baseColor
 
