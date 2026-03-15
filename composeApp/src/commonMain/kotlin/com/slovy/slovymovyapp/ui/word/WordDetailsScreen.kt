@@ -34,6 +34,7 @@ import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.speech.VoiceQuality
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
+import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onCompletion
@@ -506,6 +507,7 @@ class WordDetailViewModel(
     fun dismissVoiceSetup() {
         viewModelScope.launch { voiceFilterHelper.markVoiceSetupShown(dictionaryLanguage) }
         showVoiceSetupSheet = false
+        doPlayWord()
     }
 
     fun openVoiceSettings() {
