@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.data.remote.LearnerLevel
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class AmbiguousTranslationsTest {
@@ -33,7 +34,8 @@ class AmbiguousTranslationsTest {
             sense("2", mapOf(Language.ENGLISH to trans("marry", "wed")))
         )
         val result = computeAmbiguousTranslations(senses)
-        assertEquals(setOf("marry", "wed"), result)
+        assertEquals(setOf("marry", "wed"), result["1"])
+        assertEquals(setOf("marry", "wed"), result["2"])
     }
 
     @Test
@@ -69,11 +71,38 @@ class AmbiguousTranslationsTest {
             sense("2", mapOf(Language.ENGLISH to trans("get married", "wed")))
         )
         // fingerprints match → ambiguous, but "get married" is multi-word so excluded from result
-        assertEquals(setOf("wed"), computeAmbiguousTranslations(senses))
+        assertEquals(setOf("wed"), computeAmbiguousTranslations(senses)["1"])
+        assertEquals(setOf("wed"), computeAmbiguousTranslations(senses)["2"])
     }
 
     @Test
     fun empty_senses_returns_empty() {
         assertTrue(computeAmbiguousTranslations(emptyList()).isEmpty())
+    }
+
+    @Test
+    fun non_duplicated_sense_not_flagged_when_sharing_word_with_duplicated_group() {
+        // senses "1" and "2" are duplicated; sense "3" shares "bank" but has a different set
+        val senses = listOf(
+            sense("1", mapOf(Language.ENGLISH to trans("bank"))),
+            sense("2", mapOf(Language.ENGLISH to trans("bank"))),
+            sense("3", mapOf(Language.ENGLISH to trans("bank", "shore")))
+        )
+        val result = computeAmbiguousTranslations(senses)
+        assertEquals(setOf("bank"), result["1"])
+        assertEquals(setOf("bank"), result["2"])
+        assertFalse(result.containsKey("3"), "sense 3 must not be flagged")
+    }
+
+    @Test
+    fun duplicate_entries_within_sense_treated_as_single_word() {
+        // same word listed twice in one sense — should still match a sense with it once
+        val senses = listOf(
+            sense("1", mapOf(Language.ENGLISH to trans("bank", "bank"))),
+            sense("2", mapOf(Language.ENGLISH to trans("bank")))
+        )
+        val result = computeAmbiguousTranslations(senses)
+        assertEquals(setOf("bank"), result["1"])
+        assertEquals(setOf("bank"), result["2"])
     }
 }

@@ -549,7 +549,7 @@ internal fun EntryCard(
                 }
 
                 // Senses - edge-to-edge (no horizontal padding)
-                val ambiguousTranslations = remember(entry.senses) {
+                val ambiguousTranslationsBySense = remember(entry.senses) {
                     computeAmbiguousTranslations(entry.senses)
                 }
                 entry.senses.forEach { sense ->
@@ -564,7 +564,7 @@ internal fun EntryCard(
                             pos = entry.pos,
                             translationLoading = translationLoading || senseState.translationLoading,
                             translationError = translationError ?: senseState.translationError,
-                            ambiguousTranslations = ambiguousTranslations
+                            ambiguousTranslations = ambiguousTranslationsBySense[sense.senseId] ?: emptySet()
                         ),
                         state = senseState,
                         onToggle = { onSenseToggle(sense.senseId) },
@@ -580,10 +580,10 @@ internal fun EntryCard(
     }
 }
 
-internal fun computeAmbiguousTranslations(senses: List<LanguageCardResponseSense>): Set<String> {
+internal fun computeAmbiguousTranslations(senses: List<LanguageCardResponseSense>): Map<String, Set<String>> {
     val fingerprint = { sense: LanguageCardResponseSense ->
         sense.translations.entries
-            .flatMap { (lang, translations) -> translations.map { "${lang}:${it.targetLangWord}" } }
+            .flatMap { (lang, translations) -> translations.map { it.targetLangWord }.distinct().map { "$lang:$it" } }
             .sorted()
             .joinToString(",")
     }
@@ -595,12 +595,12 @@ internal fun computeAmbiguousTranslations(senses: List<LanguageCardResponseSense
     val duplicated = counts.filterValues { it > 1 }.keys
     return senses
         .filter { fingerprint(it) in duplicated }
-        .flatMap { sense ->
-            sense.translations.values.flatten()
+        .associate { sense ->
+            sense.senseId to sense.translations.values.flatten()
                 .filter { !it.targetLangWord.contains(' ') }
                 .map { it.targetLangWord }
+                .toSet()
         }
-        .toSet()
 }
 
 fun pluralEnding(count: Int): String = if (count == 1) "" else "s"
