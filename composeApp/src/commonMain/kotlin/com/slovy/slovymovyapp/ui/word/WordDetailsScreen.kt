@@ -31,6 +31,7 @@ import com.slovy.slovymovyapp.speech.TTSStatus
 import com.slovy.slovymovyapp.speech.Text2SpeechVoice
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
+import com.slovy.slovymovyapp.speech.VoiceQuality
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
 import kotlinx.coroutines.cancel
@@ -289,6 +290,9 @@ class WordDetailViewModel(
     var availableVoices by mutableStateOf<List<Text2SpeechVoice>>(emptyList())
         private set
 
+    var showVoiceSetupSheet by mutableStateOf(false)
+        private set
+
     val snackbarHostState = SnackbarHostState()
 
     var pendingIssueUrl by mutableStateOf<String?>(null)
@@ -490,6 +494,13 @@ class WordDetailViewModel(
                     if (availableVoices.isNotEmpty()) {
                         currentVoiceIndex = availableVoices.indices.random()
                     }
+
+                    // Show voice setup sheet once if no good/best quality voice is available
+                    // TODO: restore isVoiceSetupShown() check before release
+                    val hasHighQualityVoice = availableVoices.any { it.quality != VoiceQuality.MEDIUM }
+                    if (!hasHighQualityVoice) {
+                        showVoiceSetupSheet = true
+                    }
                 }
             } catch (_: Exception) {
                 // Failed to load voices, button will be disabled
@@ -497,6 +508,13 @@ class WordDetailViewModel(
             }
         }
     }
+
+    fun dismissVoiceSetup() {
+        viewModelScope.launch { voiceFilterHelper.markVoiceSetupShown() }
+        showVoiceSetupSheet = false
+    }
+
+    fun openVoiceSettings() = ttsManager.openSettings()
 
     fun isSenseFavorite(senseId: String): Boolean {
         return senseId in favoriteSenses
@@ -738,6 +756,10 @@ fun WordDetailScreen(
         onNavigateToSettings = onNavigateToSettings,
         onPlayWord = { viewModel.playWord() },
         onStopWord = { viewModel.stopPlayback() },
+        dictionaryLanguage = viewModel.dictionaryLanguage,
+        showVoiceSetupSheet = viewModel.showVoiceSetupSheet,
+        onOpenVoiceSettings = { viewModel.openVoiceSettings() },
+        onDismissVoiceSetup = { viewModel.dismissVoiceSetup() },
         onOpenFeedback = { viewModel.openFeedbackDialog() },
         onDismissFeedback = { viewModel.dismissFeedbackDialog() },
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
@@ -775,6 +797,10 @@ fun WordDetailScreenContent(
     onNavigateToSettings: () -> Unit = {},
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
+    dictionaryLanguage: Language = Language.ENGLISH,
+    showVoiceSetupSheet: Boolean = false,
+    onOpenVoiceSettings: () -> Unit = {},
+    onDismissVoiceSetup: () -> Unit = {},
     onOpenFeedback: () -> Unit = {},
     onDismissFeedback: () -> Unit = {},
     onFeedbackCommentChange: (String) -> Unit = {},
@@ -930,6 +956,14 @@ fun WordDetailScreenContent(
                 }
             }
         }
+    }
+
+    if (showVoiceSetupSheet) {
+        com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet(
+            language = dictionaryLanguage,
+            onOpenSettings = onOpenVoiceSettings,
+            onDismiss = onDismissVoiceSetup
+        )
     }
 
     if (state is WordDetailUiState.Content && state.feedbackDialogVisible) {

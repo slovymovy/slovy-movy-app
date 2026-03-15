@@ -8,6 +8,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 
 /**
@@ -67,6 +68,17 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
             setEnabledVoices(language, localVoices)
         }
         localVoices
+    }
+
+    suspend fun isVoiceSetupShown(): Boolean = withContext(Dispatchers.IO) {
+        val repo = settingsRepo ?: return@withContext true
+        val setting = repo.getById(Setting.Name.VOICE_SETUP_SHOWN) ?: return@withContext false
+        (setting.value as? JsonPrimitive)?.booleanOrNull == true
+    }
+
+    suspend fun markVoiceSetupShown() = withContext(Dispatchers.IO) {
+        val repo = settingsRepo ?: return@withContext
+        repo.insert(Setting(Setting.Name.VOICE_SETUP_SHOWN, JsonPrimitive(true)))
     }
 
     suspend fun filterVoicesByEnabled(
