@@ -59,8 +59,11 @@ class DownloadCoordinator(
             } catch (t: Throwable) {
                 updateEntry(key, DownloadEntry(status = DownloadStatus.Failed, error = t))
             } finally {
-                jobs.remove(key)
-                cancelTokens.remove(key)
+                // Guard against removing a newer job's entries if this key was reused
+                if (cancelTokens[key] === cancelToken) {
+                    jobs.remove(key)
+                    cancelTokens.remove(key)
+                }
             }
         }
         jobs[key] = job
@@ -69,6 +72,7 @@ class DownloadCoordinator(
 
     fun cancel(key: String) {
         cancelTokens[key]?.cancel()
+        jobs[key]?.cancel()
     }
 
     fun clear(key: String) {

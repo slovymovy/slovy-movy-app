@@ -175,6 +175,11 @@ class DownloadViewModel(
         downloadCoordinator.cancel(downloadKey)
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        downloadCoordinator.cancel(downloadKey)
+    }
+
     fun retry() {
         terminalHandled = false
         if (failedDuringLoadItems) {

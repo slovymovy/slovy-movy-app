@@ -326,7 +326,7 @@ fun App(
                             },
                             onSuccess = {
                                 navController.navigate(AppDestination.Search) {
-                                    popUpTo<AppDestination.SetupLanguages> { inclusive = true }
+                                    popUpTo<AppDestination.DownloadSetup> { inclusive = true }
                                 }
                             },
                             onCancel = {
