@@ -326,12 +326,12 @@ fun App(
                             },
                             onSuccess = {
                                 navController.navigate(AppDestination.Search) {
-                                    popUpTo<AppDestination.Search> { inclusive = false }
+                                    popUpTo<AppDestination.SetupLanguages> { inclusive = true }
                                 }
                             },
                             onCancel = {
                                 navController.navigate(AppDestination.Search) {
-                                    popUpTo<AppDestination.Search> { inclusive = true }
+                                    popUpTo<AppDestination.SetupLanguages> { inclusive = false }
                                 }
                             },
                             onError = { _ ->
