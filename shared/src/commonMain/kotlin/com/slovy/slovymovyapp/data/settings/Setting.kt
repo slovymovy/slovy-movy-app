@@ -16,6 +16,7 @@ data class Setting(
         LANGUAGE,
         DICTIONARY,
         DATA_VERSION,
-        ENABLED_VOICES
+        ENABLED_VOICES,
+        VOICE_SETUP_SHOWN
     }
 }

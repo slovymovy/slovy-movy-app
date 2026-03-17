@@ -13,9 +13,9 @@ abstract class BaseLLMTest {
     fun pickFastModel(provider: AIProvider): String {
         val models = provider.getAvailableModels()
         val preferred = when (provider) {
-            is GeminiProvider -> listOf(GEMINI_3_0_FLASH_PREVIEW)
+            is GeminiProvider -> listOf(GEMINI_FLASH_LATEST)
             is OpenAIProvider -> listOf(
-                ChatModel.GPT_5_2.asString()
+                ChatModel.GPT_5_4.asString()
             )
 
             else -> emptyList()

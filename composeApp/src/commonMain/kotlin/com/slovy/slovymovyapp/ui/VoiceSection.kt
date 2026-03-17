@@ -156,59 +156,57 @@ fun VoiceSectionItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DownloadMoreVoicesCard(onOpenSettings: () -> Unit) {
+    val platform = getPlatform().name
+    val isIos = platform.contains("iOS", ignoreCase = true)
+    val isAndroid = platform.contains("Android", ignoreCase = true)
+
+    val step1Instruction = when {
+        isAndroid -> "Open your phone's text-to-speech settings and download a high-quality voice."
+        isIos -> "Go to your iPhone Settings → Accessibility → Read & Speak → Voices and download a high-quality voice."
+        else -> "Download a high-quality voice from your system settings."
+    }
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
-        onClick = onOpenSettings
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(AppSpacing.lg),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
-            Icon(
-                imageVector = Icons.Default.Download,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = Modifier.width(AppSpacing.md))
-
-            Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Download,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(AppSpacing.md))
                 Text(
                     text = "Download more voices",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium
                 )
-                val platform = getPlatform().name
-                val voicesText = when {
-                    platform.contains("Android", ignoreCase = true) -> "Open system settings"
-                    platform.contains("iOS", ignoreCase = true) -> "Accessibility → Spoken Content → Voices"
-                    else -> ""
-                }
-
-                if (voicesText.isNotEmpty()) {
-                    Text(
-                        text = voicesText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
 
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            StepRow(number = 1, text = step1Instruction)
+            StepRow(number = 2, text = "Come back to Open Words Settings → Voice and enable the new voice.")
+
+            if (isAndroid || isIos) {
+                FilledTonalButton(
+                    onClick = onOpenSettings,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Open System Settings")
+                }
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ import com.slovy.slovymovyapp.ui.icons.DownloadScreenTransparent
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -40,7 +41,7 @@ class DownloadViewModel(
     private val downloadCoordinator: DownloadCoordinator,
     private val downloadKey: String,
     private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
-    private val onSuccess: () -> Unit,
+    private val onSuccess: suspend () -> Unit,
     private val onCancel: () -> Unit,
     private val onError: (Throwable) -> Unit,
     private val loadItems: (suspend () -> List<DownloadItem>)? = null
@@ -114,9 +115,10 @@ class DownloadViewModel(
                     DownloadStatus.Running -> {
                         val progress = entry?.progress
                         val percent = progress?.percent?.coerceAtLeast(0) ?: 0
-                        state = DownloadUiState.Running(percent, progress?.totalBytes)
+                        state = DownloadUiState.Running(percent, progress?.totalBytes, progress?.currentFile)
                     }
 
+                    // Terminal states are owned by attachDownloadCallbacks
                     else -> Unit
                 }
             }
@@ -128,29 +130,29 @@ class DownloadViewModel(
             downloadFlow.collect { entry ->
                 when (entry?.status ?: DownloadStatus.Idle) {
                     DownloadStatus.Done -> {
-                        state = DownloadUiState.Done
                         if (!terminalHandled) {
                             terminalHandled = true
-                            onSuccess()
                             downloadCoordinator.clear(downloadKey)
+                            for (i in 3 downTo 1) {
+                                state = DownloadUiState.Done(countdown = i)
+                                delay(1_000)
+                            }
+                            onSuccess()
                         }
                     }
 
                     DownloadStatus.Cancelled -> {
-                        state = DownloadUiState.Cancelled
                         if (!terminalHandled) {
                             terminalHandled = true
-                            onCancel()
+                            state = DownloadUiState.Cancelled
                             downloadCoordinator.clear(downloadKey)
                         }
                     }
 
                     DownloadStatus.Failed -> {
-                        val error = entry?.error ?: Throwable("Unknown error")
-                        state = DownloadUiState.Failed(error)
                         if (!terminalHandled) {
                             terminalHandled = true
-                            onError(error)
+                            state = DownloadUiState.Failed(entry?.error ?: Throwable("Unknown error"))
                             downloadCoordinator.clear(downloadKey)
                         }
                     }
@@ -159,6 +161,14 @@ class DownloadViewModel(
                 }
             }
         }
+    }
+
+    fun onDismissCancel() {
+        onCancel()
+    }
+
+    fun onDismissError() {
+        onError((state as? DownloadUiState.Failed)?.error ?: Throwable("Unknown error"))
     }
 
     fun cancelDownload() {
@@ -193,7 +203,8 @@ fun DownloadScreen(
         onLaterClick = onLaterClick,
         onCancelClick = { viewModel.cancelDownload() },
         onRetryClick = { viewModel.retry() },
-        onCloseClick = { viewModel.cancelDownload() }
+        onCloseClick = { viewModel.onDismissCancel() },
+        onErrorLaterClick = { viewModel.onDismissError() }
     )
 }
 
@@ -209,6 +220,7 @@ fun DownloadScreenContent(
     onCancelClick: () -> Unit = {},
     onRetryClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
+    onErrorLaterClick: () -> Unit = {},
 ) {
     val hasActions = state is DownloadUiState.ReadyToDownload ||
             state is DownloadUiState.Running ||
@@ -267,6 +279,15 @@ fun DownloadScreenContent(
                         is DownloadUiState.Failed -> {
                             OutlinedButton(onClick = onRetryClick) {
                                 Text("Retry")
+                            }
+
+                            Spacer(Modifier.height(AppSpacing.sm))
+
+                            TextButton(onClick = onErrorLaterClick) {
+                                Text(
+                                    "Later",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
 
@@ -437,6 +458,14 @@ fun DownloadScreenContent(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    if (state.currentFile != null) {
+                        Spacer(Modifier.height(AppSpacing.xs))
+                        Text(
+                            text = state.currentFile,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 is DownloadUiState.Failed -> {
@@ -462,6 +491,13 @@ fun DownloadScreenContent(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
+                    Text(
+                        text = "${state.countdown}",
+                        style = MaterialTheme.typography.displayMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         }
@@ -472,10 +508,10 @@ sealed interface DownloadUiState {
     data object Loading : DownloadUiState
     data class ReadyToDownload(val items: List<DownloadItem>) : DownloadUiState
     data object Idle : DownloadUiState
-    data class Running(val percent: Int, val total: Long?) : DownloadUiState
+    data class Running(val percent: Int, val total: Long?, val currentFile: String? = null) : DownloadUiState
     data class Failed(val error: Throwable) : DownloadUiState
     data object Cancelled : DownloadUiState
-    data object Done : DownloadUiState
+    data class Done(val countdown: Int) : DownloadUiState
 }
 
 @Preview
@@ -552,6 +588,6 @@ private fun DownloadScreenPreviewDone(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(state = DownloadUiState.Done)
+        DownloadScreenContent(state = DownloadUiState.Done(countdown = 3))
     }
 }

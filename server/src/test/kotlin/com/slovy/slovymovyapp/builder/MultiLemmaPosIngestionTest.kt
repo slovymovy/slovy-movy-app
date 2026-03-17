@@ -84,7 +84,7 @@ class MultiLemmaPosIngestionTest {
 
         assertTrue(layCluster != null, "'lay' form not found in any verb lemma_pos")
         assertTrue(liedCluster != null, "'lied' form not found in any verb lemma_pos")
-        assertTrue(layCluster!!.id != liedCluster!!.id, "'lay' and 'lied' must be in DIFFERENT lemma_pos")
+        assertTrue(layCluster.id != liedCluster.id, "'lay' and 'lied' must be in DIFFERENT lemma_pos")
         assertTrue(layCluster.forms.contains("lain"), "'lain' should be in the same cluster as 'lay'")
     }
 
@@ -102,7 +102,7 @@ class MultiLemmaPosIngestionTest {
 
         assertTrue(modalCluster != null, "'could' form not found in any verb lemma_pos")
         assertTrue(cannerCluster != null, "'canned' form not found in any verb lemma_pos")
-        assertTrue(modalCluster!!.id != cannerCluster!!.id, "'could' and 'canned' must be in DIFFERENT lemma_pos")
+        assertTrue(modalCluster.id != cannerCluster.id, "'could' and 'canned' must be in DIFFERENT lemma_pos")
     }
 
     @Test
@@ -118,7 +118,7 @@ class MultiLemmaPosIngestionTest {
 
         assertTrue(flewCluster != null, "'flew' form not found in any verb lemma_pos")
         assertTrue(fliedCluster != null, "'flied' form not found in any verb lemma_pos")
-        assertTrue(flewCluster!!.id != fliedCluster!!.id, "'flew' and 'flied' must be in DIFFERENT lemma_pos")
+        assertTrue(flewCluster.id != fliedCluster.id, "'flew' and 'flied' must be in DIFFERENT lemma_pos")
     }
 
     @Test
@@ -345,8 +345,8 @@ class MultiLemmaPosIngestionTest {
         assertTrue(occurClusterId != preventClusterId, "Two clusters must have different IDs")
 
         // Both clusters should have senses — confirming hint-based routing works
-        val occurSenses = dictQ.selectSensesByLemmaPosId(occurClusterId!!).executeAsList()
-        val preventSenses = dictQ.selectSensesByLemmaPosId(preventClusterId!!).executeAsList()
+        val occurSenses = dictQ.selectSensesByLemmaPosId(occurClusterId).executeAsList()
+        val preventSenses = dictQ.selectSensesByLemmaPosId(preventClusterId).executeAsList()
 
         assertTrue(occurSenses.isNotEmpty(), "'vóórkomen' cluster should have senses after processed-over-raw")
         assertTrue(preventSenses.isNotEmpty(), "'voorkómen' cluster should have senses after processed-over-raw")
@@ -387,7 +387,7 @@ class MultiLemmaPosIngestionTest {
 
         // The "lie down" sense (0bc4b833) belongs to the lay/lain cluster
         val senseLayDown = uuidParse("0bc4b833-695d-3f43-ad1b-3dfebd4ce1d1")
-        val senseLayDownRow = dictQ.selectSensesByLemmaPosId(layLemmaPosId!!).executeAsList()
+        val senseLayDownRow = dictQ.selectSensesByLemmaPosId(layLemmaPosId).executeAsList()
             .firstOrNull { it.sense_id == senseLayDown }
         assertTrue(
             senseLayDownRow != null,
@@ -396,7 +396,7 @@ class MultiLemmaPosIngestionTest {
 
         // The "deceive" sense (8f0630d5) belongs to the lied cluster
         val senseDeceive = uuidParse("8f0630d5-11db-3350-bc4e-b3391287e68c")
-        val senseDeceiveRow = dictQ.selectSensesByLemmaPosId(liedLemmaPosId!!).executeAsList()
+        val senseDeceiveRow = dictQ.selectSensesByLemmaPosId(liedLemmaPosId).executeAsList()
             .firstOrNull { it.sense_id == senseDeceive }
         assertTrue(
             senseDeceiveRow != null,
