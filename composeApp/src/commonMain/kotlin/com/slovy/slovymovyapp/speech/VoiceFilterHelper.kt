@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.speech
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +68,25 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
             setEnabledVoices(language, localVoices)
         }
         localVoices
+    }
+
+    suspend fun isVoiceSetupShown(language: Language): Boolean = withContext(Dispatchers.IO) {
+        val repo = settingsRepo ?: return@withContext true
+        val setting = repo.getById(Setting.Name.VOICE_SETUP_SHOWN) ?: return@withContext false
+        val shownCodes = (setting.value as? JsonArray)
+            ?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+            ?.toSet() ?: emptySet()
+        language.code in shownCodes
+    }
+
+    suspend fun markVoiceSetupShown(language: Language) = withContext(Dispatchers.IO) {
+        val repo = settingsRepo ?: return@withContext
+        val existing = repo.getById(Setting.Name.VOICE_SETUP_SHOWN)
+        val currentCodes = (existing?.value as? JsonArray)
+            ?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+            ?.toMutableSet() ?: mutableSetOf()
+        currentCodes.add(language.code)
+        repo.insert(Setting(Setting.Name.VOICE_SETUP_SHOWN, JsonArray(currentCodes.map { JsonPrimitive(it) })))
     }
 
     suspend fun filterVoicesByEnabled(
