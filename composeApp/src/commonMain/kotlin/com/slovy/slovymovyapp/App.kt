@@ -34,10 +34,7 @@ private sealed interface AppDestination {
     data object Welcome : AppDestination
 
     @Serializable
-    data object DownloadDictionary : AppDestination
-
-    @Serializable
-    data object DownloadTranslation : AppDestination
+    data object DownloadSetup : AppDestination
 
     @Serializable
     data object SetupLanguages : AppDestination
@@ -170,9 +167,6 @@ fun App(
             val dictionary = dictionaryCode?.let { Language.fromCodeOrNull(it) }
             if (dictionary != null) {
                 dictionaryLanguage = dictionary
-                if (!dataManager.hasDictionary(dictionary)) {
-                    return AppDestination.DownloadDictionary
-                }
                 val downloadableTargets = try {
                     dataManager.downloadableTranslationTargets(dictionary, natives)
                 } catch (e: CancellationException) {
@@ -180,9 +174,10 @@ fun App(
                 } catch (e: Exception) {
                     emptyList()
                 }
-                val missingTranslation = downloadableTargets.find { !dataManager.hasTranslation(dictionary, it) }
-                return if (missingTranslation != null) {
-                    AppDestination.DownloadTranslation
+                val needsDownload = !dataManager.hasDictionary(dictionary) ||
+                        downloadableTargets.any { !dataManager.hasTranslation(dictionary, it) }
+                return if (needsDownload) {
+                    AppDestination.DownloadSetup
                 } else {
                     AppDestination.Search
                 }
@@ -275,152 +270,54 @@ fun App(
                             )
                             nativeLanguages = native
                             dictionaryLanguage = learning
-                            navController.navigate(AppDestination.DownloadDictionary)
+                            navController.navigate(AppDestination.DownloadSetup)
                         }
                     }
                 )
             }
-            composable<AppDestination.DownloadDictionary> { backStackEntry ->
+            composable<AppDestination.DownloadSetup> { backStackEntry ->
                 val dictLang = dictionaryLanguage
                 if (dictLang == null) {
                     LaunchedEffect(Unit) {
-                        navController.navigate(AppDestination.Error("Dictionary not selected")) {
-                            popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
+                        navController.navigate(AppDestination.SetupLanguages) {
+                            popUpTo<AppDestination.SetupLanguages> { inclusive = true }
                         }
                     }
                 } else {
-                    val viewModel = viewModel(
-                        viewModelStoreOwner = backStackEntry
-                    ) {
-                        DownloadViewModel(
-                            downloadCoordinator = downloadCoordinator,
-                            downloadKey = "dict_${dictLang.code}",
-                            download = { onProgress, cancel ->
-                                dataManager.ensureDictionary(dictLang, onProgress, cancel)
-                            },
-                            onSuccess = {
-                                coroutineScope.launch {
-                                    val downloadable = try {
-                                        dataManager.downloadableTranslationTargets(dictLang, nativeLanguages)
-                                    } catch (e: CancellationException) {
-                                        throw e
-                                    } catch (e: Exception) {
-                                        emptyList()
-                                    }
-                                    val missingTranslation =
-                                        downloadable.find { !dataManager.hasTranslation(dictLang, it) }
-                                    if (missingTranslation == null) {
-                                        navController.navigate(AppDestination.Search) {
-                                            popUpTo<AppDestination.SetupLanguages> { inclusive = false }
-                                        }
-                                    } else {
-                                        navController.navigate(AppDestination.DownloadTranslation) {
-                                            popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
-                                        }
-                                    }
-                                }
-                            },
-                            onCancel = {
-                                navController.navigate(AppDestination.Error("Download cancelled")) {
-                                    popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
-                                }
-                            },
-                            onError = { t ->
-                                navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
-                                    popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
-                                }
-                            },
-                            loadItems = {
-                                val available = dataManager.fetchAvailableLanguages()
-                                val langInfo = available.find { it.language == dictLang }
-                                val items = mutableListOf<DownloadItem>()
-                                langInfo?.dictionarySizeBytes?.let { size ->
-                                    items.add(DownloadItem("${dictLang.selfName} Dictionary", size, dictLang.flag))
-                                }
-                                val downloadableTargets = try {
-                                    dataManager.downloadableTranslationTargets(dictLang, nativeLanguages)
-                                } catch (e: CancellationException) {
-                                    throw e
-                                } catch (e: Exception) {
-                                    emptyList()
-                                }
-                                for (target in downloadableTargets) {
-                                    val translationSize = langInfo?.availableTranslations
-                                        ?.find { it.targetLanguage == target }?.sizeBytes
-                                    if (translationSize != null) {
-                                        items.add(
-                                            DownloadItem(
-                                                "${dictLang.selfName} \u2192 ${target.selfName}",
-                                                translationSize,
-                                                target.flag
-                                            )
-                                        )
-                                    }
-                                }
-                                items
-                            }
-                        )
-                    }
+                    var downloadDict = false
+                    val downloadTranslations = mutableListOf<Language>()
 
-                    DownloadScreen(
-                        viewModel = viewModel,
-                        description = "Downloading dictionary",
-                        onLaterClick = {
-                            navController.navigate(AppDestination.Search) {
-                                popUpTo<AppDestination.DownloadDictionary> { inclusive = true }
-                            }
-                        }
-                    )
-                }
-            }
-            composable<AppDestination.DownloadTranslation> { backStackEntry ->
-                val dictLang = dictionaryLanguage
-                val missingTranslations by produceState<List<Language>?>(initialValue = null, dictLang) {
-                    value = if (dictLang != null) {
-                        val downloadable = try {
-                            dataManager.downloadableTranslationTargets(dictLang, nativeLanguages)
-                        } catch (e: CancellationException) {
-                            throw e
-                        } catch (e: Exception) {
-                            emptyList()
-                        }
-                        downloadable.filter { !dataManager.hasTranslation(dictLang, it) }
-                    } else {
-                        emptyList()
-                    }
-                }
-                val resolved = missingTranslations
-                if (dictLang == null || resolved?.isEmpty() == true) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(AppDestination.Search) {
-                            popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
-                        }
-                    }
-                } else if (resolved != null) {
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
-                        val downloadKey = "setup_trans_${dictLang.code}_" +
-                                resolved.joinToString("_") { it.code }
                         DownloadViewModel(
                             downloadCoordinator = downloadCoordinator,
-                            downloadKey = downloadKey,
-                            //TODO if one of multiple translations fails we show error, but other langs downloaded.
+                            downloadKey = "setup_${dictLang.code}",
                             download = { onProgress, cancel ->
-                                resolved.forEachIndexed { index, target ->
+                                val totalItems = (if (downloadDict) 1 else 0) + downloadTranslations.size
+                                val translationOffset = if (downloadDict) 1 else 0
+                                if (downloadDict) {
+                                    val fileName = "${dictLang.selfName} Dictionary"
+                                    dataManager.ensureDictionary(dictLang, { p ->
+                                        val current = if (p.percent >= 0) p.percent.toFloat() / totalItems else 0f
+                                        onProgress(object : DownloadProgress(p.bytesDownloaded, p.totalBytes) {
+                                            override val percent: Int = current.toInt()
+                                            override val currentFile: String = fileName
+                                        })
+                                    }, cancel)
+                                }
+                                downloadTranslations.forEachIndexed { index, target ->
+                                    val itemIndex = index + translationOffset
+                                    val fileName = "${dictLang.selfName} \u2192 ${target.selfName}"
                                     dataManager.ensureTranslation(
                                         dictLang,
                                         target,
                                         onProgress = { p ->
-                                            // Combine progress of multiple downloads
-                                            val currentBase = (index.toFloat() / resolved.size) * 100
-                                            val currentProgress =
-                                                if (p.percent >= 0) (p.percent.toFloat() / resolved.size) else 0f
-                                            val totalPercent = (currentBase + currentProgress).toInt()
-
-                                            // Create a dummy DownloadProgress with the combined percentage
+                                            val base = (itemIndex.toFloat() / totalItems) * 100
+                                            val current = if (p.percent >= 0) p.percent.toFloat() / totalItems else 0f
                                             onProgress(object : DownloadProgress(p.bytesDownloaded, p.totalBytes) {
-                                                override val percent: Int = totalPercent
+                                                override val percent: Int = (base + current).toInt()
+                                                override val currentFile: String = fileName
                                             })
                                         },
                                         cancelToken = cancel
@@ -429,29 +326,65 @@ fun App(
                             },
                             onSuccess = {
                                 navController.navigate(AppDestination.Search) {
-                                    popUpTo<AppDestination.SetupLanguages> { inclusive = false }
+                                    popUpTo<AppDestination.SetupLanguages> { inclusive = true }
                                 }
                             },
                             onCancel = {
-                                navController.navigate(AppDestination.Error("Download cancelled")) {
-                                    popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
+                                navController.navigate(AppDestination.Search) {
+                                    popUpTo<AppDestination.SetupLanguages> { inclusive = false }
                                 }
                             },
-                            onError = { t ->
-                                coroutineScope.launch {
-                                    settingsRepository.deleteById(Setting.Name.LANGUAGE)
-                                    settingsRepository.deleteById(Setting.Name.DICTIONARY)
-                                    navController.navigate(AppDestination.Error(t.message ?: "Unknown error")) {
-                                        popUpTo<AppDestination.DownloadTranslation> { inclusive = true }
+                            onError = { _ ->
+                                navController.navigate(AppDestination.Search) {
+                                    popUpTo<AppDestination.DownloadSetup> { inclusive = true }
+                                }
+                            },
+                            loadItems = {
+                                downloadDict = !dataManager.hasDictionary(dictLang)
+                                val available = dataManager.fetchAvailableLanguages()
+                                val langInfo = available.find { it.language == dictLang }
+                                val items = mutableListOf<DownloadItem>()
+                                if (downloadDict) {
+                                    langInfo?.dictionarySizeBytes?.let { size ->
+                                        items.add(DownloadItem("${dictLang.selfName} Dictionary", size, dictLang.flag))
                                     }
                                 }
+                                val downloadableTargets = try {
+                                    dataManager.downloadableTranslationTargets(dictLang, nativeLanguages)
+                                } catch (e: CancellationException) {
+                                    throw e
+                                } catch (_: Exception) {
+                                    emptyList()
+                                }
+                                val missing = downloadableTargets.filter { !dataManager.hasTranslation(dictLang, it) }
+                                downloadTranslations.clear()
+                                downloadTranslations.addAll(missing)
+                                for (target in downloadTranslations) {
+                                    langInfo?.availableTranslations
+                                        ?.find { it.targetLanguage == target }?.sizeBytes
+                                        ?.let { size ->
+                                            items.add(
+                                                DownloadItem(
+                                                    "${dictLang.selfName} \u2192 ${target.selfName}",
+                                                    size,
+                                                    target.flag
+                                                )
+                                            )
+                                        }
+                                }
+                                items
                             }
                         )
                     }
 
                     DownloadScreen(
                         viewModel = viewModel,
-                        description = "Preparing translations"
+                        description = "Downloading",
+                        onLaterClick = {
+                            navController.navigate(AppDestination.Search) {
+                                popUpTo<AppDestination.DownloadSetup> { inclusive = true }
+                            }
+                        }
                     )
                 }
             }
