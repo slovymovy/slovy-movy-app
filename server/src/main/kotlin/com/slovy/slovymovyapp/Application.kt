@@ -9,7 +9,7 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.ingestion.ExtractedWordData
 import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
-import com.slovy.slovymovyapp.server.ai.GEMINI_3_0_FLASH_PREVIEW
+import com.slovy.slovymovyapp.server.ai.GEMINI_FLASH_LATEST
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
 import com.slovy.slovymovyapp.server.ai.OpenAIProvider
 import com.slovy.slovymovyapp.server.ai.enhancer.*
@@ -526,7 +526,7 @@ private suspend fun enhanceWithAI(
             enhancer.enhance(
                 request = request,
                 provider = geminiProvider,
-                model = GEMINI_3_0_FLASH_PREVIEW,
+                model = GEMINI_FLASH_LATEST,
                 reasoningBudget = 1
             )
         },
@@ -534,7 +534,7 @@ private suspend fun enhanceWithAI(
             enhancer.enhance(
                 request = request,
                 provider = openAIProvider,
-                model = ChatModel.GPT_5_2.asString(),
+                model = ChatModel.GPT_5_4.asString(),
                 reasoningBudget = 900
             )
         },
@@ -687,7 +687,7 @@ private suspend fun enhanceWithTranslations(
                             request = translationRequest,
                             provider = geminiProvider,
                             targetLanguageName = targetLangName,
-                            model = GEMINI_3_0_FLASH_PREVIEW,
+                            model = GEMINI_FLASH_LATEST,
                             reasoningBudget = 1
                         )
                     },
@@ -696,7 +696,7 @@ private suspend fun enhanceWithTranslations(
                             request = translationRequest,
                             provider = openAIProvider,
                             targetLanguageName = targetLangName,
-                            model = ChatModel.GPT_5_2.asString(),
+                            model = ChatModel.GPT_5_4.asString(),
                             reasoningBudget = 900
                         )
                     },

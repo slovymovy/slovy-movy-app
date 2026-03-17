@@ -246,6 +246,14 @@ class OpenAIProvider : AIProvider {
                 reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
             ),
             ModelInfo(
+                ChatModel.GPT_5_4.asString(),
+                "OpenAI gpt-5.4",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
                 ChatModel.GPT_5_1.asString(),
                 "OpenAI gpt-5.1",
                 AIProviderType.OPENAI,
