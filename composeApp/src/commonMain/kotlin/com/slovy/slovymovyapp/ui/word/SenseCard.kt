@@ -117,17 +117,10 @@ internal fun SenseCard(
                                 clickableWords = relatedWords.keys,
                                 onWordClick = onWordClick
                             )
-                        } else if (sense.hasAmbiguousClarifications(data.ambiguousTranslations)) {
-                            TranslationsHeaderWithClarifications(
+                        } else {
+                            TranslationHeader(
                                 sense = sense,
                                 ambiguous = data.ambiguousTranslations,
-                                clickableWords = relatedWords.keys,
-                                onWordClick = onWordClick
-                            )
-                        } else {
-                            HighlightedText(
-                                text = translationBasedHeader,
-                                style = MaterialTheme.typography.titleMedium,
                                 clickableWords = relatedWords.keys,
                                 onWordClick = onWordClick
                             )
@@ -451,12 +444,25 @@ internal fun LanguageCardResponseSense.collectLanguages(): List<Language> {
 }
 
 @Composable
-private fun TranslationsHeaderWithClarifications(
+internal fun TranslationHeader(
     sense: LanguageCardResponseSense,
     ambiguous: Set<String>,
     clickableWords: Set<String> = emptySet(),
     onWordClick: (String) -> Unit = {}
 ) {
+    val hasClarifications = ambiguous.isNotEmpty() &&
+            sense.translations.values.flatten().any { it.targetLangWord in ambiguous && it.targetLangSenseClarification != null }
+
+    if (!hasClarifications) {
+        HighlightedText(
+            text = sense.translationsHeader() ?: "",
+            style = MaterialTheme.typography.titleMedium,
+            clickableWords = clickableWords,
+            onWordClick = onWordClick
+        )
+        return
+    }
+
     val multiLang = sense.translations.keys.size > 1
     val clarificationColor = MaterialTheme.colorScheme.onSurfaceVariant
     val clickableStyle = SpanStyle(
@@ -473,7 +479,7 @@ private fun TranslationsHeaderWithClarifications(
                 val word = translation.targetLangWord
                 val isClickable = clickableWords.any { it.equals(word, ignoreCase = true) }
                 if (isClickable) {
-                    withLink(LinkAnnotation.Clickable(tag = "CLICKABLE_WORD_$word", linkInteractionListener = { onWordClick(word) })) {
+                    withLink(LinkAnnotation.Clickable(tag = "$CLICKABLE_WORD_TAG_PREFIX$word", linkInteractionListener = { onWordClick(word) })) {
                         withStyle(clickableStyle) { append(word) }
                     }
                 } else {
@@ -500,10 +506,6 @@ private fun LanguageCardResponseSense.translationsHeader(): String? {
         prefix + it.value.map { translation -> translation.targetLangWord }.sortedBy { text -> text }
             .joinToString(separator = ", ")
     }
-}
-
-private fun LanguageCardResponseSense.hasAmbiguousClarifications(ambiguous: Set<String>): Boolean {
-    return translations.values.flatten().any { it.targetLangWord in ambiguous && it.targetLangSenseClarification != null }
 }
 
 internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
