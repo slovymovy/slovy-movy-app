@@ -46,7 +46,9 @@ open class VoiceFilterHelperTest : BaseTest() {
     @BeforeTest
     fun before() {
         runBlocking {
-            settingsRepository().deleteById(Setting.Name.ENABLED_VOICES)
+            val repo = settingsRepository()
+            repo.deleteById(Setting.Name.ENABLED_VOICES)
+            repo.deleteById(Setting.Name.VOICE_SETUP_SHOWN)
         }
     }
 
@@ -201,6 +203,47 @@ open class VoiceFilterHelperTest : BaseTest() {
 
         val result = helper.getEnabledVoices(testLanguage)
         assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun isVoiceSetupShown_returns_false_when_no_setting() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+
+        assertFalse(helper.isVoiceSetupShown(Language.ENGLISH))
+    }
+
+    @Test
+    fun markVoiceSetupShown_marks_language_as_shown() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+
+        helper.markVoiceSetupShown(Language.ENGLISH)
+
+        assertTrue(helper.isVoiceSetupShown(Language.ENGLISH))
+    }
+
+    @Test
+    fun markVoiceSetupShown_does_not_affect_other_languages() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+
+        helper.markVoiceSetupShown(Language.ENGLISH)
+
+        assertFalse(helper.isVoiceSetupShown(Language.DUTCH))
+    }
+
+    @Test
+    fun isVoiceSetupShown_returns_true_when_no_repository() = runBlocking {
+        val helper = VoiceFilterHelper(null)
+
+        assertTrue(helper.isVoiceSetupShown(Language.ENGLISH))
+    }
+
+    @Test
+    fun markVoiceSetupShown_does_nothing_when_no_repository() = runBlocking {
+        val helper = VoiceFilterHelper(null)
+
+        helper.markVoiceSetupShown(Language.ENGLISH)
+
+        assertTrue(helper.isVoiceSetupShown(Language.ENGLISH))
     }
 
     @Test
