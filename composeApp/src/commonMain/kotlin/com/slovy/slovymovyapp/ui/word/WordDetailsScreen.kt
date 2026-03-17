@@ -31,8 +31,10 @@ import com.slovy.slovymovyapp.speech.TTSStatus
 import com.slovy.slovymovyapp.speech.Text2SpeechVoice
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
+import com.slovy.slovymovyapp.speech.VoiceQuality
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
+import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onCompletion
@@ -289,6 +291,9 @@ class WordDetailViewModel(
     var availableVoices by mutableStateOf<List<Text2SpeechVoice>>(emptyList())
         private set
 
+    var showVoiceSetupSheet by mutableStateOf(false)
+        private set
+
     val snackbarHostState = SnackbarHostState()
 
     var pendingIssueUrl by mutableStateOf<String?>(null)
@@ -490,12 +495,29 @@ class WordDetailViewModel(
                     if (availableVoices.isNotEmpty()) {
                         currentVoiceIndex = availableVoices.indices.random()
                     }
+
                 }
             } catch (_: Exception) {
                 // Failed to load voices, button will be disabled
                 availableVoices = emptyList()
             }
         }
+    }
+
+    fun dismissVoiceSetup() {
+        viewModelScope.launch { voiceFilterHelper.markVoiceSetupShown(dictionaryLanguage) }
+        showVoiceSetupSheet = false
+    }
+
+    fun dismissVoiceSetupAndPlay() {
+        dismissVoiceSetup()
+        doPlayWord()
+    }
+
+    fun openVoiceSettings() {
+        viewModelScope.launch { voiceFilterHelper.markVoiceSetupShown(dictionaryLanguage) }
+        showVoiceSetupSheet = false
+        ttsManager.openSettings()
     }
 
     fun isSenseFavorite(senseId: String): Boolean {
@@ -648,6 +670,22 @@ class WordDetailViewModel(
     fun playWord() {
         if (availableVoices.isEmpty()) return
 
+        val hasHighQualityVoice = availableVoices.any { it.quality != VoiceQuality.MEDIUM }
+        if (!hasHighQualityVoice) {
+            viewModelScope.launch {
+                if (!voiceFilterHelper.isVoiceSetupShown(dictionaryLanguage)) {
+                    showVoiceSetupSheet = true
+                    return@launch
+                }
+                doPlayWord()
+            }
+            return
+        }
+
+        doPlayWord()
+    }
+
+    private fun doPlayWord() {
         try {
             // Rotate to the next voice
             currentVoiceIndex = (currentVoiceIndex + 1) % availableVoices.size
@@ -738,6 +776,11 @@ fun WordDetailScreen(
         onNavigateToSettings = onNavigateToSettings,
         onPlayWord = { viewModel.playWord() },
         onStopWord = { viewModel.stopPlayback() },
+        dictionaryLanguage = viewModel.dictionaryLanguage,
+        showVoiceSetupSheet = viewModel.showVoiceSetupSheet,
+        onOpenVoiceSettings = { viewModel.openVoiceSettings() },
+        onDismissVoiceSetup = { viewModel.dismissVoiceSetup() },
+        onLaterVoiceSetup = { viewModel.dismissVoiceSetupAndPlay() },
         onOpenFeedback = { viewModel.openFeedbackDialog() },
         onDismissFeedback = { viewModel.dismissFeedbackDialog() },
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
@@ -775,6 +818,11 @@ fun WordDetailScreenContent(
     onNavigateToSettings: () -> Unit = {},
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
+    dictionaryLanguage: Language = Language.ENGLISH,
+    showVoiceSetupSheet: Boolean = false,
+    onOpenVoiceSettings: () -> Unit = {},
+    onDismissVoiceSetup: () -> Unit = {},
+    onLaterVoiceSetup: () -> Unit = {},
     onOpenFeedback: () -> Unit = {},
     onDismissFeedback: () -> Unit = {},
     onFeedbackCommentChange: (String) -> Unit = {},
@@ -930,6 +978,15 @@ fun WordDetailScreenContent(
                 }
             }
         }
+    }
+
+    if (showVoiceSetupSheet) {
+        VoiceSetupBottomSheet(
+            language = dictionaryLanguage,
+            onOpenSettings = onOpenVoiceSettings,
+            onDismiss = onDismissVoiceSetup,
+            onLater = onLaterVoiceSetup
+        )
     }
 
     if (state is WordDetailUiState.Content && state.feedbackDialogVisible) {

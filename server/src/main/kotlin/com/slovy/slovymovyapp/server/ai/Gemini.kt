@@ -144,32 +144,21 @@ class GeminiProvider : AIProvider {
 
     override fun getAvailableModels(): List<ModelInfo> {
         return listOf(
+
             ModelInfo(
-                GEMINI_3_0_PREVIEW, "Gemini 3.0 Preview", AIProviderType.GEMINI,
+                GEMINI_FLASH_LATEST, "Gemini 3.0 Flash Latest", AIProviderType.GEMINI,
                 supportsTemperature = true,
                 supportsVerbosity = false,
                 reasoningType = ReasoningType.HIGH_LOW,
             ),
             ModelInfo(
-                GEMINI_3_0_FLASH_PREVIEW, "Gemini 3.0 Flash Preview", AIProviderType.GEMINI,
-                supportsTemperature = true,
-                supportsVerbosity = false,
-                reasoningType = ReasoningType.HIGH_LOW,
-            ),
-            ModelInfo(
-                GEMINI_2_5_FLASH, "Gemini 2.5 Flash", AIProviderType.GEMINI,
-                supportsTemperature = true,
-                supportsVerbosity = false,
-                reasoningType = ReasoningType.TOKENS,
-            ),
-            ModelInfo(
-                GEMINI_2_5_PRO, "Gemini 2.5 Pro", AIProviderType.GEMINI,
+                GEMINI_3_1_PRO_PREVIEW, "Gemini 3.1 Pro Preview", AIProviderType.GEMINI,
                 supportsTemperature = true,
                 supportsVerbosity = false,
                 reasoningType = ReasoningType.TOKENS
             ),
             ModelInfo(
-                GEMINI_2_5_FLASH_LITE, "Gemini 2.5 Flash Light", AIProviderType.GEMINI,
+                GEMINI_3_1_FLASH_LITE, "Gemini 3.1 Flash Light", AIProviderType.GEMINI,
                 supportsTemperature = true,
                 supportsVerbosity = false,
                 reasoningType = ReasoningType.TOKENS
@@ -200,8 +189,6 @@ class GeminiProvider : AIProvider {
     }
 }
 
-const val GEMINI_3_0_PREVIEW = "gemini-3-pro-preview"
-const val GEMINI_3_0_FLASH_PREVIEW = "gemini-3-flash-preview"
-const val GEMINI_2_5_FLASH = "gemini-2.5-flash"
-const val GEMINI_2_5_PRO = "gemini-2.5-pro"
-const val GEMINI_2_5_FLASH_LITE = "gemini-2.5-flash-lite"
+const val GEMINI_FLASH_LATEST = "gemini-flash-latest"
+const val GEMINI_3_1_PRO_PREVIEW = "gemini-3.1-pro-preview"
+const val GEMINI_3_1_FLASH_LITE = "gemini-3.1-flash-lite-preview"
