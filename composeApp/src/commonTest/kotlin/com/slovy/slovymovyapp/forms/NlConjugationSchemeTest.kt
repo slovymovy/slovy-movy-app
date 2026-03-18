@@ -137,6 +137,32 @@ class NlConjugationSchemeTest : BaseTest() {
     }
 
     @Test
+    fun preprocessForms_tDeletion_irregularVowelLengthening_marksInversionForm() {
+        val resolver = NlConjugationScheme.NL_VERB.tagResolver
+
+        // gaan: "ga" is the inversion form, "gaat" is the main-clause form.
+        // Simple form+t gives "gat", not "gaat", so the irregular map must be used.
+        val ga = SchemeInputForm(
+            tags = listOf("present", "second-person", "singular"),
+            form = "ga",
+            source = FormSource.NATIVE,
+        )
+        val gaat = SchemeInputForm(
+            tags = listOf("present", "second-person", "singular"),
+            form = "gaat",
+            source = FormSource.NATIVE,
+        )
+
+        val result = resolver.preprocessForms(listOf(ga, gaat), lemma = "gaan")
+
+        val gaResult = result.filter { it.form == "ga" && "second-person" in it.tags }
+        val gaatResult = result.filter { it.form == "gaat" && "second-person" in it.tags }
+
+        assertTrue(gaResult.all { "gij" in it.tags }, "ga must be marked with gij as inversion form")
+        assertTrue(gaatResult.none { "gij" in it.tags }, "gaat must not be marked with gij")
+    }
+
+    @Test
     fun preprocessForms_tDeletion_noTForm_notMarked() {
         val resolver = NlConjugationScheme.NL_VERB.tagResolver
 

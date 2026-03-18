@@ -7,6 +7,17 @@ import com.slovy.slovymovyapp.data.forms.*
 
 object NlConjugationScheme : ConjugationSchemeProvider {
 
+    /**
+     * Maps inversion finite tokens to their main-clause counterparts for irregular verbs
+     * where simple +t does not produce the correct form (vowel-lengthening verbs).
+     * E.g. gaan: "ga" (inversion) → "gaat" (main-clause), not "gat".
+     */
+    private val irregularInversionToMain = mapOf(
+        "ga" to "gaat",
+        "sta" to "staat",
+        "sla" to "slaat",
+    )
+
     private object DutchSchemeTagResolver : SchemeTagResolver {
         override fun preprocessForms(forms: List<SchemeInputForm>, lemma: String?): List<SchemeInputForm> {
             // Drop forms that are purely parenthetical (e.g. "(kindeke)") or trailing-comma data
@@ -164,8 +175,9 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 .map { it.form }
                 .toSet()
             val withFiniteT: (String) -> String = { form ->
-                if (' ' in form) form.substringBefore(' ') + "t " + form.substringAfter(' ')
-                else form + "t"
+                val token = form.substringBefore(' ')
+                val rest = if (' ' in form) " " + form.substringAfter(' ') else ""
+                (irregularInversionToMain[token] ?: (token + "t")) + rest
             }
             val inversionForms2ndPerson = secondPersonPresentStrings
                 .filter { withFiniteT(it) in secondPersonPresentStrings }
