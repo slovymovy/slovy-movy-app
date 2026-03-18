@@ -154,7 +154,35 @@ object NlConjugationScheme : ConjugationSchemeProvider {
 
                 result
             }
-            return if (extras.isEmpty()) finalForms else finalForms + extras
+            // T-deletion heuristic: in Dutch inversion (jij/je before verb), the 2nd-person
+            // present -t is dropped ("Heb jij?" vs "Jij hebt"). Both the inversion form ("heb")
+            // and the main-clause form ("hebt") may carry second-person+present+singular tags.
+            // Inject "gij" onto inversion candidates so the -t form wins the extra-tag tiebreaker.
+            // Separable verbs: -t is on the finite token, so "spreek af" → "spreekt af".
+            val secondPersonPresentStrings = processedForms
+                .filter { "second-person" in it.tags && "present" in it.tags && "singular" in it.tags }
+                .map { it.form }
+                .toSet()
+            val withFiniteT: (String) -> String = { form ->
+                if (' ' in form) form.substringBefore(' ') + "t " + form.substringAfter(' ')
+                else form + "t"
+            }
+            val inversionForms2ndPerson = secondPersonPresentStrings
+                .filter { withFiniteT(it) in secondPersonPresentStrings }
+                .toSet()
+            val tDeletionMarkedForms = if (inversionForms2ndPerson.isEmpty()) finalForms else {
+                finalForms.map { form ->
+                    if (form.form in inversionForms2ndPerson
+                        && "second-person" in form.tags
+                        && "present" in form.tags
+                        && "singular" in form.tags
+                    ) {
+                        form.copy(tags = form.tags + "gij", source = FormSource.HEURISTIC)
+                    } else form
+                }
+            }
+
+            return if (extras.isEmpty()) tDeletionMarkedForms else tDeletionMarkedForms + extras
         }
 
         override fun selectCandidate(candidates: List<SchemeCellCandidate>): SchemeCellCandidate? {
@@ -205,7 +233,11 @@ object NlConjugationScheme : ConjugationSchemeProvider {
                 data(Tense.PRESENT, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
             }
             row {
-                rowHeader("Present (jij/hij/u)")
+                rowHeader("Present (jij/je)")
+                data(Tense.PRESENT, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE, Clause.MAIN))
+            }
+            row {
+                rowHeader("Present (hij/zij/het)")
                 data(Tense.PRESENT, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
             }
             row {
@@ -237,7 +269,7 @@ object NlConjugationScheme : ConjugationSchemeProvider {
             row {
                 rowHeader("Present")
                 data(Tense.PRESENT, Person.FIRST, Num.SG, supporting = setOf(Mood.INDICATIVE))
-                data(Tense.PRESENT, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE))
+                data(Tense.PRESENT, Person.SECOND, Num.SG, supporting = setOf(Mood.INDICATIVE, Clause.MAIN))
                 data(Tense.PRESENT, Person.THIRD, Num.SG, supporting = setOf(Mood.INDICATIVE))
                 data(Tense.PRESENT, Num.PL, supporting = setOf(Mood.INDICATIVE))
             }

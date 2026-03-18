@@ -37,16 +37,29 @@ object EnConjugationScheme : ConjugationSchemeProvider {
                     result += SchemeInputForm(tags = listOf("infinitive"), form = baseWord, FormSource.HEURISTIC)
                 }
 
+                val presentSingularNonThird = forms.firstOrNull { form ->
+                    form.hasTag("present") && form.hasTag("singular") && !form.hasTag("third-person")
+                }
+
                 val hasFirstPersonPresent = forms.any {
                     it.hasTag("first-person") && it.hasTag("present") && it.hasTag("singular")
                 }
                 if (!hasFirstPersonPresent) {
-                    val presentSingularNonThird = forms.firstOrNull { form ->
-                        form.hasTag("present") && form.hasTag("singular") && !form.hasTag("third-person")
-                    }
                     val inferredForm = presentSingularNonThird?.form ?: baseWord
                     result += SchemeInputForm(
                         tags = listOf("first-person", "present", "singular"),
+                        form = inferredForm,
+                        FormSource.HEURISTIC
+                    )
+                }
+
+                val hasSecondPersonPresent = forms.any {
+                    it.hasTag("second-person") && it.hasTag("present") && it.hasTag("singular")
+                }
+                if (!hasSecondPersonPresent) {
+                    val inferredForm = presentSingularNonThird?.form ?: baseWord
+                    result += SchemeInputForm(
+                        tags = listOf("second-person", "present", "singular"),
                         form = inferredForm,
                         FormSource.HEURISTIC
                     )
@@ -142,6 +155,10 @@ object EnConjugationScheme : ConjugationSchemeProvider {
             row {
                 rowHeader("present (I)")
                 data(Person.FIRST, Tense.PRESENT, Num.SG)
+            }
+            row {
+                rowHeader("present (you)")
+                data(Person.SECOND, Tense.PRESENT, Num.SG)
             }
             row {
                 rowHeader("present (he/she/it)")
