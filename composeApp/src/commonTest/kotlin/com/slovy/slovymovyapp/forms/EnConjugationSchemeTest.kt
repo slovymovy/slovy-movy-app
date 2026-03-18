@@ -108,6 +108,7 @@ class EnConjugationSchemeTest : BaseTest() {
             listOf(null, null),      // header row
             listOf(null, "test"),    // infinitive
             listOf(null, "test"),    // present (I)
+            listOf(null, "test"),    // present (you)
             listOf(null, "tests"),   // present (he/she/it)
             listOf(null, "testing"), // present participle
             listOf(null, "tested"),  // past simple

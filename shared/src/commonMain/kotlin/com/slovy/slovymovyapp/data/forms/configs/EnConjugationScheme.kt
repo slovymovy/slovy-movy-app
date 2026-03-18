@@ -37,16 +37,39 @@ object EnConjugationScheme : ConjugationSchemeProvider {
                     result += SchemeInputForm(tags = listOf("infinitive"), form = baseWord, FormSource.HEURISTIC)
                 }
 
+                val presentSingularNonThird = forms.firstOrNull { form ->
+                    form.hasTag("present") && form.hasTag("singular") && !form.hasTag("third-person")
+                }
+
                 val hasFirstPersonPresent = forms.any {
                     it.hasTag("first-person") && it.hasTag("present") && it.hasTag("singular")
                 }
                 if (!hasFirstPersonPresent) {
-                    val presentSingularNonThird = forms.firstOrNull { form ->
-                        form.hasTag("present") && form.hasTag("singular") && !form.hasTag("third-person")
-                    }
                     val inferredForm = presentSingularNonThird?.form ?: baseWord
                     result += SchemeInputForm(
                         tags = listOf("first-person", "present", "singular"),
+                        form = inferredForm,
+                        FormSource.HEURISTIC
+                    )
+                }
+
+                val hasSecondPersonPresent = forms.any {
+                    it.hasTag("second-person") && it.hasTag("present") && it.hasTag("singular")
+                }
+                if (!hasSecondPersonPresent) {
+                    // Prefer a generic (non-first, non-third) present singular to avoid
+                    // copying irregular 1st-person forms (e.g. "am") as 2nd-person.
+                    // Fall back to any non-third present singular (may be 1st-person),
+                    // then to the lemma as last resort.
+                    val nonFirstNonThirdPresent = forms.firstOrNull { form ->
+                        form.hasTag("present") && form.hasTag("singular")
+                            && !form.hasTag("first-person") && !form.hasTag("third-person")
+                    }
+                    val inferredForm = nonFirstNonThirdPresent?.form
+                        ?: presentSingularNonThird?.form
+                        ?: baseWord
+                    result += SchemeInputForm(
+                        tags = listOf("second-person", "present", "singular"),
                         form = inferredForm,
                         FormSource.HEURISTIC
                     )
@@ -142,6 +165,10 @@ object EnConjugationScheme : ConjugationSchemeProvider {
             row {
                 rowHeader("present (I)")
                 data(Person.FIRST, Tense.PRESENT, Num.SG)
+            }
+            row {
+                rowHeader("present (you)")
+                data(Person.SECOND, Tense.PRESENT, Num.SG)
             }
             row {
                 rowHeader("present (he/she/it)")

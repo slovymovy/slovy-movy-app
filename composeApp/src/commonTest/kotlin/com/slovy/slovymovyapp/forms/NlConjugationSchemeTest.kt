@@ -74,6 +74,118 @@ class NlConjugationSchemeTest : BaseTest() {
     }
 
     @Test
+    fun preprocessForms_tDeletion_marksInversionFormWithGij() {
+        val resolver = NlConjugationScheme.NL_VERB.tagResolver
+
+        // Synthetic forms mimicking hebben: both "heb" and "hebt" tagged as
+        // second-person+present+singular. "heb" is the inversion form (t-deletion);
+        // "hebt" is the main-clause form. The heuristic must inject "gij" onto "heb"
+        // so "hebt" wins the extra-tag tiebreaker.
+        val heb = SchemeInputForm(
+            tags = listOf("present", "second-person", "singular"),
+            form = "heb",
+            source = FormSource.NATIVE,
+        )
+        val hebt = SchemeInputForm(
+            tags = listOf("present", "second-person", "singular"),
+            form = "hebt",
+            source = FormSource.NATIVE,
+        )
+        // Also include a first-person form so preprocessForms has a realistic input set.
+        val hebFirst = SchemeInputForm(
+            tags = listOf("first-person", "present", "singular"),
+            form = "heb",
+            source = FormSource.NATIVE,
+        )
+
+        val result = resolver.preprocessForms(listOf(heb, hebt, hebFirst), lemma = "hebben")
+
+        val hebSecond = result.filter { it.form == "heb" && "second-person" in it.tags && "present" in it.tags }
+        val hebtSecond = result.filter { it.form == "hebt" && "second-person" in it.tags }
+
+        assertTrue(hebSecond.isNotEmpty(), "heb (second-person) must survive preprocessing")
+        assertTrue(hebSecond.all { "gij" in it.tags }, "heb (second-person) must be marked with gij as inversion form")
+        assertTrue(hebtSecond.isNotEmpty(), "hebt must survive preprocessing")
+        assertTrue(hebtSecond.none { "gij" in it.tags }, "hebt must not be marked with gij")
+    }
+
+    @Test
+    fun preprocessForms_tDeletion_separableVerb_marksInversionForm() {
+        val resolver = NlConjugationScheme.NL_VERB.tagResolver
+
+        // Separable-verb variant: "spreek af" (inversion) vs "spreekt af" (main-clause).
+        // The -t is on the finite token, so the heuristic must check token+t rather than
+        // whole-form+t.
+        val spreekAf = SchemeInputForm(
+            tags = listOf("present", "second-person", "singular"),
+            form = "spreek af",
+            source = FormSource.NATIVE,
+        )
+        val spreektAf = SchemeInputForm(
+            tags = listOf("present", "second-person", "singular"),
+            form = "spreekt af",
+            source = FormSource.NATIVE,
+        )
+
+        val result = resolver.preprocessForms(listOf(spreekAf, spreektAf), lemma = "afspreken")
+
+        val inversionResult = result.filter { it.form == "spreek af" && "second-person" in it.tags }
+        val mainResult = result.filter { it.form == "spreekt af" && "second-person" in it.tags }
+
+        assertTrue(inversionResult.isNotEmpty(), "spreek af (second-person) must survive preprocessing")
+        assertTrue(inversionResult.all { "gij" in it.tags }, "spreek af must be marked with gij as inversion form")
+        assertTrue(mainResult.isNotEmpty(), "spreekt af must survive preprocessing")
+        assertTrue(mainResult.none { "gij" in it.tags }, "spreekt af must not be marked with gij")
+    }
+
+    @Test
+    fun preprocessForms_tDeletion_irregularVowelLengthening_marksInversionForm() {
+        val resolver = NlConjugationScheme.NL_VERB.tagResolver
+
+        // gaan: "ga" is the inversion form, "gaat" is the main-clause form.
+        // Simple form+t gives "gat", not "gaat", so the irregular map must be used.
+        val ga = SchemeInputForm(
+            tags = listOf("present", "second-person", "singular"),
+            form = "ga",
+            source = FormSource.NATIVE,
+        )
+        val gaat = SchemeInputForm(
+            tags = listOf("present", "second-person", "singular"),
+            form = "gaat",
+            source = FormSource.NATIVE,
+        )
+
+        val result = resolver.preprocessForms(listOf(ga, gaat), lemma = "gaan")
+
+        val gaResult = result.filter { it.form == "ga" && "second-person" in it.tags }
+        val gaatResult = result.filter { it.form == "gaat" && "second-person" in it.tags }
+
+        assertTrue(gaResult.isNotEmpty(), "ga (second-person) must survive preprocessing")
+        assertTrue(gaResult.all { "gij" in it.tags }, "ga must be marked with gij as inversion form")
+        assertTrue(gaatResult.isNotEmpty(), "gaat must survive preprocessing")
+        assertTrue(gaatResult.none { "gij" in it.tags }, "gaat must not be marked with gij")
+    }
+
+    @Test
+    fun preprocessForms_tDeletion_noTForm_notMarked() {
+        val resolver = NlConjugationScheme.NL_VERB.tagResolver
+
+        // When only one second-person present form exists (no -t counterpart),
+        // the heuristic must not fire — the form should not receive a gij tag.
+        val onlyForm = SchemeInputForm(
+            tags = listOf("present", "second-person", "singular"),
+            form = "word",
+            source = FormSource.NATIVE,
+        )
+
+        val result = resolver.preprocessForms(listOf(onlyForm), lemma = "worden")
+
+        val secondPersonResult = result.filter { it.form == "word" && "second-person" in it.tags }
+        assertTrue(secondPersonResult.isNotEmpty(), "form must survive preprocessing")
+        assertTrue(secondPersonResult.none { "gij" in it.tags }, "sole second-person form must not be marked with gij")
+    }
+
+    @Test
     fun dutchSnapshots_matchExpectedTables() = runBlocking {
         val (mgr, repo) = createSnapshotRepository()
         try {
@@ -128,7 +240,8 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, null),
             listOf(null, "te zeggen"),    // infinitive
             listOf(null, "zeg"),           // present (ik)
-            listOf(null, "zegt"),          // present (jij/hij/u)
+            listOf(null, "zegt"),          // present (jij/je)
+            listOf(null, "zegt"),          // present (hij/zij/het)
             listOf(null, "zegde\nzei"),    // past singular
             listOf(null, "zegden\nzeiden"), // past plural
             listOf(null, "gezegd"),        // past participle
@@ -177,7 +290,8 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, null),
             listOf(null, "uit te wringen"),    // infinitive
             listOf(null, "wring uit"),          // present (ik)
-            listOf(null, "wringt uit"),         // present (jij/hij/u)
+            listOf(null, "wringt uit"),         // present (jij/je)
+            listOf(null, "wringt uit"),         // present (hij/zij/het)
             listOf(null, "wrong uit"),          // past singular — modern form wins over archaic wrongt uit
             listOf(null, "wrongen uit"),        // past plural
             listOf(null, "uitgewrongen"),       // past participle
@@ -205,7 +319,8 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, null),
             listOf(null, "af te spreken"),     // infinitive
             listOf(null, "spreek af"),          // present (ik)
-            listOf(null, "spreekt af"),         // present (jij/hij/u)
+            listOf(null, "spreekt af"),         // present (jij/je)
+            listOf(null, "spreekt af"),         // present (hij/zij/het)
             listOf(null, "sprak af"),           // past singular — modern form wins over archaic spraakt af
             listOf(null, "spraken af"),         // past plural
             listOf(null, "afgesproken"),        // past participle
@@ -242,7 +357,8 @@ class NlConjugationSchemeTest : BaseTest() {
             listOf(null, null),
             listOf(null, "onder te stromen"),  // infinitive (long-form te-infinitive wins)
             listOf(null, "stroom onder"),      // present (ik) — main-clause form
-            listOf(null, "stroomt onder"),     // present (jij/hij/u)
+            listOf(null, "stroomt onder"),     // present (jij/je)
+            listOf(null, "stroomt onder"),     // present (hij/zij/het)
             listOf(null, "stroomde onder"),    // past singular
             listOf(null, "stroomden onder"),   // past plural
             listOf(null, "ondergestroomd"),    // past participle
