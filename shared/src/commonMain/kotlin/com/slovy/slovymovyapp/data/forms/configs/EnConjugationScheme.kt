@@ -57,14 +57,17 @@ object EnConjugationScheme : ConjugationSchemeProvider {
                     it.hasTag("second-person") && it.hasTag("present") && it.hasTag("singular")
                 }
                 if (!hasSecondPersonPresent) {
-                    // Prefer a generic (non-first, non-third) present singular over the
-                    // first-person fallback to avoid copying irregular 1st-person forms
-                    // (e.g. "am") as the 2nd-person synthesis. Fall back to the lemma.
+                    // Prefer a generic (non-first, non-third) present singular to avoid
+                    // copying irregular 1st-person forms (e.g. "am") as 2nd-person.
+                    // Fall back to any non-third present singular (may be 1st-person),
+                    // then to the lemma as last resort.
                     val nonFirstNonThirdPresent = forms.firstOrNull { form ->
                         form.hasTag("present") && form.hasTag("singular")
                             && !form.hasTag("first-person") && !form.hasTag("third-person")
                     }
-                    val inferredForm = nonFirstNonThirdPresent?.form ?: baseWord
+                    val inferredForm = nonFirstNonThirdPresent?.form
+                        ?: presentSingularNonThird?.form
+                        ?: baseWord
                     result += SchemeInputForm(
                         tags = listOf("second-person", "present", "singular"),
                         form = inferredForm,

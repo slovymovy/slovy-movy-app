@@ -132,7 +132,9 @@ class NlConjugationSchemeTest : BaseTest() {
         val inversionResult = result.filter { it.form == "spreek af" && "second-person" in it.tags }
         val mainResult = result.filter { it.form == "spreekt af" && "second-person" in it.tags }
 
+        assertTrue(inversionResult.isNotEmpty(), "spreek af (second-person) must survive preprocessing")
         assertTrue(inversionResult.all { "gij" in it.tags }, "spreek af must be marked with gij as inversion form")
+        assertTrue(mainResult.isNotEmpty(), "spreekt af must survive preprocessing")
         assertTrue(mainResult.none { "gij" in it.tags }, "spreekt af must not be marked with gij")
     }
 
@@ -158,7 +160,9 @@ class NlConjugationSchemeTest : BaseTest() {
         val gaResult = result.filter { it.form == "ga" && "second-person" in it.tags }
         val gaatResult = result.filter { it.form == "gaat" && "second-person" in it.tags }
 
+        assertTrue(gaResult.isNotEmpty(), "ga (second-person) must survive preprocessing")
         assertTrue(gaResult.all { "gij" in it.tags }, "ga must be marked with gij as inversion form")
+        assertTrue(gaatResult.isNotEmpty(), "gaat must survive preprocessing")
         assertTrue(gaatResult.none { "gij" in it.tags }, "gaat must not be marked with gij")
     }
 
