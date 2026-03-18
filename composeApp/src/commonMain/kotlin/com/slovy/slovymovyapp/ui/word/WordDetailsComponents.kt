@@ -24,6 +24,8 @@ import com.slovy.slovymovyapp.data.util.HtmlTagParser
  * Returns the appropriate navigation arrow based on word availability.
  * @param isOnline true if word is online-only, false if available offline, null if unknown
  */
+internal const val CLICKABLE_WORD_TAG_PREFIX = "CLICKABLE_WORD_"
+
 internal fun navigationArrow(isOnline: Boolean?): String =
     if (isOnline == false) "➤" else "➼"
 
@@ -185,7 +187,7 @@ internal fun appendTextWithW(
             if (isClickable) {
                 // Use LinkAnnotation for clickable words
                 val link = LinkAnnotation.Clickable(
-                    tag = "CLICKABLE_WORD_$word",
+                    tag = "$CLICKABLE_WORD_TAG_PREFIX$word",
                     linkInteractionListener = {
                         onWordClick(word)
                     }

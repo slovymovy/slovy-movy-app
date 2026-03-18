@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.forms.GridCell
 import com.slovy.slovymovyapp.data.remote.FormsSchemeView
 import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
+import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.ui.components.PartOfSpeechIndicator
 import kotlin.math.max
@@ -548,6 +549,9 @@ internal fun EntryCard(
                 }
 
                 // Senses - edge-to-edge (no horizontal padding)
+                val ambiguousTranslationsBySense = remember(entry.senses) {
+                    computeAmbiguousTranslations(entry.senses)
+                }
                 entry.senses.forEach { sense ->
                     val senseState = entryState.senses.find { it.senseId == sense.senseId }
                         ?: throw IllegalStateException("Sense state not found for sense ${sense.senseId}")
@@ -559,7 +563,8 @@ internal fun EntryCard(
                             sense = sense,
                             pos = entry.pos,
                             translationLoading = translationLoading || senseState.translationLoading,
-                            translationError = translationError ?: senseState.translationError
+                            translationError = translationError ?: senseState.translationError,
+                            ambiguousTranslations = ambiguousTranslationsBySense[sense.senseId] ?: emptySet()
                         ),
                         state = senseState,
                         onToggle = { onSenseToggle(sense.senseId) },
@@ -573,6 +578,29 @@ internal fun EntryCard(
             }
         }
     }
+}
+
+internal fun computeAmbiguousTranslations(senses: List<LanguageCardResponseSense>): Map<String, Set<String>> {
+    val fingerprint = { sense: LanguageCardResponseSense ->
+        sense.translations.entries
+            .flatMap { (lang, translations) -> translations.map { it.targetLangWord }.distinct().map { "$lang:$it" } }
+            .sorted()
+            .joinToString(",")
+    }
+    val counts = mutableMapOf<String, Int>()
+    senses.forEach { sense ->
+        val fp = fingerprint(sense)
+        if (fp.isNotEmpty()) counts[fp] = (counts[fp] ?: 0) + 1
+    }
+    val duplicated = counts.filterValues { it > 1 }.keys
+    return senses
+        .filter { fingerprint(it) in duplicated }
+        .associate { sense ->
+            sense.senseId to sense.translations.values.flatten()
+                .filter { !it.targetLangWord.contains(' ') }
+                .map { it.targetLangWord }
+                .toSet()
+        }
 }
 
 fun pluralEnding(count: Int): String = if (count == 1) "" else "s"

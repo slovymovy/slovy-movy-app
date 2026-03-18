@@ -19,10 +19,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
@@ -39,7 +42,8 @@ data class SenseCardData(
     val error: String? = null,
     val translationLoading: Boolean = false,
     val translationError: String? = null,
-    val diagnosticInfoOnError: String? = null
+    val diagnosticInfoOnError: String? = null,
+    val ambiguousTranslations: Set<String> = emptySet()
 )
 
 @Composable
@@ -114,9 +118,9 @@ internal fun SenseCard(
                                 onWordClick = onWordClick
                             )
                         } else {
-                            HighlightedText(
-                                text = translationBasedHeader,
-                                style = MaterialTheme.typography.titleMedium,
+                            TranslationHeader(
+                                sense = sense,
+                                ambiguous = data.ambiguousTranslations,
                                 clickableWords = relatedWords.keys,
                                 onWordClick = onWordClick
                             )
@@ -437,6 +441,60 @@ internal fun LanguageCardResponseSense.collectLanguages(): List<Language> {
     ordered += translations.keys
     examples.forEach { ex -> ordered += ex.targetLangTranslations.keys }
     return ordered.toList()
+}
+
+@Composable
+internal fun TranslationHeader(
+    sense: LanguageCardResponseSense,
+    ambiguous: Set<String>,
+    clickableWords: Set<String> = emptySet(),
+    onWordClick: (String) -> Unit = {}
+) {
+    val hasClarifications = ambiguous.isNotEmpty() &&
+            sense.translations.values.flatten().any { it.targetLangWord in ambiguous && it.targetLangSenseClarification != null }
+
+    if (!hasClarifications) {
+        HighlightedText(
+            text = sense.translationsHeader() ?: "",
+            style = MaterialTheme.typography.titleMedium,
+            clickableWords = clickableWords,
+            onWordClick = onWordClick
+        )
+        return
+    }
+
+    val multiLang = sense.translations.keys.size > 1
+    val clarificationColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val clickableStyle = SpanStyle(
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Medium,
+        textDecoration = TextDecoration.Underline
+    )
+    val style = MaterialTheme.typography.titleMedium
+    sense.translations.entries.sortedBy { it.key }.forEach { (_, langTranslations) ->
+        val annotated = buildAnnotatedString {
+            if (multiLang) append("$bullet ")
+            langTranslations.sortedBy { it.targetLangWord }.forEachIndexed { index, translation ->
+                if (index > 0) append(", ")
+                val word = translation.targetLangWord
+                val isClickable = clickableWords.any { it.equals(word, ignoreCase = true) }
+                if (isClickable) {
+                    withLink(LinkAnnotation.Clickable(tag = "$CLICKABLE_WORD_TAG_PREFIX$word", linkInteractionListener = { onWordClick(word) })) {
+                        withStyle(clickableStyle) { append(word) }
+                    }
+                } else {
+                    append(word)
+                }
+                val clarification = translation.targetLangSenseClarification
+                if (word in ambiguous && clarification != null) {
+                    withStyle(SpanStyle(color = clarificationColor)) {
+                        append(" $bullet $clarification")
+                    }
+                }
+            }
+        }
+        Text(text = annotated, style = style)
+    }
 }
 
 private fun LanguageCardResponseSense.translationsHeader(): String? {
