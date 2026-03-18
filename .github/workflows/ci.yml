@@ -265,6 +265,23 @@ jobs:
 
       - name: setup Gradle
         uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-disabled: true
+
+      - name: select Xcode 16.4
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+
+      - name: print Apple toolchain
+        run: |
+          xcode-select -p
+          xcodebuild -version
+          xcrun --sdk iphonesimulator --show-sdk-version
+
+      - name: clear local iOS and Kotlin caches
+        run: |
+          rm -rf ~/.konan
+          rm -rf ~/.gradle/caches
+          rm -rf ~/Library/Developer/Xcode/DerivedData
 
       - name: run iOS simulator arm64 tests
         env:
@@ -285,5 +302,4 @@ jobs:
             **/build/reports/problems/**
             **/build/reports/tests/**
             **/build/test-results/**
-
 
