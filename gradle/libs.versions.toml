@@ -33,7 +33,7 @@ openaiJava = "4.29.0"
 logback = "1.5.32"
 sqldelight = "2.3.2"
 valkyrie = "0.4.0"
-material3 = '1.11.0-alpha04'
+material3 = '1.11.0-alpha03'
 
 [libraries]
 androidx-emoji2 = { module = "androidx.emoji2:emoji2", version.ref = "emoji2" }
