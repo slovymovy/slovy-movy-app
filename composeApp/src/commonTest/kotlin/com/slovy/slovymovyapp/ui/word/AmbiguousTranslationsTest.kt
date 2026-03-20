@@ -9,7 +9,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.test.assertNotNull
 
 class AmbiguousTranslationsTest {
 
@@ -115,7 +114,7 @@ class AmbiguousTranslationsTest {
             LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "a target")
         )
         val annotated = buildClarificationRow(translations, setOf("miss"), multiLang = false)
-        assertNotNull(annotated.text.contains("a target"), "clarification text must appear in the row")
+        assertTrue(annotated.text.contains("a target"), "clarification text must appear in the row")
     }
 
     @Test
