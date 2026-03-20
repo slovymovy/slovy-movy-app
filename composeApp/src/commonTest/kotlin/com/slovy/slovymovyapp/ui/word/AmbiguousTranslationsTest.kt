@@ -9,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.assertNotNull
 
 class AmbiguousTranslationsTest {
 
@@ -92,6 +93,29 @@ class AmbiguousTranslationsTest {
         assertEquals(setOf("bank"), result["1"])
         assertEquals(setOf("bank"), result["2"])
         assertFalse(result.containsKey("3"), "sense 3 must not be flagged")
+    }
+
+    @Test
+    fun clarificationRow_ambiguousWord_hasNoLinkAnnotation() {
+        // Regression: translation words must never be clickable links — they are in a different
+        // language from the source relatedWords index and navigation would be wrong.
+        val translations = listOf(
+            LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "someone/something"),
+            LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "a target")
+        )
+        val ambiguous = setOf("miss")
+        val annotated = buildClarificationRow(translations, ambiguous, multiLang = false)
+        val links = annotated.getLinkAnnotations(0, annotated.length)
+        assertTrue(links.isEmpty(), "clarification row must not contain any link annotations, found: $links")
+    }
+
+    @Test
+    fun clarificationRow_clarificationTextAppended() {
+        val translations = listOf(
+            LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "a target")
+        )
+        val annotated = buildClarificationRow(translations, setOf("miss"), multiLang = false)
+        assertNotNull(annotated.text.contains("a target"), "clarification text must appear in the row")
     }
 
     @Test

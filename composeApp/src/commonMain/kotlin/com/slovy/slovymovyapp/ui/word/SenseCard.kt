@@ -19,13 +19,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
@@ -467,21 +464,30 @@ internal fun TranslationHeader(
     val clarificationColor = MaterialTheme.colorScheme.onSurfaceVariant
     val style = MaterialTheme.typography.titleMedium
     sense.translations.entries.sortedBy { it.key }.forEach { (_, langTranslations) ->
-        val annotated = buildAnnotatedString {
-            if (multiLang) append("$bullet ")
-            langTranslations.sortedBy { it.targetLangWord }.forEachIndexed { index, translation ->
-                if (index > 0) append(", ")
-                val word = translation.targetLangWord
-                append(word)
-                val clarification = translation.targetLangSenseClarification
-                if (word in ambiguous && clarification != null) {
-                    withStyle(SpanStyle(color = clarificationColor)) {
-                        append(" $bullet $clarification")
-                    }
-                }
+        Text(
+            text = buildClarificationRow(langTranslations, ambiguous, multiLang, clarificationColor),
+            style = style
+        )
+    }
+}
+
+internal fun buildClarificationRow(
+    langTranslations: List<LanguageCardTranslation>,
+    ambiguous: Set<String>,
+    multiLang: Boolean,
+    clarificationColor: Color = Color.Unspecified
+) = buildAnnotatedString {
+    if (multiLang) append("$bullet ")
+    langTranslations.sortedBy { it.targetLangWord }.forEachIndexed { index, translation ->
+        if (index > 0) append(", ")
+        val word = translation.targetLangWord
+        append(word)
+        val clarification = translation.targetLangSenseClarification
+        if (word in ambiguous && clarification != null) {
+            withStyle(SpanStyle(color = clarificationColor)) {
+                append(" $bullet $clarification")
             }
         }
-        Text(text = annotated, style = style)
     }
 }
 
