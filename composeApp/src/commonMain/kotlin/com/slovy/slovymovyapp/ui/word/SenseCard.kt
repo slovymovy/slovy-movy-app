@@ -465,11 +465,6 @@ internal fun TranslationHeader(
 
     val multiLang = sense.translations.keys.size > 1
     val clarificationColor = MaterialTheme.colorScheme.onSurfaceVariant
-    val clickableStyle = SpanStyle(
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Medium,
-        textDecoration = TextDecoration.Underline
-    )
     val style = MaterialTheme.typography.titleMedium
     sense.translations.entries.sortedBy { it.key }.forEach { (_, langTranslations) ->
         val annotated = buildAnnotatedString {
@@ -477,14 +472,7 @@ internal fun TranslationHeader(
             langTranslations.sortedBy { it.targetLangWord }.forEachIndexed { index, translation ->
                 if (index > 0) append(", ")
                 val word = translation.targetLangWord
-                val isClickable = clickableWords.any { it.equals(word, ignoreCase = true) }
-                if (isClickable) {
-                    withLink(LinkAnnotation.Clickable(tag = "$CLICKABLE_WORD_TAG_PREFIX$word", linkInteractionListener = { onWordClick(word) })) {
-                        withStyle(clickableStyle) { append(word) }
-                    }
-                } else {
-                    append(word)
-                }
+                append(word)
                 val clarification = translation.targetLangSenseClarification
                 if (word in ambiguous && clarification != null) {
                     withStyle(SpanStyle(color = clarificationColor)) {
