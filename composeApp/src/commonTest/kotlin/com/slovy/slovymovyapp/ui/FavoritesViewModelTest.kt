@@ -236,6 +236,31 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
+    fun requestScrollToTop_filteredOut_keepsPendingUntilVisible() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add("s1", Language.ENGLISH, "hello")
+        favRepo.add("s2", Language.ENGLISH, "world")
+
+        val vm = createViewModel(favRepo)
+        vm.loadAndApplyState("")
+
+        // User adds s3 but Favorites reloads with an active query that hides it
+        favRepo.add("s3", Language.ENGLISH, "newword")
+        vm.requestScrollToTop("s3")
+        vm.loadAndApplyState("hello") // query hides s3
+
+        assertEquals(0, contentState(vm).scrollToTopVersion,
+            "Should not scroll while the new sense is filtered out by query")
+
+        // User clears the query — s3 becomes visible
+        vm.loadAndApplyState("")
+
+        assertTrue(contentState(vm).scrollToTopVersion > 0,
+            "Should scroll once the filtered-out sense becomes visible")
+    }
+
+    @Test
     fun dropdownExpandedState_resetsWhenPickerBecomesHidden() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()

@@ -61,6 +61,7 @@ sealed interface FavoritesUiState {
         val availableLanguages: List<Language> = emptyList(),
         val selectedLanguage: Language? = null,
         val isLanguageDropdownExpanded: Boolean = false,
+        val allFavoriteIds: Set<String> = emptySet(),
         val scrollToTopVersion: Int = 0
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
@@ -211,19 +212,29 @@ class FavoritesViewModel(
             availableLanguages = availableLanguages,
             selectedLanguage = selectedLanguage,
             isLanguageDropdownExpanded = if (availableLanguages.size > 1)
-                currentContent?.isLanguageDropdownExpanded ?: false else false
+                currentContent?.isLanguageDropdownExpanded ?: false else false,
+            allFavoriteIds = allFavorites.map { it.senseId }.toSet()
         )
     }
 
     private fun applyScrollVersion(newState: FavoritesUiState.Content): FavoritesUiState.Content {
         val targetSenseId = pendingScrollForSenseId ?: return newState
-        pendingScrollForSenseId = null
-        // Only scroll if the added sense is actually visible in the reloaded list.
-        // If the user removed it before navigating here, or it's filtered out by the
-        // current language selection, skip the scroll.
-        if (newState.senses.none { it.senseId == targetSenseId }) return newState
-        val prevVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
-        return newState.copy(scrollToTopVersion = prevVersion + 1)
+        return when {
+            // Sense was deleted from favorites entirely — drop the request.
+            targetSenseId !in newState.allFavoriteIds -> {
+                pendingScrollForSenseId = null
+                newState
+            }
+            // Sense is in favorites but hidden by an active query or language filter —
+            // keep the request pending until it becomes visible.
+            newState.senses.none { it.senseId == targetSenseId } -> newState
+            // Sense is visible — trigger scroll.
+            else -> {
+                pendingScrollForSenseId = null
+                val prevVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
+                newState.copy(scrollToTopVersion = prevVersion + 1)
+            }
+        }
     }
 
     /** Computes and applies favorites state. Exposed for tests; production code uses the
@@ -364,9 +375,13 @@ fun FavoritesScreen(
         }
     }
 
-    val scrollToTopVersion = (viewModel.state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
+    val scrollToTopContent = viewModel.state as? FavoritesUiState.Content
+    val scrollToTopVersion = scrollToTopContent?.scrollToTopVersion ?: 0
     LaunchedEffect(scrollToTopVersion) {
-        if (scrollToTopVersion > 0) {
+        // Guard: version is only bumped when the target sense is visible, so senses
+        // is non-empty here. The explicit check prevents a hang if that invariant
+        // is ever violated by future changes.
+        if (scrollToTopVersion > 0 && scrollToTopContent?.senses?.isNotEmpty() == true) {
             // Wait for the first layout pass so scrollToItem(0) sees the updated item list.
             snapshotFlow { viewModel.scrollState.layoutInfo.totalItemsCount }
                 .first { it > 0 }
