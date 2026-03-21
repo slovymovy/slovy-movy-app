@@ -84,6 +84,9 @@ class FavoritesViewModel(
     /** Called from outside (e.g. word detail) when a favorite was just added. */
     fun requestScrollToTop() {
         pendingScrollToTop = true
+        // Trigger a reload so the flag is always consumed even if the Favorites screen's
+        // initial loadFavorites() ran before onFavoriteAdded was invoked.
+        loadFavorites()
     }
 
     private val queryFlow = MutableStateFlow(QueryState("", Uuid.random()))
@@ -106,14 +109,7 @@ class FavoritesViewModel(
                         .flowOn(Dispatchers.Default)
                 }
                 .collect { newState ->
-                    val shouldScrollToTop = pendingScrollToTop
-                    if (shouldScrollToTop) pendingScrollToTop = false
-                    val prevVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
-                    state = if (shouldScrollToTop) {
-                        newState.copy(scrollToTopVersion = prevVersion + 1)
-                    } else {
-                        newState
-                    }
+                    state = applyScrollVersion(newState)
                     prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
                 }
         }
@@ -222,10 +218,17 @@ class FavoritesViewModel(
         )
     }
 
+    private fun applyScrollVersion(newState: FavoritesUiState.Content): FavoritesUiState.Content {
+        val shouldScroll = pendingScrollToTop
+        if (shouldScroll) pendingScrollToTop = false
+        val prevVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
+        return if (shouldScroll) newState.copy(scrollToTopVersion = prevVersion + 1) else newState
+    }
+
     /** Computes and applies favorites state. Exposed for tests; production code uses the
      *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
     internal suspend fun loadAndApplyState(query: String) {
-        state = computeFavoritesState(query, state as? FavoritesUiState.Content)
+        state = applyScrollVersion(computeFavoritesState(query, state as? FavoritesUiState.Content))
     }
 
 

@@ -179,6 +179,44 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
+    fun requestScrollToTop_incrementsScrollToTopVersionOnNextLoad() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add("s1", Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.loadAndApplyState("")
+        assertEquals(0, contentState(vm).scrollToTopVersion, "Version should start at 0")
+
+        vm.requestScrollToTop()
+        vm.loadAndApplyState("")
+
+        assertTrue(contentState(vm).scrollToTopVersion > 0,
+            "scrollToTopVersion should be incremented after requestScrollToTop + load")
+    }
+
+    @Test
+    fun requestScrollToTop_raceCondition_scrollHappensEvenWhenInitialLoadRunsFirst() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+
+        val vm = createViewModel(favRepo)
+        // Simulate Favorites screen's initial loadFavorites() running before the favorite is added
+        vm.loadAndApplyState("")
+        assertEquals(0, contentState(vm).scrollToTopVersion)
+
+        // Favorite is added and onFavoriteAdded fires after the initial load
+        favRepo.add("s1", Language.ENGLISH, "hello")
+        vm.requestScrollToTop() // sets flag + triggers its own loadFavorites()
+        vm.loadAndApplyState("") // simulate the reload triggered by requestScrollToTop
+
+        val content = contentState(vm)
+        assertEquals(1, content.senses.size, "New favorite should be present")
+        assertTrue(content.scrollToTopVersion > 0,
+            "Should scroll to top even when the initial Favorites load ran before onFavoriteAdded")
+    }
+
+    @Test
     fun dropdownExpandedState_resetsWhenPickerBecomesHidden() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
