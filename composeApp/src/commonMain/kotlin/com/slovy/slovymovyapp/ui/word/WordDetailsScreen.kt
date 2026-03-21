@@ -262,7 +262,7 @@ class WordDetailViewModel(
     private val lemma: String = "",
     val targetSenseId: String? = null,
     private val translationLanguages: List<Language>? = null,
-    private val onFavoriteAdded: (() -> Unit)? = null
+    private val onFavoriteAdded: ((senseId: String) -> Unit)? = null
 ) : ViewModel() {
     var state by mutableStateOf<WordDetailUiState>(
         WordDetailUiState.Empty(
@@ -532,7 +532,7 @@ class WordDetailViewModel(
                     favoritesRepository.remove(senseId, lang)
                 } else {
                     favoritesRepository.add(senseId, lang, lemma)
-                    onFavoriteAdded?.invoke()
+                    onFavoriteAdded?.invoke(senseId)
                 }
                 loadFavorites()
             }

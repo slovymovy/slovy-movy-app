@@ -79,11 +79,11 @@ class FavoritesViewModel(
     val scrollState = LazyListState()
     val snackbarHostState = SnackbarHostState()
 
-    private var pendingScrollToTop = false
+    private var pendingScrollForSenseId: String? = null
 
     /** Called from outside (e.g. word detail) when a favorite was just added. */
-    fun requestScrollToTop() {
-        pendingScrollToTop = true
+    fun requestScrollToTop(senseId: String) {
+        pendingScrollForSenseId = senseId
     }
 
     private val queryFlow = MutableStateFlow(QueryState("", Uuid.random()))
@@ -216,10 +216,14 @@ class FavoritesViewModel(
     }
 
     private fun applyScrollVersion(newState: FavoritesUiState.Content): FavoritesUiState.Content {
-        val shouldScroll = pendingScrollToTop
-        if (shouldScroll) pendingScrollToTop = false
+        val targetSenseId = pendingScrollForSenseId ?: return newState
+        pendingScrollForSenseId = null
+        // Only scroll if the added sense is actually visible in the reloaded list.
+        // If the user removed it before navigating here, or it's filtered out by the
+        // current language selection, skip the scroll.
+        if (newState.senses.none { it.senseId == targetSenseId }) return newState
         val prevVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
-        return if (shouldScroll) newState.copy(scrollToTopVersion = prevVersion + 1) else newState
+        return newState.copy(scrollToTopVersion = prevVersion + 1)
     }
 
     /** Computes and applies favorites state. Exposed for tests; production code uses the

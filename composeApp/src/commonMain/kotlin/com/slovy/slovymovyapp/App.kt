@@ -533,7 +533,7 @@ fun App(
                         args.lemma,
                         args.targetSenseId,
                         args.translationLanguages,
-                        onFavoriteAdded = { favoritesViewModel.requestScrollToTop() }
+                        onFavoriteAdded = { senseId -> favoritesViewModel.requestScrollToTop(senseId) }
                     ).also { created ->
                         wordDetailViewModels[args] = created
                     }

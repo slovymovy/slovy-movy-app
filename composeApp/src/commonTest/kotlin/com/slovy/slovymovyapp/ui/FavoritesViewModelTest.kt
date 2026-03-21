@@ -188,7 +188,7 @@ open class FavoritesViewModelTest : BaseTest() {
         vm.loadAndApplyState("")
         assertEquals(0, contentState(vm).scrollToTopVersion, "Version should start at 0")
 
-        vm.requestScrollToTop()
+        vm.requestScrollToTop("s1")
         vm.loadAndApplyState("")
 
         assertTrue(contentState(vm).scrollToTopVersion > 0,
@@ -207,13 +207,32 @@ open class FavoritesViewModelTest : BaseTest() {
 
         // Favorite is added and onFavoriteAdded fires after the initial load
         favRepo.add("s1", Language.ENGLISH, "hello")
-        vm.requestScrollToTop() // sets the pending flag
+        vm.requestScrollToTop("s1") // sets the pending flag
         vm.loadAndApplyState("") // simulate the subsequent Favorites reload (debounced queryFlow)
 
         val content = contentState(vm)
         assertEquals(1, content.senses.size, "New favorite should be present")
         assertTrue(content.scrollToTopVersion > 0,
             "Should scroll to top even when the initial Favorites load ran before onFavoriteAdded")
+    }
+
+    @Test
+    fun requestScrollToTop_addThenRemove_doesNotScroll() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add("s1", Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.loadAndApplyState("")
+
+        // User adds a new favorite then removes it before Favorites reloads
+        favRepo.add("s2", Language.ENGLISH, "world")
+        vm.requestScrollToTop("s2")
+        favRepo.remove("s2", Language.ENGLISH)
+        vm.loadAndApplyState("")
+
+        assertEquals(0, contentState(vm).scrollToTopVersion,
+            "Should not scroll if the added sense was removed before the reload")
     }
 
     @Test
