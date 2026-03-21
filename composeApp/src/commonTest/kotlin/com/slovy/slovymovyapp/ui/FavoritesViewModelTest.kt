@@ -261,6 +261,31 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
+    fun scrollToTop_notRetriggered_afterVersionConsumed() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add("s1", Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.loadAndApplyState("")
+
+        // Add a favorite and trigger scroll
+        favRepo.add("s2", Language.ENGLISH, "world")
+        vm.requestScrollToTop("s2")
+        vm.loadAndApplyState("")
+        assertTrue(contentState(vm).scrollToTopVersion > 0, "Version should be bumped")
+
+        // Composable consumes the scroll event (as LaunchedEffect does after scrollToItem)
+        vm.consumeScrollToTop()
+        assertEquals(0, contentState(vm).scrollToTopVersion, "Version should reset to 0 after consume")
+
+        // Simulate re-entering Favorites (loadFavorites fires on screen entry, no new add)
+        vm.loadAndApplyState("")
+        assertEquals(0, contentState(vm).scrollToTopVersion,
+            "Re-entering Favorites without a new add must not re-trigger scroll")
+    }
+
+    @Test
     fun dropdownExpandedState_resetsWhenPickerBecomesHidden() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()

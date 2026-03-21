@@ -237,6 +237,12 @@ class FavoritesViewModel(
         }
     }
 
+    /** Called by the composable after scrollToItem(0) completes to reset the scroll trigger. */
+    fun consumeScrollToTop() {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.copy(scrollToTopVersion = 0)
+    }
+
     /** Computes and applies favorites state. Exposed for tests; production code uses the
      *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
     internal suspend fun loadAndApplyState(query: String) {
@@ -380,8 +386,11 @@ fun FavoritesScreen(
         // scrollToItem is a suspend function that queues the scroll for the next layout pass.
         // LaunchedEffect fires after the composition that bumped scrollToTopVersion, so the
         // LazyColumn already has the new item at index 0 in its composition when layout runs.
+        // consumeScrollToTop resets the version to 0 so re-entering Favorites does not
+        // replay the scroll.
         if (scrollToTopVersion > 0) {
             viewModel.scrollState.scrollToItem(0)
+            viewModel.consumeScrollToTop()
         }
     }
 
