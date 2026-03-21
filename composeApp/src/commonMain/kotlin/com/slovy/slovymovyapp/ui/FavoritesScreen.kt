@@ -375,23 +375,13 @@ fun FavoritesScreen(
         }
     }
 
-    val scrollToTopContent = viewModel.state as? FavoritesUiState.Content
-    val scrollToTopVersion = scrollToTopContent?.scrollToTopVersion ?: 0
+    val scrollToTopVersion = (viewModel.state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
     LaunchedEffect(scrollToTopVersion) {
-        // Guard: version is only bumped when the target sense is visible, so senses
-        // is non-empty here. The explicit check prevents a hang if that invariant
-        // is ever violated by future changes.
-        if (scrollToTopVersion > 0 && scrollToTopContent?.senses?.isNotEmpty() == true) {
-            // Wait for the first layout pass so scrollToItem(0) sees the updated item list.
-            // Timeout guards against the edge case where items are removed before the
-            // layout emits >0, which would otherwise suspend until composable disposal.
-            val layoutReady = withTimeoutOrNull(500L) {
-                snapshotFlow { viewModel.scrollState.layoutInfo.totalItemsCount }
-                    .first { it > 0 }
-            }
-            if (layoutReady != null) {
-                viewModel.scrollState.scrollToItem(0)
-            }
+        // scrollToItem is a suspend function that queues the scroll for the next layout pass.
+        // LaunchedEffect fires after the composition that bumped scrollToTopVersion, so the
+        // LazyColumn already has the new item at index 0 in its composition when layout runs.
+        if (scrollToTopVersion > 0) {
+            viewModel.scrollState.scrollToItem(0)
         }
     }
 
