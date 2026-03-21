@@ -383,9 +383,15 @@ fun FavoritesScreen(
         // is ever violated by future changes.
         if (scrollToTopVersion > 0 && scrollToTopContent?.senses?.isNotEmpty() == true) {
             // Wait for the first layout pass so scrollToItem(0) sees the updated item list.
-            snapshotFlow { viewModel.scrollState.layoutInfo.totalItemsCount }
-                .first { it > 0 }
-            viewModel.scrollState.scrollToItem(0)
+            // Timeout guards against the edge case where items are removed before the
+            // layout emits >0, which would otherwise suspend until composable disposal.
+            val layoutReady = withTimeoutOrNull(500L) {
+                snapshotFlow { viewModel.scrollState.layoutInfo.totalItemsCount }
+                    .first { it > 0 }
+            }
+            if (layoutReady != null) {
+                viewModel.scrollState.scrollToItem(0)
+            }
         }
     }
 
