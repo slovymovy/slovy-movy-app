@@ -207,8 +207,8 @@ open class FavoritesViewModelTest : BaseTest() {
 
         // Favorite is added and onFavoriteAdded fires after the initial load
         favRepo.add("s1", Language.ENGLISH, "hello")
-        vm.requestScrollToTop() // sets flag + triggers its own loadFavorites()
-        vm.loadAndApplyState("") // simulate the reload triggered by requestScrollToTop
+        vm.requestScrollToTop() // sets the pending flag
+        vm.loadAndApplyState("") // simulate the subsequent Favorites reload (debounced queryFlow)
 
         val content = contentState(vm)
         assertEquals(1, content.senses.size, "New favorite should be present")

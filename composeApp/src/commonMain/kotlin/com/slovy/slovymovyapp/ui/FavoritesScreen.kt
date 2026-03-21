@@ -362,7 +362,10 @@ fun FavoritesScreen(
 
     val scrollToTopVersion = (viewModel.state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
     LaunchedEffect(scrollToTopVersion) {
-        if (scrollToTopVersion > 0 && viewModel.scrollState.layoutInfo.totalItemsCount > 0) {
+        if (scrollToTopVersion > 0) {
+            // Wait for the first layout pass so scrollToItem(0) sees the updated item list.
+            snapshotFlow { viewModel.scrollState.layoutInfo.totalItemsCount }
+                .first { it > 0 }
             viewModel.scrollState.scrollToItem(0)
         }
     }
