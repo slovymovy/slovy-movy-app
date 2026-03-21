@@ -442,7 +442,7 @@ fun App(
                 )
             }
             composable<AppDestination.Favorites> {
-                // Reload favorites when navigating to this screen
+                // Reload favorites when navigating to this screen.
                 LaunchedEffect(Unit) {
                     favoritesViewModel.loadFavorites()
                 }
@@ -532,7 +532,8 @@ fun App(
                         args.dictionaryLanguage,
                         args.lemma,
                         args.targetSenseId,
-                        args.translationLanguages
+                        args.translationLanguages,
+                        onFavoriteAdded = { favoritesViewModel.requestScrollToTop() }
                     ).also { created ->
                         wordDetailViewModels[args] = created
                     }

@@ -60,7 +60,8 @@ sealed interface FavoritesUiState {
         val favoriteLemmas: Set<String> = emptySet(),
         val availableLanguages: List<Language> = emptyList(),
         val selectedLanguage: Language? = null,
-        val isLanguageDropdownExpanded: Boolean = false
+        val isLanguageDropdownExpanded: Boolean = false,
+        val scrollToTopVersion: Int = 0
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
         val showLanguagePicker: Boolean get() = availableLanguages.size > 1
@@ -77,6 +78,13 @@ class FavoritesViewModel(
 
     val scrollState = LazyListState()
     val snackbarHostState = SnackbarHostState()
+
+    private var pendingScrollToTop = false
+
+    /** Called from outside (e.g. word detail) when a favorite was just added. */
+    fun requestScrollToTop() {
+        pendingScrollToTop = true
+    }
 
     private val queryFlow = MutableStateFlow(QueryState("", Uuid.random()))
 
@@ -98,7 +106,14 @@ class FavoritesViewModel(
                         .flowOn(Dispatchers.Default)
                 }
                 .collect { newState ->
-                    state = newState
+                    val shouldScrollToTop = pendingScrollToTop
+                    if (shouldScrollToTop) pendingScrollToTop = false
+                    val prevVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
+                    state = if (shouldScrollToTop) {
+                        newState.copy(scrollToTopVersion = prevVersion + 1)
+                    } else {
+                        newState
+                    }
                     prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
                 }
         }
@@ -342,6 +357,13 @@ fun FavoritesScreen(
     LaunchedEffect(viewModel.scrollState.isScrollInProgress) {
         if (viewModel.scrollState.isScrollInProgress) {
             focusManager.clearFocus()
+        }
+    }
+
+    val scrollToTopVersion = (viewModel.state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
+    LaunchedEffect(scrollToTopVersion) {
+        if (scrollToTopVersion > 0) {
+            viewModel.scrollState.scrollToItem(0)
         }
     }
 
