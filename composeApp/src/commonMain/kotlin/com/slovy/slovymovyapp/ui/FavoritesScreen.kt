@@ -84,9 +84,6 @@ class FavoritesViewModel(
     /** Called from outside (e.g. word detail) when a favorite was just added. */
     fun requestScrollToTop() {
         pendingScrollToTop = true
-        // Trigger a reload so the flag is always consumed even if the Favorites screen's
-        // initial loadFavorites() ran before onFavoriteAdded was invoked.
-        loadFavorites()
     }
 
     private val queryFlow = MutableStateFlow(QueryState("", Uuid.random()))
@@ -365,7 +362,7 @@ fun FavoritesScreen(
 
     val scrollToTopVersion = (viewModel.state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
     LaunchedEffect(scrollToTopVersion) {
-        if (scrollToTopVersion > 0) {
+        if (scrollToTopVersion > 0 && viewModel.scrollState.layoutInfo.totalItemsCount > 0) {
             viewModel.scrollState.scrollToItem(0)
         }
     }
