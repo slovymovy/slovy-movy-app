@@ -111,6 +111,26 @@ fun AcknowledgementsBottomSheetContent() {
             thickness = 0.5.dp,
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
+        AcknowledgementItem(
+            title = "Application code",
+            body = "Application code is available under CC-BY-SA-4.0 license.",
+            urlLabel = "github.com/slovymovy/slovy-movy-app",
+            url = "https://github.com/slovymovy/slovy-movy-app"
+        )
+        HorizontalDivider(
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        )
+        AcknowledgementItem(
+            title = "Words sources",
+            body = "All the words data is available under CC-BY-SA-4.0 license.",
+            urlLabel = "github.com/slovymovy/words",
+            url = "https://github.com/slovymovy/words"
+        )
+        HorizontalDivider(
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        )
         Text(
             text = "We're grateful to the Wiktionary community and to Tatu Ylonen for making this data freely available.",
             style = MaterialTheme.typography.bodyMedium,
