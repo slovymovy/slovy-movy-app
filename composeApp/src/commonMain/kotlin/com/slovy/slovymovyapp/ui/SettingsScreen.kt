@@ -74,6 +74,7 @@ data class SettingsUiState(
 
     // About
     val buildConfig: AppBuildConfig = AppBuildConfig("compile", 42, true, "com.slovy.slovymovyapp"),
+    val acknowledgementsVisible: Boolean = false,
 
     // Feedback
     val feedbackDialogVisible: Boolean = false,
@@ -625,6 +626,14 @@ class SettingsViewModel(
         return url
     }
 
+    fun openAcknowledgements() {
+        state = state.copy(acknowledgementsVisible = true)
+    }
+
+    fun dismissAcknowledgements() {
+        state = state.copy(acknowledgementsVisible = false)
+    }
+
     fun openFeedbackDialog() {
         state = state.copy(
             feedbackDialogVisible = true,
@@ -803,6 +812,8 @@ fun SettingsScreen(
         onDismissError = { viewModel.dismissError() },
         onConfirmDelete = { viewModel.confirmDelete() },
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
+        onAcknowledgements = { viewModel.openAcknowledgements() },
+        onDismissAcknowledgements = { viewModel.dismissAcknowledgements() },
         onSendFeedback = { viewModel.openFeedbackDialog() },
         onDismissFeedback = { viewModel.dismissFeedbackDialog() },
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
@@ -837,6 +848,8 @@ fun SettingsScreenContent(
     onDismissError: () -> Unit = {},
     onConfirmDelete: () -> Unit = {},
     onDismissDeleteConfirmation: () -> Unit = {},
+    onAcknowledgements: () -> Unit = {},
+    onDismissAcknowledgements: () -> Unit = {},
     onSendFeedback: () -> Unit = {},
     onDismissFeedback: () -> Unit = {},
     onFeedbackCommentChange: (String) -> Unit = {},
@@ -1064,7 +1077,8 @@ fun SettingsScreenContent(
                                 item {
                                     AboutSection(
                                         buildConfig = buildConfig,
-                                        onSendFeedback = onSendFeedback
+                                        onSendFeedback = onSendFeedback,
+                                        onAcknowledgements = onAcknowledgements
                                     )
                                 }
                             }
@@ -1082,6 +1096,10 @@ fun SettingsScreenContent(
                 onConfirm = onConfirmDelete,
                 onDismiss = onDismissDeleteConfirmation
             )
+        }
+
+        if (state.acknowledgementsVisible) {
+            AcknowledgementsBottomSheet(onDismiss = onDismissAcknowledgements)
         }
 
         if (state.feedbackDialogVisible) {
@@ -1375,6 +1393,21 @@ private fun SettingsScreenPreviewWithMixedStates(
                     "trans_en_pl" to DownloadProgress(2 * 1024 * 1024, 7 * 1024 * 1024)
                 ),
                 isAppDataExportSupported = true,
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsScreenPreviewAcknowledgements(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SettingsScreenContent(
+            state = SettingsUiState(
+                isLoading = false,
+                acknowledgementsVisible = true
             )
         )
     }
