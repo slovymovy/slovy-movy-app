@@ -222,12 +222,12 @@ class FavoritesViewModel(
     }
 
     private fun applyNewState(newState: FavoritesUiState.Content) {
+        val currentVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
         state = if (pendingScrollToTop) {
             pendingScrollToTop = false
-            val prevVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
-            newState.copy(scrollToTopVersion = prevVersion + 1)
+            newState.copy(scrollToTopVersion = currentVersion + 1)
         } else {
-            newState
+            newState.copy(scrollToTopVersion = currentVersion)
         }
     }
 
