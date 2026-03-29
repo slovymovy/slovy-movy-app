@@ -188,7 +188,7 @@ open class FavoritesViewModelTest : BaseTest() {
         vm.loadAndApplyState("")
         assertEquals(0, contentState(vm).scrollToTopVersion, "Version should start at 0")
 
-        vm.requestScrollToTop("s1")
+        vm.requestScrollToTop()
         vm.loadAndApplyState("")
 
         assertTrue(contentState(vm).scrollToTopVersion > 0,
@@ -207,7 +207,7 @@ open class FavoritesViewModelTest : BaseTest() {
 
         // Favorite is added and onFavoriteAdded fires after the initial load
         favRepo.add("s1", Language.ENGLISH, "hello")
-        vm.requestScrollToTop("s1") // sets the pending flag
+        vm.requestScrollToTop() // sets the pending flag
         vm.loadAndApplyState("") // simulate the subsequent Favorites reload (debounced queryFlow)
 
         val content = contentState(vm)
@@ -217,47 +217,41 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
-    fun requestScrollToTop_addThenRemove_doesNotScroll() = runTest {
+    fun requestScrollToTop_scrollsEvenWhenFilterActive() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         favRepo.add("s1", Language.ENGLISH, "hello")
+        favRepo.add("s2", Language.ENGLISH, "world")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
-        // User adds a new favorite then removes it before Favorites reloads
-        favRepo.add("s2", Language.ENGLISH, "world")
-        vm.requestScrollToTop("s2")
-        favRepo.remove("s2", Language.ENGLISH)
-        vm.loadAndApplyState("")
+        // Add a new favorite and request scroll while a query is active
+        favRepo.add("s3", Language.ENGLISH, "newword")
+        vm.requestScrollToTop()
+        vm.loadAndApplyState("hello") // query hides s3
 
-        assertEquals(0, contentState(vm).scrollToTopVersion,
-            "Should not scroll if the added sense was removed before the reload")
+        assertTrue(contentState(vm).scrollToTopVersion > 0,
+            "Should scroll to top of the filtered results immediately, flag is not kept pending")
     }
 
     @Test
-    fun requestScrollToTop_filteredOut_keepsPendingUntilVisible() = runTest {
+    fun requestScrollToTop_scrollsEvenWhenSenseRemovedBeforeReload() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         favRepo.add("s1", Language.ENGLISH, "hello")
-        favRepo.add("s2", Language.ENGLISH, "world")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
-        // User adds s3 but Favorites reloads with an active query that hides it
-        favRepo.add("s3", Language.ENGLISH, "newword")
-        vm.requestScrollToTop("s3")
-        vm.loadAndApplyState("hello") // query hides s3
-
-        assertEquals(0, contentState(vm).scrollToTopVersion,
-            "Should not scroll while the new sense is filtered out by query")
-
-        // User clears the query — s3 becomes visible
+        // Add then immediately remove before reload
+        favRepo.add("s2", Language.ENGLISH, "world")
+        vm.requestScrollToTop()
+        favRepo.remove("s2", Language.ENGLISH)
         vm.loadAndApplyState("")
 
         assertTrue(contentState(vm).scrollToTopVersion > 0,
-            "Should scroll once the filtered-out sense becomes visible")
+            "Should still scroll to top even if the added sense was removed before reload")
     }
 
     @Test
@@ -271,7 +265,7 @@ open class FavoritesViewModelTest : BaseTest() {
 
         // Add a favorite and trigger scroll
         favRepo.add("s2", Language.ENGLISH, "world")
-        vm.requestScrollToTop("s2")
+        vm.requestScrollToTop()
         vm.loadAndApplyState("")
         assertTrue(contentState(vm).scrollToTopVersion > 0, "Version should be bumped")
 

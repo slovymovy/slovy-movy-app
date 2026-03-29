@@ -61,7 +61,6 @@ sealed interface FavoritesUiState {
         val availableLanguages: List<Language> = emptyList(),
         val selectedLanguage: Language? = null,
         val isLanguageDropdownExpanded: Boolean = false,
-        val allFavoriteIds: Set<String> = emptySet(),
         val scrollToTopVersion: Int = 0
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
@@ -80,11 +79,11 @@ class FavoritesViewModel(
     val scrollState = LazyListState()
     val snackbarHostState = SnackbarHostState()
 
-    private var pendingScrollForSenseId: String? = null
+    private var pendingScrollToTop: Boolean = false
 
     /** Called from outside (e.g. word detail) when a favorite was just added. */
-    fun requestScrollToTop(senseId: String) {
-        pendingScrollForSenseId = senseId
+    fun requestScrollToTop() {
+        pendingScrollToTop = true
     }
 
     private val queryFlow = MutableStateFlow(QueryState("", Uuid.random()))
@@ -107,7 +106,7 @@ class FavoritesViewModel(
                         .flowOn(Dispatchers.Default)
                 }
                 .collect { newState ->
-                    state = applyScrollVersion(newState)
+                    applyNewState(newState)
                     prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
                 }
         }
@@ -213,28 +212,7 @@ class FavoritesViewModel(
             selectedLanguage = selectedLanguage,
             isLanguageDropdownExpanded = if (availableLanguages.size > 1)
                 currentContent?.isLanguageDropdownExpanded ?: false else false,
-            allFavoriteIds = allFavorites.map { it.senseId }.toSet()
         )
-    }
-
-    private fun applyScrollVersion(newState: FavoritesUiState.Content): FavoritesUiState.Content {
-        val targetSenseId = pendingScrollForSenseId ?: return newState
-        return when {
-            // Sense was deleted from favorites entirely — drop the request.
-            targetSenseId !in newState.allFavoriteIds -> {
-                pendingScrollForSenseId = null
-                newState
-            }
-            // Sense is in favorites but hidden by an active query or language filter —
-            // keep the request pending until it becomes visible.
-            newState.senses.none { it.senseId == targetSenseId } -> newState
-            // Sense is visible — trigger scroll.
-            else -> {
-                pendingScrollForSenseId = null
-                val prevVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
-                newState.copy(scrollToTopVersion = prevVersion + 1)
-            }
-        }
     }
 
     /** Called by the composable after scrollToItem(0) completes to reset the scroll trigger. */
@@ -243,10 +221,20 @@ class FavoritesViewModel(
         state = content.copy(scrollToTopVersion = 0)
     }
 
+    private fun applyNewState(newState: FavoritesUiState.Content) {
+        state = if (pendingScrollToTop) {
+            pendingScrollToTop = false
+            val prevVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
+            newState.copy(scrollToTopVersion = prevVersion + 1)
+        } else {
+            newState
+        }
+    }
+
     /** Computes and applies favorites state. Exposed for tests; production code uses the
      *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
     internal suspend fun loadAndApplyState(query: String) {
-        state = applyScrollVersion(computeFavoritesState(query, state as? FavoritesUiState.Content))
+        applyNewState(computeFavoritesState(query, state as? FavoritesUiState.Content))
     }
 
 
