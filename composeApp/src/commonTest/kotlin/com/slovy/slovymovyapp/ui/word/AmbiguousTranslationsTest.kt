@@ -95,6 +95,29 @@ class AmbiguousTranslationsTest {
     }
 
     @Test
+    fun clarificationRow_ambiguousWord_hasNoLinkAnnotation() {
+        // Regression: translation words must never be clickable links — they are in a different
+        // language from the source relatedWords index and navigation would be wrong.
+        val translations = listOf(
+            LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "someone/something"),
+            LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "a target")
+        )
+        val ambiguous = setOf("miss")
+        val annotated = buildClarificationRow(translations, ambiguous, multiLang = false)
+        val links = annotated.getLinkAnnotations(0, annotated.length)
+        assertTrue(links.isEmpty(), "clarification row must not contain any link annotations, found: $links")
+    }
+
+    @Test
+    fun clarificationRow_clarificationTextAppended() {
+        val translations = listOf(
+            LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "a target")
+        )
+        val annotated = buildClarificationRow(translations, setOf("miss"), multiLang = false)
+        assertTrue(annotated.text.contains("a target"), "clarification text must appear in the row")
+    }
+
+    @Test
     fun duplicate_entries_within_sense_treated_as_single_word() {
         // same word listed twice in one sense — should still match a sense with it once
         val senses = listOf(
