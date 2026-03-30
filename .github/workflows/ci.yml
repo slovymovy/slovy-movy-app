@@ -34,7 +34,7 @@ jobs:
           java-version: 21
 
       - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: run shared tests
         env:
@@ -81,7 +81,7 @@ jobs:
           java-version: 21
 
       - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: run compose desktop JVM tests
         env:
@@ -119,7 +119,7 @@ jobs:
           java-version: 21
 
       - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: run server tests
         env:
@@ -186,7 +186,7 @@ jobs:
           java-version: 21
 
       - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: AVD cache
         uses: actions/cache@v5
@@ -264,7 +264,7 @@ jobs:
           java-version: 21
 
       - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: run iOS simulator arm64 tests
         env:
