@@ -186,13 +186,13 @@ open class FavoritesViewModelTest : BaseTest() {
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
-        assertEquals(0, contentState(vm).scrollToTopVersion, "Version should start at 0")
+        assertFalse(contentState(vm).scrollToTop, "scrollToTop should start as false")
 
         vm.requestScrollToTop()
         vm.loadAndApplyState("")
 
-        assertTrue(contentState(vm).scrollToTopVersion > 0,
-            "scrollToTopVersion should be incremented after requestScrollToTop + load")
+        assertTrue(contentState(vm).scrollToTop,
+            "scrollToTop should be true after requestScrollToTop + load")
     }
 
     @Test
@@ -203,7 +203,7 @@ open class FavoritesViewModelTest : BaseTest() {
         val vm = createViewModel(favRepo)
         // Simulate Favorites screen's initial loadFavorites() running before the favorite is added
         vm.loadAndApplyState("")
-        assertEquals(0, contentState(vm).scrollToTopVersion)
+        assertFalse(contentState(vm).scrollToTop)
 
         // Favorite is added and onFavoriteAdded fires after the initial load
         favRepo.add("s1", Language.ENGLISH, "hello")
@@ -212,7 +212,7 @@ open class FavoritesViewModelTest : BaseTest() {
 
         val content = contentState(vm)
         assertEquals(1, content.senses.size, "New favorite should be present")
-        assertTrue(content.scrollToTopVersion > 0,
+        assertTrue(content.scrollToTop,
             "Should scroll to top even when the initial Favorites load ran before onFavoriteAdded")
     }
 
@@ -231,7 +231,7 @@ open class FavoritesViewModelTest : BaseTest() {
         vm.requestScrollToTop()
         vm.loadAndApplyState("hello") // query hides s3
 
-        assertTrue(contentState(vm).scrollToTopVersion > 0,
+        assertTrue(contentState(vm).scrollToTop,
             "Should scroll to top of the filtered results immediately, flag is not kept pending")
     }
 
@@ -250,7 +250,7 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.remove("s2", Language.ENGLISH)
         vm.loadAndApplyState("")
 
-        assertTrue(contentState(vm).scrollToTopVersion > 0,
+        assertTrue(contentState(vm).scrollToTop,
             "Should still scroll to top even if the added sense was removed before reload")
     }
 
@@ -267,15 +267,15 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.add("s2", Language.ENGLISH, "world")
         vm.requestScrollToTop()
         vm.loadAndApplyState("")
-        assertTrue(contentState(vm).scrollToTopVersion > 0, "Version should be bumped")
+        assertTrue(contentState(vm).scrollToTop, "scrollToTop should be true after add")
 
         // Composable consumes the scroll event (as LaunchedEffect does after scrollToItem)
         vm.consumeScrollToTop()
-        assertEquals(0, contentState(vm).scrollToTopVersion, "Version should reset to 0 after consume")
+        assertFalse(contentState(vm).scrollToTop, "scrollToTop should reset to false after consume")
 
         // Simulate re-entering Favorites (loadFavorites fires on screen entry, no new add)
         vm.loadAndApplyState("")
-        assertEquals(0, contentState(vm).scrollToTopVersion,
+        assertFalse(contentState(vm).scrollToTop,
             "Re-entering Favorites without a new add must not re-trigger scroll")
     }
 

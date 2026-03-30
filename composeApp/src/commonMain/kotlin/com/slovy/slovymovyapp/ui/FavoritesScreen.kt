@@ -61,7 +61,7 @@ sealed interface FavoritesUiState {
         val availableLanguages: List<Language> = emptyList(),
         val selectedLanguage: Language? = null,
         val isLanguageDropdownExpanded: Boolean = false,
-        val scrollToTopVersion: Int = 0
+        val scrollToTop: Boolean = false
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
         val showLanguagePicker: Boolean get() = availableLanguages.size > 1
@@ -218,16 +218,15 @@ class FavoritesViewModel(
     /** Called by the composable after scrollToItem(0) completes to reset the scroll trigger. */
     fun consumeScrollToTop() {
         val content = state as? FavoritesUiState.Content ?: return
-        state = content.copy(scrollToTopVersion = 0)
+        state = content.copy(scrollToTop = false)
     }
 
     private fun applyNewState(newState: FavoritesUiState.Content) {
-        val currentVersion = (state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
         state = if (pendingScrollToTop) {
             pendingScrollToTop = false
-            newState.copy(scrollToTopVersion = currentVersion + 1)
+            newState.copy(scrollToTop = true)
         } else {
-            newState.copy(scrollToTopVersion = currentVersion)
+            newState.copy(scrollToTop = (state as? FavoritesUiState.Content)?.scrollToTop ?: false)
         }
     }
 
@@ -369,14 +368,9 @@ fun FavoritesScreen(
         }
     }
 
-    val scrollToTopVersion = (viewModel.state as? FavoritesUiState.Content)?.scrollToTopVersion ?: 0
-    LaunchedEffect(scrollToTopVersion) {
-        // scrollToItem is a suspend function that queues the scroll for the next layout pass.
-        // LaunchedEffect fires after the composition that bumped scrollToTopVersion, so the
-        // LazyColumn already has the new item at index 0 in its composition when layout runs.
-        // consumeScrollToTop resets the version to 0 so re-entering Favorites does not
-        // replay the scroll.
-        if (scrollToTopVersion > 0) {
+    val scrollToTop = (viewModel.state as? FavoritesUiState.Content)?.scrollToTop ?: false
+    LaunchedEffect(scrollToTop) {
+        if (scrollToTop) {
             viewModel.scrollState.scrollToItem(0)
             viewModel.consumeScrollToTop()
         }
