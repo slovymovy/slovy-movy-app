@@ -60,7 +60,8 @@ sealed interface FavoritesUiState {
         val favoriteLemmas: Set<String> = emptySet(),
         val availableLanguages: List<Language> = emptyList(),
         val selectedLanguage: Language? = null,
-        val isLanguageDropdownExpanded: Boolean = false
+        val isLanguageDropdownExpanded: Boolean = false,
+        val scrollToTop: Boolean = false
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
         val showLanguagePicker: Boolean get() = availableLanguages.size > 1
@@ -77,6 +78,13 @@ class FavoritesViewModel(
 
     val scrollState = LazyListState()
     val snackbarHostState = SnackbarHostState()
+
+    private var pendingScrollToTop: Boolean = false
+
+    /** Called from outside (e.g. word detail) when a favorite was just added. */
+    fun requestScrollToTop() {
+        pendingScrollToTop = true
+    }
 
     private val queryFlow = MutableStateFlow(QueryState("", Uuid.random()))
 
@@ -98,7 +106,7 @@ class FavoritesViewModel(
                         .flowOn(Dispatchers.Default)
                 }
                 .collect { newState ->
-                    state = newState
+                    applyNewState(newState)
                     prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
                 }
         }
@@ -203,14 +211,29 @@ class FavoritesViewModel(
             availableLanguages = availableLanguages,
             selectedLanguage = selectedLanguage,
             isLanguageDropdownExpanded = if (availableLanguages.size > 1)
-                currentContent?.isLanguageDropdownExpanded ?: false else false
+                currentContent?.isLanguageDropdownExpanded ?: false else false,
         )
+    }
+
+    /** Called by the composable after scrollToItem(0) completes to reset the scroll trigger. */
+    fun consumeScrollToTop() {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.copy(scrollToTop = false)
+    }
+
+    private fun applyNewState(newState: FavoritesUiState.Content) {
+        state = if (pendingScrollToTop) {
+            pendingScrollToTop = false
+            newState.copy(scrollToTop = true)
+        } else {
+            newState.copy(scrollToTop = (state as? FavoritesUiState.Content)?.scrollToTop ?: false)
+        }
     }
 
     /** Computes and applies favorites state. Exposed for tests; production code uses the
      *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
     internal suspend fun loadAndApplyState(query: String) {
-        state = computeFavoritesState(query, state as? FavoritesUiState.Content)
+        applyNewState(computeFavoritesState(query, state as? FavoritesUiState.Content))
     }
 
 
@@ -342,6 +365,14 @@ fun FavoritesScreen(
     LaunchedEffect(viewModel.scrollState.isScrollInProgress) {
         if (viewModel.scrollState.isScrollInProgress) {
             focusManager.clearFocus()
+        }
+    }
+
+    val scrollToTop = (viewModel.state as? FavoritesUiState.Content)?.scrollToTop ?: false
+    LaunchedEffect(scrollToTop) {
+        if (scrollToTop) {
+            viewModel.scrollState.scrollToItem(0)
+            viewModel.consumeScrollToTop()
         }
     }
 
