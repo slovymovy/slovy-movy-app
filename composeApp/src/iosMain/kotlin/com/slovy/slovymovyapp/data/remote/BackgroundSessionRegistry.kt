@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.data.remote
 
 import kotlinx.atomicfu.locks.reentrantLock
 import kotlinx.atomicfu.locks.synchronized
+import kotlinx.atomicfu.locks.withLock
 
 /**
  * Callback interface used to bridge iOS background URL session completion handlers
@@ -22,11 +23,11 @@ object BackgroundSessionRegistry {
     private val handlers = mutableMapOf<String, BackgroundDownloadCompletionCallback>()
 
     fun registerCompletionHandler(sessionId: String, handler: BackgroundDownloadCompletionCallback) {
-        lock.synchronized { handlers[sessionId] = handler }
+        lock.withLock { handlers[sessionId] = handler }
     }
 
     internal fun callAndRemove(sessionId: String) {
-        val handler = lock.synchronized { handlers.remove(sessionId) }
+        val handler = lock.withLock { handlers.remove(sessionId) }
         handler?.call()
     }
 }
