@@ -18,15 +18,21 @@ internal suspend fun nsUrlSessionDownload(
     moveFile: (from: Path, to: Path) -> Boolean,
     getAvailableBytesForDestination: () -> Long?,
 ) = suspendCancellableCoroutine<Unit> { cont ->
-    val sessionId = "com.slovy.slovymovyapp.dl.${
-        NSURL.fileURLWithPath(destPath.toString()).lastPathComponent ?: destPath.name
-    }"
+    // Derive a stable, collision-resistant session identifier from the full
+    // destination path. lastPathComponent alone collides whenever two
+    // destinations share a filename (e.g. dictionary vs. translation DBs with
+    // the same name in different dirs, or retries of the same target).
+    val destPathStr = destPath.toString()
+    val pathHash = destPathStr.hashCode().toUInt().toString(16)
+    val filename = NSURL.fileURLWithPath(destPathStr).lastPathComponent ?: destPath.name
+    val sessionId = "com.slovy.slovymovyapp.dl.$pathHash.$filename"
     val config = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(sessionId)
     config.discretionary = false
     config.allowsCellularAccess = true
 
     val delegate = object : NSObject(), NSURLSessionDownloadDelegateProtocol {
         private var diskSpaceChecked = false
+        private var cancelledByUs = false
 
         override fun URLSession(
             session: NSURLSession,
@@ -36,6 +42,7 @@ internal suspend fun nsUrlSessionDownload(
             totalBytesExpectedToWrite: Long,
         ) {
             if (cancelToken.isCancelled) {
+                cancelledByUs = true
                 downloadTask.cancel()
                 return
             }
@@ -110,9 +117,16 @@ internal suspend fun nsUrlSessionDownload(
             didCompleteWithError: NSError?,
         ) {
             if (didCompleteWithError != null && cont.isActive) {
-                cont.resumeWithException(
-                    IllegalStateException("Download failed: ${didCompleteWithError.localizedDescription}")
-                )
+                val isCancellation = cancelledByUs ||
+                    cancelToken.isCancelled ||
+                    didCompleteWithError.code == NSURLErrorCancelled
+                if (isCancellation) {
+                    cont.resumeWithException(DataDbManager.DownloadCancelledException())
+                } else {
+                    cont.resumeWithException(
+                        IllegalStateException("Download failed: ${didCompleteWithError.localizedDescription}")
+                    )
+                }
             }
         }
 
