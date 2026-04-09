@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.data.remote
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
@@ -190,7 +191,11 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     ) {
         val intent = Intent(ctx, DownloadForegroundService::class.java)
         if (activeDownloads.getAndIncrement() == 0) {
-            ctx.startForegroundService(intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ctx.startForegroundService(intent)
+            } else {
+                ctx.startService(intent)
+            }
         }
         try {
             downloadViaKtor(url, headers, destPath, onProgress, cancelToken)
