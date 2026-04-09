@@ -143,16 +143,22 @@ internal suspend fun nsUrlSessionDownload(
             task: NSURLSessionTask,
             didCompleteWithError: NSError?,
         ) {
-            if (didCompleteWithError != null && cont.isActive) {
-                val isCancellation = cancelledByUs ||
-                    cancelToken.isCancelled ||
-                    didCompleteWithError.code == NSURLErrorCancelled
-                if (isCancellation) {
-                    cont.resumeWithException(DataDbManager.DownloadCancelledException())
-                } else {
-                    cont.resumeWithException(
-                        IllegalStateException("Download failed: ${didCompleteWithError.localizedDescription}")
-                    )
+            if (didCompleteWithError != null) {
+                // Always tear down the background session on transport errors
+                // (DNS, timeout, offline, ...). Otherwise it stays alive and a
+                // later download with the same identifier collides with it.
+                session.finishTasksAndInvalidate()
+                if (cont.isActive) {
+                    val isCancellation = cancelledByUs ||
+                        cancelToken.isCancelled ||
+                        didCompleteWithError.code == NSURLErrorCancelled
+                    if (isCancellation) {
+                        cont.resumeWithException(DataDbManager.DownloadCancelledException())
+                    } else {
+                        cont.resumeWithException(
+                            IllegalStateException("Download failed: ${didCompleteWithError.localizedDescription}")
+                        )
+                    }
                 }
             }
         }
@@ -165,11 +171,13 @@ internal suspend fun nsUrlSessionDownload(
         // documented at the top of this file.
     }
 
-    val session = NSURLSession.sessionWithConfiguration(config, delegate = delegate, delegateQueue = null)
+    // Validate URL before creating the session so a malformed URL does not
+    // leak a live NSURLSession.
     val nsUrl = NSURL.URLWithString(url) ?: run {
         cont.resumeWithException(IllegalArgumentException("Invalid URL: $url"))
         return@suspendCancellableCoroutine
     }
+    val session = NSURLSession.sessionWithConfiguration(config, delegate = delegate, delegateQueue = null)
     val request = NSMutableURLRequest.requestWithURL(nsUrl)
     headers.forEach { (k, v) -> request.setValue(v, forHTTPHeaderField = k) }
     val task = session.downloadTaskWithRequest(request)

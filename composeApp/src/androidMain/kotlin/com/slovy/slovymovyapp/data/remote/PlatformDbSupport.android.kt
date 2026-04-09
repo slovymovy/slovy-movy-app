@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger
 actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     private val ctx: Context = (androidContext as? Context)
         ?: error("Android Context is required for PlatformDbSupport on Android")
-    private val activeDownloads = AtomicInteger(0)
 
     actual fun getDatabasePath(name: String): Path {
         if (name.isEmpty()) {
@@ -286,5 +285,12 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         } finally {
             client.close()
         }
+    }
+
+    companion object {
+        // Process-global so concurrent downloads from multiple PlatformDbSupport
+        // instances cannot stop the foreground service while another download
+        // is still running.
+        private val activeDownloads = AtomicInteger(0)
     }
 }
