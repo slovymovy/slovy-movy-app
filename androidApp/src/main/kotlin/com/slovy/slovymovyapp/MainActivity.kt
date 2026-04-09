@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.slovy.slovymovyapp.androidApp.BuildConfig
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvider

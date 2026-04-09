@@ -11,4 +11,5 @@ internal expect suspend fun nsUrlSessionDownload(
     onProgress: (DownloadProgress) -> Unit,
     cancelToken: CancelToken,
     moveFile: (from: Path, to: Path) -> Boolean,
+    getAvailableBytesForDestination: () -> Long?,
 )

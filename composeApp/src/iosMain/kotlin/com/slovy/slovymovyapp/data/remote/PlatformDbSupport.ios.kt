@@ -230,5 +230,6 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         onProgress = onProgress,
         cancelToken = cancelToken,
         moveFile = { from, to -> moveFile(from, to) },
+        getAvailableBytesForDestination = { getAvailableBytesForPath(destPath) },
     )
 }

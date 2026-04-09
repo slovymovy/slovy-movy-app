@@ -190,17 +190,28 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         cancelToken: CancelToken,
     ) {
         val intent = Intent(ctx, DownloadForegroundService::class.java)
-        if (activeDownloads.getAndIncrement() == 0) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ctx.startForegroundService(intent)
-            } else {
-                ctx.startService(intent)
+        val startedService = if (activeDownloads.getAndIncrement() == 0) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ctx.startForegroundService(intent)
+                } else {
+                    ctx.startService(intent)
+                }
+                true
+            } catch (t: Throwable) {
+                // e.g. ForegroundServiceStartNotAllowedException on Android 12+
+                // when launched from background. Fall through to a foregroundless
+                // download instead of leaking the ref-count.
+                activeDownloads.decrementAndGet()
+                false
             }
+        } else {
+            true
         }
         try {
             downloadViaKtor(url, headers, destPath, onProgress, cancelToken)
         } finally {
-            if (activeDownloads.decrementAndGet() == 0) {
+            if (startedService && activeDownloads.decrementAndGet() == 0) {
                 ctx.stopService(intent)
             }
         }

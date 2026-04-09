@@ -13,7 +13,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.slovy.slovymovyapp"
+    namespace = "com.slovy.slovymovyapp.androidApp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     buildFeatures {
