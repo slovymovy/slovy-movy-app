@@ -16,11 +16,8 @@ import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.io.files.Path
 import platform.Foundation.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     val lock: ReentrantLock = reentrantLock()
@@ -220,38 +217,20 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         }
     }
 
-    @OptIn(ExperimentalForeignApi::class)
     actual suspend fun downloadFileToPath(
         url: String,
         headers: Map<String, String>,
         destPath: Path,
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken,
-    ) = suspendCancellableCoroutine { cont ->
-        val sessionId = "com.slovy.slovymovyapp.dl.${
-            NSURL.fileURLWithPath(destPath.toString()).lastPathComponent ?: destPath.name
-        }"
-        val config = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(sessionId)
-        config.discretionary = false
-        config.allowsCellularAccess = true
-
-        val tempPath = Path("$destPath.part")
-        val delegate = IosBackgroundDownloadDelegate(tempPath, destPath, this, onProgress, cancelToken, cont)
-        val session = NSURLSession.sessionWithConfiguration(config, delegate = delegate, delegateQueue = null)
-
-        val nsUrl = NSURL.URLWithString(url) ?: run {
-            cont.resumeWithException(IllegalArgumentException("Invalid URL: $url"))
-            return@suspendCancellableCoroutine
-        }
-        val request = NSMutableURLRequest.requestWithURL(nsUrl)
-        headers.forEach { (k, v) -> request.setValue(v, forHTTPHeaderField = k) }
-        val task = session.downloadTaskWithRequest(request)
-
-        cont.invokeOnCancellation {
-            task.cancel()
-            session.invalidateAndCancel()
-            deleteFile(tempPath)
-        }
-        task.resume()
-    }
+    ) = nsUrlSessionDownload(
+        url = url,
+        headers = headers,
+        destPath = destPath,
+        tempPath = Path("$destPath.part"),
+        onProgress = onProgress,
+        cancelToken = cancelToken,
+        moveFile = { from, to -> moveFile(from, to) },
+        deleteFile = { path -> deleteFile(path) },
+    )
 }
