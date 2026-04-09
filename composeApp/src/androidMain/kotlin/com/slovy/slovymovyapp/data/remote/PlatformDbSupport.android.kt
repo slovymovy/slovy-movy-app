@@ -20,10 +20,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.io.files.Path
 import java.io.File
 import java.io.FileOutputStream
+import java.util.concurrent.atomic.AtomicInteger
 
 actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     private val ctx: Context = (androidContext as? Context)
         ?: error("Android Context is required for PlatformDbSupport on Android")
+    private val activeDownloads = AtomicInteger(0)
 
     actual fun getDatabasePath(name: String): Path {
         if (name.isEmpty()) {
@@ -187,11 +189,15 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         cancelToken: CancelToken,
     ) {
         val intent = Intent(ctx, DownloadForegroundService::class.java)
-        ctx.startForegroundService(intent)
+        if (activeDownloads.getAndIncrement() == 0) {
+            ctx.startForegroundService(intent)
+        }
         try {
             downloadViaKtor(url, headers, destPath, onProgress, cancelToken)
         } finally {
-            ctx.stopService(intent)
+            if (activeDownloads.decrementAndGet() == 0) {
+                ctx.stopService(intent)
+            }
         }
     }
 

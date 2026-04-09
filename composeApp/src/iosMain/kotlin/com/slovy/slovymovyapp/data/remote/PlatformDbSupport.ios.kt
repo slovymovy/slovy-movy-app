@@ -227,10 +227,8 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         url = url,
         headers = headers,
         destPath = destPath,
-        tempPath = Path("$destPath.part"),
         onProgress = onProgress,
         cancelToken = cancelToken,
         moveFile = { from, to -> moveFile(from, to) },
-        deleteFile = { path -> deleteFile(path) },
     )
 }

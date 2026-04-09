@@ -12,11 +12,9 @@ internal actual suspend fun nsUrlSessionDownload(
     url: String,
     headers: Map<String, String>,
     destPath: Path,
-    tempPath: Path,
     onProgress: (DownloadProgress) -> Unit,
     cancelToken: CancelToken,
     moveFile: (from: Path, to: Path) -> Boolean,
-    deleteFile: (path: Path) -> Unit,
 ) = suspendCancellableCoroutine<Unit> { cont ->
     val sessionId = "com.slovy.slovymovyapp.dl.${
         NSURL.fileURLWithPath(destPath.toString()).lastPathComponent ?: destPath.name
@@ -47,7 +45,7 @@ internal actual suspend fun nsUrlSessionDownload(
             didFinishDownloadingToURL: NSURL,
         ) {
             // The file at didFinishDownloadingToURL is temporary — iOS deletes it when
-            // this method returns. Move it synchronously before returning.
+            // this method returns. Move it directly to the final destination.
             val srcPath = Path(
                 didFinishDownloadingToURL.path ?: run {
                     session.finishTasksAndInvalidate()
@@ -55,7 +53,7 @@ internal actual suspend fun nsUrlSessionDownload(
                     return
                 }
             )
-            val moved = moveFile(srcPath, tempPath) && moveFile(tempPath, destPath)
+            val moved = moveFile(srcPath, destPath)
             session.finishTasksAndInvalidate()
             if (moved) {
                 cont.resume(Unit)
@@ -72,11 +70,16 @@ internal actual suspend fun nsUrlSessionDownload(
             didCompleteWithError: NSError?,
         ) {
             if (didCompleteWithError != null && cont.isActive) {
-                deleteFile(tempPath)
                 cont.resumeWithException(
                     IllegalStateException("Download failed: ${didCompleteWithError.localizedDescription}")
                 )
             }
+        }
+
+        override fun URLSessionDidFinishEventsForBackgroundURLSession(session: NSURLSession) {
+            // Called after all pending background session events have been delivered.
+            // Signal iOS that we are done processing so it can release background time.
+            session.configuration.identifier?.let { BackgroundSessionRegistry.callAndRemove(it) }
         }
     }
 
@@ -92,7 +95,6 @@ internal actual suspend fun nsUrlSessionDownload(
     cont.invokeOnCancellation {
         task.cancel()
         session.invalidateAndCancel()
-        deleteFile(tempPath)
     }
     task.resume()
 }

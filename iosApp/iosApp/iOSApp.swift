@@ -1,4 +1,5 @@
 import SwiftUI
+import ComposeApp
 
 @main
 struct iOSApp: App {
@@ -17,9 +18,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         handleEventsForBackgroundURLSession identifier: String,
         completionHandler: @escaping () -> Void
     ) {
-        // Called when the app is relaunched after being killed mid-download.
-        // iOS delivers the pending delegate callbacks for the background session,
-        // then we call completionHandler() to let iOS know we're done processing.
-        completionHandler()
+        // Store the handler so the KMP session delegate can call it after all
+        // pending background session events have been delivered via
+        // URLSessionDidFinishEventsForBackgroundURLSession.
+        BackgroundSessionRegistry.shared.registerCompletionHandler(
+            sessionId: identifier,
+            handler: MainThreadCompletionCallback(completionHandler)
+        )
     }
+}
+
+/// Wraps an iOS background-session completion handler so it can be stored in
+/// the KMP BackgroundSessionRegistry and invoked from the session delegate.
+private class MainThreadCompletionCallback: BackgroundDownloadCompletionCallback {
+    private let handler: () -> Void
+    init(_ handler: @escaping () -> Void) { self.handler = handler }
+    func call() { DispatchQueue.main.async { self.handler() } }
 }

@@ -8,9 +8,7 @@ internal expect suspend fun nsUrlSessionDownload(
     url: String,
     headers: Map<String, String>,
     destPath: Path,
-    tempPath: Path,
     onProgress: (DownloadProgress) -> Unit,
     cancelToken: CancelToken,
     moveFile: (from: Path, to: Path) -> Boolean,
-    deleteFile: (path: Path) -> Unit,
 )

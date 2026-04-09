@@ -27,6 +27,7 @@
         </activity>
         <service
                 android:name="com.slovy.slovymovyapp.data.remote.DownloadForegroundService"
+                android:exported="false"
                 android:foregroundServiceType="dataSync"/>
         <provider
                 android:name="androidx.core.content.FileProvider"
