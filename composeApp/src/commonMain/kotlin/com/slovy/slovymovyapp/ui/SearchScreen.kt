@@ -16,7 +16,13 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -31,6 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,7 +65,6 @@ data class SearchUiState(
     val selectedLanguage: Language? = null,
     val isLanguageDropdownExpanded: Boolean = false,
     val isSuggestionsRefreshing: Boolean = false,
-    val showPullToRefreshHint: Boolean = true,
     val wordSuggestions: List<String> = emptyList(),
     val favoriteLemmas: List<String> = emptyList()
 )
@@ -132,14 +138,6 @@ class SearchViewModel(
         state = state.copy(wordSuggestions = suggestions, favoriteLemmas = favorites)
     }
 
-    fun refreshSuggestions() {
-        // Skip if initial load hasn't completed yet (avoid double load on first open)
-        if (!suggestionsInitialized) return
-        viewModelScope.launch {
-            loadSuggestionsForCurrentLanguage()
-        }
-    }
-
     fun refreshSuggestionsFromPull() {
         // Skip until initial data is loaded and avoid concurrent refresh jobs.
         if (!suggestionsInitialized || state.isSuggestionsRefreshing) return
@@ -148,10 +146,7 @@ class SearchViewModel(
             try {
                 loadSuggestionsForCurrentLanguage()
             } finally {
-                state = state.copy(
-                    isSuggestionsRefreshing = false,
-                    showPullToRefreshHint = false
-                )
+                state = state.copy(isSuggestionsRefreshing = false)
             }
         }
     }
@@ -230,10 +225,9 @@ fun SearchScreen(
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
 
-    // Refresh language indicators, suggestions, and search results when screen is opened
+    // Refresh language indicators and search results when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
-        viewModel.refreshSuggestions()
         viewModel.refreshResults()
     }
 
@@ -423,8 +417,7 @@ fun SearchScreenContent(
                             EmptySearchState(
                                 wordSuggestions = state.wordSuggestions,
                                 favoriteLemmas = state.favoriteLemmas,
-                            onWordClick = onSuggestionSelected,
-                                showPullToRefreshHint = state.showPullToRefreshHint && !state.isSuggestionsRefreshing
+                                onWordClick = onSuggestionSelected
                             )
                         }
                     }
@@ -530,8 +523,7 @@ private fun SearchResultCard(
 private fun EmptySearchState(
     wordSuggestions: List<String>,
     favoriteLemmas: List<String>,
-    onWordClick: (String) -> Unit,
-    showPullToRefreshHint: Boolean = true
+    onWordClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -546,7 +538,8 @@ private fun EmptySearchState(
             WordChipSection(
                 title = "Explore new words",
                 words = wordSuggestions,
-                onWordClick = onWordClick
+                onWordClick = onWordClick,
+                hint = "Pull down to refresh"
             )
         }
 
@@ -554,7 +547,8 @@ private fun EmptySearchState(
             WordChipSection(
                 title = "Your latest favorites",
                 words = favoriteLemmas,
-                onWordClick = onWordClick
+                onWordClick = onWordClick,
+                leadingIcon = Icons.Filled.Favorite
             )
         }
 
@@ -564,69 +558,97 @@ private fun EmptySearchState(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        } else if (showPullToRefreshHint) {
-            Spacer(modifier = Modifier.height(0.dp)) // reset arrangement gap
-            Text(
-                modifier = Modifier.offset(y = (-12).dp),
-                text = "Pull down to refresh suggestions",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalAnimationApi::class)
 @Composable
 private fun WordChipSection(
     title: String,
     words: List<String>,
-    onWordClick: (String) -> Unit
+    onWordClick: (String) -> Unit,
+    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    hint: String? = null
 ) {
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shape = MaterialTheme.shapes.medium
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier = Modifier.padding(horizontal = 16.dp).padding(top = 14.dp, bottom = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if (leadingIcon != null) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        tint = FavoriteAccentColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
                 Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                words.forEach { word ->
-                    SuggestionChip(
-                        onClick = { onWordClick(word) },
-                        label = {
-                            Text(
-                                text = word,
-                                style = MaterialTheme.typography.bodyMedium
+            AnimatedContent(
+                targetState = words,
+                transitionSpec = {
+                    fadeIn(tween(300)) togetherWith fadeOut(tween(150))
+                },
+                label = "chips"
+            ) { currentWords ->
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    currentWords.forEach { word ->
+                        SuggestionChip(
+                            onClick = { onWordClick(word) },
+                            label = {
+                                Text(
+                                    text = word,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            },
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            border = SuggestionChipDefaults.suggestionChipBorder(
+                                enabled = true,
+                                borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                            ),
+                            elevation = SuggestionChipDefaults.suggestionChipElevation(
+                                elevation = 2.dp
                             )
-                        },
-                        colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            labelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        border = SuggestionChipDefaults.suggestionChipBorder(
-                            enabled = true,
-                            borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        ),
-                        elevation = SuggestionChipDefaults.suggestionChipElevation(
-                            elevation = 2.dp
                         )
-                    )
+                    }
                 }
+            }
+
+            if (hint != null) {
+                Text(
+                    text = hint,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp, bottom = 4.dp)
+                )
             }
         }
     }

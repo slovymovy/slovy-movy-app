@@ -159,7 +159,7 @@ internal fun SenseCard(
                                     Icons.Outlined.FavoriteBorder
                                 },
                                 tint = if (state.favorite) {
-                                    Color(0xFFC46060) // Warm dusty rose
+                                    FavoriteAccentColor
                                 } else {
                                     LocalContentColor.current
                                 },
