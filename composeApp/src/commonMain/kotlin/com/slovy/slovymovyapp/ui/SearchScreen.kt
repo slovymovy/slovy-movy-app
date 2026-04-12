@@ -138,6 +138,15 @@ class SearchViewModel(
         state = state.copy(wordSuggestions = suggestions, favoriteLemmas = favorites)
     }
 
+    fun refreshRecentFavorites() {
+        if (!suggestionsInitialized) return
+        viewModelScope.launch {
+            val language = state.selectedLanguage ?: return@launch
+            val favorites = repository.getRecentFavoriteLemmas(language)
+            state = state.copy(favoriteLemmas = favorites)
+        }
+    }
+
     fun refreshSuggestionsFromPull() {
         // Skip until initial data is loaded and avoid concurrent refresh jobs.
         if (!suggestionsInitialized || state.isSuggestionsRefreshing) return
@@ -225,9 +234,10 @@ fun SearchScreen(
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
 
-    // Refresh language indicators and search results when screen is opened
+    // Refresh language indicators, recent favorites, and search results when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
+        viewModel.refreshRecentFavorites()
         viewModel.refreshResults()
     }
 
