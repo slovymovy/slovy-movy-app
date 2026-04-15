@@ -14,7 +14,7 @@ fun main() = application {
         isDebug = false,
         applicationId = "com.slovy.slovymovyapp"
     )
-    val windowTitle = if (buildConfig.isDebug) "Open words Debug" else "Open words"
+    val windowTitle = if (buildConfig.isDebug) "OpenWords Debug" else "OpenWords"
 
     Window(
         onCloseRequest = ::exitApplication,
