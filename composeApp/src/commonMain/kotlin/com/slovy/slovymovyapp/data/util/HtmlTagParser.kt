@@ -208,12 +208,11 @@ object HtmlTagParser {
     }
 
     /**
-     * Removes all `<w>...</w>` and simple highlight tags from text, returning plain text.
-     * Recurses into nested tag content so inner markup is also stripped.
+     * Removes all markup tags from text, returning plain text.
+     * Strips any `<...>` or `</...>` markers — handles <w>, </w>, nested tags,
+     * malformed unclosed tags, and any other paired markup (e.g. <b>...</b>).
      */
-    fun stripTags(text: String): String = parseTextSegments(text).joinToString("") { segment ->
-        if (segment.isTagged) stripTags(segment.text) else segment.text
-    }
+    fun stripTags(text: String): String = text.replace(Regex("<[^>]*>"), "")
 
     private fun findNextSimpleTagStart(text: String, startIndex: Int): Int {
         var searchIndex = startIndex

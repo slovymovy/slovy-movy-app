@@ -303,13 +303,27 @@ class HtmlTagParserTest {
     }
 
     @Test
-    fun stripTags_simpleHighlightTag_stripsTag() {
-        assertEquals("take off", HtmlTagParser.stripTags("<take off>"))
+    fun stripTags_simpleHighlightTag_stripsTagAndContent() {
+        // <take off> is a tag marker — the whole thing is removed
+        assertEquals("", HtmlTagParser.stripTags("<take off>"))
     }
 
     @Test
-    fun stripTags_malformedUnclosedWTag_returnsOriginal() {
-        assertEquals("<w>unclosed", HtmlTagParser.stripTags("<w>unclosed"))
+    fun stripTags_standardPairedTag_stripsMarkupLeavesText() {
+        assertEquals("take off", HtmlTagParser.stripTags("<b>take off</b>"))
+    }
+
+    @Test
+    fun stripTags_malformedUnclosedWTag_stripsOpenTag() {
+        // unclosed <w> has no matching </w>, but the tag marker itself is still removed
+        assertEquals("unclosed", HtmlTagParser.stripTags("<w>unclosed"))
+    }
+
+    @Test
+    fun stripTags_withTrim_matchesRelatedWordKeyIgnoreCase() {
+        // Simulates EntryList normalization: tagged AI output should match a plain relatedWords key
+        val stripped = HtmlTagParser.stripTags("<w>Take Off</w>").trim()
+        assertTrue(stripped.equals("take off", ignoreCase = true))
     }
 
     @Test
