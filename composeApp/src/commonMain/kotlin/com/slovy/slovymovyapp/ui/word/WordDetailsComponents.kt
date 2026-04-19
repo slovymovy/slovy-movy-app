@@ -129,9 +129,7 @@ internal fun EntryList(
                     isClickable = isClickable,
                     isOnline = matchingKey?.let { relatedWords[it]?.online },
                     isFavorite = favoriteLemmas.any { it.equals(word, ignoreCase = true) },
-                    onClick = if (isClickable) {
-                        { onWordClick(matchingKey!!) }
-                    } else null
+                    onClick = matchingKey?.let { key -> { onWordClick(key) } }
                 )
             }
         }
