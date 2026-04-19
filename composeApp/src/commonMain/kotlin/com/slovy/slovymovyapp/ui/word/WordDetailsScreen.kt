@@ -24,6 +24,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
@@ -530,8 +532,12 @@ class WordDetailViewModel(
             dictionaryLanguage.let { lang ->
                 if (senseId in favoriteSenses) {
                     favoritesRepository.remove(senseId, lang)
+                    Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_REMOVE)
+
+
                 } else {
                     favoritesRepository.add(senseId, lang, lemma)
+                    Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_SAVE)
                     onFavoriteAdded?.invoke()
                 }
                 loadFavorites()
@@ -670,6 +676,7 @@ class WordDetailViewModel(
     }
 
     fun playWord() {
+        Analytics.logEvent(AnalyticsEvent.WORD_PLAY_CLICK)
         if (availableVoices.isEmpty()) return
 
         val hasHighQualityVoice = availableVoices.any { it.quality != VoiceQuality.MEDIUM }
@@ -702,6 +709,7 @@ class WordDetailViewModel(
     }
 
     fun stopPlayback() {
+        Analytics.logEvent(AnalyticsEvent.WORD_STOP_PLAY_CLICK)
         ttsManager.stop()
     }
 

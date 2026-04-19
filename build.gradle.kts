@@ -12,5 +12,6 @@ plugins {
     alias(libs.plugins.sqldelight) apply false
     alias(libs.plugins.serialization) apply false
     alias(libs.plugins.valkyrie) apply false
+    alias(libs.plugins.googleServices) apply false
 }
 

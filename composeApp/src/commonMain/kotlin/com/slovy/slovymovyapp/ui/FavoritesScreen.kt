@@ -19,6 +19,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
@@ -288,6 +290,7 @@ class FavoritesViewModel(
 
             // Remove from repository, then remove from displayed list for immediate feedback
             favoritesRepository.remove(senseId, favorite.language)
+            Analytics.logEvent(AnalyticsEvent.FAVOURITES_REMOVE)
             val content = state as? FavoritesUiState.Content ?: return@launch
             state = content.copy(senses = content.senses.filter { it.senseId != senseId })
 
@@ -308,6 +311,7 @@ class FavoritesViewModel(
             if (result == SnackbarResult.ActionPerformed) {
                 // Re-add with the original createdAt to preserve position
                 favoritesRepository.add(senseId, favorite.language, favorite.lemma, favorite.createdAt)
+                Analytics.logEvent(AnalyticsEvent.FAVOURITES_SAVE)
                 loadFavorites()
             }
         }
@@ -638,6 +642,7 @@ fun FavoritesScreenContent(
                                                 onNavigateToWordDetail(item.targetLang, item.lemma, item.senseId)
                                             },
                                             onWordClick = { word ->
+                                                Analytics.logEvent(AnalyticsEvent.FAVORITES_WORD_SHOW)
                                                 onNavigateToWordDetail(item.targetLang, word, null)
                                             },
                                             favoriteLemmas = state.favoriteLemmas

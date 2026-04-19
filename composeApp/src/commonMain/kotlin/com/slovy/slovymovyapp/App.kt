@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
@@ -231,6 +233,7 @@ fun App(
                                         value = Json.parseToJsonElement("true")
                                     )
                                 )
+                                Analytics.logEvent(AnalyticsEvent.WELCOME_SCREEN_CLICK)
                                 navController.navigate(AppDestination.SetupLanguages) {
                                     popUpTo<AppDestination.Welcome> { inclusive = true }
                                 }
@@ -381,6 +384,7 @@ fun App(
                         viewModel = viewModel,
                         description = "Downloading",
                         onLaterClick = {
+                            Analytics.logEvent(AnalyticsEvent.DOWNLOAD_LATER_CLICK)
                             navController.navigate(AppDestination.Search) {
                                 popUpTo<AppDestination.DownloadSetup> { inclusive = true }
                             }

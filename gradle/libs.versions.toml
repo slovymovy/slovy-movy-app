@@ -34,6 +34,9 @@ logback = "1.5.32"
 sqldelight = "2.3.2"
 valkyrie = "0.4.0"
 material3 = '1.11.0-alpha03'
+firebase-bom = "34.12.0"
+google-services = "4.4.4"
+crashlytics-plugin = "3.0.4"
 
 [libraries]
 androidx-emoji2 = { module = "androidx.emoji2:emoji2", version.ref = "emoji2" }
@@ -82,6 +85,9 @@ sqldelight-nativeDriver = { module = "app.cash.sqldelight:native-driver", versio
 sqldelight-sqliteDriver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
 commons-text = { module = "org.apache.commons:commons-text", version = "1.15.0" }
 androidx-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.9.2" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Compose Multiplatform direct library references (replaces deprecated compose.* aliases)
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
@@ -106,3 +112,5 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 valkyrie = { id = "io.github.composegears.valkyrie", version.ref = "valkyrie" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
+crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics-plugin" }
