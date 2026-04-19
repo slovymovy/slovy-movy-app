@@ -303,27 +303,29 @@ class HtmlTagParserTest {
     }
 
     @Test
-    fun stripTags_simpleHighlightTag_stripsTagAndContent() {
-        // <take off> is a tag marker — the whole thing is removed
-        assertEquals("", HtmlTagParser.stripTags("<take off>"))
-    }
-
-    @Test
-    fun stripTags_standardPairedTag_stripsMarkupLeavesText() {
-        assertEquals("take off", HtmlTagParser.stripTags("<b>take off</b>"))
+    fun stripTags_nonTagAngleBrackets_preserved() {
+        // <3> and <stdin> are not <w> tags and should not be touched
+        assertEquals("<3>", HtmlTagParser.stripTags("<3>"))
+        assertEquals("<stdin>", HtmlTagParser.stripTags("<stdin>"))
     }
 
     @Test
     fun stripTags_malformedUnclosedWTag_stripsOpenTag() {
-        // unclosed <w> has no matching </w>, but the tag marker itself is still removed
         assertEquals("unclosed", HtmlTagParser.stripTags("<w>unclosed"))
     }
 
     @Test
-    fun stripTags_withTrim_matchesRelatedWordKeyIgnoreCase() {
-        // Simulates EntryList normalization: tagged AI output should match a plain relatedWords key
-        val stripped = HtmlTagParser.stripTags("<w>Take Off</w>").trim()
-        assertTrue(stripped.equals("take off", ignoreCase = true))
+    fun entryList_taggedValue_resolvesToCanonicalKeyAndFavorite() {
+        // Simulates EntryList normalization for a tagged AI phrase:
+        // strip → trim → case-insensitive key lookup and favorite check must both succeed
+        val raw = "<w>Take Off</w>"
+        val word = HtmlTagParser.stripTags(raw).trim()
+        val relatedWords = mapOf("take off" to com.slovy.slovymovyapp.data.remote.RelatedWord("take off", 4.5f, false))
+        val favoriteLemmas = setOf("take off")
+
+        val matchingKey = relatedWords.keys.firstOrNull { it.equals(word, ignoreCase = true) }
+        assertEquals("take off", matchingKey)
+        assertTrue(favoriteLemmas.any { it.equals(word, ignoreCase = true) })
     }
 
     @Test
