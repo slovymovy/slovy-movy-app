@@ -224,6 +224,9 @@ internal fun colorsForNameType(nameType: NameType): Pair<Color, Color> {
     }
 }
 
+/** Warm dusty rose used for favorite heart indicators across the UI. */
+internal val FavoriteAccentColor = Color(0xFFC46060)
+
 /**
  * Colors for synonyms badges - warm sage tones indicating similarity/harmony
  */

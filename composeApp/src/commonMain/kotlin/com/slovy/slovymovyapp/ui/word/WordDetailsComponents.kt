@@ -244,7 +244,7 @@ internal fun Badge(
                 Text(
                     text = "\u2665",
                     style = style,
-                    color = Color(0xFFC46060)
+                    color = FavoriteAccentColor
                 )
             }
             Text(
