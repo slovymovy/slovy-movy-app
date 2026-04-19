@@ -268,6 +268,41 @@ class HtmlTagParserTest {
     }
 
     @Test
+    fun stripTags_noTags_returnsOriginal() {
+        assertEquals("take off", HtmlTagParser.stripTags("take off"))
+    }
+
+    @Test
+    fun stripTags_singleTag_returnsPlainText() {
+        assertEquals("take off", HtmlTagParser.stripTags("<w>take off</w>"))
+    }
+
+    @Test
+    fun stripTags_tagWithSurroundingText_stripsTagsOnly() {
+        assertEquals("to take off quickly", HtmlTagParser.stripTags("to <w>take off</w> quickly"))
+    }
+
+    @Test
+    fun stripTags_nestedTags_stripsAllMarkup() {
+        assertEquals("outer inner text", HtmlTagParser.stripTags("<w>outer <w>inner</w> text</w>"))
+    }
+
+    @Test
+    fun stripTags_tagWithWhitespace_preservesWhitespace() {
+        assertEquals(" take off ", HtmlTagParser.stripTags("<w> take off </w>"))
+    }
+
+    @Test
+    fun stripTags_emptyTag_returnsEmpty() {
+        assertEquals("", HtmlTagParser.stripTags("<w></w>"))
+    }
+
+    @Test
+    fun stripTags_emptyString_returnsEmpty() {
+        assertEquals("", HtmlTagParser.stripTags(""))
+    }
+
+    @Test
     fun parseTextSegments_preservesIndices() {
         val text = "Hello <w>world</w>!"
         val result = HtmlTagParser.parseTextSegments(text)
