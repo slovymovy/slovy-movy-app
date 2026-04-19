@@ -310,6 +310,13 @@ class HtmlTagParserTest {
     }
 
     @Test
+    fun stripTags_simpleHighlightTag_preserved() {
+        // Simple highlight tags like <take off> are outside the scope of stripTags;
+        // only <w>/<w> are stripped — this locks the intended behavior
+        assertEquals("to <take off> quickly", HtmlTagParser.stripTags("to <take off> quickly"))
+    }
+
+    @Test
     fun stripTags_malformedUnclosedWTag_stripsOpenTag() {
         assertEquals("unclosed", HtmlTagParser.stripTags("<w>unclosed"))
     }

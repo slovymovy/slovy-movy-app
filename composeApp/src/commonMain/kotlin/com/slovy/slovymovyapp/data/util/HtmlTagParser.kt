@@ -210,6 +210,11 @@ object HtmlTagParser {
     /**
      * Removes `<w>` and `</w>` tags from text, returning plain text.
      * Handles nested and malformed (unclosed) tags.
+     *
+     * Only `<w>`/`</w>` are stripped. Other angle-bracket tokens — including
+     * simple highlight tags like `<take off>` and non-markup text like `<3>` —
+     * are left unchanged. This is intentional: the function targets the specific
+     * AI mistake of wrapping words in `<w>` markup, not general HTML sanitization.
      */
     fun stripTags(text: String): String = text.replace(W_TAG_REGEX, "")
 
