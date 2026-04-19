@@ -303,6 +303,16 @@ class HtmlTagParserTest {
     }
 
     @Test
+    fun stripTags_simpleHighlightTag_stripsTag() {
+        assertEquals("take off", HtmlTagParser.stripTags("<take off>"))
+    }
+
+    @Test
+    fun stripTags_malformedUnclosedWTag_returnsOriginal() {
+        assertEquals("<w>unclosed", HtmlTagParser.stripTags("<w>unclosed"))
+    }
+
+    @Test
     fun parseTextSegments_preservesIndices() {
         val text = "Hello <w>world</w>!"
         val result = HtmlTagParser.parseTextSegments(text)
