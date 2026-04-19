@@ -117,7 +117,8 @@ internal fun EntryList(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            values.forEach { word ->
+            values.forEach { raw ->
+                val word = HtmlTagParser.stripTags(raw)
                 val matchingKey = relatedWords.keys.firstOrNull { it.equals(word, ignoreCase = true) }
                 val isClickable = matchingKey != null
                 Badge(

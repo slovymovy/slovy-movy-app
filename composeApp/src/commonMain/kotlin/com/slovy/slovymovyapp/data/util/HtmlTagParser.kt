@@ -207,6 +207,11 @@ object HtmlTagParser {
         return extractTaggedWords(text, splitMultipleWords).toSet()
     }
 
+    /**
+     * Removes all `<w>...</w>` and simple highlight tags from text, returning plain text.
+     */
+    fun stripTags(text: String): String = parseTextSegments(text).joinToString("") { it.text }
+
     private fun findNextSimpleTagStart(text: String, startIndex: Int): Int {
         var searchIndex = startIndex
         while (searchIndex < text.length) {
