@@ -936,7 +936,7 @@ fun WordDetailScreenContent(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
-                            .padding(horizontal = 12.dp, vertical = 20.dp),
+                            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 20.dp),
                         cardLoading = state.cardLoading,
                         cardError = state.cardError,
                         translationLoading = state.translationLoading,
@@ -1036,30 +1036,6 @@ private fun WordDetailContent(
         },
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        // Display word family if available
-        if (card.wordFamily.isNotEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                EntryList(
-                    label = "Word Family",
-                    values = card.wordFamily,
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    relatedWords = card.relatedWords,
-                    onWordClick = onWordClick,
-                    favoriteLemmas = favoriteLemmas
-                )
-            }
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-            )
-        }
-
         if (card.entries.isEmpty()) {
             Text(
                 text = "No entries available.",
@@ -1098,6 +1074,29 @@ private fun WordDetailContent(
                         onSensePositioned(senseId, relativeY)
                     },
                     onSenseFavoriteToggle = onSenseFavoriteToggle,
+                    relatedWords = card.relatedWords,
+                    onWordClick = onWordClick,
+                    favoriteLemmas = favoriteLemmas
+                )
+            }
+        }
+
+        if (card.wordFamily.isNotEmpty()) {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                EntryList(
+                    label = "Word Family",
+                    values = card.wordFamily,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     relatedWords = card.relatedWords,
                     onWordClick = onWordClick,
                     favoriteLemmas = favoriteLemmas
