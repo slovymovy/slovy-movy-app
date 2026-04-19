@@ -109,7 +109,8 @@ internal fun EntryList(
     onWordClick: (String) -> Unit = {},
     favoriteLemmas: Set<String> = emptySet()
 ) {
-    if (values.isEmpty()) return
+    val normalized = values.map { HtmlTagParser.stripTags(it).trim() }.filter { it.isNotBlank() }
+    if (normalized.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionLabel(label)
         FlowRow(
@@ -117,9 +118,7 @@ internal fun EntryList(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            values.forEach { raw ->
-                val word = HtmlTagParser.stripTags(raw).trim()
-                if (word.isBlank()) return@forEach
+            normalized.forEach { word ->
                 val matchingKey = relatedWords.keys.firstOrNull { it.equals(word, ignoreCase = true) }
                 val isClickable = matchingKey != null
                 Badge(
