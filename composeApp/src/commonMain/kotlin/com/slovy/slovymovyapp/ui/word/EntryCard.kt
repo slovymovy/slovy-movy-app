@@ -412,14 +412,15 @@ private fun GrammarSection(
     expanded: Boolean,
     onToggle: () -> Unit,
     onFormsViewSelect: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showToggleButton: Boolean = true
 ) {
     val selectedFormsView = formsViews.firstOrNull { it.view.viewId == selectedViewId } ?: formsViews.first()
     val selectedViewIdResolved = selectedFormsView.view.viewId
     val shape = RoundedCornerShape(14.dp)
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Surface(
+        if (showToggleButton) Surface(
             modifier = Modifier
                 .clip(shape)
                 .clickable(onClick = onToggle),
@@ -500,7 +501,7 @@ internal fun EntryCard(
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.extraLarge)
                 .clickable(onClick = onEntryToggle)
-                .padding(horizontal = 8.dp, vertical = 14.dp),
+                .padding(horizontal = 4.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -512,6 +513,37 @@ internal fun EntryCard(
             )
             if (!cardLoading && cardError == null) {
                 Spacer(modifier = Modifier.weight(1f))
+
+                if (entry.formsViews.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .border(
+                                0.5.dp,
+                                MaterialTheme.colorScheme.outlineVariant,
+                                RoundedCornerShape(50)
+                            )
+                            .clickable { onFormsToggle() }
+                            .padding(top = 4.dp, bottom = 4.dp, start = 9.dp, end = 10.dp)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.LibraryBooks,
+                                contentDescription = if (entryState.formsExpanded) "Hide forms" else "Show forms",
+                                modifier = Modifier.size(12.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "Forms",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
 
                 Icon(
                     imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
@@ -544,7 +576,8 @@ internal fun EntryCard(
                         expanded = entryState.formsExpanded,
                         onToggle = onFormsToggle,
                         onFormsViewSelect = onFormsViewSelect,
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        showToggleButton = false
                     )
                 }
 

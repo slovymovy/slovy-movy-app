@@ -195,22 +195,24 @@ internal fun SenseCard(
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 SectionLabel("Definition")
                                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    if (translationBasedHeader != null) {
-                                        HighlightedText(
-                                            text = sense.senseDefinition,
-                                            clickableWords = relatedWords.keys,
-                                            onWordClick = onWordClick,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                        )
-                                    }
+                                    // Target language definition first (English) — primary
                                     HighlightedText(
                                         text = sense.targetLangDefinitions.map { definition ->
                                             definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
                                         }.joinToString("\n"),
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        ),
+                                        clickableWords = relatedWords.keys,
+                                        onWordClick = onWordClick,
+                                        style = MaterialTheme.typography.bodyLarge,
                                     )
+                                    // Source language definition second (Dutch) — secondary
+                                    if (translationBasedHeader != null && sense.senseDefinition.isNotBlank()) {
+                                        HighlightedText(
+                                            text = sense.senseDefinition,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            ),
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -371,6 +373,7 @@ internal fun ExampleItem(
             ExampleText(
                 text = example.text,
                 style = MaterialTheme.typography.bodyLarge.copy(
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                     lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f
                 ),
             )
@@ -423,11 +426,11 @@ internal fun LevelAndFrequencyRow(
     ) {
         val (lc, lcc) = colorsForLevel(level)
         val (fc, fcc) = colorsForFrequency(frequency)
-        Badge(text = level.name, containerColor = lc, contentColor = lcc)
-        Badge(text = frequency.label, containerColor = fc, contentColor = fcc)
+        MetaBadge(text = level.name, containerColor = lc, contentColor = lcc)
+        MetaBadge(text = frequency.label, containerColor = fc, contentColor = fcc)
         if (nameType != null && nameType != NameType.NO) {
             val (nc, ncc) = colorsForNameType(nameType)
-            Badge(text = nameType.displayName, containerColor = nc, contentColor = ncc)
+            MetaBadge(text = nameType.displayName, containerColor = nc, contentColor = ncc)
         }
     }
 }
