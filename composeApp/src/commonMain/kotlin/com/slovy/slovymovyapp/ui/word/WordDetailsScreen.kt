@@ -1115,7 +1115,6 @@ private fun WordDetailContent(
                     cardError = cardError,
                     translationLoading = translationLoading,
                     translationError = translationError,
-                    onEntryToggle = { onEntryToggle(entryState.entryId) },
                     onFormsToggle = { onFormsToggle(entryState.entryId) },
                     onFormsViewSelect = { viewId -> onFormsViewSelect(entryState.entryId, viewId) },
                     onSenseToggle = { senseId -> onSenseToggle(entryState.entryId, senseId) },

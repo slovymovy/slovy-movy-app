@@ -211,6 +211,8 @@ internal fun SenseCard(
                                             style = MaterialTheme.typography.bodyMedium.copy(
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             ),
+                                            clickableWords = relatedWords.keys,
+                                            onWordClick = onWordClick,
                                         )
                                     }
                                 }
@@ -403,7 +405,7 @@ private fun ExampleText(
         color = style.color
     )
     val annotated = buildAnnotatedString {
-        appendTextWithW(this, text, highlight, highlight, emptySet()) { }
+        appendTextWithW(this, text, highlight, highlight, emptySet())
     }
 
     Text(

@@ -7,7 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -152,8 +152,10 @@ internal fun HighlightedText(
         fontWeight = FontWeight.Medium,
         textDecoration = TextDecoration.Underline
     )
-    val annotated = buildAnnotatedString {
-        appendTextWithW(this, text, highlight, clickableHighlight, clickableWords, onWordClick)
+    val annotated = remember(text, clickableWords, onWordClick) {
+        buildAnnotatedString {
+            appendTextWithW(this, text, highlight, clickableHighlight, clickableWords, onWordClick)
+        }
     }
 
     Text(
@@ -176,31 +178,22 @@ internal fun appendTextWithW(
 
     segments.forEach { segment ->
         if (segment.isTagged) {
-            // This is a word inside <w> tags
             val word = segment.text
             val isClickable = clickableWords.any { it.equals(word, ignoreCase = true) }
             val styleToUse = if (isClickable) clickableHighlight else highlight
 
             if (isClickable) {
-                // Use LinkAnnotation for clickable words
                 val link = LinkAnnotation.Clickable(
                     tag = "$CLICKABLE_WORD_TAG_PREFIX$word",
-                    linkInteractionListener = {
-                        onWordClick(word)
-                    }
+                    linkInteractionListener = { onWordClick(word) }
                 )
                 builder.withLink(link) {
-                    builder.withStyle(styleToUse) {
-                        builder.append(word)
-                    }
+                    builder.withStyle(styleToUse) { builder.append(word) }
                 }
             } else {
-                builder.withStyle(styleToUse) {
-                    builder.append(word)
-                }
+                builder.withStyle(styleToUse) { builder.append(word) }
             }
         } else {
-            // Regular text, no highlighting
             builder.append(segment.text)
         }
     }

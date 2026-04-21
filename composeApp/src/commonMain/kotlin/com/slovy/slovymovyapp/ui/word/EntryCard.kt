@@ -18,9 +18,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.forms.GridCell
 import com.slovy.slovymovyapp.data.remote.FormsSchemeView
 import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
@@ -482,7 +484,6 @@ internal fun EntryCard(
     cardError: String? = null,
     translationLoading: Boolean = false,
     translationError: String? = null,
-    onEntryToggle: () -> Unit,
     onFormsToggle: () -> Unit,
     onFormsViewSelect: (String) -> Unit,
     onSenseToggle: (String) -> Unit,
@@ -493,25 +494,23 @@ internal fun EntryCard(
     lemma: String,
     favoriteLemmas: Set<String> = emptySet()
 ) {
-    val expanded = entryState.expanded && !cardLoading && cardError == null
+    val showContent = !cardLoading && cardError == null
     Column(modifier = Modifier.fillMaxWidth()) {
-        // POS Header - kept with its own padding
+        // POS Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(MaterialTheme.shapes.extraLarge)
-                .clickable(onClick = onEntryToggle)
                 .padding(horizontal = 4.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             PartOfSpeechIndicator(
                 partOfSpeech = entry.pos.name,
-                meaningCount = if (!cardLoading && cardError == null) entry.senses.size else null,
+                meaningCount = if (showContent) entry.senses.size else null,
                 cardLoading = cardLoading,
                 cardError = cardError
             )
-            if (!cardLoading && cardError == null) {
+            if (showContent) {
                 Spacer(modifier = Modifier.weight(1f))
 
                 if (entry.formsViews.isNotEmpty()) {
@@ -519,7 +518,7 @@ internal fun EntryCard(
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
                             .border(
-                                0.5.dp,
+                                1.dp,
                                 MaterialTheme.colorScheme.outlineVariant,
                                 RoundedCornerShape(50)
                             )
@@ -527,7 +526,7 @@ internal fun EntryCard(
                             .padding(top = 4.dp, bottom = 4.dp, start = 9.dp, end = 10.dp)
                     ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
@@ -538,35 +537,25 @@ internal fun EntryCard(
                             )
                             Text(
                                 text = "Forms",
-                                style = MaterialTheme.typography.labelSmall,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 0.3.sp
+                                ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 }
-
-                Icon(
-                    imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
-                    contentDescription = if (expanded) {
-                        "Collapse ${entry.pos} entry"
-                    } else {
-                        "Expand ${entry.pos} entry"
-                    },
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
 
-        AnimatedVisibility(
-            visible = expanded,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
+        if (showContent) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(top = if (entry.formsViews.isEmpty()) 8.dp else 2.dp, bottom = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Grammar section - indented under POS header
                 if (entry.formsViews.isNotEmpty()) {
