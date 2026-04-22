@@ -29,7 +29,7 @@ import com.slovy.slovymovyapp.data.util.HtmlTagParser
 internal const val CLICKABLE_WORD_TAG_PREFIX = "CLICKABLE_WORD_"
 
 internal fun navigationArrow(isOnline: Boolean?): String =
-    if (isOnline == false) "›" else "›› "
+    if (isOnline == false) "›" else "››"
 
 @Composable
 internal fun SectionLabel(text: String) {

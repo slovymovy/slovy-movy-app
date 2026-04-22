@@ -80,7 +80,6 @@ val WordDetailUiState.isRefreshing: Boolean
 
 data class EntryUiState(
     val entryId: String,
-    val expanded: Boolean = true,
     val formsExpanded: Boolean = false,
     val selectedFormsViewId: String? = null,
     val senses: List<SenseUiState> = emptyList()
@@ -139,7 +138,6 @@ private fun LanguageCardPosEntry.toEntryUiState(
     numPos: Int
 ): EntryUiState = EntryUiState(
     entryId = "${pos.name.lowercase()}_$index",
-    expanded = true,
     formsExpanded = false,
     selectedFormsViewId = formsViews.firstOrNull()?.view?.viewId,
     senses = senses.map {
@@ -170,9 +168,6 @@ private fun LanguageCardResponseSense.toSenseUiState(
         showFavoriteToggle = true
     )
 }
-
-private fun WordDetailUiState.Content.toggleEntry(entryId: String): WordDetailUiState.Content =
-    updateEntry(entryId) { entry -> entry.copy(expanded = !entry.expanded) }
 
 private fun WordDetailUiState.Content.toggleForms(entryId: String): WordDetailUiState.Content =
     updateEntry(entryId) { entry -> entry.copy(formsExpanded = !entry.formsExpanded) }
@@ -205,7 +200,6 @@ private fun WordDetailUiState.Content.mergeStateFrom(
         merged = merged.updateEntry(previousEntry.entryId) { entry ->
             val availableViews = availableFormsViewsByEntryId[entry.entryId].orEmpty()
             var updatedEntry = entry.copy(
-                expanded = previousEntry.expanded,
                 formsExpanded = previousEntry.formsExpanded,
                 selectedFormsViewId = resolveSelectedFormsViewId(
                     previousEntry.selectedFormsViewId,
@@ -560,13 +554,6 @@ class WordDetailViewModel(
         hasScrolledToTarget = true
     }
 
-    fun toggleEntry(entryId: String) {
-        val current = state
-        if (current is WordDetailUiState.Content) {
-            state = current.toggleEntry(entryId)
-        }
-    }
-
     fun toggleForms(entryId: String) {
         val current = state
         if (current is WordDetailUiState.Content) {
@@ -848,7 +835,9 @@ fun WordDetailScreenContent(
     }
     val density = LocalDensity.current
     val heroThresholdPx = remember(density) { with(density) { 80.dp.toPx() } }
-    val showTitleInBar = state is WordDetailUiState.Empty || scrollState.value > heroThresholdPx
+    val showTitleInBar by remember(heroThresholdPx) {
+        derivedStateOf { state is WordDetailUiState.Empty || scrollState.value > heroThresholdPx }
+    }
     val titleAlpha by animateFloatAsState(
         targetValue = if (showTitleInBar) 1f else 0f,
         animationSpec = tween(durationMillis = 150),
