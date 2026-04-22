@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui.word
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -152,7 +153,7 @@ internal fun HighlightedText(
         fontWeight = FontWeight.Medium,
         textDecoration = TextDecoration.Underline
     )
-    val annotated = remember(text, clickableWords, onWordClick) {
+    val annotated = remember(text, clickableWords, onWordClick, highlight, clickableHighlight) {
         buildAnnotatedString {
             appendTextWithW(this, text, highlight, clickableHighlight, clickableWords, onWordClick)
         }
@@ -218,16 +219,17 @@ internal fun Badge(
         color = containerColor,
         contentColor = contentColor,
         shape = shape,
+        border = if (isClickable) BorderStroke(0.5.dp, contentColor.copy(alpha = 0.18f)) else null,
         modifier = if (onClick != null) {
             Modifier.clickable(onClick = onClick)
         } else Modifier
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(
-                start = if (isFavorite) 9.dp else 11.dp,
-                end = 10.dp,
+                start = if (isClickable && isFavorite) 9.dp else if (isClickable) 11.dp else 12.dp,
+                end = if (isClickable) 8.dp else 12.dp,
                 top = 5.dp,
                 bottom = 5.dp
             )

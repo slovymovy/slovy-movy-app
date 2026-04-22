@@ -510,7 +510,8 @@ private fun SearchResultCard(
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(20.dp)
                     )
-                } else if (item.onlineOnly) {
+                }
+                if (item.onlineOnly) {
                     Icon(
                         imageVector = DownloadVector,
                         contentDescription = "Not downloaded",

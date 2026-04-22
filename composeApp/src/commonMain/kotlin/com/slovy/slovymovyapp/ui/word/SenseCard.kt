@@ -375,7 +375,7 @@ internal fun ExampleItem(
             ExampleText(
                 text = example.text,
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Normal,
                     lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f
                 ),
             )

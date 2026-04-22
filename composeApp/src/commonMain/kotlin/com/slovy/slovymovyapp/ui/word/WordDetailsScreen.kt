@@ -792,7 +792,6 @@ fun WordDetailScreen(
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
         onFeedbackEmailChange = { viewModel.updateFeedbackEmail(it) },
         onSubmitFeedback = { viewModel.submitFeedback() },
-        onEntryToggle = { entryId -> viewModel.toggleEntry(entryId) },
         onFormsToggle = { entryId -> viewModel.toggleForms(entryId) },
         onFormsViewSelect = { entryId, viewId -> viewModel.selectFormsView(entryId, viewId) },
         onSenseToggle = { entryId, senseId -> viewModel.toggleSense(entryId, senseId) },
@@ -834,7 +833,6 @@ fun WordDetailScreenContent(
     onFeedbackCommentChange: (String) -> Unit = {},
     onFeedbackEmailChange: (String) -> Unit = {},
     onSubmitFeedback: () -> Unit = {},
-    onEntryToggle: (String) -> Unit = {},
     onFormsToggle: (String) -> Unit = {},
     onFormsViewSelect: (String, String) -> Unit = { _, _ -> },
     onSenseToggle: (String, String) -> Unit = { _, _ -> },
@@ -862,18 +860,42 @@ fun WordDetailScreenContent(
             Column {
                 CenterAlignedTopAppBar(
                     title = {
-                        if (showTitleInBar) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.graphicsLayer { alpha = titleAlpha }
+                        ) {
                             Text(
                                 text = titleText,
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Medium,
                                     letterSpacing = (-0.3).sp
                                 ),
-                                textAlign = TextAlign.Center,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.graphicsLayer { alpha = titleAlpha }
+                                overflow = TextOverflow.Ellipsis
                             )
+                            if (state is WordDetailUiState.Content) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(
+                                    onClick = { if (isPlaying) onStopWord() else onPlayWord() },
+                                    enabled = canPlay && !isPreparing,
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    when {
+                                        isPreparing -> CircularProgressIndicator(
+                                            modifier = Modifier.size(20.dp),
+                                            strokeWidth = 2.dp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        else -> Icon(
+                                            imageVector = if (isPlaying) Icons.Filled.StopCircle else SpeakerVector,
+                                            contentDescription = if (isPlaying) "Stop" else "Play word",
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                .copy(alpha = if (canPlay) 1f else 0.38f)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     },
                     navigationIcon = {
@@ -881,9 +903,9 @@ fun WordDetailScreenContent(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back"
-                        )
-                    }
-                },
+                            )
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background
                     )
@@ -929,7 +951,6 @@ fun WordDetailScreenContent(
                         canPlay = canPlay,
                         onPlayWord = onPlayWord,
                         onStopWord = onStopWord,
-                        onEntryToggle = onEntryToggle,
                         onFormsToggle = onFormsToggle,
                         onFormsViewSelect = onFormsViewSelect,
                         onSenseToggle = onSenseToggle,
@@ -1010,7 +1031,6 @@ private fun WordDetailContent(
     canPlay: Boolean = false,
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
-    onEntryToggle: (String) -> Unit,
     onFormsToggle: (String) -> Unit,
     onFormsViewSelect: (String, String) -> Unit,
     onSenseToggle: (String, String) -> Unit,
