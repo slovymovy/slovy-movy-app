@@ -256,6 +256,7 @@ internal fun colorsForAntonyms(): Pair<Color, Color> {
     }
 }
 
+// Stroke color is black so Icon() tint overrides it correctly. Do not render these via Image().
 private val strokeRound = SolidColor(Color.Black)
 
 internal val ChapterDiamondVector: ImageVector = ImageVector.Builder(

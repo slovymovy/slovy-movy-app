@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material3.*
+import androidx.compose.ui.semantics.Role
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalDensity
@@ -516,13 +517,14 @@ internal fun EntryCard(
                 if (entry.formsViews.isNotEmpty()) {
                     Box(
                         modifier = Modifier
+                            .minimumInteractiveComponentSize()
                             .clip(RoundedCornerShape(50))
                             .border(
                                 1.dp,
                                 MaterialTheme.colorScheme.outlineVariant,
                                 RoundedCornerShape(50)
                             )
-                            .clickable { onFormsToggle() }
+                            .clickable(role = Role.Button) { onFormsToggle() }
                             .padding(top = 4.dp, bottom = 4.dp, start = 9.dp, end = 10.dp)
                     ) {
                         Row(

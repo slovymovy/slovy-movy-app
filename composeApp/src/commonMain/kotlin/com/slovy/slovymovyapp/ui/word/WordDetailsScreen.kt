@@ -18,7 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
@@ -834,9 +836,10 @@ fun WordDetailScreenContent(
         is WordDetailUiState.Empty -> state.lemma ?: fallbackTitle
     }
     val density = LocalDensity.current
-    val heroThresholdPx = remember(density) { with(density) { 80.dp.toPx() } }
-    val showTitleInBar by remember(heroThresholdPx) {
-        derivedStateOf { state is WordDetailUiState.Empty || scrollState.value > heroThresholdPx }
+    val heroThresholdPx = remember(density) { mutableFloatStateOf(with(density) { 80.dp.toPx() }) }
+    val isEmptyState = state is WordDetailUiState.Empty
+    val showTitleInBar by remember(isEmptyState) {
+        derivedStateOf { isEmptyState || scrollState.value > heroThresholdPx.value }
     }
     val titleAlpha by animateFloatAsState(
         targetValue = if (showTitleInBar) 1f else 0f,
@@ -948,7 +951,8 @@ fun WordDetailScreenContent(
                         onSenseFavoriteToggle = onSenseFavoriteToggle,
                         onWordClick = onWordClick,
                         favoriteLemmas = favoriteLemmas,
-                        onOpenFeedback = onOpenFeedback
+                        onOpenFeedback = onOpenFeedback,
+                        onHeroMeasured = { heroThresholdPx.value = it }
                     )
                 }
 
@@ -1028,7 +1032,8 @@ private fun WordDetailContent(
     onSenseFavoriteToggle: (String) -> Unit = {},
     onWordClick: (String) -> Unit = {},
     favoriteLemmas: Set<String> = emptySet(),
-    onOpenFeedback: () -> Unit = {}
+    onOpenFeedback: () -> Unit = {},
+    onHeroMeasured: (Float) -> Unit = {}
 ) {
     var scrollContainerY by remember { mutableStateOf(0f) }
 
@@ -1037,7 +1042,12 @@ private fun WordDetailContent(
             scrollContainerY = coordinates.positionInWindow().y
         },
     ) {
-        // Hero lemma
+        // Hero section — measured so the top bar threshold tracks actual layout height
+        Column(
+            modifier = Modifier.fillMaxWidth().onSizeChanged { size: IntSize ->
+                if (size.height > 0) onHeroMeasured(size.height.toFloat())
+            }
+        ) {
         var lemmaFontSize by remember(card.lemma) { mutableStateOf(42.sp) }
         Row(
             modifier = Modifier
@@ -1088,6 +1098,7 @@ private fun WordDetailContent(
         }
 
         ChapterRule()
+        } // end hero measurement Column
 
         Column(
             modifier = Modifier
