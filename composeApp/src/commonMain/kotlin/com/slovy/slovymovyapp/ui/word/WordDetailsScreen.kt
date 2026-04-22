@@ -838,7 +838,7 @@ fun WordDetailScreenContent(
     val density = LocalDensity.current
     val heroThresholdPx = remember(density) { mutableFloatStateOf(with(density) { 80.dp.toPx() }) }
     val isEmptyState = state is WordDetailUiState.Empty
-    val showTitleInBar by remember(isEmptyState) {
+    val showTitleInBar by remember(isEmptyState, scrollState) {
         derivedStateOf { isEmptyState || scrollState.value > heroThresholdPx.value }
     }
     val titleAlpha by animateFloatAsState(
@@ -1048,7 +1048,10 @@ private fun WordDetailContent(
                 if (size.height > 0) onHeroMeasured(size.height.toFloat())
             }
         ) {
-        var lemmaFontSize by remember(card.lemma) { mutableStateOf(42.sp) }
+        val fontScale = LocalDensity.current.fontScale
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val maxWidth = constraints.maxWidth
+        var lemmaFontSize by remember(card.lemma, maxWidth, fontScale) { mutableStateOf(42.sp) }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1066,7 +1069,7 @@ private fun WordDetailContent(
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
-                overflow = TextOverflow.Clip,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
                 onTextLayout = { result ->
                     if (result.hasVisualOverflow && lemmaFontSize > 22.sp) {
@@ -1096,6 +1099,7 @@ private fun WordDetailContent(
                 }
             }
         }
+        } // end BoxWithConstraints
 
         ChapterRule()
         } // end hero measurement Column
