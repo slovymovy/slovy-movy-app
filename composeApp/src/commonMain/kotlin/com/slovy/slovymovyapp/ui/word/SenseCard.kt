@@ -195,7 +195,6 @@ internal fun SenseCard(
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 SectionLabel("Definition")
                                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    // Target language definition first (English) — primary
                                     HighlightedText(
                                         text = sense.targetLangDefinitions.map { definition ->
                                             definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
@@ -204,7 +203,6 @@ internal fun SenseCard(
                                         onWordClick = onWordClick,
                                         style = MaterialTheme.typography.bodyLarge,
                                     )
-                                    // Source language definition second (Dutch) — secondary
                                     if (translationBasedHeader != null && sense.senseDefinition.isNotBlank()) {
                                         HighlightedText(
                                             text = sense.senseDefinition,
