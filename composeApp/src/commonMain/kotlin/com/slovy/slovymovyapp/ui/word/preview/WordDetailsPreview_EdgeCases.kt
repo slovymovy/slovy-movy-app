@@ -28,7 +28,6 @@ private fun WordDetailScreenPreviewNoTranslationsAllExpanded(
         val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
         val expanded = base.entries.map { entryState ->
             entryState.copy(
-                expanded = true,
                 formsExpanded = true,
                 senses = entryState.senses.map { senseState ->
                     senseState.copy(
@@ -54,7 +53,6 @@ private fun WordDetailScreenPreviewNoTranslationsCollapsed(
         val base = sampleNoTranslationCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
         val collapsedEntries = base.entries.map { entryState ->
             entryState.copy(
-                expanded = false,
                 formsExpanded = false,
                 senses = entryState.senses.map { senseState ->
                     senseState.copy(
@@ -91,7 +89,6 @@ private fun WordDetailScreenPreviewMultilingualCollapsed(
         val base = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
         val collapsedEntries = base.entries.map { entryState ->
             entryState.copy(
-                expanded = false,
                 formsExpanded = false,
                 senses = entryState.senses.map { senseState ->
                     senseState.copy(

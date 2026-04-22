@@ -26,7 +26,6 @@ private fun WordDetailScreenPreviewCollapsed(
         val base = sampleTestingCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
         val collapsedEntries = base.entries.map { entryState ->
             entryState.copy(
-                expanded = false,
                 formsExpanded = false,
                 senses = entryState.senses.map { senseState ->
                     senseState.copy(
