@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
@@ -37,6 +36,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.slovy.slovymovyapp.ui.word.DownloadVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -481,20 +481,19 @@ private fun SearchResultCard(
                 .padding(horizontal = 16.dp, vertical = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Word display
             Text(
                 text = item.display,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                ),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
 
-            // Icons section - aligned to the right
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Show language badge if searching multiple dictionaries
                 if (showLanguageIndicator) {
                     Badge(
                         text = item.language.selfName,
@@ -504,7 +503,6 @@ private fun SearchResultCard(
                     )
                 }
 
-                // Favorite icon
                 if (item.isFavorite) {
                     Icon(
                         imageVector = Icons.Filled.Favorite,
@@ -513,12 +511,10 @@ private fun SearchResultCard(
                         modifier = Modifier.size(20.dp)
                     )
                 }
-
-                // Online-only / download icon
                 if (item.onlineOnly) {
                     Icon(
-                        imageVector = Icons.Filled.DownloadForOffline,
-                        contentDescription = "Online",
+                        imageVector = DownloadVector,
+                        contentDescription = "Not downloaded",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )

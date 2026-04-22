@@ -6,22 +6,28 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
@@ -76,7 +82,6 @@ val WordDetailUiState.isRefreshing: Boolean
 
 data class EntryUiState(
     val entryId: String,
-    val expanded: Boolean = true,
     val formsExpanded: Boolean = false,
     val selectedFormsViewId: String? = null,
     val senses: List<SenseUiState> = emptyList()
@@ -135,7 +140,6 @@ private fun LanguageCardPosEntry.toEntryUiState(
     numPos: Int
 ): EntryUiState = EntryUiState(
     entryId = "${pos.name.lowercase()}_$index",
-    expanded = true,
     formsExpanded = false,
     selectedFormsViewId = formsViews.firstOrNull()?.view?.viewId,
     senses = senses.map {
@@ -166,9 +170,6 @@ private fun LanguageCardResponseSense.toSenseUiState(
         showFavoriteToggle = true
     )
 }
-
-private fun WordDetailUiState.Content.toggleEntry(entryId: String): WordDetailUiState.Content =
-    updateEntry(entryId) { entry -> entry.copy(expanded = !entry.expanded) }
 
 private fun WordDetailUiState.Content.toggleForms(entryId: String): WordDetailUiState.Content =
     updateEntry(entryId) { entry -> entry.copy(formsExpanded = !entry.formsExpanded) }
@@ -201,7 +202,6 @@ private fun WordDetailUiState.Content.mergeStateFrom(
         merged = merged.updateEntry(previousEntry.entryId) { entry ->
             val availableViews = availableFormsViewsByEntryId[entry.entryId].orEmpty()
             var updatedEntry = entry.copy(
-                expanded = previousEntry.expanded,
                 formsExpanded = previousEntry.formsExpanded,
                 selectedFormsViewId = resolveSelectedFormsViewId(
                     previousEntry.selectedFormsViewId,
@@ -556,13 +556,6 @@ class WordDetailViewModel(
         hasScrolledToTarget = true
     }
 
-    fun toggleEntry(entryId: String) {
-        val current = state
-        if (current is WordDetailUiState.Content) {
-            state = current.toggleEntry(entryId)
-        }
-    }
-
     fun toggleForms(entryId: String) {
         val current = state
         if (current is WordDetailUiState.Content) {
@@ -788,7 +781,6 @@ fun WordDetailScreen(
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
         onFeedbackEmailChange = { viewModel.updateFeedbackEmail(it) },
         onSubmitFeedback = { viewModel.submitFeedback() },
-        onEntryToggle = { entryId -> viewModel.toggleEntry(entryId) },
         onFormsToggle = { entryId -> viewModel.toggleForms(entryId) },
         onFormsViewSelect = { entryId, viewId -> viewModel.selectFormsView(entryId, viewId) },
         onSenseToggle = { entryId, senseId -> viewModel.toggleSense(entryId, senseId) },
@@ -830,7 +822,6 @@ fun WordDetailScreenContent(
     onFeedbackCommentChange: (String) -> Unit = {},
     onFeedbackEmailChange: (String) -> Unit = {},
     onSubmitFeedback: () -> Unit = {},
-    onEntryToggle: (String) -> Unit = {},
     onFormsToggle: (String) -> Unit = {},
     onFormsViewSelect: (String, String) -> Unit = { _, _ -> },
     onSenseToggle: (String, String) -> Unit = { _, _ -> },
@@ -844,71 +835,77 @@ fun WordDetailScreenContent(
         is WordDetailUiState.Content -> state.card.lemma
         is WordDetailUiState.Empty -> state.lemma ?: fallbackTitle
     }
+    val density = LocalDensity.current
+    val heroThresholdPx = remember(density) { mutableFloatStateOf(with(density) { 80.dp.toPx() }) }
+    val isEmptyState = state is WordDetailUiState.Empty
+    val showTitleInBar by remember(isEmptyState, scrollState) {
+        derivedStateOf { isEmptyState || scrollState.value > heroThresholdPx.value }
+    }
+    val titleAlpha by animateFloatAsState(
+        targetValue = if (showTitleInBar) 1f else 0f,
+        animationSpec = tween(durationMillis = 150),
+        label = "titleAlpha"
+    )
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        when (state) {
-                            is WordDetailUiState.Content ->
-                                Text(
-                                    text = state.card.lemma,
-                                    style = MaterialTheme.typography.headlineSmall.copy(
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-
-                            is WordDetailUiState.Empty -> HighlightedText(
+            Column {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
                                 text = titleText,
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    fontWeight = FontWeight.SemiBold
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Medium,
+                                    letterSpacing = (-0.3).sp
                                 ),
-                                textAlign = TextAlign.Center
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.graphicsLayer { alpha = titleAlpha }
                             )
-                        }
-
-                        if (state is WordDetailUiState.Content) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            IconButton(
-                                onClick = { if (isPlaying) onStopWord() else onPlayWord() },
-                                enabled = canPlay && !isPreparing,
-                                modifier = Modifier.size(36.dp)
-                            ) {
-                                when {
-                                    isPreparing -> CircularProgressIndicator(
-                                        modifier = Modifier.size(24.dp),
-                                        strokeWidth = 2.dp
-                                    )
-
-                                    else -> Icon(
-                                        imageVector = if (isPlaying) Icons.Filled.StopCircle else Icons.AutoMirrored.Filled.VolumeUp,
-                                        contentDescription = if (isPlaying) "Stop" else "Play word",
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
+                            if (showTitleInBar && state is WordDetailUiState.Content) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(
+                                    onClick = { if (isPlaying) onStopWord() else onPlayWord() },
+                                    enabled = canPlay && !isPreparing,
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    when {
+                                        isPreparing -> CircularProgressIndicator(
+                                            modifier = Modifier.size(20.dp),
+                                            strokeWidth = 2.dp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        else -> Icon(
+                                            imageVector = if (isPlaying) Icons.Filled.StopCircle else SpeakerVector,
+                                            contentDescription = if (isPlaying) "Stop" else "Play word",
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                .copy(alpha = if (canPlay) 1f else 0.38f)
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
                 )
-            )
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = titleAlpha * 0.6f)
+                )
+            }
         },
         bottomBar = {
             AppNavigationBar(
@@ -936,12 +933,16 @@ fun WordDetailScreenContent(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
-                            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 20.dp),
+                            .padding(bottom = 20.dp),
                         cardLoading = state.cardLoading,
                         cardError = state.cardError,
                         translationLoading = state.translationLoading,
                         translationError = state.translationError,
-                        onEntryToggle = onEntryToggle,
+                        isPlaying = isPlaying,
+                        isPreparing = isPreparing,
+                        canPlay = canPlay,
+                        onPlayWord = onPlayWord,
+                        onStopWord = onStopWord,
                         onFormsToggle = onFormsToggle,
                         onFormsViewSelect = onFormsViewSelect,
                         onSenseToggle = onSenseToggle,
@@ -950,7 +951,8 @@ fun WordDetailScreenContent(
                         onSenseFavoriteToggle = onSenseFavoriteToggle,
                         onWordClick = onWordClick,
                         favoriteLemmas = favoriteLemmas,
-                        onOpenFeedback = onOpenFeedback
+                        onOpenFeedback = onOpenFeedback,
+                        onHeroMeasured = { heroThresholdPx.value = it }
                     )
                 }
 
@@ -1017,7 +1019,11 @@ private fun WordDetailContent(
     cardError: String? = null,
     translationLoading: Boolean = false,
     translationError: String? = null,
-    onEntryToggle: (String) -> Unit,
+    isPlaying: Boolean = false,
+    isPreparing: Boolean = false,
+    canPlay: Boolean = false,
+    onPlayWord: () -> Unit = {},
+    onStopWord: () -> Unit = {},
     onFormsToggle: (String) -> Unit,
     onFormsViewSelect: (String, String) -> Unit,
     onSenseToggle: (String, String) -> Unit,
@@ -1026,7 +1032,8 @@ private fun WordDetailContent(
     onSenseFavoriteToggle: (String) -> Unit = {},
     onWordClick: (String) -> Unit = {},
     favoriteLemmas: Set<String> = emptySet(),
-    onOpenFeedback: () -> Unit = {}
+    onOpenFeedback: () -> Unit = {},
+    onHeroMeasured: (Float) -> Unit = {}
 ) {
     var scrollContainerY by remember { mutableStateOf(0f) }
 
@@ -1034,8 +1041,76 @@ private fun WordDetailContent(
         modifier = modifier.onGloballyPositioned { coordinates ->
             scrollContainerY = coordinates.positionInWindow().y
         },
-        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        // Hero section — measured so the top bar threshold tracks actual layout height
+        Column(
+            modifier = Modifier.fillMaxWidth().onSizeChanged { size: IntSize ->
+                if (size.height > 0) onHeroMeasured(size.height.toFloat())
+            }
+        ) {
+        val fontScale = LocalDensity.current.fontScale
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val maxWidth = constraints.maxWidth
+        var lemmaFontSize by remember(card.lemma, maxWidth, fontScale) { mutableStateOf(42.sp) }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 16.dp),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = card.lemma,
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontSize = lemmaFontSize,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = (lemmaFontSize.value * 1.05f).sp,
+                    letterSpacing = (-0.3).sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+                onTextLayout = { result ->
+                    if (result.hasVisualOverflow && lemmaFontSize > 22.sp) {
+                        lemmaFontSize = (lemmaFontSize.value * 0.9f).sp
+                    }
+                }
+            )
+            IconButton(
+                onClick = { if (isPlaying) onStopWord() else onPlayWord() },
+                enabled = canPlay && !isPreparing,
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .size(36.dp)
+            ) {
+                when {
+                    isPreparing -> CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    else -> Icon(
+                        imageVector = if (isPlaying) Icons.Filled.StopCircle else SpeakerVector,
+                        contentDescription = if (isPlaying) "Stop" else "Play word",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            .copy(alpha = if (canPlay) 1f else 0.38f)
+                    )
+                }
+            }
+        }
+        } // end BoxWithConstraints
+
+        ChapterRule()
+        } // end hero measurement Column
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 0.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+
         if (card.entries.isEmpty()) {
             Text(
                 text = "No entries available.",
@@ -1064,7 +1139,6 @@ private fun WordDetailContent(
                     cardError = cardError,
                     translationLoading = translationLoading,
                     translationError = translationError,
-                    onEntryToggle = { onEntryToggle(entryState.entryId) },
                     onFormsToggle = { onFormsToggle(entryState.entryId) },
                     onFormsViewSelect = { viewId -> onFormsViewSelect(entryState.entryId, viewId) },
                     onSenseToggle = { senseId -> onSenseToggle(entryState.entryId, senseId) },
@@ -1122,5 +1196,32 @@ private fun WordDetailContent(
                 style = MaterialTheme.typography.bodyMedium
             )
         }
+        } // end inner content Column
+    }
+}
+
+@Composable
+private fun ChapterRule() {
+    val color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 40.dp, end = 40.dp, top = 2.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = color.copy(alpha = 0.45f * 0.35f)
+        )
+        Icon(
+            imageVector = ChapterDiamondVector,
+            contentDescription = null,
+            modifier = Modifier.padding(horizontal = 8.dp),
+            tint = color
+        )
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = color.copy(alpha = 0.45f * 0.35f)
+        )
     }
 }

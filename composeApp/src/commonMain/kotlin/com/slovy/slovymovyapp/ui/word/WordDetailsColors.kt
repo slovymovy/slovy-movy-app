@@ -4,7 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.addPathNodes as parsePathNodes
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.LearnerLevel
@@ -252,6 +255,68 @@ internal fun colorsForAntonyms(): Pair<Color, Color> {
         Color(0xFFEBDDD8) to Color(0xFF7A4A50) // Light dusty rose / Mauve
     }
 }
+
+// Stroke color is black so Icon() tint overrides it correctly. Do not render these via Image().
+private val strokeRound = SolidColor(Color.Black)
+
+internal val ChapterDiamondVector: ImageVector = ImageVector.Builder(
+    name = "ChapterDiamond",
+    defaultWidth = 14.dp,
+    defaultHeight = 14.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f
+).apply {
+    addPath(
+        pathData = parsePathNodes("M12 4 L14 10 L20 12 L14 14 L12 20 L10 14 L4 12 L10 10 Z"),
+        fill = null,
+        stroke = strokeRound,
+        strokeLineWidth = 1.2f,
+        strokeLineCap = StrokeCap.Round,
+        strokeLineJoin = StrokeJoin.Round
+    )
+}.build()
+
+internal val SpeakerVector: ImageVector = ImageVector.Builder(
+    name = "Speaker",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f
+).apply {
+    addPath(
+        pathData = parsePathNodes("M11 5L6 9H2v6h4l5 4V5z"),
+        fill = null,
+        stroke = strokeRound,
+        strokeLineWidth = 2f,
+        strokeLineCap = StrokeCap.Round,
+        strokeLineJoin = StrokeJoin.Round
+    )
+    addPath(
+        pathData = parsePathNodes("M19.1 5a9 9 0 0 1 0 14M15.5 8.5a5 5 0 0 1 0 7"),
+        fill = null,
+        stroke = strokeRound,
+        strokeLineWidth = 2f,
+        strokeLineCap = StrokeCap.Round,
+        strokeLineJoin = StrokeJoin.Round
+    )
+}.build()
+
+internal val DownloadVector: ImageVector = ImageVector.Builder(
+    name = "Download",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f
+).apply {
+    addPath(
+        pathData = parsePathNodes("M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"),
+        fill = null,
+        stroke = strokeRound,
+        strokeLineWidth = 2f,
+        strokeLineCap = StrokeCap.Round,
+        strokeLineJoin = StrokeJoin.Round
+    )
+}.build()
 
 internal val ExpandMoreVector: ImageVector = ImageVector.Builder(
     name = "ExpandableChevronDown",

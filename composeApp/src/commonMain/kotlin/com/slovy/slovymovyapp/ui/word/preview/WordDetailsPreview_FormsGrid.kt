@@ -128,7 +128,6 @@ private fun formsFocusedState(
         entries = base.entries.mapIndexed { index, entryState ->
             if (index == 0) {
                 entryState.copy(
-                    expanded = true,
                     formsExpanded = formsExpanded,
                     selectedFormsViewId = selectedViewId ?: entryState.selectedFormsViewId,
                     senses = entryState.senses.map { senseState ->
@@ -140,7 +139,7 @@ private fun formsFocusedState(
                     }
                 )
             } else {
-                entryState.copy(expanded = false, formsExpanded = false)
+                entryState.copy(formsExpanded = false)
             }
         }
     )
