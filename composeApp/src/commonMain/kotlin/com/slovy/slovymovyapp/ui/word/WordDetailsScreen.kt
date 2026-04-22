@@ -862,8 +862,7 @@ fun WordDetailScreenContent(
                     title = {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.graphicsLayer { alpha = titleAlpha }
+                            horizontalArrangement = Arrangement.Center
                         ) {
                             Text(
                                 text = titleText,
@@ -872,9 +871,10 @@ fun WordDetailScreenContent(
                                     letterSpacing = (-0.3).sp
                                 ),
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.graphicsLayer { alpha = titleAlpha }
                             )
-                            if (state is WordDetailUiState.Content) {
+                            if (showTitleInBar && state is WordDetailUiState.Content) {
                                 Spacer(modifier = Modifier.width(8.dp))
                                 IconButton(
                                     onClick = { if (isPlaying) onStopWord() else onPlayWord() },
