@@ -1,11 +1,10 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -24,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
@@ -114,8 +115,12 @@ fun LanguageSetupScreen(
         onNext = {
             val learning = viewModel.state.learningLanguage
             val native = viewModel.state.nativeLanguages.sortedBy { it.selfName }
+            Analytics.logEvent(AnalyticsEvent.LANG_TO_TRANSLATE_SELECTED, mapOf("lang" to native.joinToString(",") { it.code }))
             if (learning != null) {
                 onNext(learning, native)
+                Analytics.logEvent(AnalyticsEvent.LANG_TO_LEARN_SELECTED, mapOf("lang" to learning.code))
+            } else {
+                Analytics.logEvent(AnalyticsEvent.LANG_TO_LEARN_NOT_SELECTED, mapOf("lang" to "not selected"))
             }
         },
         onRetry = viewModel::retry

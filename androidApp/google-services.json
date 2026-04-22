@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "173493944112",
+    "project_id": "gen-lang-client-0152295640",
+    "storage_bucket": "gen-lang-client-0152295640.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:173493944112:android:dc51117c505857771212f5",
+        "android_client_info": {
+          "package_name": "com.slovy.slovymovyapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDv-hMPuTxUNxLrikvouaBZ39eUkRLw-p4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:173493944112:android:dc51117c505857771212f5",
+        "android_client_info": {
+          "package_name": "com.slovy.slovymovyapp.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDv-hMPuTxUNxLrikvouaBZ39eUkRLw-p4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -22,6 +22,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.icons.DownloadScreenTransparent
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
@@ -99,6 +101,7 @@ class DownloadViewModel(
     }
 
     private fun beginDownload(): Flow<DownloadEntry?> {
+        Analytics.logEvent(AnalyticsEvent.DOWNLOAD_DICTIONARY_CLICK)
         return downloadCoordinator.startDownload(downloadKey, download)
     }
 

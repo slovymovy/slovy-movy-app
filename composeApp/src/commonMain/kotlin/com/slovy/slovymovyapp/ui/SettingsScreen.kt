@@ -17,6 +17,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.AppBuildConfig
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.remote.*
@@ -540,6 +542,7 @@ class SettingsViewModel(
     }
 
     fun testVoice(voice: Text2SpeechVoice) {
+        Analytics.logEvent(AnalyticsEvent.SETTINGS_TEST_VOICE_CLICK, mapOf("lang" to voice.language.code))
         if (state.ttsStatus == TTSStatus.SPEAKING && state.testingVoice != voice) {
             ttsManager.stop()
         }
@@ -558,6 +561,7 @@ class SettingsViewModel(
     }
 
     fun openSystemSettings() {
+        Analytics.logEvent(AnalyticsEvent.SETTINGS_OPEN_SYSTEM_SETTINGS_CLICK)
         ttsManager.openSettings()
     }
 
@@ -600,8 +604,10 @@ class SettingsViewModel(
                 val langState = state.languages[language] ?: return@launch
                 val currentEnabled = langState.enabledVoiceIds
                 val newEnabled = if (voiceId in currentEnabled) {
+                    Analytics.logEvent(AnalyticsEvent.SETTINGS_VOICE_DISABLE_CLICK, mapOf("lang" to language.language.code))
                     currentEnabled - voiceId
                 } else {
+                    Analytics.logEvent(AnalyticsEvent.SETTINGS_VOICE_ENABLE_CLICK, mapOf("lang" to language.language.code))
                     currentEnabled + voiceId
                 }
 

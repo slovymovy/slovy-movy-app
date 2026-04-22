@@ -1,8 +1,21 @@
 import SwiftUI
 import ComposeApp
+import FirebaseCore
+import FirebaseAnalytics
+
+private class FirebaseAnalyticsLogger: AnalyticsLogger {
+    func logEvent(name: String, params: [String: String]) {
+        FirebaseAnalytics.Analytics.logEvent(name, parameters: params)
+    }
+}
 
 @main
 struct iOSApp: App {
+    init() {
+        FirebaseApp.configure()
+        Analytics.shared.logger = FirebaseAnalyticsLogger()
+    }
+
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {

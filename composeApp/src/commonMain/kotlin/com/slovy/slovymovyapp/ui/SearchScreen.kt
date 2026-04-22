@@ -41,6 +41,8 @@ import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
@@ -259,11 +261,13 @@ fun SearchScreen(
         onQueryChange = { viewModel.updateQuery(it) },
         onResultSelected = { item ->
             focusManager.clearFocus()
+            Analytics.logEvent(AnalyticsEvent.WORD_SEARCH_RESULT_SHOW)
             onWordSelected(item)
         },
         onSuggestionSelected = { word ->
             focusManager.clearFocus()
             viewModel.state.selectedLanguage?.let { language ->
+                Analytics.logEvent(AnalyticsEvent.WORD_SEARCH_SUGGESTION_CLICK)
                 onSuggestionSelected(language, word)
             }
         },
