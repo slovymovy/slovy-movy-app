@@ -52,8 +52,9 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "ComposeApp"
+            baseName = "com.slovy.openwords"
             isStatic = true
+            binaryOption("bundleId", "com.slovy.openwords")
         }
     }
 
