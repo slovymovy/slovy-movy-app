@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
@@ -239,7 +240,7 @@ internal fun Badge(
             if (isFavorite) {
                 Text(
                     text = "\u2665",
-                    style = style.copy(fontSize = 11.sp),
+                    style = style.copy(fontSize = 11.sp, fontFamily = FontFamily.Default),
                     color = FavoriteAccentColor
                 )
             }
