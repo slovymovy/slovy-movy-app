@@ -517,7 +517,6 @@ internal fun EntryCard(
                 if (entry.formsViews.isNotEmpty()) {
                     Box(
                         modifier = Modifier
-                            .minimumInteractiveComponentSize()
                             .clip(RoundedCornerShape(50))
                             .border(
                                 1.dp,
@@ -556,7 +555,7 @@ internal fun EntryCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = if (entry.formsViews.isEmpty()) 8.dp else 2.dp, bottom = 8.dp),
+                    .padding(top = if (entry.formsViews.isEmpty()) 8.dp else 0.dp, bottom = 0.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Grammar section - indented under POS header

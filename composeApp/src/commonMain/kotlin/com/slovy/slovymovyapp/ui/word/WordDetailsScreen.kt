@@ -1065,7 +1065,7 @@ private fun WordDetailContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 16.dp),
+                .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -1117,8 +1117,8 @@ private fun WordDetailContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 0.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
 
         if (card.entries.isEmpty()) {
@@ -1129,13 +1129,6 @@ private fun WordDetailContent(
             )
         } else {
             card.entries.forEachIndexed { index, entry ->
-                // Add divider between POS sections (not before the first one)
-                if (index > 0) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                    )
-                }
                 val entryState = entryStates.getOrNull(index) ?: entry.toEntryUiState(
                     index,
                     isSenseFavorite = isSenseFavorite,
@@ -1166,10 +1159,6 @@ private fun WordDetailContent(
         }
 
         if (card.wordFamily.isNotEmpty()) {
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-            )
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1216,7 +1205,7 @@ private fun ChapterRule() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 40.dp, end = 40.dp, top = 2.dp, bottom = 8.dp),
+            .padding(start = 40.dp, end = 40.dp, top = 2.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         HorizontalDivider(

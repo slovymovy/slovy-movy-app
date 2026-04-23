@@ -380,7 +380,7 @@ internal fun ExampleItem(
                 text = example.text,
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontFamily = MaterialTheme.serifFontFamily,
-                    fontStyle = FontStyle.Italic,
+                    fontStyle = FontStyle.Normal,
                     lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f
                 ),
             )
