@@ -43,6 +43,7 @@ import com.slovy.slovymovyapp.speech.VoiceQuality
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
 import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onCompletion
@@ -868,7 +869,8 @@ fun WordDetailScreenContent(
                                 text = titleText,
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Medium,
-                                    letterSpacing = (-0.3).sp
+                                    letterSpacing = (-0.3).sp,
+                                    fontFamily = MaterialTheme.serifFontFamily
                                 ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
