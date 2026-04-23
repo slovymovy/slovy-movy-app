@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -206,6 +207,7 @@ internal fun Badge(
     containerColor: Color,
     contentColor: Color,
     style: TextStyle = MaterialTheme.typography.bodySmall.copy(
+        fontFamily = MaterialTheme.serifFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 13.sp
     ),

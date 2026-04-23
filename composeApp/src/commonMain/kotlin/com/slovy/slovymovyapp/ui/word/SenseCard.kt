@@ -22,11 +22,13 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlin.text.Typography.bullet
 
 data class SenseCardData(
@@ -103,7 +105,9 @@ internal fun SenseCard(
                     if (data.showLemma) {
                         HighlightedText(
                             text = data.lemma,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontFamily = MaterialTheme.serifFontFamily
+                            )
                         )
                     }
                     if (sense != null) {
@@ -201,7 +205,9 @@ internal fun SenseCard(
                                         }.joinToString("\n"),
                                         clickableWords = relatedWords.keys,
                                         onWordClick = onWordClick,
-                                        style = MaterialTheme.typography.bodyLarge,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontFamily = MaterialTheme.serifFontFamily
+                                        ),
                                     )
                                     if (translationBasedHeader != null && sense.senseDefinition.isNotBlank()) {
                                         HighlightedText(
@@ -373,7 +379,8 @@ internal fun ExampleItem(
             ExampleText(
                 text = example.text,
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontStyle = androidx.compose.ui.text.font.FontStyle.Normal,
+                    fontFamily = MaterialTheme.serifFontFamily,
+                    fontStyle = FontStyle.Normal,
                     lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f
                 ),
             )

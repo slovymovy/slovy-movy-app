@@ -26,6 +26,7 @@ import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.pluralEnding
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -884,8 +885,10 @@ fun SettingsScreenContent(
                     title = {
                         Text(
                             "Settings",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontFamily = MaterialTheme.serifFontFamily,
+                                fontWeight = FontWeight.Medium
+                            )
                         )
                     }
                 )
