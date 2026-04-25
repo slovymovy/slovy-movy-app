@@ -250,7 +250,7 @@ class DictionaryRepository(
                         result[form] = RelatedWord(lemma = byForm.lemma, zipfFrequency = byForm.zipf_frequency.toFloat(), online = byForm.online_only)
                     continue
                 }
-                val byNorm = q.selectLemmasByFormNormalizedEquals(language.code, form, 1L).executeAsList().firstOrNull()
+                val byNorm = q.selectLemmasByFormNormalizedEquals(language.code, stripAccents(form), 1L).executeAsList().firstOrNull()
                 if (byNorm != null && (form !in result || result[form]!!.online)) {
                     result[form] = RelatedWord(lemma = byNorm.lemma, zipfFrequency = byNorm.zipf_frequency.toFloat(), online = byNorm.online_only)
                 }

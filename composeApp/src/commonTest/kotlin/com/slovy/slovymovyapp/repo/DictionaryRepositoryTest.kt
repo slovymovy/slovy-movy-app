@@ -656,6 +656,61 @@ class DictionaryRepositoryTest : BaseTest() {
     }
 
     @Test
+    fun loadRelatedWords_resolves_accented_form_via_normalized_fallback() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking { mgr.deleteDictionary(Language.DUTCH) }
+
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+
+        try {
+            val q = localMgr.openLocalDictionary().dictionaryQueries
+
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
+            val formId = Uuid.random()
+
+            q.insertLemma(lemmaId, "nl", "loden", "loden", 4.0, false)
+            q.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.VERB)
+            q.insertSense(
+                sense_id = senseId,
+                lemma_pos_id = lemmaPosId,
+                sense_definition = "to lead",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "group1",
+                name_type = null
+            )
+            // Form stored with accent; form_normalized strips it to "lody"
+            q.insertForm(formId, lemmaPosId, "łody", "lody", FormSource.NATIVE)
+            // Word family entry with original JSON casing
+            q.insertLemmaWordFamily(lemmaId, "Łody")
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository())
+
+            val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "loden") }
+            assertNotNull(card, "Card should be built for 'loden'")
+
+            // "łody" exact-form lookup may miss if collation is case-sensitive;
+            // the normalized fallback must resolve it via form_normalized = "lody".
+            val resolved = card.relatedWords["łody"]
+            assertNotNull(resolved, "Accented form 'łody' must be resolved in relatedWords")
+            assertEquals("loden", resolved.lemma, "Accented form chip must navigate to parent lemma 'loden'")
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
+        }
+    }
+
+    @Test
     fun getWordSuggestions_excludes_name_and_article_pos() {
         val platform = testPlatformDbSupport()
         val mgr = testDataDbManager()
