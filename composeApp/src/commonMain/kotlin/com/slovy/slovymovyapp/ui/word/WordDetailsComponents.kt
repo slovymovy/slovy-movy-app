@@ -119,6 +119,7 @@ internal fun EntryList(
         ) {
             values.forEach { word ->
                 val matchingKey = relatedWords.keys.firstOrNull { it.equals(word, ignoreCase = true) }
+                val resolvedLemma = matchingKey?.let { relatedWords[it]?.lemma } ?: word
                 val isClickable = matchingKey != null
                 Badge(
                     text = word,
@@ -126,9 +127,9 @@ internal fun EntryList(
                     contentColor = contentColor,
                     isClickable = isClickable,
                     isOnline = matchingKey?.let { relatedWords[it]?.online },
-                    isFavorite = favoriteLemmas.any { it.equals(word, ignoreCase = true) },
+                    isFavorite = favoriteLemmas.any { it.equals(resolvedLemma, ignoreCase = true) },
                     onClick = if (isClickable) {
-                        { onWordClick(word) }
+                        { onWordClick(resolvedLemma) }
                     } else null
                 )
             }

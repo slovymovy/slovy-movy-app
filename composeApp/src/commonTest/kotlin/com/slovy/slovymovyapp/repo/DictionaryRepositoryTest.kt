@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.repo
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
+import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
 import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
@@ -592,6 +593,65 @@ class DictionaryRepositoryTest : BaseTest() {
             assertEquals(5, newSuggestions.size, "Should still return 5 suggestions after excluding favorite")
         } finally {
             runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+        }
+    }
+
+    @Test
+    fun loadRelatedWords_resolves_inflected_form_to_parent_lemma() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        // No RO Dutch dictionary — only local DB is queried
+        runBlocking { mgr.deleteDictionary(Language.DUTCH) }
+
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+
+        try {
+            val q = localMgr.openLocalDictionary().dictionaryQueries
+
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
+            val formId = Uuid.random()
+
+            q.insertLemma(lemmaId, "nl", "buigen", "buigen", 5.0, false)
+            q.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.VERB)
+            q.insertSense(
+                sense_id = senseId,
+                lemma_pos_id = lemmaPosId,
+                sense_definition = "to bend",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "group1",
+                name_type = null
+            )
+            // "gebogen" is an inflected form, not a standalone lemma
+            q.insertForm(formId, lemmaPosId, "gebogen", "gebogen", FormSource.NATIVE)
+            // Word family stores original JSON casing — may be capitalised
+            q.insertLemmaWordFamily(lemmaId, "Gebogen")
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository())
+
+            val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "buigen") }
+            assertNotNull(card, "Card should be built for 'buigen'")
+
+            // The form "gebogen" is not a lemma, so the form-fallback in loadRelatedWords must
+            // resolve it to its parent lemma "buigen" — enabling chip navigation without a 404.
+            val resolved = card.relatedWords["gebogen"]
+            assertNotNull(resolved, "Form 'gebogen' must be present in relatedWords (keyed lowercase)")
+            assertEquals(
+                "buigen", resolved.lemma,
+                "RelatedWord.lemma for form chip must point to the parent lemma so navigation lands correctly"
+            )
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
         }
     }
 

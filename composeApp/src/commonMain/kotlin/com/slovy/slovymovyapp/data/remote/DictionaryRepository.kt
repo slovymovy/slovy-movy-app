@@ -222,7 +222,8 @@ class DictionaryRepository(
         val lowercaseWords = relatedWords.map { it.lowercase() }.toSet()
 
         for (db in databases) {
-            db.dictionaryQueries.selectLemmasByWords(language.code, lowercaseWords.toList())
+            val q = db.dictionaryQueries
+            q.selectLemmasByWords(language.code, lowercaseWords.toList())
                 .executeAsList()
                 .forEach { row ->
                     if (row.lemma !in result || result[row.lemma]!!.online) {
@@ -233,6 +234,27 @@ class DictionaryRepository(
                         )
                     }
                 }
+            // Fallback: resolve inflected forms (e.g. "Gebogen" → parent lemma "buigen").
+            // Keyed by the form so the chip text matches, but RelatedWord.lemma holds the
+            // parent lemma that navigation will use.
+            // Include online-only results so a later offline DB can replace them,
+            // matching the same precedence logic as the lemma path above.
+            val notFoundOrOnline = lowercaseWords.filter { w ->
+                val existing = result.entries.firstOrNull { it.key.equals(w, ignoreCase = true) }
+                existing == null || existing.value.online
+            }
+            for (form in notFoundOrOnline) {
+                val byForm = q.selectLemmasByFormEquals(language.code, form, 1L).executeAsList().firstOrNull()
+                if (byForm != null) {
+                    if (form !in result || result[form]!!.online)
+                        result[form] = RelatedWord(lemma = byForm.lemma, zipfFrequency = byForm.zipf_frequency.toFloat(), online = byForm.online_only)
+                    continue
+                }
+                val byNorm = q.selectLemmasByFormNormalizedEquals(language.code, form, 1L).executeAsList().firstOrNull()
+                if (byNorm != null && (form !in result || result[form]!!.online)) {
+                    result[form] = RelatedWord(lemma = byNorm.lemma, zipfFrequency = byNorm.zipf_frequency.toFloat(), online = byNorm.online_only)
+                }
+            }
         }
         return result
     }
@@ -524,7 +546,7 @@ class DictionaryRepository(
                 onlineOnly = result.online_only
                 zipfFrequency = result.zipf_frequency.toFloat()
                 sourceDb = db
-                if (!onlineOnly) break // if online only - try to find in local db
+                if (!onlineOnly) break
             }
         }
 
