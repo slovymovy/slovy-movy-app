@@ -183,7 +183,6 @@ private fun MyScreenPreview(
 
 - Key parity check task: `gradlew :composeApp:verifyLocalizationKeys`.
 - CI runs the same parity task and fails if any locale is missing/has extra keys vs base `values/`.
-- Hardcoded UI string CI check is currently not enabled; enforce this in code review and local checks.
 
 ### SVG Icons (Valkyrie)
 
