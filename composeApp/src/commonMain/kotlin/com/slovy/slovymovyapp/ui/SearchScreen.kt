@@ -11,8 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
@@ -28,12 +28,18 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.slovy.slovymovyapp.ui.word.DownloadVector
+import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
@@ -41,6 +47,7 @@ import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.icons.SearchOtter
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
 import kotlinx.coroutines.Dispatchers
@@ -58,7 +65,6 @@ data class SearchUiState(
     val selectedLanguage: Language? = null,
     val isLanguageDropdownExpanded: Boolean = false,
     val isSuggestionsRefreshing: Boolean = false,
-    val showPullToRefreshHint: Boolean = true,
     val wordSuggestions: List<String> = emptyList(),
     val favoriteLemmas: List<String> = emptyList()
 )
@@ -132,11 +138,12 @@ class SearchViewModel(
         state = state.copy(wordSuggestions = suggestions, favoriteLemmas = favorites)
     }
 
-    fun refreshSuggestions() {
-        // Skip if initial load hasn't completed yet (avoid double load on first open)
+    fun refreshRecentFavorites() {
         if (!suggestionsInitialized) return
         viewModelScope.launch {
-            loadSuggestionsForCurrentLanguage()
+            val language = state.selectedLanguage ?: return@launch
+            val favorites = repository.getRecentFavoriteLemmas(language)
+            state = state.copy(favoriteLemmas = favorites)
         }
     }
 
@@ -148,10 +155,7 @@ class SearchViewModel(
             try {
                 loadSuggestionsForCurrentLanguage()
             } finally {
-                state = state.copy(
-                    isSuggestionsRefreshing = false,
-                    showPullToRefreshHint = false
-                )
+                state = state.copy(isSuggestionsRefreshing = false)
             }
         }
     }
@@ -230,10 +234,10 @@ fun SearchScreen(
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
 
-    // Refresh language indicators, suggestions, and search results when screen is opened
+    // Refresh language indicators, recent favorites, and search results when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
-        viewModel.refreshSuggestions()
+        viewModel.refreshRecentFavorites()
         viewModel.refreshResults()
     }
 
@@ -255,11 +259,13 @@ fun SearchScreen(
         onQueryChange = { viewModel.updateQuery(it) },
         onResultSelected = { item ->
             focusManager.clearFocus()
+            Analytics.logEvent(AnalyticsEvent.WORD_SEARCH_RESULT_SHOW)
             onWordSelected(item)
         },
         onSuggestionSelected = { word ->
             focusManager.clearFocus()
             viewModel.state.selectedLanguage?.let { language ->
+                Analytics.logEvent(AnalyticsEvent.WORD_SEARCH_SUGGESTION_CLICK)
                 onSuggestionSelected(language, word)
             }
         },
@@ -423,8 +429,7 @@ fun SearchScreenContent(
                             EmptySearchState(
                                 wordSuggestions = state.wordSuggestions,
                                 favoriteLemmas = state.favoriteLemmas,
-                            onWordClick = onSuggestionSelected,
-                                showPullToRefreshHint = state.showPullToRefreshHint && !state.isSuggestionsRefreshing
+                                onWordClick = onSuggestionSelected
                             )
                         }
                     }
@@ -455,7 +460,6 @@ fun SearchScreenContent(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SearchResultCard(
     item: DictionaryRepository.SearchItem,
@@ -478,20 +482,20 @@ private fun SearchResultCard(
                 .padding(horizontal = 16.dp, vertical = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Word display
             Text(
                 text = item.display,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                    fontFamily = MaterialTheme.serifFontFamily
+                ),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
 
-            // Icons section - aligned to the right
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Show language badge if searching multiple dictionaries
                 if (showLanguageIndicator) {
                     Badge(
                         text = item.language.selfName,
@@ -501,7 +505,6 @@ private fun SearchResultCard(
                     )
                 }
 
-                // Favorite icon
                 if (item.isFavorite) {
                     Icon(
                         imageVector = Icons.Filled.Favorite,
@@ -510,12 +513,10 @@ private fun SearchResultCard(
                         modifier = Modifier.size(20.dp)
                     )
                 }
-
-                // Online-only / download icon
                 if (item.onlineOnly) {
                     Icon(
-                        imageVector = Icons.Filled.DownloadForOffline,
-                        contentDescription = "Online",
+                        imageVector = DownloadVector,
+                        contentDescription = "Not downloaded",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
@@ -525,110 +526,122 @@ private fun SearchResultCard(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun EmptySearchState(
     wordSuggestions: List<String>,
     favoriteLemmas: List<String>,
-    onWordClick: (String) -> Unit,
-    showPullToRefreshHint: Boolean = true
+    onWordClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp)
-            .padding(top = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+            .padding(horizontal = 16.dp)
+            .padding(top = 4.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (wordSuggestions.isNotEmpty()) {
-            WordChipSection(
-                title = "Explore new words",
-                words = wordSuggestions,
-                onWordClick = onWordClick
+            Text(
+                text = "Explore".uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.2.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
             )
+            wordSuggestions.forEach { lemma ->
+                SuggestionCard(lemma = lemma, onClick = { onWordClick(lemma) })
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "Pull down for new words",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 11.5.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
 
         if (favoriteLemmas.isNotEmpty()) {
-            WordChipSection(
-                title = "Your latest favorites",
-                words = favoriteLemmas,
-                onWordClick = onWordClick
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = if (wordSuggestions.isNotEmpty()) 12.dp else 8.dp, bottom = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = null,
+                    tint = FavoriteAccentColor,
+                    modifier = Modifier.size(13.dp)
+                )
+                Text(
+                    text = "Recently saved".uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            favoriteLemmas.forEach { lemma ->
+                SuggestionCard(lemma = lemma, onClick = { onWordClick(lemma) })
+            }
         }
 
         if (wordSuggestions.isEmpty() && favoriteLemmas.isEmpty()) {
             Text(
                 text = "Start typing to search",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        } else if (showPullToRefreshHint) {
-            Spacer(modifier = Modifier.height(0.dp)) // reset arrangement gap
-            Text(
-                modifier = Modifier.offset(y = (-12).dp),
-                text = "Pull down to refresh suggestions",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 32.dp),
+                textAlign = TextAlign.Center
             )
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun WordChipSection(
-    title: String,
-    words: List<String>,
-    onWordClick: (String) -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = MaterialTheme.shapes.medium
+private fun SuggestionCard(lemma: String, onClick: () -> Unit) {
+    val containerColor = colorForLemma(lemma, MaterialTheme.colorScheme.surface)
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { role = Role.Button }
+            .clickable(onClickLabel = "Open $lemma", onClick = onClick),
+        shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.outlinedCardColors(containerColor = containerColor),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-                Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                words.forEach { word ->
-                    SuggestionChip(
-                        onClick = { onWordClick(word) },
-                        label = {
-                            Text(
-                                text = word,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        },
-                        colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            labelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        border = SuggestionChipDefaults.suggestionChipBorder(
-                            enabled = true,
-                            borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        ),
-                        elevation = SuggestionChipDefaults.suggestionChipElevation(
-                            elevation = 2.dp
-                        )
-                    )
-                }
-            }
-        }
+        Text(
+            text = lemma,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = MaterialTheme.serifFontFamily
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp)
+        )
     }
 }
 

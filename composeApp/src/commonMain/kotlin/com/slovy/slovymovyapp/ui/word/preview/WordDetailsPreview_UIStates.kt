@@ -63,7 +63,6 @@ private fun WordDetailScreenPreviewPartiallyExpanded(
         val base = sampleMultilingualCard().toContentUiState(isSenseFavorite = isSenseFavoritePreview)
         val mixedEntries = base.entries.mapIndexed { entryIndex, entryState ->
             entryState.copy(
-                expanded = true,
                 formsExpanded = entryIndex == 0, // Only first entry has forms expanded
                 senses = entryState.senses.mapIndexed { senseIndex, senseState ->
                     senseState.copy(

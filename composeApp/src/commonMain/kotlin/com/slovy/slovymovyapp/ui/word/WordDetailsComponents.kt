@@ -1,22 +1,26 @@
 package com.slovy.slovymovyapp.ui.word
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 
@@ -27,23 +31,19 @@ import com.slovy.slovymovyapp.data.util.HtmlTagParser
 internal const val CLICKABLE_WORD_TAG_PREFIX = "CLICKABLE_WORD_"
 
 internal fun navigationArrow(isOnline: Boolean?): String =
-    if (isOnline == false) "➤" else "➼"
+    if (isOnline == false) "›" else "››"
 
 @Composable
 internal fun SectionLabel(text: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 4.dp)
-    ) {
-        HighlightedText(
-            text = text,
-            style = MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        )
-    }
+    Text(
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.2.sp,
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 4.dp)
+    )
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -114,11 +114,12 @@ internal fun EntryList(
         SectionLabel(label)
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             values.forEach { word ->
                 val matchingKey = relatedWords.keys.firstOrNull { it.equals(word, ignoreCase = true) }
+                val resolvedLemma = matchingKey?.let { relatedWords[it]?.lemma } ?: word
                 val isClickable = matchingKey != null
                 Badge(
                     text = word,
@@ -126,9 +127,9 @@ internal fun EntryList(
                     contentColor = contentColor,
                     isClickable = isClickable,
                     isOnline = matchingKey?.let { relatedWords[it]?.online },
-                    isFavorite = favoriteLemmas.any { it.equals(word, ignoreCase = true) },
+                    isFavorite = favoriteLemmas.any { it.equals(resolvedLemma, ignoreCase = true) },
                     onClick = if (isClickable) {
-                        { onWordClick(word) }
+                        { onWordClick(resolvedLemma) }
                     } else null
                 )
             }
@@ -155,8 +156,10 @@ internal fun HighlightedText(
         fontWeight = FontWeight.Medium,
         textDecoration = TextDecoration.Underline
     )
-    val annotated = buildAnnotatedString {
-        appendTextWithW(this, text, highlight, clickableHighlight, clickableWords, onWordClick)
+    val annotated = remember(text, clickableWords, onWordClick, highlight, clickableHighlight) {
+        buildAnnotatedString {
+            appendTextWithW(this, text, highlight, clickableHighlight, clickableWords, onWordClick)
+        }
     }
 
     Text(
@@ -179,31 +182,22 @@ internal fun appendTextWithW(
 
     segments.forEach { segment ->
         if (segment.isTagged) {
-            // This is a word inside <w> tags
             val word = segment.text
             val isClickable = clickableWords.any { it.equals(word, ignoreCase = true) }
             val styleToUse = if (isClickable) clickableHighlight else highlight
 
             if (isClickable) {
-                // Use LinkAnnotation for clickable words
                 val link = LinkAnnotation.Clickable(
                     tag = "$CLICKABLE_WORD_TAG_PREFIX$word",
-                    linkInteractionListener = {
-                        onWordClick(word)
-                    }
+                    linkInteractionListener = { onWordClick(word) }
                 )
                 builder.withLink(link) {
-                    builder.withStyle(styleToUse) {
-                        builder.append(word)
-                    }
+                    builder.withStyle(styleToUse) { builder.append(word) }
                 }
             } else {
-                builder.withStyle(styleToUse) {
-                    builder.append(word)
-                }
+                builder.withStyle(styleToUse) { builder.append(word) }
             }
         } else {
-            // Regular text, no highlighting
             builder.append(segment.text)
         }
     }
@@ -214,8 +208,12 @@ internal fun Badge(
     text: String,
     containerColor: Color,
     contentColor: Color,
-    style: TextStyle = MaterialTheme.typography.labelMedium,
-    shape: Shape = RoundedCornerShape(6.dp),
+    style: TextStyle = MaterialTheme.typography.bodySmall.copy(
+        fontFamily = MaterialTheme.serifFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 13.sp
+    ),
+    shape: Shape = RoundedCornerShape(14.dp),
     isClickable: Boolean = false,
     isOnline: Boolean? = null,
     isFavorite: Boolean = false,
@@ -225,41 +223,67 @@ internal fun Badge(
         color = containerColor,
         contentColor = contentColor,
         shape = shape,
-        border = BorderStroke(
-            width = if (isClickable) 0.75.dp else 0.5.dp,
-            color = contentColor.copy(alpha = if (isClickable) 0.4f else 0.15f)
-        ),
-        tonalElevation = if (isClickable) 2.dp else 0.dp,
-        shadowElevation = if (isClickable) 1.dp else 0.dp,
+        border = if (isClickable) BorderStroke(0.5.dp, contentColor.copy(alpha = 0.18f)) else null,
         modifier = if (onClick != null) {
             Modifier.clickable(onClick = onClick)
         } else Modifier
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            modifier = Modifier.padding(
+                start = if (isClickable && isFavorite) 9.dp else if (isClickable) 11.dp else 12.dp,
+                end = if (isClickable) 8.dp else 12.dp,
+                top = 5.dp,
+                bottom = 5.dp
+            )
         ) {
             if (isFavorite) {
                 Text(
                     text = "\u2665",
-                    style = style,
-                    color = Color(0xFFC46060)
+                    style = style.copy(fontSize = 11.sp, fontFamily = FontFamily.Default),
+                    color = FavoriteAccentColor
                 )
             }
             Text(
                 text = text,
-                style = style.copy(
-                    fontWeight = if (isClickable) FontWeight.Medium else style.fontWeight
-                )
+                style = style
             )
             if (isClickable) {
                 Text(
                     text = navigationArrow(isOnline),
-                    style = style.copy(fontWeight = FontWeight.Bold),
+                    style = style.copy(
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.5).sp
+                    ),
                     color = contentColor.copy(alpha = 0.7f)
                 )
             }
         }
+    }
+}
+
+@Composable
+internal fun MetaBadge(
+    text: String,
+    containerColor: Color,
+    contentColor: Color,
+) {
+    Box(
+        modifier = Modifier
+            .background(containerColor, RoundedCornerShape(4.dp))
+            .padding(horizontal = 8.dp, vertical = 3.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp,
+                letterSpacing = 0.3.sp,
+                lineHeight = 14.sp
+            ),
+            color = contentColor
+        )
     }
 }

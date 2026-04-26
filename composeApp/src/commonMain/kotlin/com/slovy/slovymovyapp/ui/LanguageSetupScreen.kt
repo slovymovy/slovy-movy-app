@@ -1,11 +1,10 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -16,7 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -24,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
@@ -114,8 +118,12 @@ fun LanguageSetupScreen(
         onNext = {
             val learning = viewModel.state.learningLanguage
             val native = viewModel.state.nativeLanguages.sortedBy { it.selfName }
+            Analytics.logEvent(AnalyticsEvent.LANG_TO_TRANSLATE_SELECTED, mapOf("lang" to native.joinToString(",") { it.code }))
             if (learning != null) {
                 onNext(learning, native)
+                Analytics.logEvent(AnalyticsEvent.LANG_TO_LEARN_SELECTED, mapOf("lang" to learning.code))
+            } else {
+                Analytics.logEvent(AnalyticsEvent.LANG_TO_LEARN_NOT_SELECTED, mapOf("lang" to "not selected"))
             }
         },
         onRetry = viewModel::retry
@@ -162,6 +170,7 @@ fun LanguageSetupScreenContent(
                 Text(
                     text = "Select Languages",
                     style = MaterialTheme.typography.headlineSmall.copy(
+                        fontFamily = FontFamily.Default,
                         fontWeight = FontWeight.Bold
                     ),
                     color = MaterialTheme.colorScheme.primary
@@ -171,7 +180,10 @@ fun LanguageSetupScreenContent(
 
                 Text(
                     text = "Choose what you're learning and your translation preferences.",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontStyle = FontStyle.Italic
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
@@ -324,7 +336,10 @@ fun LanguageSetupScreenContent(
 
                 Text(
                     text = "Update anytime in Settings",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontStyle = FontStyle.Italic
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 

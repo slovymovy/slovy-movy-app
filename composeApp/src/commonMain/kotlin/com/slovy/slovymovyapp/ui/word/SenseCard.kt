@@ -22,11 +22,13 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlin.text.Typography.bullet
 
 data class SenseCardData(
@@ -103,7 +105,9 @@ internal fun SenseCard(
                     if (data.showLemma) {
                         HighlightedText(
                             text = data.lemma,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontFamily = MaterialTheme.serifFontFamily
+                            )
                         )
                     }
                     if (sense != null) {
@@ -159,7 +163,7 @@ internal fun SenseCard(
                                     Icons.Outlined.FavoriteBorder
                                 },
                                 tint = if (state.favorite) {
-                                    Color(0xFFC46060) // Warm dusty rose
+                                    FavoriteAccentColor
                                 } else {
                                     LocalContentColor.current
                                 },
@@ -195,22 +199,26 @@ internal fun SenseCard(
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 SectionLabel("Definition")
                                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    if (translationBasedHeader != null) {
-                                        HighlightedText(
-                                            text = sense.senseDefinition,
-                                            clickableWords = relatedWords.keys,
-                                            onWordClick = onWordClick,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                        )
-                                    }
                                     HighlightedText(
                                         text = sense.targetLangDefinitions.map { definition ->
                                             definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
                                         }.joinToString("\n"),
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        clickableWords = relatedWords.keys,
+                                        onWordClick = onWordClick,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontFamily = MaterialTheme.serifFontFamily
                                         ),
                                     )
+                                    if (translationBasedHeader != null && sense.senseDefinition.isNotBlank()) {
+                                        HighlightedText(
+                                            text = sense.senseDefinition,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            ),
+                                            clickableWords = relatedWords.keys,
+                                            onWordClick = onWordClick,
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -371,6 +379,8 @@ internal fun ExampleItem(
             ExampleText(
                 text = example.text,
                 style = MaterialTheme.typography.bodyLarge.copy(
+                    fontFamily = MaterialTheme.serifFontFamily,
+                    fontStyle = FontStyle.Normal,
                     lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f
                 ),
             )
@@ -400,7 +410,7 @@ private fun ExampleText(
         color = style.color
     )
     val annotated = buildAnnotatedString {
-        appendTextWithW(this, text, highlight, highlight, emptySet()) { }
+        appendTextWithW(this, text, highlight, highlight, emptySet())
     }
 
     Text(
@@ -423,11 +433,11 @@ internal fun LevelAndFrequencyRow(
     ) {
         val (lc, lcc) = colorsForLevel(level)
         val (fc, fcc) = colorsForFrequency(frequency)
-        Badge(text = level.name, containerColor = lc, contentColor = lcc)
-        Badge(text = frequency.label, containerColor = fc, contentColor = fcc)
+        MetaBadge(text = level.name, containerColor = lc, contentColor = lcc)
+        MetaBadge(text = frequency.label, containerColor = fc, contentColor = fcc)
         if (nameType != null && nameType != NameType.NO) {
             val (nc, ncc) = colorsForNameType(nameType)
-            Badge(text = nameType.displayName, containerColor = nc, contentColor = ncc)
+            MetaBadge(text = nameType.displayName, containerColor = nc, contentColor = ncc)
         }
     }
 }
@@ -478,7 +488,7 @@ internal fun buildClarificationRow(
     clarificationColor: Color = Color.Unspecified
 ) = buildAnnotatedString {
     if (multiLang) append("$bullet ")
-    langTranslations.sortedBy { it.targetLangWord }.forEachIndexed { index, translation ->
+    langTranslations.orderedByIdx().forEachIndexed { index, translation ->
         if (index > 0) append(", ")
         val word = translation.targetLangWord
         append(word)
@@ -491,16 +501,19 @@ internal fun buildClarificationRow(
     }
 }
 
-private fun LanguageCardResponseSense.translationsHeader(): String? {
+internal fun LanguageCardResponseSense.translationsHeader(): String? {
     if (translations.isEmpty()) {
         return null
     }
     val prefix = if (translations.keys.size > 1) "$bullet " else ""
     return translations.entries.sortedBy { it.key }.joinToString(separator = "\n") {
-        prefix + it.value.map { translation -> translation.targetLangWord }.sortedBy { text -> text }
+        prefix + it.value.orderedByIdx().map { translation -> translation.targetLangWord }
             .joinToString(separator = ", ")
     }
 }
+
+private fun List<LanguageCardTranslation>.orderedByIdx(): List<LanguageCardTranslation> =
+    sortedBy { it.idx }
 
 internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
     if (lemma == null) return baseColor

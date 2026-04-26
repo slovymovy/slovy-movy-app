@@ -54,6 +54,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            binaryOption("bundleId", "com.slovy.openwords")
         }
     }
 
@@ -73,6 +74,10 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel.savedstate)
             implementation(libs.androidx.lifecycle.runtime)
             implementation(libs.androidx.customview.poolingcontainer)
+
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.analytics)
+            implementation(libs.firebase.crashlytics)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
