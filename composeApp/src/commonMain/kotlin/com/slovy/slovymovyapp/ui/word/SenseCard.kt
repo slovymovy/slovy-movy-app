@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Favorite
@@ -189,87 +190,89 @@ internal fun SenseCard(
                 exit = shrinkVertically() + fadeOut()
             ) {
                 sense?.let {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        if (sense.targetLangDefinitions.isNotEmpty()) {
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                SectionLabel("Definition")
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    HighlightedText(
-                                        text = sense.targetLangDefinitions.map { definition ->
-                                            definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
-                                        }.joinToString("\n"),
-                                        clickableWords = relatedWords.keys,
-                                        onWordClick = onWordClick,
-                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            fontFamily = MaterialTheme.serifFontFamily
-                                        ),
-                                    )
-                                    if (translationBasedHeader != null && sense.senseDefinition.isNotBlank()) {
+                    SelectionContainer {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            if (sense.targetLangDefinitions.isNotEmpty()) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    SectionLabel("Definition")
+                                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                         HighlightedText(
-                                            text = sense.senseDefinition,
-                                            style = MaterialTheme.typography.bodyMedium.copy(
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            ),
+                                            text = sense.targetLangDefinitions.map { definition ->
+                                                definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
+                                            }.joinToString("\n"),
                                             clickableWords = relatedWords.keys,
                                             onWordClick = onWordClick,
+                                            style = MaterialTheme.typography.bodyLarge.copy(
+                                                fontFamily = MaterialTheme.serifFontFamily
+                                            ),
                                         )
+                                        if (translationBasedHeader != null && sense.senseDefinition.isNotBlank()) {
+                                            HighlightedText(
+                                                text = sense.senseDefinition,
+                                                style = MaterialTheme.typography.bodyMedium.copy(
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                ),
+                                                clickableWords = relatedWords.keys,
+                                                onWordClick = onWordClick,
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (sense.traits.isNotEmpty()) {
-                            TraitsList(traits = sense.traits)
-                        }
+                            if (sense.traits.isNotEmpty()) {
+                                TraitsList(traits = sense.traits)
+                            }
 
-                        if (sense.examples.isNotEmpty()) {
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                SectionLabel(text = "Examples")
-                                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                                    sense.examples.forEach { ex ->
-                                        ExampleItem(
-                                            example = ex,
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
+                            if (sense.examples.isNotEmpty()) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    SectionLabel(text = "Examples")
+                                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                                        sense.examples.forEach { ex ->
+                                            ExampleItem(
+                                                example = ex,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        EntryList(
-                            "Common phrases",
-                            sense.commonPhrases,
-                            MaterialTheme.colorScheme.primaryContainer,
-                            MaterialTheme.colorScheme.onPrimaryContainer,
-                            relatedWords = relatedWords,
-                            onWordClick = onWordClick,
-                            favoriteLemmas = favoriteLemmas
-                        )
-                        val (synonymBg, synonymText) = colorsForSynonyms()
-                        EntryList(
-                            "Synonyms",
-                            sense.synonyms,
-                            synonymBg,
-                            synonymText,
-                            relatedWords = relatedWords,
-                            onWordClick = onWordClick,
-                            favoriteLemmas = favoriteLemmas
-                        )
-                        val (antonymBg, antonymText) = colorsForAntonyms()
-                        EntryList(
-                            "Antonyms",
-                            sense.antonyms,
-                            antonymBg,
-                            antonymText,
-                            relatedWords = relatedWords,
-                            onWordClick = onWordClick,
-                            favoriteLemmas = favoriteLemmas
-                        )
+                            EntryList(
+                                "Common phrases",
+                                sense.commonPhrases,
+                                MaterialTheme.colorScheme.primaryContainer,
+                                MaterialTheme.colorScheme.onPrimaryContainer,
+                                relatedWords = relatedWords,
+                                onWordClick = onWordClick,
+                                favoriteLemmas = favoriteLemmas
+                            )
+                            val (synonymBg, synonymText) = colorsForSynonyms()
+                            EntryList(
+                                "Synonyms",
+                                sense.synonyms,
+                                synonymBg,
+                                synonymText,
+                                relatedWords = relatedWords,
+                                onWordClick = onWordClick,
+                                favoriteLemmas = favoriteLemmas
+                            )
+                            val (antonymBg, antonymText) = colorsForAntonyms()
+                            EntryList(
+                                "Antonyms",
+                                sense.antonyms,
+                                antonymBg,
+                                antonymText,
+                                relatedWords = relatedWords,
+                                onWordClick = onWordClick,
+                                favoriteLemmas = favoriteLemmas
+                            )
+                        }
                     }
                 }
             }
@@ -338,7 +341,7 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
                         append(": ")
                         withStyle(
                             style = SpanStyle(
-                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                fontStyle = FontStyle.Italic
                             )
                         ) {
                             append(trait.comment)
