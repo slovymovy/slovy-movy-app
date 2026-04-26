@@ -195,8 +195,14 @@
     <string name="settings_dictionary_size_with_colon">Woordenboek: %1$s</string>
     <string name="settings_dictionary_size">Woordenboek %1$s</string>
     <string name="settings_translations_title">Vertalingen</string>
-    <string name="settings_translations_all_downloaded">Alle %1$d vertaling%2$s gedownload</string>
-    <string name="settings_translations_partially_downloaded">%1$d van %2$d vertaling%3$s gedownload</string>
+    <plurals name="settings_translations_all_downloaded">
+        <item quantity="one">Alle %1$d vertaling gedownload</item>
+        <item quantity="other">Alle %1$d vertalingen gedownload</item>
+    </plurals>
+    <plurals name="settings_translations_partially_downloaded">
+        <item quantity="one">%1$d van %2$d vertaling gedownload</item>
+        <item quantity="other">%1$d van %2$d vertalingen gedownload</item>
+    </plurals>
     <string name="settings_online_only_count">%1$d alleen online</string>
     <string name="settings_translations_online_only">%1$d vertalingen (alleen online)</string>
     <string name="settings_remove_language">Verwijder %1$s</string>
@@ -205,12 +211,18 @@
     <string name="settings_download_language">Downloaden %1$s</string>
     <string name="settings_edit_translation_languages">Vertaaltalen bewerken</string>
     <string name="settings_no_languages_selected">Geen talen geselecteerd</string>
-    <string name="settings_languages_selected">%1$d taal%2$s geselecteerd</string>
+    <plurals name="settings_languages_selected">
+        <item quantity="one">%1$d taal geselecteerd</item>
+        <item quantity="other">%1$d talen geselecteerd</item>
+    </plurals>
     <string name="settings_languages_more">+%1$d meer</string>
     <string name="settings_toggle_translation_for_language">Schakel %1$s-vertaling in of uit</string>
     <string name="settings_remove_language_confirm_title">%1$s verwijderen?</string>
     <string name="settings_remove_language_confirm_message">Het woordenboek en alle vertalingen worden verwijderd. Je kunt ze altijd opnieuw downloaden.</string>
-    <string name="settings_remove_language_warning">Hierdoor worden ook %1$d vertaling%2$s verwijderd.</string>
+    <plurals name="settings_remove_language_warning">
+        <item quantity="one">Hierdoor wordt ook %1$d vertaling verwijderd.</item>
+        <item quantity="other">Hierdoor worden ook %1$d vertalingen verwijderd.</item>
+    </plurals>
     <string name="settings_language_removed">%1$s verwijderd</string>
     <string name="settings_error_save_translation_languages">Opslaan van vertaaltalen mislukt: %1$s</string>
     <string name="settings_error_delete_with_reason">Verwijderen mislukt: %1$s</string>
@@ -235,6 +247,9 @@
     <string name="common_clear">Wissen</string>
     <string name="common_search_placeholder">Zoeken...</string>
     <string name="common_unknown_error">Onbekende fout</string>
-    <string name="part_of_speech_with_sense_count">%1$s - %2$d betekenis%3$s</string>
+    <plurals name="part_of_speech_with_sense_count">
+        <item quantity="one">%1$s - %2$d betekenis</item>
+        <item quantity="other">%1$s - %2$d betekenissen</item>
+    </plurals>
     <string name="part_of_speech_generating_definitions_examples">Definities en voorbeelden worden gegenereerd...</string>
 </resources>

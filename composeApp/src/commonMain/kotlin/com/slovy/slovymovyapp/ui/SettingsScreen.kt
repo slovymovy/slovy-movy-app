@@ -29,7 +29,6 @@ import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
-import com.slovy.slovymovyapp.ui.word.pluralEnding
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -40,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
+import org.jetbrains.compose.resources.getPluralString
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
@@ -300,9 +300,10 @@ class SettingsViewModel(
             ?.translations?.count { it.isDownloaded } ?: 0
 
         val warning = if (translationCount > 0) {
-            UiText.Resource(
-                Res.string.settings_remove_language_warning,
-                listOf(translationCount, pluralEnding(translationCount))
+            UiText.Plural(
+                Res.plurals.settings_remove_language_warning,
+                translationCount,
+                listOf(translationCount)
             )
         } else null
 
@@ -780,6 +781,7 @@ class SettingsViewModel(
     private suspend fun resolveUiText(text: UiText): String = when (text) {
         is UiText.Plain -> text.value
         is UiText.Resource -> getString(text.key, *text.args.toTypedArray())
+        is UiText.Plural -> getPluralString(text.key, text.quantity, *text.args.toTypedArray())
     }
 
     private suspend fun showSnackbar(

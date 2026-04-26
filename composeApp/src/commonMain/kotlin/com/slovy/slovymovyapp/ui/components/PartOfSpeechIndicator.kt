@@ -18,7 +18,7 @@ import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.word.ErrorIcon
-import com.slovy.slovymovyapp.ui.word.pluralEnding
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.part_of_speech_generating_definitions_examples
@@ -70,11 +70,11 @@ fun PartOfSpeechIndicator(
 
         if (!cardLoading && cardError == null) {
             val label = if (meaningCount != null) {
-                stringResource(
-                    Res.string.part_of_speech_with_sense_count,
-                    partOfSpeech,
+                pluralStringResource(
+                    Res.plurals.part_of_speech_with_sense_count,
                     meaningCount,
-                    pluralEnding(meaningCount)
+                    partOfSpeech,
+                    meaningCount
                 )
             } else {
                 partOfSpeech

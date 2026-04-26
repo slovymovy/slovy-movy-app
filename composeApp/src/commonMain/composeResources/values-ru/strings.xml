@@ -195,8 +195,18 @@
     <string name="settings_dictionary_size_with_colon">Словарь: %1$s</string>
     <string name="settings_dictionary_size">Словарь %1$s</string>
     <string name="settings_translations_title">Переводы</string>
-    <string name="settings_translations_all_downloaded">Все %1$d перевод%2$s загружены</string>
-    <string name="settings_translations_partially_downloaded">%1$d из %2$d перевод%3$s загружены</string>
+    <plurals name="settings_translations_all_downloaded">
+        <item quantity="one">Все %1$d перевод загружен</item>
+        <item quantity="few">Все %1$d перевода загружены</item>
+        <item quantity="many">Все %1$d переводов загружено</item>
+        <item quantity="other">Все %1$d перевода загружены</item>
+    </plurals>
+    <plurals name="settings_translations_partially_downloaded">
+        <item quantity="one">%1$d из %2$d перевода загружено</item>
+        <item quantity="few">%1$d из %2$d переводов загружено</item>
+        <item quantity="many">%1$d из %2$d переводов загружено</item>
+        <item quantity="other">%1$d из %2$d перевода загружено</item>
+    </plurals>
     <string name="settings_online_only_count">%1$d только онлайн</string>
     <string name="settings_translations_online_only">%1$d переводов (только онлайн)</string>
     <string name="settings_remove_language">Удалить %1$s</string>
@@ -205,12 +215,22 @@
     <string name="settings_download_language">Скачать %1$s</string>
     <string name="settings_edit_translation_languages">Изменить языки перевода</string>
     <string name="settings_no_languages_selected">Языки не выбраны</string>
-    <string name="settings_languages_selected">Выбрано %1$d язык%2$s</string>
+    <plurals name="settings_languages_selected">
+        <item quantity="one">Выбран %1$d язык</item>
+        <item quantity="few">Выбрано %1$d языка</item>
+        <item quantity="many">Выбрано %1$d языков</item>
+        <item quantity="other">Выбрано %1$d языка</item>
+    </plurals>
     <string name="settings_languages_more">+%1$d еще</string>
     <string name="settings_toggle_translation_for_language">Переключить перевод %1$s</string>
     <string name="settings_remove_language_confirm_title">Удалить %1$s?</string>
     <string name="settings_remove_language_confirm_message">Словарь и все его переводы будут удалены. Вы сможете скачать их снова в любое время.</string>
-    <string name="settings_remove_language_warning">Это также удалит %1$d перевод%2$s.</string>
+    <plurals name="settings_remove_language_warning">
+        <item quantity="one">Это также удалит %1$d перевод.</item>
+        <item quantity="few">Это также удалит %1$d перевода.</item>
+        <item quantity="many">Это также удалит %1$d переводов.</item>
+        <item quantity="other">Это также удалит %1$d перевода.</item>
+    </plurals>
     <string name="settings_language_removed">%1$s удалён</string>
     <string name="settings_error_save_translation_languages">Не удалось сохранить языки перевода: %1$s</string>
     <string name="settings_error_delete_with_reason">Не удалось удалить: %1$s</string>
@@ -235,6 +255,11 @@
     <string name="common_clear">Очистить</string>
     <string name="common_search_placeholder">Поиск...</string>
     <string name="common_unknown_error">Неизвестная ошибка</string>
-    <string name="part_of_speech_with_sense_count">%1$s - %2$d значение%3$s</string>
+    <plurals name="part_of_speech_with_sense_count">
+        <item quantity="one">%1$s - %2$d значение</item>
+        <item quantity="few">%1$s - %2$d значения</item>
+        <item quantity="many">%1$s - %2$d значений</item>
+        <item quantity="other">%1$s - %2$d значения</item>
+    </plurals>
     <string name="part_of_speech_generating_definitions_examples">Генерируем определения и примеры...</string>
 </resources>

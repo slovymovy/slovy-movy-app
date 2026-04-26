@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
-import com.slovy.slovymovyapp.ui.word.pluralEnding
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 
@@ -105,16 +105,16 @@ fun LearningLanguageCard(
                         val downloadPart = when {
                             downloadableCount == 0 -> null
                             downloadedCount == downloadableCount ->
-                                stringResource(
-                                    Res.string.settings_translations_all_downloaded,
+                                pluralStringResource(
+                                    Res.plurals.settings_translations_all_downloaded,
                                     downloadableCount,
-                                    pluralEnding(downloadableCount)
+                                    downloadableCount
                                 )
-                            else -> stringResource(
-                                Res.string.settings_translations_partially_downloaded,
-                                downloadedCount,
+                            else -> pluralStringResource(
+                                Res.plurals.settings_translations_partially_downloaded,
                                 downloadableCount,
-                                pluralEnding(downloadableCount)
+                                downloadedCount,
+                                downloadableCount
                             )
                         }
                         val onlinePart = if (onlineOnlyCount > 0) {
@@ -424,10 +424,10 @@ fun TranslationLanguageSection(
                             text = if (selectedLanguages.isEmpty()) {
                                 stringResource(Res.string.settings_no_languages_selected)
                             } else {
-                                stringResource(
-                                    Res.string.settings_languages_selected,
+                                pluralStringResource(
+                                    Res.plurals.settings_languages_selected,
                                     selectedLanguages.size,
-                                    pluralEnding(selectedLanguages.size)
+                                    selectedLanguages.size
                                 )
                             },
                             style = MaterialTheme.typography.bodyMedium,

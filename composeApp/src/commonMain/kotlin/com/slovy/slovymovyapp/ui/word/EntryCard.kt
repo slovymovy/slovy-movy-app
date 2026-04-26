@@ -636,6 +636,3 @@ internal fun computeAmbiguousTranslations(senses: List<LanguageCardResponseSense
         }
 }
 
-fun pluralEnding(count: Int): String = if (count == 1) "" else "s"
-
-fun pluralEnding(someList: List<*>): String = pluralEnding(someList.size)
