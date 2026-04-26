@@ -488,7 +488,7 @@ internal fun buildClarificationRow(
     clarificationColor: Color = Color.Unspecified
 ) = buildAnnotatedString {
     if (multiLang) append("$bullet ")
-    langTranslations.sortedBy { it.targetLangWord }.forEachIndexed { index, translation ->
+    langTranslations.orderedByIdx().forEachIndexed { index, translation ->
         if (index > 0) append(", ")
         val word = translation.targetLangWord
         append(word)
@@ -501,16 +501,19 @@ internal fun buildClarificationRow(
     }
 }
 
-private fun LanguageCardResponseSense.translationsHeader(): String? {
+internal fun LanguageCardResponseSense.translationsHeader(): String? {
     if (translations.isEmpty()) {
         return null
     }
     val prefix = if (translations.keys.size > 1) "$bullet " else ""
     return translations.entries.sortedBy { it.key }.joinToString(separator = "\n") {
-        prefix + it.value.map { translation -> translation.targetLangWord }.sortedBy { text -> text }
+        prefix + it.value.orderedByIdx().map { translation -> translation.targetLangWord }
             .joinToString(separator = ", ")
     }
 }
+
+private fun List<LanguageCardTranslation>.orderedByIdx(): List<LanguageCardTranslation> =
+    sortedBy { it.idx }
 
 internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
     if (lemma == null) return baseColor

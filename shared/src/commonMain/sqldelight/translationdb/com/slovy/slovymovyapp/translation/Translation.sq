@@ -93,7 +93,7 @@ selectSenseTranslationsBySenseIds:
 SELECT sense_id, idx, target_lang_word, target_lang_sense_clarification, lemma_id, lemma_pos_id
 FROM sense_translation
 WHERE sense_id IN ? AND from_lang_code = ? AND target_lang_code = ?
-ORDER BY idx;
+ORDER BY sense_id, idx;
 
 selectExampleTranslationsBySenseIds:
 SELECT sense_id, example_id, translation FROM example_translation
@@ -107,4 +107,3 @@ WHERE from_lang_code = ?
   AND target_lang_word_normalized >= ?
   AND target_lang_word_normalized < ?
   AND sense_id IN ?;
-

@@ -680,7 +680,8 @@ class DictionaryRepository(
                             .groupBy({ it.sense_id }) { row ->
                                 LanguageCardTranslation(
                                     targetLangWord = row.target_lang_word,
-                                    targetLangSenseClarification = row.target_lang_sense_clarification
+                                    targetLangSenseClarification = row.target_lang_sense_clarification,
+                                    idx = row.idx
                                 )
                             }
 

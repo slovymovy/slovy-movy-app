@@ -107,7 +107,9 @@ data class LanguageCardExample(
 )
 
 data class LanguageCardTranslation(
-    val targetLangWord: String, val targetLangSenseClarification: String? = null
+    val targetLangWord: String,
+    val targetLangSenseClarification: String? = null,
+    val idx: Long = 0
 )
 
 enum class TraitType(val displayName: String) {
