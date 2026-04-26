@@ -150,8 +150,26 @@ valkyrie {
     }
 }
 
+val generateAppVersion = tasks.register<WriteAppVersionTask>("generateAppVersion") {
+    versionName.set(rootProject.extra["versionName"] as String)
+    versionCode.set(rootProject.extra["versionCode"] as Int)
+    outputDir.set(layout.buildDirectory.dir("generated/appversion/commonMain/kotlin"))
+}
+
+val generateIosVersionXcconfig = tasks.register<WriteIosVersionXcconfigTask>("generateIosVersionXcconfig") {
+    versionName.set(rootProject.extra["versionName"] as String)
+    versionCode.set(rootProject.extra["versionCode"] as Int)
+    outputFile.set(rootProject.layout.projectDirectory.file("iosApp/Configuration/Version.xcconfig"))
+}
+
+kotlin.sourceSets.commonMain {
+    kotlin.srcDir(generateAppVersion.map { it.outputDir })
+}
+
 tasks.withType<KotlinCompilationTask<*>>().configureEach {
     dependsOn("generateValkyrieImageVector")
+    dependsOn(generateAppVersion)
+    dependsOn(generateIosVersionXcconfig)
 }
 
 compose.desktop {
@@ -161,7 +179,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.slovy.slovymovyapp"
-            packageVersion = "1.0.0"
+            packageVersion = rootProject.extra["versionName"] as String
         }
     }
 }

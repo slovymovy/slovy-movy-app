@@ -26,8 +26,8 @@ android {
         applicationId = "com.slovy.slovymovyapp"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 17 // version
-        versionName = "Alpha"
+        versionCode = rootProject.extra["versionCode"] as Int
+        versionName = rootProject.extra["versionName"] as String
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         testInstrumentationRunnerArguments[TestEnvironment.IS_TEST] = "true"

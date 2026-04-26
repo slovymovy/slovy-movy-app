@@ -5,6 +5,7 @@ import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvider
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.generated.AppVersion
 import platform.Foundation.NSBundle
 
 fun MainViewController() = ComposeUIViewController {
@@ -20,15 +21,13 @@ private fun createBuildConfig(): AppBuildConfig {
     val bundle = NSBundle.mainBundle
     val infoDictionary = bundle.infoDictionary
 
-    val versionName = infoDictionary?.get("CFBundleShortVersionString") as? String ?: "?"
-    val versionCode = (infoDictionary?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: 17 // version
     val bundleId = bundle.bundleIdentifier ?: ""
     val displayName = infoDictionary?.get("CFBundleDisplayName") as? String ?: "?"
     val isDebug = displayName.contains("debug", ignoreCase = true)
 
     return AppBuildConfig(
-        versionName = versionName,
-        versionCode = versionCode,
+        versionName = AppVersion.NAME,
+        versionCode = AppVersion.CODE,
         isDebug = isDebug,
         applicationId = bundleId
     )

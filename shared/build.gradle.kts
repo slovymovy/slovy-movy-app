@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.slovy.slovymovyapp"
-version = "1.0.0"
+version = rootProject.extra["versionName"] as String
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
