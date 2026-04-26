@@ -262,10 +262,10 @@
         <item quantity="other">%1$s - %2$d значения</item>
     </plurals>
     <string name="part_of_speech_generating_definitions_examples">Готовим определения и примеры...</string>
-    <string name="sense_frequency_high">Высокая</string>
-    <string name="sense_frequency_middle">Средняя</string>
-    <string name="sense_frequency_low">Низкая</string>
-    <string name="sense_frequency_very_low">Очень низкая</string>
+    <string name="sense_frequency_high">Часто</string>
+    <string name="sense_frequency_middle">Обычно</string>
+    <string name="sense_frequency_low">Редко</string>
+    <string name="sense_frequency_very_low">Очень редко</string>
     <string name="pos_article">Артикль</string>
     <string name="pos_noun">Существительное</string>
     <string name="pos_name">Имя собственное</string>
