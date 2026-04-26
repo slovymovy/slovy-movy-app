@@ -7,28 +7,28 @@
     <string name="nav_word_detail">Słowo</string>
     <string name="nav_settings">Ustawienia</string>
 
-    <string name="welcome_tagline">Szczegółowy słownik\ndla zaangażowanych osób uczących się języka.</string>
-    <string name="welcome_selling_point_translations_title">Więcej niż tłumaczenie jednym słowem</string>
-    <string name="welcome_selling_point_translations_description">Zobacz wszystkie znaczenia, częstotliwość słów, popularne frazy i przykłady z praktyki.</string>
+    <string name="welcome_tagline">Poznaj język od podszewki.\nSłownik dla ambitnych uczniów.</string>
+    <string name="welcome_selling_point_translations_title">Więcej niż proste tłumaczenia</string>
+    <string name="welcome_selling_point_translations_description">Wszystkie znaczenia, częstotliwość, typowe zwroty i żywe przykłady.</string>
     <string name="welcome_selling_point_collection_title">Twoja kolekcja</string>
-    <string name="welcome_selling_point_collection_description">Zapisuj słowa w osobistej bibliotece i rozwijaj słownictwo lokalnie.</string>
+    <string name="welcome_selling_point_collection_description">Zapisuj słowa w bibliotece i rozwijaj swoje słownictwo.</string>
     <string name="welcome_selling_point_no_ads_title">Bez reklam i subskrypcji</string>
-    <string name="welcome_selling_point_no_ads_description">Pełna funkcjonalność bez paywalla. Najważniejsze dane pozostają na twoim urządzeniu.</string>
-    <string name="welcome_cta_explore_now">Zacznij</string>
+    <string name="welcome_selling_point_no_ads_description">Pełen dostęp bez płatnych blokad. Dane pozostają na Twoim urządzeniu.</string>
+    <string name="welcome_cta_explore_now">Wybierz języki</string>
 
-    <string name="search_placeholder">Szukaj słowa...</string>
+    <string name="search_placeholder">Wyszukaj słowo...</string>
     <string name="search_open_item">Otwórz %1$s</string>
     <string name="search_content_desc_favorite">Ulubione</string>
     <string name="search_content_desc_not_downloaded">Niepobrane</string>
     <string name="search_section_explore">Odkrywaj</string>
-    <string name="search_pull_to_refresh_hint">Przeciągnij w dół po nowe słowa</string>
+    <string name="search_pull_to_refresh_hint">Pociągnij w dół, aby zobaczyć nowe słowa</string>
     <string name="search_section_recently_saved">Ostatnio zapisane</string>
     <string name="search_empty_start_typing">Zacznij pisać, aby wyszukać</string>
     <string name="search_no_dictionary_title">Brak pobranego słownika</string>
-    <string name="search_no_dictionary_description">Pobierz słownik, aby rozpocząć wyszukiwanie słów</string>
+    <string name="search_no_dictionary_description">Pobierz słownik, aby zacząć szukać słów</string>
     <string name="search_go_to_settings">Przejdź do ustawień</string>
-    <string name="search_no_results_title">Brak wyników dla "%1$s"</string>
-    <string name="search_no_results_description">Spróbuj innej pisowni lub wyszukiwanej frazy</string>
+    <string name="search_no_results_title">Brak wyników dla „%1$s"</string>
+    <string name="search_no_results_description">Sprawdź pisownię lub spróbuj innego słowa.</string>
 
     <string name="common_back">Wstecz</string>
     <string name="common_cancel">Anuluj</string>
@@ -64,15 +64,15 @@
     <string name="download_state_completed">Pobieranie zakończone</string>
 
     <string name="favorites_title">Moje słowa</string>
-    <string name="favorites_loading">Ładowanie ulubionych...</string>
-    <string name="favorites_search_placeholder">Wpisz słowo...</string>
+    <string name="favorites_loading">Ładowanie...</string>
+    <string name="favorites_search_placeholder">Wyszukaj słowo...</string>
     <string name="favorites_empty_title">Brak ulubionych</string>
-    <string name="favorites_empty_description">Zapisuj słowa, które chcesz zapamiętać</string>
-    <string name="favorites_empty_action_start_searching">Rozpocznij wyszukiwanie</string>
-    <string name="favorites_no_results_title">Brak pasujących ulubionych dla "%1$s"</string>
-    <string name="favorites_no_results_description">Spróbuj innej pisowni lub wyszukaj w słowniku</string>
+    <string name="favorites_empty_description">Zapisuj słowa, które chcesz zapamiętać.</string>
+    <string name="favorites_empty_action_start_searching">Zacznij szukać</string>
+    <string name="favorites_no_results_title">Brak wyników dla „%1$s"</string>
+    <string name="favorites_no_results_description">Sprawdź pisownię lub wyszukaj w całym słowniku.</string>
     <string name="favorites_no_results_action_search_dictionary">Szukaj w słowniku</string>
-    <string name="favorites_stats">%1$d znaczeń · %2$d słów</string>
+    <string name="favorites_stats">%1$d znaczeń • %2$d słów</string>
 
     <string name="language_setup_title">Wybierz języki</string>
     <string name="language_setup_subtitle">Wybierz język, którego się uczysz, i preferowane języki tłumaczeń.</string>
