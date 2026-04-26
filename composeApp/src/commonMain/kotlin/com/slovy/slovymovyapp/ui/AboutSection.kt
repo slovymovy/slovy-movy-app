@@ -20,6 +20,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.AppBuildConfig
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 @Composable
 fun AboutSection(
@@ -38,8 +40,8 @@ fun AboutSection(
         Column(modifier = Modifier.fillMaxWidth()) {
             AboutItem(
                 icon = Icons.Outlined.Feedback,
-                title = "Send us feedback",
-                subtitle = "We'd love to hear from you",
+                title = stringResource(Res.string.about_send_feedback_title),
+                subtitle = stringResource(Res.string.about_send_feedback_subtitle),
                 onClick = onSendFeedback
             )
             HorizontalDivider(
@@ -49,8 +51,8 @@ fun AboutSection(
             )
             AboutItem(
                 icon = Icons.Outlined.VolunteerActivism,
-                title = "Acknowledgements",
-                subtitle = "Data sources & credits",
+                title = stringResource(Res.string.about_acknowledgements_title),
+                subtitle = stringResource(Res.string.about_acknowledgements_subtitle),
                 onClick = onAcknowledgements
             )
             HorizontalDivider(
@@ -60,7 +62,7 @@ fun AboutSection(
             )
             AboutItem(
                 icon = Icons.Outlined.Info,
-                title = "Version",
+                title = stringResource(Res.string.about_version_title),
                 subtitle = buildConfig.versionName
             )
         }
@@ -87,13 +89,13 @@ fun AcknowledgementsBottomSheetContent() {
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
     ) {
         Text(
-            text = "Acknowledgements",
+            text = stringResource(Res.string.acknowledgements_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold
         )
         AcknowledgementItem(
-            title = "Vocabulary data",
-            body = "Our word data is sourced from Wiktionary, the free multilingual dictionary built by volunteers worldwide.",
+            title = stringResource(Res.string.acknowledgements_vocab_data_title),
+            body = stringResource(Res.string.acknowledgements_vocab_data_body),
             urlLabel = "wiktionary.org",
             url = "https://www.wiktionary.org"
         )
@@ -102,8 +104,8 @@ fun AcknowledgementsBottomSheetContent() {
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
         AcknowledgementItem(
-            title = "Dictionary extracts",
-            body = "We use pre-processed dictionary data from Kaikki.org, extracted from Wiktionary using the open-source wiktextract tool by Tatu Ylonen.",
+            title = stringResource(Res.string.acknowledgements_dictionary_extracts_title),
+            body = stringResource(Res.string.acknowledgements_dictionary_extracts_body),
             urlLabel = "kaikki.org",
             url = "https://kaikki.org"
         )
@@ -112,8 +114,8 @@ fun AcknowledgementsBottomSheetContent() {
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
         AcknowledgementItem(
-            title = "Application code",
-            body = "Application code is available under CC-BY-SA-4.0 license.",
+            title = stringResource(Res.string.acknowledgements_application_code_title),
+            body = stringResource(Res.string.acknowledgements_application_code_body),
             urlLabel = "github.com/slovymovy/slovy-movy-app",
             url = "https://github.com/slovymovy/slovy-movy-app"
         )
@@ -122,8 +124,8 @@ fun AcknowledgementsBottomSheetContent() {
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
         AcknowledgementItem(
-            title = "Words sources",
-            body = "All the words data is available under CC-BY-SA-4.0 license.",
+            title = stringResource(Res.string.acknowledgements_words_sources_title),
+            body = stringResource(Res.string.acknowledgements_words_sources_body),
             urlLabel = "github.com/slovymovy/words",
             url = "https://github.com/slovymovy/words"
         )
@@ -132,7 +134,7 @@ fun AcknowledgementsBottomSheetContent() {
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
         Text(
-            text = "We're grateful to the Wiktionary community and to Tatu Ylonen for making this data freely available.",
+            text = stringResource(Res.string.acknowledgements_thanks),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

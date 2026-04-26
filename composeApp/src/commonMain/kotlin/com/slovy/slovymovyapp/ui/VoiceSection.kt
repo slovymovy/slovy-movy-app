@@ -2,20 +2,43 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
@@ -24,6 +47,29 @@ import com.slovy.slovymovyapp.speech.Text2SpeechLanguage
 import com.slovy.slovymovyapp.speech.Text2SpeechVoice
 import com.slovy.slovymovyapp.speech.VoiceQuality
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.common_action_collapse
+import slovymovyapp.composeapp.generated.resources.common_action_expand
+import slovymovyapp.composeapp.generated.resources.common_open_system_settings
+import slovymovyapp.composeapp.generated.resources.common_state_collapsed
+import slovymovyapp.composeapp.generated.resources.common_state_expanded
+import slovymovyapp.composeapp.generated.resources.voice_download_more_step_android
+import slovymovyapp.composeapp.generated.resources.voice_download_more_step_ios
+import slovymovyapp.composeapp.generated.resources.voice_download_more_step_other
+import slovymovyapp.composeapp.generated.resources.voice_download_more_step_two
+import slovymovyapp.composeapp.generated.resources.voice_download_more_title
+import slovymovyapp.composeapp.generated.resources.voice_enable_label
+import slovymovyapp.composeapp.generated.resources.voice_many_enabled
+import slovymovyapp.composeapp.generated.resources.voice_network_online
+import slovymovyapp.composeapp.generated.resources.voice_no_voices_available
+import slovymovyapp.composeapp.generated.resources.voice_no_voices_enabled
+import slovymovyapp.composeapp.generated.resources.voice_quality_good
+import slovymovyapp.composeapp.generated.resources.voice_quality_high
+import slovymovyapp.composeapp.generated.resources.voice_quality_medium
+import slovymovyapp.composeapp.generated.resources.voice_single_enabled
+import slovymovyapp.composeapp.generated.resources.voice_test_action
+import slovymovyapp.composeapp.generated.resources.voice_unknown_name
 
 val TEST_PHRASES = mapOf(
     Language.ENGLISH to "Hello! This is a test of the text to speech system.",
@@ -47,6 +93,13 @@ fun VoiceSectionItem(
     onToggleVoiceEnabled: (String) -> Unit,
     testingVoice: Text2SpeechVoice? = null
 ) {
+    val expandedStateDescription = stringResource(Res.string.common_state_expanded)
+    val collapsedStateDescription = stringResource(Res.string.common_state_collapsed)
+    val collapseAction = stringResource(Res.string.common_action_collapse)
+    val expandAction = stringResource(Res.string.common_action_expand)
+    val noVoicesEnabled = stringResource(Res.string.voice_no_voices_enabled)
+    val unknownVoice = stringResource(Res.string.voice_unknown_name)
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -60,12 +113,16 @@ fun VoiceSectionItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .semantics(mergeDescendants = true) {
-                        stateDescription = if (languageState.isExpanded) "Expanded" else "Collapsed"
+                        stateDescription = if (languageState.isExpanded) {
+                            expandedStateDescription
+                        } else {
+                            collapsedStateDescription
+                        }
                     }
                     .clickable(
                         onClick = onExpand,
                         role = Role.Button,
-                        onClickLabel = if (languageState.isExpanded) "Collapse" else "Expand"
+                        onClickLabel = if (languageState.isExpanded) collapseAction else expandAction
                     )
                     .padding(AppSpacing.lg),
                 verticalAlignment = Alignment.CenterVertically
@@ -86,14 +143,14 @@ fun VoiceSectionItem(
                     )
                     val enabledVoicesCount = languageState.enabledVoiceIds.size
                     val voiceText = when {
-                        enabledVoicesCount == 0 -> "No voices enabled"
+                        enabledVoicesCount == 0 -> noVoicesEnabled
                         enabledVoicesCount == 1 -> {
                             languageState.voices.find { it.id in languageState.enabledVoiceIds }?.let {
-                                "${it.name ?: "Unknown"} (${it.language.code.uppercase()})"
-                            } ?: "1 voice enabled"
+                                "${it.name ?: unknownVoice} (${it.language.code.uppercase()})"
+                            } ?: stringResource(Res.string.voice_single_enabled)
                         }
 
-                        else -> "$enabledVoicesCount voices enabled"
+                        else -> stringResource(Res.string.voice_many_enabled, enabledVoicesCount)
                     }
                     Text(
                         text = voiceText,
@@ -103,7 +160,11 @@ fun VoiceSectionItem(
                 }
 
                 Icon(
-                    imageVector = if (languageState.isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    imageVector = if (languageState.isExpanded) {
+                        Icons.Default.KeyboardArrowUp
+                    } else {
+                        Icons.Default.KeyboardArrowDown
+                    },
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -121,7 +182,7 @@ fun VoiceSectionItem(
                     }
                 } else if (languageState.voices.isEmpty()) {
                     Text(
-                        text = "No voices available",
+                        text = stringResource(Res.string.voice_no_voices_available),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm)
@@ -163,9 +224,9 @@ fun DownloadMoreVoicesCard(onOpenSettings: () -> Unit) {
     val isAndroid = platform.contains("Android", ignoreCase = true)
 
     val step1Instruction = when {
-        isAndroid -> "Open your phone's text-to-speech settings and download a high-quality voice."
-        isIos -> "Go to your iPhone Settings → Accessibility → Read & Speak → Voices and download a high-quality voice."
-        else -> "Download a high-quality voice from your system settings."
+        isAndroid -> stringResource(Res.string.voice_download_more_step_android)
+        isIos -> stringResource(Res.string.voice_download_more_step_ios)
+        else -> stringResource(Res.string.voice_download_more_step_other)
     }
 
     ElevatedCard(
@@ -191,20 +252,20 @@ fun DownloadMoreVoicesCard(onOpenSettings: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(AppSpacing.md))
                 Text(
-                    text = "Download more voices",
+                    text = stringResource(Res.string.voice_download_more_title),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
 
             StepRow(number = 1, text = step1Instruction)
-            StepRow(number = 2, text = "Come back to Open Words Settings → Voice and enable the new voice.")
+            StepRow(number = 2, text = stringResource(Res.string.voice_download_more_step_two))
 
             if (isAndroid || isIos) {
                 FilledTonalButton(
                     onClick = onOpenSettings,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Open System Settings")
+                    Text(stringResource(Res.string.common_open_system_settings))
                 }
             }
         }
@@ -276,9 +337,9 @@ fun VoiceItem(
                 ) {
                     Text(
                         text = when (voice.quality) {
-                            VoiceQuality.BEST -> "High"
-                            VoiceQuality.GOOD -> "Good"
-                            VoiceQuality.MEDIUM -> "Medium"
+                            VoiceQuality.BEST -> stringResource(Res.string.voice_quality_high)
+                            VoiceQuality.GOOD -> stringResource(Res.string.voice_quality_good)
+                            VoiceQuality.MEDIUM -> stringResource(Res.string.voice_quality_medium)
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = qualityColor,
@@ -291,7 +352,7 @@ fun VoiceItem(
                         color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
                     ) {
                         Text(
-                            text = "Online",
+                            text = stringResource(Res.string.voice_network_online),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = 2.dp)
@@ -304,7 +365,7 @@ fun VoiceItem(
         IconButton(onClick = onTest) {
             Icon(
                 imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Test Voice",
+                contentDescription = stringResource(Res.string.voice_test_action),
                 tint = if (isTesting) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -312,7 +373,7 @@ fun VoiceItem(
         CircularToggle(
             isSelected = isEnabled,
             onClick = onToggleEnabled,
-            label = "Enable ${voice.name ?: voice.id}"
+            label = stringResource(Res.string.voice_enable_label, voice.name ?: voice.id)
         )
     }
 }

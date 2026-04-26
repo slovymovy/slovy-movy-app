@@ -13,6 +13,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 @Composable
 fun FeedbackDialog(
@@ -44,7 +46,7 @@ fun FeedbackDialog(
                         modifier = Modifier.size(24.dp)
                     )
                     Text(
-                        text = "Feedback sent",
+                        text = stringResource(Res.string.feedback_dialog_sent_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.SemiBold
                         )
@@ -54,20 +56,20 @@ fun FeedbackDialog(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Thank you! We've created a tracking issue for your feedback. You can follow its progress on GitHub.",
+                        text = stringResource(Res.string.feedback_dialog_sent_message),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     TextButton(
                         onClick = { uriHandler.openUri(resultUrl) },
                         contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text("Track on GitHub")
+                        Text(stringResource(Res.string.feedback_dialog_track_on_github))
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = onDismiss) {
-                    Text("Close")
+                    Text(stringResource(Res.string.common_close))
                 }
             }
         )
@@ -104,7 +106,7 @@ fun FeedbackDialog(
                         maxLines = 6,
                         singleLine = false,
                         enabled = !isSending,
-                        label = { Text("Comment") },
+                        label = { Text(stringResource(Res.string.feedback_dialog_comment_label)) },
                         placeholder = {
                             Text(
                                 text = commentPlaceholder,
@@ -121,17 +123,17 @@ fun FeedbackDialog(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         enabled = !isSending,
-                        label = { Text("Email (optional)") },
+                        label = { Text(stringResource(Res.string.feedback_dialog_email_label)) },
                         placeholder = {
                             Text(
-                                text = "Email (optional)",
+                                text = stringResource(Res.string.feedback_dialog_email_label),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         },
                         shape = MaterialTheme.shapes.small,
                         colors = fieldColors,
                         supportingText = {
-                            Text("May be publicly visible on GitHub")
+                            Text(stringResource(Res.string.feedback_dialog_email_supporting))
                         }
                     )
                     if (error != null) {
@@ -154,9 +156,9 @@ fun FeedbackDialog(
                             strokeWidth = 2.dp
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Sending…")
+                        Text(stringResource(Res.string.feedback_dialog_sending))
                     } else {
-                        Text("Send")
+                        Text(stringResource(Res.string.feedback_dialog_send))
                     }
                 }
             },
@@ -168,7 +170,7 @@ fun FeedbackDialog(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(Res.string.common_cancel))
                 }
             }
         )

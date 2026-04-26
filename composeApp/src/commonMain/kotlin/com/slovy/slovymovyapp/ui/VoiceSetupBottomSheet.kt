@@ -1,9 +1,24 @@
 package com.slovy.slovymovyapp.ui
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
-import androidx.compose.material3.*
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,6 +29,16 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.getPlatform
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.common_later
+import slovymovyapp.composeapp.generated.resources.common_open_system_settings
+import slovymovyapp.composeapp.generated.resources.voice_setup_description
+import slovymovyapp.composeapp.generated.resources.voice_setup_step_android
+import slovymovyapp.composeapp.generated.resources.voice_setup_step_ios
+import slovymovyapp.composeapp.generated.resources.voice_setup_step_other
+import slovymovyapp.composeapp.generated.resources.voice_setup_step_two
+import slovymovyapp.composeapp.generated.resources.voice_setup_title
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,9 +68,9 @@ fun VoiceSetupBottomSheetContent(
     val isAndroid = platform.contains("Android", ignoreCase = true)
 
     val step1Instruction = when {
-        isAndroid -> "Open your phone's text-to-speech settings and download a high-quality voice for ${language.selfName}."
-        isIos -> "Go to your iPhone Settings → Accessibility → Read & Speak → Voices and download a voice for ${language.selfName}."
-        else -> "Download a high-quality voice for ${language.selfName} from your system settings."
+        isAndroid -> stringResource(Res.string.voice_setup_step_android, language.selfName)
+        isIos -> stringResource(Res.string.voice_setup_step_ios, language.selfName)
+        else -> stringResource(Res.string.voice_setup_step_other, language.selfName)
     }
 
     Column(
@@ -66,13 +91,13 @@ fun VoiceSetupBottomSheetContent(
                 modifier = Modifier.size(24.dp)
             )
             Text(
-                text = "Get better pronunciation",
+                text = stringResource(Res.string.voice_setup_title),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
             )
         }
 
         Text(
-            text = "The default voice may sound robotic. Here's how to get a better one:",
+            text = stringResource(Res.string.voice_setup_description),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -80,7 +105,7 @@ fun VoiceSetupBottomSheetContent(
         Spacer(modifier = Modifier.height(AppSpacing.sm))
 
         StepRow(number = 1, text = step1Instruction)
-        StepRow(number = 2, text = "Come back to Open Words Settings → Voices and enable the new voice.")
+        StepRow(number = 2, text = stringResource(Res.string.voice_setup_step_two))
 
         Spacer(modifier = Modifier.height(AppSpacing.sm))
 
@@ -89,7 +114,7 @@ fun VoiceSetupBottomSheetContent(
                 onClick = onOpenSettings,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Open System Settings")
+                Text(stringResource(Res.string.common_open_system_settings))
             }
         }
 
@@ -97,7 +122,7 @@ fun VoiceSetupBottomSheetContent(
             onClick = onLater,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Later")
+            Text(stringResource(Res.string.common_later))
         }
     }
 }

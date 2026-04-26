@@ -21,6 +21,8 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.word.pluralEnding
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 data class LearningLanguageUiState(
     val language: Language,
@@ -46,6 +48,11 @@ fun LearningLanguageCard(
     onCancelDownload: (String) -> Unit,
     onDeleteTranslation: (Language) -> Unit
 ) {
+    val expandedStateDescription = stringResource(Res.string.common_state_expanded)
+    val collapsedStateDescription = stringResource(Res.string.common_state_collapsed)
+    val collapseAction = stringResource(Res.string.common_action_collapse)
+    val expandAction = stringResource(Res.string.common_action_expand)
+
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -65,12 +72,12 @@ fun LearningLanguageCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .semantics {
-                        stateDescription = if (state.isExpanded) "Expanded" else "Collapsed"
+                        stateDescription = if (state.isExpanded) expandedStateDescription else collapsedStateDescription
                     }
                     .clickable(
                         onClick = onToggleExpansion,
                         role = Role.Button,
-                        onClickLabel = if (state.isExpanded) "Collapse" else "Expand"
+                        onClickLabel = if (state.isExpanded) collapseAction else expandAction
                     )
                     .padding(AppSpacing.lg),
                 verticalAlignment = Alignment.CenterVertically
@@ -83,7 +90,10 @@ fun LearningLanguageCard(
                     )
                     Spacer(modifier = Modifier.height(AppSpacing.xs))
                     Text(
-                        text = "Dictionary: ${formatFileSize(state.dictionarySizeBytes)}",
+                        text = stringResource(
+                            Res.string.settings_dictionary_size_with_colon,
+                            formatFileSize(state.dictionarySizeBytes)
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -95,12 +105,30 @@ fun LearningLanguageCard(
                         val downloadPart = when {
                             downloadableCount == 0 -> null
                             downloadedCount == downloadableCount ->
-                                "All $downloadableCount translation${pluralEnding(downloadableCount)} downloaded"
-                            else -> "$downloadedCount of $downloadableCount translation${pluralEnding(downloadableCount)} downloaded"
+                                stringResource(
+                                    Res.string.settings_translations_all_downloaded,
+                                    downloadableCount,
+                                    pluralEnding(downloadableCount)
+                                )
+                            else -> stringResource(
+                                Res.string.settings_translations_partially_downloaded,
+                                downloadedCount,
+                                downloadableCount,
+                                pluralEnding(downloadableCount)
+                            )
                         }
-                        val onlinePart = if (onlineOnlyCount > 0) "$onlineOnlyCount online only" else null
+                        val onlinePart = if (onlineOnlyCount > 0) {
+                            stringResource(Res.string.settings_online_only_count, onlineOnlyCount)
+                        } else {
+                            null
+                        }
                         val summaryText = listOfNotNull(downloadPart, onlinePart).joinToString(", ")
-                            .ifEmpty { "${state.translations.size} translations (online only)" }
+                            .ifEmpty {
+                                stringResource(
+                                    Res.string.settings_translations_online_only,
+                                    state.translations.size
+                                )
+                            }
                         Text(
                             text = summaryText,
                             style = MaterialTheme.typography.bodySmall,
@@ -112,7 +140,10 @@ fun LearningLanguageCard(
                 IconButton(onClick = onRemove) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Remove ${state.language.selfName}",
+                        contentDescription = stringResource(
+                            Res.string.settings_remove_language,
+                            state.language.selfName
+                        ),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -133,7 +164,7 @@ fun LearningLanguageCard(
                     verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
                 ) {
                     Text(
-                        text = "Translations",
+                        text = stringResource(Res.string.settings_translations_title),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -199,13 +230,19 @@ private fun TranslationRow(
                 )
                 val statusText = when {
                     translation.isDownloaded && translation.sizeBytes != null ->
-                        "Downloaded ${formatFileSize(translation.sizeBytes)}"
-                    translation.isDownloaded -> "Downloaded"
-                    isDownloading -> "Downloading..."
+                        stringResource(
+                            Res.string.common_status_downloaded_with_size,
+                            formatFileSize(translation.sizeBytes)
+                        )
+                    translation.isDownloaded -> stringResource(Res.string.common_status_downloaded)
+                    isDownloading -> stringResource(Res.string.common_status_downloading_ellipsis)
                     translation.isDownloadable && translation.sizeBytes != null ->
-                        "Available ${formatFileSize(translation.sizeBytes)}"
-                    translation.isDownloadable -> "Available"
-                    else -> "Online only"
+                        stringResource(
+                            Res.string.common_status_available_with_size,
+                            formatFileSize(translation.sizeBytes)
+                        )
+                    translation.isDownloadable -> stringResource(Res.string.common_status_available)
+                    else -> stringResource(Res.string.common_status_online_only)
                 }
                 Text(
                     text = statusText,
@@ -230,7 +267,10 @@ private fun TranslationRow(
                         IconButton(onClick = onDelete) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete ${translation.targetLanguage.selfName} translation",
+                                contentDescription = stringResource(
+                                    Res.string.settings_delete_translation,
+                                    translation.targetLanguage.selfName
+                                ),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -240,7 +280,10 @@ private fun TranslationRow(
                         IconButton(onClick = onDownload) {
                             Icon(
                                 imageVector = Icons.Default.Download,
-                                contentDescription = "Download ${translation.targetLanguage.selfName} translation",
+                                contentDescription = stringResource(
+                                    Res.string.settings_download_translation,
+                                    translation.targetLanguage.selfName
+                                ),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -249,7 +292,7 @@ private fun TranslationRow(
                     else -> {
                         Icon(
                             imageVector = Icons.Default.Cloud,
-                            contentDescription = "Online only",
+                            contentDescription = stringResource(Res.string.common_status_online_only),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
                         )
@@ -296,7 +339,10 @@ fun AddLanguageCard(
                 if (dictionarySizeBytes != null) {
                     Spacer(modifier = Modifier.height(AppSpacing.xs))
                     Text(
-                        text = "Dictionary ${formatFileSize(dictionarySizeBytes)}",
+                        text = stringResource(
+                            Res.string.settings_dictionary_size,
+                            formatFileSize(dictionarySizeBytes)
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -317,7 +363,10 @@ fun AddLanguageCard(
                     IconButton(onClick = onDownload) {
                         Icon(
                             imageVector = Icons.Default.Download,
-                            contentDescription = "Download ${language.selfName}",
+                            contentDescription = stringResource(
+                                Res.string.settings_download_language,
+                                language.selfName
+                            ),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -335,6 +384,14 @@ fun TranslationLanguageSection(
     onToggleExpanded: () -> Unit,
     onToggleLanguage: (Language) -> Unit
 ) {
+    val expandedStateDescription = stringResource(Res.string.common_state_expanded)
+    val collapsedStateDescription = stringResource(Res.string.common_state_collapsed)
+    val editTranslationsAction = stringResource(Res.string.settings_edit_translation_languages)
+    val collapseAction = stringResource(Res.string.common_action_collapse)
+    val expandAction = stringResource(Res.string.common_action_expand)
+    val selectedState = stringResource(Res.string.common_state_selected)
+    val notSelectedState = stringResource(Res.string.common_state_not_selected)
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -350,12 +407,12 @@ fun TranslationLanguageSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .semantics(mergeDescendants = true) {
-                            stateDescription = "Collapsed"
+                            stateDescription = collapsedStateDescription
                         }
                         .clickable(
                             onClick = onToggleExpanded,
                             role = Role.Button,
-                            onClickLabel = "Edit translation languages"
+                            onClickLabel = editTranslationsAction
                         )
                         .padding(AppSpacing.lg)
                 ) {
@@ -365,9 +422,13 @@ fun TranslationLanguageSection(
                     ) {
                         Text(
                             text = if (selectedLanguages.isEmpty()) {
-                                "No languages selected"
+                                stringResource(Res.string.settings_no_languages_selected)
                             } else {
-                                "${selectedLanguages.size} language${pluralEnding(selectedLanguages.size)} selected"
+                                stringResource(
+                                    Res.string.settings_languages_selected,
+                                    selectedLanguages.size,
+                                    pluralEnding(selectedLanguages.size)
+                                )
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -375,7 +436,7 @@ fun TranslationLanguageSection(
                         )
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Expand",
+                            contentDescription = expandAction,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -402,7 +463,7 @@ fun TranslationLanguageSection(
                         }
                         if (remaining > 0) {
                             Text(
-                                text = "+$remaining more",
+                                text = stringResource(Res.string.settings_languages_more, remaining),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(vertical = AppSpacing.xs)
@@ -416,12 +477,12 @@ fun TranslationLanguageSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .semantics {
-                            stateDescription = "Expanded"
+                            stateDescription = expandedStateDescription
                         }
                         .clickable(
                             onClick = onToggleExpanded,
                             role = Role.Button,
-                            onClickLabel = "Collapse"
+                            onClickLabel = collapseAction
                         )
                         .padding(AppSpacing.lg),
                     verticalAlignment = Alignment.CenterVertically
@@ -455,12 +516,15 @@ fun TranslationLanguageSection(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .semantics(mergeDescendants = true) {
-                                    stateDescription = if (isSelected) "Selected" else "Not selected"
+                                    stateDescription = if (isSelected) selectedState else notSelectedState
                                 }
                                 .clickable(
                                     onClick = { onToggleLanguage(language) },
                                     role = Role.Checkbox,
-                                    onClickLabel = "Toggle ${language.selfName} translation"
+                                    onClickLabel = stringResource(
+                                        Res.string.settings_toggle_translation_for_language,
+                                        language.selfName
+                                    )
                                 )
                                 .padding(vertical = AppSpacing.sm),
                             verticalAlignment = Alignment.CenterVertically
