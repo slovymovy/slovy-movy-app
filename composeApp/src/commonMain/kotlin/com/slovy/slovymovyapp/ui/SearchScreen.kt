@@ -340,9 +340,7 @@ fun SearchScreenContent(
                         query = state.query,
                         onQueryChange = onQueryChange,
                         modifier = Modifier.weight(1f),
-                        placeholder = stringResource(Res.string.search_placeholder),
-                        focusRequester = searchFocusRequester,
-                        onFocusChanged = { isSearchFocused = it }
+                        placeholder = stringResource(Res.string.search_placeholder)
                     )
 
                     // Language filter dropdown
