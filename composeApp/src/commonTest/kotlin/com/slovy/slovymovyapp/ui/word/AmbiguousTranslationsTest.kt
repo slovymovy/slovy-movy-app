@@ -118,6 +118,30 @@ class AmbiguousTranslationsTest {
     }
 
     @Test
+    fun clarificationRow_usesIdxOrder() {
+        val translations = listOf(
+            LanguageCardTranslation(targetLangWord = "zeta", idx = 2),
+            LanguageCardTranslation(targetLangWord = "alpha", idx = 1)
+        )
+        val annotated = buildClarificationRow(translations, emptySet(), multiLang = false)
+        assertEquals("alpha, zeta", annotated.text)
+    }
+
+    @Test
+    fun translationsHeader_usesIdxOrder() {
+        val sense = sense(
+            "1",
+            mapOf(
+                Language.ENGLISH to listOf(
+                    LanguageCardTranslation(targetLangWord = "zeta", idx = 2),
+                    LanguageCardTranslation(targetLangWord = "alpha", idx = 1)
+                )
+            )
+        )
+        assertEquals("alpha, zeta", sense.translationsHeader())
+    }
+
+    @Test
     fun duplicate_entries_within_sense_treated_as_single_word() {
         // same word listed twice in one sense — should still match a sense with it once
         val senses = listOf(
