@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.slovy.slovymovyapp"
-version = "1.0.0"
+version = rootProject.extra["versionName"] as String
 application {
     mainClass.set("com.slovy.slovymovyapp.ApplicationKt")
 

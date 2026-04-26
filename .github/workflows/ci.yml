@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Free disk space
         uses: jlumbroso/free-disk-space@main
@@ -72,7 +72,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: setup Java
         uses: actions/setup-java@v5
@@ -110,7 +110,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: setup Java
         uses: actions/setup-java@v5
@@ -161,7 +161,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Free disk space
         uses: jlumbroso/free-disk-space@main
@@ -249,13 +249,13 @@ jobs:
 
   tests-macos-arm64:
     timeout-minutes: 30
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: setup Java
         uses: actions/setup-java@v5

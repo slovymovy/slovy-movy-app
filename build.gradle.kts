@@ -15,3 +15,7 @@ plugins {
     alias(libs.plugins.googleServices) apply false
 }
 
+val gitCommitCount = providers.of(GitCommitCountValueSource::class) {}.get()
+val appVersionBase = libs.versions.appVersionBase.get()
+extra["versionCode"] = gitCommitCount
+extra["versionName"] = "$appVersionBase.$gitCommitCount"

@@ -6,11 +6,12 @@ import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvider
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.generated.AppVersion
 
 fun main() = application {
     val buildConfig = AppBuildConfig(
-        versionName = "1.0.0",
-        versionCode = 17, // version
+        versionName = AppVersion.NAME,
+        versionCode = AppVersion.CODE,
         isDebug = false,
         applicationId = "com.slovy.slovymovyapp"
     )
