@@ -24,6 +24,8 @@ import androidx.lifecycle.ViewModel
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 data class WelcomeUiState(
     val isStarting: Boolean = false
@@ -81,7 +83,7 @@ fun WelcomeScreenContent(
                 Spacer(modifier = Modifier.height(AppSpacing.xxxl))
 
                 Text(
-                    text = "OpenWords",
+                    text = stringResource(Res.string.common_app_name),
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontFamily = FontFamily.Default,
                         fontWeight = FontWeight.Bold
@@ -92,7 +94,7 @@ fun WelcomeScreenContent(
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
 
                 Text(
-                    text = "Deep-dive dictionary\nfor committed learners like you.",
+                    text = stringResource(Res.string.welcome_tagline),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontStyle = FontStyle.Italic
@@ -109,20 +111,20 @@ fun WelcomeScreenContent(
                 ) {
                     SellingPointCard(
                         icon = Icons.Outlined.Lightbulb,
-                        title = "Beyond one-word translations",
-                        description = "Find all meanings, word frequency, common phrases, and real-world examples."
+                        title = stringResource(Res.string.welcome_selling_point_translations_title),
+                        description = stringResource(Res.string.welcome_selling_point_translations_description)
                     )
 
                     SellingPointCard(
                         icon = Icons.Outlined.FavoriteBorder,
-                        title = "Your Collection",
-                        description = "Save words to your personal library and build your vocabulary locally."
+                        title = stringResource(Res.string.welcome_selling_point_collection_title),
+                        description = stringResource(Res.string.welcome_selling_point_collection_description)
                     )
 
                     SellingPointCard(
                         icon = Icons.Outlined.Shield,
-                        title = "No ads, no subscription",
-                        description = "Access the full experience without paywalls. Essential data stays on your device."
+                        title = stringResource(Res.string.welcome_selling_point_no_ads_title),
+                        description = stringResource(Res.string.welcome_selling_point_no_ads_description)
                     )
                 }
 
@@ -150,7 +152,7 @@ fun WelcomeScreenContent(
                     )
                 } else {
                     Text(
-                        text = "Explore Now",
+                        text = stringResource(Res.string.welcome_cta_explore_now),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold
                         )

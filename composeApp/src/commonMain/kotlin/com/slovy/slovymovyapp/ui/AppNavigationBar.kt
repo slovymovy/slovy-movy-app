@@ -13,6 +13,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 enum class AppScreen {
     SEARCH,
@@ -30,6 +32,11 @@ fun AppNavigationBar(
     wordDetailLabel: String? = null,
     onNavigateToSettings: () -> Unit = {}
 ) {
+    val searchLabel = stringResource(Res.string.nav_search)
+    val favoritesLabel = stringResource(Res.string.nav_favorites)
+    val wordDetailLabelText = stringResource(Res.string.nav_word_detail)
+    val settingsLabel = stringResource(Res.string.nav_settings)
+
     val itemColors = NavigationBarItemDefaults.colors(
         indicatorColor = Color.Transparent,
         selectedIconColor = MaterialTheme.colorScheme.primary,
@@ -52,12 +59,12 @@ fun AppNavigationBar(
                     } else {
                         Icons.Outlined.Search
                     },
-                    contentDescription = "Search"
+                    contentDescription = searchLabel
                 )
             },
             label = {
                 Text(
-                    "Search",
+                    searchLabel,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall
@@ -75,12 +82,12 @@ fun AppNavigationBar(
                     } else {
                         Icons.Outlined.FavoriteBorder
                     },
-                    contentDescription = "Favorites"
+                    contentDescription = favoritesLabel
                 )
             },
             label = {
                 Text(
-                    "Favorites",
+                    favoritesLabel,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall
@@ -98,12 +105,12 @@ fun AppNavigationBar(
                     } else {
                         Icons.Outlined.Book
                     },
-                    contentDescription = "Word Detail"
+                    contentDescription = wordDetailLabelText
                 )
             },
             label = {
                 Text(
-                    wordDetailLabel ?: "Word Detail",
+                    wordDetailLabel ?: wordDetailLabelText,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall
@@ -122,12 +129,12 @@ fun AppNavigationBar(
                     } else {
                         Icons.Outlined.Settings
                     },
-                    contentDescription = "Settings"
+                    contentDescription = settingsLabel
                 )
             },
             label = {
                 Text(
-                    "Settings",
+                    settingsLabel,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall

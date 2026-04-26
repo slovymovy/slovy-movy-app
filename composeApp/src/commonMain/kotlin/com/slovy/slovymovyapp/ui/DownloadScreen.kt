@@ -35,6 +35,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 data class DownloadItem(
     val label: String,
@@ -202,7 +204,7 @@ class DownloadViewModel(
 @Composable
 fun DownloadScreen(
     viewModel: DownloadViewModel,
-    description: String = "Setting up your library",
+    description: String? = null,
     onLaterClick: () -> Unit = {}
 ) {
     DownloadScreenContent(
@@ -224,7 +226,7 @@ fun DownloadScreen(
 fun DownloadScreenContent(
     state: DownloadUiState,
     scrollState: ScrollState = ScrollState(0),
-    description: String = "Setting up your library",
+    description: String? = null,
     hadConfirmation: Boolean = false,
     onDownloadClick: () -> Unit = {},
     onLaterClick: () -> Unit = {},
@@ -233,6 +235,7 @@ fun DownloadScreenContent(
     onCloseClick: () -> Unit = {},
     onErrorLaterClick: () -> Unit = {},
 ) {
+    val descriptionText = description ?: stringResource(Res.string.download_description_setting_up_library)
     val hasActions = state is DownloadUiState.ReadyToDownload ||
             state is DownloadUiState.Running ||
             state is DownloadUiState.Failed ||
@@ -261,7 +264,7 @@ fun DownloadScreenContent(
                                 )
                             ) {
                                 Text(
-                                    "Download $totalSize",
+                                    stringResource(Res.string.download_action_download_size, totalSize),
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.SemiBold
                                     )
@@ -272,7 +275,7 @@ fun DownloadScreenContent(
 
                             TextButton(onClick = onLaterClick) {
                                 Text(
-                                    "Later",
+                                    stringResource(Res.string.common_later),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -281,7 +284,7 @@ fun DownloadScreenContent(
                         is DownloadUiState.Running -> {
                             TextButton(onClick = onCancelClick) {
                                 Text(
-                                    "Cancel",
+                                    stringResource(Res.string.common_cancel),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -289,14 +292,14 @@ fun DownloadScreenContent(
 
                         is DownloadUiState.Failed -> {
                             OutlinedButton(onClick = onRetryClick) {
-                                Text("Retry")
+                                Text(stringResource(Res.string.common_retry))
                             }
 
                             Spacer(Modifier.height(AppSpacing.sm))
 
                             TextButton(onClick = onErrorLaterClick) {
                                 Text(
-                                    "Later",
+                                    stringResource(Res.string.common_later),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -305,7 +308,7 @@ fun DownloadScreenContent(
                         is DownloadUiState.Cancelled -> {
                             TextButton(onClick = onCloseClick) {
                                 Text(
-                                    "Close",
+                                    stringResource(Res.string.common_close),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -327,21 +330,21 @@ fun DownloadScreenContent(
 
             val (title, subtitle) = when (state) {
                 is DownloadUiState.ReadyToDownload ->
-                    "Ready to Download" to "You need these dictionaries to get all set."
+                    stringResource(Res.string.download_title_ready) to stringResource(Res.string.download_subtitle_ready)
 
                 is DownloadUiState.Failed ->
-                    "Download Failed" to "Something went wrong. Please try again."
+                    stringResource(Res.string.download_title_failed) to stringResource(Res.string.download_subtitle_failed)
 
                 is DownloadUiState.Cancelled ->
-                    "Download Cancelled" to "You can retry from Settings."
+                    stringResource(Res.string.download_title_cancelled) to stringResource(Res.string.download_subtitle_cancelled)
 
                 is DownloadUiState.Done ->
-                    "All Set" to "Your library is ready."
+                    stringResource(Res.string.download_title_done) to stringResource(Res.string.download_subtitle_done)
 
                 else -> if (hadConfirmation) {
-                    "Downloading" to "Getting your library ready.\nThis may take a moment."
+                    stringResource(Res.string.download_title_downloading) to stringResource(Res.string.download_subtitle_downloading)
                 } else {
-                    "Setting Up" to "Getting your library ready.\nWill take a moment."
+                    stringResource(Res.string.download_title_setting_up) to stringResource(Res.string.download_subtitle_setting_up)
                 }
             }
 
@@ -379,14 +382,15 @@ fun DownloadScreenContent(
 
             when (state) {
                 is DownloadUiState.Loading -> {
+                    val loadingInfoContentDescription = stringResource(Res.string.download_content_desc_loading_info)
                     CircularProgressIndicator(
                         modifier = Modifier.semantics {
-                            contentDescription = "Loading download information"
+                            contentDescription = loadingInfoContentDescription
                         }
                     )
                     Spacer(Modifier.height(AppSpacing.lg))
                     Text(
-                        text = "Preparing...",
+                        text = stringResource(Res.string.download_preparing),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -394,8 +398,11 @@ fun DownloadScreenContent(
 
                 is DownloadUiState.ReadyToDownload -> {
                     state.items.forEach { item ->
-                        val itemDescription =
-                            "${item.label}, ${formatFileSize(item.sizeBytes)}"
+                        val itemDescription = stringResource(
+                            Res.string.download_item_accessibility,
+                            item.label,
+                            formatFileSize(item.sizeBytes)
+                        )
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -441,14 +448,15 @@ fun DownloadScreenContent(
                 }
 
                 is DownloadUiState.Idle -> {
+                    val preparingContentDescription = stringResource(Res.string.download_content_desc_preparing)
                     CircularProgressIndicator(
                         modifier = Modifier.semantics {
-                            contentDescription = "Preparing download"
+                            contentDescription = preparingContentDescription
                         }
                     )
                     Spacer(Modifier.height(AppSpacing.lg))
                     Text(
-                        text = "Preparing...",
+                        text = stringResource(Res.string.download_preparing),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -456,9 +464,9 @@ fun DownloadScreenContent(
 
                 is DownloadUiState.Running -> {
                     val progressDescription = if (state.percent >= 0) {
-                        "Downloading, ${state.percent} percent complete"
+                        stringResource(Res.string.download_progress_with_percent, state.percent)
                     } else {
-                        "Downloading"
+                        stringResource(Res.string.download_title_downloading)
                     }
                     LinearWavyProgressIndicator(
                         progress = { state.percent / 100f },
@@ -469,7 +477,7 @@ fun DownloadScreenContent(
                     Spacer(Modifier.height(AppSpacing.lg))
                     val pct = if (state.percent >= 0) "${state.percent}%" else ""
                     Text(
-                        text = "$description... $pct",
+                        text = stringResource(Res.string.download_running_status, descriptionText, pct),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -494,7 +502,7 @@ fun DownloadScreenContent(
 
                 is DownloadUiState.Cancelled -> {
                     Text(
-                        text = "Download cancelled",
+                        text = stringResource(Res.string.download_state_cancelled),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -502,7 +510,7 @@ fun DownloadScreenContent(
 
                 is DownloadUiState.Done -> {
                     Text(
-                        text = "Download completed",
+                        text = stringResource(Res.string.download_state_completed),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )

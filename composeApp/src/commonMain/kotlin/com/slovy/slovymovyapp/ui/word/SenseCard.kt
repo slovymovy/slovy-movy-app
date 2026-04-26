@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 import kotlin.text.Typography.bullet
 
 data class SenseCardData(
@@ -99,9 +101,9 @@ internal fun SenseCard(
                             }
                         }
 
-                        data.loading -> LoadingPlaceholder("Loading meaning…")
+                        data.loading -> LoadingPlaceholder(stringResource(Res.string.word_details_loading_meaning))
                         data.translationError != null -> ErrorPlaceholder(data.translationError)
-                        data.translationLoading -> LoadingPlaceholder("Preparing translation…")
+                        data.translationLoading -> LoadingPlaceholder(stringResource(Res.string.word_details_preparing_translation))
                     }
                     if (data.showLemma) {
                         HighlightedText(
@@ -140,7 +142,7 @@ internal fun SenseCard(
                         }
                     } else if (data.error == null && !data.loading) {
                         HighlightedText(
-                            text = "Meaning will load when expanded",
+                            text = stringResource(Res.string.word_details_meaning_load_when_expanded),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -168,16 +170,16 @@ internal fun SenseCard(
                                 } else {
                                     LocalContentColor.current
                                 },
-                                contentDescription = "Favorites"
+                                contentDescription = stringResource(Res.string.search_content_desc_favorite)
                             )
                         }
                     }
                     Icon(
                         imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
                         contentDescription = if (expanded) {
-                            "Collapse sense"
+                            stringResource(Res.string.word_details_collapse_sense)
                         } else {
-                            "Expand sense"
+                            stringResource(Res.string.word_details_expand_sense)
                         },
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -199,7 +201,7 @@ internal fun SenseCard(
                         ) {
                             if (sense.targetLangDefinitions.isNotEmpty()) {
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    SectionLabel("Definition")
+                                    SectionLabel(stringResource(Res.string.word_details_definition))
                                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                         HighlightedText(
                                             text = sense.targetLangDefinitions.map { definition ->
@@ -231,7 +233,7 @@ internal fun SenseCard(
 
                             if (sense.examples.isNotEmpty()) {
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    SectionLabel(text = "Examples")
+                                    SectionLabel(text = stringResource(Res.string.word_details_examples))
                                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                                         sense.examples.forEach { ex ->
                                             ExampleItem(
@@ -244,7 +246,7 @@ internal fun SenseCard(
                             }
 
                             EntryList(
-                                "Common phrases",
+                                stringResource(Res.string.word_details_common_phrases),
                                 sense.commonPhrases,
                                 MaterialTheme.colorScheme.primaryContainer,
                                 MaterialTheme.colorScheme.onPrimaryContainer,
@@ -254,7 +256,7 @@ internal fun SenseCard(
                             )
                             val (synonymBg, synonymText) = colorsForSynonyms()
                             EntryList(
-                                "Synonyms",
+                                stringResource(Res.string.word_details_synonyms),
                                 sense.synonyms,
                                 synonymBg,
                                 synonymText,
@@ -264,7 +266,7 @@ internal fun SenseCard(
                             )
                             val (antonymBg, antonymText) = colorsForAntonyms()
                             EntryList(
-                                "Antonyms",
+                                stringResource(Res.string.word_details_antonyms),
                                 sense.antonyms,
                                 antonymBg,
                                 antonymText,
@@ -296,7 +298,7 @@ internal fun SenseCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "See full word",
+                            text = stringResource(Res.string.word_details_see_full_word),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -320,7 +322,7 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        SectionLabel("Usage Context")
+        SectionLabel(stringResource(Res.string.word_details_usage_context))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -328,6 +330,7 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             traits.forEach { trait ->
+                val traitName = stringResource(trait.traitType.displayName)
                 val annotatedText = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
@@ -335,7 +338,7 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     ) {
-                        append(trait.traitType.displayName)
+                        append(traitName)
                     }
                     if (trait.comment.isNotBlank()) {
                         append(": ")
@@ -437,10 +440,10 @@ internal fun LevelAndFrequencyRow(
         val (lc, lcc) = colorsForLevel(level)
         val (fc, fcc) = colorsForFrequency(frequency)
         MetaBadge(text = level.name, containerColor = lc, contentColor = lcc)
-        MetaBadge(text = frequency.label, containerColor = fc, contentColor = fcc)
+        MetaBadge(text = stringResource(frequency.label), containerColor = fc, contentColor = fcc)
         if (nameType != null && nameType != NameType.NO) {
             val (nc, ncc) = colorsForNameType(nameType)
-            MetaBadge(text = nameType.displayName, containerColor = nc, contentColor = ncc)
+            MetaBadge(text = stringResource(nameType.displayName), containerColor = nc, contentColor = ncc)
         }
     }
 }

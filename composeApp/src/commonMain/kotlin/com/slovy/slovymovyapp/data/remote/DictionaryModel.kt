@@ -2,6 +2,9 @@ package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.forms.SchemeView
+import org.jetbrains.compose.resources.StringResource
+import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.*
 
 data class LanguageCard(
     val lemma: String,
@@ -34,26 +37,26 @@ enum class LearnerLevel {
     C2;
 }
 
-enum class SenseFrequency(val label: String) {
-    HIGH("High"),
-    MIDDLE("Middle"),
-    LOW("Low"),
-    VERY_LOW("Very low");
+enum class SenseFrequency(val label: StringResource) {
+    HIGH(Res.string.sense_frequency_high),
+    MIDDLE(Res.string.sense_frequency_middle),
+    LOW(Res.string.sense_frequency_low),
+    VERY_LOW(Res.string.sense_frequency_very_low);
 }
 
-enum class PartOfSpeech(val short: String) {
-    ARTICLE("Art"),
-    NOUN("Noun"),
-    NAME("Name"),
-    VERB("Verb"),
-    ADJECTIVE("Adj"),
-    ADVERB("Adv"),
-    PRONOUN("Pron"),
-    PREPOSITION("Prep"),
-    CONJUNCTION("Conj"),
-    INTERJECTION("Interj"),
-    DETERMINER("Det"),
-    NUMERAL("Num");
+enum class PartOfSpeech(val short: String, val displayName: StringResource) {
+    ARTICLE("Art", Res.string.pos_article),
+    NOUN("Noun", Res.string.pos_noun),
+    NAME("Name", Res.string.pos_name),
+    VERB("Verb", Res.string.pos_verb),
+    ADJECTIVE("Adj", Res.string.pos_adjective),
+    ADVERB("Adv", Res.string.pos_adverb),
+    PRONOUN("Pron", Res.string.pos_pronoun),
+    PREPOSITION("Prep", Res.string.pos_preposition),
+    CONJUNCTION("Conj", Res.string.pos_conjunction),
+    INTERJECTION("Interj", Res.string.pos_interjection),
+    DETERMINER("Det", Res.string.pos_determiner),
+    NUMERAL("Num", Res.string.pos_numeral);
 
     fun capitalized(): String {
         return name.lowercase()
@@ -61,29 +64,29 @@ enum class PartOfSpeech(val short: String) {
     }
 }
 
-enum class NameType(val displayName: String) {
-    NO("No"),
-    PERSON_NAME("Person Name"),
-    PLACE_NAME("Place Name"),
-    GEOGRAPHICAL_FEATURE("Geographical Feature"),
-    ORGANIZATION_NAME("Organization Name"),
-    FICTIONAL_NAME("Fictional Name"),
-    HISTORICAL_NAME("Historical Name"),
-    EVENT_NAME("Event Name"),
-    WORK_OF_ART_NAME("Work Of Art Name"),
-    LANGUAGE_NAME("Language Name"),
-    ETHNIC_GROUP_NAME("Ethnic Group Name"),
-    DEITY_OR_RELIGIOUS_NAME("Deity or Religious Name"),
-    RELIGION_OR_PHILOSOPHY_NAME("Religion or Philosophy Name"),
-    ASTRONOMICAL_NAME("Astronomical Name"),
-    TITLE_OR_HONORIFIC_NAME("Title or Honorific Name"),
-    BRAND_OR_PRODUCT_NAME("Brand or Product Name"),
-    TECHNOLOGY_OR_SOFTWARE_NAME("Technology or Software Name"),
-    GAME_OR_SPORT_NAME("Game or Sport Name"),
-    IDEOLOGY_OR_MOVEMENT_NAME("Ideology or Movement Name"),
-    MYTHOLOGICAL_OR_ASTROLOGICAL_ENTITY("Mythological or Astrological Entity"),
-    DOCUMENT_OR_PROGRAM_NAME("Document or Program Name"),
-    OTHER("Other");
+enum class NameType(val displayName: StringResource) {
+    NO(Res.string.name_type_no),
+    PERSON_NAME(Res.string.name_type_person_name),
+    PLACE_NAME(Res.string.name_type_place_name),
+    GEOGRAPHICAL_FEATURE(Res.string.name_type_geographical_feature),
+    ORGANIZATION_NAME(Res.string.name_type_organization_name),
+    FICTIONAL_NAME(Res.string.name_type_fictional_name),
+    HISTORICAL_NAME(Res.string.name_type_historical_name),
+    EVENT_NAME(Res.string.name_type_event_name),
+    WORK_OF_ART_NAME(Res.string.name_type_work_of_art_name),
+    LANGUAGE_NAME(Res.string.name_type_language_name),
+    ETHNIC_GROUP_NAME(Res.string.name_type_ethnic_group_name),
+    DEITY_OR_RELIGIOUS_NAME(Res.string.name_type_deity_or_religious_name),
+    RELIGION_OR_PHILOSOPHY_NAME(Res.string.name_type_religion_or_philosophy_name),
+    ASTRONOMICAL_NAME(Res.string.name_type_astronomical_name),
+    TITLE_OR_HONORIFIC_NAME(Res.string.name_type_title_or_honorific_name),
+    BRAND_OR_PRODUCT_NAME(Res.string.name_type_brand_or_product_name),
+    TECHNOLOGY_OR_SOFTWARE_NAME(Res.string.name_type_technology_or_software_name),
+    GAME_OR_SPORT_NAME(Res.string.name_type_game_or_sport_name),
+    IDEOLOGY_OR_MOVEMENT_NAME(Res.string.name_type_ideology_or_movement_name),
+    MYTHOLOGICAL_OR_ASTROLOGICAL_ENTITY(Res.string.name_type_mythological_or_astrological_entity),
+    DOCUMENT_OR_PROGRAM_NAME(Res.string.name_type_document_or_program_name),
+    OTHER(Res.string.name_type_other);
 }
 
 data class LanguageCardResponseSense(
@@ -112,16 +115,16 @@ data class LanguageCardTranslation(
     val idx: Long = 0
 )
 
-enum class TraitType(val displayName: String) {
-    DATED("Dated"),
-    COLLOQUIAL("Colloquial"),
-    OBSOLETE("Obsolete"),
-    DIALECTAL("Dialectal"),
-    ARCHAIC("Archaic"),
-    REGIONAL("Regional"),
-    SLANG("Slang"),
-    FORM("Form"),
-    SURNAME("Surname");
+enum class TraitType(val displayName: StringResource) {
+    DATED(Res.string.trait_type_dated),
+    COLLOQUIAL(Res.string.trait_type_colloquial),
+    OBSOLETE(Res.string.trait_type_obsolete),
+    DIALECTAL(Res.string.trait_type_dialectal),
+    ARCHAIC(Res.string.trait_type_archaic),
+    REGIONAL(Res.string.trait_type_regional),
+    SLANG(Res.string.trait_type_slang),
+    FORM(Res.string.trait_type_form),
+    SURNAME(Res.string.trait_type_surname);
 }
 
 data class LanguageCardTrait(

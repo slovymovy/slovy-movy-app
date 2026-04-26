@@ -149,6 +149,41 @@ private fun MyScreenPreview(
   ) { ... }
   ```
 
+### Localization
+
+- Localization uses Compose Multiplatform resources from `composeApp/src/commonMain/composeResources/`.
+- Base locale is `values/strings.xml`.
+- Supported locales are separate folders (for example `values-ru`, `values-nl`, `values-pl`).
+- App language follows the OS locale (no in-app language override).
+
+#### Adding or changing text
+
+- For UI text in composables, use `stringResource(Res.string.<key>)`.
+- Localize accessibility text too (`contentDescription`, `onClickLabel`, `stateDescription`).
+- For parameterized strings, use placeholders in XML (`%1$s`, `%1$d`) and pass args from code.
+- If pluralization is needed, add `<plurals>` resources instead of manual `"s"` suffix logic.
+- Keep user-visible copy out of Kotlin literals in `commonMain` UI code.
+- Preview-only literals are acceptable in `@Preview` functions.
+
+#### Non-composable and shared text
+
+- `stringResource(...)` is composable-only. For non-composable flows, prefer passing localized text from UI layer.
+- If text must be represented before rendering, use the `UiText` pattern in
+  `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/i18n/` and resolve at the composable boundary.
+
+#### Platform-specific localization
+
+- Android platform UI surfaces (notifications, foreground service channel names, chooser titles) must be localized too.
+- iOS app metadata shown by the system (for example display name and permission copy) should use localized
+  `InfoPlist.strings` where applicable.
+- Keep Compose resources as source of truth for shared UI, and use native platform resources only for
+  platform-owned surfaces.
+
+#### Quality gates
+
+- Key parity check task: `gradlew :composeApp:verifyLocalizationKeys`.
+- CI runs the same parity task and fails if any locale is missing/has extra keys vs base `values/`.
+
 ### SVG Icons (Valkyrie)
 
 - The [Valkyrie Gradle plugin](https://github.com/ComposeGears/Valkyrie) converts SVG files into Compose `ImageVector`

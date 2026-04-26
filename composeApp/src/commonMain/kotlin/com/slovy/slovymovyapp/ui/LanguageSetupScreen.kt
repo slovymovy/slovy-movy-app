@@ -34,6 +34,8 @@ import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 data class LanguageSetupUiState(
     val isLoading: Boolean = true,
@@ -157,7 +159,7 @@ fun LanguageSetupScreenContent(
             ) {
                 Text(state.errorMessage, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
                 Button(onClick = onRetry, modifier = Modifier.padding(top = AppSpacing.lg)) {
-                    Text("Retry")
+                    Text(stringResource(Res.string.common_retry))
                 }
             }
         } else {
@@ -168,7 +170,7 @@ fun LanguageSetupScreenContent(
                 Spacer(Modifier.height(AppSpacing.xxxl))
 
                 Text(
-                    text = "Select Languages",
+                    text = stringResource(Res.string.language_setup_title),
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontFamily = FontFamily.Default,
                         fontWeight = FontWeight.Bold
@@ -179,7 +181,7 @@ fun LanguageSetupScreenContent(
                 Spacer(Modifier.height(AppSpacing.sm))
 
                 Text(
-                    text = "Choose what you're learning and your translation preferences.",
+                    text = stringResource(Res.string.language_setup_subtitle),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontStyle = FontStyle.Italic
@@ -193,7 +195,7 @@ fun LanguageSetupScreenContent(
                 // I'm learning... section
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "I'm learning...",
+                        text = stringResource(Res.string.language_setup_learning_label),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Medium
                         )
@@ -222,7 +224,7 @@ fun LanguageSetupScreenContent(
                                     Text(state.learningLanguage?.flag ?: "", fontSize = 20.sp)
                                     Spacer(Modifier.width(AppSpacing.md))
                                     Text(
-                                        text = state.learningLanguage?.selfName ?: "Select language",
+                                        text = state.learningLanguage?.selfName ?: stringResource(Res.string.language_setup_select_language),
                                         style = MaterialTheme.typography.bodyLarge,
                                         color = if (state.learningLanguage != null)
                                             MaterialTheme.colorScheme.onSurface
@@ -266,7 +268,7 @@ fun LanguageSetupScreenContent(
                 // My native language(s) section
                 Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     Text(
-                        text = "Translate into:",
+                        text = stringResource(Res.string.language_setup_translate_into),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Medium
                         )
@@ -335,7 +337,7 @@ fun LanguageSetupScreenContent(
                 Spacer(Modifier.height(AppSpacing.lg))
 
                 Text(
-                    text = "Update anytime in Settings",
+                    text = stringResource(Res.string.language_setup_update_anytime),
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontStyle = FontStyle.Italic
@@ -355,7 +357,7 @@ fun LanguageSetupScreenContent(
                     )
                 ) {
                     Text(
-                        "Next",
+                        stringResource(Res.string.common_next),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold
                         )

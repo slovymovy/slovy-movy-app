@@ -52,6 +52,8 @@ import com.slovy.slovymovyapp.ui.word.colorForLemma
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 import kotlin.uuid.Uuid
 
 data class SearchUiState(
@@ -346,7 +348,7 @@ fun SearchScreenContent(
                         query = state.query,
                         onQueryChange = onQueryChange,
                         modifier = Modifier.weight(1f),
-                        placeholder = "Search your word...",
+                        placeholder = stringResource(Res.string.search_placeholder),
                         focusRequester = searchFocusRequester,
                         onFocusChanged = { isSearchFocused = it }
                     )
@@ -472,7 +474,10 @@ private fun SearchResultCard(
         modifier = Modifier
             .fillMaxWidth()
             .semantics { role = Role.Button }
-            .clickable(onClickLabel = "Open ${item.display}", onClick = onClick),
+            .clickable(
+                onClickLabel = stringResource(Res.string.search_open_item, item.display),
+                onClick = onClick
+            ),
         shape = MaterialTheme.shapes.small,
         colors = CardDefaults.outlinedCardColors(containerColor = containerColor),
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -509,7 +514,7 @@ private fun SearchResultCard(
                 if (item.isFavorite) {
                     Icon(
                         imageVector = Icons.Filled.Favorite,
-                        contentDescription = "Favorite",
+                        contentDescription = stringResource(Res.string.search_content_desc_favorite),
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(20.dp)
                     )
@@ -517,7 +522,7 @@ private fun SearchResultCard(
                 if (item.onlineOnly) {
                     Icon(
                         imageVector = DownloadVector,
-                        contentDescription = "Not downloaded",
+                        contentDescription = stringResource(Res.string.search_content_desc_not_downloaded),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
@@ -543,7 +548,7 @@ private fun EmptySearchState(
     ) {
         if (wordSuggestions.isNotEmpty()) {
             Text(
-                text = "Explore".uppercase(),
+                text = stringResource(Res.string.search_section_explore).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.2.sp
@@ -568,7 +573,7 @@ private fun EmptySearchState(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Pull down for new words",
+                    text = stringResource(Res.string.search_pull_to_refresh_hint),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Medium,
                         fontSize = 11.5.sp
@@ -593,7 +598,7 @@ private fun EmptySearchState(
                     modifier = Modifier.size(13.dp)
                 )
                 Text(
-                    text = "Recently saved".uppercase(),
+                    text = stringResource(Res.string.search_section_recently_saved).uppercase(),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.2.sp
@@ -608,7 +613,7 @@ private fun EmptySearchState(
 
         if (wordSuggestions.isEmpty() && favoriteLemmas.isEmpty()) {
             Text(
-                text = "Start typing to search",
+                text = stringResource(Res.string.search_empty_start_typing),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
@@ -627,7 +632,10 @@ private fun SuggestionCard(lemma: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .semantics { role = Role.Button }
-            .clickable(onClickLabel = "Open $lemma", onClick = onClick),
+            .clickable(
+                onClickLabel = stringResource(Res.string.search_open_item, lemma),
+                onClick = onClick
+            ),
         shape = MaterialTheme.shapes.small,
         colors = CardDefaults.outlinedCardColors(containerColor = containerColor),
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -659,7 +667,7 @@ private fun NoDictionaryState(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No dictionary downloaded",
+            text = stringResource(Res.string.search_no_dictionary_title),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -667,7 +675,7 @@ private fun NoDictionaryState(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Download a dictionary to start searching for words",
+            text = stringResource(Res.string.search_no_dictionary_description),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -676,7 +684,7 @@ private fun NoDictionaryState(
         Spacer(modifier = Modifier.height(24.dp))
 
         FilledTonalButton(onClick = onNavigateToSettings) {
-            Text("Go to Settings")
+            Text(stringResource(Res.string.search_go_to_settings))
         }
     }
 }
@@ -697,8 +705,8 @@ private fun NoResultsState(query: String) {
                     modifier = Modifier.size(140.dp)
                 )
             },
-            title = "No results for \"$query\"",
-            description = "Try a different spelling or search term?"
+            title = stringResource(Res.string.search_no_results_title, query),
+            description = stringResource(Res.string.search_no_results_description)
         )
     }
 }

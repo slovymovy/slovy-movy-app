@@ -25,11 +25,14 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.forms.GridCell
+import com.slovy.slovymovyapp.data.forms.TagMapping
 import com.slovy.slovymovyapp.data.remote.FormsSchemeView
 import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.ui.components.PartOfSpeechIndicator
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -88,10 +91,21 @@ private fun resolvedFormValue(view: FormsSchemeView, sourceRow: Int, sourceColum
 }
 
 @Composable
+private fun resolveHeaderLabel(label: String): String {
+    val lower = label.lowercase()
+    val tagRes = (TagMapping.resolve(lower))
+        ?.let { formTagDisplayNames[it] }
+    if (tagRes != null) return stringResource(tagRes)
+    val schemeRes = schemeLabelResources[label] ?: schemeLabelResources[lower]
+    if (schemeRes != null) return stringResource(schemeRes)
+    return label
+}
+
+@Composable
 private fun FormsGridCell(cell: GridCell, value: String?) {
     val text = when (cell) {
-        is GridCell.RowHeader -> cell.label
-        is GridCell.ColHeader -> cell.label
+        is GridCell.RowHeader -> resolveHeaderLabel(cell.label)
+        is GridCell.ColHeader -> resolveHeaderLabel(cell.label)
         is GridCell.Data -> value ?: "?"
         is GridCell.Empty -> ""
     }
@@ -364,12 +378,16 @@ private fun FormsModeSelector(
     ) {
         formsViews.forEach { formsView ->
             val viewId = formsView.view.viewId
+            val description = formsView.view.description
+            val localizedDescription = schemeLabelResources[description]
+                ?.let { stringResource(it) }
+                ?: description.ifBlank { viewId }
             FilterChip(
                 selected = selectedViewId == viewId,
                 onClick = { onFormsViewSelect(viewId) },
                 label = {
                     Text(
-                        text = formsView.view.description.ifBlank { viewId },
+                        text = localizedDescription,
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -442,13 +460,17 @@ private fun GrammarSection(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "Grammar forms",
+                    text = stringResource(Res.string.word_details_grammar_forms),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Icon(
                     imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
-                    contentDescription = if (expanded) "Hide forms" else "Show forms",
+                    contentDescription = if (expanded) {
+                        stringResource(Res.string.word_details_hide_forms)
+                    } else {
+                        stringResource(Res.string.word_details_show_forms)
+                    },
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
@@ -506,7 +528,7 @@ internal fun EntryCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             PartOfSpeechIndicator(
-                partOfSpeech = entry.pos.name,
+                pos = entry.pos,
                 meaningCount = if (showContent) entry.senses.size else null,
                 cardLoading = cardLoading,
                 cardError = cardError
@@ -532,12 +554,16 @@ internal fun EntryCard(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Outlined.LibraryBooks,
-                                contentDescription = if (entryState.formsExpanded) "Hide forms" else "Show forms",
+                                contentDescription = if (entryState.formsExpanded) {
+                                    stringResource(Res.string.word_details_hide_forms)
+                                } else {
+                                    stringResource(Res.string.word_details_show_forms)
+                                },
                                 modifier = Modifier.size(12.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = "Forms",
+                                text = stringResource(Res.string.word_details_forms),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.SemiBold,
@@ -626,6 +652,3 @@ internal fun computeAmbiguousTranslations(senses: List<LanguageCardResponseSense
         }
 }
 
-fun pluralEnding(count: Int): String = if (count == 1) "" else "s"
-
-fun pluralEnding(someList: List<*>): String = pluralEnding(someList.size)

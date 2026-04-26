@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 @Composable
 fun SectionHeader(
@@ -56,6 +58,12 @@ fun CancellableProgressIndicator(
     val clampedProgress = progress.coerceIn(0f, 1f)
     val isIndeterminate = progress < 0f
     val progressPercent = if (isIndeterminate) null else (clampedProgress * 100).toInt()
+    val stateDescriptionText = if (isIndeterminate) {
+        stringResource(Res.string.common_status_downloading)
+    } else {
+        stringResource(Res.string.common_status_downloading_percent, progressPercent ?: 0)
+    }
+    val cancelDownloadClickLabel = stringResource(Res.string.common_action_cancel_download)
 
     Box(
         modifier = modifier
@@ -67,11 +75,11 @@ fun CancellableProgressIndicator(
                 } else {
                     ProgressBarRangeInfo(clampedProgress, 0f..1f)
                 }
-                stateDescription = if (isIndeterminate) "Downloading" else "Downloading $progressPercent%"
+                stateDescription = stateDescriptionText
             }
             .clickable(
                 onClick = onCancel,
-                onClickLabel = "Cancel download",
+                onClickLabel = cancelDownloadClickLabel,
                 role = Role.Button
             ),
         contentAlignment = Alignment.Center
@@ -154,7 +162,7 @@ fun DeleteConfirmationDialog(
                     contentColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Delete")
+                Text(stringResource(Res.string.common_delete))
             }
         },
         dismissButton = {
@@ -164,7 +172,7 @@ fun DeleteConfirmationDialog(
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             ) {
-                Text("Cancel")
+                Text(stringResource(Res.string.common_cancel))
             }
         }
     )
@@ -184,6 +192,9 @@ fun CircularToggle(
     modifier: Modifier = Modifier,
     label: String? = null
 ) {
+    val selectedStateDescription = stringResource(Res.string.common_state_selected)
+    val notSelectedStateDescription = stringResource(Res.string.common_state_not_selected)
+
     Box(
         modifier = modifier
             .size(48.dp)
@@ -192,7 +203,11 @@ fun CircularToggle(
                 if (onClick != null) {
                     Modifier
                         .semantics(mergeDescendants = true) {
-                            stateDescription = if (isSelected) "Selected" else "Not selected"
+                            stateDescription = if (isSelected) {
+                                selectedStateDescription
+                            } else {
+                                notSelectedStateDescription
+                            }
                             if (label != null) {
                                 contentDescription = label
                             }

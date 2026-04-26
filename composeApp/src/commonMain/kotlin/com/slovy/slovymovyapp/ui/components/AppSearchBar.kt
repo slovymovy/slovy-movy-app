@@ -24,6 +24,11 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.common_clear
+import slovymovyapp.composeapp.generated.resources.common_search
+import slovymovyapp.composeapp.generated.resources.common_search_placeholder
 
 /**
  * Themed search bar component following Material Design 3 principles.
@@ -39,7 +44,7 @@ import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
  * @param query Current search query text
  * @param onQueryChange Callback when query text changes
  * @param modifier Modifier to be applied to the search bar
- * @param placeholder Placeholder text shown when query is empty
+ * @param placeholder Placeholder text shown when query is empty; defaults to localized text
  * @param onSearch Optional callback when search is submitted (IME action)
  * @param leadingIcon Optional custom leading icon composable
  * @param enabled Whether the search bar is enabled
@@ -49,7 +54,7 @@ fun AppSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "Search...",
+    placeholder: String? = null,
     onSearch: (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
@@ -73,6 +78,9 @@ fun AppSearchBar(
     )
 
     var textFieldValue by remember { mutableStateOf(TextFieldValue(query, TextRange(query.length))) }
+    val placeholderText = placeholder ?: stringResource(Res.string.common_search_placeholder)
+    val searchContentDescription = stringResource(Res.string.common_search)
+    val clearContentDescription = stringResource(Res.string.common_clear)
     // Plain (non-observable) ref updated synchronously in onValueChange before onQueryChange
     // is called. LaunchedEffect reads it on the main thread after the event fires, so it
     // always sees the up-to-date value. Using a non-State holder avoids the extra
@@ -114,14 +122,14 @@ fun AppSearchBar(
                 .then(if (onFocusChanged != null) Modifier.onFocusChanged { onFocusChanged(it.isFocused) } else Modifier),
             placeholder = {
                 Text(
-                    text = placeholder,
+                    text = placeholderText,
                     style = MaterialTheme.typography.bodyLarge
                 )
             },
             leadingIcon = leadingIcon ?: {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
+                    contentDescription = searchContentDescription,
                     tint = if (isFocused) {
                         MaterialTheme.colorScheme.primary
                     } else {
@@ -138,7 +146,7 @@ fun AppSearchBar(
                     }) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear",
+                            contentDescription = clearContentDescription,
                             tint = if (isFocused) {
                                 MaterialTheme.colorScheme.primary
                             } else {

@@ -28,6 +28,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 @Serializable
 private sealed interface AppDestination {
@@ -198,6 +200,7 @@ fun App(
     }
 
     val resolvedStart = startDestination ?: return
+    val dataVersionMismatchMessage = stringResource(Res.string.app_data_version_mismatch_message)
 
     AppTheme {
         NavHost(
@@ -375,7 +378,7 @@ fun App(
 
                     DownloadScreen(
                         viewModel = viewModel,
-                        description = "Downloading",
+                        description = stringResource(Res.string.download_title_downloading),
                         onLaterClick = {
                             Analytics.logEvent(AnalyticsEvent.DOWNLOAD_LATER_CLICK)
                             navController.navigate(AppDestination.Search) {
@@ -573,7 +576,7 @@ fun App(
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
                 ) {
-                    ErrorViewModel("We've updated the dictionary format. You'll need to re-download your dictionaries — your saved words are safe.")
+                    ErrorViewModel(dataVersionMismatchMessage)
                 }
 
                 ErrorScreen(

@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.format.char
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -432,7 +434,7 @@ fun FavoritesScreenContent(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "My words",
+                        stringResource(Res.string.favorites_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontFamily = MaterialTheme.serifFontFamily,
                             fontWeight = FontWeight.Medium
@@ -462,7 +464,7 @@ fun FavoritesScreenContent(
                         .padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
-                    LoadingPlaceholder(label = "Loading favorites...")
+                    LoadingPlaceholder(label = stringResource(Res.string.favorites_loading))
                 }
             }
 
@@ -496,7 +498,7 @@ fun FavoritesScreenContent(
                                 query = state.query,
                                 onQueryChange = onQueryChange,
                                 modifier = Modifier.weight(1f),
-                                placeholder = "Type a word..."
+                                placeholder = stringResource(Res.string.favorites_search_placeholder)
                             )
 
                             if (state.showLanguagePicker) {
@@ -577,11 +579,11 @@ fun FavoritesScreenContent(
                                             modifier = Modifier.size(180.dp)
                                         )
                                     },
-                                    title = "No Favorites Yet",
-                                    description = "Save words you want to remember",
+                                    title = stringResource(Res.string.favorites_empty_title),
+                                    description = stringResource(Res.string.favorites_empty_description),
                                     action = {
                                         FilledTonalButton(onClick = onNavigateToSearch) {
-                                            Text("Start searching")
+                                            Text(stringResource(Res.string.favorites_empty_action_start_searching))
                                         }
                                     }
                                 )
@@ -601,13 +603,13 @@ fun FavoritesScreenContent(
                                             modifier = Modifier.size(140.dp)
                                         )
                                     },
-                                    title = "No matching favorites for \"${state.query}\"",
-                                    description = "Try a different spelling or search the dictionary instead",
+                                    title = stringResource(Res.string.favorites_no_results_title, state.query),
+                                    description = stringResource(Res.string.favorites_no_results_description),
                                     action = {
                                         FilledTonalButton(
                                             onClick = { onSearchInDictionary(state.query) }
                                         ) {
-                                            Text("Search dictionary")
+                                            Text(stringResource(Res.string.favorites_no_results_action_search_dictionary))
                                         }
                                     }
                                 )
@@ -618,11 +620,11 @@ fun FavoritesScreenContent(
                             Column(modifier = Modifier.fillMaxSize()) {
                                 val words = state.senses.distinctBy { it.lemma }
                                 Text(
-                                    text = "${state.senses.size} meaning${pluralEnding(state.senses)} · ${words.size} word${
-                                        pluralEnding(
-                                            words
-                                        )
-                                    }",
+                                    text = stringResource(
+                                        Res.string.favorites_stats,
+                                        state.senses.size,
+                                        words.size
+                                    ),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)

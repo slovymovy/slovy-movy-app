@@ -14,38 +14,41 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.word.ErrorIcon
-import com.slovy.slovymovyapp.ui.word.pluralEnding
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.part_of_speech_generating_definitions_examples
+import slovymovyapp.composeapp.generated.resources.part_of_speech_with_sense_count
 
 /**
  * Vertical color bar indicator for parts of speech, matching Figma design.
  *
- * Color mapping:
- * - verb: Emerald (#10B981)
- * - noun: Blue (#3B82F6)
- * - adjective: Orange (#F97316)
- * - adverb: Purple (#A855F7)
- * - preposition: Pink (#EC4899)
- * - pronoun: Cyan (#06B6D4)
- * - name: Blue (#3B82F6)
- * - default: Gray (#6B7280)
- *
- * @param partOfSpeech Part of speech label
- * @param modifier Modifier to be applied to the indicator
+ * Color mapping is keyed off the [PartOfSpeech] enum so it stays stable across locales:
+ * - VERB: Emerald (#10B981)
+ * - NOUN: Blue (#3B82F6)
+ * - ADJECTIVE: Orange (#F97316)
+ * - ADVERB: Purple (#A855F7)
+ * - PREPOSITION: Pink (#EC4899)
+ * - PRONOUN: Cyan (#06B6D4)
+ * - NAME: Pink-ish (#D598AA)
+ * - default: Lime (#B4D42A)
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PartOfSpeechIndicator(
-    partOfSpeech: String,
+    pos: PartOfSpeech,
     modifier: Modifier = Modifier,
     meaningCount: Int? = null,
     cardLoading: Boolean = false,
     cardError: String? = null
 ) {
-    val color = getPartOfSpeechColor(partOfSpeech)
+    val color = getPartOfSpeechColor(pos)
+    val partOfSpeech = stringResource(pos.displayName)
 
     Row(
         modifier = modifier,
@@ -66,7 +69,12 @@ fun PartOfSpeechIndicator(
 
         if (!cardLoading && cardError == null) {
             val label = if (meaningCount != null) {
-                "${partOfSpeech} · $meaningCount sense${pluralEnding(meaningCount)}"
+                pluralStringResource(
+                    Res.plurals.part_of_speech_with_sense_count,
+                    meaningCount,
+                    partOfSpeech,
+                    meaningCount
+                )
             } else {
                 partOfSpeech
             }.uppercase()
@@ -80,7 +88,7 @@ fun PartOfSpeechIndicator(
             )
         } else if (cardLoading) {
             Text(
-                text = "Generating definitions and examples…",
+                text = stringResource(Res.string.part_of_speech_generating_definitions_examples),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -95,18 +103,17 @@ fun PartOfSpeechIndicator(
 }
 
 /**
- * Returns the color for a given part of speech.
+ * Returns the color for a given part of speech. Keyed off the enum so it stays stable across locales.
  */
-@Composable
-fun getPartOfSpeechColor(partOfSpeech: String): Color {
-    return when (partOfSpeech.lowercase()) {
-        "verb" -> Color(0xFF10B981)
-        "noun" -> Color(0xFF3B82F6)
-        "adjective" -> Color(0xFFF97316)
-        "adverb" -> Color(0xFFA855F7)
-        "preposition" -> Color(0xFFEC4899)
-        "pronoun" -> Color(0xFF06B6D4)
-        "name" -> Color(0xFFD598AA)
+fun getPartOfSpeechColor(pos: PartOfSpeech): Color {
+    return when (pos) {
+        PartOfSpeech.VERB -> Color(0xFF10B981)
+        PartOfSpeech.NOUN -> Color(0xFF3B82F6)
+        PartOfSpeech.ADJECTIVE -> Color(0xFFF97316)
+        PartOfSpeech.ADVERB -> Color(0xFFA855F7)
+        PartOfSpeech.PREPOSITION -> Color(0xFFEC4899)
+        PartOfSpeech.PRONOUN -> Color(0xFF06B6D4)
+        PartOfSpeech.NAME -> Color(0xFFD598AA)
         else -> Color(0xFFB4D42A)
     }
 }
@@ -116,10 +123,11 @@ fun getPartOfSpeechColor(partOfSpeech: String): Color {
  */
 @Composable
 fun PartOfSpeechBadge(
-    partOfSpeech: String,
+    pos: PartOfSpeech,
     modifier: Modifier = Modifier
 ) {
-    val color = getPartOfSpeechColor(partOfSpeech)
+    val color = getPartOfSpeechColor(pos)
+    val label = stringResource(pos.displayName)
 
     Box(
         modifier = modifier
@@ -130,7 +138,7 @@ fun PartOfSpeechBadge(
             .padding(horizontal = AppSpacing.md, vertical = 6.dp)
     ) {
         Text(
-            text = partOfSpeech.replaceFirstChar { it.uppercase() },
+            text = label.replaceFirstChar { it.uppercase() },
             style = MaterialTheme.typography.labelSmall,
             color = color
         )
@@ -148,12 +156,12 @@ private fun PartOfSpeechIndicatorPreview(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
-            PartOfSpeechIndicator(partOfSpeech = "verb", meaningCount = 3)
-            PartOfSpeechIndicator(partOfSpeech = "noun", meaningCount = 1)
-            PartOfSpeechIndicator(partOfSpeech = "adjective", meaningCount = 5)
-            PartOfSpeechIndicator(partOfSpeech = "adverb", meaningCount = 2)
-            PartOfSpeechIndicator(partOfSpeech = "preposition")
-            PartOfSpeechIndicator(partOfSpeech = "pronoun")
+            PartOfSpeechIndicator(pos = PartOfSpeech.VERB, meaningCount = 3)
+            PartOfSpeechIndicator(pos = PartOfSpeech.NOUN, meaningCount = 1)
+            PartOfSpeechIndicator(pos = PartOfSpeech.ADJECTIVE, meaningCount = 5)
+            PartOfSpeechIndicator(pos = PartOfSpeech.ADVERB, meaningCount = 2)
+            PartOfSpeechIndicator(pos = PartOfSpeech.PREPOSITION)
+            PartOfSpeechIndicator(pos = PartOfSpeech.PRONOUN)
         }
     }
 }
@@ -168,8 +176,8 @@ private fun PartOfSpeechIndicatorPreviewLoadingError(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
-            PartOfSpeechIndicator(partOfSpeech = "verb", cardLoading = true, cardError = null)
-            PartOfSpeechIndicator(partOfSpeech = "noun", cardLoading = false, cardError = "Errors")
+            PartOfSpeechIndicator(pos = PartOfSpeech.VERB, cardLoading = true, cardError = null)
+            PartOfSpeechIndicator(pos = PartOfSpeech.NOUN, cardLoading = false, cardError = "Errors")
         }
     }
 }
@@ -187,16 +195,16 @@ private fun PartOfSpeechBadgePreview(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
-                PartOfSpeechBadge(partOfSpeech = "verb")
-                PartOfSpeechBadge(partOfSpeech = "noun")
-                PartOfSpeechBadge(partOfSpeech = "adjective")
+                PartOfSpeechBadge(pos = PartOfSpeech.VERB)
+                PartOfSpeechBadge(pos = PartOfSpeech.NOUN)
+                PartOfSpeechBadge(pos = PartOfSpeech.ADJECTIVE)
             }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
-                PartOfSpeechBadge(partOfSpeech = "adverb")
-                PartOfSpeechBadge(partOfSpeech = "preposition")
-                PartOfSpeechBadge(partOfSpeech = "pronoun")
+                PartOfSpeechBadge(pos = PartOfSpeech.ADVERB)
+                PartOfSpeechBadge(pos = PartOfSpeech.PREPOSITION)
+                PartOfSpeechBadge(pos = PartOfSpeech.PRONOUN)
             }
         }
     }

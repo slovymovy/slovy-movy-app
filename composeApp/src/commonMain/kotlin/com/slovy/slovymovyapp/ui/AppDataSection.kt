@@ -11,6 +11,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 @Composable
 fun AppDataSection(
@@ -33,11 +35,11 @@ fun AppDataSection(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             Text(
-                text = "Back up your saved words",
+                text = stringResource(Res.string.app_data_backup_title),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "Exports your saved words and app settings to an archive. Useful for keeping a copy or moving to a new device.",
+                text = stringResource(Res.string.app_data_backup_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -60,7 +62,13 @@ fun AppDataSection(
                             contentDescription = null
                         )
                     }
-                    Text(if (isExporting) "Exporting..." else "Export now")
+                    Text(
+                        if (isExporting) {
+                            stringResource(Res.string.app_data_exporting)
+                        } else {
+                            stringResource(Res.string.app_data_export_now)
+                        }
+                    )
                 }
             }
         }
