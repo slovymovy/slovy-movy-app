@@ -91,16 +91,21 @@ private fun resolvedFormValue(view: FormsSchemeView, sourceRow: Int, sourceColum
 }
 
 @Composable
+private fun resolveHeaderLabel(label: String): String {
+    val lower = label.lowercase()
+    val tagRes = (TagMapping.resolve(lower))
+        ?.let { formTagDisplayNames[it] }
+    if (tagRes != null) return stringResource(tagRes)
+    val schemeRes = schemeLabelResources[label] ?: schemeLabelResources[lower]
+    if (schemeRes != null) return stringResource(schemeRes)
+    return label
+}
+
+@Composable
 private fun FormsGridCell(cell: GridCell, value: String?) {
     val text = when (cell) {
-        is GridCell.RowHeader -> TagMapping.resolve(cell.label)
-            ?.let { formTagDisplayNames[it] }
-            ?.let { stringResource(it) }
-            ?: cell.label
-        is GridCell.ColHeader -> TagMapping.resolve(cell.label)
-            ?.let { formTagDisplayNames[it] }
-            ?.let { stringResource(it) }
-            ?: cell.label
+        is GridCell.RowHeader -> resolveHeaderLabel(cell.label)
+        is GridCell.ColHeader -> resolveHeaderLabel(cell.label)
         is GridCell.Data -> value ?: "?"
         is GridCell.Empty -> ""
     }
@@ -373,12 +378,16 @@ private fun FormsModeSelector(
     ) {
         formsViews.forEach { formsView ->
             val viewId = formsView.view.viewId
+            val description = formsView.view.description
+            val localizedDescription = schemeLabelResources[description]
+                ?.let { stringResource(it) }
+                ?: description.ifBlank { viewId }
             FilterChip(
                 selected = selectedViewId == viewId,
                 onClick = { onFormsViewSelect(viewId) },
                 label = {
                     Text(
-                        text = formsView.view.description.ifBlank { viewId },
+                        text = localizedDescription,
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
