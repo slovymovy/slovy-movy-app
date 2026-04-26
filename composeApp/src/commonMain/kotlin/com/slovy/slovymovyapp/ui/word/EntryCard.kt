@@ -528,7 +528,7 @@ internal fun EntryCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             PartOfSpeechIndicator(
-                partOfSpeech = stringResource(entry.pos.displayName),
+                pos = entry.pos,
                 meaningCount = if (showContent) entry.senses.size else null,
                 cardLoading = cardLoading,
                 cardError = cardError
