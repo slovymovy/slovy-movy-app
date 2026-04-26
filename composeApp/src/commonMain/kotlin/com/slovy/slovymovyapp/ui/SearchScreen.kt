@@ -2,7 +2,7 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -301,17 +300,19 @@ fun SearchScreenContent(
     val focusManager = LocalFocusManager.current
     val searchFocusRequester = remember { FocusRequester() }
     var isSearchFocused by remember { mutableStateOf(false) }
+    val tapInteractionSource = remember { MutableInteractionSource() }
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(isSearchFocused) {
-                detectTapGestures(onTap = {
-                    if (!isSearchFocused) {
-                        searchFocusRequester.requestFocus()
-                    } else {
-                        focusManager.clearFocus()
-                    }
-                })
+            .clickable(
+                interactionSource = tapInteractionSource,
+                indication = null
+            ) {
+                if (!isSearchFocused) {
+                    searchFocusRequester.requestFocus()
+                } else {
+                    focusManager.clearFocus()
+                }
             }
     ) {
         Scaffold(
@@ -485,7 +486,7 @@ private fun SearchResultCard(
             Text(
                 text = item.display,
                 style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                    fontWeight = FontWeight.SemiBold,
                     fontFamily = MaterialTheme.serifFontFamily
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
