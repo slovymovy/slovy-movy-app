@@ -221,3 +221,9 @@ tasks.matching { it.name == "connectedAndroidTest" || it.name == "connectedAndro
     dependsOn(startTestServer)
     usesService(testServerService)
 }
+
+tasks.register<VerifyLocalizationKeysTask>("verifyLocalizationKeys") {
+    group = "verification"
+    description = "Ensures every localized compose resource file has the same keys as base values."
+    resourcesDir.set(layout.projectDirectory.dir("src/commonMain/composeResources"))
+}

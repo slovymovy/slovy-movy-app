@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_app_name">OpenWords</string>
+
+    <string name="nav_search">Zoeken</string>
+    <string name="nav_favorites">Favorieten</string>
+    <string name="nav_word_detail">Woord</string>
+    <string name="nav_settings">Instellingen</string>
+
+    <string name="welcome_tagline">Diepgaand woordenboek\nvoor toegewijde taalleerders zoals jij.</string>
+    <string name="welcome_selling_point_translations_title">Meer dan één-woordvertalingen</string>
+    <string name="welcome_selling_point_translations_description">Bekijk alle betekenissen, woordfrequentie, veelgebruikte uitdrukkingen en voorbeelden uit de praktijk.</string>
+    <string name="welcome_selling_point_collection_title">Jouw collectie</string>
+    <string name="welcome_selling_point_collection_description">Sla woorden op in je persoonlijke bibliotheek en bouw lokaal je woordenschat op.</string>
+    <string name="welcome_selling_point_no_ads_title">Geen advertenties, geen abonnement</string>
+    <string name="welcome_selling_point_no_ads_description">Volledige toegang zonder paywall. Essentiële data blijft op je apparaat.</string>
+    <string name="welcome_cta_explore_now">Nu verkennen</string>
+
+    <string name="search_placeholder">Zoek je woord...</string>
+    <string name="search_open_item">Open %1$s</string>
+    <string name="search_content_desc_favorite">Favoriet</string>
+    <string name="search_content_desc_not_downloaded">Niet gedownload</string>
+    <string name="search_section_explore">Verkennen</string>
+    <string name="search_pull_to_refresh_hint">Trek omlaag voor nieuwe woorden</string>
+    <string name="search_section_recently_saved">Recent opgeslagen</string>
+    <string name="search_empty_start_typing">Begin te typen om te zoeken</string>
+    <string name="search_no_dictionary_title">Geen woordenboek gedownload</string>
+    <string name="search_no_dictionary_description">Download een woordenboek om met zoeken te beginnen</string>
+    <string name="search_go_to_settings">Ga naar instellingen</string>
+    <string name="search_no_results_title">Geen resultaten voor "%1$s"</string>
+    <string name="search_no_results_description">Probeer een andere spelling of zoekterm</string>
+</resources>

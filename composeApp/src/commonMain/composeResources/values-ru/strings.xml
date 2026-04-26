@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_app_name">OpenWords</string>
+
+    <string name="nav_search">Поиск</string>
+    <string name="nav_favorites">Избранное</string>
+    <string name="nav_word_detail">Слово</string>
+    <string name="nav_settings">Настройки</string>
+
+    <string name="welcome_tagline">Подробный словарь\nдля тех, кто серьезно учит язык.</string>
+    <string name="welcome_selling_point_translations_title">Больше, чем однословный перевод</string>
+    <string name="welcome_selling_point_translations_description">Смотрите значения, частотность, устойчивые фразы и примеры из реального языка.</string>
+    <string name="welcome_selling_point_collection_title">Ваша коллекция</string>
+    <string name="welcome_selling_point_collection_description">Сохраняйте слова в личную библиотеку и развивайте словарный запас локально.</string>
+    <string name="welcome_selling_point_no_ads_title">Без рекламы и подписок</string>
+    <string name="welcome_selling_point_no_ads_description">Полный функционал без пейвола. Основные данные остаются на вашем устройстве.</string>
+    <string name="welcome_cta_explore_now">Начать</string>
+
+    <string name="search_placeholder">Введите слово...</string>
+    <string name="search_open_item">Открыть %1$s</string>
+    <string name="search_content_desc_favorite">Избранное</string>
+    <string name="search_content_desc_not_downloaded">Не загружено</string>
+    <string name="search_section_explore">Исследовать</string>
+    <string name="search_pull_to_refresh_hint">Потяните вниз, чтобы обновить слова</string>
+    <string name="search_section_recently_saved">Недавно сохранено</string>
+    <string name="search_empty_start_typing">Начните вводить слово для поиска</string>
+    <string name="search_no_dictionary_title">Словарь не загружен</string>
+    <string name="search_no_dictionary_description">Загрузите словарь, чтобы начать поиск слов</string>
+    <string name="search_go_to_settings">Перейти в настройки</string>
+    <string name="search_no_results_title">Ничего не найдено для "%1$s"</string>
+    <string name="search_no_results_description">Попробуйте другое написание или запрос</string>
+</resources>

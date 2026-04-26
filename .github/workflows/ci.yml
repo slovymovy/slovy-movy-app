@@ -36,6 +36,9 @@ jobs:
       - name: setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      - name: verify localization keys
+        run: ./gradlew :composeApp:verifyLocalizationKeys
+
       - name: run shared tests
         env:
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
@@ -285,5 +288,4 @@ jobs:
             **/build/reports/problems/**
             **/build/reports/tests/**
             **/build/test-results/**
-
 

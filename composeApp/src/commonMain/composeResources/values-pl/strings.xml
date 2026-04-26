@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_app_name">OpenWords</string>
+
+    <string name="nav_search">Szukaj</string>
+    <string name="nav_favorites">Ulubione</string>
+    <string name="nav_word_detail">Słowo</string>
+    <string name="nav_settings">Ustawienia</string>
+
+    <string name="welcome_tagline">Dogłębny słownik\ndla zaangażowanych osób uczących się języka.</string>
+    <string name="welcome_selling_point_translations_title">Więcej niż tłumaczenia jednym słowem</string>
+    <string name="welcome_selling_point_translations_description">Zobacz wszystkie znaczenia, częstość użycia, popularne frazy i przykłady z życia.</string>
+    <string name="welcome_selling_point_collection_title">Twoja kolekcja</string>
+    <string name="welcome_selling_point_collection_description">Zapisuj słowa w osobistej bibliotece i rozwijaj słownictwo lokalnie.</string>
+    <string name="welcome_selling_point_no_ads_title">Bez reklam i subskrypcji</string>
+    <string name="welcome_selling_point_no_ads_description">Pełna funkcjonalność bez paywalla. Kluczowe dane pozostają na twoim urządzeniu.</string>
+    <string name="welcome_cta_explore_now">Odkrywaj teraz</string>
+
+    <string name="search_placeholder">Wyszukaj słowo...</string>
+    <string name="search_open_item">Otwórz %1$s</string>
+    <string name="search_content_desc_favorite">Ulubione</string>
+    <string name="search_content_desc_not_downloaded">Niepobrane</string>
+    <string name="search_section_explore">Odkrywaj</string>
+    <string name="search_pull_to_refresh_hint">Przeciągnij w dół po nowe słowa</string>
+    <string name="search_section_recently_saved">Ostatnio zapisane</string>
+    <string name="search_empty_start_typing">Zacznij pisać, aby wyszukać</string>
+    <string name="search_no_dictionary_title">Brak pobranego słownika</string>
+    <string name="search_no_dictionary_description">Pobierz słownik, aby rozpocząć wyszukiwanie słów</string>
+    <string name="search_go_to_settings">Przejdź do ustawień</string>
+    <string name="search_no_results_title">Brak wyników dla "%1$s"</string>
+    <string name="search_no_results_description">Spróbuj innej pisowni lub hasła</string>
+</resources>
