@@ -24,6 +24,8 @@ import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
@@ -38,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 
@@ -64,7 +67,7 @@ data class SettingsUiState(
     val isLoading: Boolean = true,
     val isLoadingAvailable: Boolean = false,
     val settingsLoaded: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
 
     // Voice
     val testingVoice: Text2SpeechVoice? = null,
@@ -86,14 +89,14 @@ data class SettingsUiState(
     val feedbackComment: String = "",
     val feedbackEmail: String = "",
     val feedbackSubmitting: Boolean = false,
-    val feedbackError: String? = null,
+    val feedbackError: UiText? = null,
     val feedbackDiscussionUrl: String? = null
 )
 
 data class DeleteConfirmationState(
-    val title: String,
-    val message: String,
-    val warning: String? = null,
+    val title: UiText,
+    val message: UiText,
+    val warning: UiText? = null,
     val onConfirm: () -> Unit
 )
 
@@ -269,7 +272,7 @@ class SettingsViewModel(
                 state = state.copy(
                     isLoadingAvailable = false,
                     isLoading = false,
-                    errorMessage = NetworkErrorClassifier.userMessage(e)
+                    errorMessage = UiText.Plain(NetworkErrorClassifier.userMessage(e))
                 )
             }
         }
@@ -297,15 +300,21 @@ class SettingsViewModel(
             ?.translations?.count { it.isDownloaded } ?: 0
 
         val warning = if (translationCount > 0) {
-            "This will also remove $translationCount translation${pluralEnding(translationCount)}."
+            UiText.Resource(
+                Res.string.settings_remove_language_warning,
+                listOf(translationCount, pluralEnding(translationCount))
+            )
         } else null
 
         showDeleteConfirmation(
-            title = "Remove ${language.selfName}?",
-            message = "The dictionary and all its translations will be deleted. You can re-download anytime.",
+            title = UiText.Resource(Res.string.settings_remove_language_confirm_title, listOf(language.selfName)),
+            message = UiText.Resource(Res.string.settings_remove_language_confirm_message),
             warning = warning
         ) {
-            deleteDictionary(language, "${language.selfName} removed")
+            deleteDictionary(
+                language,
+                UiText.Resource(Res.string.settings_language_removed, listOf(language.selfName))
+            )
         }
     }
 
@@ -330,16 +339,19 @@ class SettingsViewModel(
             } catch (e: Exception) {
                 state = state.copy(
                     translationLanguages = previous,
-                    errorMessage = "Failed to save translation languages: ${e.message}"
+                    errorMessage = UiText.Resource(
+                        Res.string.settings_error_save_translation_languages,
+                        listOf(messageOrUnknown(e))
+                    )
                 )
             }
         }
     }
 
     fun showDeleteConfirmation(
-        title: String,
-        message: String,
-        warning: String? = null,
+        title: UiText,
+        message: UiText,
+        warning: UiText? = null,
         onConfirm: () -> Unit
     ) {
         state = state.copy(
@@ -361,7 +373,7 @@ class SettingsViewModel(
         state = state.copy(deleteConfirmation = null)
     }
 
-    private fun deleteDictionary(language: Language, toastMessage: String) {
+    private fun deleteDictionary(language: Language, toastMessage: UiText) {
         viewModelScope.launch {
             try {
                 // Cancel all in-flight downloads for this language before deleting
@@ -390,27 +402,43 @@ class SettingsViewModel(
                 }
 
                 reloadSettings()
-                snackbarHostState.showSnackbar(toastMessage)
+                showSnackbar(toastMessage)
             } catch (e: Exception) {
-                state = state.copy(errorMessage = "Failed to delete: ${e.message}")
+                state = state.copy(
+                    errorMessage = UiText.Resource(
+                        Res.string.settings_error_delete_with_reason,
+                        listOf(messageOrUnknown(e))
+                    )
+                )
             }
         }
     }
 
     fun deleteTranslation(src: Language, tgt: Language) {
-        val toastMsg = "${src.selfName} → ${tgt.selfName} translation deleted"
+        val toastMsg = UiText.Resource(
+            Res.string.settings_translation_deleted,
+            listOf(src.selfName, tgt.selfName)
+        )
         showDeleteConfirmation(
-            title = "Delete ${src.selfName} → ${tgt.selfName} Translation?",
-            message = "You can re-download it anytime."
+            title = UiText.Resource(
+                Res.string.settings_delete_translation_confirm_title,
+                listOf(src.selfName, tgt.selfName)
+            ),
+            message = UiText.Resource(Res.string.settings_delete_translation_confirm_message)
         ) {
             viewModelScope.launch {
                 try {
                     dataDbManager.deleteTranslation(src, tgt)
                     dictionaryRepository.clearSenseCache()
                     loadLearningLanguages()
-                    snackbarHostState.showSnackbar(toastMsg)
+                    showSnackbar(toastMsg)
                 } catch (e: Exception) {
-                    state = state.copy(errorMessage = "Failed to delete: ${e.message}")
+                    state = state.copy(
+                        errorMessage = UiText.Resource(
+                            Res.string.settings_error_delete_with_reason,
+                            listOf(messageOrUnknown(e))
+                        )
+                    )
                 }
             }
         }
@@ -430,8 +458,10 @@ class SettingsViewModel(
         attachDownloadCallbacks(
             downloadKey = downloadKey,
             downloadFlow = downloadFlow,
-            successMessage = "Dictionary downloaded successfully",
-            errorPrefix = "Failed to download dictionary"
+            successMessage = UiText.Resource(Res.string.settings_dictionary_download_success),
+            errorMessageBuilder = { reason ->
+                UiText.Resource(Res.string.settings_error_download_dictionary_with_reason, listOf(reason))
+            }
         ) {
             dictionaryRepository.clearSenseCache()
             reloadSettings()
@@ -453,8 +483,10 @@ class SettingsViewModel(
         attachDownloadCallbacks(
             downloadKey = downloadKey,
             downloadFlow = downloadFlow,
-            successMessage = "Translation downloaded successfully",
-            errorPrefix = "Failed to download translation"
+            successMessage = UiText.Resource(Res.string.settings_translation_download_success),
+            errorMessageBuilder = { reason ->
+                UiText.Resource(Res.string.settings_error_download_translation_with_reason, listOf(reason))
+            }
         ) {
             dictionaryRepository.clearSenseCache()
             loadLearningLanguages()
@@ -490,7 +522,7 @@ class SettingsViewModel(
                 throw e
             } catch (e: Exception) {
                 state = state.copy(
-                    errorMessage = NetworkErrorClassifier.userMessage(e)
+                    errorMessage = UiText.Plain(NetworkErrorClassifier.userMessage(e))
                 )
             }
         }
@@ -522,7 +554,12 @@ class SettingsViewModel(
                 }
             } catch (e: Exception) {
                 updateLanguageState(language) { it.copy(isLoadingVoices = false) }
-                state = state.copy(errorMessage = "Failed to load voices: ${e.message}")
+                state = state.copy(
+                    errorMessage = UiText.Resource(
+                        Res.string.settings_error_load_voices_with_reason,
+                        listOf(messageOrUnknown(e))
+                    )
+                )
             }
         }
     }
@@ -552,7 +589,10 @@ class SettingsViewModel(
         } catch (e: Exception) {
             state = state.copy(
                 testingVoice = null,
-                errorMessage = "Failed to test voice: ${e.message}"
+                errorMessage = UiText.Resource(
+                    Res.string.settings_error_test_voice_with_reason,
+                    listOf(messageOrUnknown(e))
+                )
             )
         }
     }
@@ -569,22 +609,33 @@ class SettingsViewModel(
             state = state.copy(isExportingAppData = true)
             try {
                 val result = appDataExporter.exportAppData()
-                viewModelScope.launch {
-                    snackbarHostState.showSnackbar(
-                        "Exported ${result.artifactName} to ${result.destinationLabel}"
+                showSnackbar(
+                    UiText.Resource(
+                        Res.string.settings_export_success,
+                        listOf(result.artifactName, result.destinationLabel)
                     )
-                }
+                )
                 if (appDataExporter.canShareExport) {
                     try {
                         appDataExporter.shareExport(result)
                     } catch (e: Exception) {
-                        state = state.copy(errorMessage = "Failed to open share dialog: ${e.message}")
+                        state = state.copy(
+                            errorMessage = UiText.Resource(
+                                Res.string.settings_error_open_share_dialog_with_reason,
+                                listOf(messageOrUnknown(e))
+                            )
+                        )
                     }
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                state = state.copy(errorMessage = "Failed to export app data: ${e.message}")
+                state = state.copy(
+                    errorMessage = UiText.Resource(
+                        Res.string.settings_error_export_app_data_with_reason,
+                        listOf(messageOrUnknown(e))
+                    )
+                )
             } finally {
                 state = state.copy(isExportingAppData = false)
             }
@@ -617,7 +668,12 @@ class SettingsViewModel(
                 voiceFilterHelper.setEnabledVoices(language, newEnabled)
                 updateLanguageState(language) { it.copy(enabledVoiceIds = newEnabled) }
             } catch (e: Exception) {
-                state = state.copy(errorMessage = "Failed to update voice selection: ${e.message}")
+                state = state.copy(
+                    errorMessage = UiText.Resource(
+                        Res.string.settings_error_update_voice_selection_with_reason,
+                        listOf(messageOrUnknown(e))
+                    )
+                )
             }
         }
     }
@@ -666,9 +722,9 @@ class SettingsViewModel(
         )
         if (discussionUrl != null) {
             viewModelScope.launch {
-                val result = snackbarHostState.showSnackbar(
-                    message = "Feedback sent",
-                    actionLabel = "View",
+                val result = showSnackbar(
+                    message = UiText.Resource(Res.string.settings_feedback_sent),
+                    actionLabel = UiText.Resource(Res.string.settings_feedback_view),
                     duration = SnackbarDuration.Long
                 )
                 if (result == SnackbarResult.ActionPerformed) {
@@ -691,7 +747,7 @@ class SettingsViewModel(
 
         val comment = state.feedbackComment.trim()
         if (comment.isBlank()) {
-            state = state.copy(feedbackError = "Comment is required")
+            state = state.copy(feedbackError = UiText.Resource(Res.string.settings_feedback_comment_required))
             return
         }
 
@@ -710,10 +766,32 @@ class SettingsViewModel(
             } catch (e: Exception) {
                 state = state.copy(
                     feedbackSubmitting = false,
-                    feedbackError = NetworkErrorClassifier.userMessage(e)
+                    feedbackError = UiText.Plain(NetworkErrorClassifier.userMessage(e))
                 )
             }
         }
+    }
+
+    private fun messageOrUnknown(throwable: Throwable): String {
+        val message = throwable.message?.takeIf { it.isNotBlank() }
+        return message ?: NetworkErrorClassifier.userMessage(throwable)
+    }
+
+    private suspend fun resolveUiText(text: UiText): String = when (text) {
+        is UiText.Plain -> text.value
+        is UiText.Resource -> getString(text.key, *text.args.toTypedArray())
+    }
+
+    private suspend fun showSnackbar(
+        message: UiText,
+        actionLabel: UiText? = null,
+        duration: SnackbarDuration = SnackbarDuration.Short
+    ): SnackbarResult {
+        return snackbarHostState.showSnackbar(
+            message = resolveUiText(message),
+            actionLabel = actionLabel?.let { resolveUiText(it) },
+            duration = duration
+        )
     }
 
     override fun onCleared() {
@@ -738,8 +816,8 @@ class SettingsViewModel(
     private fun attachDownloadCallbacks(
         downloadKey: String,
         downloadFlow: Flow<DownloadEntry?>,
-        successMessage: String,
-        errorPrefix: String,
+        successMessage: UiText,
+        errorMessageBuilder: (String) -> UiText,
         onSuccess: suspend () -> Unit
     ) {
         if (downloadJobs[downloadKey]?.isActive == true) return
@@ -751,21 +829,22 @@ class SettingsViewModel(
                         DownloadStatus.Done -> {
                             downloadCoordinator.clear(downloadKey)
                             onSuccess()
-                            snackbarHostState.showSnackbar(successMessage)
+                            showSnackbar(successMessage)
                             cancel()
                         }
 
                         DownloadStatus.Cancelled -> {
                             downloadCoordinator.clear(downloadKey)
-                            snackbarHostState.showSnackbar("Download cancelled")
+                            showSnackbar(UiText.Resource(Res.string.settings_download_cancelled))
                             cancel()
                         }
 
                         DownloadStatus.Failed -> {
                             downloadCoordinator.clear(downloadKey)
                             val message =
-                                if (entry.error != null) NetworkErrorClassifier.userMessage(entry.error) else "Unknown error"
-                            state = state.copy(errorMessage = "$errorPrefix: $message")
+                                if (entry.error != null) NetworkErrorClassifier.userMessage(entry.error)
+                                else resolveUiText(UiText.Resource(Res.string.common_unknown_error))
+                            state = state.copy(errorMessage = errorMessageBuilder(message))
                             cancel()
                         }
 
@@ -871,9 +950,10 @@ fun SettingsScreenContent(
 ) {
     val dismissActionLabel = stringResource(Res.string.common_dismiss)
     state.errorMessage?.let { error ->
+        val errorMessage = error.resolve()
         LaunchedEffect(error) {
             snackbarHostState.showSnackbar(
-                message = error,
+                message = errorMessage,
                 actionLabel = dismissActionLabel,
                 duration = SnackbarDuration.Short
             )
@@ -1102,9 +1182,9 @@ fun SettingsScreenContent(
 
         state.deleteConfirmation?.let { confirmation ->
             DeleteConfirmationDialog(
-                title = confirmation.title,
-                message = confirmation.message,
-                warning = confirmation.warning,
+                title = confirmation.title.resolve(),
+                message = confirmation.message.resolve(),
+                warning = confirmation.warning?.resolve(),
                 onConfirm = onConfirmDelete,
                 onDismiss = onDismissDeleteConfirmation
             )
@@ -1121,7 +1201,7 @@ fun SettingsScreenContent(
                 comment = state.feedbackComment,
                 email = state.feedbackEmail,
                 isSending = state.feedbackSubmitting,
-                error = state.feedbackError,
+                error = state.feedbackError?.resolve(),
                 resultUrl = state.feedbackDiscussionUrl,
                 onCommentChange = onFeedbackCommentChange,
                 onEmailChange = onFeedbackEmailChange,
@@ -1315,7 +1395,7 @@ private fun SettingsScreenPreviewWithError(
                     )
                 ),
                 translationLanguages = emptySet(),
-                errorMessage = "Failed to load voices for this language"
+                errorMessage = UiText.Plain("Failed to load voices for this language")
             )
         )
     }
@@ -1347,9 +1427,9 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
                 ),
                 translationLanguages = setOf(Language.RUSSIAN),
                 deleteConfirmation = DeleteConfirmationState(
-                    title = "Remove English?",
-                    message = "The dictionary and all its translations will be deleted. You can re-download anytime.",
-                    warning = "This will also remove 1 translation.",
+                    title = UiText.Plain("Remove English?"),
+                    message = UiText.Plain("The dictionary and all its translations will be deleted. You can re-download anytime."),
+                    warning = UiText.Plain("This will also remove 1 translation."),
                     onConfirm = {}
                 )
             )

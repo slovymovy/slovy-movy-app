@@ -19,6 +19,10 @@ import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.word.ErrorIcon
 import com.slovy.slovymovyapp.ui.word.pluralEnding
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.part_of_speech_generating_definitions_examples
+import slovymovyapp.composeapp.generated.resources.part_of_speech_with_sense_count
 
 /**
  * Vertical color bar indicator for parts of speech, matching Figma design.
@@ -66,7 +70,12 @@ fun PartOfSpeechIndicator(
 
         if (!cardLoading && cardError == null) {
             val label = if (meaningCount != null) {
-                "${partOfSpeech} · $meaningCount sense${pluralEnding(meaningCount)}"
+                stringResource(
+                    Res.string.part_of_speech_with_sense_count,
+                    partOfSpeech,
+                    meaningCount,
+                    pluralEnding(meaningCount)
+                )
             } else {
                 partOfSpeech
             }.uppercase()
@@ -80,7 +89,7 @@ fun PartOfSpeechIndicator(
             )
         } else if (cardLoading) {
             Text(
-                text = "Generating definitions and examples…",
+                text = stringResource(Res.string.part_of_speech_generating_definitions_examples),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
