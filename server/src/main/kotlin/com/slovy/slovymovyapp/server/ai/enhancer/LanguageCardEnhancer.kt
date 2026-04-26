@@ -76,8 +76,24 @@ class LanguageCardEnhancer {
         )
         val decodedResponse = Json.decodeFromString<LanguageCardResponse>(response)
         validateSenseIds(request, decodedResponse)
-        return decodedResponse
+        return decodedResponse.stripWTags()
     }
+
+    private fun String.stripWTags(): String = replace(Regex("</?w>"), "")
+
+    private fun LanguageCardResponse.stripWTags(): LanguageCardResponse = copy(
+        entries = entries.map { entry ->
+            entry.copy(
+                senses = entry.senses.map { sense ->
+                    sense.copy(
+                        synonyms = sense.synonyms.map { it.stripWTags() },
+                        antonyms = sense.antonyms.map { it.stripWTags() },
+                        commonPhrases = sense.commonPhrases.map { it.stripWTags() }
+                    )
+                }
+            )
+        }
+    )
 
     /**
      * Builds the JSON schema for the language card response based on the request data.
