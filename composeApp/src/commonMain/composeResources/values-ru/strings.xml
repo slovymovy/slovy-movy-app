@@ -29,4 +29,94 @@
     <string name="search_go_to_settings">Перейти в настройки</string>
     <string name="search_no_results_title">Ничего не найдено для "%1$s"</string>
     <string name="search_no_results_description">Попробуйте другое написание или запрос</string>
+
+    <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_close">Close</string>
+    <string name="common_dismiss">Dismiss</string>
+    <string name="common_error">Error</string>
+    <string name="common_got_it">Got it</string>
+    <string name="common_later">Later</string>
+    <string name="common_next">Next</string>
+    <string name="common_retry">Retry</string>
+
+    <string name="download_description_setting_up_library">Setting up your library</string>
+    <string name="download_action_download_size">Download %1$s</string>
+    <string name="download_title_ready">Ready to Download</string>
+    <string name="download_subtitle_ready">You need these dictionaries to get all set.</string>
+    <string name="download_title_failed">Download Failed</string>
+    <string name="download_subtitle_failed">Something went wrong. Please try again.</string>
+    <string name="download_title_cancelled">Download Cancelled</string>
+    <string name="download_subtitle_cancelled">You can retry from Settings.</string>
+    <string name="download_title_done">All Set</string>
+    <string name="download_subtitle_done">Your library is ready.</string>
+    <string name="download_title_downloading">Downloading</string>
+    <string name="download_subtitle_downloading">Getting your library ready.\nThis may take a moment.</string>
+    <string name="download_title_setting_up">Setting Up</string>
+    <string name="download_subtitle_setting_up">Getting your library ready.\nWill take a moment.</string>
+    <string name="download_content_desc_loading_info">Loading download information</string>
+    <string name="download_content_desc_preparing">Preparing download</string>
+    <string name="download_preparing">Preparing...</string>
+    <string name="download_item_accessibility">%1$s, %2$s</string>
+    <string name="download_progress_with_percent">Downloading, %1$d percent complete</string>
+    <string name="download_running_status">%1$s... %2$s</string>
+    <string name="download_state_cancelled">Download cancelled</string>
+    <string name="download_state_completed">Download completed</string>
+
+    <string name="favorites_title">My words</string>
+    <string name="favorites_loading">Loading favorites...</string>
+    <string name="favorites_search_placeholder">Type a word...</string>
+    <string name="favorites_empty_title">No Favorites Yet</string>
+    <string name="favorites_empty_description">Save words you want to remember</string>
+    <string name="favorites_empty_action_start_searching">Start searching</string>
+    <string name="favorites_no_results_title">No matching favorites for "%1$s"</string>
+    <string name="favorites_no_results_description">Try a different spelling or search the dictionary instead</string>
+    <string name="favorites_no_results_action_search_dictionary">Search dictionary</string>
+    <string name="favorites_stats">%1$d meanings · %2$d words</string>
+
+    <string name="language_setup_title">Select Languages</string>
+    <string name="language_setup_subtitle">Choose what you're learning and your translation preferences.</string>
+    <string name="language_setup_learning_label">I'm learning...</string>
+    <string name="language_setup_select_language">Select language</string>
+    <string name="language_setup_translate_into">Translate into:</string>
+    <string name="language_setup_update_anytime">Update anytime in Settings</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_languages_i_learn">Languages I learn</string>
+    <string name="settings_no_languages_available">No languages available</string>
+    <string name="settings_add_language_to_learn">Add a language to learn</string>
+    <string name="settings_section_translation_languages">Translation languages</string>
+    <string name="settings_section_voice">Voice</string>
+    <string name="settings_section_your_data">Your data</string>
+    <string name="settings_section_about">About</string>
+
+    <string name="feedback_dialog_title">App feedback</string>
+    <string name="feedback_dialog_placeholder">Share your thoughts…</string>
+
+    <string name="app_data_version_mismatch_message">We've updated the dictionary format. You'll need to re-download your dictionaries — your saved words are safe.</string>
+
+    <string name="word_details_title">Word Details</string>
+    <string name="word_details_action_stop">Stop</string>
+    <string name="word_details_action_play_word">Play word</string>
+    <string name="word_details_feedback_title">Suggest a correction</string>
+    <string name="word_details_feedback_placeholder">What needs correcting?</string>
+    <string name="word_details_no_entries">No entries available.</string>
+    <string name="word_details_word_family">Word Family</string>
+    <string name="word_details_suggest_correction">Suggest a correction</string>
+    <string name="word_details_grammar_forms">Grammar forms</string>
+    <string name="word_details_hide_forms">Hide forms</string>
+    <string name="word_details_show_forms">Show forms</string>
+    <string name="word_details_forms">Forms</string>
+    <string name="word_details_loading_meaning">Loading meaning…</string>
+    <string name="word_details_preparing_translation">Preparing translation…</string>
+    <string name="word_details_meaning_load_when_expanded">Meaning will load when expanded</string>
+    <string name="word_details_collapse_sense">Collapse sense</string>
+    <string name="word_details_expand_sense">Expand sense</string>
+    <string name="word_details_definition">Definition</string>
+    <string name="word_details_examples">Examples</string>
+    <string name="word_details_common_phrases">Common phrases</string>
+    <string name="word_details_synonyms">Synonyms</string>
+    <string name="word_details_antonyms">Antonyms</string>
+    <string name="word_details_see_full_word">See full word</string>
+    <string name="word_details_usage_context">Usage Context</string>
 </resources>

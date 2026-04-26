@@ -38,6 +38,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 data class LanguageUiState(
     val voices: List<Text2SpeechVoice> = emptyList(),
@@ -867,11 +869,12 @@ fun SettingsScreenContent(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit = {}
 ) {
+    val dismissActionLabel = stringResource(Res.string.common_dismiss)
     state.errorMessage?.let { error ->
         LaunchedEffect(error) {
             snackbarHostState.showSnackbar(
                 message = error,
-                actionLabel = "Dismiss",
+                actionLabel = dismissActionLabel,
                 duration = SnackbarDuration.Short
             )
             onDismissError()
@@ -884,7 +887,7 @@ fun SettingsScreenContent(
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            "Settings",
+                            stringResource(Res.string.settings_title),
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontFamily = MaterialTheme.serifFontFamily,
                                 fontWeight = FontWeight.Medium
@@ -928,7 +931,7 @@ fun SettingsScreenContent(
                         ) {
                             // === Languages I learn ===
                             item {
-                                SectionHeader(title = "Languages I learn")
+                                SectionHeader(title = stringResource(Res.string.settings_section_languages_i_learn))
                             }
 
                             if (state.isLoadingAvailable) {
@@ -945,7 +948,7 @@ fun SettingsScreenContent(
                                 if (state.learningLanguages.isEmpty() && state.addableLanguages.isEmpty()) {
                                     item {
                                         Text(
-                                            text = "No languages available",
+                                            text = stringResource(Res.string.settings_no_languages_available),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -985,7 +988,7 @@ fun SettingsScreenContent(
                                                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                                             )
                                             Text(
-                                                text = "Add a language to learn",
+                                                text = stringResource(Res.string.settings_add_language_to_learn),
                                                 style = MaterialTheme.typography.labelMedium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 modifier = Modifier.padding(horizontal = AppSpacing.md)
@@ -1016,7 +1019,7 @@ fun SettingsScreenContent(
                             // Translation languages (always visible — prefs are local)
                             item {
                                 SectionHeader(
-                                    title = "Translation languages",
+                                    title = stringResource(Res.string.settings_section_translation_languages),
                                     modifier = Modifier.padding(top = AppSpacing.sm)
                                 )
                             }
@@ -1034,7 +1037,7 @@ fun SettingsScreenContent(
                             if (state.languages.isNotEmpty()) {
                                 item {
                                     SectionHeader(
-                                        title = "Voice",
+                                        title = stringResource(Res.string.settings_section_voice),
                                         modifier = Modifier.padding(top = AppSpacing.sm)
                                     )
                                 }
@@ -1061,7 +1064,7 @@ fun SettingsScreenContent(
                             if (state.isAppDataExportSupported) {
                                 item {
                                     SectionHeader(
-                                        title = "Your data",
+                                        title = stringResource(Res.string.settings_section_your_data),
                                         modifier = Modifier.padding(top = AppSpacing.sm)
                                     )
                                 }
@@ -1078,7 +1081,7 @@ fun SettingsScreenContent(
                             state.buildConfig.let { buildConfig ->
                                 item {
                                     SectionHeader(
-                                        title = "About",
+                                        title = stringResource(Res.string.settings_section_about),
                                         modifier = Modifier.padding(top = AppSpacing.sm)
                                     )
                                 }
@@ -1113,8 +1116,8 @@ fun SettingsScreenContent(
 
         if (state.feedbackDialogVisible) {
             FeedbackDialog(
-                title = "App feedback",
-                commentPlaceholder = "Share your thoughts…",
+                title = stringResource(Res.string.feedback_dialog_title),
+                commentPlaceholder = stringResource(Res.string.feedback_dialog_placeholder),
                 comment = state.feedbackComment,
                 email = state.feedbackEmail,
                 isSending = state.feedbackSubmitting,

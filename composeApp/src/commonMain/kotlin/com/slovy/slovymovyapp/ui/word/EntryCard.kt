@@ -30,6 +30,8 @@ import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.ui.components.PartOfSpeechIndicator
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -442,13 +444,17 @@ private fun GrammarSection(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "Grammar forms",
+                    text = stringResource(Res.string.word_details_grammar_forms),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Icon(
                     imageVector = if (expanded) ExpandLessVector else ExpandMoreVector,
-                    contentDescription = if (expanded) "Hide forms" else "Show forms",
+                    contentDescription = if (expanded) {
+                        stringResource(Res.string.word_details_hide_forms)
+                    } else {
+                        stringResource(Res.string.word_details_show_forms)
+                    },
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
@@ -532,12 +538,16 @@ internal fun EntryCard(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Outlined.LibraryBooks,
-                                contentDescription = if (entryState.formsExpanded) "Hide forms" else "Show forms",
+                                contentDescription = if (entryState.formsExpanded) {
+                                    stringResource(Res.string.word_details_hide_forms)
+                                } else {
+                                    stringResource(Res.string.word_details_show_forms)
+                                },
                                 modifier = Modifier.size(12.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = "Forms",
+                                text = stringResource(Res.string.word_details_forms),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.SemiBold,

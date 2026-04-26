@@ -48,6 +48,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 import kotlin.coroutines.cancellation.CancellationException
 
 sealed interface WordDetailUiState {
@@ -839,7 +841,7 @@ fun WordDetailScreenContent(
     onSenseFavoriteToggle: (String) -> Unit = {},
     onWordClick: (String) -> Unit = {}
 ) {
-    val fallbackTitle = "Word Details"
+    val fallbackTitle = stringResource(Res.string.word_details_title)
     val titleText = when (state) {
         is WordDetailUiState.Content -> state.card.lemma
         is WordDetailUiState.Empty -> state.lemma ?: fallbackTitle
@@ -891,7 +893,11 @@ fun WordDetailScreenContent(
                                         )
                                         else -> Icon(
                                             imageVector = if (isPlaying) Icons.Filled.StopCircle else SpeakerVector,
-                                            contentDescription = if (isPlaying) "Stop" else "Play word",
+                                            contentDescription = if (isPlaying) {
+                                                stringResource(Res.string.word_details_action_stop)
+                                            } else {
+                                                stringResource(Res.string.word_details_action_play_word)
+                                            },
                                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                                                 .copy(alpha = if (canPlay) 1f else 0.38f)
                                         )
@@ -904,7 +910,7 @@ fun WordDetailScreenContent(
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = stringResource(Res.string.common_back)
                             )
                         }
                     },
@@ -1005,8 +1011,8 @@ fun WordDetailScreenContent(
 
     if (state is WordDetailUiState.Content && state.feedbackDialogVisible) {
         com.slovy.slovymovyapp.ui.FeedbackDialog(
-            title = "Suggest a correction",
-            commentPlaceholder = "What needs correcting?",
+            title = stringResource(Res.string.word_details_feedback_title),
+            commentPlaceholder = stringResource(Res.string.word_details_feedback_placeholder),
             comment = state.feedbackComment,
             email = state.feedbackEmail,
             isSending = state.feedbackSubmitting,
@@ -1102,7 +1108,11 @@ private fun WordDetailContent(
                     )
                     else -> Icon(
                         imageVector = if (isPlaying) Icons.Filled.StopCircle else SpeakerVector,
-                        contentDescription = if (isPlaying) "Stop" else "Play word",
+                        contentDescription = if (isPlaying) {
+                            stringResource(Res.string.word_details_action_stop)
+                        } else {
+                            stringResource(Res.string.word_details_action_play_word)
+                        },
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                             .copy(alpha = if (canPlay) 1f else 0.38f)
                     )
@@ -1123,7 +1133,7 @@ private fun WordDetailContent(
 
         if (card.entries.isEmpty()) {
             Text(
-                text = "No entries available.",
+                text = stringResource(Res.string.word_details_no_entries),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1166,7 +1176,7 @@ private fun WordDetailContent(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 EntryList(
-                    label = "Word Family",
+                    label = stringResource(Res.string.word_details_word_family),
                     values = card.wordFamily,
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -1191,7 +1201,7 @@ private fun WordDetailContent(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = "Suggest a correction",
+                text = stringResource(Res.string.word_details_suggest_correction),
                 style = MaterialTheme.typography.bodyMedium
             )
         }

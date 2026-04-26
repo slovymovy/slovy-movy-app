@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 
 /**
  * Returns the appropriate navigation arrow based on word availability.
@@ -92,7 +94,7 @@ internal fun ErrorPlaceholder(
 fun ErrorIcon(modifier: Modifier) {
     Icon(
         imageVector = Icons.Filled.ErrorOutline,
-        contentDescription = "Error",
+        contentDescription = stringResource(Res.string.common_error),
         modifier = modifier,
         tint = MaterialTheme.colorScheme.error
     )
