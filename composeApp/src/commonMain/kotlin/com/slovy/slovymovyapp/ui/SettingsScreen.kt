@@ -321,6 +321,7 @@ class SettingsViewModel(
                 val current = state.translationLanguages
                 val jsonArray = JsonArray(current.sortedBy { it.ordinal }.map { JsonPrimitive(it.code) })
                 settingsRepository.insert(Setting(Setting.Name.LANGUAGE, jsonArray))
+                dictionaryRepository.clearSenseCache()
                 loadLearningLanguages()
             } catch (e: CancellationException) {
                 throw e
