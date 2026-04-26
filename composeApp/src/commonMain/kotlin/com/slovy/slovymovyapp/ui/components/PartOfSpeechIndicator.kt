@@ -2,7 +2,6 @@ package com.slovy.slovymovyapp.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -10,10 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
@@ -53,12 +53,10 @@ fun PartOfSpeechIndicator(
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
     ) {
         if (!cardLoading && cardError == null) {
-            // Vertical color bar
             Box(
                 modifier = Modifier
-                    .width(4.dp)
-                    .height(24.dp)
-                    .background(color, RoundedCornerShape(2.dp))
+                    .size(7.dp)
+                    .background(color, CircleShape)
             )
         } else if (cardLoading) {
             ContainedLoadingIndicator(indicatorColor = color)
@@ -67,20 +65,19 @@ fun PartOfSpeechIndicator(
         }
 
         if (!cardLoading && cardError == null) {
-            // Part of speech label
+            val label = if (meaningCount != null) {
+                "${partOfSpeech} · $meaningCount sense${pluralEnding(meaningCount)}"
+            } else {
+                partOfSpeech
+            }.uppercase()
             Text(
-                text = partOfSpeech.capitalize(Locale.current),
-                style = MaterialTheme.typography.titleMedium,
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.2.sp
+                ),
                 color = MaterialTheme.colorScheme.onSurface
             )
-            // Optional meaning count (secondary)
-            if (meaningCount != null) {
-                Text(
-                    text = "· $meaningCount meaning${pluralEnding(meaningCount)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         } else if (cardLoading) {
             Text(
                 text = "Generating definitions and examples…",
@@ -133,7 +130,7 @@ fun PartOfSpeechBadge(
             .padding(horizontal = AppSpacing.md, vertical = 6.dp)
     ) {
         Text(
-            text = partOfSpeech.capitalize(Locale.current),
+            text = partOfSpeech.replaceFirstChar { it.uppercase() },
             style = MaterialTheme.typography.labelSmall,
             color = color
         )

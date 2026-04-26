@@ -15,13 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.icons.DownloadScreenTransparent
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
@@ -99,6 +104,7 @@ class DownloadViewModel(
     }
 
     private fun beginDownload(): Flow<DownloadEntry?> {
+        Analytics.logEvent(AnalyticsEvent.DOWNLOAD_DICTIONARY_CLICK)
         return downloadCoordinator.startDownload(downloadKey, download)
     }
 
@@ -342,6 +348,7 @@ fun DownloadScreenContent(
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineSmall.copy(
+                    fontFamily = FontFamily.Default,
                     fontWeight = FontWeight.Bold
                 ),
                 color = MaterialTheme.colorScheme.primary
@@ -351,7 +358,10 @@ fun DownloadScreenContent(
 
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontFamily = MaterialTheme.serifFontFamily,
+                    fontStyle = FontStyle.Italic
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 minLines = 2

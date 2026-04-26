@@ -209,7 +209,7 @@ class DictionaryRepository(
         }
     }
 
-    // Loads related words from all databases, later databases take precedence
+    // Loads related words from all databases. Offline rows replace online-only rows.
     private fun loadRelatedWords(
         databases: List<DictionaryDatabase>,
         language: Language,
@@ -219,23 +219,67 @@ class DictionaryRepository(
 
         val result = mutableMapOf<String, RelatedWord>()
         // Normalize to lowercase for case-insensitive matching (DB stores lemmas lowercase)
-        val lowercaseWords = relatedWords.map { it.lowercase() }.toSet()
+        val lookupWords = relatedWords.map { it.lowercase() }.toSet()
+
+        fun putIfMissingOrOnline(key: String, relatedWord: RelatedWord) {
+            if (result[key]?.online != false) {
+                result[key] = relatedWord
+            }
+        }
 
         for (db in databases) {
-            db.dictionaryQueries.selectLemmasByWords(language.code, lowercaseWords.toList())
+            val q = db.dictionaryQueries
+            q.selectLemmasByWords(language.code, lookupWords.toList())
                 .executeAsList()
                 .forEach { row ->
-                    if (row.lemma !in result || result[row.lemma]!!.online) {
-                        result[row.lemma] = RelatedWord(
-                            lemma = row.lemma,
-                            zipfFrequency = row.zipf_frequency.toFloat(),
-                            online = row.online_only
-                        )
+                    putIfMissingOrOnline(
+                        row.lemma,
+                        relatedWord(row.lemma, row.zipf_frequency, row.online_only)
+                    )
+                }
+
+            // Fallback: resolve inflected forms (e.g. "Gebogen" → parent lemma "buigen").
+            // Keep the form as the map key so chip text stays unchanged, while
+            // RelatedWord.lemma points navigation at the parent lemma.
+            lookupWords
+                .filter { form -> result[form]?.online != false }
+                .forEach { form ->
+                    q.resolveRelatedForm(language, form)?.let { relatedWord ->
+                        putIfMissingOrOnline(form, relatedWord)
                     }
                 }
         }
         return result
     }
+
+    private fun DictionaryQueries.resolveRelatedForm(
+        language: Language,
+        form: String
+    ): RelatedWord? {
+        val exact = selectLemmasByFormEquals(language.code, form, 1L)
+            .executeAsList()
+            .firstOrNull()
+        if (exact != null) {
+            return relatedWord(exact.lemma, exact.zipf_frequency, exact.online_only)
+        }
+
+        val normalized = selectLemmasByFormNormalizedEquals(language.code, stripAccents(form), 1L)
+            .executeAsList()
+            .firstOrNull()
+            ?: return null
+
+        return relatedWord(normalized.lemma, normalized.zipf_frequency, normalized.online_only)
+    }
+
+    private fun relatedWord(
+        lemma: String,
+        zipfFrequency: Number,
+        onlineOnly: Boolean
+    ): RelatedWord = RelatedWord(
+        lemma = lemma,
+        zipfFrequency = zipfFrequency.toFloat(),
+        online = onlineOnly
+    )
 
     fun installedDictionaries(): List<Language> = languages.filter { lang ->
         try {
@@ -524,7 +568,7 @@ class DictionaryRepository(
                 onlineOnly = result.online_only
                 zipfFrequency = result.zipf_frequency.toFloat()
                 sourceDb = db
-                if (!onlineOnly) break // if online only - try to find in local db
+                if (!onlineOnly) break
             }
         }
 
@@ -680,7 +724,8 @@ class DictionaryRepository(
                             .groupBy({ it.sense_id }) { row ->
                                 LanguageCardTranslation(
                                     targetLangWord = row.target_lang_word,
-                                    targetLangSenseClarification = row.target_lang_sense_clarification
+                                    targetLangSenseClarification = row.target_lang_sense_clarification,
+                                    idx = row.idx
                                 )
                             }
 

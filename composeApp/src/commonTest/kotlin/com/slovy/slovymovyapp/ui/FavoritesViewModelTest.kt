@@ -179,6 +179,107 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
+    fun requestScrollToTop_incrementsScrollToTopVersionOnNextLoad() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add("s1", Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.loadAndApplyState("")
+        assertFalse(contentState(vm).scrollToTop, "scrollToTop should start as false")
+
+        vm.requestScrollToTop()
+        vm.loadAndApplyState("")
+
+        assertTrue(contentState(vm).scrollToTop,
+            "scrollToTop should be true after requestScrollToTop + load")
+    }
+
+    @Test
+    fun requestScrollToTop_raceCondition_scrollHappensEvenWhenInitialLoadRunsFirst() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+
+        val vm = createViewModel(favRepo)
+        // Simulate Favorites screen's initial loadFavorites() running before the favorite is added
+        vm.loadAndApplyState("")
+        assertFalse(contentState(vm).scrollToTop)
+
+        // Favorite is added and onFavoriteAdded fires after the initial load
+        favRepo.add("s1", Language.ENGLISH, "hello")
+        vm.requestScrollToTop() // sets the pending flag
+        vm.loadAndApplyState("") // simulate the subsequent Favorites reload (debounced queryFlow)
+
+        val content = contentState(vm)
+        assertEquals(1, content.senses.size, "New favorite should be present")
+        assertTrue(content.scrollToTop,
+            "Should scroll to top even when the initial Favorites load ran before onFavoriteAdded")
+    }
+
+    @Test
+    fun requestScrollToTop_scrollsEvenWhenFilterActive() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add("s1", Language.ENGLISH, "hello")
+        favRepo.add("s2", Language.ENGLISH, "world")
+
+        val vm = createViewModel(favRepo)
+        vm.loadAndApplyState("")
+
+        // Add a new favorite and request scroll while a query is active
+        favRepo.add("s3", Language.ENGLISH, "newword")
+        vm.requestScrollToTop()
+        vm.loadAndApplyState("hello") // query hides s3
+
+        assertTrue(contentState(vm).scrollToTop,
+            "Should scroll to top of the filtered results immediately, flag is not kept pending")
+    }
+
+    @Test
+    fun requestScrollToTop_scrollsEvenWhenSenseRemovedBeforeReload() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add("s1", Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.loadAndApplyState("")
+
+        // Add then immediately remove before reload
+        favRepo.add("s2", Language.ENGLISH, "world")
+        vm.requestScrollToTop()
+        favRepo.remove("s2", Language.ENGLISH)
+        vm.loadAndApplyState("")
+
+        assertTrue(contentState(vm).scrollToTop,
+            "Should still scroll to top even if the added sense was removed before reload")
+    }
+
+    @Test
+    fun scrollToTop_notRetriggered_afterVersionConsumed() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add("s1", Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.loadAndApplyState("")
+
+        // Add a favorite and trigger scroll
+        favRepo.add("s2", Language.ENGLISH, "world")
+        vm.requestScrollToTop()
+        vm.loadAndApplyState("")
+        assertTrue(contentState(vm).scrollToTop, "scrollToTop should be true after add")
+
+        // Composable consumes the scroll event (as LaunchedEffect does after scrollToItem)
+        vm.consumeScrollToTop()
+        assertFalse(contentState(vm).scrollToTop, "scrollToTop should reset to false after consume")
+
+        // Simulate re-entering Favorites (loadFavorites fires on screen entry, no new add)
+        vm.loadAndApplyState("")
+        assertFalse(contentState(vm).scrollToTop,
+            "Re-entering Favorites without a new add must not re-trigger scroll")
+    }
+
+    @Test
     fun dropdownExpandedState_resetsWhenPickerBecomesHidden() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()

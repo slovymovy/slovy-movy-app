@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.crashlytics)
 }
 
 kotlin {
@@ -13,7 +15,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.slovy.slovymovyapp"
+    namespace = "com.slovy.slovymovyapp.androidApp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     buildFeatures {
@@ -24,7 +26,7 @@ android {
         applicationId = "com.slovy.slovymovyapp"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 16 // version
+        versionCode = 17 // version
         versionName = "Alpha"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

@@ -216,4 +216,20 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
             null
         }
     }
+
+    actual suspend fun downloadFileToPath(
+        url: String,
+        headers: Map<String, String>,
+        destPath: Path,
+        onProgress: (DownloadProgress) -> Unit,
+        cancelToken: CancelToken,
+    ) = nsUrlSessionDownload(
+        url = url,
+        headers = headers,
+        destPath = destPath,
+        onProgress = onProgress,
+        cancelToken = cancelToken,
+        moveFile = { from, to -> moveFile(from, to) },
+        getAvailableBytesForDestination = { getAvailableBytesForPath(destPath) },
+    )
 }

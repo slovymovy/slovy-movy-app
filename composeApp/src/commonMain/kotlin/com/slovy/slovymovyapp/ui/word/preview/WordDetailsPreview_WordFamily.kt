@@ -89,7 +89,6 @@ private fun WordDetailScreenPreviewWithClickableHighlightedWords(
         )
         val expanded = base.entries.map { entryState ->
             entryState.copy(
-                expanded = true,
                 formsExpanded = true,
                 senses = entryState.senses.map { senseState ->
                     senseState.copy(

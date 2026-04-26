@@ -53,11 +53,12 @@ class WordFetchManager(
         translationTargets: List<Language>,
         pushToRepo: Boolean = false
     ): Flow<WordResult> = mutex.withLock {
+        val normalizedLemma = lemma.trim().lowercase()
         // Normalize translations to make cache key deterministic
         val normalizedTargets = translationTargets.distinct().sortedBy { it.code }
         val key = FetchKey(
             language = language,
-            lemma = lemma,
+            lemma = normalizedLemma,
             translationsKey = normalizedTargets.joinToString(",") { it.code },
             pushToRepo = pushToRepo
         )
@@ -81,7 +82,7 @@ class WordFetchManager(
 
         // Start collecting from DictionaryClient and forwarding to SharedFlow
         scope.launch {
-            dictionaryClient.getWord(language, lemma, normalizedTargets, pushToRepo)
+            dictionaryClient.getWord(language, normalizedLemma, normalizedTargets, pushToRepo)
                 .onCompletion {
                     // Mark as complete - will be removed on next getWord call
                     entry.isComplete = true
