@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import org.jetbrains.compose.resources.stringResource
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.word.colorsForFrequency
@@ -38,7 +39,7 @@ fun FrequencyBadge(
         border = BorderStroke(0.5.dp, textColor.copy(alpha = 0.15f))
     ) {
         Text(
-            text = frequency.label,
+            text = stringResource(frequency.label),
             modifier = Modifier.padding(horizontal = AppSpacing.md, vertical = 6.dp),
             style = MaterialTheme.typography.labelSmall,
             color = textColor
@@ -63,7 +64,7 @@ fun CompactFrequencyBadge(
         border = BorderStroke(0.5.dp, textColor.copy(alpha = 0.15f))
     ) {
         Text(
-            text = frequency.label,
+            text = stringResource(frequency.label),
             modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = 4.dp),
             style = MaterialTheme.typography.labelSmall,
             color = textColor

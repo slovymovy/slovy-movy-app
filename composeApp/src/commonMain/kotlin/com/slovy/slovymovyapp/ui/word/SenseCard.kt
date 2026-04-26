@@ -330,6 +330,7 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             traits.forEach { trait ->
+                val traitName = stringResource(trait.traitType.displayName)
                 val annotatedText = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
@@ -337,7 +338,7 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     ) {
-                        append(trait.traitType.displayName)
+                        append(traitName)
                     }
                     if (trait.comment.isNotBlank()) {
                         append(": ")
@@ -439,10 +440,10 @@ internal fun LevelAndFrequencyRow(
         val (lc, lcc) = colorsForLevel(level)
         val (fc, fcc) = colorsForFrequency(frequency)
         MetaBadge(text = level.name, containerColor = lc, contentColor = lcc)
-        MetaBadge(text = frequency.label, containerColor = fc, contentColor = fcc)
+        MetaBadge(text = stringResource(frequency.label), containerColor = fc, contentColor = fcc)
         if (nameType != null && nameType != NameType.NO) {
             val (nc, ncc) = colorsForNameType(nameType)
-            MetaBadge(text = nameType.displayName, containerColor = nc, contentColor = ncc)
+            MetaBadge(text = stringResource(nameType.displayName), containerColor = nc, contentColor = ncc)
         }
     }
 }

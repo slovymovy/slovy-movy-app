@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.forms.GridCell
+import com.slovy.slovymovyapp.data.forms.TagMapping
 import com.slovy.slovymovyapp.data.remote.FormsSchemeView
 import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
@@ -92,8 +93,14 @@ private fun resolvedFormValue(view: FormsSchemeView, sourceRow: Int, sourceColum
 @Composable
 private fun FormsGridCell(cell: GridCell, value: String?) {
     val text = when (cell) {
-        is GridCell.RowHeader -> cell.label
-        is GridCell.ColHeader -> cell.label
+        is GridCell.RowHeader -> TagMapping.resolve(cell.label)
+            ?.let { formTagDisplayNames[it] }
+            ?.let { stringResource(it) }
+            ?: cell.label
+        is GridCell.ColHeader -> TagMapping.resolve(cell.label)
+            ?.let { formTagDisplayNames[it] }
+            ?.let { stringResource(it) }
+            ?: cell.label
         is GridCell.Data -> value ?: "?"
         is GridCell.Empty -> ""
     }
@@ -512,7 +519,7 @@ internal fun EntryCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             PartOfSpeechIndicator(
-                partOfSpeech = entry.pos.name,
+                partOfSpeech = stringResource(entry.pos.displayName),
                 meaningCount = if (showContent) entry.senses.size else null,
                 cardLoading = cardLoading,
                 cardError = cardError
