@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.format.char
+import kotlin.time.Duration.Companion.milliseconds
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Instant
@@ -68,7 +69,7 @@ sealed interface FavoritesUiState {
         val isLanguageDropdownExpanded: Boolean = false,
         val scrollToTop: Boolean = false
     ) : FavoritesUiState {
-        val showNoResults: Boolean get() = senses.isEmpty() && query.isNotEmpty()
+        val showNoResults: Boolean get() = senses.isEmpty() && query.isNotBlank()
         val showLanguagePicker: Boolean get() = availableLanguages.size > 1
     }
 }
@@ -104,7 +105,7 @@ class FavoritesViewModel(
         viewModelScope.launch {
             @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
             queryFlow
-                .debounce(QUERY_DEBOUNCE_MS)
+                .debounce(QUERY_DEBOUNCE_MS.milliseconds)
                 .flatMapLatest { queryState ->
                     val snapshot = state as? FavoritesUiState.Content
                     flow { emit(computeFavoritesState(queryState.query, snapshot)) }
@@ -423,13 +424,7 @@ fun FavoritesScreenContent(
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    focusManager.clearFocus()
-                })
-            },
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -565,7 +560,16 @@ fun FavoritesScreenContent(
                         Spacer(modifier = Modifier.height(4.dp))
                     }
 
-                    when {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTapGestures(onTap = {
+                                    focusManager.clearFocus()
+                                })
+                            }
+                    ) {
+                        when {
                         !state.hasAnyFavorites -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
@@ -656,6 +660,7 @@ fun FavoritesScreenContent(
                                 }
                             }
                         }
+                    }
                     }
                 }
             }

@@ -1,12 +1,8 @@
 package com.slovy.slovymovyapp.ui.components
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -14,12 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
@@ -61,8 +51,7 @@ fun AppSearchBar(
     focusRequester: FocusRequester? = null,
     onFocusChanged: ((Boolean) -> Unit)? = null
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
+    var isFocused by remember { mutableStateOf(false) }
     val isDarkTheme = LocalIsDarkTheme.current
 
     // Animate elevation based on focus state
@@ -76,27 +65,9 @@ fun AppSearchBar(
         },
         label = "searchBarElevation"
     )
-
-    var textFieldValue by remember { mutableStateOf(TextFieldValue(query, TextRange(query.length))) }
     val placeholderText = placeholder ?: stringResource(Res.string.common_search_placeholder)
     val searchContentDescription = stringResource(Res.string.common_search)
     val clearContentDescription = stringResource(Res.string.common_clear)
-    // Plain (non-observable) ref updated synchronously in onValueChange before onQueryChange
-    // is called. LaunchedEffect reads it on the main thread after the event fires, so it
-    // always sees the up-to-date value. Using a non-State holder avoids the extra
-    // recomposition that a mutableStateOf write would trigger, which on iOS caused
-    // the UIKit text bridge to drop characters mid-keystroke.
-    val lastSentQuery = remember { object { var value = query } }
-
-    LaunchedEffect(query) {
-        // Only sync when query was changed from outside (not as a round-trip echo of our
-        // own onValueChange call). This preserves cursor position during normal typing
-        // while still handling external resets such as restore-after-process-death.
-        if (query != lastSentQuery.value) {
-            lastSentQuery.value = query
-            textFieldValue = TextFieldValue(query, TextRange(query.length))
-        }
-    }
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -109,23 +80,12 @@ fun AppSearchBar(
             else -> MaterialTheme.colorScheme.surfaceContainerHighest
         }
     ) {
-        OutlinedTextField(
-            value = textFieldValue,
-            onValueChange = { newValue ->
-                textFieldValue = newValue
-                lastSentQuery.value = newValue.text
-                onQueryChange(newValue.text)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
-                .then(if (onFocusChanged != null) Modifier.onFocusChanged { onFocusChanged(it.isFocused) } else Modifier),
-            placeholder = {
-                Text(
-                    text = placeholderText,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            },
+        PlatformSearchTextInput(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = placeholderText,
+            onSearch = onSearch,
             leadingIcon = leadingIcon ?: {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -137,11 +97,9 @@ fun AppSearchBar(
                     }
                 )
             },
-            trailingIcon = if (textFieldValue.text.isNotEmpty()) {
+            trailingIcon = if (query.isNotEmpty()) {
                 {
                     IconButton(onClick = {
-                        textFieldValue = TextFieldValue("", TextRange(0))
-                        lastSentQuery.value = ""
                         onQueryChange("")
                     }) {
                         Icon(
@@ -156,26 +114,12 @@ fun AppSearchBar(
                     }
                 }
             } else null,
-            shape = MaterialTheme.shapes.extraLarge,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-                disabledBorderColor = Color.Transparent,
-                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            ),
-            singleLine = true,
             enabled = enabled,
-            interactionSource = interactionSource,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(
-                onSearch = { onSearch?.invoke() }
-            ),
+            focusRequester = focusRequester,
+            onFocusChanged = { focused ->
+                isFocused = focused
+                onFocusChanged?.invoke(focused)
+            },
             textStyle = MaterialTheme.typography.bodyLarge
         )
     }

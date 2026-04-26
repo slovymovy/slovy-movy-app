@@ -2,11 +2,12 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -22,7 +23,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -52,6 +52,7 @@ import com.slovy.slovymovyapp.ui.word.colorForLemma
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.uuid.Uuid
@@ -102,7 +103,7 @@ class SearchViewModel(
         viewModelScope.launch {
             @OptIn(kotlinx.coroutines.FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
             queryFlow
-                .debounce(200) // Wait ms after last keystroke
+                .debounce(200.milliseconds) // Wait ms after last keystroke
                 .flatMapLatest { queryState ->
                     flow {
                         val query = queryState.query
@@ -162,17 +163,17 @@ class SearchViewModel(
     }
 
     fun updateQuery(newQuery: String) {
-        val trimmed = newQuery.trim()
+        val normalized = newQuery.trim()
         // Update UI state immediately for responsive typing
-        state = if (trimmed.isEmpty()) {
-            state.copy(query = trimmed, results = emptyList(), showNoResults = false)
+        state = if (normalized.isEmpty()) {
+            state.copy(query = newQuery, results = emptyList(), showNoResults = false)
         } else {
-            state.copy(query = trimmed)
+            state.copy(query = newQuery)
         }
         // Trigger debounced search
         queryFlow.value =
             queryFlow.value.copy(
-                query = trimmed,
+                query = normalized,
                 language = state.selectedLanguage,
                 force = Uuid.random(),
                 resetFocus = true
@@ -181,8 +182,9 @@ class SearchViewModel(
 
     fun refreshResults() {
         // Re-trigger search to update favorite status
-        if (state.query.isNotEmpty()) {
-            queryFlow.value = queryFlow.value.copy(force = Uuid.random(), resetFocus = false)
+        val normalized = state.query.trim()
+        if (normalized.isNotEmpty()) {
+            queryFlow.value = queryFlow.value.copy(query = normalized, force = Uuid.random(), resetFocus = false)
         }
     }
 
@@ -200,8 +202,14 @@ class SearchViewModel(
         val langChanged = state.selectedLanguage != language
         state = state.copy(selectedLanguage = language)
         // Re-trigger search with new language filter
-        if (state.query.isNotEmpty()) {
-            queryFlow.value = queryFlow.value.copy(language = language, force = Uuid.random(), resetFocus = langChanged)
+        val normalized = state.query.trim()
+        if (normalized.isNotEmpty()) {
+            queryFlow.value = queryFlow.value.copy(
+                query = normalized,
+                language = language,
+                force = Uuid.random(),
+                resetFocus = langChanged
+            )
         }
         // Load suggestions for new language
         if (langChanged) {
@@ -243,7 +251,7 @@ fun SearchScreen(
     }
 
     LaunchedEffect(savedQuery) {
-        if (viewModel.state.query.isEmpty() && savedQuery.isNotEmpty()) {
+        if (viewModel.state.query.isBlank() && savedQuery.isNotBlank()) {
             viewModel.updateQuery(savedQuery)
         }
     }
@@ -300,40 +308,24 @@ fun SearchScreenContent(
     onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
-    val searchFocusRequester = remember { FocusRequester() }
-    var isSearchFocused by remember { mutableStateOf(false) }
-    val tapInteractionSource = remember { MutableInteractionSource() }
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(
-                interactionSource = tapInteractionSource,
-                indication = null
-            ) {
-                if (!isSearchFocused) {
-                    searchFocusRequester.requestFocus()
-                } else {
-                    focusManager.clearFocus()
-                }
-            }
-    ) {
-        Scaffold(
-            bottomBar = {
-                AppNavigationBar(
-                    currentScreen = AppScreen.SEARCH,
-                    onNavigateToSearch = {},
-                    onNavigateToFavorites = onNavigateToFavorites,
-                    onNavigateToWordDetail = onNavigateToWordDetail,
-                    wordDetailLabel = wordDetailLabel,
-                    onNavigateToSettings = onNavigateToSettings
-                )
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            AppNavigationBar(
+                currentScreen = AppScreen.SEARCH,
+                onNavigateToSearch = {},
+                onNavigateToFavorites = onNavigateToFavorites,
+                onNavigateToWordDetail = onNavigateToWordDetail,
+                wordDetailLabel = wordDetailLabel,
+                onNavigateToSettings = onNavigateToSettings
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
                 // Search field with language dropdown on the same row
                 Row(
                     modifier = Modifier
@@ -417,50 +409,59 @@ fun SearchScreenContent(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Result area
-                when {
-                    state.availableLanguages.isEmpty() -> {
-                        NoDictionaryState(onNavigateToSettings = onNavigateToSettings)
-                    }
-
-                    state.query.isEmpty() -> {
-                        PullToRefreshBox(
-                            modifier = Modifier.fillMaxSize(),
-                            isRefreshing = state.isSuggestionsRefreshing,
-                            onRefresh = onRefreshSuggestions
-                        ) {
-                            EmptySearchState(
-                                wordSuggestions = state.wordSuggestions,
-                                favoriteLemmas = state.favoriteLemmas,
-                                onWordClick = onSuggestionSelected
-                            )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectTapGestures(onTap = {
+                                focusManager.clearFocus()
+                            })
                         }
-                    }
+                ) {
+                    // Result area
+                    when {
+                        state.availableLanguages.isEmpty() -> {
+                            NoDictionaryState(onNavigateToSettings = onNavigateToSettings)
+                        }
 
-                    state.showNoResults -> {
-                        NoResultsState(query = state.query)
-                    }
-
-                    else -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(16.dp),
-                            state = state.scrollState
-                        ) {
-                            items(state.results) { item ->
-                                SearchResultCard(
-                                    item = item,
-                                    showLanguageIndicator = state.showLanguageIndicators,
-                                    onClick = { onResultSelected(item) }
+                        state.query.isBlank() -> {
+                            PullToRefreshBox(
+                                modifier = Modifier.fillMaxSize(),
+                                isRefreshing = state.isSuggestionsRefreshing,
+                                onRefresh = onRefreshSuggestions
+                            ) {
+                                EmptySearchState(
+                                    wordSuggestions = state.wordSuggestions,
+                                    favoriteLemmas = state.favoriteLemmas,
+                                    onWordClick = onSuggestionSelected
                                 )
+                            }
+                        }
+
+                        state.showNoResults -> {
+                            NoResultsState(query = state.query)
+                        }
+
+                        else -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(16.dp),
+                                state = state.scrollState
+                            ) {
+                                items(state.results) { item ->
+                                    SearchResultCard(
+                                        item = item,
+                                        showLanguageIndicator = state.showLanguageIndicators,
+                                        onClick = { onResultSelected(item) }
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
 }
 
 @Composable
