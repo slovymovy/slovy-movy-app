@@ -5,6 +5,9 @@ steps:
     args:
       - '-c'
       - |
+        set -e
+        apt-get update
+        apt-get install -y --no-install-recommends git
         ./gradlew :server:installDist -x test --build-cache --no-daemon
 
   # Build the container image
