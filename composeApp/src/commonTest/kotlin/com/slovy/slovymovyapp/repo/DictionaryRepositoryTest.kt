@@ -9,10 +9,14 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
+import com.slovy.slovymovyapp.data.settings.Setting
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.*
 import kotlin.uuid.Uuid
 
@@ -23,6 +27,10 @@ class DictionaryRepositoryTest : BaseTest() {
 
     private fun favoritesRepository(): FavoritesRepository {
         return FavoritesRepository(testAppDatabaseHolder().database)
+    }
+
+    private fun settingsRepository(): SettingsRepository {
+        return SettingsRepository(testAppDatabaseHolder().database)
     }
 
     @Test
@@ -46,7 +54,7 @@ class DictionaryRepositoryTest : BaseTest() {
 
             val favoritesRepo = favoritesRepository()
             val localMgr = testLocalDbManager()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
 
             // Verify installed sets reflect downloads
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
@@ -92,7 +100,7 @@ class DictionaryRepositoryTest : BaseTest() {
 
             val favoritesRepo = favoritesRepository()
             val localMgr = testLocalDbManager()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
             assertTrue(repo.installedDictionaries().contains(Language.DUTCH), "'nl' dictionary should be installed")
 
             val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "tegengesteld") }
@@ -125,7 +133,7 @@ class DictionaryRepositoryTest : BaseTest() {
 
             val favoritesRepo = favoritesRepository()
             val localMgr = testLocalDbManager()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "bu" which should match "bu" and its forms
@@ -171,7 +179,7 @@ class DictionaryRepositoryTest : BaseTest() {
 
             val favoritesRepo = favoritesRepository()
             val localMgr = testLocalDbManager()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             // Search for "test" - should match the base lemma "test"
@@ -223,7 +231,7 @@ class DictionaryRepositoryTest : BaseTest() {
 
             val favoritesRepo = favoritesRepository()
             val localMgr = testLocalDbManager()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
             assertTrue(repo.installedDictionaries().contains(Language.ENGLISH), "'en' dictionary should be installed")
 
             runBlocking {
@@ -277,7 +285,7 @@ class DictionaryRepositoryTest : BaseTest() {
             )
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
 
             // Verify RO dictionary doesn't exist
             assertFalse(mgr.hasDictionary(Language.ENGLISH), "RO dictionary should not exist")
@@ -365,7 +373,7 @@ class DictionaryRepositoryTest : BaseTest() {
             )
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
 
             val card = runBlocking {
                 repo.getLanguageCard(Language.ENGLISH, "simultaneously", listOf(Language.RUSSIAN))
@@ -384,6 +392,90 @@ class DictionaryRepositoryTest : BaseTest() {
         } finally {
             runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
             localMgr.closeAll()
+            if (platform.fileExists(localTransPath)) {
+                platform.deleteFile(localTransPath)
+            }
+        }
+    }
+
+    @Test
+    fun getSenses_uses_settings_targets_for_local_translations_without_definition() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
+
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+        if (platform.fileExists(localTransPath)) {
+            platform.deleteFile(localTransPath)
+        }
+
+        try {
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
+
+            val localDictDb = localMgr.openLocalDictionary()
+            localDictDb.dictionaryQueries.insertLemma(lemmaId, "en", "localfavorite", "localfavorite", 5.0, false)
+            localDictDb.dictionaryQueries.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.NOUN)
+            localDictDb.dictionaryQueries.insertSense(
+                sense_id = senseId,
+                lemma_pos_id = lemmaPosId,
+                sense_definition = "A favorite stored locally",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "group1",
+                name_type = null
+            )
+
+            val localTransDb = localMgr.openLocalTranslation()
+            localTransDb.translationQueries.insertSenseTranslation(
+                sense_id = senseId,
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                idx = 0,
+                target_lang_word = "Локальный",
+                target_lang_word_normalized = "локальный",
+                target_lang_sense_clarification = null,
+                lemma_id = lemmaId,
+                lemma_pos_id = lemmaPosId
+            )
+
+            val settingsRepo = settingsRepository()
+            runBlocking {
+                settingsRepo.insert(
+                    Setting(
+                        id = Setting.Name.LANGUAGE,
+                        value = JsonArray(listOf(JsonPrimitive("ru")))
+                    )
+                )
+            }
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepo)
+            val loaded = runBlocking {
+                repo.getSenses(Language.ENGLISH, "localfavorite", setOf(senseId.toString()))
+            }
+
+            val sense = loaded[senseId.toString()]?.sense
+            assertNotNull(sense, "Should load the local favorite sense")
+            assertEquals(
+                "Локальный",
+                sense.translations[Language.RUSSIAN]?.firstOrNull()?.targetLangWord,
+                "Should load local translations using settings targets even when no target definition exists"
+            )
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
             if (platform.fileExists(localTransPath)) {
                 platform.deleteFile(localTransPath)
             }
@@ -427,7 +519,7 @@ class DictionaryRepositoryTest : BaseTest() {
             )
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
 
             // Verify RO dictionary doesn't exist
             assertFalse(mgr.hasDictionary(Language.ENGLISH), "RO dictionary should not exist")
@@ -495,7 +587,7 @@ class DictionaryRepositoryTest : BaseTest() {
             )
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
 
             // Search for "simultaneously"
             val results = runBlocking { repo.search("simultaneously", dictionaryLanguage = Language.ENGLISH) }
@@ -526,7 +618,7 @@ class DictionaryRepositoryTest : BaseTest() {
         runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
 
         val favoritesRepo = favoritesRepository()
-        val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+        val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
 
         val suggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
         assertTrue(suggestions.isEmpty(), "Should return empty list when no dictionary installed")
@@ -547,7 +639,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
 
             val suggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
 
@@ -573,7 +665,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
 
             // Get initial suggestions
             val initialSuggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
@@ -634,7 +726,7 @@ class DictionaryRepositoryTest : BaseTest() {
             // Word family stores original JSON casing — may be capitalised
             q.insertLemmaWordFamily(lemmaId, "Gebogen")
 
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository())
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
 
             val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "buigen") }
             assertNotNull(card, "Card should be built for 'buigen'")
@@ -692,7 +784,7 @@ class DictionaryRepositoryTest : BaseTest() {
             // Word family entry with original JSON casing
             q.insertLemmaWordFamily(lemmaId, "Łody")
 
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository())
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
 
             val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "loden") }
             assertNotNull(card, "Card should be built for 'loden'")
@@ -725,7 +817,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
 
             val suggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, count = 10, offset = 0) }
             assertTrue(suggestions.isNotEmpty(), "Should return at least one suggestion")
@@ -796,7 +888,7 @@ class DictionaryRepositoryTest : BaseTest() {
             )
 
             val favoritesRepo = favoritesRepository()
-            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo)
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepo, settingsRepository())
 
             val results = runBlocking {
                 repo.searchSenseIdsByTranslation(

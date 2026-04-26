@@ -9,6 +9,7 @@ import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryClient
 import com.slovy.slovymovyapp.data.remote.DictionaryClientException
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
@@ -30,7 +31,8 @@ class DictionaryClientTest : BaseTest() {
         return DictionaryRepository(
             testDataDbManager(),
             testLocalDbManager(),
-            favoritesRepository()
+            favoritesRepository(),
+            SettingsRepository(testAppDatabaseHolder().database)
         )
     }
 

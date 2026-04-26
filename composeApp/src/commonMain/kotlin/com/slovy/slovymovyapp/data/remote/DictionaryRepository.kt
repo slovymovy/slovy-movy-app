@@ -8,6 +8,7 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.forms.*
 import com.slovy.slovymovyapp.data.forms.configs.SchemeRegistry
 import com.slovy.slovymovyapp.data.local.LocalDbManager
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.translation.TranslationDatabase
@@ -123,6 +124,7 @@ class DictionaryRepository(
     private val dataDbManager: DataDbManager,
     private val localDbManager: LocalDbManager,
     private val favoritesRepository: FavoritesRepository,
+    private val settingsRepository: SettingsRepository,
     private val languages: List<Language> = Language.entries,
 ) {
 
@@ -291,6 +293,15 @@ class DictionaryRepository(
 
     fun installedTranslationTargets(src: Language): List<Language> = languages.filter { tgt ->
         tgt != src && dataDbManager.hasTranslation(src, tgt)
+    }
+
+    private suspend fun defaultTranslationTargets(src: Language): List<Language> {
+        val configuredTargets = settingsRepository
+            .getTranslationLanguages()
+            .filter { it != src }
+            .distinctBy { it.code }
+
+        return configuredTargets.ifEmpty { installedTranslationTargets(src) }
     }
 
     // Search within all installed dictionaries by default; if dictionaryLanguage provided, restrict to it.
@@ -543,9 +554,10 @@ class DictionaryRepository(
     suspend fun getLanguageCard(
         language: Language,
         lemma: String,
-        translationTargets: List<Language> = installedTranslationTargets(language),
+        translationTargets: List<Language>? = null,
         senseIds: Set<String>? = null
     ): LanguageCard? = withContext(Dispatchers.IO) {
+        val resolvedTranslationTargets = translationTargets ?: defaultTranslationTargets(language)
         // Open dictionary databases in priority order
         val dictDatabases = openDictionaryDatabases(language)
         val senseIdFilter = senseIds?.takeIf { it.isNotEmpty() }
@@ -580,7 +592,7 @@ class DictionaryRepository(
         val lemmaPosIds = q.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
 
         // Open translation databases for all target languages
-        val translationDbsMap = translationTargets.associateWith { tgt ->
+        val translationDbsMap = resolvedTranslationTargets.associateWith { tgt ->
             openTranslationDatabases(language, tgt)
         }
 
@@ -710,35 +722,58 @@ class DictionaryRepository(
 
         val translationDataMap: Map<Language, TranslationData> = if (allUncachedSenseIds.isNotEmpty()) {
             translationDbsMap.mapNotNull { (tgt, transDbs) ->
-                // Try databases in order, use the first one that has definitions
+                val definitions = LinkedHashMap<Uuid, String>()
+                val translations = LinkedHashMap<Uuid, List<LanguageCardTranslation>>()
+                val exampleTranslations = LinkedHashMap<Uuid, MutableMap<Long, String>>()
+
                 for (transDb in transDbs) {
-                    val defs = transDb.translationQueries
+                    val queries = transDb.translationQueries
+
+                    queries
                         .selectDefinitionsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
                         .executeAsList()
-                    if (defs.isNotEmpty()) {
-                        val definitions = defs.associate { it.sense_id to it.definition }
-
-                        val translations = transDb.translationQueries
-                            .selectSenseTranslationsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
-                            .executeAsList()
-                            .groupBy({ it.sense_id }) { row ->
-                                LanguageCardTranslation(
-                                    targetLangWord = row.target_lang_word,
-                                    targetLangSenseClarification = row.target_lang_sense_clarification,
-                                    idx = row.idx
-                                )
+                        .forEach { row ->
+                            if (row.sense_id !in definitions) {
+                                definitions[row.sense_id] = row.definition
                             }
+                        }
 
-                        val exampleTrans = transDb.translationQueries
-                            .selectExampleTranslationsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
-                            .executeAsList()
-                            .groupBy({ it.sense_id }) { it }
-                            .mapValues { (_, rows) -> rows.associate { it.example_id to it.translation } }
+                    queries
+                        .selectSenseTranslationsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
+                        .executeAsList()
+                        .groupBy({ it.sense_id }) { row ->
+                            LanguageCardTranslation(
+                                targetLangWord = row.target_lang_word,
+                                targetLangSenseClarification = row.target_lang_sense_clarification,
+                                idx = row.idx
+                            )
+                        }
+                        .forEach { (senseId, rows) ->
+                            if (rows.isNotEmpty() && senseId !in translations) {
+                                translations[senseId] = rows
+                            }
+                        }
 
-                        return@mapNotNull tgt to TranslationData(definitions, translations, exampleTrans)
-                    }
+                    queries
+                        .selectExampleTranslationsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
+                        .executeAsList()
+                        .forEach { row ->
+                            val senseTranslations = exampleTranslations.getOrPut(row.sense_id) { LinkedHashMap() }
+                            if (row.example_id !in senseTranslations) {
+                                senseTranslations[row.example_id] = row.translation
+                            }
+                        }
                 }
-                null
+
+                if (definitions.isEmpty() && translations.isEmpty() && exampleTranslations.isEmpty()) {
+                    null
+                } else {
+                    tgt to TranslationData(
+                        definitions = definitions,
+                        translations = translations,
+                        exampleTranslations = exampleTranslations
+                    )
+                }
             }.toMap()
         } else emptyMap()
 
@@ -851,7 +886,7 @@ class DictionaryRepository(
         language: Language,
         lemma: String,
         senseIds: Set<String>,
-        translationTargets: List<Language> = installedTranslationTargets(language)
+        translationTargets: List<Language>? = null
     ): Map<String, SenseWithPos> {
         if (senseIds.isEmpty()) return emptyMap()
 

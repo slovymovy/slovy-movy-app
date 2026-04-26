@@ -274,14 +274,7 @@ class SettingsViewModel(
     }
 
     private suspend fun loadTranslationLanguages(): Set<Language> {
-        val setting = settingsRepository.getById(Setting.Name.LANGUAGE)
-        val json = setting?.value
-        val codes = if (json is JsonArray) {
-            json.mapNotNull { it.jsonPrimitive.content }
-        } else {
-            listOfNotNull(json?.jsonPrimitive?.content)
-        }
-        return codes.mapNotNull { Language.fromCodeOrNull(it) }.toSet()
+        return settingsRepository.getTranslationLanguages()
     }
 
     fun toggleLearningLanguageExpansion(language: Language) {
@@ -605,10 +598,16 @@ class SettingsViewModel(
                 val langState = state.languages[language] ?: return@launch
                 val currentEnabled = langState.enabledVoiceIds
                 val newEnabled = if (voiceId in currentEnabled) {
-                    Analytics.logEvent(AnalyticsEvent.SETTINGS_VOICE_DISABLE_CLICK, mapOf("lang" to language.language.code))
+                    Analytics.logEvent(
+                        AnalyticsEvent.SETTINGS_VOICE_DISABLE_CLICK,
+                        mapOf("lang" to language.language.code)
+                    )
                     currentEnabled - voiceId
                 } else {
-                    Analytics.logEvent(AnalyticsEvent.SETTINGS_VOICE_ENABLE_CLICK, mapOf("lang" to language.language.code))
+                    Analytics.logEvent(
+                        AnalyticsEvent.SETTINGS_VOICE_ENABLE_CLICK,
+                        mapOf("lang" to language.language.code)
+                    )
                     currentEnabled + voiceId
                 }
 
