@@ -295,17 +295,18 @@ class DictionaryRepository(
         tgt != src && dataDbManager.hasTranslation(src, tgt)
     }
 
-    private suspend fun defaultTranslationTargets(src: Language): List<Language> {
+    suspend fun defaultTranslationTargets(src: Language): List<Language> {
         val configuredTargets = settingsRepository
-            .getTranslationLanguages()
+            .getTranslationLanguagesOrNull()
+            ?: return installedTranslationTargets(src)
+
+        return configuredTargets
             .filter { it != src }
             .distinctBy { it.code }
-
-        return configuredTargets.ifEmpty { installedTranslationTargets(src) }
     }
 
     // Search within all installed dictionaries by default; if dictionaryLanguage provided, restrict to it.
-    // translationTargets: if null, uses installedTranslationTargets for each source language; if empty, skips translation search.
+    // translationTargets: if null, uses defaultTranslationTargets for each source language; if empty, skips translation search.
     suspend fun search(
         query: String,
         dictionaryLanguage: Language? = null,
@@ -333,7 +334,7 @@ class DictionaryRepository(
             // search by translation (target language words)
             val targets = translationTargets
                 ?.filter { it != lang && dataDbManager.hasTranslation(lang, it) }
-                ?: installedTranslationTargets(lang)
+                ?: defaultTranslationTargets(lang)
 
             // Build database list: local first, then RO
             val databases = buildList {

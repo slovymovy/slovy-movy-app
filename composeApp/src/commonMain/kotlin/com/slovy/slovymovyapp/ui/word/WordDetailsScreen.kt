@@ -317,7 +317,7 @@ class WordDetailViewModel(
     init {
         viewModelScope.launch {
             val resolvedTranslations = translationLanguages?.distinctBy { it.code }
-                ?: repository.installedTranslationTargets(dictionaryLanguage).distinctBy { it.code }
+                ?: repository.defaultTranslationTargets(dictionaryLanguage).distinctBy { it.code }
             requestedTranslationLanguages = resolvedTranslations
             wordFetchManager.getWord(
                 dictionaryLanguage,
@@ -453,7 +453,7 @@ class WordDetailViewModel(
     private fun loadFavorites() {
         viewModelScope.launch {
             val resolvedTranslations = requestedTranslationLanguages.ifEmpty {
-                repository.installedTranslationTargets(dictionaryLanguage).distinctBy { it.code }
+                repository.defaultTranslationTargets(dictionaryLanguage).distinctBy { it.code }
                     .also { requestedTranslationLanguages = it }
             }
             val card = repository.getLanguageCard(

@@ -29,15 +29,18 @@ class SettingsRepository(private val db: AppDatabase) {
         }
     }
 
-    suspend fun getTranslationLanguages(): Set<Language> {
-        val json = getById(Setting.Name.LANGUAGE)?.value
+    suspend fun getTranslationLanguagesOrNull(): Set<Language>? {
+        val json = getById(Setting.Name.LANGUAGE)?.value ?: return null
         val codes = if (json is JsonArray) {
             json.mapNotNull { it.jsonPrimitive.content }
         } else {
-            listOfNotNull(json?.jsonPrimitive?.content)
+            listOf(json.jsonPrimitive.content)
         }
         return codes.mapNotNull { Language.fromCodeOrNull(it) }.toSet()
     }
+
+    suspend fun getTranslationLanguages(): Set<Language> =
+        getTranslationLanguagesOrNull().orEmpty()
 
     suspend fun deleteById(id: Setting.Name) = withContext(Dispatchers.IO) {
         db.settingsQueries.deleteById(id)

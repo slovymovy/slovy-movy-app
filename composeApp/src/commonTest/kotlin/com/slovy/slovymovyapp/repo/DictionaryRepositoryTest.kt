@@ -483,6 +483,89 @@ class DictionaryRepositoryTest : BaseTest() {
     }
 
     @Test
+    fun getSenses_respects_empty_translation_language_setting() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
+
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+        if (platform.fileExists(localTransPath)) {
+            platform.deleteFile(localTransPath)
+        }
+
+        try {
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
+
+            val localDictDb = localMgr.openLocalDictionary()
+            localDictDb.dictionaryQueries.insertLemma(lemmaId, "en", "emptytargets", "emptytargets", 5.0, false)
+            localDictDb.dictionaryQueries.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.NOUN)
+            localDictDb.dictionaryQueries.insertSense(
+                sense_id = senseId,
+                lemma_pos_id = lemmaPosId,
+                sense_definition = "A favorite with disabled translations",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "group1",
+                name_type = null
+            )
+
+            val localTransDb = localMgr.openLocalTranslation()
+            localTransDb.translationQueries.insertSenseTranslation(
+                sense_id = senseId,
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                idx = 0,
+                target_lang_word = "Скрытый",
+                target_lang_word_normalized = "скрытый",
+                target_lang_sense_clarification = null,
+                lemma_id = lemmaId,
+                lemma_pos_id = lemmaPosId
+            )
+
+            val settingsRepo = settingsRepository()
+            runBlocking {
+                settingsRepo.insert(
+                    Setting(
+                        id = Setting.Name.LANGUAGE,
+                        value = JsonArray(emptyList())
+                    )
+                )
+            }
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepo)
+            val loaded = runBlocking {
+                repo.getSenses(Language.ENGLISH, "emptytargets", setOf(senseId.toString()))
+            }
+
+            val sense = loaded[senseId.toString()]?.sense
+            assertNotNull(sense, "Should still load the local favorite sense")
+            assertTrue(
+                sense.translations.isEmpty(),
+                "Explicit empty translation-language setting should not fall back to installed or local targets"
+            )
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
+            if (platform.fileExists(localTransPath)) {
+                platform.deleteFile(localTransPath)
+            }
+        }
+    }
+
+    @Test
     fun search_finds_local_lemmas_first() {
         val platform = testPlatformDbSupport()
         val mgr = testDataDbManager()
