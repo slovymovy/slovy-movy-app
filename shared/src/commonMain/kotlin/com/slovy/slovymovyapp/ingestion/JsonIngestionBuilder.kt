@@ -3,11 +3,7 @@
 package com.slovy.slovymovyapp.ingestion
 
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
-import com.slovy.slovymovyapp.data.dictionary.FormSource
-import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
-import com.slovy.slovymovyapp.data.dictionary.NameType
-import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
+import com.slovy.slovymovyapp.data.dictionary.*
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.dictionary.DictionaryQueries
 import com.slovy.slovymovyapp.translation.TranslationDatabase

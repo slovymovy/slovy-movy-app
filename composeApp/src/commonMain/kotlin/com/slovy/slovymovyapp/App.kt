@@ -27,7 +27,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
@@ -89,8 +88,8 @@ fun App(
     }
     val localDbManager = remember(platform) { LocalDbManager(platform) }
     val dictionaryRepository =
-        remember(dataManager, localDbManager, favoritesRepository) {
-            DictionaryRepository(dataManager, localDbManager, favoritesRepository)
+        remember(dataManager, localDbManager, favoritesRepository, settingsRepository) {
+            DictionaryRepository(dataManager, localDbManager, favoritesRepository, settingsRepository)
         }
     val dictionaryClient = remember(platform, dictionaryRepository, localDbManager, dataManager) {
         DictionaryClient(platform, dictionaryRepository, localDbManager, dataManager)
@@ -154,13 +153,7 @@ fun App(
         }
 
         val nativeSetting = settingsRepository.getById(Setting.Name.LANGUAGE)
-        val nativeJson = nativeSetting?.value
-        val nativeCodes = if (nativeJson is JsonArray) {
-            nativeJson.mapNotNull { it.jsonPrimitive.content }
-        } else {
-            listOfNotNull(nativeJson?.jsonPrimitive?.content)
-        }
-        val natives = nativeCodes.mapNotNull { Language.fromCodeOrNull(it) }
+        val natives = settingsRepository.getTranslationLanguages().sortedBy { it.ordinal }
 
         // Existing user: has language settings configured (empty array is a valid selection).
         if (nativeSetting != null) {

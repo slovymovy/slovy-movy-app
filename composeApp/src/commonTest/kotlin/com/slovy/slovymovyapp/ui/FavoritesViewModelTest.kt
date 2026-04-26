@@ -4,14 +4,10 @@ import androidx.lifecycle.ViewModelStore
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.test.runTest
-import kotlin.test.AfterTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertIs
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 open class FavoritesViewModelTest : BaseTest() {
 
@@ -27,7 +23,12 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     private fun dictionaryRepository(favoritesRepo: FavoritesRepository): DictionaryRepository {
-        return DictionaryRepository(testDataDbManager(), testLocalDbManager(), favoritesRepo)
+        return DictionaryRepository(
+            testDataDbManager(),
+            testLocalDbManager(),
+            favoritesRepo,
+            SettingsRepository(testAppDatabaseHolder().database)
+        )
     }
 
     private fun createViewModel(
@@ -74,8 +75,10 @@ open class FavoritesViewModelTest : BaseTest() {
         assertTrue(content.showLanguagePicker)
         assertEquals(listOf(Language.ENGLISH, Language.RUSSIAN), content.availableLanguages)
         assertEquals(Language.ENGLISH, content.selectedLanguage, "Should default to first language")
-        assertTrue(content.senses.all { it.targetLang == Language.ENGLISH },
-            "Should only show selected language's favorites")
+        assertTrue(
+            content.senses.all { it.targetLang == Language.ENGLISH },
+            "Should only show selected language's favorites"
+        )
     }
 
     @Test
@@ -124,8 +127,10 @@ open class FavoritesViewModelTest : BaseTest() {
         vm.loadAndApplyState("")
 
         val content = contentState(vm)
-        assertEquals(Language.ENGLISH, content.selectedLanguage,
-            "Should switch to the remaining language")
+        assertEquals(
+            Language.ENGLISH, content.selectedLanguage,
+            "Should switch to the remaining language"
+        )
         assertFalse(content.showLanguagePicker, "Picker should hide with single language left")
         assertEquals(2, content.senses.size, "Should show English favorites")
     }
@@ -153,8 +158,10 @@ open class FavoritesViewModelTest : BaseTest() {
         vm.loadAndApplyState("hello")
 
         content = contentState(vm)
-        assertEquals(Language.ENGLISH, content.selectedLanguage,
-            "Should stay on English since 'world' still exists")
+        assertEquals(
+            Language.ENGLISH, content.selectedLanguage,
+            "Should stay on English since 'world' still exists"
+        )
         assertTrue(content.showLanguagePicker, "Picker should remain visible")
     }
 
@@ -191,8 +198,10 @@ open class FavoritesViewModelTest : BaseTest() {
         vm.requestScrollToTop()
         vm.loadAndApplyState("")
 
-        assertTrue(contentState(vm).scrollToTop,
-            "scrollToTop should be true after requestScrollToTop + load")
+        assertTrue(
+            contentState(vm).scrollToTop,
+            "scrollToTop should be true after requestScrollToTop + load"
+        )
     }
 
     @Test
@@ -212,8 +221,10 @@ open class FavoritesViewModelTest : BaseTest() {
 
         val content = contentState(vm)
         assertEquals(1, content.senses.size, "New favorite should be present")
-        assertTrue(content.scrollToTop,
-            "Should scroll to top even when the initial Favorites load ran before onFavoriteAdded")
+        assertTrue(
+            content.scrollToTop,
+            "Should scroll to top even when the initial Favorites load ran before onFavoriteAdded"
+        )
     }
 
     @Test
@@ -231,8 +242,10 @@ open class FavoritesViewModelTest : BaseTest() {
         vm.requestScrollToTop()
         vm.loadAndApplyState("hello") // query hides s3
 
-        assertTrue(contentState(vm).scrollToTop,
-            "Should scroll to top of the filtered results immediately, flag is not kept pending")
+        assertTrue(
+            contentState(vm).scrollToTop,
+            "Should scroll to top of the filtered results immediately, flag is not kept pending"
+        )
     }
 
     @Test
@@ -250,8 +263,10 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo.remove("s2", Language.ENGLISH)
         vm.loadAndApplyState("")
 
-        assertTrue(contentState(vm).scrollToTop,
-            "Should still scroll to top even if the added sense was removed before reload")
+        assertTrue(
+            contentState(vm).scrollToTop,
+            "Should still scroll to top even if the added sense was removed before reload"
+        )
     }
 
     @Test
@@ -275,8 +290,10 @@ open class FavoritesViewModelTest : BaseTest() {
 
         // Simulate re-entering Favorites (loadFavorites fires on screen entry, no new add)
         vm.loadAndApplyState("")
-        assertFalse(contentState(vm).scrollToTop,
-            "Re-entering Favorites without a new add must not re-trigger scroll")
+        assertFalse(
+            contentState(vm).scrollToTop,
+            "Re-entering Favorites without a new add must not re-trigger scroll"
+        )
     }
 
     @Test
@@ -301,7 +318,9 @@ open class FavoritesViewModelTest : BaseTest() {
 
         val content = contentState(vm)
         assertFalse(content.showLanguagePicker)
-        assertFalse(content.isLanguageDropdownExpanded,
-            "Dropdown expanded state should reset when picker becomes hidden")
+        assertFalse(
+            content.isLanguageDropdownExpanded,
+            "Dropdown expanded state should reset when picker becomes hidden"
+        )
     }
 }

@@ -6,6 +6,7 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlin.test.assertNotNull
 
@@ -14,7 +15,8 @@ internal fun BaseTest.createSnapshotRepository(): Pair<DataDbManager, Dictionary
     val repo = DictionaryRepository(
         dataDbManager = mgr,
         localDbManager = testLocalDbManager(),
-        favoritesRepository = FavoritesRepository(testAppDatabaseHolder().database)
+        favoritesRepository = FavoritesRepository(testAppDatabaseHolder().database),
+        settingsRepository = SettingsRepository(testAppDatabaseHolder().database)
     )
     return mgr to repo
 }
