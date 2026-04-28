@@ -212,6 +212,7 @@ class DictionaryRepository(
     }
 
     // Loads related words from all databases. Offline rows replace online-only rows.
+    // Direct lemma hits always beat form-fallback results, even offline ones from an earlier DB.
     private fun loadRelatedWords(
         databases: List<DictionaryDatabase>,
         language: Language,
@@ -222,10 +223,23 @@ class DictionaryRepository(
         val result = mutableMapOf<String, RelatedWord>()
         // Normalize to lowercase for case-insensitive matching (DB stores lemmas lowercase)
         val lookupWords = relatedWords.map { it.lowercase() }.toSet()
+        // Forms confirmed as standalone lemmas — the fallback must never redirect these to a parent.
+        val foundAsLemmaKeys = mutableSetOf<String>()
+        // Keys whose current result came from a form-fallback; a direct lemma hit may still override them.
+        val formFallbackKeys = mutableSetOf<String>()
 
-        fun putIfMissingOrOnline(key: String, relatedWord: RelatedWord) {
+        fun putFromLemma(key: String, relatedWord: RelatedWord) {
+            // A direct lemma hit wins over: (1) any online-only result, (2) any form-fallback result.
+            if (result[key]?.online != false || key in formFallbackKeys) {
+                result[key] = relatedWord
+                formFallbackKeys.remove(key)
+            }
+        }
+
+        fun putFromFallback(key: String, relatedWord: RelatedWord) {
             if (result[key]?.online != false) {
                 result[key] = relatedWord
+                formFallbackKeys.add(key)
             }
         }
 
@@ -234,20 +248,20 @@ class DictionaryRepository(
             q.selectLemmasByWords(language.code, lookupWords.toList())
                 .executeAsList()
                 .forEach { row ->
-                    putIfMissingOrOnline(
-                        row.lemma,
-                        relatedWord(row.lemma, row.zipf_frequency, row.online_only)
-                    )
+                    putFromLemma(row.lemma, relatedWord(row.lemma, row.zipf_frequency, row.online_only))
+                    foundAsLemmaKeys.add(row.lemma)
                 }
 
             // Fallback: resolve inflected forms (e.g. "Gebogen" → parent lemma "buigen").
+            // Only applies to forms that are not standalone lemmas; standalone lemmas navigate
+            // to themselves regardless of online/offline status.
             // Keep the form as the map key so chip text stays unchanged, while
             // RelatedWord.lemma points navigation at the parent lemma.
             lookupWords
-                .filter { form -> result[form]?.online != false }
+                .filter { form -> form !in foundAsLemmaKeys }
                 .forEach { form ->
                     q.resolveRelatedForm(language, form)?.let { relatedWord ->
-                        putIfMissingOrOnline(form, relatedWord)
+                        putFromFallback(form, relatedWord)
                     }
                 }
         }
