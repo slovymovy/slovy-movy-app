@@ -508,7 +508,7 @@ class DictionaryRepository(
                 // Build translation database pairs: (translation DB, dictionary DB for lemma lookup)
                 val transDatabasePairs = buildList {
                     add(localDbManager.openLocalTranslation() to localDbManager.openLocalDictionary())
-                    if (dataDbManager.hasTranslation(lang, tgt)) {
+                    if (dataDbManager.hasTranslation(lang, tgt) && dataDbManager.hasDictionary(lang)) {
                         add(
                             dataDbManager.openTranslationReadOnly(lang, tgt) to
                                     dataDbManager.openDictionaryReadOnly(lang)
