@@ -71,7 +71,7 @@ private sealed interface AppDestination {
     data class Error(val message: String) : AppDestination
 
     @Serializable
-    data object DataVersionMismatch : AppDestination
+    data object DataVersionUpdateDownload : AppDestination
 }
 
 @Composable
@@ -85,6 +85,7 @@ fun App(
     var pendingSearchQuery by remember { mutableStateOf<String?>(null) }
     var nativeLanguages by remember { mutableStateOf<List<Language>>(emptyList()) }
     var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
+    var versionUpdateTargets by remember { mutableStateOf<List<DatabaseFileInfo>?>(null) }
     val favoritesRepository = remember(dataManager) {
         FavoritesRepository(DataDbManager.openAppDatabase(platform))
     }
@@ -148,9 +149,10 @@ fun App(
         // Check if data version is current (before welcome, so existing users see mismatch)
         if (!dataManager.hasRequiredVersion()) {
             val savedVersion = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
-            // If version exists but is outdated, show error before deleting
+            // If version exists but is outdated, capture what's downloaded and go straight to re-download
             if (savedVersion != null) {
-                return AppDestination.DataVersionMismatch
+                versionUpdateTargets = dataManager.listDownloadedDatabases()
+                return AppDestination.DataVersionUpdateDownload
             }
         }
 
@@ -200,7 +202,6 @@ fun App(
     }
 
     val resolvedStart = startDestination ?: return
-    val dataVersionMismatchMessage = stringResource(Res.string.app_data_version_mismatch_message)
 
     AppTheme {
         NavHost(
@@ -571,27 +572,70 @@ fun App(
                     }
                 )
             }
-            composable<AppDestination.DataVersionMismatch> { backStackEntry ->
-                val coroutineScope = rememberCoroutineScope()
-                val viewModel = viewModel(
-                    viewModelStoreOwner = backStackEntry
-                ) {
-                    ErrorViewModel(dataVersionMismatchMessage)
-                }
+            composable<AppDestination.DataVersionUpdateDownload> { backStackEntry ->
+                val targets = versionUpdateTargets ?: emptyList()
+                val dictTargets = targets.filterIsInstance<DatabaseFileInfo.Dictionary>()
+                val transTargets = targets.filterIsInstance<DatabaseFileInfo.Translation>()
+                val totalItems = dictTargets.size + transTargets.size
 
-                ErrorScreen(
-                    viewModel = viewModel,
-                    onOkay = {
-                        coroutineScope.launch {
+                val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
+                    DownloadViewModel(
+                        downloadCoordinator = downloadCoordinator,
+                        downloadKey = "version_update",
+                        download = { onProgress, cancel ->
+                            dictTargets.forEachIndexed { index, dict ->
+                                val fileName = "${dict.language.selfName} Dictionary"
+                                dataManager.ensureDictionary(dict.language, { p ->
+                                    val base = (index.toFloat() / totalItems) * 100
+                                    val current = if (p.percent >= 0) p.percent.toFloat() / totalItems else 0f
+                                    onProgress(object : DownloadProgress(p.bytesDownloaded, p.totalBytes) {
+                                        override val percent: Int = (base + current).toInt()
+                                        override val currentFile: String = fileName
+                                    })
+                                }, cancel)
+                            }
+                            transTargets.forEachIndexed { index, trans ->
+                                val itemIndex = dictTargets.size + index
+                                val fileName = "${trans.sourceLanguage.selfName} → ${trans.targetLanguage.selfName}"
+                                dataManager.ensureTranslation(trans.sourceLanguage, trans.targetLanguage, { p ->
+                                    val base = (itemIndex.toFloat() / totalItems) * 100
+                                    val current = if (p.percent >= 0) p.percent.toFloat() / totalItems else 0f
+                                    onProgress(object : DownloadProgress(p.bytesDownloaded, p.totalBytes) {
+                                        override val percent: Int = (base + current).toInt()
+                                        override val currentFile: String = fileName
+                                    })
+                                }, cancel)
+                            }
+                        },
+                        onSuccess = {
+                            val dest = selectInitialDestination()
+                            navController.navigate(dest) {
+                                popUpTo<AppDestination.DataVersionUpdateDownload> { inclusive = true }
+                            }
+                        },
+                        onCancel = {},
+                        onError = {},
+                        loadItems = {
                             dataManager.deleteAllDownloadedData()
                             localDbManager.deleteAll()
                             dictionaryRepository.clearSenseCache()
-                            val target = selectInitialDestination()
-                            navController.navigate(target) {
-                                popUpTo<AppDestination.DataVersionMismatch> { inclusive = true }
+
+                            val items = mutableListOf<DownloadItem>()
+                            for (dict in dictTargets) {
+                                items.add(DownloadItem("${dict.language.selfName} Dictionary", dict.sizeBytes, dict.language.flag))
                             }
+                            for (trans in transTargets) {
+                                items.add(DownloadItem("${trans.sourceLanguage.selfName} → ${trans.targetLanguage.selfName}", trans.sizeBytes, trans.targetLanguage.flag))
+                            }
+                            items
                         }
-                    }
+                    )
+                }
+
+                DownloadScreen(
+                    viewModel = viewModel,
+                    description = stringResource(Res.string.download_title_downloading),
+                    isMandatory = true
                 )
             }
             composable<AppDestination.Error> { backStackEntry ->

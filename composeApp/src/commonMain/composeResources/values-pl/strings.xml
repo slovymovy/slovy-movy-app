@@ -54,6 +54,8 @@
     <string name="download_subtitle_downloading">Przygotowujemy Twoją bibliotekę.\nTo może chwilę potrwać.</string>
     <string name="download_title_setting_up">Konfigurowanie...</string>
     <string name="download_subtitle_setting_up">Przygotowujemy Twoją bibliotekę.\nTo potrwa tylko chwilę.</string>
+    <string name="download_title_update_required">Zaktualizuj słownik</string>
+    <string name="download_subtitle_update_required">Ulepszona wersja jest gotowa do pobrania. Twoje zapisane słowa pozostaną dokładnie tam, gdzie je zostawiłeś.</string>
     <string name="download_content_desc_loading_info">Ładowanie informacji o pobieraniu</string>
     <string name="download_content_desc_preparing">Przygotowywanie pobierania</string>
     <string name="download_preparing">Przygotowywanie...</string>

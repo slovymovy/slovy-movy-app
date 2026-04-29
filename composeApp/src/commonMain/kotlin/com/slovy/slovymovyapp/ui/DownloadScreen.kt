@@ -205,6 +205,7 @@ class DownloadViewModel(
 fun DownloadScreen(
     viewModel: DownloadViewModel,
     description: String? = null,
+    isMandatory: Boolean = false,
     onLaterClick: () -> Unit = {}
 ) {
     DownloadScreenContent(
@@ -212,6 +213,7 @@ fun DownloadScreen(
         scrollState = viewModel.scrollState,
         description = description,
         hadConfirmation = viewModel.hadConfirmation,
+        isMandatory = isMandatory,
         onDownloadClick = { viewModel.startDownload() },
         onLaterClick = onLaterClick,
         onCancelClick = { viewModel.cancelDownload() },
@@ -228,6 +230,7 @@ fun DownloadScreenContent(
     scrollState: ScrollState = ScrollState(0),
     description: String? = null,
     hadConfirmation: Boolean = false,
+    isMandatory: Boolean = false,
     onDownloadClick: () -> Unit = {},
     onLaterClick: () -> Unit = {},
     onCancelClick: () -> Unit = {},
@@ -237,7 +240,7 @@ fun DownloadScreenContent(
 ) {
     val descriptionText = description ?: stringResource(Res.string.download_description_setting_up_library)
     val hasActions = state is DownloadUiState.ReadyToDownload ||
-            state is DownloadUiState.Running ||
+            (!isMandatory && state is DownloadUiState.Running) ||
             state is DownloadUiState.Failed ||
             state is DownloadUiState.Cancelled
 
@@ -271,13 +274,15 @@ fun DownloadScreenContent(
                                 )
                             }
 
-                            Spacer(Modifier.height(AppSpacing.sm))
+                            if (!isMandatory) {
+                                Spacer(Modifier.height(AppSpacing.sm))
 
-                            TextButton(onClick = onLaterClick) {
-                                Text(
-                                    stringResource(Res.string.common_later),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                TextButton(onClick = onLaterClick) {
+                                    Text(
+                                        stringResource(Res.string.common_later),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
 
@@ -295,22 +300,30 @@ fun DownloadScreenContent(
                                 Text(stringResource(Res.string.common_retry))
                             }
 
-                            Spacer(Modifier.height(AppSpacing.sm))
+                            if (!isMandatory) {
+                                Spacer(Modifier.height(AppSpacing.sm))
 
-                            TextButton(onClick = onErrorLaterClick) {
-                                Text(
-                                    stringResource(Res.string.common_later),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                TextButton(onClick = onErrorLaterClick) {
+                                    Text(
+                                        stringResource(Res.string.common_later),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
 
                         is DownloadUiState.Cancelled -> {
-                            TextButton(onClick = onCloseClick) {
-                                Text(
-                                    stringResource(Res.string.common_close),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                            if (isMandatory) {
+                                OutlinedButton(onClick = onRetryClick) {
+                                    Text(stringResource(Res.string.common_retry))
+                                }
+                            } else {
+                                TextButton(onClick = onCloseClick) {
+                                    Text(
+                                        stringResource(Res.string.common_close),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }
@@ -330,7 +343,11 @@ fun DownloadScreenContent(
 
             val (title, subtitle) = when (state) {
                 is DownloadUiState.ReadyToDownload ->
-                    stringResource(Res.string.download_title_ready) to stringResource(Res.string.download_subtitle_ready)
+                    if (isMandatory) {
+                        stringResource(Res.string.download_title_update_required) to stringResource(Res.string.download_subtitle_update_required)
+                    } else {
+                        stringResource(Res.string.download_title_ready) to stringResource(Res.string.download_subtitle_ready)
+                    }
 
                 is DownloadUiState.Failed ->
                     stringResource(Res.string.download_title_failed) to stringResource(Res.string.download_subtitle_failed)
@@ -561,6 +578,25 @@ private fun DownloadScreenPreviewReadyToDownload(
                     DownloadItem("Nederlands \u2192 Русский", 38_000_000L, "\uD83C\uDDF7\uD83C\uDDFA")
                 )
             )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DownloadScreenPreviewUpdateRequired(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DownloadScreenContent(
+            state = DownloadUiState.ReadyToDownload(
+                items = listOf(
+                    DownloadItem("Nederlands Dictionary", 156_000_000L, "🇳🇱"),
+                    DownloadItem("Nederlands → English", 42_000_000L, "🇬🇧"),
+                    DownloadItem("Nederlands → Русский", 38_000_000L, "🇷🇺")
+                )
+            ),
+            isMandatory = true
         )
     }
 }

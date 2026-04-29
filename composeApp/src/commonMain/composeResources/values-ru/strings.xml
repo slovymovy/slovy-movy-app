@@ -54,6 +54,8 @@
     <string name="download_subtitle_downloading">Готовим вашу библиотеку.\nЭто займёт пару минут.</string>
     <string name="download_title_setting_up">Настройка...</string>
     <string name="download_subtitle_setting_up">Готовим вашу библиотеку.\nЭто займёт пару минут.</string>
+    <string name="download_title_update_required">Обновите словарь</string>
+    <string name="download_subtitle_update_required">Улучшенная версия готова к скачиванию. Ваши сохранённые слова останутся на месте.</string>
     <string name="download_content_desc_loading_info">Получение данных...</string>
     <string name="download_content_desc_preparing">Подготовка к скачиванию</string>
     <string name="download_preparing">Подготовка...</string>
