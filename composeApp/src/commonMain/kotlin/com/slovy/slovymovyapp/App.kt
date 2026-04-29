@@ -151,8 +151,13 @@ fun App(
             val savedVersion = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
             // If version exists but is outdated, capture what's downloaded and go straight to re-download
             if (savedVersion != null) {
-                versionUpdateTargets = dataManager.listDownloadedDatabases()
-                return AppDestination.DataVersionUpdateDownload
+                val downloaded = dataManager.listDownloadedDatabases()
+                if (downloaded.isNotEmpty()) {
+                    versionUpdateTargets = downloaded
+                    return AppDestination.DataVersionUpdateDownload
+                }
+                // Nothing to re-download; clear the stale version and fall through to normal routing
+                dataManager.clearVersion()
             }
         }
 
