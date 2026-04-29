@@ -95,8 +95,6 @@
     <string name="feedback_dialog_title">Opinia o aplikacji</string>
     <string name="feedback_dialog_placeholder">Napisz, co myślisz...</string>
 
-    <string name="app_data_version_mismatch_message">Zaktualizowaliśmy format słowników. Musisz pobrać je ponownie — Twoje zapisane słowa są bezpieczne.</string>
-
     <string name="word_details_title">O słowie</string>
     <string name="word_details_action_stop">Zatrzymaj</string>
     <string name="word_details_action_play_word">Odtwórz</string>

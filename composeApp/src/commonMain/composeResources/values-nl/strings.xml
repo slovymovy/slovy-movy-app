@@ -95,8 +95,6 @@
     <string name="feedback_dialog_title">App-feedback</string>
     <string name="feedback_dialog_placeholder">Deel je gedachten...</string>
 
-    <string name="app_data_version_mismatch_message">We hebben het woordenboekformaat bijgewerkt. Je moet je woordenboeken opnieuw downloaden — je opgeslagen woorden zijn veilig.</string>
-
     <string name="word_details_title">Woorddetails</string>
     <string name="word_details_action_stop">Stoppen</string>
     <string name="word_details_action_play_word">Woord afspelen</string>

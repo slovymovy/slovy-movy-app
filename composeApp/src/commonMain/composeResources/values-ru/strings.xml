@@ -95,8 +95,6 @@
     <string name="feedback_dialog_title">Отзыв о приложении</string>
     <string name="feedback_dialog_placeholder">Напишите, что вы думаете...</string>
 
-    <string name="app_data_version_mismatch_message">Мы обновили формат словарей. Их нужно скачать заново — ваши сохранённые слова в безопасности.</string>
-
     <string name="word_details_title">О слове</string>
     <string name="word_details_action_stop">Стоп</string>
     <string name="word_details_action_play_word">Прослушать</string>

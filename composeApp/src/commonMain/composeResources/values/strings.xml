@@ -95,8 +95,6 @@
     <string name="feedback_dialog_title">App feedback</string>
     <string name="feedback_dialog_placeholder">Share your thoughts…</string>
 
-    <string name="app_data_version_mismatch_message">We've updated the dictionary format. You'll need to re-download your dictionaries — your saved words are safe.</string>
-
     <string name="word_details_title">Word Details</string>
     <string name="word_details_action_stop">Stop</string>
     <string name="word_details_action_play_word">Play word</string>
