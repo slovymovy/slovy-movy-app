@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.remote.RelatedWord
@@ -109,16 +110,18 @@ internal fun EntryList(
     contentColor: Color,
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
-    favoriteLemmas: Set<String> = emptySet()
+    favoriteLemmas: Set<String> = emptySet(),
+    chipShape: Shape = RoundedCornerShape(14.dp),
+    chipBorder: BorderStroke? = null,
+    chipSpacing: Dp = 6.dp
 ) {
     if (values.isEmpty()) return
-    val chipBorder = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionLabel(label)
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(chipSpacing),
+            verticalArrangement = Arrangement.spacedBy(chipSpacing)
         ) {
             values.forEach { word ->
                 val matchingKey = relatedWords.keys.firstOrNull { it.equals(word, ignoreCase = true) }
@@ -128,11 +131,11 @@ internal fun EntryList(
                     text = word,
                     containerColor = containerColor,
                     contentColor = contentColor,
-                    shape = RoundedCornerShape(50),
+                    shape = chipShape,
                     isClickable = isClickable,
                     isOnline = matchingKey?.let { relatedWords[it]?.online },
                     isFavorite = favoriteLemmas.any { it.equals(resolvedLemma, ignoreCase = true) },
-                    border = chipBorder,
+                    border = chipBorder ?: if (isClickable) BorderStroke(0.5.dp, contentColor.copy(alpha = 0.18f)) else null,
                     onClick = if (isClickable) {
                         { onWordClick(resolvedLemma) }
                     } else null
