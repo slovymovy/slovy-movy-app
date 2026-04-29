@@ -112,12 +112,13 @@ internal fun EntryList(
     favoriteLemmas: Set<String> = emptySet()
 ) {
     if (values.isEmpty()) return
+    val chipBorder = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionLabel(label)
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             values.forEach { word ->
                 val matchingKey = relatedWords.keys.firstOrNull { it.equals(word, ignoreCase = true) }
@@ -127,9 +128,11 @@ internal fun EntryList(
                     text = word,
                     containerColor = containerColor,
                     contentColor = contentColor,
+                    shape = RoundedCornerShape(50),
                     isClickable = isClickable,
                     isOnline = matchingKey?.let { relatedWords[it]?.online },
                     isFavorite = favoriteLemmas.any { it.equals(resolvedLemma, ignoreCase = true) },
+                    border = chipBorder,
                     onClick = if (isClickable) {
                         { onWordClick(resolvedLemma) }
                     } else null
@@ -219,13 +222,14 @@ internal fun Badge(
     isClickable: Boolean = false,
     isOnline: Boolean? = null,
     isFavorite: Boolean = false,
+    border: BorderStroke? = if (isClickable) BorderStroke(0.5.dp, contentColor.copy(alpha = 0.18f)) else null,
     onClick: (() -> Unit)? = null
 ) {
     Surface(
         color = containerColor,
         contentColor = contentColor,
         shape = shape,
-        border = if (isClickable) BorderStroke(0.5.dp, contentColor.copy(alpha = 0.18f)) else null,
+        border = border,
         modifier = if (onClick != null) {
             Modifier.clickable(onClick = onClick)
         } else Modifier

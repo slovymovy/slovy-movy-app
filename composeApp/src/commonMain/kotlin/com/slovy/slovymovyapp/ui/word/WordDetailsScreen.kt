@@ -1178,8 +1178,8 @@ private fun WordDetailContent(
                 EntryList(
                     label = stringResource(Res.string.word_details_word_family),
                     values = card.wordFamily,
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     relatedWords = card.relatedWords,
                     onWordClick = onWordClick,
                     favoriteLemmas = favoriteLemmas
