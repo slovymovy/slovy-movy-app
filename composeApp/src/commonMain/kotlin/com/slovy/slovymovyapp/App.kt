@@ -588,6 +588,10 @@ fun App(
                         downloadCoordinator = downloadCoordinator,
                         downloadKey = "version_update",
                         download = { onProgress, cancel ->
+                            dataManager.deleteAllDownloadedData()
+                            localDbManager.deleteAll()
+                            dictionaryRepository.clearSenseCache()
+
                             dictTargets.forEachIndexed { index, dict ->
                                 val fileName = "${dict.language.selfName} Dictionary"
                                 dataManager.ensureDictionary(dict.language, { p ->
@@ -597,7 +601,7 @@ fun App(
                                         override val percent: Int = (base + current).toInt()
                                         override val currentFile: String = fileName
                                     })
-                                }, cancel)
+                                }, cancel, skipVersionUpdate = true)
                             }
                             transTargets.forEachIndexed { index, trans ->
                                 val itemIndex = dictTargets.size + index
@@ -609,10 +613,11 @@ fun App(
                                         override val percent: Int = (base + current).toInt()
                                         override val currentFile: String = fileName
                                     })
-                                }, cancel)
+                                }, cancel, skipVersionUpdate = true)
                             }
                         },
                         onSuccess = {
+                            dataManager.setDownloadedVersion()
                             val dest = selectInitialDestination()
                             navController.navigate(dest) {
                                 popUpTo<AppDestination.DataVersionUpdateDownload> { inclusive = true }
@@ -621,10 +626,6 @@ fun App(
                         onCancel = {},
                         onError = {},
                         loadItems = {
-                            dataManager.deleteAllDownloadedData()
-                            localDbManager.deleteAll()
-                            dictionaryRepository.clearSenseCache()
-
                             val items = mutableListOf<DownloadItem>()
                             for (dict in dictTargets) {
                                 items.add(DownloadItem("${dict.language.selfName} Dictionary", dict.sizeBytes, dict.language.flag))

@@ -63,10 +63,11 @@ class DataDbManager(
     suspend fun ensureDictionary(
         lang: Language,
         onProgress: (DownloadProgress) -> Unit = {},
-        cancelToken: CancelToken? = null
+        cancelToken: CancelToken? = null,
+        skipVersionUpdate: Boolean = false
     ): Path {
         val name = dictionaryFileName(lang)
-        return ensureFile(name, onProgress, cancelToken)
+        return ensureFile(name, onProgress, cancelToken, skipVersionUpdate)
     }
 
     suspend fun deleteDictionary(lang: Language) {
@@ -94,10 +95,11 @@ class DataDbManager(
         src: Language,
         tgt: Language,
         onProgress: (DownloadProgress) -> Unit = {},
-        cancelToken: CancelToken? = null
+        cancelToken: CancelToken? = null,
+        skipVersionUpdate: Boolean = false
     ): Path {
         val name = translationFileName(src, tgt)
-        return ensureFile(name, onProgress, cancelToken)
+        return ensureFile(name, onProgress, cancelToken, skipVersionUpdate)
     }
 
     suspend fun deleteTranslation(src: Language, tgt: Language) {
@@ -277,6 +279,7 @@ class DataDbManager(
         name: String,
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken?,
+        skipVersionUpdate: Boolean = false,
     ): Path = withContext(Dispatchers.Default) {
         val path = platform.getDatabasePath(name)
         val file = Path(path)
@@ -285,8 +288,9 @@ class DataDbManager(
             platform.ensureDatabasesDir()
             downloadToFile(url, remoteDataProvider.headersForHttp(), path, onProgress, cancelToken ?: CancelToken())
             platform.markNoBackup(path)
-            // After first successful download, save version
-            setDownloadedVersion()
+            if (!skipVersionUpdate) {
+                setDownloadedVersion()
+            }
         }
         file
     }
