@@ -298,9 +298,9 @@ class DataDbManagerTest : BaseTest() {
     }
 
     @Test
-    fun deleteAllDownloadedData_clears_version_setting() {
+    fun deleteAllDownloadedData_preserves_version_setting() {
         val platform = testPlatformDbSupport()
-        val appDbPath = platform.getDatabasePath("test_delete_clears_version.db")
+        val appDbPath = platform.getDatabasePath("test_delete_preserves_version.db")
         if (platform.fileExists(appDbPath)) {
             platform.deleteFile(appDbPath)
         }
@@ -326,7 +326,7 @@ class DataDbManagerTest : BaseTest() {
                 mgr.deleteAllDownloadedData()
 
                 val versionAfter = settingsRepo.getById(Setting.Name.DATA_VERSION)
-                assertTrue(versionAfter == null, "Version should be cleared after deleteAllDownloadedData")
+                assertTrue(versionAfter != null, "Version should be preserved after deleteAllDownloadedData for crash-safe re-download detection")
             }
         } finally {
             appDriver.close()

@@ -127,7 +127,6 @@ class DataDbManager(
                 platform.deleteFile(file)
             }
         }
-        clearVersion()
     }
 
     /**
@@ -254,7 +253,7 @@ class DataDbManager(
         val files = platform.listFiles(databasesDir)
         return files.mapNotNull { file ->
             val fileName = file.name
-            val size = platform.getFileSize(file) ?: return@mapNotNull null
+            val size = platform.getFileSize(file) ?: 0L
             when {
                 fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
                     val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
