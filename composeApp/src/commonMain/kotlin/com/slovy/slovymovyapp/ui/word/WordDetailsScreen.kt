@@ -1,7 +1,9 @@
 package com.slovy.slovymovyapp.ui.word
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -1178,11 +1180,14 @@ private fun WordDetailContent(
                 EntryList(
                     label = stringResource(Res.string.word_details_word_family),
                     values = card.wordFamily,
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     relatedWords = card.relatedWords,
                     onWordClick = onWordClick,
-                    favoriteLemmas = favoriteLemmas
+                    favoriteLemmas = favoriteLemmas,
+                    chipShape = RoundedCornerShape(50),
+                    chipBorder = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    chipSpacing = 8.dp
                 )
             }
         }

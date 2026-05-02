@@ -46,6 +46,7 @@ import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.icons.SearchOtter
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
+import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
@@ -468,7 +469,7 @@ private fun SearchResultCard(
     showLanguageIndicator: Boolean = false,
     onClick: () -> Unit
 ) {
-    val containerColor = colorForLemma(item.lemma, MaterialTheme.colorScheme.surface)
+    val containerColor = colorForLemma(item.lemma, MaterialTheme.colorScheme.surface, LocalIsDarkTheme.current)
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -626,7 +627,7 @@ private fun EmptySearchState(
 
 @Composable
 private fun SuggestionCard(lemma: String, onClick: () -> Unit) {
-    val containerColor = colorForLemma(lemma, MaterialTheme.colorScheme.surface)
+    val containerColor = colorForLemma(lemma, MaterialTheme.colorScheme.surface, LocalIsDarkTheme.current)
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
