@@ -183,6 +183,8 @@
     <string name="acknowledgements_dictionary_extracts_body">We gebruiken voorbewerkte woordenboekgegevens van Kaikki.org, geëxtraheerd uit Wiktionary met de open-source tool wiktextract van Tatu Ylonen.</string>
     <string name="acknowledgements_application_code_title">Applicatiecode</string>
     <string name="acknowledgements_application_code_body">Applicatiecode is beschikbaar onder de CC-BY-SA-4.0-licentie.</string>
+    <string name="acknowledgements_fsrs_title">FSRS-herhalingsalgoritme</string>
+    <string name="acknowledgements_fsrs_body">We gebruiken een Kotlin-port van FSRS-Kotlin, beschikbaar onder de MIT-licentie. FSRS is oorspronkelijk ontwikkeld door Jarrett Ye met de Open Spaced Repetition-community.</string>
     <string name="acknowledgements_words_sources_title">Woordbronnen</string>
     <string name="acknowledgements_words_sources_body">Alle woordgegevens zijn beschikbaar onder de CC-BY-SA-4.0-licentie.</string>
     <string name="acknowledgements_thanks">We zijn de Wiktionary-gemeenschap en Tatu Ylonen dankbaar dat ze deze gegevens vrij beschikbaar hebben gemaakt.</string>

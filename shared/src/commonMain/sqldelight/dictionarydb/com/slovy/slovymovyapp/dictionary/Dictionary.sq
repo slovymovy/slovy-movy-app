@@ -361,7 +361,10 @@ selectSenseTraitsBySenseIds:
 SELECT sense_id, trait_type, comment FROM sense_trait WHERE sense_id IN ?;
 
 selectSenseExamplesBySenseIds:
-SELECT sense_id, example_id, text FROM sense_example WHERE sense_id IN ?;
+SELECT sense_id, example_id, text
+FROM sense_example
+WHERE sense_id IN ?
+ORDER BY sense_id, example_id;
 
 selectTopFrequentLemmas:
 SELECT l.id, l.lemma, l.zipf_frequency

@@ -710,7 +710,7 @@ private fun FavoriteSenseCard(
 private val dateFormat = LocalDateTime.Format { date(LocalDate.Formats.ISO); char(' '); time(LocalTime.Formats.ISO) }
 
 private fun buildDiagnosticInfo(senseId: String, createdAt: Long): String {
-    val instant = Instant.fromEpochSeconds(createdAt)
+    val instant = Instant.fromEpochMilliseconds(createdAt)
     val timeZone = currentSystemDefault()
     val localDateTime: LocalDateTime = instant.toLocalDateTime(timeZone)
     val dateStr = localDateTime.format(dateFormat)

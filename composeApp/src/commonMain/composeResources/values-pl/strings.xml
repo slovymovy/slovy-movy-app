@@ -183,6 +183,8 @@
     <string name="acknowledgements_dictionary_extracts_body">Korzystamy z przetworzonych danych z serwisu Kaikki.org, wyodrębnionych z Wiktionary za pomocą otwartoźródłowego narzędzia wiktextract autorstwa Tatu Ylonena.</string>
     <string name="acknowledgements_application_code_title">Kod źródłowy</string>
     <string name="acknowledgements_application_code_body">Kod aplikacji jest dostępny na licencji CC-BY-SA-4.0.</string>
+    <string name="acknowledgements_fsrs_title">Algorytm powtórek FSRS</string>
+    <string name="acknowledgements_fsrs_body">Korzystamy z portu FSRS-Kotlin dla Kotlina, dostępnego na licencji MIT. FSRS został pierwotnie opracowany przez Jarretta Ye wraz ze społecznością Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Źródła danych</string>
     <string name="acknowledgements_words_sources_body">Wszystkie dane słownikowe są dostępne na licencji CC-BY-SA-4.0.</string>
     <string name="acknowledgements_thanks">Dziękujemy społeczności Wiktionary oraz Tatu Ylonenowi za udostępnienie tych danych.</string>

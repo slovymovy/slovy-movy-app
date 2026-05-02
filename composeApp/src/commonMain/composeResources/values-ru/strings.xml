@@ -183,6 +183,8 @@
     <string name="acknowledgements_dictionary_extracts_body">Мы используем данные проекта Kaikki.org, извлечённые из Викисловаря с помощью инструмента wiktextract (автор — Тату Илонен).</string>
     <string name="acknowledgements_application_code_title">Исходный код</string>
     <string name="acknowledgements_application_code_body">Код приложения распространяется по лицензии CC-BY-SA-4.0.</string>
+    <string name="acknowledgements_fsrs_title">Алгоритм повторения FSRS</string>
+    <string name="acknowledgements_fsrs_body">Мы используем Kotlin-порт FSRS-Kotlin, распространяемый по лицензии MIT. FSRS изначально разработал Джарретт Йе совместно с сообществом Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Источники данных</string>
     <string name="acknowledgements_words_sources_body">Все материалы доступны по лицензии CC-BY-SA-4.0.</string>
     <string name="acknowledgements_thanks">Благодарим сообщество Викисловаря и Тату Илонена за свободный доступ к этим данным.</string>

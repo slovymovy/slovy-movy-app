@@ -1,51 +1,413 @@
--- Favorites table: stores favorite word senses
+import com.slovy.slovymovyapp.data.learning.CardFamily;
+import com.slovy.slovymovyapp.data.learning.CardKind;
+import com.slovy.slovymovyapp.data.learning.CardState;
+import com.slovy.slovymovyapp.data.learning.Rating;
+import kotlin.Boolean;
+import kotlin.uuid.Uuid;
+
 CREATE TABLE favorites (
   sense_id TEXT NOT NULL,
-  target_lang TEXT NOT NULL,
+  lang_code TEXT NOT NULL,
   lemma TEXT NOT NULL,
   created_at INTEGER NOT NULL,
-  PRIMARY KEY (sense_id, target_lang)
+  activated_at INTEGER,
+  PRIMARY KEY (sense_id, lang_code)
 );
 
--- Index for efficient grouping by language and lemma
-CREATE INDEX idx_favorites_lang_lemma ON favorites(target_lang, lemma);
+CREATE INDEX idx_favorites_pending_intake
+ON favorites(activated_at, created_at);
 
--- Favorites queries
+CREATE INDEX idx_favorites_lang_lemma
+ON favorites(lang_code, lemma);
 
+CREATE TABLE card (
+  id BLOB AS Uuid NOT NULL PRIMARY KEY,
+  sense_id BLOB AS Uuid NOT NULL,
+  lemma_id BLOB AS Uuid NOT NULL,
+  lang_code TEXT NOT NULL,
+  family INTEGER AS CardFamily NOT NULL,
+  state INTEGER AS CardState NOT NULL,
+  stability REAL NOT NULL,
+  difficulty REAL NOT NULL,
+  due INTEGER NOT NULL,
+  last_review INTEGER,
+  reps INTEGER NOT NULL DEFAULT 0,
+  lapses INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  available_after INTEGER,
+  answer_key TEXT NOT NULL,
+  suspended INTEGER AS Boolean NOT NULL DEFAULT 0
+);
+
+CREATE UNIQUE INDEX idx_card_unique_task
+ON card(sense_id, lang_code, family);
+
+CREATE INDEX idx_card_due
+ON card(lang_code, suspended, available_after, due);
+
+CREATE INDEX idx_card_new
+ON card(lang_code, state, created_at);
+
+CREATE INDEX idx_card_collision
+ON card(lang_code, lemma_id, answer_key);
+
+CREATE TABLE review_log (
+  id BLOB AS Uuid NOT NULL PRIMARY KEY,
+  card_id BLOB AS Uuid NOT NULL,
+  reviewed_at INTEGER NOT NULL,
+  rating INTEGER AS Rating NOT NULL,
+  variant_kind INTEGER AS CardKind NOT NULL,
+  variant_target_lang TEXT,
+  example_id INTEGER,
+  state_before INTEGER AS CardState NOT NULL,
+  stability_before REAL NOT NULL,
+  difficulty_before REAL NOT NULL,
+  elapsed_days INTEGER NOT NULL,
+  scheduled_days INTEGER NOT NULL,
+  stability_after REAL NOT NULL,
+  difficulty_after REAL NOT NULL,
+  duration_ms INTEGER NOT NULL
+);
+
+CREATE INDEX idx_review_log_card_reviewed
+ON review_log(card_id, reviewed_at DESC);
+
+CREATE INDEX idx_review_log_reviewed
+ON review_log(reviewed_at);
+
+-- Favorite queries.
 insertFavorite:
-INSERT OR IGNORE INTO favorites(sense_id, target_lang, lemma, created_at)
-VALUES (?, ?, ?, ?);
+INSERT OR IGNORE INTO favorites(
+  sense_id, lang_code, lemma, created_at, activated_at
+) VALUES (?, ?, ?, ?, ?);
 
 deleteFavorite:
-DELETE FROM favorites WHERE sense_id = ? AND target_lang = ?;
+DELETE FROM favorites WHERE sense_id = ? AND lang_code = ?;
 
 selectAll:
-SELECT sense_id, target_lang, lemma, created_at FROM favorites
+SELECT sense_id, lang_code, lemma, created_at FROM favorites
+ORDER BY created_at DESC;
+
+selectAllFull:
+SELECT sense_id, lang_code, lemma, created_at, activated_at
+FROM favorites
 ORDER BY created_at DESC;
 
 selectByLangAndLemma:
-SELECT sense_id, target_lang, lemma, created_at FROM favorites
-WHERE target_lang = ? AND lemma = ?
+SELECT sense_id, lang_code, lemma, created_at FROM favorites
+WHERE lang_code = ? AND lemma = ?
 ORDER BY created_at DESC;
 
 selectAllOrderedByLangAndLemma:
-SELECT sense_id, target_lang, lemma, created_at FROM favorites
-ORDER BY (SELECT MAX(created_at) FROM favorites f2 WHERE f2.lemma = favorites.lemma) DESC, target_lang ASC, lemma ASC, created_at DESC;
+SELECT sense_id, lang_code, lemma, created_at FROM favorites
+ORDER BY (SELECT MAX(created_at) FROM favorites f2 WHERE f2.lemma = favorites.lemma) DESC, lang_code ASC, lemma ASC, created_at DESC;
 
 selectByLemmaSearch:
-SELECT sense_id, target_lang, lemma, created_at FROM favorites
+SELECT sense_id, lang_code, lemma, created_at FROM favorites
 WHERE lemma LIKE ?
-ORDER BY (SELECT MAX(created_at) FROM favorites f2 WHERE f2.lemma = favorites.lemma) DESC, target_lang ASC, lemma ASC, created_at DESC;
+ORDER BY (SELECT MAX(created_at) FROM favorites f2 WHERE f2.lemma = favorites.lemma) DESC, lang_code ASC, lemma ASC, created_at DESC;
 
 countBySenseIdAndLang:
-SELECT COUNT(*) FROM favorites WHERE sense_id = ? AND target_lang = ?;
+SELECT COUNT(*) FROM favorites WHERE sense_id = ? AND lang_code = ?;
 
-selectOne:
-SELECT sense_id, target_lang, lemma, created_at FROM favorites
-WHERE sense_id = ? AND target_lang = ?;
+selectFavoriteSummary:
+SELECT sense_id, lang_code, lemma, created_at FROM favorites
+WHERE sense_id = ? AND lang_code = ?;
+
+selectFavoriteWithActivation:
+SELECT sense_id, lang_code, lemma, created_at, activated_at
+FROM favorites
+WHERE sense_id = ? AND lang_code = ?;
 
 selectDistinctLemmasByLang:
-SELECT DISTINCT lemma FROM favorites WHERE target_lang = ?;
+SELECT DISTINCT lemma FROM favorites WHERE lang_code = ?;
 
 deleteAll:
 DELETE FROM favorites;
+
+selectFavoritesPendingActivation:
+SELECT sense_id, lang_code, lemma, created_at, activated_at
+FROM favorites
+WHERE lang_code = ? AND activated_at IS NULL
+ORDER BY created_at ASC
+LIMIT ?;
+
+markFavoriteActivated:
+UPDATE favorites
+SET activated_at = ?
+WHERE sense_id = ? AND lang_code = ?;
+
+countFavorites:
+SELECT COUNT(*) FROM favorites;
+
+-- Card queries.
+insertCard:
+INSERT OR IGNORE INTO card(
+  id, sense_id, lemma_id, lang_code, family, state, stability, difficulty,
+  due, last_review, reps, lapses, created_at,
+  available_after, answer_key, suspended
+) VALUES (
+  :id, :sense_id, :lemma_id, :lang_code, :family, :state, :stability, :difficulty,
+  :due, :last_review, :reps, :lapses, :created_at,
+  :available_after, :answer_key, :suspended
+);
+
+selectDueCards:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card
+WHERE lang_code = :lang_code
+  AND due <= :now
+  AND state != 0
+  AND suspended = 0
+  AND (available_after IS NULL OR available_after <= :now)
+ORDER BY due ASC, created_at ASC
+LIMIT :limit;
+
+selectNewCards:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card
+WHERE lang_code = :lang_code
+  AND state = 0
+  AND due <= :now
+  AND suspended = 0
+  AND (available_after IS NULL OR available_after <= :now)
+ORDER BY created_at ASC
+LIMIT :limit;
+
+selectCardById:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card
+WHERE id = :id;
+
+selectCardBySenseAndFamily:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card
+WHERE sense_id = :sense_id
+  AND lang_code = :lang_code
+  AND family = :family;
+
+selectCardsBySense:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card
+WHERE sense_id = :sense_id
+  AND lang_code = :lang_code
+ORDER BY family ASC;
+
+selectCardsByFavorite:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card
+WHERE sense_id = :sense_id
+  AND lang_code = :lang_code
+ORDER BY family ASC;
+
+selectAvailableAfterCandidatesBySense:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card
+WHERE sense_id = :sense_id
+  AND lang_code = :lang_code
+  AND id != :id
+  AND suspended = 0;
+
+selectAvailableAfterCandidatesByLemma:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card
+WHERE lang_code = :lang_code
+  AND lemma_id = :lemma_id
+  AND sense_id != :sense_id
+  AND suspended = 0;
+
+selectAvailableAfterCandidatesByAnswer:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card
+WHERE lang_code = :lang_code
+  AND answer_key = :answer_key
+  AND id != :id
+  AND suspended = 0;
+
+countCardsByFavorite:
+SELECT COUNT(*)
+FROM card
+WHERE sense_id = :sense_id
+  AND lang_code = :lang_code;
+
+countDueCardsByLang:
+SELECT COUNT(*)
+FROM card
+WHERE lang_code = :lang_code
+  AND due <= :now
+  AND state != 0
+  AND suspended = 0
+  AND (available_after IS NULL OR available_after <= :now);
+
+countNewCardsCreatedSince:
+SELECT COUNT(*)
+FROM card
+WHERE lang_code = :lang_code
+  AND created_at >= :since
+  AND suspended = 0;
+
+countCardsByLang:
+SELECT COUNT(*)
+FROM card
+WHERE lang_code = :lang_code
+  AND suspended = 0;
+
+countMatureCardsByLang:
+SELECT COUNT(*)
+FROM card
+WHERE lang_code = :lang_code
+  AND stability >= :matureStability
+  AND suspended = 0;
+
+countDueToday:
+SELECT COUNT(*)
+FROM card
+WHERE lang_code = :lang_code
+  AND due <= :now
+  AND suspended = 0;
+
+updateCardAfterReview:
+UPDATE card
+SET state = :state,
+    stability = :stability,
+    difficulty = :difficulty,
+    due = :due,
+    last_review = :last_review,
+    reps = :reps,
+    lapses = :lapses
+WHERE id = :id;
+
+setCardAvailableAfter:
+UPDATE card
+SET available_after = :availableAfter
+WHERE id = :id
+  AND suspended = 0
+  AND (available_after IS NULL OR available_after < :availableAfter);
+
+suspendCardsByFavorite:
+UPDATE card
+SET suspended = 1,
+    available_after = NULL
+WHERE sense_id = :sense_id
+  AND lang_code = :lang_code;
+
+unsuspendCardsByFavorite:
+UPDATE card
+SET suspended = 0,
+    available_after = NULL
+WHERE sense_id = :sense_id
+  AND lang_code = :lang_code;
+
+suspendAllCards:
+UPDATE card
+SET suspended = 1;
+
+-- Review log queries.
+insertReviewLog:
+INSERT INTO review_log(
+  id, card_id, reviewed_at, rating, variant_kind, variant_target_lang, example_id,
+  state_before, stability_before, difficulty_before, elapsed_days, scheduled_days,
+  stability_after, difficulty_after, duration_ms
+) VALUES (
+  :id, :card_id, :reviewed_at, :rating, :variant_kind, :variant_target_lang, :example_id,
+  :state_before, :stability_before, :difficulty_before, :elapsed_days, :scheduled_days,
+  :stability_after, :difficulty_after, :duration_ms
+);
+
+selectReviewLogsByCard:
+SELECT reviewed_at, rating, variant_kind, variant_target_lang, example_id,
+       state_before, stability_before, difficulty_before,
+       elapsed_days, scheduled_days, stability_after, difficulty_after, duration_ms
+FROM review_log
+WHERE card_id = :card_id
+ORDER BY reviewed_at DESC
+LIMIT :limit;
+
+selectLastReviewVariantByCard:
+SELECT variant_kind, variant_target_lang
+FROM review_log
+WHERE card_id = :card_id
+ORDER BY reviewed_at DESC
+LIMIT 1;
+
+selectReviewLogsBySense:
+SELECT c.id AS card_id, c.family, r.reviewed_at, r.rating, r.variant_kind, r.variant_target_lang, r.duration_ms
+FROM review_log r
+JOIN card c ON c.id = r.card_id
+WHERE c.sense_id = :sense_id
+  AND c.lang_code = :lang_code
+ORDER BY r.reviewed_at DESC;
+
+selectRecentReviewedExampleIdsBySense:
+SELECT r.example_id
+FROM review_log r
+JOIN card c ON c.id = r.card_id
+WHERE c.sense_id = :sense_id AND r.example_id IS NOT NULL
+ORDER BY r.reviewed_at DESC
+LIMIT :limit;
+
+selectRecentReviewedCards:
+SELECT c.sense_id, c.lemma_id, c.answer_key, c.family, r.reviewed_at
+FROM review_log r
+JOIN card c ON c.id = r.card_id
+WHERE c.lang_code = :lang_code
+  AND r.reviewed_at >= :since
+ORDER BY r.reviewed_at DESC
+LIMIT :limit;
+
+selectNextDueBySense:
+SELECT MIN(
+  CASE
+    WHEN available_after IS NOT NULL AND available_after > due THEN available_after
+    ELSE due
+  END
+) AS next_due
+FROM card
+WHERE sense_id = :sense_id
+  AND lang_code = :lang_code
+  AND suspended = 0;
+
+selectLapsesBySense:
+SELECT SUM(lapses) AS total_lapses
+FROM card
+WHERE sense_id = :sense_id
+  AND lang_code = :lang_code;
+
+countReviewsSince:
+SELECT COUNT(*)
+FROM review_log r
+JOIN card c ON c.id = r.card_id
+WHERE c.lang_code = :lang_code
+  AND r.reviewed_at >= :since;
+
+countSuccessfulReviewsSince:
+SELECT COUNT(*)
+FROM review_log r
+JOIN card c ON c.id = r.card_id
+WHERE c.lang_code = :lang_code
+  AND r.reviewed_at >= :since
+  AND r.rating != 1;
+
+deleteAllLearning:
+DELETE FROM review_log;
+
+deleteAllCards:
+DELETE FROM card;

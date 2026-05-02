@@ -756,9 +756,9 @@ class DictionaryRepositoryTest : BaseTest() {
             val initialSuggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
             assertTrue(initialSuggestions.isNotEmpty(), "Should have initial suggestions")
 
-            // Add the first suggestion to favorites (using a dummy sense ID since we just need the lemma match)
+            // Add the first suggestion to favorites (using a stable UUID since FavoritesRepository syncs cards by ID)
             val wordToFavorite = initialSuggestions.first()
-            runBlocking { favoritesRepo.add("dummy-sense-id", Language.ENGLISH, wordToFavorite) }
+            runBlocking { favoritesRepo.add("00000000-0000-0000-0000-000000000999", Language.ENGLISH, wordToFavorite) }
 
             // Get suggestions again
             val newSuggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
