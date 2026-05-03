@@ -42,6 +42,12 @@ fun buildTaskVariants(
                 .filter { target -> sense.examples.any { it.hasTranslatedCloze(target) } }
                 .forEach { add(CardVariant(CardKind.CLOZE_TRANSLATION, targetLang = it.code)) }
         }
+
+        CardFamily.RECOGNIZE_VOICE -> buildList {
+            targets
+                .filter { sense.hasTranslationCue(it) }
+                .forEach { add(CardVariant(CardKind.LISTENING_TRANSLATION, targetLang = it.code)) }
+        }
     }
 }
 

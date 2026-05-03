@@ -57,10 +57,10 @@ class SessionService(
         emit(null)
     }
 
-    suspend fun previewRatings(card: SessionCard): List<GradeOutcome> =
+    fun previewRatings(card: SessionCard): List<GradeOutcome> =
         scheduler.preview(card.card.scheduling, clock.now())
 
-    suspend fun submitReview(card: SessionCard, outcome: GradeOutcome, durationMs: Long): SessionCard {
+    fun submitReview(card: SessionCard, outcome: GradeOutcome, durationMs: Long): SessionCard {
         val now = clock.now()
         val nowMs = now.toEpochMilliseconds()
         val before = card.card.scheduling
@@ -315,6 +315,7 @@ class SessionService(
             CardKind.TRANSLATION_TO_WORD -> 1
             CardKind.CLOZE_SOURCE -> 0
             CardKind.CLOZE_TRANSLATION -> 1
+            CardKind.LISTENING_TRANSLATION -> 1
         }
 
     private fun fallbackVariant(family: CardFamily): CardVariant =
@@ -331,6 +332,11 @@ class SessionService(
 
             CardFamily.PRODUCE_WORD_IN_CONTEXT -> CardVariant(
                 CardKind.CLOZE_SOURCE,
+                targetLang = null,
+            )
+
+            CardFamily.RECOGNIZE_VOICE -> CardVariant(
+                CardKind.LISTENING_TRANSLATION,
                 targetLang = null,
             )
         }

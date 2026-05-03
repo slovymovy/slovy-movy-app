@@ -13,6 +13,7 @@ import com.slovy.slovymovyapp.i18n.UiText
 import kotlin.math.roundToLong
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.study_chip_fill_in
+import slovymovyapp.composeapp.generated.resources.study_chip_listen
 import slovymovyapp.composeapp.generated.resources.study_chip_source_only
 import slovymovyapp.composeapp.generated.resources.study_prompt_recall_word
 import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
@@ -49,6 +50,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
         CardKind.WORD_TO_TRANSLATION -> {
             val target = targetLanguage ?: return null
             val answer = sense.translationCue(target) ?: return null
+            val definition = sense.translationDef(target) ?: return null
             StudyCardUiState.Recognition(
                 id = card.id.toString(),
                 chipLabel = UiText.Plain("${sourceLanguage.studyCode()} -> ${target.studyCode()}"),
@@ -57,7 +59,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                 mode = StudyRecognitionMode.BILINGUAL,
                 back = StudyCardBackUiState(
                     headline = answer,
-                    definition = sense.senseDefinition,
+                    definition = definition,
                     examples = sense.studyExamples(target),
                     audioText = null,
                 ),
@@ -136,6 +138,20 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                 ),
             )
         }
+
+        CardKind.LISTENING_TRANSLATION -> {
+            val target = targetLanguage ?: return null
+            StudyCardUiState.Listening(
+                id = card.id.toString(),
+                chipLabel = UiText.Resource(Res.string.study_chip_listen),
+                promptAudioText = lemma,
+                back = sourceBack(
+                    lemma = lemma,
+                    sense = sense,
+                    targetLanguage = target,
+                ),
+            )
+        }
     }
 }
 
@@ -179,8 +195,9 @@ private fun sourceBack(
     )
 
 private fun LanguageCardResponseSense.translationCue(language: Language): String? =
+    translationWords(language)
+private fun LanguageCardResponseSense.translationDef(language: Language): String? =
     targetLangDefinitions[language]
-        ?: translationWords(language)
 
 private fun LanguageCardResponseSense.translationWords(language: Language): String? =
     translations[language]
@@ -192,11 +209,10 @@ private fun LanguageCardResponseSense.translationWords(language: Language): Stri
         .takeIf { it.isNotBlank() }
 
 private fun LanguageCardResponseSense.studyExamples(targetLanguage: Language?): List<StudyExampleUiState> =
-    examples.take(2).map { example ->
+    examples.take(1).map { example ->
         StudyExampleUiState(
             text = example.text,
             translation = targetLanguage?.let { example.targetLangTranslations[it] }
-                ?: example.targetLangTranslations.values.firstOrNull(),
         )
     }
 

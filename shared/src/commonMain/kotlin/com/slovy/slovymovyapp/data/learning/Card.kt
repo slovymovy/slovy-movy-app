@@ -18,6 +18,7 @@ enum class CardFamily(
     RECOGNIZE_SENSE(testsWordRecall = false),
     PRODUCE_WORD(testsWordRecall = true),
     PRODUCE_WORD_IN_CONTEXT(testsWordRecall = true),
+    RECOGNIZE_VOICE(testsWordRecall = true),
 }
 
 enum class CardKind(
@@ -54,6 +55,11 @@ enum class CardKind(
         requiresTranslation = true,
         isCloze = true,
         family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+    ),
+    LISTENING_TRANSLATION(
+        requiresTranslation = true,
+        isCloze = false,
+        family = CardFamily.RECOGNIZE_VOICE,
     ),
 }
 

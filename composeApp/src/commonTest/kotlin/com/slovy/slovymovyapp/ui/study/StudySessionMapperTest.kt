@@ -42,6 +42,21 @@ class StudySessionMapperTest {
     }
 
     @Test
+    fun mapsListeningTranslationCard() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.LISTENING_TRANSLATION, targetLang = Language.ENGLISH.code),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Listening>(sessionCard.toStudyCardUiState())
+
+        assertEquals("gezellig", mapped.promptAudioText)
+        assertEquals("cosy, sociable", mapped.back.headline)
+        assertEquals("a feeling of warmth", mapped.back.definition)
+        assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
+        assertEquals("It was so cosy.", mapped.back.examples.single().translation)
+    }
+
+    @Test
     fun mapsSourceClozeCard() {
         val sessionCard = sessionCard(
             variant = CardVariant(CardKind.CLOZE_SOURCE, targetLang = null),

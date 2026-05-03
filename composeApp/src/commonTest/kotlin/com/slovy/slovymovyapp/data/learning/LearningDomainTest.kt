@@ -33,6 +33,7 @@ class LearningDomainTest {
                 "TRANSLATION_TO_WORD",
                 "WORD_TO_TRANSLATION",
                 "CLOZE_TRANSLATION",
+                "LISTENING_TRANSLATION",
             ),
             CardKind.entries.map { it.name },
         )
