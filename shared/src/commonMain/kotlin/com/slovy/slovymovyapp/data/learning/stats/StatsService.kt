@@ -27,7 +27,7 @@ class StatsService(
     private val matureStabilityDays = config.matureStability.toDouble(DurationUnit.DAYS)
 
     @OptIn(ExperimentalTime::class)
-    suspend fun progressForSense(senseId: Uuid, langCode: String): SenseProgress {
+    fun progressForSense(senseId: Uuid, langCode: String): SenseProgress {
         val cards = learning.selectCardsBySense(senseId, langCode).executeAsList().map { it.toCard() }
         val reviewLogs = learning.selectReviewLogsBySense(
             sense_id = senseId,
@@ -58,7 +58,7 @@ class StatsService(
     }
 
     @OptIn(ExperimentalTime::class)
-    suspend fun cardsForSense(senseId: Uuid, langCode: String): List<CardSummary> {
+    fun cardsForSense(senseId: Uuid, langCode: String): List<CardSummary> {
         val now = clock.now()
         val reviewLogsByCard = learning.selectReviewLogsBySense(
             sense_id = senseId,
@@ -87,7 +87,7 @@ class StatsService(
     }
 
     @OptIn(ExperimentalTime::class)
-    suspend fun historyForCard(cardId: Uuid, limit: Int): List<ReviewLogEntry> =
+    fun historyForCard(cardId: Uuid, limit: Int): List<ReviewLogEntry> =
         learning.selectReviewLogsByCard(cardId, limit.toLong()).executeAsList().map { row ->
             ReviewLogEntry(
                 reviewedAt = Instant.fromEpochMilliseconds(row.reviewed_at),
@@ -107,14 +107,14 @@ class StatsService(
         }
 
     @OptIn(ExperimentalTime::class)
-    suspend fun globalStats(langCode: String): GlobalStats {
+    fun globalStats(langCode: String): GlobalStats {
         val now = clock.now().toEpochMilliseconds()
         val since = now - 7 * DAY.inWholeMilliseconds
         val totalReviews = learning.countReviewsSince(langCode, since).executeAsOne()
         val successfulReviews = learning.countSuccessfulReviewsSince(langCode, since).executeAsOne()
         return GlobalStats(
             totalCards = learning.countCardsByLang(langCode).executeAsOne().toInt(),
-            dueToday = learning.countDueCardsByLang(langCode, now).executeAsOne().toInt(),
+            dueToday = learning.countDueCardsByLangDistinctBySense(langCode, now).executeAsOne().toInt(),
             reviewedLast7d = totalReviews.toInt(),
             rollingRetention7d = if (totalReviews == 0L) null else successfulReviews.toDouble() / totalReviews,
             matureCount = learning.countMatureCardsByLang(langCode, matureStabilityDays).executeAsOne().toInt(),
