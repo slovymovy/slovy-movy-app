@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.ui.study
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -98,6 +99,7 @@ fun StudySessionScreen(
 ) {
     StudySessionScreenContent(
         state = viewModel.state,
+        completeScrollState = viewModel.completeScrollState,
         onClose = onClose,
         onReveal = viewModel::reveal,
         onRate = viewModel::rate,
@@ -110,6 +112,7 @@ fun StudySessionScreen(
 @Composable
 fun StudySessionScreenContent(
     state: StudySessionUiState,
+    completeScrollState: ScrollState = ScrollState(0),
     onClose: () -> Unit,
     onReveal: () -> Unit = {},
     onRate: (StudyRating) -> Unit = {},
@@ -194,6 +197,7 @@ fun StudySessionScreenContent(
 
         is StudySessionUiState.Complete -> StudySessionCompleteContent(
             reviewedCount = state.reviewedCount,
+            scrollState = completeScrollState,
             onClose = onClose,
             modifier = modifier,
         )
@@ -248,6 +252,7 @@ private fun StudySessionLoadingContent(
 @Composable
 private fun StudySessionCompleteContent(
     reviewedCount: Int,
+    scrollState: ScrollState,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -274,12 +279,12 @@ private fun StudySessionCompleteContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.Center)
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(scrollState)
                         .padding(horizontal = AppSpacing.xl, vertical = AppSpacing.md),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Image(
-                        imageVector = SlovyIcons.ImageOtterSessionComplete,
+                        imageVector = with(SlovyIcons) { ImageOtterSessionComplete },
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth(0.58f)
