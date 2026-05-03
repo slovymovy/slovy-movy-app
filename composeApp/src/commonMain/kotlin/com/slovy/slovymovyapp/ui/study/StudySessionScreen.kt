@@ -265,48 +265,54 @@ private fun StudySessionCompleteContent(
                 progress = null,
                 onClose = onClose,
             )
-            Column(
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = AppSpacing.xl),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
             ) {
-                Image(
-                    imageVector = SlovyIcons.ImageOtterSessionComplete,
-                    contentDescription = null,
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth(0.58f)
-                        .heightIn(max = 280.dp),
-                )
-                Spacer(Modifier.height(AppSpacing.xxl))
-                Text(
-                    text = stringResource(Res.string.study_complete_title),
-                    style = MaterialTheme.typography.displaySmall,
-                    fontFamily = MaterialTheme.serifFontFamily,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                )
-                Spacer(Modifier.height(AppSpacing.md))
-                Text(
-                    text = pluralStringResource(Res.plurals.study_complete_description, reviewedCount, reviewedCount),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontFamily = MaterialTheme.serifFontFamily,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-                Spacer(Modifier.height(AppSpacing.xs))
-                Text(
-                    text = stringResource(Res.string.study_complete_supporting),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontFamily = MaterialTheme.serifFontFamily,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = AppSpacing.xl, vertical = AppSpacing.md),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Image(
+                        imageVector = SlovyIcons.ImageOtterSessionComplete,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth(0.58f)
+                            .heightIn(max = 280.dp),
+                    )
+                    Spacer(Modifier.height(AppSpacing.xxl))
+                    Text(
+                        text = stringResource(Res.string.study_complete_title),
+                        style = MaterialTheme.typography.displaySmall,
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(AppSpacing.md))
+                    Text(
+                        text = pluralStringResource(Res.plurals.study_complete_description, reviewedCount, reviewedCount),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(AppSpacing.xs))
+                    Text(
+                        text = stringResource(Res.string.study_complete_supporting),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
             Button(
                 onClick = onClose,
