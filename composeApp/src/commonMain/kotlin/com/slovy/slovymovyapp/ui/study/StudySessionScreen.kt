@@ -1,6 +1,5 @@
 package com.slovy.slovymovyapp.ui.study
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,15 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,7 +62,6 @@ import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.study_action_close
-import slovymovyapp.composeapp.generated.resources.study_action_more
 import slovymovyapp.composeapp.generated.resources.study_action_retry
 import slovymovyapp.composeapp.generated.resources.study_complete_description
 import slovymovyapp.composeapp.generated.resources.study_complete_title
@@ -89,12 +89,10 @@ import slovymovyapp.composeapp.generated.resources.study_tap_to_flip
 fun StudySessionScreen(
     viewModel: StudySessionViewModel,
     onClose: () -> Unit,
-    onMoreOptions: () -> Unit = {},
 ) {
     StudySessionScreenContent(
         state = viewModel.state,
         onClose = onClose,
-        onMoreOptions = onMoreOptions,
         onReveal = viewModel::reveal,
         onRate = viewModel::rate,
         onPlayAudio = viewModel::playAudio,
@@ -107,7 +105,6 @@ fun StudySessionScreen(
 fun StudySessionScreenContent(
     state: StudySessionUiState,
     onClose: () -> Unit,
-    onMoreOptions: () -> Unit = {},
     onReveal: () -> Unit = {},
     onRate: (StudyRating) -> Unit = {},
     onPlayAudio: (String) -> Unit = {},
@@ -122,7 +119,6 @@ fun StudySessionScreenContent(
                 StudySessionMessageScaffold(
                     modifier = modifier,
                     onClose = onClose,
-                    onMoreOptions = onMoreOptions,
                 ) {
                     StudyLoadingIndicator()
                 }
@@ -130,7 +126,6 @@ fun StudySessionScreenContent(
                 StudySessionLoadingContent(
                     progress = progress,
                     onClose = onClose,
-                    onMoreOptions = onMoreOptions,
                     modifier = modifier,
                 )
             }
@@ -139,7 +134,6 @@ fun StudySessionScreenContent(
         StudySessionUiState.Empty -> StudySessionMessageScaffold(
             modifier = modifier,
             onClose = onClose,
-            onMoreOptions = onMoreOptions,
         ) {
             Text(
                 text = stringResource(Res.string.study_empty_title),
@@ -159,7 +153,6 @@ fun StudySessionScreenContent(
         is StudySessionUiState.Error -> StudySessionMessageScaffold(
             modifier = modifier,
             onClose = onClose,
-            onMoreOptions = onMoreOptions,
         ) {
             Text(
                 text = stringResource(Res.string.study_error_title),
@@ -186,7 +179,6 @@ fun StudySessionScreenContent(
         is StudySessionUiState.Active -> StudySessionActiveContent(
             state = state,
             onClose = onClose,
-            onMoreOptions = onMoreOptions,
             onReveal = onReveal,
             onRate = onRate,
             onPlayAudio = onPlayAudio,
@@ -197,7 +189,6 @@ fun StudySessionScreenContent(
         is StudySessionUiState.Complete -> StudySessionMessageScaffold(
             modifier = modifier,
             onClose = onClose,
-            onMoreOptions = onMoreOptions,
         ) {
             Text(
                 text = stringResource(Res.string.study_complete_title),
@@ -220,7 +211,6 @@ fun StudySessionScreenContent(
 private fun StudySessionLoadingContent(
     progress: StudySessionProgressUiState,
     onClose: () -> Unit,
-    onMoreOptions: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -236,7 +226,6 @@ private fun StudySessionLoadingContent(
             StudySessionTopBar(
                 progress = progress,
                 onClose = onClose,
-                onMoreOptions = onMoreOptions,
             )
             Spacer(Modifier.height(AppSpacing.md))
             StudySegmentProgress(progress = progress)
@@ -245,9 +234,8 @@ private fun StudySessionLoadingContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                shape = MaterialTheme.shapes.small,
+                shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 tonalElevation = 0.dp,
             ) {
                 Box(
@@ -283,7 +271,6 @@ private fun StudyLoadingIndicator() {
 @Composable
 private fun StudySessionMessageScaffold(
     onClose: () -> Unit,
-    onMoreOptions: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -300,7 +287,6 @@ private fun StudySessionMessageScaffold(
             StudySessionTopBar(
                 progress = null,
                 onClose = onClose,
-                onMoreOptions = onMoreOptions,
             )
             Column(
                 modifier = Modifier
@@ -318,7 +304,6 @@ private fun StudySessionMessageScaffold(
 private fun StudySessionActiveContent(
     state: StudySessionUiState.Active,
     onClose: () -> Unit,
-    onMoreOptions: () -> Unit,
     onReveal: () -> Unit,
     onRate: (StudyRating) -> Unit,
     onPlayAudio: (String) -> Unit,
@@ -338,7 +323,6 @@ private fun StudySessionActiveContent(
             StudySessionTopBar(
                 progress = state.progress,
                 onClose = onClose,
-                onMoreOptions = onMoreOptions,
             )
             Spacer(Modifier.height(AppSpacing.md))
             StudySegmentProgress(progress = state.progress)
@@ -356,12 +340,12 @@ private fun StudySessionActiveContent(
             )
             Spacer(Modifier.height(AppSpacing.lg))
             if (state.side == StudyCardSide.FRONT) {
-                FilledTonalButton(
+                Button(
                     onClick = onReveal,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    shape = MaterialTheme.shapes.small,
+                    shape = MaterialTheme.shapes.extraLarge,
                     contentPadding = PaddingValues(horizontal = AppSpacing.lg),
                 ) {
                     Text(
@@ -390,41 +374,32 @@ private fun StudySessionActiveContent(
 private fun StudySessionTopBar(
     progress: StudySessionProgressUiState?,
     onClose: () -> Unit,
-    onMoreOptions: () -> Unit,
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(onClick = onClose) {
+        IconButton(
+            onClick = onClose,
+            modifier = Modifier.align(Alignment.CenterStart),
+        ) {
             Icon(
                 imageVector = Icons.Filled.Close,
                 contentDescription = stringResource(Res.string.study_action_close),
             )
         }
-        Box(
-            modifier = Modifier.weight(1f),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (progress != null) {
-                Text(
-                    text = stringResource(
-                        Res.string.study_progress_count,
-                        progress.safeCurrent,
-                        progress.safeTotal,
-                    ),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
-        IconButton(onClick = onMoreOptions) {
-            Icon(
-                imageVector = Icons.Filled.MoreVert,
-                contentDescription = stringResource(Res.string.study_action_more),
+        if (progress != null) {
+            Text(
+                text = stringResource(
+                    Res.string.study_progress_count,
+                    progress.safeCurrent,
+                    progress.safeTotal,
+                ),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.Center),
             )
         }
     }
@@ -479,9 +454,8 @@ private fun StudyCardSurface(
 ) {
     Surface(
         modifier = modifier,
-        shape = MaterialTheme.shapes.small,
+        shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         tonalElevation = 0.dp,
     ) {
         Column(
@@ -523,7 +497,7 @@ private fun StudyChip(
 ) {
     Surface(
         modifier = modifier,
-        shape = MaterialTheme.shapes.extraSmall,
+        shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ) {
@@ -690,7 +664,6 @@ private fun ClozeFront(
             card.translationHint?.let { hint ->
                 StudyExampleBlock(
                     example = StudyExampleUiState(text = hint),
-                    compact = true,
                 )
             }
         }
@@ -875,37 +848,64 @@ private fun StudySpeakerButton(
 @Composable
 private fun StudyExampleBlock(
     example: StudyExampleUiState,
-    compact: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
     ) {
         Box(
             modifier = Modifier
-                .width(2.dp)
-                .height(if (compact) 28.dp else 48.dp)
-                .background(MaterialTheme.colorScheme.outlineVariant),
+                .width(3.dp)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(1.5.dp))
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
         )
-        Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
-            StudyTaggedText(
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            StudyExampleText(
                 text = example.text,
-                style = MaterialTheme.typography.bodyMedium.copy(
+                style = MaterialTheme.typography.bodyLarge.copy(
                     fontFamily = MaterialTheme.serifFontFamily,
-                    fontStyle = FontStyle.Italic,
+                    fontStyle = FontStyle.Normal,
+                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f,
                 ),
-                color = MaterialTheme.colorScheme.onSurface,
             )
             example.translation?.let { translation ->
-                StudyTaggedText(
+                StudyExampleText(
                     text = translation,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1f,
+                    ),
                 )
             }
         }
     }
+}
+
+@Composable
+private fun StudyExampleText(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+) {
+    val annotated = buildAnnotatedString {
+        HtmlTagParser.parseTextSegments(text).forEach { segment ->
+            if (segment.isTagged) {
+                pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                append(HtmlTagParser.plainText(segment.text))
+                pop()
+            } else {
+                append(segment.text)
+            }
+        }
+    }
+    Text(text = annotated, style = style, modifier = modifier)
 }
 
 @Composable
@@ -1013,14 +1013,15 @@ private fun StudyRatingButton(
     onRate: (StudyRating) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val (containerColor, contentColor) = colorsForRating(option.rating)
     Surface(
         modifier = modifier
             .height(56.dp)
-            .clip(MaterialTheme.shapes.small)
+            .clip(MaterialTheme.shapes.large)
             .clickable(enabled = enabled, role = Role.Button) { onRate(option.rating) },
-        shape = MaterialTheme.shapes.small,
-        color = ratingContainerColor(option.rating).copy(alpha = if (enabled) 1f else 0.5f),
-        contentColor = ratingContentColor(option.rating),
+        shape = MaterialTheme.shapes.large,
+        color = containerColor.copy(alpha = if (enabled) 1f else 0.5f),
+        contentColor = contentColor,
     ) {
         Column(
             modifier = Modifier
@@ -1054,24 +1055,6 @@ private fun ratingLabel(rating: StudyRating): String =
             StudyRating.EASY -> Res.string.study_rating_easy
         },
     )
-
-@Composable
-private fun ratingContainerColor(rating: StudyRating): Color =
-    when (rating) {
-        StudyRating.AGAIN -> MaterialTheme.colorScheme.errorContainer
-        StudyRating.HARD -> MaterialTheme.colorScheme.secondaryContainer
-        StudyRating.GOOD -> MaterialTheme.colorScheme.tertiaryContainer
-        StudyRating.EASY -> MaterialTheme.colorScheme.primaryContainer
-    }
-
-@Composable
-private fun ratingContentColor(rating: StudyRating): Color =
-    when (rating) {
-        StudyRating.AGAIN -> MaterialTheme.colorScheme.onErrorContainer
-        StudyRating.HARD -> MaterialTheme.colorScheme.onSecondaryContainer
-        StudyRating.GOOD -> MaterialTheme.colorScheme.onTertiaryContainer
-        StudyRating.EASY -> MaterialTheme.colorScheme.onPrimaryContainer
-    }
 
 private fun sampleRatings() = listOf(
     StudyRatingUiState(StudyRating.AGAIN, "< 1m"),
