@@ -21,7 +21,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     private lateinit var tts: TextToSpeech
 
     private var onWordBoundary: ((IntRange) -> Unit)? = null
-    private var onStatusChange: ((TTSStatus) -> Unit)? = null
+    private val statusListeners = mutableMapOf<Any, (TTSStatus) -> Unit>()
 
     init {
         initializeTTS()
@@ -38,21 +38,21 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     private fun setupUtteranceProgressListener() {
         tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {
-                onStatusChange?.invoke(TTSStatus.SPEAKING)
+                statusListeners.values.forEach { it(TTSStatus.SPEAKING) }
             }
 
             override fun onDone(utteranceId: String?) {
-                onStatusChange?.invoke(TTSStatus.IDLE)
+                statusListeners.values.forEach { it(TTSStatus.IDLE) }
             }
 
             @Suppress("OVERRIDE_DEPRECATION")
             @Deprecated("Deprecated in Java")
             override fun onError(utteranceId: String?) {
-                onStatusChange?.invoke(TTSStatus.IDLE)
+                statusListeners.values.forEach { it(TTSStatus.IDLE) }
             }
 
             override fun onError(utteranceId: String?, errorCode: Int) {
-                onStatusChange?.invoke(TTSStatus.IDLE)
+                statusListeners.values.forEach { it(TTSStatus.IDLE) }
             }
 
             override fun onRangeStart(
@@ -72,6 +72,11 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
             putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id)
         }
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, id)
+    }
+
+    actual fun speak(text: String, language: Language) {
+        tts.setLanguage(toLocale(language))
+        speak(text)
     }
 
     actual suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> = withContext(Dispatchers.IO) {
@@ -150,14 +155,18 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual fun stop() {
         tts.stop()
-        onStatusChange?.invoke(TTSStatus.IDLE)
+        statusListeners.values.forEach { it(TTSStatus.IDLE) }
     }
 
     actual fun setOnWordBoundaryListener(listener: (wordRange: IntRange) -> Unit) {
         onWordBoundary = listener
     }
 
-    actual fun setOnStatusChangeListener(listener: (status: TTSStatus) -> Unit) {
-        onStatusChange = listener
+    actual fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {
+        statusListeners[key] = listener
+    }
+
+    actual fun removeOnStatusChangeListener(key: Any) {
+        statusListeners.remove(key)
     }
 }

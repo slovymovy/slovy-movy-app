@@ -20,6 +20,8 @@ sealed interface StudySessionUiState {
         val side: StudyCardSide,
         val ratingOptions: List<StudyRatingUiState> = emptyList(),
         val isSubmittingReview: Boolean = false,
+        val isPlayingAudio: Boolean = false,
+        val isPreparingAudio: Boolean = false,
     ) : StudySessionUiState
 
     data class Complete(
