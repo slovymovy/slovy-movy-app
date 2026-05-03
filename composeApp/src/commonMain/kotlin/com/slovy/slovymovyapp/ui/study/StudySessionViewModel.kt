@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
@@ -12,6 +13,8 @@ import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.learning.session.SessionService
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.speech.TTSStatus
+import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
@@ -30,11 +33,13 @@ class StudySessionViewModel(
     private val sessionService: SessionService,
     private val statsService: StatsService,
     private val clock: Clock,
+    private val ttsManager: TextToSpeechManager,
 ) : ViewModel() {
 
     var state by mutableStateOf<StudySessionUiState>(StudySessionUiState.Loading())
         private set
 
+    private val language: Language? = Language.fromCodeOrNull(langCode)
     private val sessionStartedAt: Instant = clock.now()
     private var cardShownAt: Instant = sessionStartedAt
     private var currentCard: SessionCard? = null
@@ -43,7 +48,28 @@ class StudySessionViewModel(
     private var sessionTotal: Int = 0
 
     init {
+        ttsManager.addOnStatusChangeListener(this) { status ->
+            val active = state as? StudySessionUiState.Active ?: return@addOnStatusChangeListener
+            state = when (status) {
+                TTSStatus.SPEAKING -> active.copy(isPreparingAudio = false, isPlayingAudio = true)
+                TTSStatus.IDLE -> active.copy(isPreparingAudio = false, isPlayingAudio = false)
+            }
+        }
         start()
+    }
+
+    fun playAudio(text: String) {
+        val active = state as? StudySessionUiState.Active ?: return
+        state = active.copy(isPreparingAudio = true, isPlayingAudio = false)
+        if (language != null) {
+            ttsManager.speak(text, language)
+        } else {
+            ttsManager.speak(text)
+        }
+    }
+
+    fun stopAudio() {
+        ttsManager.stop()
     }
 
     fun retry() {
@@ -116,6 +142,7 @@ class StudySessionViewModel(
     }
 
     private fun loadNextCard() {
+        ttsManager.stop()
         state = StudySessionUiState.Loading(nextCardProgress())
         viewModelScope.launch {
             runCatching {
@@ -174,4 +201,10 @@ class StudySessionViewModel(
             current = reviewedCount + 1,
             total = maxOf(sessionTotal, reviewedCount + 1),
         )
+
+    override fun onCleared() {
+        super.onCleared()
+        ttsManager.removeOnStatusChangeListener(this)
+        ttsManager.stop()
+    }
 }

@@ -135,7 +135,7 @@ class SettingsViewModel(
     }
 
     private fun setupTTSListeners() {
-        ttsManager.setOnStatusChangeListener { status ->
+        ttsManager.addOnStatusChangeListener(this) { status ->
             state = state.copy(
                 ttsStatus = status,
                 testingVoice = if (status == TTSStatus.IDLE) null else state.testingVoice
@@ -798,6 +798,7 @@ class SettingsViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        ttsManager.removeOnStatusChangeListener(this)
         ttsManager.stop()
     }
 

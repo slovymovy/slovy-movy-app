@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -74,6 +75,7 @@ import slovymovyapp.composeapp.generated.resources.study_listen_prompt
 import slovymovyapp.composeapp.generated.resources.study_loading
 import slovymovyapp.composeapp.generated.resources.study_play_prompt_audio
 import slovymovyapp.composeapp.generated.resources.study_play_word_audio
+import slovymovyapp.composeapp.generated.resources.study_stop_audio
 import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
 import slovymovyapp.composeapp.generated.resources.study_progress_count
 import slovymovyapp.composeapp.generated.resources.study_rating_again
@@ -87,7 +89,6 @@ import slovymovyapp.composeapp.generated.resources.study_tap_to_flip
 fun StudySessionScreen(
     viewModel: StudySessionViewModel,
     onClose: () -> Unit,
-    onPlayAudio: (String) -> Unit = {},
     onMoreOptions: () -> Unit = {},
 ) {
     StudySessionScreenContent(
@@ -96,7 +97,8 @@ fun StudySessionScreen(
         onMoreOptions = onMoreOptions,
         onReveal = viewModel::reveal,
         onRate = viewModel::rate,
-        onPlayAudio = onPlayAudio,
+        onPlayAudio = viewModel::playAudio,
+        onStopAudio = viewModel::stopAudio,
         onRetry = viewModel::retry,
     )
 }
@@ -109,6 +111,7 @@ fun StudySessionScreenContent(
     onReveal: () -> Unit = {},
     onRate: (StudyRating) -> Unit = {},
     onPlayAudio: (String) -> Unit = {},
+    onStopAudio: () -> Unit = {},
     onRetry: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -187,6 +190,7 @@ fun StudySessionScreenContent(
             onReveal = onReveal,
             onRate = onRate,
             onPlayAudio = onPlayAudio,
+            onStopAudio = onStopAudio,
             modifier = modifier,
         )
 
@@ -318,6 +322,7 @@ private fun StudySessionActiveContent(
     onReveal: () -> Unit,
     onRate: (StudyRating) -> Unit,
     onPlayAudio: (String) -> Unit,
+    onStopAudio: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -341,7 +346,10 @@ private fun StudySessionActiveContent(
             StudyCardSurface(
                 card = state.card,
                 side = state.side,
+                isPlayingAudio = state.isPlayingAudio,
+                isPreparingAudio = state.isPreparingAudio,
                 onPlayAudio = onPlayAudio,
+                onStopAudio = onStopAudio,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
@@ -463,7 +471,10 @@ private fun StudySegmentProgress(
 private fun StudyCardSurface(
     card: StudyCardUiState,
     side: StudyCardSide,
+    isPlayingAudio: Boolean,
+    isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
+    onStopAudio: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -484,7 +495,10 @@ private fun StudyCardSurface(
             if (side == StudyCardSide.FRONT) {
                 StudyCardFront(
                     card = card,
+                    isPlayingAudio = isPlayingAudio,
+                    isPreparingAudio = isPreparingAudio,
                     onPlayAudio = onPlayAudio,
+                    onStopAudio = onStopAudio,
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 360.dp),
@@ -492,7 +506,10 @@ private fun StudyCardSurface(
             } else {
                 StudyCardBack(
                     back = card.back,
+                    isPlayingAudio = isPlayingAudio,
+                    isPreparingAudio = isPreparingAudio,
                     onPlayAudio = onPlayAudio,
+                    onStopAudio = onStopAudio,
                 )
             }
         }
@@ -522,13 +539,19 @@ private fun StudyChip(
 @Composable
 private fun StudyCardFront(
     card: StudyCardUiState,
+    isPlayingAudio: Boolean,
+    isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
+    onStopAudio: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (card) {
         is StudyCardUiState.Recognition -> RecognitionFront(
             card = card,
+            isPlayingAudio = isPlayingAudio,
+            isPreparingAudio = isPreparingAudio,
             onPlayAudio = onPlayAudio,
+            onStopAudio = onStopAudio,
             modifier = modifier,
         )
 
@@ -544,7 +567,10 @@ private fun StudyCardFront(
 
         is StudyCardUiState.Listening -> ListeningFront(
             card = card,
+            isPlayingAudio = isPlayingAudio,
+            isPreparingAudio = isPreparingAudio,
             onPlayAudio = onPlayAudio,
+            onStopAudio = onStopAudio,
             modifier = modifier,
         )
     }
@@ -553,7 +579,10 @@ private fun StudyCardFront(
 @Composable
 private fun RecognitionFront(
     card: StudyCardUiState.Recognition,
+    isPlayingAudio: Boolean,
+    isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
+    onStopAudio: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -575,8 +604,12 @@ private fun RecognitionFront(
             card.promptAudioText?.let { audioText ->
                 StudySpeakerButton(
                     audioText = audioText,
-                    contentDescription = stringResource(Res.string.study_play_word_audio),
+                    playContentDescription = stringResource(Res.string.study_play_word_audio),
+                    stopContentDescription = stringResource(Res.string.study_stop_audio),
+                    isPlayingAudio = isPlayingAudio,
+                    isPreparingAudio = isPreparingAudio,
                     onPlayAudio = onPlayAudio,
+                    onStopAudio = onStopAudio,
                 )
             }
         }
@@ -667,7 +700,10 @@ private fun ClozeFront(
 @Composable
 private fun ListeningFront(
     card: StudyCardUiState.Listening,
+    isPlayingAudio: Boolean,
+    isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
+    onStopAudio: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -682,17 +718,31 @@ private fun ListeningFront(
                 modifier = Modifier
                     .size(132.dp)
                     .clip(CircleShape)
-                    .clickable(role = Role.Button) { onPlayAudio(card.promptAudioText) },
+                    .clickable(enabled = !isPreparingAudio, role = Role.Button) {
+                        if (isPlayingAudio) onStopAudio() else onPlayAudio(card.promptAudioText)
+                    },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
                 contentColor = MaterialTheme.colorScheme.primary,
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = stringResource(Res.string.study_play_prompt_audio),
-                        modifier = Modifier.size(56.dp),
-                    )
+                    when {
+                        isPreparingAudio -> CircularProgressIndicator(
+                            modifier = Modifier.size(48.dp),
+                            strokeWidth = 3.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        isPlayingAudio -> Icon(
+                            imageVector = Icons.Filled.StopCircle,
+                            contentDescription = stringResource(Res.string.study_stop_audio),
+                            modifier = Modifier.size(56.dp),
+                        )
+                        else -> Icon(
+                            imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                            contentDescription = stringResource(Res.string.study_play_prompt_audio),
+                            modifier = Modifier.size(56.dp),
+                        )
+                    }
                 }
             }
             Text(
@@ -708,7 +758,10 @@ private fun ListeningFront(
 @Composable
 private fun StudyCardBack(
     back: StudyCardBackUiState,
+    isPlayingAudio: Boolean,
+    isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
+    onStopAudio: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -741,8 +794,12 @@ private fun StudyCardBack(
             back.audioText?.let { audioText ->
                 StudySpeakerButton(
                     audioText = audioText,
-                    contentDescription = stringResource(Res.string.study_play_word_audio),
+                    playContentDescription = stringResource(Res.string.study_play_word_audio),
+                    stopContentDescription = stringResource(Res.string.study_stop_audio),
+                    isPlayingAudio = isPlayingAudio,
+                    isPreparingAudio = isPreparingAudio,
                     onPlayAudio = onPlayAudio,
+                    onStopAudio = onStopAudio,
                 )
             }
         }
@@ -774,25 +831,43 @@ private fun StudyCardBack(
 @Composable
 private fun StudySpeakerButton(
     audioText: String,
-    contentDescription: String,
+    playContentDescription: String,
+    stopContentDescription: String,
+    isPlayingAudio: Boolean,
+    isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
+    onStopAudio: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier
             .size(36.dp)
             .clip(CircleShape)
-            .clickable(role = Role.Button) { onPlayAudio(audioText) },
+            .clickable(enabled = !isPreparingAudio, role = Role.Button) {
+                if (isPlayingAudio) onStopAudio() else onPlayAudio(audioText)
+            },
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                contentDescription = contentDescription,
-                modifier = Modifier.size(20.dp),
-            )
+            when {
+                isPreparingAudio -> CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                isPlayingAudio -> Icon(
+                    imageVector = Icons.Filled.StopCircle,
+                    contentDescription = stopContentDescription,
+                    modifier = Modifier.size(20.dp),
+                )
+                else -> Icon(
+                    imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                    contentDescription = playContentDescription,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
         }
     }
 }

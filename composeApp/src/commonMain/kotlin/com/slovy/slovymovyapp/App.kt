@@ -546,6 +546,7 @@ fun App(
                         sessionService = sessionService,
                         statsService = statsService,
                         clock = Clock.System,
+                        ttsManager = ttsManager,
                     )
                 }
                 StudySessionScreen(
@@ -554,9 +555,6 @@ fun App(
                         if (!navController.popBackStack()) {
                             navController.navigate(AppDestination.Favorites)
                         }
-                    },
-                    onPlayAudio = { text ->
-                        ttsManager.speak(text)
                     },
                 )
             }

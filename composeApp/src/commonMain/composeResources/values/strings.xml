@@ -455,6 +455,7 @@
     <string name="study_fill_blank">Fill in the blank</string>
     <string name="study_play_word_audio">Play word audio</string>
     <string name="study_play_prompt_audio">Play prompt audio</string>
+    <string name="study_stop_audio">Stop audio</string>
     <string name="study_listen_prompt">Tap to play. What word do you hear?</string>
     <string name="study_rating_again">Again</string>
     <string name="study_rating_hard">Hard</string>

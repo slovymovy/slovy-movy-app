@@ -455,6 +455,7 @@
     <string name="study_fill_blank">Uzupełnij lukę</string>
     <string name="study_play_word_audio">Odtwórz słowo</string>
     <string name="study_play_prompt_audio">Odtwórz zadanie</string>
+    <string name="study_stop_audio">Zatrzymaj audio</string>
     <string name="study_listen_prompt">Dotknij, aby odtworzyć. Jakie słowo słyszysz?</string>
     <string name="study_rating_again">Jeszcze raz</string>
     <string name="study_rating_hard">Trudne</string>

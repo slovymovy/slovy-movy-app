@@ -1,7 +1,16 @@
 package com.slovy.slovymovyapp.speech
 
+import com.slovy.slovymovyapp.data.Language
+
 actual class TextToSpeechManager actual constructor(androidContext: Any?) {
+    private val statusListeners = mutableMapOf<Any, (TTSStatus) -> Unit>()
+
     actual fun speak(text: String) {
+        statusListeners.values.forEach { it(TTSStatus.IDLE) }
+    }
+
+    actual fun speak(text: String, language: Language) {
+        statusListeners.values.forEach { it(TTSStatus.IDLE) }
     }
 
     actual fun stop() {
@@ -24,6 +33,11 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     actual fun setOnWordBoundaryListener(listener: (wordRange: IntRange) -> Unit) {
     }
 
-    actual fun setOnStatusChangeListener(listener: (status: TTSStatus) -> Unit) {
+    actual fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {
+        statusListeners[key] = listener
+    }
+
+    actual fun removeOnStatusChangeListener(key: Any) {
+        statusListeners.remove(key)
     }
 }
