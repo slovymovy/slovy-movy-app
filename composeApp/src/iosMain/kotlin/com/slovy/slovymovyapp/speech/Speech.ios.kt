@@ -30,12 +30,12 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     init {
         synthesizer.delegate = delegate
         delegate.setCallbacks(
-            onStart = { statusListeners.values.forEach { it(TTSStatus.SPEAKING) } },
+            onStart = { statusListeners.values.toList().forEach { it(TTSStatus.SPEAKING) } },
             onSpeechEnded = { generation ->
                 // Only deactivate if this callback is for the current generation
                 if (generation == speechGeneration) {
                     deactivateAudioSession()
-                    statusListeners.values.forEach { it(TTSStatus.IDLE) }
+                    statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
                 }
             },
             onWordBoundary = { range -> onWordBoundary?.invoke(range) }
@@ -78,9 +78,11 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         val voiceForLanguage = (voices as List<*>)
             .filterIsInstance<AVSpeechSynthesisVoice>()
             .firstOrNull { it.language.startsWith(language.code) }
-        if (voiceForLanguage != null) {
-            currentVoice = voiceForLanguage
+        if (voiceForLanguage == null) {
+            statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
+            return
         }
+        currentVoice = voiceForLanguage
         speak(text)
     }
 
@@ -175,7 +177,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
         // Deactivate session and set idle state
         deactivateAudioSession()
-        statusListeners.values.forEach { it(TTSStatus.IDLE) }
+        statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
     }
 
     actual fun setOnWordBoundaryListener(listener: (wordRange: IntRange) -> Unit) {
