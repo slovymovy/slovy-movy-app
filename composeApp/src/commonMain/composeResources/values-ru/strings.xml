@@ -455,6 +455,7 @@
     <string name="study_fill_blank">Заполните пропуск</string>
     <string name="study_play_word_audio">Воспроизвести слово</string>
     <string name="study_play_prompt_audio">Воспроизвести задание</string>
+    <string name="study_stop_audio">Остановить аудио</string>
     <string name="study_listen_prompt">Нажмите для воспроизведения. Какое слово вы слышите?</string>
     <string name="study_rating_again">Снова</string>
     <string name="study_rating_hard">Трудно</string>

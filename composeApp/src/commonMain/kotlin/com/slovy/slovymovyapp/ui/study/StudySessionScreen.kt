@@ -75,6 +75,7 @@ import slovymovyapp.composeapp.generated.resources.study_listen_prompt
 import slovymovyapp.composeapp.generated.resources.study_loading
 import slovymovyapp.composeapp.generated.resources.study_play_prompt_audio
 import slovymovyapp.composeapp.generated.resources.study_play_word_audio
+import slovymovyapp.composeapp.generated.resources.study_stop_audio
 import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
 import slovymovyapp.composeapp.generated.resources.study_progress_count
 import slovymovyapp.composeapp.generated.resources.study_rating_again
@@ -603,7 +604,8 @@ private fun RecognitionFront(
             card.promptAudioText?.let { audioText ->
                 StudySpeakerButton(
                     audioText = audioText,
-                    contentDescription = stringResource(Res.string.study_play_word_audio),
+                    playContentDescription = stringResource(Res.string.study_play_word_audio),
+                    stopContentDescription = stringResource(Res.string.study_stop_audio),
                     isPlayingAudio = isPlayingAudio,
                     isPreparingAudio = isPreparingAudio,
                     onPlayAudio = onPlayAudio,
@@ -732,7 +734,7 @@ private fun ListeningFront(
                         )
                         isPlayingAudio -> Icon(
                             imageVector = Icons.Filled.StopCircle,
-                            contentDescription = stringResource(Res.string.study_play_prompt_audio),
+                            contentDescription = stringResource(Res.string.study_stop_audio),
                             modifier = Modifier.size(56.dp),
                         )
                         else -> Icon(
@@ -792,7 +794,8 @@ private fun StudyCardBack(
             back.audioText?.let { audioText ->
                 StudySpeakerButton(
                     audioText = audioText,
-                    contentDescription = stringResource(Res.string.study_play_word_audio),
+                    playContentDescription = stringResource(Res.string.study_play_word_audio),
+                    stopContentDescription = stringResource(Res.string.study_stop_audio),
                     isPlayingAudio = isPlayingAudio,
                     isPreparingAudio = isPreparingAudio,
                     onPlayAudio = onPlayAudio,
@@ -828,7 +831,8 @@ private fun StudyCardBack(
 @Composable
 private fun StudySpeakerButton(
     audioText: String,
-    contentDescription: String,
+    playContentDescription: String,
+    stopContentDescription: String,
     isPlayingAudio: Boolean,
     isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
@@ -855,12 +859,12 @@ private fun StudySpeakerButton(
                 )
                 isPlayingAudio -> Icon(
                     imageVector = Icons.Filled.StopCircle,
-                    contentDescription = contentDescription,
+                    contentDescription = stopContentDescription,
                     modifier = Modifier.size(20.dp),
                 )
                 else -> Icon(
                     imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                    contentDescription = contentDescription,
+                    contentDescription = playContentDescription,
                     modifier = Modifier.size(20.dp),
                 )
             }

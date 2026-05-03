@@ -455,6 +455,7 @@
     <string name="study_fill_blank">Vul de lege plek in</string>
     <string name="study_play_word_audio">Woord afspelen</string>
     <string name="study_play_prompt_audio">Opdracht afspelen</string>
+    <string name="study_stop_audio">Audio stoppen</string>
     <string name="study_listen_prompt">Tik om af te spelen. Welk woord hoor je?</string>
     <string name="study_rating_again">Opnieuw</string>
     <string name="study_rating_hard">Moeilijk</string>
