@@ -375,15 +375,13 @@ private fun StudySessionTopBar(
     progress: StudySessionProgressUiState?,
     onClose: () -> Unit,
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(
-            onClick = onClose,
-            modifier = Modifier.align(Alignment.CenterStart),
-        ) {
+        IconButton(onClick = onClose) {
             Icon(
                 imageVector = Icons.Filled.Close,
                 contentDescription = stringResource(Res.string.study_action_close),
@@ -399,9 +397,12 @@ private fun StudySessionTopBar(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.Center),
+                modifier = Modifier.weight(1f),
             )
+        } else {
+            Spacer(Modifier.weight(1f))
         }
+        Spacer(Modifier.size(48.dp))
     }
 }
 
