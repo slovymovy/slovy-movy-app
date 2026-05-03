@@ -124,6 +124,16 @@ fun AcknowledgementsBottomSheetContent() {
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
         AcknowledgementItem(
+            title = stringResource(Res.string.acknowledgements_fsrs_title),
+            body = stringResource(Res.string.acknowledgements_fsrs_body),
+            urlLabel = "github.com/open-spaced-repetition/FSRS-Kotlin",
+            url = "https://github.com/open-spaced-repetition/FSRS-Kotlin"
+        )
+        HorizontalDivider(
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        )
+        AcknowledgementItem(
             title = stringResource(Res.string.acknowledgements_words_sources_title),
             body = stringResource(Res.string.acknowledgements_words_sources_body),
             urlLabel = "github.com/slovymovy/words",

@@ -197,7 +197,9 @@ class DictionaryRepository(
             if (dataDbManager.hasDictionary(language)) {
                 add(dataDbManager.openDictionaryReadOnly(language))
             }
-            add(localDbManager.openLocalDictionary())
+            if (localDbManager.hasLocalDictionary()) {
+                add(localDbManager.openLocalDictionary())
+            }
         }
     }
 
@@ -207,7 +209,9 @@ class DictionaryRepository(
             if (dataDbManager.hasTranslation(src, tgt)) {
                 add(dataDbManager.openTranslationReadOnly(src, tgt))
             }
-            add(localDbManager.openLocalTranslation())
+            if (localDbManager.hasLocalTranslation()) {
+                add(localDbManager.openLocalTranslation())
+            }
         }
     }
 
@@ -352,7 +356,9 @@ class DictionaryRepository(
 
             // Build database list: local first, then RO
             val databases = buildList {
-                add(localDbManager.openLocalDictionary())
+                if (localDbManager.hasLocalDictionary()) {
+                    add(localDbManager.openLocalDictionary())
+                }
                 if (dataDbManager.hasDictionary(lang)) {
                     add(dataDbManager.openDictionaryReadOnly(lang))
                 }
@@ -521,7 +527,9 @@ class DictionaryRepository(
             for (tgt in targets) {
                 // Build translation database pairs: (translation DB, dictionary DB for lemma lookup)
                 val transDatabasePairs = buildList {
-                    add(localDbManager.openLocalTranslation() to localDbManager.openLocalDictionary())
+                    if (localDbManager.hasLocalTranslation() && localDbManager.hasLocalDictionary()) {
+                        add(localDbManager.openLocalTranslation() to localDbManager.openLocalDictionary())
+                    }
                     if (dataDbManager.hasTranslation(lang, tgt) && dataDbManager.hasDictionary(lang)) {
                         add(
                             dataDbManager.openTranslationReadOnly(lang, tgt) to
@@ -1074,10 +1082,13 @@ class DictionaryRepository(
         currentCoroutineContext().ensureActive()
 
         // Search the local translation DB
-        val localTransDb = localDbManager.openLocalTranslation()
-        val translationQueries = localTransDb.translationQueries
-        val results = searchSensesByTranslations(translationQueries, sourceLanguage, prefixStart, prefixEnd, senseUuids)
-        matchingSenseIds.addAll(results.map { it.toString() })
+        if (localDbManager.hasLocalTranslation()) {
+            val localTransDb = localDbManager.openLocalTranslation()
+            val translationQueries = localTransDb.translationQueries
+            val results =
+                searchSensesByTranslations(translationQueries, sourceLanguage, prefixStart, prefixEnd, senseUuids)
+            matchingSenseIds.addAll(results.map { it.toString() })
+        }
         matchingSenseIds
     }
 
@@ -1155,12 +1166,16 @@ class DictionaryRepository(
         var result = out.take(maxItems)
         val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
         if (onlineOnlyIds.isNotEmpty()) {
-            val localDb = localDbManager.openLocalDictionary()
-            val localLemmaIds = localDb.dictionaryQueries
-                .selectLemmasByIds(onlineOnlyIds)
-                .executeAsList()
-                .map { it.id }
-                .toSet()
+            val localLemmaIds = if (localDbManager.hasLocalDictionary()) {
+                val localDb = localDbManager.openLocalDictionary()
+                localDb.dictionaryQueries
+                    .selectLemmasByIds(onlineOnlyIds)
+                    .executeAsList()
+                    .map { it.id }
+                    .toSet()
+            } else {
+                emptySet()
+            }
 
             result = result.map { item ->
                 if (item.onlineOnly && item.lemmaId in localLemmaIds) {

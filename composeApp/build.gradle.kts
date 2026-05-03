@@ -27,6 +27,7 @@ kotlin {
         namespace = "com.slovy.slovymovyapp"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
+        enableCoreLibraryDesugaring = true
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
@@ -131,6 +132,10 @@ kotlin {
             }
         }
     }
+}
+
+dependencies {
+    coreLibraryDesugaring(libs.android.desugarJdkLibs)
 }
 
 sqldelight {

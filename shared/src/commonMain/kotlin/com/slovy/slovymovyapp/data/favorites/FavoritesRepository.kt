@@ -7,55 +7,53 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import kotlin.uuid.Uuid
 
 class FavoritesRepository(private val db: AppDatabase) {
 
     @OptIn(ExperimentalTime::class)
-    suspend fun add(senseId: String, targetLang: Language, lemma: String) = withContext(Dispatchers.IO) {
-        db.favoritesQueries.insertFavorite(
-            sense_id = senseId,
-            target_lang = targetLang.code,
-            lemma = lemma,
-            created_at = Clock.System.now().epochSeconds
-        )
+    suspend fun add(senseId: String, language: Language, lemma: String) = withContext(Dispatchers.IO) {
+        addFavorite(senseId, language, lemma, Clock.System.now().toEpochMilliseconds())
     }
 
-    suspend fun add(senseId: String, targetLang: Language, lemma: String, createdAt: Long) =
+    @OptIn(ExperimentalTime::class)
+    suspend fun add(senseId: String, language: Language, lemma: String, createdAt: Long) =
         withContext(Dispatchers.IO) {
-            db.favoritesQueries.insertFavorite(
-                sense_id = senseId,
-                target_lang = targetLang.code,
-                lemma = lemma,
-                created_at = createdAt
-            )
+            addFavorite(senseId, language, lemma, createdAt)
         }
 
-    suspend fun remove(senseId: String, targetLang: Language) = withContext(Dispatchers.IO) {
-        db.favoritesQueries.deleteFavorite(
-            sense_id = senseId,
-            target_lang = targetLang.code
-        )
+    suspend fun remove(senseId: String, language: Language) = withContext(Dispatchers.IO) {
+        db.favoritesQueries.transaction {
+            db.favoritesQueries.suspendCardsByFavorite(
+                sense_id = Uuid.parse(senseId),
+                lang_code = language.code,
+            )
+            db.favoritesQueries.deleteFavorite(
+                sense_id = senseId,
+                lang_code = language.code
+            )
+        }
     }
 
     suspend fun getAll(): List<Favorite> = withContext(Dispatchers.IO) {
         db.favoritesQueries.selectAll().executeAsList().map { row ->
             Favorite(
                 senseId = row.sense_id,
-                language = Language.fromCode(row.target_lang),
+                language = Language.fromCode(row.lang_code),
                 lemma = row.lemma,
                 createdAt = row.created_at
             )
         }
     }
 
-    suspend fun getByLangAndLemma(targetLang: Language, lemma: String): List<Favorite> =
+    suspend fun getByLangAndLemma(language: Language, lemma: String): List<Favorite> =
         withContext(Dispatchers.IO) {
-            db.favoritesQueries.selectByLangAndLemma(target_lang = targetLang.code, lemma = lemma)
+            db.favoritesQueries.selectByLangAndLemma(lang_code = language.code, lemma = lemma)
                 .executeAsList()
                 .map { row ->
                     Favorite(
                         senseId = row.sense_id,
-                        language = Language.fromCode(row.target_lang),
+                        language = Language.fromCode(row.lang_code),
                         lemma = row.lemma,
                         createdAt = row.created_at
                     )
@@ -66,7 +64,7 @@ class FavoritesRepository(private val db: AppDatabase) {
         db.favoritesQueries.selectAllOrderedByLangAndLemma().executeAsList().map { row ->
             Favorite(
                 senseId = row.sense_id,
-                language = Language.fromCode(row.target_lang),
+                language = Language.fromCode(row.lang_code),
                 lemma = row.lemma,
                 createdAt = row.created_at
             )
@@ -78,38 +76,71 @@ class FavoritesRepository(private val db: AppDatabase) {
         db.favoritesQueries.selectByLemmaSearch(pattern).executeAsList().map { row ->
             Favorite(
                 senseId = row.sense_id,
-                language = Language.fromCode(row.target_lang),
+                language = Language.fromCode(row.lang_code),
                 lemma = row.lemma,
                 createdAt = row.created_at
             )
         }
     }
 
-    suspend fun exists(senseId: String, targetLang: Language): Boolean = withContext(Dispatchers.IO) {
-        db.favoritesQueries.countBySenseIdAndLang(sense_id = senseId, target_lang = targetLang.code)
+    suspend fun exists(senseId: String, language: Language): Boolean = withContext(Dispatchers.IO) {
+        db.favoritesQueries.countBySenseIdAndLang(sense_id = senseId, lang_code = language.code)
             .executeAsOne() > 0
     }
 
-    suspend fun getOne(senseId: String, targetLang: Language): Favorite? = withContext(Dispatchers.IO) {
-        db.favoritesQueries.selectOne(sense_id = senseId, target_lang = targetLang.code)
+    suspend fun getOne(senseId: String, language: Language): Favorite? = withContext(Dispatchers.IO) {
+        db.favoritesQueries.selectFavoriteSummary(sense_id = senseId, lang_code = language.code)
             .executeAsOneOrNull()
             ?.let { row ->
                 Favorite(
                     senseId = row.sense_id,
-                    language = Language.fromCode(row.target_lang),
+                    language = Language.fromCode(row.lang_code),
                     lemma = row.lemma,
                     createdAt = row.created_at
                 )
             }
     }
 
-    suspend fun getDistinctLemmasByLang(targetLang: Language): Set<String> = withContext(Dispatchers.IO) {
-        db.favoritesQueries.selectDistinctLemmasByLang(target_lang = targetLang.code)
+    suspend fun getDistinctLemmasByLang(language: Language): Set<String> = withContext(Dispatchers.IO) {
+        db.favoritesQueries.selectDistinctLemmasByLang(lang_code = language.code)
             .executeAsList()
             .toSet()
     }
 
     suspend fun deleteAll() = withContext(Dispatchers.IO) {
-        db.favoritesQueries.deleteAll()
+        db.favoritesQueries.transaction {
+            db.favoritesQueries.suspendAllCards()
+            db.favoritesQueries.deleteAll()
+        }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun addFavorite(senseId: String, language: Language, lemma: String, createdAt: Long) {
+        val senseUuid = Uuid.parse(senseId)
+        val restoredAt = Clock.System.now().toEpochMilliseconds()
+        db.favoritesQueries.transaction {
+            val existing = db.favoritesQueries.selectFavoriteWithActivation(
+                sense_id = senseId,
+                lang_code = language.code,
+            ).executeAsOneOrNull()
+            if (existing != null) return@transaction
+            val hasLearningCards = db.favoritesQueries.countCardsByFavorite(
+                sense_id = senseUuid,
+                lang_code = language.code,
+            ).executeAsOne() > 0
+            db.favoritesQueries.insertFavorite(
+                sense_id = senseId,
+                lang_code = language.code,
+                lemma = lemma,
+                created_at = createdAt,
+                activated_at = if (hasLearningCards) restoredAt else null,
+            )
+            if (hasLearningCards) {
+                db.favoritesQueries.unsuspendCardsByFavorite(
+                    sense_id = senseUuid,
+                    lang_code = language.code,
+                )
+            }
+        }
     }
 }
