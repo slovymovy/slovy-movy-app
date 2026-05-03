@@ -50,7 +50,8 @@ class StudySessionMapperTest {
         val mapped = assertIs<StudyCardUiState.Listening>(sessionCard.toStudyCardUiState())
 
         assertEquals("gezellig", mapped.promptAudioText)
-        assertEquals("cosy, sociable", mapped.back.headline)
+        assertEquals("gezellig", mapped.back.headline)
+        assertEquals("cosy, sociable", mapped.back.secondary)
         assertEquals("a feeling of warmth", mapped.back.definition)
         assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
         assertEquals("It was so cosy.", mapped.back.examples.single().translation)
@@ -130,7 +131,7 @@ class StudySessionMapperTest {
                                     targetLangTranslations = mapOf(Language.ENGLISH to "It was so cosy."),
                                 ),
                             ),
-                            targetLangDefinitions = mapOf(Language.ENGLISH to "cosy, sociable"),
+                            targetLangDefinitions = mapOf(Language.ENGLISH to "a feeling of warmth"),
                             translations = mapOf(
                                 Language.ENGLISH to listOf(
                                     LanguageCardTranslation(targetLangWord = "cosy"),
