@@ -96,41 +96,50 @@ class SessionService(
                 difficulty_after = after.difficulty,
                 duration_ms = durationMs,
             )
-            applyAvailableAfter(
-                cards = learning.selectAvailableAfterCandidatesBySense(
-                    sense_id = card.card.senseId,
-                    lang_code = card.card.langCode,
-                    id = card.card.id,
-                ).executeAsList().map { it.toCard() },
-                nowMs = nowMs,
-                cooldown = config.sameSenseCooldown,
-                relation = "same-sense",
-            )
-            applyAvailableAfter(
-                cards = learning.selectAvailableAfterCandidatesByLemma(
-                    lang_code = card.card.langCode,
-                    lemma_id = card.card.lemmaId,
-                    sense_id = card.card.senseId,
-                ).executeAsList().map { it.toCard() },
-                nowMs = nowMs,
-                cooldown = config.sameLemmaCooldown,
-                relation = "same-lemma",
-            )
-            if (card.card.family.testsWordRecall) {
+            if (outcome.rating.buriesSiblings()) {
                 applyAvailableAfter(
-                    cards = learning.selectAvailableAfterCandidatesByAnswer(
+                    cards = learning.selectAvailableAfterCandidatesBySense(
+                        sense_id = card.card.senseId,
                         lang_code = card.card.langCode,
-                        answer_key = card.card.answerKey,
                         id = card.card.id,
-                    ).executeAsList()
-                        .map { it.toCard() }
-                        .filter { it.family.testsWordRecall },
+                    ).executeAsList().map { it.toCard() },
                     nowMs = nowMs,
-                    cooldown = config.sameAnswerCooldown,
-                    relation = "same-answer",
+                    cooldown = config.sameSenseCooldown,
+                    relation = "same-sense",
+                )
+                applyAvailableAfter(
+                    cards = learning.selectAvailableAfterCandidatesByLemma(
+                        lang_code = card.card.langCode,
+                        lemma_id = card.card.lemmaId,
+                        sense_id = card.card.senseId,
+                    ).executeAsList().map { it.toCard() },
+                    nowMs = nowMs,
+                    cooldown = config.sameLemmaCooldown,
+                    relation = "same-lemma",
+                )
+                if (card.card.family.testsWordRecall) {
+                    applyAvailableAfter(
+                        cards = learning.selectAvailableAfterCandidatesByAnswer(
+                            lang_code = card.card.langCode,
+                            answer_key = card.card.answerKey,
+                            id = card.card.id,
+                        ).executeAsList()
+                            .map { it.toCard() }
+                            .filter { it.family.testsWordRecall },
+                        nowMs = nowMs,
+                        cooldown = config.sameAnswerCooldown,
+                        relation = "same-answer",
+                    )
+                }
+            } else {
+                learning.setCardAvailableAfter(
+                    availableAfter = after.dueEpochMs,
+                    id = card.card.id,
                 )
             }
-            unlockNextFamilyIfEligible(card, after, nowMs)
+            if (outcome.rating.unlocksNextFamily()) {
+                unlockNextFamilyIfEligible(card, after, nowMs)
+            }
         }
 
         return card.copy(card = card.card.copy(scheduling = after))
@@ -433,6 +442,12 @@ class SessionService(
             .plus(sense.translations.keys)
             .plus(sense.examples.flatMap { it.targetLangTranslations.keys })
             .distinctBy { it.code }
+
+    private fun Rating.buriesSiblings(): Boolean =
+        this != Rating.AGAIN
+
+    private fun Rating.unlocksNextFamily(): Boolean =
+        this == Rating.GOOD || this == Rating.EASY
 
     private companion object {
         const val HARD_EXCLUDE: Double = 1_000_000.0

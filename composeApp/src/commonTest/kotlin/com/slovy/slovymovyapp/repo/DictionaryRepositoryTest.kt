@@ -1131,4 +1131,57 @@ class DictionaryRepositoryTest : BaseTest() {
             }
         }
     }
+
+    @Test
+    fun getLanguageCard_withMissingLocalTranslationDb_returnsBaseCardWithoutCreatingTranslationDb() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+
+        runBlocking {
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
+        if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
+        if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
+
+        try {
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
+            val localDictDb = localMgr.openLocalDictionary()
+            localDictDb.dictionaryQueries.apply {
+                insertLemma(lemmaId, "en", "missinglocaltranslation", "missinglocaltranslation", 5.0, false)
+                insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.NOUN)
+                insertSense(
+                    sense_id = senseId,
+                    lemma_pos_id = lemmaPosId,
+                    sense_definition = "base definition",
+                    learner_level = LearnerLevel.A1,
+                    frequency = SenseFrequency.HIGH,
+                    semantic_group_id = "sg",
+                    name_type = null,
+                )
+            }
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+            val card = runBlocking {
+                repo.getLanguageCard(
+                    Language.ENGLISH,
+                    "missinglocaltranslation",
+                    translationTargets = listOf(Language.RUSSIAN),
+                )
+            }
+
+            val sense = assertNotNull(card).entries.single().senses.single()
+            assertTrue(sense.translations.isEmpty())
+            assertTrue(sense.targetLangDefinitions.isEmpty())
+            assertFalse(platform.fileExists(localTransPath), "Read path must not create local translation DB")
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
+            if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
+        }
+    }
 }

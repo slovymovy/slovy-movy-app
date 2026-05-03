@@ -42,8 +42,10 @@ import kotlin.test.*
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import kotlin.time.toDuration
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalTime::class)
@@ -340,11 +342,24 @@ class LearningE2ETest : BaseTest() {
 
     @Test
     fun again_review_does_not_bury_siblings() = runBlocking {
-        withEnv(includeTranslation = true) { env ->
+        withEnv(includeTranslation = false) { env ->
             val fixture = env.seedSense(lemma = "againfixtureword")
-            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
             env.addFavorite(fixture)
-            env.intake.runIntake("en")
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                cardId = Uuid.parse("00000000-0000-0000-0000-000000000201"),
+            )
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                cardId = Uuid.parse("00000000-0000-0000-0000-000000000202"),
+            )
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                cardId = Uuid.parse("00000000-0000-0000-0000-000000000203"),
+            )
 
             val card = env.nextLoadedCard("en")
             env.session.submitReview(
@@ -355,7 +370,67 @@ class LearningE2ETest : BaseTest() {
 
             val siblings = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
                 .filter { it.id != card.card.id }
-            assertTrue(siblings.isEmpty())
+            assertEquals(2, siblings.size)
+            assertTrue(siblings.all { it.available_after == null })
+        }
+    }
+
+    @Test
+    fun again_review_does_not_repeat_card_before_displayed_interval() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            val fixture = env.seedSense(lemma = "againintervalfixture")
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+            )
+
+            val card = env.nextLoadedCard("en")
+            val again = env.session.previewRatings(card).first { it.rating == Rating.AGAIN }
+            env.session.submitReview(card, again, durationMs = 1_000)
+
+            val reviewed = env.app.favoritesQueries.selectCardById(card.card.id).executeAsOne()
+            assertEquals(reviewed.due, reviewed.available_after)
+            assertNull(env.session.nextCard("en", start).first())
+
+            env.clock.advance(again.intervalMillis.toDuration(DurationUnit.MILLISECONDS))
+
+            val repeated = assertNotNull(
+                env.session.nextCard("en", env.clock.now())
+                    .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
+            )
+            assertEquals(card.card.id, repeated.card.id)
+        }
+    }
+
+    @Test
+    fun again_review_does_not_unlock_next_family_even_when_stability_is_eligible() = runBlocking {
+        val config = FsrsDefaults.config().copy(
+            productionUnlockStability = 0.minutes,
+        )
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "againunlockfixture")
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.REVIEW,
+                stability = 30.0,
+                due = start.toEpochMilliseconds() - 1,
+                lastReview = start.toEpochMilliseconds() - 30.minutes.inWholeMilliseconds,
+                reps = 5,
+            )
+
+            val card = env.nextLoadedCard("en")
+            env.session.submitReview(
+                card,
+                env.session.previewRatings(card).first { it.rating == Rating.AGAIN },
+                durationMs = 1_000,
+            )
+
+            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+            assertEquals(1, cards.size)
+            assertEquals(CardFamily.RECOGNIZE_SENSE, cards.single().family)
         }
     }
 

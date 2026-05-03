@@ -207,6 +207,15 @@ object HtmlTagParser {
         return extractTaggedWords(text, splitMultipleWords).toSet()
     }
 
+    /**
+     * Removes supported highlight tags while preserving their text content.
+     */
+    fun plainText(text: String): String {
+        return parseTextSegments(text).joinToString(separator = "") { segment ->
+            if (segment.isTagged) plainText(segment.text) else segment.text
+        }
+    }
+
     private fun findNextSimpleTagStart(text: String, startIndex: Int): Int {
         var searchIndex = startIndex
         while (searchIndex < text.length) {

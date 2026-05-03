@@ -18,14 +18,18 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.Uuid
 
+interface LearningIntake {
+    suspend fun runIntake(langCode: String): IntakeResult
+}
+
 class IntakeService(
     private val learning: FavoritesQueries,
     private val dictionary: DictionaryRepository,
     private val config: FsrsConfig = FsrsDefaults.config(),
     private val clock: Clock,
-) {
+) : LearningIntake {
     @OptIn(ExperimentalTime::class)
-    suspend fun runIntake(langCode: String): IntakeResult = withContext(Dispatchers.IO) {
+    override suspend fun runIntake(langCode: String): IntakeResult = withContext(Dispatchers.IO) {
         val language = Language.fromCodeOrNull(langCode)
             ?: return@withContext IntakeResult(emptyList(), emptyList(), 0)
         val translationTargets = dictionary.defaultTranslationTargets(language)
