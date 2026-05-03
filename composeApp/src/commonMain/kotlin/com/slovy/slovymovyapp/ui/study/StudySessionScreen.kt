@@ -2,6 +2,8 @@ package com.slovy.slovymovyapp.ui.study
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,14 +58,19 @@ import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.icons.ImageOtterSessionComplete
+import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.study_action_close
+import slovymovyapp.composeapp.generated.resources.study_action_done_for_now
 import slovymovyapp.composeapp.generated.resources.study_action_retry
 import slovymovyapp.composeapp.generated.resources.study_complete_description
+import slovymovyapp.composeapp.generated.resources.study_complete_supporting
 import slovymovyapp.composeapp.generated.resources.study_complete_title
 import slovymovyapp.composeapp.generated.resources.study_empty_description
 import slovymovyapp.composeapp.generated.resources.study_empty_title
@@ -92,6 +99,7 @@ fun StudySessionScreen(
 ) {
     StudySessionScreenContent(
         state = viewModel.state,
+        completeScrollState = viewModel.completeScrollState,
         onClose = onClose,
         onReveal = viewModel::reveal,
         onRate = viewModel::rate,
@@ -104,6 +112,7 @@ fun StudySessionScreen(
 @Composable
 fun StudySessionScreenContent(
     state: StudySessionUiState,
+    completeScrollState: ScrollState = ScrollState(0),
     onClose: () -> Unit,
     onReveal: () -> Unit = {},
     onRate: (StudyRating) -> Unit = {},
@@ -186,24 +195,12 @@ fun StudySessionScreenContent(
             modifier = modifier,
         )
 
-        is StudySessionUiState.Complete -> StudySessionMessageScaffold(
-            modifier = modifier,
+        is StudySessionUiState.Complete -> StudySessionCompleteContent(
+            reviewedCount = state.reviewedCount,
+            scrollState = completeScrollState,
             onClose = onClose,
-        ) {
-            Text(
-                text = stringResource(Res.string.study_complete_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(AppSpacing.sm))
-            Text(
-                text = stringResource(Res.string.study_complete_description, state.reviewedCount),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-        }
+            modifier = modifier,
+        )
     }
 }
 
@@ -248,6 +245,94 @@ private fun StudySessionLoadingContent(
                 }
             }
             Spacer(Modifier.height(AppSpacing.lg))
+        }
+    }
+}
+
+@Composable
+private fun StudySessionCompleteContent(
+    reviewedCount: Int,
+    scrollState: ScrollState,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
+        ) {
+            StudySessionTopBar(
+                progress = null,
+                onClose = onClose,
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                        .verticalScroll(scrollState)
+                        .padding(horizontal = AppSpacing.xl, vertical = AppSpacing.md),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Image(
+                        imageVector = with(SlovyIcons) { ImageOtterSessionComplete },
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth(0.58f)
+                            .heightIn(max = 280.dp),
+                    )
+                    Spacer(Modifier.height(AppSpacing.xxl))
+                    Text(
+                        text = stringResource(Res.string.study_complete_title),
+                        style = MaterialTheme.typography.displaySmall,
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(AppSpacing.md))
+                    Text(
+                        text = pluralStringResource(Res.plurals.study_complete_description, reviewedCount, reviewedCount),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(AppSpacing.xs))
+                    Text(
+                        text = stringResource(Res.string.study_complete_supporting),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+            Button(
+                onClick = onClose,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = MaterialTheme.shapes.extraLarge,
+                contentPadding = PaddingValues(horizontal = AppSpacing.lg),
+            ) {
+                Text(
+                    text = stringResource(Res.string.study_action_done_for_now),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui.study
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,16 +16,11 @@ import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.speech.TTSStatus
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import slovymovyapp.composeapp.generated.resources.Res
-import slovymovyapp.composeapp.generated.resources.study_error_card_data_missing
-import slovymovyapp.composeapp.generated.resources.study_error_next_card_failed
-import slovymovyapp.composeapp.generated.resources.study_error_prepare_failed
-import slovymovyapp.composeapp.generated.resources.study_error_review_save_failed
 
 @OptIn(ExperimentalTime::class)
 class StudySessionViewModel(
@@ -38,6 +34,7 @@ class StudySessionViewModel(
 
     var state by mutableStateOf<StudySessionUiState>(StudySessionUiState.Loading())
         private set
+    val completeScrollState = ScrollState(0)
 
     private val language: Language? = Language.fromCodeOrNull(langCode)
     private val sessionStartedAt: Instant = clock.now()
@@ -163,7 +160,7 @@ class StudySessionViewModel(
 
                             SessionCardLoadState.READY,
                             SessionCardLoadState.ERROR,
-                            -> showLoadedCard(sessionCard)
+                                -> showLoadedCard(sessionCard)
                         }
                     }
             }.onFailure { error ->

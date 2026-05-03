@@ -441,8 +441,15 @@
     <string name="study_error_next_card_failed">Volgende kaart kon niet worden geladen.</string>
     <string name="study_error_review_save_failed">Herhaling kon niet worden opgeslagen.</string>
     <string name="study_error_card_data_missing">Deze kaart mist studiegegevens.</string>
-    <string name="study_complete_title">Sessie voltooid</string>
-    <string name="study_complete_description">%1$d kaarten herhaald.</string>
+    <string name="study_complete_title">Goed gedaan!</string>
+    <plurals name="study_complete_description">
+        <item quantity="one">%1$d kaart afgerond.</item>
+        <item quantity="few">%1$d kaarten afgerond.</item>
+        <item quantity="many">%1$d kaarten afgerond.</item>
+        <item quantity="other">%1$d kaarten afgerond.</item>
+    </plurals>
+    <string name="study_complete_supporting">Zo blijven woorden hangen.</string>
+    <string name="study_action_done_for_now">Klaar voor nu</string>
     <string name="study_progress_count">%1$d van %2$d</string>
     <string name="study_tap_to_flip">Tik om te draaien</string>
     <string name="study_tap_to_check">Tik om te controleren</string>
