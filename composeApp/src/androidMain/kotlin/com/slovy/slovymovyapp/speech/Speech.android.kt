@@ -38,21 +38,21 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     private fun setupUtteranceProgressListener() {
         tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {
-                statusListeners.values.toList().forEach { it(TTSStatus.SPEAKING) }
+                statusListeners.values.forEach { it(TTSStatus.SPEAKING) }
             }
 
             override fun onDone(utteranceId: String?) {
-                statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
+                statusListeners.values.forEach { it(TTSStatus.IDLE) }
             }
 
             @Suppress("OVERRIDE_DEPRECATION")
             @Deprecated("Deprecated in Java")
             override fun onError(utteranceId: String?) {
-                statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
+                statusListeners.values.forEach { it(TTSStatus.IDLE) }
             }
 
             override fun onError(utteranceId: String?, errorCode: Int) {
-                statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
+                statusListeners.values.forEach { it(TTSStatus.IDLE) }
             }
 
             override fun onRangeStart(
@@ -71,10 +71,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         val params = Bundle().apply {
             putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id)
         }
-        val result = tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, id)
-        if (result == TextToSpeech.ERROR) {
-            statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
-        }
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, id)
     }
 
     actual fun speak(text: String, language: Language) {
@@ -158,7 +155,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual fun stop() {
         tts.stop()
-        statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
+        statusListeners.values.forEach { it(TTSStatus.IDLE) }
     }
 
     actual fun setOnWordBoundaryListener(listener: (wordRange: IntRange) -> Unit) {
