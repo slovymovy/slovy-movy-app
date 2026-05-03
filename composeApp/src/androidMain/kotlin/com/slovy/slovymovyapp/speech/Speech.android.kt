@@ -71,7 +71,10 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         val params = Bundle().apply {
             putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id)
         }
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, id)
+        val result = tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, id)
+        if (result == TextToSpeech.ERROR) {
+            statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
+        }
     }
 
     actual fun speak(text: String, language: Language) {
