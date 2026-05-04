@@ -1,11 +1,14 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,10 +16,14 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
@@ -42,6 +49,7 @@ import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.format.char
 import kotlin.time.Duration.Companion.milliseconds
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Instant
@@ -345,7 +353,7 @@ class FavoritesViewModel(
         }
     }
 
-    fun toggleFavorite(senseId: String) {
+    fun toggleFavorite(senseId: String, removedMessage: String, undoLabel: String) {
         val item = findSense(senseId) ?: return
         viewModelScope.launch {
             // Fetch the favorite to get its createdAt before removal
@@ -366,8 +374,8 @@ class FavoritesViewModel(
 
             // Show snackbar with an undo option
             val result = snackbarHostState.showSnackbar(
-                message = "Removed from favorites",
-                actionLabel = "Undo",
+                message = removedMessage,
+                actionLabel = undoLabel,
                 duration = SnackbarDuration.Short
             )
 
@@ -429,6 +437,8 @@ fun FavoritesScreen(
     onStartStudy: (Language) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
+    val removedMessage = stringResource(Res.string.favorites_removed_message)
+    val undoLabel = stringResource(Res.string.favorites_removed_undo)
 
     LifecycleResumeEffect(viewModel) {
         viewModel.loadFavorites()
@@ -457,7 +467,7 @@ fun FavoritesScreen(
         onSearchInDictionary = onSearchInDictionary,
         onQueryChange = { viewModel.updateQuery(it) },
         onSenseToggle = { viewModel.toggleSense(it) },
-        onFavoriteToggle = { viewModel.toggleFavorite(it) },
+        onFavoriteToggle = { viewModel.toggleFavorite(it, removedMessage, undoLabel) },
         onNavigateToWordDetail = onNavigateToWordDetail,
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
@@ -789,60 +799,60 @@ private fun StudyDueCard(
     onStartStudy: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val actionLabel = stringResource(Res.string.favorites_study_due_action)
     Surface(
-        modifier = modifier,
+        onClick = onStartStudy,
+        modifier = modifier.semantics {
+            onClick(label = actionLabel, action = null)
+        },
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        tonalElevation = 1.dp,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(AppSpacing.lg),
-            horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
+                .padding(horizontal = 18.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Surface(
-                modifier = Modifier.size(52.dp),
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = stringResource(Res.string.favorites_study_due_title),
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.4.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = study.dueCount.toString(),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
+                        text = pluralStringResource(Res.plurals.favorites_study_due_count, study.dueCount, study.dueCount),
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = (-0.3).sp,
+                        lineHeight = 27.3.sp,
+                        modifier = Modifier.alignByBaseline(),
+                    )
+                    Text(
+                        text = stringResource(Res.string.favorites_study_due_subtitle, study.estimatedMinutes),
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontSize = 13.sp,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
+                        modifier = Modifier.alignByBaseline(),
                     )
                 }
             }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(Res.string.favorites_study_due_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = stringResource(
-                        Res.string.favorites_study_due_subtitle,
-                        study.dueCount,
-                        study.estimatedMinutes,
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
-                )
-            }
-            FilledTonalButton(
-                onClick = onStartStudy,
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
-                shape = MaterialTheme.shapes.small,
-            ) {
-                Text(stringResource(Res.string.favorites_study_due_action))
-            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+            )
         }
     }
 }

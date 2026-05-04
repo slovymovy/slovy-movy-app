@@ -3,7 +3,7 @@
     <string name="common_app_name">OpenWords</string>
 
     <string name="nav_search">Szukaj</string>
-    <string name="nav_favorites">Ulubione</string>
+    <string name="nav_favorites">Moje słowa</string>
     <string name="nav_word_detail">Słowo</string>
     <string name="nav_settings">Ustawienia</string>
 
@@ -66,13 +66,15 @@
     <string name="favorites_title">Moje słowa</string>
     <string name="favorites_loading">Ładowanie...</string>
     <string name="favorites_search_placeholder">Wyszukaj słowo...</string>
-    <string name="favorites_empty_title">Brak ulubionych</string>
-    <string name="favorites_empty_description">Zapisuj słowa, które chcesz zapamiętać.</string>
+    <string name="favorites_empty_title">Twoja lista słówek zaczyna się tutaj.</string>
+    <string name="favorites_empty_description">Wyszukaj dowolne słowo i kliknij serduszko, aby zapisać je do nauki.</string>
     <string name="favorites_empty_action_start_searching">Zacznij szukać</string>
     <string name="favorites_no_results_title">Brak wyników dla „%1$s"</string>
     <string name="favorites_no_results_description">Sprawdź pisownię lub wyszukaj w całym słowniku.</string>
     <string name="favorites_no_results_action_search_dictionary">Szukaj w słowniku</string>
     <string name="favorites_stats">%1$d znaczeń • %2$d słów</string>
+    <string name="favorites_removed_message">Słowo usunięte</string>
+    <string name="favorites_removed_undo">Cofnij</string>
 
     <string name="language_setup_title">Wybierz języki</string>
     <string name="language_setup_subtitle">Wybierz język, którego się uczysz, i preferencje tłumaczeń.</string>
@@ -467,7 +469,13 @@
     <string name="study_rating_hard">Trudne</string>
     <string name="study_rating_good">Dobrze</string>
     <string name="study_rating_easy">Łatwe</string>
-    <string name="favorites_study_due_title">Do powtórki dzisiaj</string>
-    <string name="favorites_study_due_subtitle">%1$d kart · około %2$d min</string>
-    <string name="favorites_study_due_action">Ucz się</string>
+    <string name="favorites_study_due_title">DO POWTÓRKI DZISIAJ</string>
+    <plurals name="favorites_study_due_count">
+        <item quantity="one">%1$d karta</item>
+        <item quantity="few">%1$d karty</item>
+        <item quantity="many">%1$d kart</item>
+        <item quantity="other">%1$d kart</item>
+    </plurals>
+    <string name="favorites_study_due_subtitle">Około %1$d min</string>
+    <string name="favorites_study_due_action">Rozpocznij powtórkę</string>
 </resources>
