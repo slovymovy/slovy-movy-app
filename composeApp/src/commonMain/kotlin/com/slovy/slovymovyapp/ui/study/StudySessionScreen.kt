@@ -25,7 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import com.slovy.slovymovyapp.ui.SpeakerVector
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,7 +37,18 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,12 +58,14 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
@@ -690,10 +703,11 @@ private fun ProductionFront(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
         ) {
             Text(
-                text = card.promptLabel.resolve(),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = card.promptLabel.resolve().uppercase(),
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = 1.4.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
             StudyTaggedText(
@@ -707,15 +721,29 @@ private fun ProductionFront(
             )
             card.firstLetterHint?.let { hint ->
                 Surface(
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ) {
-                    Text(
-                        text = hint,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm),
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(
+                            text = hint.take(1),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = hint.drop(2),
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily.Monospace,
+                            letterSpacing = 4.sp,
+                        )
+                    }
                 }
             }
         }
@@ -735,10 +763,11 @@ private fun ClozeFront(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
         ) {
             Text(
-                text = stringResource(Res.string.study_fill_blank),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = stringResource(Res.string.study_fill_blank).uppercase(),
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = 1.4.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             StudyClozeText(
                 cloze = card.prompt,
@@ -796,7 +825,7 @@ private fun ListeningFront(
                             modifier = Modifier.size(56.dp),
                         )
                         else -> Icon(
-                            imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                            imageVector = SpeakerVector,
                             contentDescription = stringResource(Res.string.study_play_prompt_audio),
                             modifier = Modifier.size(56.dp),
                         )
@@ -920,7 +949,7 @@ private fun StudySpeakerButton(
                     modifier = Modifier.size(20.dp),
                 )
                 else -> Icon(
-                    imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                    imageVector = SpeakerVector,
                     contentDescription = playContentDescription,
                     modifier = Modifier.size(20.dp),
                 )
