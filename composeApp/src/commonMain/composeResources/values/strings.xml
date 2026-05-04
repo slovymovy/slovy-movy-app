@@ -3,7 +3,7 @@
     <string name="common_app_name">OpenWords</string>
 
     <string name="nav_search">Search</string>
-    <string name="nav_favorites">Favorites</string>
+    <string name="nav_favorites">My words</string>
     <string name="nav_word_detail">Word Detail</string>
     <string name="nav_settings">Settings</string>
 
@@ -64,15 +64,17 @@
     <string name="download_state_completed">Download completed</string>
 
     <string name="favorites_title">My words</string>
-    <string name="favorites_loading">Loading favorites...</string>
+    <string name="favorites_loading">Loading...</string>
     <string name="favorites_search_placeholder">Type a word...</string>
-    <string name="favorites_empty_title">No Favorites Yet</string>
-    <string name="favorites_empty_description">Save words you want to remember</string>
+    <string name="favorites_empty_title">Your learning list starts here.</string>
+    <string name="favorites_empty_description">Search for any word and tap the heart icon to save it here for later study.</string>
     <string name="favorites_empty_action_start_searching">Start searching</string>
-    <string name="favorites_no_results_title">No matching favorites for "%1$s"</string>
+    <string name="favorites_no_results_title">No saved words matching "%1$s"</string>
     <string name="favorites_no_results_description">Try a different spelling or search the dictionary instead</string>
     <string name="favorites_no_results_action_search_dictionary">Search dictionary</string>
     <string name="favorites_stats">%1$d meanings · %2$d words</string>
+    <string name="favorites_removed_message">Word removed</string>
+    <string name="favorites_removed_undo">Undo</string>
 
     <string name="language_setup_title">Select Languages</string>
     <string name="language_setup_subtitle">Choose what you're learning and your translation preferences.</string>
@@ -467,7 +469,8 @@
     <string name="study_rating_hard">Hard</string>
     <string name="study_rating_good">Good</string>
     <string name="study_rating_easy">Easy</string>
-    <string name="favorites_study_due_title">Due for review today</string>
-    <string name="favorites_study_due_subtitle">%1$d cards · about %2$d min</string>
-    <string name="favorites_study_due_action">Study</string>
+    <string name="favorites_study_due_title">DUE FOR REVIEW TODAY</string>
+    <string name="favorites_study_due_count">%1$d cards</string>
+    <string name="favorites_study_due_subtitle">About %1$d min</string>
+    <string name="favorites_study_due_action">Start study session</string>
 </resources>

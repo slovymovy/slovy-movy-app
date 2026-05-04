@@ -3,7 +3,7 @@
     <string name="common_app_name">OpenWords</string>
 
     <string name="nav_search">Zoeken</string>
-    <string name="nav_favorites">Favorieten</string>
+    <string name="nav_favorites">Mijn woorden</string>
     <string name="nav_word_detail">Woord</string>
     <string name="nav_settings">Instellingen</string>
 
@@ -64,15 +64,17 @@
     <string name="download_state_completed">Download voltooid</string>
 
     <string name="favorites_title">Mijn woorden</string>
-    <string name="favorites_loading">Favorieten laden...</string>
+    <string name="favorites_loading">Laden...</string>
     <string name="favorites_search_placeholder">Typ een woord...</string>
-    <string name="favorites_empty_title">Nog geen favorieten</string>
-    <string name="favorites_empty_description">Sla woorden op die je wilt onthouden</string>
+    <string name="favorites_empty_title">Je eigen woordenlijst begint hier.</string>
+    <string name="favorites_empty_description">Zoek een woord en tik op het hartje om het op te slaan voor later.</string>
     <string name="favorites_empty_action_start_searching">Begin met zoeken</string>
-    <string name="favorites_no_results_title">Geen overeenkomende favorieten voor "%1$s"</string>
+    <string name="favorites_no_results_title">Geen opgeslagen woorden voor "%1$s"</string>
     <string name="favorites_no_results_description">Probeer een andere spelling of zoek in het woordenboek</string>
     <string name="favorites_no_results_action_search_dictionary">Zoek in woordenboek</string>
     <string name="favorites_stats">%1$d betekenissen · %2$d woorden</string>
+    <string name="favorites_removed_message">Woord verwijderd</string>
+    <string name="favorites_removed_undo">Ongedaan maken</string>
 
     <string name="language_setup_title">Selecteer talen</string>
     <string name="language_setup_subtitle">Kies wat je leert en je vertaalvoorkeuren.</string>
@@ -467,7 +469,8 @@
     <string name="study_rating_hard">Moeilijk</string>
     <string name="study_rating_good">Goed</string>
     <string name="study_rating_easy">Makkelijk</string>
-    <string name="favorites_study_due_title">Vandaag te herhalen</string>
-    <string name="favorites_study_due_subtitle">%1$d kaarten · ongeveer %2$d min</string>
-    <string name="favorites_study_due_action">Studeren</string>
+    <string name="favorites_study_due_title">VANDAAG TE HERHALEN</string>
+    <string name="favorites_study_due_count">%1$d kaarten</string>
+    <string name="favorites_study_due_subtitle">Ongeveer %1$d min</string>
+    <string name="favorites_study_due_action">Herhaling starten</string>
 </resources>
