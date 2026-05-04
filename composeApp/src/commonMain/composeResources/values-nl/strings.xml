@@ -470,7 +470,12 @@
     <string name="study_rating_good">Goed</string>
     <string name="study_rating_easy">Makkelijk</string>
     <string name="favorites_study_due_title">VANDAAG TE HERHALEN</string>
-    <string name="favorites_study_due_count">%1$d kaarten</string>
+    <plurals name="favorites_study_due_count">
+        <item quantity="one">%1$d kaart</item>
+        <item quantity="few">%1$d kaarten</item>
+        <item quantity="many">%1$d kaarten</item>
+        <item quantity="other">%1$d kaarten</item>
+    </plurals>
     <string name="favorites_study_due_subtitle">Ongeveer %1$d min</string>
     <string name="favorites_study_due_action">Herhaling starten</string>
 </resources>

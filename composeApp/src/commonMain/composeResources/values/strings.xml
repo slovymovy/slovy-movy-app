@@ -470,7 +470,12 @@
     <string name="study_rating_good">Good</string>
     <string name="study_rating_easy">Easy</string>
     <string name="favorites_study_due_title">DUE FOR REVIEW TODAY</string>
-    <string name="favorites_study_due_count">%1$d cards</string>
+    <plurals name="favorites_study_due_count">
+        <item quantity="one">%1$d card</item>
+        <item quantity="few">%1$d cards</item>
+        <item quantity="many">%1$d cards</item>
+        <item quantity="other">%1$d cards</item>
+    </plurals>
     <string name="favorites_study_due_subtitle">About %1$d min</string>
     <string name="favorites_study_due_action">Start study session</string>
 </resources>

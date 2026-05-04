@@ -470,7 +470,12 @@
     <string name="study_rating_good">Dobrze</string>
     <string name="study_rating_easy">Łatwe</string>
     <string name="favorites_study_due_title">DO POWTÓRKI DZISIAJ</string>
-    <string name="favorites_study_due_count">%1$d kart</string>
+    <plurals name="favorites_study_due_count">
+        <item quantity="one">%1$d karta</item>
+        <item quantity="few">%1$d karty</item>
+        <item quantity="many">%1$d kart</item>
+        <item quantity="other">%1$d kart</item>
+    </plurals>
     <string name="favorites_study_due_subtitle">Około %1$d min</string>
     <string name="favorites_study_due_action">Rozpocznij powtórkę</string>
 </resources>

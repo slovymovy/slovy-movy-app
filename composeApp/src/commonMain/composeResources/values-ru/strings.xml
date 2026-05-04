@@ -470,7 +470,12 @@
     <string name="study_rating_good">Хорошо</string>
     <string name="study_rating_easy">Легко</string>
     <string name="favorites_study_due_title">СЕГОДНЯ НУЖНО ПОВТОРИТЬ</string>
-    <string name="favorites_study_due_count">%1$d карточек</string>
+    <plurals name="favorites_study_due_count">
+        <item quantity="one">%1$d карточка</item>
+        <item quantity="few">%1$d карточки</item>
+        <item quantity="many">%1$d карточек</item>
+        <item quantity="other">%1$d карточек</item>
+    </plurals>
     <string name="favorites_study_due_subtitle">около %1$d мин</string>
     <string name="favorites_study_due_action">Начать повторение</string>
 </resources>

@@ -49,6 +49,7 @@ import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.format.char
 import kotlin.time.Duration.Companion.milliseconds
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Instant
@@ -802,7 +803,7 @@ private fun StudyDueCard(
     Surface(
         onClick = onStartStudy,
         modifier = modifier.semantics {
-            onClick(label = actionLabel) { onStartStudy(); true }
+            onClick(label = actionLabel, action = null)
         },
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.primaryContainer,
@@ -828,7 +829,7 @@ private fun StudyDueCard(
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = stringResource(Res.string.favorites_study_due_count, study.dueCount),
+                        text = pluralStringResource(Res.plurals.favorites_study_due_count, study.dueCount, study.dueCount),
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Medium,
