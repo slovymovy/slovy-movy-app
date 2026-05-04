@@ -469,7 +469,7 @@
     <string name="study_rating_hard">Trudne</string>
     <string name="study_rating_good">Dobrze</string>
     <string name="study_rating_easy">Łatwe</string>
-    <string name="favorites_study_due_title">DO POWTÓRKI DZISIAJ</string>
+    <string name="favorites_study_due_title">DO POWTÓRKI</string>
     <plurals name="favorites_study_due_count">
         <item quantity="one">%1$d karta</item>
         <item quantity="few">%1$d karty</item>
