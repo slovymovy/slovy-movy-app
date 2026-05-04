@@ -742,7 +742,6 @@ private fun ClozeFront(
             )
             StudyClozeText(
                 cloze = card.prompt,
-                filled = false,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontFamily = MaterialTheme.serifFontFamily,
                 ),
@@ -829,7 +828,6 @@ private fun StudyCardBack(
         back.cloze?.let { cloze ->
             StudyClozeText(
                 cloze = cloze,
-                filled = true,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontFamily = MaterialTheme.serifFontFamily,
                 ),
@@ -997,16 +995,15 @@ private fun StudyExampleText(
 @Composable
 private fun StudyClozeText(
     cloze: StudyClozeTextUiState,
-    filled: Boolean,
     style: TextStyle,
     modifier: Modifier = Modifier,
 ) {
     val highlightColor = MaterialTheme.colorScheme.primary
     val highlightBackground = MaterialTheme.colorScheme.primaryContainer
-    val blank = " ".repeat(cloze.answer.length.coerceAtLeast(6))
+    val blank = " ".repeat(cloze.answer.length.coerceAtLeast(6))
     val text = buildAnnotatedString {
         append(HtmlTagParser.plainText(cloze.prefix))
-        if (filled) {
+        if (cloze.filled) {
             pushStyle(
                 SpanStyle(
                     color = highlightColor,
@@ -1203,6 +1200,7 @@ private fun clozeCard() = StudyCardUiState.Cloze(
             prefix = "Het was zo ",
             answer = "gezellig",
             suffix = " bij jullie thuis.",
+            filled = true,
         ),
     ),
 )

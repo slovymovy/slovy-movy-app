@@ -104,6 +104,7 @@ data class StudyClozeTextUiState(
     val prefix: String,
     val answer: String,
     val suffix: String,
+    val filled: Boolean = false,
 )
 
 data class StudyRatingUiState(
