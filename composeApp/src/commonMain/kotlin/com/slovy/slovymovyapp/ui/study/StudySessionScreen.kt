@@ -97,12 +97,14 @@ import slovymovyapp.composeapp.generated.resources.study_tap_to_flip
 @Composable
 fun StudySessionScreen(
     viewModel: StudySessionViewModel,
-    onClose: () -> Unit,
+    onCancel: () -> Unit,
+    onEnd: () -> Unit,
 ) {
     StudySessionScreenContent(
         state = viewModel.state,
         completeScrollState = viewModel.completeScrollState,
-        onClose = onClose,
+        onCancel = onCancel,
+        onEnd = onEnd,
         onReveal = viewModel::reveal,
         onRate = viewModel::rate,
         onPlayAudio = viewModel::playAudio,
@@ -115,7 +117,8 @@ fun StudySessionScreen(
 fun StudySessionScreenContent(
     state: StudySessionUiState,
     completeScrollState: ScrollState = ScrollState(0),
-    onClose: () -> Unit,
+    onCancel: () -> Unit,
+    onEnd: () -> Unit,
     onReveal: () -> Unit = {},
     onRate: (StudyRating) -> Unit = {},
     onPlayAudio: (String) -> Unit = {},
@@ -129,14 +132,14 @@ fun StudySessionScreenContent(
             if (progress == null) {
                 StudySessionMessageScaffold(
                     modifier = modifier,
-                    onClose = onClose,
+                    onClose = onCancel,
                 ) {
                     StudyLoadingIndicator()
                 }
             } else {
                 StudySessionLoadingContent(
                     progress = progress,
-                    onClose = onClose,
+                    onClose = onCancel,
                     modifier = modifier,
                 )
             }
@@ -144,7 +147,7 @@ fun StudySessionScreenContent(
 
         StudySessionUiState.Empty -> StudySessionMessageScaffold(
             modifier = modifier,
-            onClose = onClose,
+            onClose = onCancel,
         ) {
             Text(
                 text = stringResource(Res.string.study_empty_title),
@@ -163,7 +166,7 @@ fun StudySessionScreenContent(
 
         is StudySessionUiState.Error -> StudySessionMessageScaffold(
             modifier = modifier,
-            onClose = onClose,
+            onClose = onCancel,
         ) {
             Text(
                 text = stringResource(Res.string.study_error_title),
@@ -189,7 +192,7 @@ fun StudySessionScreenContent(
 
         is StudySessionUiState.Active -> StudySessionActiveContent(
             state = state,
-            onClose = onClose,
+            onClose = onCancel,
             onReveal = onReveal,
             onRate = onRate,
             onPlayAudio = onPlayAudio,
@@ -200,7 +203,7 @@ fun StudySessionScreenContent(
         is StudySessionUiState.Complete -> StudySessionCompleteContent(
             reviewedCount = state.reviewedCount,
             scrollState = completeScrollState,
-            onClose = onClose,
+            onClose = onEnd,
             modifier = modifier,
         )
     }
@@ -1259,7 +1262,8 @@ private fun StudySessionLoadingPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = StudySessionUiState.Loading(),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1274,7 +1278,8 @@ private fun StudySessionCardLoadingPreview(
             state = StudySessionUiState.Loading(
                 progress = StudySessionProgressUiState(current = 3, total = 12),
             ),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1287,7 +1292,8 @@ private fun StudySessionEmptyPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = StudySessionUiState.Empty,
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1300,7 +1306,8 @@ private fun StudySessionErrorPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = StudySessionUiState.Error(UiText.Plain("This card is missing example data.")),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1313,7 +1320,8 @@ private fun StudySessionRecognitionFrontPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(recognitionCard(), StudyCardSide.FRONT),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1326,7 +1334,8 @@ private fun StudySessionRecognitionBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(recognitionCard(), StudyCardSide.BACK),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1339,7 +1348,8 @@ private fun StudySessionProductionFrontPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(productionCard(), StudyCardSide.FRONT, current = 5),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1352,7 +1362,8 @@ private fun StudySessionProductionBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(productionCard(), StudyCardSide.BACK, current = 5),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1365,7 +1376,8 @@ private fun StudySessionClozeFrontPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(clozeCard(), StudyCardSide.FRONT, current = 6),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1378,7 +1390,8 @@ private fun StudySessionClozeBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(clozeCard(), StudyCardSide.BACK, current = 6),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1391,7 +1404,8 @@ private fun StudySessionListeningFrontPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(listeningCard(), StudyCardSide.FRONT, current = 2),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1404,7 +1418,8 @@ private fun StudySessionListeningBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(listeningCard(), StudyCardSide.BACK, current = 2),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1417,7 +1432,8 @@ private fun StudySessionCompletePreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = StudySessionUiState.Complete(reviewedCount = 12),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
