@@ -164,6 +164,11 @@ private fun MyScreenPreview(
 - If pluralization is needed, add `<plurals>` resources instead of manual `"s"` suffix logic.
 - Keep user-visible copy out of Kotlin literals in `commonMain` UI code.
 - Preview-only literals are acceptable in `@Preview` functions.
+- Exception: copy that must render in the *studied* language (not the user's UI locale) does not belong in
+  `composeResources/`. `stringResource` resolves by OS locale, so it cannot pick by a per-session language code. For
+  these cases, hold the strings in a Kotlin map keyed by `Language` (see
+  `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/ui/study/StudyCompletionMessages.kt`) and resolve in the
+  ViewModel/state — not in the composable, so random picks are stable across recompositions.
 
 #### Non-composable and shared text
 

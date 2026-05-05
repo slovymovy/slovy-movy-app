@@ -256,8 +256,8 @@ WHERE lang_code = :lang_code
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now);
 
-countDueCardsByLangDistinctBySense:
-SELECT COUNT(DISTINCT sense_id)
+countDueCardsByLangDistinctByLemma:
+SELECT COUNT(DISTINCT lemma_id)
 FROM card
 WHERE lang_code = :lang_code
   AND due <= :now

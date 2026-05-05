@@ -114,7 +114,7 @@ class StatsService(
         val successfulReviews = learning.countSuccessfulReviewsSince(langCode, since).executeAsOne()
         return GlobalStats(
             totalCards = learning.countCardsByLang(langCode).executeAsOne().toInt(),
-            dueToday = learning.countDueCardsByLangDistinctBySense(langCode, now).executeAsOne().toInt(),
+            dueToday = learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt(),
             reviewedLast7d = totalReviews.toInt(),
             rollingRetention7d = if (totalReviews == 0L) null else successfulReviews.toDouble() / totalReviews,
             matureCount = learning.countMatureCardsByLang(langCode, matureStabilityDays).executeAsOne().toInt(),

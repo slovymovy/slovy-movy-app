@@ -25,7 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import com.slovy.slovymovyapp.ui.SpeakerVector
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,12 +47,14 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
@@ -71,7 +73,6 @@ import slovymovyapp.composeapp.generated.resources.study_action_done_for_now
 import slovymovyapp.composeapp.generated.resources.study_action_retry
 import slovymovyapp.composeapp.generated.resources.study_complete_description
 import slovymovyapp.composeapp.generated.resources.study_complete_supporting
-import slovymovyapp.composeapp.generated.resources.study_complete_title
 import slovymovyapp.composeapp.generated.resources.study_empty_description
 import slovymovyapp.composeapp.generated.resources.study_empty_title
 import slovymovyapp.composeapp.generated.resources.study_error_title
@@ -95,12 +96,14 @@ import slovymovyapp.composeapp.generated.resources.study_tap_to_flip
 @Composable
 fun StudySessionScreen(
     viewModel: StudySessionViewModel,
-    onClose: () -> Unit,
+    onCancel: () -> Unit,
+    onEnd: () -> Unit,
 ) {
     StudySessionScreenContent(
         state = viewModel.state,
         completeScrollState = viewModel.completeScrollState,
-        onClose = onClose,
+        onCancel = onCancel,
+        onEnd = onEnd,
         onReveal = viewModel::reveal,
         onRate = viewModel::rate,
         onPlayAudio = viewModel::playAudio,
@@ -113,7 +116,8 @@ fun StudySessionScreen(
 fun StudySessionScreenContent(
     state: StudySessionUiState,
     completeScrollState: ScrollState = ScrollState(0),
-    onClose: () -> Unit,
+    onCancel: () -> Unit,
+    onEnd: () -> Unit,
     onReveal: () -> Unit = {},
     onRate: (StudyRating) -> Unit = {},
     onPlayAudio: (String) -> Unit = {},
@@ -127,14 +131,14 @@ fun StudySessionScreenContent(
             if (progress == null) {
                 StudySessionMessageScaffold(
                     modifier = modifier,
-                    onClose = onClose,
+                    onClose = onCancel,
                 ) {
                     StudyLoadingIndicator()
                 }
             } else {
                 StudySessionLoadingContent(
                     progress = progress,
-                    onClose = onClose,
+                    onClose = onCancel,
                     modifier = modifier,
                 )
             }
@@ -142,7 +146,7 @@ fun StudySessionScreenContent(
 
         StudySessionUiState.Empty -> StudySessionMessageScaffold(
             modifier = modifier,
-            onClose = onClose,
+            onClose = onCancel,
         ) {
             Text(
                 text = stringResource(Res.string.study_empty_title),
@@ -161,7 +165,7 @@ fun StudySessionScreenContent(
 
         is StudySessionUiState.Error -> StudySessionMessageScaffold(
             modifier = modifier,
-            onClose = onClose,
+            onClose = onCancel,
         ) {
             Text(
                 text = stringResource(Res.string.study_error_title),
@@ -187,7 +191,7 @@ fun StudySessionScreenContent(
 
         is StudySessionUiState.Active -> StudySessionActiveContent(
             state = state,
-            onClose = onClose,
+            onClose = onCancel,
             onReveal = onReveal,
             onRate = onRate,
             onPlayAudio = onPlayAudio,
@@ -197,8 +201,9 @@ fun StudySessionScreenContent(
 
         is StudySessionUiState.Complete -> StudySessionCompleteContent(
             reviewedCount = state.reviewedCount,
+            message = state.message,
             scrollState = completeScrollState,
-            onClose = onClose,
+            onClose = onEnd,
             modifier = modifier,
         )
     }
@@ -252,6 +257,7 @@ private fun StudySessionLoadingContent(
 @Composable
 private fun StudySessionCompleteContent(
     reviewedCount: Int,
+    message: String,
     scrollState: ScrollState,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
@@ -292,7 +298,7 @@ private fun StudySessionCompleteContent(
                     )
                     Spacer(Modifier.height(AppSpacing.xxl))
                     Text(
-                        text = stringResource(Res.string.study_complete_title),
+                        text = message,
                         style = MaterialTheme.typography.displaySmall,
                         fontFamily = MaterialTheme.serifFontFamily,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -328,7 +334,7 @@ private fun StudySessionCompleteContent(
                 contentPadding = PaddingValues(horizontal = AppSpacing.lg),
             ) {
                 Text(
-                    text = stringResource(Res.string.study_action_done_for_now),
+                    text =stringResource(Res.string.study_action_done_for_now),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -690,10 +696,11 @@ private fun ProductionFront(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
         ) {
             Text(
-                text = card.promptLabel.resolve(),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = card.promptLabel.resolve().uppercase(),
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = 1.4.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
             StudyTaggedText(
@@ -707,15 +714,29 @@ private fun ProductionFront(
             )
             card.firstLetterHint?.let { hint ->
                 Surface(
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ) {
-                    Text(
-                        text = hint,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm),
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(
+                            text = hint.take(1),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = hint.drop(2),
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily.Monospace,
+                            letterSpacing = 4.sp,
+                        )
+                    }
                 }
             }
         }
@@ -735,14 +756,14 @@ private fun ClozeFront(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
         ) {
             Text(
-                text = stringResource(Res.string.study_fill_blank),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = stringResource(Res.string.study_fill_blank).uppercase(),
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = 1.4.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             StudyClozeText(
                 cloze = card.prompt,
-                filled = false,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontFamily = MaterialTheme.serifFontFamily,
                 ),
@@ -797,7 +818,7 @@ private fun ListeningFront(
                             modifier = Modifier.size(56.dp),
                         )
                         else -> Icon(
-                            imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                            imageVector = SpeakerVector,
                             contentDescription = stringResource(Res.string.study_play_prompt_audio),
                             modifier = Modifier.size(56.dp),
                         )
@@ -829,7 +850,6 @@ private fun StudyCardBack(
         back.cloze?.let { cloze ->
             StudyClozeText(
                 cloze = cloze,
-                filled = true,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontFamily = MaterialTheme.serifFontFamily,
                 ),
@@ -922,7 +942,7 @@ private fun StudySpeakerButton(
                     modifier = Modifier.size(20.dp),
                 )
                 else -> Icon(
-                    imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                    imageVector = SpeakerVector,
                     contentDescription = playContentDescription,
                     modifier = Modifier.size(20.dp),
                 )
@@ -997,16 +1017,15 @@ private fun StudyExampleText(
 @Composable
 private fun StudyClozeText(
     cloze: StudyClozeTextUiState,
-    filled: Boolean,
     style: TextStyle,
     modifier: Modifier = Modifier,
 ) {
     val highlightColor = MaterialTheme.colorScheme.primary
     val highlightBackground = MaterialTheme.colorScheme.primaryContainer
-    val blank = " ".repeat(cloze.answer.length.coerceAtLeast(6))
+    val blank = " ".repeat(cloze.answer.length.coerceAtLeast(6))
     val text = buildAnnotatedString {
         append(HtmlTagParser.plainText(cloze.prefix))
-        if (filled) {
+        if (cloze.filled) {
             pushStyle(
                 SpanStyle(
                     color = highlightColor,
@@ -1203,6 +1222,7 @@ private fun clozeCard() = StudyCardUiState.Cloze(
             prefix = "Het was zo ",
             answer = "gezellig",
             suffix = " bij jullie thuis.",
+            filled = true,
         ),
     ),
 )
@@ -1243,7 +1263,8 @@ private fun StudySessionLoadingPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = StudySessionUiState.Loading(),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1258,7 +1279,8 @@ private fun StudySessionCardLoadingPreview(
             state = StudySessionUiState.Loading(
                 progress = StudySessionProgressUiState(current = 3, total = 12),
             ),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1271,7 +1293,8 @@ private fun StudySessionEmptyPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = StudySessionUiState.Empty,
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1284,7 +1307,8 @@ private fun StudySessionErrorPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = StudySessionUiState.Error(UiText.Plain("This card is missing example data.")),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1297,7 +1321,8 @@ private fun StudySessionRecognitionFrontPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(recognitionCard(), StudyCardSide.FRONT),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1310,7 +1335,8 @@ private fun StudySessionRecognitionBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(recognitionCard(), StudyCardSide.BACK),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1323,7 +1349,8 @@ private fun StudySessionProductionFrontPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(productionCard(), StudyCardSide.FRONT, current = 5),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1336,7 +1363,8 @@ private fun StudySessionProductionBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(productionCard(), StudyCardSide.BACK, current = 5),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1349,7 +1377,8 @@ private fun StudySessionClozeFrontPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(clozeCard(), StudyCardSide.FRONT, current = 6),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1362,7 +1391,8 @@ private fun StudySessionClozeBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(clozeCard(), StudyCardSide.BACK, current = 6),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1375,7 +1405,8 @@ private fun StudySessionListeningFrontPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(listeningCard(), StudyCardSide.FRONT, current = 2),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1388,7 +1419,8 @@ private fun StudySessionListeningBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(listeningCard(), StudyCardSide.BACK, current = 2),
-            onClose = {},
+            onCancel = {},
+            onEnd = {},
         )
     }
 }
@@ -1400,8 +1432,9 @@ private fun StudySessionCompletePreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
-            state = StudySessionUiState.Complete(reviewedCount = 12),
-            onClose = {},
+            state = StudySessionUiState.Complete(reviewedCount = 12, message = "Goed gedaan!"),
+            onCancel = {},
+            onEnd = {},
         )
     }
 }

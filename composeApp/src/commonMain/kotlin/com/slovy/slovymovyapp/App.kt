@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.export.AppDataExporter
@@ -37,7 +37,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.stringResource
-import slovymovyapp.composeapp.generated.resources.*
+import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.app_data_version_mismatch_message
+import slovymovyapp.composeapp.generated.resources.download_title_downloading
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -224,7 +226,7 @@ fun App(
                     dataManager.downloadableTranslationTargets(dictionary, natives)
                 } catch (e: CancellationException) {
                     throw e
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     emptyList()
                 }
                 val needsDownload = !dataManager.hasDictionary(dictionary) ||
@@ -285,11 +287,11 @@ fun App(
                                         value = Json.parseToJsonElement("true")
                                     )
                                 )
-                                Analytics.logEvent(AnalyticsEvent.WELCOME_SCREEN_CLICK)
+                                logEvent(AnalyticsEvent.WELCOME_SCREEN_CLICK)
                                 navController.navigate(AppDestination.SetupLanguages) {
                                     popUpTo<AppDestination.Welcome> { inclusive = true }
                                 }
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 viewModel.onError()
                             }
                         }
@@ -436,7 +438,7 @@ fun App(
                         viewModel = viewModel,
                         description = stringResource(Res.string.download_title_downloading),
                         onLaterClick = {
-                            Analytics.logEvent(AnalyticsEvent.DOWNLOAD_LATER_CLICK)
+                            logEvent(AnalyticsEvent.DOWNLOAD_LATER_CLICK)
                             navController.navigate(AppDestination.Search) {
                                 popUpTo<AppDestination.DownloadSetup> { inclusive = true }
                             }
@@ -531,6 +533,7 @@ fun App(
                             navController.navigate(AppDestination.Settings)
                     },
                     onStartStudy = { language ->
+                        logEvent(AnalyticsEvent.STUDY_START_SESSION)
                         navController.navigate(AppDestination.StudySession(language.code))
                     }
                 )
@@ -547,11 +550,19 @@ fun App(
                         statsService = statsService,
                         clock = Clock.System,
                         ttsManager = ttsManager,
+                        voiceFilterHelper = voiceFilterHelper,
                     )
                 }
                 StudySessionScreen(
                     viewModel = viewModel,
-                    onClose = {
+                    onCancel = {
+                        logEvent(AnalyticsEvent.STUDY_CANCEL_SESSION)
+                        if (!navController.popBackStack()) {
+                            navController.navigate(AppDestination.Favorites)
+                        }
+                    },
+                    onEnd = {
+                        logEvent(AnalyticsEvent.STUDY_END_SESSION)
                         if (!navController.popBackStack()) {
                             navController.navigate(AppDestination.Favorites)
                         }
