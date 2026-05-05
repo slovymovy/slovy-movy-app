@@ -7,14 +7,14 @@
     <string name="nav_word_detail">Woord</string>
     <string name="nav_settings">Instellingen</string>
 
-    <string name="welcome_tagline">Diepgaand woordenboek\nvoor toegewijde taalleerders zoals jij.</string>
-    <string name="welcome_selling_point_translations_title">Meer dan vertalingen met één woord</string>
-    <string name="welcome_selling_point_translations_description">Bekijk alle betekenissen, woordfrequentie, veelgebruikte uitdrukkingen en voorbeelden uit de praktijk.</string>
-    <string name="welcome_selling_point_collection_title">Jouw collectie</string>
-    <string name="welcome_selling_point_collection_description">Sla woorden op in je persoonlijke bibliotheek en bouw lokaal je woordenschat op.</string>
-    <string name="welcome_selling_point_no_ads_title">Geen advertenties, geen abonnement</string>
-    <string name="welcome_selling_point_no_ads_description">Volledige toegang zonder betaalmuur. Belangrijke data blijft op je apparaat.</string>
-    <string name="welcome_cta_explore_now">Begin nu</string>
+    <string name="welcome_tagline">Niet alleen woorden opzoeken, maar ze ook echt leren. Gratis.</string>
+    <string name="welcome_selling_point_translations_title">Zoek elk woord op</string>
+    <string name="welcome_selling_point_translations_description">Voorbeelden, vormen, zinnen en synoniemen — alles handig op één plek.</string>
+    <string name="welcome_selling_point_collection_title">Je eigen woordenlijst</string>
+    <string name="welcome_selling_point_collection_description">Bewaar de woorden die je wilt onthouden. Je lijst blijft gewoon op je eigen toestel staan.</string>
+    <string name="welcome_selling_point_practice_title">Houd je kennis vast</string>
+    <string name="welcome_selling_point_practice_description">Slim herhalen en verschillende oefeningen helpen je om woorden echt te onthouden.</string>
+    <string name="welcome_cta_explore_now">Aan de slag</string>
 
     <string name="search_placeholder">Zoek je woord...</string>
     <string name="search_open_item">Openen %1$s</string>

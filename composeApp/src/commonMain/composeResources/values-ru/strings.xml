@@ -7,14 +7,14 @@
     <string name="nav_word_detail">Слово</string>
     <string name="nav_settings">Настройки</string>
 
-    <string name="welcome_tagline">Глубокое погружение в язык\nдля тех, кто ценит детали.</string>
-    <string name="welcome_selling_point_translations_title">Больше, чем просто перевод</string>
-    <string name="welcome_selling_point_translations_description">Все значения, частотность, устойчивые фразы и живые примеры из речи.</string>
-    <string name="welcome_selling_point_collection_title">Личный словарь</string>
-    <string name="welcome_selling_point_collection_description">Сохраняйте слова в свою библиотеку и пополняйте словарный запас.</string>
-    <string name="welcome_selling_point_no_ads_title">Без рекламы и подписок</string>
-    <string name="welcome_selling_point_no_ads_description">Полный доступ без платных преград. Все данные хранятся только у вас.</string>
-    <string name="welcome_cta_explore_now">Выбрать языки</string>
+    <string name="welcome_tagline">Приложение, чтобы не просто искать слова, а учить их. Бесплатно.</string>
+    <string name="welcome_selling_point_translations_title">Ищите любые слова</string>
+    <string name="welcome_selling_point_translations_description">Примеры, формы, фразы и синонимы — всё в одном месте.</string>
+    <string name="welcome_selling_point_collection_title">Свой список слов</string>
+    <string name="welcome_selling_point_collection_description">Сохраняйте то, что хотите запомнить. Ваша подборка остается только на устройстве.</string>
+    <string name="welcome_selling_point_practice_title">Закрепляйте результат</string>
+    <string name="welcome_selling_point_practice_description">Интервальные повторения и разные режимы помогут по-настоящему запомнить новые слова.</string>
+    <string name="welcome_cta_explore_now">Начать</string>
 
     <string name="search_placeholder">Найти слово...</string>
     <string name="search_open_item">Открыть %1$s</string>
