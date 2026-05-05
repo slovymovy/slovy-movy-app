@@ -69,10 +69,10 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.study_action_close
+import slovymovyapp.composeapp.generated.resources.study_action_done_for_now
 import slovymovyapp.composeapp.generated.resources.study_action_retry
 import slovymovyapp.composeapp.generated.resources.study_complete_description
 import slovymovyapp.composeapp.generated.resources.study_complete_supporting
-import slovymovyapp.composeapp.generated.resources.study_complete_title
 import slovymovyapp.composeapp.generated.resources.study_empty_description
 import slovymovyapp.composeapp.generated.resources.study_empty_title
 import slovymovyapp.composeapp.generated.resources.study_error_title
@@ -298,7 +298,7 @@ private fun StudySessionCompleteContent(
                     )
                     Spacer(Modifier.height(AppSpacing.xxl))
                     Text(
-                        text = stringResource(Res.string.study_complete_title),
+                        text = message,
                         style = MaterialTheme.typography.displaySmall,
                         fontFamily = MaterialTheme.serifFontFamily,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -334,7 +334,7 @@ private fun StudySessionCompleteContent(
                 contentPadding = PaddingValues(horizontal = AppSpacing.lg),
             ) {
                 Text(
-                    text = message,
+                    text =stringResource(Res.string.study_action_done_for_now),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )

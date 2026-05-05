@@ -443,7 +443,6 @@
     <string name="study_error_next_card_failed">Nie udało się wczytać następnej karty.</string>
     <string name="study_error_review_save_failed">Nie udało się zapisać powtórki.</string>
     <string name="study_error_card_data_missing">Na tej karcie brakuje danych do nauki.</string>
-    <string name="study_complete_title">Świetna robota!</string>
     <plurals name="study_complete_description">
         <item quantity="one">Przerobiono %1$d kartę.</item>
         <item quantity="few">Przerobiono %1$d karty.</item>
@@ -451,6 +450,7 @@
         <item quantity="other">Przerobiono %1$d karty.</item>
     </plurals>
     <string name="study_complete_supporting">Właśnie tak utrwalasz słownictwo.</string>
+    <string name="study_action_done_for_now">Na dziś wystarczy</string>
     <string name="study_progress_count">%1$d z %2$d</string>
     <string name="study_tap_to_flip">Dotknij, aby odwrócić</string>
     <string name="study_tap_to_check">Dotknij, aby sprawdzić</string>

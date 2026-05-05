@@ -443,7 +443,6 @@
     <string name="study_error_next_card_failed">Не удалось загрузить следующую карточку.</string>
     <string name="study_error_review_save_failed">Не удалось сохранить повторение.</string>
     <string name="study_error_card_data_missing">В этой карточке не хватает данных для обучения.</string>
-    <string name="study_complete_title">Отличная работа!</string>
     <plurals name="study_complete_description">
         <item quantity="one">Пройдена %1$d карточка.</item>
         <item quantity="few">Пройдено %1$d карточки.</item>
@@ -451,6 +450,7 @@
         <item quantity="other">Пройдено %1$d карточки.</item>
     </plurals>
     <string name="study_complete_supporting">Вот так слова и запоминаются.</string>
+    <string name="study_action_done_for_now">На сегодня хватит</string>
     <string name="study_progress_count">%1$d из %2$d</string>
     <string name="study_tap_to_flip">Нажмите, чтобы перевернуть</string>
     <string name="study_tap_to_check">Нажмите, чтобы проверить</string>
