@@ -184,7 +184,7 @@
     <string name="acknowledgements_dictionary_extracts_title">Dictionary extracts</string>
     <string name="acknowledgements_dictionary_extracts_body">We use pre-processed dictionary data from Kaikki.org, extracted from Wiktionary using the open-source wiktextract tool by Tatu Ylonen.</string>
     <string name="acknowledgements_application_code_title">Application code</string>
-    <string name="acknowledgements_application_code_body">Application code is available under CC-BY-SA-4.0 license.</string>
+    <string name="acknowledgements_application_code_body">Application source code is available under BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">FSRS scheduling algorithm</string>
     <string name="acknowledgements_fsrs_body">We use a Kotlin port of FSRS-Kotlin, provided under the MIT License. FSRS was originally developed by Jarrett Ye with the Open Spaced Repetition community.</string>
     <string name="acknowledgements_words_sources_title">Words sources</string>
