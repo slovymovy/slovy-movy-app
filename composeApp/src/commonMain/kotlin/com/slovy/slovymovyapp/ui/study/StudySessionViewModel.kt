@@ -103,8 +103,11 @@ class StudySessionViewModel(
                 } else {
                     ttsManager.speak(text)
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
-                state = active.copy(isPreparingAudio = false, isPlayingAudio = false)
+                val latest = state as? StudySessionUiState.Active ?: return@launch
+                state = latest.copy(isPreparingAudio = false, isPlayingAudio = false)
             }
         }
     }
