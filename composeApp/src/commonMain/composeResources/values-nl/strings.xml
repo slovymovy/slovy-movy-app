@@ -451,7 +451,6 @@
         <item quantity="other">%1$d kaarten afgerond.</item>
     </plurals>
     <string name="study_complete_supporting">Zo blijven woorden hangen.</string>
-    <string name="study_action_done_for_now">Klaar voor nu</string>
     <string name="study_progress_count">%1$d van %2$d</string>
     <string name="study_tap_to_flip">Tik om te draaien</string>
     <string name="study_tap_to_check">Tik om te controleren</string>

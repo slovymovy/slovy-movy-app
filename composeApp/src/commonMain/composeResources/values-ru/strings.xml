@@ -451,7 +451,6 @@
         <item quantity="other">Пройдено %1$d карточки.</item>
     </plurals>
     <string name="study_complete_supporting">Вот так слова и запоминаются.</string>
-    <string name="study_action_done_for_now">На сегодня хватит</string>
     <string name="study_progress_count">%1$d из %2$d</string>
     <string name="study_tap_to_flip">Нажмите, чтобы перевернуть</string>
     <string name="study_tap_to_check">Нажмите, чтобы проверить</string>
