@@ -117,7 +117,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     lemma = lemma,
                     sense = sense,
                     targetLanguage = null,
-                    cloze = cloze,
+                    cloze = cloze.copy(filled = true),
                 ),
             )
         }
@@ -128,13 +128,12 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
             StudyCardUiState.Cloze(
                 id = card.id.toString(),
                 chipLabel = UiText.Resource(Res.string.study_chip_fill_in),
-                prompt = cloze,
+                prompt = cloze.copy(filled = true),
                 translationHint = null,
                 back = sourceBack(
                     lemma = lemma,
                     sense = sense,
-                    targetLanguage = target,
-                    cloze = cloze,
+                    targetLanguage = target
                 ),
             )
         }

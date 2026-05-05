@@ -6,8 +6,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Lightbulb
-import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Psychology
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -110,7 +110,7 @@ fun WelcomeScreenContent(
                     verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                 ) {
                     SellingPointCard(
-                        icon = Icons.Outlined.Lightbulb,
+                        icon = Icons.Outlined.Search,
                         title = stringResource(Res.string.welcome_selling_point_translations_title),
                         description = stringResource(Res.string.welcome_selling_point_translations_description)
                     )
@@ -122,9 +122,9 @@ fun WelcomeScreenContent(
                     )
 
                     SellingPointCard(
-                        icon = Icons.Outlined.Shield,
-                        title = stringResource(Res.string.welcome_selling_point_no_ads_title),
-                        description = stringResource(Res.string.welcome_selling_point_no_ads_description)
+                        icon = Icons.Outlined.Psychology,
+                        title = stringResource(Res.string.welcome_selling_point_practice_title),
+                        description = stringResource(Res.string.welcome_selling_point_practice_description)
                     )
                 }
 
