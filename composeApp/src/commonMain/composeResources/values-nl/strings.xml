@@ -459,7 +459,8 @@
     <string name="study_chip_listen">Luisteren</string>
     <string name="study_prompt_recall_word">Herinner het woord</string>
     <string name="study_prompt_translate_to">Vertaal naar %1$s</string>
-    <string name="study_fill_blank">Vul de lege plek in</string>
+    <string name="study_chip_recall">Herinner %1$s</string>
+    <string name="guess_by_context">Raad context</string>
     <string name="study_play_word_audio">Woord afspelen</string>
     <string name="study_play_prompt_audio">Opdracht afspelen</string>
     <string name="study_stop_audio">Audio stoppen</string>

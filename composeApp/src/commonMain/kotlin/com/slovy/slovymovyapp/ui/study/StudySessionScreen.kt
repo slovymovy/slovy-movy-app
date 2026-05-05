@@ -68,6 +68,7 @@ import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.guess_by_context
 import slovymovyapp.composeapp.generated.resources.study_action_close
 import slovymovyapp.composeapp.generated.resources.study_action_done_for_now
 import slovymovyapp.composeapp.generated.resources.study_action_retry
@@ -76,7 +77,6 @@ import slovymovyapp.composeapp.generated.resources.study_complete_supporting
 import slovymovyapp.composeapp.generated.resources.study_empty_description
 import slovymovyapp.composeapp.generated.resources.study_empty_title
 import slovymovyapp.composeapp.generated.resources.study_error_title
-import slovymovyapp.composeapp.generated.resources.study_fill_blank
 import slovymovyapp.composeapp.generated.resources.study_chip_fill_in
 import slovymovyapp.composeapp.generated.resources.study_chip_listen
 import slovymovyapp.composeapp.generated.resources.study_listen_prompt
@@ -756,7 +756,7 @@ private fun ClozeFront(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
         ) {
             Text(
-                text = stringResource(Res.string.study_fill_blank).uppercase(),
+                text = stringResource(Res.string.guess_by_context).uppercase(),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.4.sp,

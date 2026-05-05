@@ -459,7 +459,8 @@
     <string name="study_chip_listen">Słuchanie</string>
     <string name="study_prompt_recall_word">Przypomnij sobie słowo</string>
     <string name="study_prompt_translate_to">Przetłumacz na %1$s</string>
-    <string name="study_fill_blank">Uzupełnij lukę</string>
+    <string name="study_chip_recall">Przypomnij %1$s</string>
+    <string name="guess_by_context">Z kontekstu</string>
     <string name="study_play_word_audio">Odtwórz słowo</string>
     <string name="study_play_prompt_audio">Odtwórz zadanie</string>
     <string name="study_stop_audio">Zatrzymaj audio</string>

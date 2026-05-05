@@ -458,8 +458,9 @@
     <string name="study_chip_fill_in">Fill in</string>
     <string name="study_chip_listen">Listen</string>
     <string name="study_prompt_recall_word">Recall the word</string>
+    <string name="study_chip_recall">Recall %1$s</string>
     <string name="study_prompt_translate_to">Translate to %1$s</string>
-    <string name="study_fill_blank">Fill in the blank</string>
+    <string name="guess_by_context">Guess from context</string>
     <string name="study_play_word_audio">Play word audio</string>
     <string name="study_play_prompt_audio">Play prompt audio</string>
     <string name="study_stop_audio">Stop audio</string>

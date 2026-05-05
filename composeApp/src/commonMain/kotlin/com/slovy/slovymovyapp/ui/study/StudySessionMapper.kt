@@ -14,6 +14,7 @@ import kotlin.math.roundToLong
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.study_chip_fill_in
 import slovymovyapp.composeapp.generated.resources.study_chip_listen
+import slovymovyapp.composeapp.generated.resources.study_chip_recall
 import slovymovyapp.composeapp.generated.resources.study_chip_source_only
 import slovymovyapp.composeapp.generated.resources.study_prompt_recall_word
 import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
@@ -127,7 +128,10 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
             val cloze = example?.toClozeText() ?: return null
             StudyCardUiState.Cloze(
                 id = card.id.toString(),
-                chipLabel = UiText.Resource(Res.string.study_chip_fill_in),
+                chipLabel = UiText.Resource(
+                    Res.string.study_chip_recall,
+                    listOf(sourceLanguage.studyCode()),
+                ),
                 prompt = cloze.copy(filled = true),
                 translationHint = null,
                 back = sourceBack(
