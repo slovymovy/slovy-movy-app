@@ -8,11 +8,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
+import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
+import com.slovy.slovymovyapp.data.learning.intake.IntakeService
+import com.slovy.slovymovyapp.data.learning.session.ExamplePicker
+import com.slovy.slovymovyapp.data.learning.session.SessionService
+import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
@@ -20,6 +26,8 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.*
+import com.slovy.slovymovyapp.ui.study.StudySessionScreen
+import com.slovy.slovymovyapp.ui.study.StudySessionViewModel
 import com.slovy.slovymovyapp.ui.theme.AppTheme
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
@@ -29,7 +37,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.stringResource
-import slovymovyapp.composeapp.generated.resources.*
+import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.app_data_version_mismatch_message
+import slovymovyapp.composeapp.generated.resources.download_title_downloading
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 @Serializable
 private sealed interface AppDestination {
@@ -47,6 +59,11 @@ private sealed interface AppDestination {
 
     @Serializable
     data object Favorites : AppDestination
+
+    @Serializable
+    data class StudySession(
+        val langCode: String,
+    ) : AppDestination
 
     @Serializable
     data class WordDetail(
@@ -74,6 +91,7 @@ private sealed interface AppDestination {
     data object DataVersionMismatch : AppDestination
 }
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun App(
     settingsRepository: SettingsRepository,
@@ -85,8 +103,11 @@ fun App(
     var pendingSearchQuery by remember { mutableStateOf<String?>(null) }
     var nativeLanguages by remember { mutableStateOf<List<Language>>(emptyList()) }
     var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
-    val favoritesRepository = remember(dataManager) {
-        FavoritesRepository(DataDbManager.openAppDatabase(platform))
+    val appDatabase = remember(platform) {
+        DataDbManager.openAppDatabase(platform)
+    }
+    val favoritesRepository = remember(appDatabase) {
+        FavoritesRepository(appDatabase)
     }
     val localDbManager = remember(platform) { LocalDbManager(platform) }
     val dictionaryRepository =
@@ -99,6 +120,41 @@ fun App(
     val wordFetchManager = remember(dictionaryClient) {
         WordFetchManager(dictionaryClient)
     }
+    val fsrsConfig = remember { FsrsDefaults.config() }
+    val fsrsScheduler = remember(fsrsConfig) {
+        FsrsScheduler(
+            retention = fsrsConfig.requestRetention,
+            weights = fsrsConfig.weights,
+            maximumInterval = fsrsConfig.maximumInterval,
+            enableFuzz = fsrsConfig.enableFuzz,
+        )
+    }
+    val intakeService = remember(appDatabase, dictionaryRepository, fsrsConfig) {
+        IntakeService(
+            learning = appDatabase.favoritesQueries,
+            dictionary = dictionaryRepository,
+            config = fsrsConfig,
+            clock = Clock.System,
+        )
+    }
+    val sessionService = remember(appDatabase, wordFetchManager, fsrsScheduler, fsrsConfig, dictionaryRepository) {
+        SessionService(
+            learning = appDatabase.favoritesQueries,
+            wordFetchManager = wordFetchManager,
+            scheduler = fsrsScheduler,
+            examplePicker = ExamplePicker(appDatabase.favoritesQueries),
+            config = fsrsConfig,
+            clock = Clock.System,
+            translationTargets = dictionaryRepository::defaultTranslationTargets,
+        )
+    }
+    val statsService = remember(appDatabase, fsrsConfig) {
+        StatsService(
+            learning = appDatabase.favoritesQueries,
+            config = fsrsConfig,
+            clock = Clock.System,
+        )
+    }
     val downloadCoordinator = remember { DownloadCoordinator() }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
     val appDataExporter = remember(androidContext) { AppDataExporter(androidContext) }
@@ -108,7 +164,9 @@ fun App(
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
     // Shared ViewModel for Favorites screen to preserve state across navigation
-    val favoritesViewModel = remember { FavoritesViewModel(favoritesRepository, dictionaryRepository) }
+    val favoritesViewModel = remember {
+        FavoritesViewModel(favoritesRepository, dictionaryRepository, statsService, intakeService)
+    }
     val buildConfig = remember { appBuildConfig }
     val settingsViewModel =
         remember {
@@ -168,7 +226,7 @@ fun App(
                     dataManager.downloadableTranslationTargets(dictionary, natives)
                 } catch (e: CancellationException) {
                     throw e
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     emptyList()
                 }
                 val needsDownload = !dataManager.hasDictionary(dictionary) ||
@@ -229,11 +287,11 @@ fun App(
                                         value = Json.parseToJsonElement("true")
                                     )
                                 )
-                                Analytics.logEvent(AnalyticsEvent.WELCOME_SCREEN_CLICK)
+                                logEvent(AnalyticsEvent.WELCOME_SCREEN_CLICK)
                                 navController.navigate(AppDestination.SetupLanguages) {
                                     popUpTo<AppDestination.Welcome> { inclusive = true }
                                 }
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 viewModel.onError()
                             }
                         }
@@ -380,7 +438,7 @@ fun App(
                         viewModel = viewModel,
                         description = stringResource(Res.string.download_title_downloading),
                         onLaterClick = {
-                            Analytics.logEvent(AnalyticsEvent.DOWNLOAD_LATER_CLICK)
+                            logEvent(AnalyticsEvent.DOWNLOAD_LATER_CLICK)
                             navController.navigate(AppDestination.Search) {
                                 popUpTo<AppDestination.DownloadSetup> { inclusive = true }
                             }
@@ -442,11 +500,6 @@ fun App(
                 )
             }
             composable<AppDestination.Favorites> {
-                // Reload favorites when navigating to this screen.
-                LaunchedEffect(Unit) {
-                    favoritesViewModel.loadFavorites()
-                }
-
                 FavoritesScreen(
                     viewModel = favoritesViewModel,
                     onNavigateToSearch = {
@@ -478,7 +531,42 @@ fun App(
                     onNavigateToSettings = {
                         if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
                             navController.navigate(AppDestination.Settings)
+                    },
+                    onStartStudy = { language ->
+                        logEvent(AnalyticsEvent.STUDY_START_SESSION)
+                        navController.navigate(AppDestination.StudySession(language.code))
                     }
+                )
+            }
+            composable<AppDestination.StudySession> { backStackEntry ->
+                val args = backStackEntry.toRoute<AppDestination.StudySession>()
+                val viewModel = viewModel(
+                    viewModelStoreOwner = backStackEntry
+                ) {
+                    StudySessionViewModel(
+                        langCode = args.langCode,
+                        intakeService = intakeService,
+                        sessionService = sessionService,
+                        statsService = statsService,
+                        clock = Clock.System,
+                        ttsManager = ttsManager,
+                        voiceFilterHelper = voiceFilterHelper,
+                    )
+                }
+                StudySessionScreen(
+                    viewModel = viewModel,
+                    onCancel = {
+                        logEvent(AnalyticsEvent.STUDY_CANCEL_SESSION)
+                        if (!navController.popBackStack()) {
+                            navController.navigate(AppDestination.Favorites)
+                        }
+                    },
+                    onEnd = {
+                        logEvent(AnalyticsEvent.STUDY_END_SESSION)
+                        if (!navController.popBackStack()) {
+                            navController.navigate(AppDestination.Favorites)
+                        }
+                    },
                 )
             }
             composable<AppDestination.Settings> {

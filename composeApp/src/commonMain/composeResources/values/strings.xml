@@ -3,18 +3,18 @@
     <string name="common_app_name">OpenWords</string>
 
     <string name="nav_search">Search</string>
-    <string name="nav_favorites">Favorites</string>
+    <string name="nav_favorites">My words</string>
     <string name="nav_word_detail">Word Detail</string>
     <string name="nav_settings">Settings</string>
 
-    <string name="welcome_tagline">Deep-dive dictionary\nfor committed learners like you.</string>
-    <string name="welcome_selling_point_translations_title">Beyond one-word translations</string>
-    <string name="welcome_selling_point_translations_description">Find all meanings, word frequency, common phrases, and real-world examples.</string>
-    <string name="welcome_selling_point_collection_title">Your Collection</string>
-    <string name="welcome_selling_point_collection_description">Save words to your personal library and build your vocabulary locally.</string>
-    <string name="welcome_selling_point_no_ads_title">No ads, no subscription</string>
-    <string name="welcome_selling_point_no_ads_description">Access the full experience without paywalls. Essential data stays on your device.</string>
-    <string name="welcome_cta_explore_now">Explore Now</string>
+    <string name="welcome_tagline">The app that turns looked-up words into learned words. Free.</string>
+    <string name="welcome_selling_point_translations_title">Look up any word</string>
+    <string name="welcome_selling_point_translations_description">Examples, forms, phrases, synonyms — everything about it in one place.</string>
+    <string name="welcome_selling_point_collection_title">Build your personal word list</string>
+    <string name="welcome_selling_point_collection_description">Save words as you go. Your collection stays on your device.</string>
+    <string name="welcome_selling_point_practice_title">Practice until words stick</string>
+    <string name="welcome_selling_point_practice_description">Spaced repetition and multiple modes help you actually remember what you learn.</string>
+    <string name="welcome_cta_explore_now">Get Started</string>
 
     <string name="search_placeholder">Search your word...</string>
     <string name="search_open_item">Open %1$s</string>
@@ -64,15 +64,17 @@
     <string name="download_state_completed">Download completed</string>
 
     <string name="favorites_title">My words</string>
-    <string name="favorites_loading">Loading favorites...</string>
+    <string name="favorites_loading">Loading...</string>
     <string name="favorites_search_placeholder">Type a word...</string>
-    <string name="favorites_empty_title">No Favorites Yet</string>
-    <string name="favorites_empty_description">Save words you want to remember</string>
+    <string name="favorites_empty_title">Your learning list starts here.</string>
+    <string name="favorites_empty_description">Search for any word and tap the heart icon to save it here for later study.</string>
     <string name="favorites_empty_action_start_searching">Start searching</string>
-    <string name="favorites_no_results_title">No matching favorites for "%1$s"</string>
+    <string name="favorites_no_results_title">No saved words matching "%1$s"</string>
     <string name="favorites_no_results_description">Try a different spelling or search the dictionary instead</string>
     <string name="favorites_no_results_action_search_dictionary">Search dictionary</string>
     <string name="favorites_stats">%1$d meanings · %2$d words</string>
+    <string name="favorites_removed_message">Word removed</string>
+    <string name="favorites_removed_undo">Undo</string>
 
     <string name="language_setup_title">Select Languages</string>
     <string name="language_setup_subtitle">Choose what you're learning and your translation preferences.</string>
@@ -183,6 +185,8 @@
     <string name="acknowledgements_dictionary_extracts_body">We use pre-processed dictionary data from Kaikki.org, extracted from Wiktionary using the open-source wiktextract tool by Tatu Ylonen.</string>
     <string name="acknowledgements_application_code_title">Application code</string>
     <string name="acknowledgements_application_code_body">Application code is available under CC-BY-SA-4.0 license.</string>
+    <string name="acknowledgements_fsrs_title">FSRS scheduling algorithm</string>
+    <string name="acknowledgements_fsrs_body">We use a Kotlin port of FSRS-Kotlin, provided under the MIT License. FSRS was originally developed by Jarrett Ye with the Open Spaced Repetition community.</string>
     <string name="acknowledgements_words_sources_title">Words sources</string>
     <string name="acknowledgements_words_sources_body">All words data is available under CC-BY-SA-4.0 license.</string>
     <string name="acknowledgements_thanks">We are grateful to the Wiktionary community and to Tatu Ylonen for making this data freely available.</string>
@@ -429,4 +433,48 @@
     <string name="scheme_label_passive_adjectival_participle">passive adj. participle</string>
     <string name="scheme_label_contemporary_adverbial_participle">contemp. adv. participle</string>
     <string name="scheme_label_verbal_noun">verbal noun</string>
+    <string name="study_action_close">Close study session</string>
+    <string name="study_action_retry">Retry</string>
+    <string name="study_loading">Preparing your review…</string>
+    <string name="study_empty_title">Nothing due right now</string>
+    <string name="study_empty_description">Saved words will appear here when they are ready for review.</string>
+    <string name="study_error_title">Could not load this card</string>
+    <string name="study_error_prepare_failed">Study session could not be prepared.</string>
+    <string name="study_error_next_card_failed">Next card could not be loaded.</string>
+    <string name="study_error_review_save_failed">Review could not be saved.</string>
+    <string name="study_error_card_data_missing">This card is missing study data.</string>
+    <plurals name="study_complete_description">
+        <item quantity="one">%1$d card completed.</item>
+        <item quantity="few">%1$d cards completed.</item>
+        <item quantity="many">%1$d cards completed.</item>
+        <item quantity="other">%1$d cards completed.</item>
+    </plurals>
+    <string name="study_complete_supporting">That’s how words stick.</string>
+    <string name="study_action_done_for_now">Done for now</string>
+    <string name="study_progress_count">%1$d of %2$d</string>
+    <string name="study_tap_to_flip">Tap to flip</string>
+    <string name="study_tap_to_check">Tap to check</string>
+    <string name="study_chip_source_only">%1$s only</string>
+    <string name="study_chip_fill_in">Fill in</string>
+    <string name="study_chip_listen">Listen</string>
+    <string name="study_prompt_recall_word">Recall the word</string>
+    <string name="study_prompt_translate_to">Translate to %1$s</string>
+    <string name="study_fill_blank">Fill in the blank</string>
+    <string name="study_play_word_audio">Play word audio</string>
+    <string name="study_play_prompt_audio">Play prompt audio</string>
+    <string name="study_stop_audio">Stop audio</string>
+    <string name="study_listen_prompt">Tap to play. What word do you hear?</string>
+    <string name="study_rating_again">Again</string>
+    <string name="study_rating_hard">Hard</string>
+    <string name="study_rating_good">Good</string>
+    <string name="study_rating_easy">Easy</string>
+    <string name="favorites_study_due_title">DUE FOR REVIEW</string>
+    <plurals name="favorites_study_due_count">
+        <item quantity="one">%1$d card</item>
+        <item quantity="few">%1$d cards</item>
+        <item quantity="many">%1$d cards</item>
+        <item quantity="other">%1$d cards</item>
+    </plurals>
+    <string name="favorites_study_due_subtitle">About %1$d min</string>
+    <string name="favorites_study_due_action">Start study session</string>
 </resources>

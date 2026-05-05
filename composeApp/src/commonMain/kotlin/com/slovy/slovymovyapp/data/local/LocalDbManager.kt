@@ -30,6 +30,16 @@ class LocalDbManager(private val platform: PlatformDbSupport) {
         }
     }
 
+    fun hasLocalDictionary(): Boolean {
+        val path = platform.getDatabasePath(LOCAL_DICTIONARY_FILENAME)
+        return platform.fileExists(path) && (platform.getFileSize(path) ?: 0L) > 0L
+    }
+
+    fun hasLocalTranslation(): Boolean =
+        platform.getDatabasePath(LOCAL_TRANSLATION_FILENAME).let { path ->
+            platform.fileExists(path) && (platform.getFileSize(path) ?: 0L) > 0L
+        }
+
     fun openLocalTranslation(): TranslationDatabase {
         return translationHolder?.database ?: run {
             val path = platform.getDatabasePath(LOCAL_TRANSLATION_FILENAME)

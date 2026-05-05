@@ -1,0 +1,79 @@
+DROP INDEX IF EXISTS idx_favorites_lang_lemma;
+
+ALTER TABLE favorites RENAME TO favorites_old;
+
+CREATE TABLE favorites (
+  sense_id TEXT NOT NULL,
+  lang_code TEXT NOT NULL,
+  lemma TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  activated_at INTEGER,
+  PRIMARY KEY (sense_id, lang_code)
+);
+
+INSERT OR IGNORE INTO favorites(sense_id, lang_code, lemma, created_at, activated_at)
+SELECT sense_id, target_lang, lemma, created_at * 1000, NULL
+FROM favorites_old;
+
+DROP TABLE favorites_old;
+
+CREATE INDEX idx_favorites_pending_intake
+ON favorites(activated_at, created_at);
+
+CREATE INDEX idx_favorites_lang_lemma
+ON favorites(lang_code, lemma);
+
+CREATE TABLE card (
+  id BLOB NOT NULL PRIMARY KEY,
+  sense_id BLOB NOT NULL,
+  lemma_id BLOB NOT NULL,
+  lang_code TEXT NOT NULL,
+  family INTEGER NOT NULL,
+  state INTEGER NOT NULL,
+  stability REAL NOT NULL,
+  difficulty REAL NOT NULL,
+  due INTEGER NOT NULL,
+  last_review INTEGER,
+  reps INTEGER NOT NULL DEFAULT 0,
+  lapses INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  available_after INTEGER,
+  answer_key TEXT NOT NULL,
+  suspended INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE UNIQUE INDEX idx_card_unique_task
+ON card(sense_id, lang_code, family);
+
+CREATE INDEX idx_card_due
+ON card(lang_code, suspended, available_after, due);
+
+CREATE INDEX idx_card_new
+ON card(lang_code, state, created_at);
+
+CREATE INDEX idx_card_collision
+ON card(lang_code, lemma_id, answer_key);
+
+CREATE TABLE review_log (
+  id BLOB NOT NULL PRIMARY KEY,
+  card_id BLOB NOT NULL,
+  reviewed_at INTEGER NOT NULL,
+  rating INTEGER NOT NULL,
+  variant_kind INTEGER NOT NULL,
+  variant_target_lang TEXT,
+  example_id INTEGER,
+  state_before INTEGER NOT NULL,
+  stability_before REAL NOT NULL,
+  difficulty_before REAL NOT NULL,
+  elapsed_days INTEGER NOT NULL,
+  scheduled_days INTEGER NOT NULL,
+  stability_after REAL NOT NULL,
+  difficulty_after REAL NOT NULL,
+  duration_ms INTEGER NOT NULL
+);
+
+CREATE INDEX idx_review_log_card_reviewed
+ON review_log(card_id, reviewed_at DESC);
+
+CREATE INDEX idx_review_log_reviewed
+ON review_log(reviewed_at);

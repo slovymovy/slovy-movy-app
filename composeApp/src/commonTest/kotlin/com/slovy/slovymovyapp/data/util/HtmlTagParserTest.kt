@@ -268,6 +268,18 @@ class HtmlTagParserTest {
     }
 
     @Test
+    fun plainText_removesSupportedTagsAndKeepsContent() {
+        val result = HtmlTagParser.plainText("Het was zo <w>gezellig</w> en <heel fijn>.")
+        assertEquals("Het was zo gezellig en heel fijn.", result)
+    }
+
+    @Test
+    fun plainText_removesNestedSupportedTagsAndKeepsContent() {
+        val result = HtmlTagParser.plainText("<w>outer <w>inner</w> text</w>")
+        assertEquals("outer inner text", result)
+    }
+
+    @Test
     fun parseTextSegments_preservesIndices() {
         val text = "Hello <w>world</w>!"
         val result = HtmlTagParser.parseTextSegments(text)

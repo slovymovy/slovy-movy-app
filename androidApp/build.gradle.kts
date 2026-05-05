@@ -54,6 +54,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     packaging {
@@ -67,6 +68,7 @@ dependencies {
     implementation(projects.composeApp)
     implementation(projects.shared)
     implementation(libs.androidx.activity.compose)
+    coreLibraryDesugaring(libs.android.desugarJdkLibs)
 
     debugImplementation(libs.androidx.lifecycle.viewmodel.savedstate)
     debugImplementation(libs.androidx.lifecycle.runtime)

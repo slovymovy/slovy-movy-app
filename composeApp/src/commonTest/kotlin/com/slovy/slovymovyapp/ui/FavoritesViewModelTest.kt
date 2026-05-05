@@ -3,15 +3,46 @@ package com.slovy.slovymovyapp.ui
 import androidx.lifecycle.ViewModelStore
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.learning.CardFamily
+import com.slovy.slovymovyapp.data.learning.CardState
+import com.slovy.slovymovyapp.data.learning.intake.IntakeResult
+import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
+import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.test.runTest
+import kotlin.time.Clock
 import kotlin.test.*
+import kotlin.uuid.Uuid
 
 open class FavoritesViewModelTest : BaseTest() {
 
     private val viewModelStore = ViewModelStore()
+
+    private companion object {
+        const val SENSE_1 = "00000000-0000-0000-0000-000000000101"
+        const val SENSE_2 = "00000000-0000-0000-0000-000000000102"
+        const val SENSE_3 = "00000000-0000-0000-0000-000000000103"
+    }
+
+    private class RecordingIntake(
+        private val onRun: suspend (String) -> Unit = {},
+    ) : LearningIntake {
+        val langCodes = mutableListOf<String>()
+
+        override suspend fun runIntake(langCode: String): IntakeResult {
+            langCodes += langCode
+            onRun(langCode)
+            return IntakeResult(activated = emptyList(), skipped = emptyList(), cardsCreated = 0)
+        }
+    }
+
+    private object NoopIntake : LearningIntake {
+        override suspend fun runIntake(langCode: String): IntakeResult =
+            IntakeResult(activated = emptyList(), skipped = emptyList(), cardsCreated = 0)
+    }
 
     @AfterTest
     fun tearDown() {
@@ -20,6 +51,10 @@ open class FavoritesViewModelTest : BaseTest() {
 
     private fun favoritesRepository(): FavoritesRepository {
         return FavoritesRepository(testAppDatabaseHolder().database)
+    }
+
+    private fun favoritesRepository(app: AppDatabase): FavoritesRepository {
+        return FavoritesRepository(app)
     }
 
     private fun dictionaryRepository(favoritesRepo: FavoritesRepository): DictionaryRepository {
@@ -33,9 +68,11 @@ open class FavoritesViewModelTest : BaseTest() {
 
     private fun createViewModel(
         favRepo: FavoritesRepository,
-        dictRepo: DictionaryRepository = dictionaryRepository(favRepo)
+        dictRepo: DictionaryRepository = dictionaryRepository(favRepo),
+        statsService: StatsService = StatsService(testAppDatabaseHolder().database.favoritesQueries, clock = Clock.System),
+        intakeService: LearningIntake = NoopIntake,
     ): FavoritesViewModel {
-        val vm = FavoritesViewModel(favRepo, dictRepo)
+        val vm = FavoritesViewModel(favRepo, dictRepo, statsService, intakeService)
         viewModelStore.put("test", vm)
         return vm
     }
@@ -49,8 +86,8 @@ open class FavoritesViewModelTest : BaseTest() {
     fun initialLoad_singleLanguage_hiddenPicker() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
-        favRepo.add("s1", Language.ENGLISH, "hello")
-        favRepo.add("s2", Language.ENGLISH, "world")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        favRepo.add(SENSE_2, Language.ENGLISH, "world")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
@@ -65,8 +102,8 @@ open class FavoritesViewModelTest : BaseTest() {
     fun initialLoad_multiLanguage_showsPicker_defaultsToFirst() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
-        favRepo.add("s1", Language.ENGLISH, "hello")
-        favRepo.add("s2", Language.RUSSIAN, "привет")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        favRepo.add(SENSE_2, Language.RUSSIAN, "привет")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
@@ -85,9 +122,9 @@ open class FavoritesViewModelTest : BaseTest() {
     fun setSelectedLanguage_filtersFavoritesToThatLanguage() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
-        favRepo.add("s1", Language.ENGLISH, "hello")
-        favRepo.add("s2", Language.ENGLISH, "world")
-        favRepo.add("s3", Language.RUSSIAN, "привет")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        favRepo.add(SENSE_2, Language.ENGLISH, "world")
+        favRepo.add(SENSE_3, Language.RUSSIAN, "привет")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
@@ -110,9 +147,9 @@ open class FavoritesViewModelTest : BaseTest() {
     fun removingLastFavoriteInLanguage_switchesToOtherLanguage() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
-        favRepo.add("s1", Language.ENGLISH, "hello")
-        favRepo.add("s2", Language.ENGLISH, "world")
-        favRepo.add("s3", Language.RUSSIAN, "привет")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        favRepo.add(SENSE_2, Language.ENGLISH, "world")
+        favRepo.add(SENSE_3, Language.RUSSIAN, "привет")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
@@ -123,7 +160,7 @@ open class FavoritesViewModelTest : BaseTest() {
         assertEquals(Language.RUSSIAN, contentState(vm).selectedLanguage)
 
         // Remove the only Russian favorite and reload (simulates toggleFavorite's logic)
-        favRepo.remove("s3", Language.RUSSIAN)
+        favRepo.remove(SENSE_3, Language.RUSSIAN)
         vm.loadAndApplyState("")
 
         val content = contentState(vm)
@@ -139,9 +176,9 @@ open class FavoritesViewModelTest : BaseTest() {
     fun removingLastVisibleResult_withActiveQuery_staysOnSameLanguage() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
-        favRepo.add("s1", Language.ENGLISH, "hello")
-        favRepo.add("s2", Language.ENGLISH, "world")
-        favRepo.add("s3", Language.RUSSIAN, "привет")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        favRepo.add(SENSE_2, Language.ENGLISH, "world")
+        favRepo.add(SENSE_3, Language.RUSSIAN, "привет")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
@@ -151,10 +188,10 @@ open class FavoritesViewModelTest : BaseTest() {
 
         var content = contentState(vm)
         assertEquals(1, content.senses.size)
-        assertEquals("s1", content.senses[0].senseId)
+        assertEquals(SENSE_1, content.senses[0].senseId)
 
         // Remove "hello" — English still has "world", should stay on English
-        favRepo.remove("s1", Language.ENGLISH)
+        favRepo.remove(SENSE_1, Language.ENGLISH)
         vm.loadAndApplyState("hello")
 
         content = contentState(vm)
@@ -170,8 +207,8 @@ open class FavoritesViewModelTest : BaseTest() {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         // Same lemma in two languages
-        favRepo.add("s1", Language.ENGLISH, "hello")
-        favRepo.add("s2", Language.RUSSIAN, "hello")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        favRepo.add(SENSE_2, Language.RUSSIAN, "hello")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
@@ -182,14 +219,14 @@ open class FavoritesViewModelTest : BaseTest() {
         val content = contentState(vm)
         assertEquals(Language.ENGLISH, content.selectedLanguage)
         assertEquals(1, content.senses.size, "Should only match within selected language")
-        assertEquals("s1", content.senses[0].senseId)
+        assertEquals(SENSE_1, content.senses[0].senseId)
     }
 
     @Test
     fun requestScrollToTop_incrementsScrollToTopVersionOnNextLoad() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
-        favRepo.add("s1", Language.ENGLISH, "hello")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
@@ -215,7 +252,7 @@ open class FavoritesViewModelTest : BaseTest() {
         assertFalse(contentState(vm).scrollToTop)
 
         // Favorite is added and onFavoriteAdded fires after the initial load
-        favRepo.add("s1", Language.ENGLISH, "hello")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
         vm.requestScrollToTop() // sets the pending flag
         vm.loadAndApplyState("") // simulate the subsequent Favorites reload (debounced queryFlow)
 
@@ -231,14 +268,14 @@ open class FavoritesViewModelTest : BaseTest() {
     fun requestScrollToTop_scrollsEvenWhenFilterActive() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
-        favRepo.add("s1", Language.ENGLISH, "hello")
-        favRepo.add("s2", Language.ENGLISH, "world")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        favRepo.add(SENSE_2, Language.ENGLISH, "world")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
         // Add a new favorite and request scroll while a query is active
-        favRepo.add("s3", Language.ENGLISH, "newword")
+        favRepo.add(SENSE_3, Language.ENGLISH, "newword")
         vm.requestScrollToTop()
         vm.loadAndApplyState("hello") // query hides s3
 
@@ -252,15 +289,15 @@ open class FavoritesViewModelTest : BaseTest() {
     fun requestScrollToTop_scrollsEvenWhenSenseRemovedBeforeReload() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
-        favRepo.add("s1", Language.ENGLISH, "hello")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
         // Add then immediately remove before reload
-        favRepo.add("s2", Language.ENGLISH, "world")
+        favRepo.add(SENSE_2, Language.ENGLISH, "world")
         vm.requestScrollToTop()
-        favRepo.remove("s2", Language.ENGLISH)
+        favRepo.remove(SENSE_2, Language.ENGLISH)
         vm.loadAndApplyState("")
 
         assertTrue(
@@ -270,16 +307,87 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
+    fun loadAndApplyState_runsIntakeWhenRequestedForSelectedLanguage() = runTest {
+        val favRepo = favoritesRepository()
+        val intake = RecordingIntake()
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo, intakeService = intake)
+        vm.loadAndApplyState("", runIntake = true)
+        vm.loadAndApplyState("", runIntake = true)
+
+        assertEquals(listOf(Language.ENGLISH.code, Language.ENGLISH.code), intake.langCodes)
+        assertFalse(contentState(vm).scrollToTop)
+    }
+
+    @Test
+    fun loadAndApplyState_usesFavoritesSnapshotAfterIntake() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        val intake = RecordingIntake {
+            favRepo.add(SENSE_2, Language.ENGLISH, "world")
+        }
+
+        val vm = createViewModel(favRepo, intakeService = intake)
+        vm.loadAndApplyState("", runIntake = true)
+
+        val content = contentState(vm)
+        assertEquals(setOf(SENSE_1, SENSE_2), content.senses.map { it.senseId }.toSet())
+        assertEquals(setOf("hello", "world"), content.favoriteLemmas)
+    }
+
+    @Test
+    fun loadAndApplyState_showsStudyCardForNewCardCreatedByIntake() = runTest {
+        val app = testAppDatabaseHolder().database
+        val favRepo = favoritesRepository(app)
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        val intake = RecordingIntake {
+            app.favoritesQueries.insertCard(
+                id = Uuid.parse("00000000-0000-0000-0000-000000000401"),
+                sense_id = Uuid.parse(SENSE_1),
+                lemma_id = Uuid.parse("00000000-0000-0000-0000-000000000402"),
+                lang_code = Language.ENGLISH.code,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = 0L,
+                last_review = null,
+                reps = 0,
+                lapses = 0,
+                created_at = 0L,
+                available_after = null,
+                answer_key = "hello",
+                suspended = false,
+            )
+        }
+
+        val vm = createViewModel(
+            favRepo = favRepo,
+            statsService = StatsService(app.favoritesQueries, clock = Clock.System),
+            intakeService = intake,
+        )
+        vm.loadAndApplyState("", runIntake = true)
+
+        val study = assertNotNull(contentState(vm).study)
+        assertEquals(Language.ENGLISH, study.language)
+        assertEquals(1, study.dueCount)
+    }
+
+    @Test
     fun scrollToTop_notRetriggered_afterVersionConsumed() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
-        favRepo.add("s1", Language.ENGLISH, "hello")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
 
         // Add a favorite and trigger scroll
-        favRepo.add("s2", Language.ENGLISH, "world")
+        favRepo.add(SENSE_2, Language.ENGLISH, "world")
         vm.requestScrollToTop()
         vm.loadAndApplyState("")
         assertTrue(contentState(vm).scrollToTop, "scrollToTop should be true after add")
@@ -300,8 +408,8 @@ open class FavoritesViewModelTest : BaseTest() {
     fun dropdownExpandedState_resetsWhenPickerBecomesHidden() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
-        favRepo.add("s1", Language.ENGLISH, "hello")
-        favRepo.add("s2", Language.RUSSIAN, "привет")
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        favRepo.add(SENSE_2, Language.RUSSIAN, "привет")
 
         val vm = createViewModel(favRepo)
         vm.loadAndApplyState("")
@@ -313,7 +421,7 @@ open class FavoritesViewModelTest : BaseTest() {
         assertTrue(contentState(vm).isLanguageDropdownExpanded)
 
         // Remove the only Russian favorite — picker becomes hidden
-        favRepo.remove("s2", Language.RUSSIAN)
+        favRepo.remove(SENSE_2, Language.RUSSIAN)
         vm.loadAndApplyState("")
 
         val content = contentState(vm)
@@ -322,5 +430,42 @@ open class FavoritesViewModelTest : BaseTest() {
             content.isLanguageDropdownExpanded,
             "Dropdown expanded state should reset when picker becomes hidden"
         )
+    }
+
+    @Test
+    fun studyState_showsDueCountForSelectedLanguage() = runTest {
+        val app = testAppDatabaseHolder().database
+        val favRepo = favoritesRepository(app)
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        app.favoritesQueries.insertCard(
+            id = Uuid.parse("00000000-0000-0000-0000-000000000201"),
+            sense_id = Uuid.parse(SENSE_1),
+            lemma_id = Uuid.parse("00000000-0000-0000-0000-000000000301"),
+            lang_code = Language.ENGLISH.code,
+            family = CardFamily.RECOGNIZE_SENSE,
+            state = CardState.REVIEW,
+            stability = 1.0,
+            difficulty = 1.0,
+            due = 0L,
+            last_review = null,
+            reps = 1,
+            lapses = 0,
+            created_at = 0L,
+            available_after = null,
+            answer_key = "hello",
+            suspended = false,
+        )
+
+        val vm = createViewModel(
+            favRepo = favRepo,
+            statsService = StatsService(app.favoritesQueries, clock = Clock.System),
+        )
+        vm.loadAndApplyState("")
+
+        val study = assertNotNull(contentState(vm).study)
+        assertEquals(Language.ENGLISH, study.language)
+        assertEquals(1, study.dueCount)
+        assertEquals(1, study.estimatedMinutes)
     }
 }

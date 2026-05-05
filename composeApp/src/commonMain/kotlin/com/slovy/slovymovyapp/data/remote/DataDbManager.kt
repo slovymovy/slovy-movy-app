@@ -32,7 +32,7 @@ class DataDbManager(
     internal val databaseCache = ReadOnlyDatabaseCache(platform)
 
     companion object {
-        const val VERSION = "v12"
+        const val VERSION = "v13"
 
         private const val DICTIONARY_PREFIX = "dictionary_"
         private const val TRANSLATION_PREFIX = "translation_"
@@ -163,10 +163,12 @@ class DataDbManager(
     }
 
     suspend fun openDictionaryReadOnly(lang: Language): DictionaryDatabase {
+        if (!hasDictionary(lang)) throw IllegalArgumentException("Dictionary for language $lang does not exist")
         return databaseCache.getDictionary(lang)
     }
 
     suspend fun openTranslationReadOnly(src: Language, tgt: Language): TranslationDatabase {
+        if (!hasTranslation(src, tgt)) throw IllegalArgumentException("Translation from $src to $tgt does not exist")
         return databaseCache.getTranslation(src, tgt)
     }
 

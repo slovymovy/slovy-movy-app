@@ -1,7 +1,10 @@
 package com.slovy.slovymovyapp.ui.word
 
+import androidx.compose.foundation.BorderStroke
+import com.slovy.slovymovyapp.ui.SpeakerVector
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -336,20 +339,27 @@ class WordDetailViewModel(
             }
         }
 
-        // Setup TTS status listener
-        ttsManager.setOnStatusChangeListener { status ->
+    }
+
+    fun attachTtsListener() {
+        ttsManager.addOnStatusChangeListener(this) { status ->
             when (status) {
                 TTSStatus.SPEAKING -> {
                     isPreparing = false
                     isPlaying = true
                 }
-
                 TTSStatus.IDLE -> {
                     isPreparing = false
                     isPlaying = false
                 }
             }
         }
+    }
+
+    fun detachTtsListener() {
+        ttsManager.removeOnStatusChangeListener(this)
+        isPlaying = false
+        isPreparing = false
     }
 
     private fun updateStateFromResult(result: WordResult) {
@@ -711,10 +721,12 @@ class WordDetailViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        ttsManager.removeOnStatusChangeListener(this)
         ttsManager.stop()
     }
 
     fun dispose() {
+        ttsManager.removeOnStatusChangeListener(this)
         ttsManager.stop()
         viewModelScope.cancel()
     }
@@ -742,6 +754,11 @@ fun WordDetailScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToWordDetail: (Language, String) -> Unit = { _, _ -> }
 ) {
+    DisposableEffect(viewModel) {
+        viewModel.attachTtsListener()
+        onDispose { viewModel.detachTtsListener() }
+    }
+
     // Restore scroll position after process death
     val savedScrollPosition = rememberSaveable { viewModel.scrollState.value }
 
@@ -1178,11 +1195,14 @@ private fun WordDetailContent(
                 EntryList(
                     label = stringResource(Res.string.word_details_word_family),
                     values = card.wordFamily,
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     relatedWords = card.relatedWords,
                     onWordClick = onWordClick,
-                    favoriteLemmas = favoriteLemmas
+                    favoriteLemmas = favoriteLemmas,
+                    chipShape = RoundedCornerShape(50),
+                    chipBorder = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    chipSpacing = 8.dp
                 )
             }
         }

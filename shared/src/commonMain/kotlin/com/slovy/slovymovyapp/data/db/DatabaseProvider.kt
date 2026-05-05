@@ -3,8 +3,11 @@ package com.slovy.slovymovyapp.data.db
 import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
 import com.slovy.slovymovyapp.data.dictionary.*
+import com.slovy.slovymovyapp.data.learning.Rating
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.db.AppDatabase
+import com.slovy.slovymovyapp.db.Card
+import com.slovy.slovymovyapp.db.Review_log
 import com.slovy.slovymovyapp.db.Settings
 import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.translation.Example_translation
@@ -37,6 +40,20 @@ object DatabaseProvider {
                     return value.name
                 }
             }
+        ),
+        cardAdapter = Card.Adapter(
+            idAdapter = UuidByteArrayColumnAdapter(),
+            sense_idAdapter = UuidByteArrayColumnAdapter(),
+            lemma_idAdapter = UuidByteArrayColumnAdapter(),
+            familyAdapter = enumOrdinalAdapter(),
+            stateAdapter = enumOrdinalAdapter(),
+        ),
+        review_logAdapter = Review_log.Adapter(
+            idAdapter = UuidByteArrayColumnAdapter(),
+            card_idAdapter = UuidByteArrayColumnAdapter(),
+            ratingAdapter = ratingFsrsAdapter(),
+            variant_kindAdapter = enumOrdinalAdapter(),
+            state_beforeAdapter = enumOrdinalAdapter(),
         ),
     )
 
@@ -109,6 +126,22 @@ object DatabaseProvider {
         ),
     )
 }
+
+inline fun <reified E : Enum<E>> enumOrdinalAdapter(): ColumnAdapter<E, Long> =
+    object : ColumnAdapter<E, Long> {
+        override fun decode(databaseValue: Long): E =
+            enumValues<E>().getOrNull(databaseValue.toInt())
+                ?: error("Unknown ${E::class.simpleName} ordinal: $databaseValue")
+
+        override fun encode(value: E): Long = value.ordinal.toLong()
+    }
+
+fun ratingFsrsAdapter(): ColumnAdapter<Rating, Long> =
+    object : ColumnAdapter<Rating, Long> {
+        override fun decode(databaseValue: Long): Rating = Rating.fromFsrsValue(databaseValue)
+
+        override fun encode(value: Rating): Long = value.fsrsValue
+    }
 
 class UuidByteArrayColumnAdapter : ColumnAdapter<Uuid, ByteArray> {
     override fun decode(databaseValue: ByteArray): Uuid {

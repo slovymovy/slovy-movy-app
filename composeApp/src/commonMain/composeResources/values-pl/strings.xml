@@ -3,18 +3,18 @@
     <string name="common_app_name">OpenWords</string>
 
     <string name="nav_search">Szukaj</string>
-    <string name="nav_favorites">Ulubione</string>
+    <string name="nav_favorites">Moje słowa</string>
     <string name="nav_word_detail">Słowo</string>
     <string name="nav_settings">Ustawienia</string>
 
-    <string name="welcome_tagline">Poznaj język od podszewki.\nSłownik dla ambitnych uczniów.</string>
-    <string name="welcome_selling_point_translations_title">Więcej niż proste tłumaczenia</string>
-    <string name="welcome_selling_point_translations_description">Wszystkie znaczenia, częstotliwość, typowe zwroty i żywe przykłady.</string>
-    <string name="welcome_selling_point_collection_title">Twoja kolekcja</string>
-    <string name="welcome_selling_point_collection_description">Zapisuj słowa w bibliotece i rozwijaj swoje słownictwo.</string>
-    <string name="welcome_selling_point_no_ads_title">Bez reklam i subskrypcji</string>
-    <string name="welcome_selling_point_no_ads_description">Pełen dostęp bez płatnych blokad. Dane pozostają na Twoim urządzeniu.</string>
-    <string name="welcome_cta_explore_now">Wybierz języki</string>
+    <string name="welcome_tagline">Aplikacja, by nie tylko sprawdzać słowa, ale faktycznie się ich uczyć. Za darmo.</string>
+    <string name="welcome_selling_point_translations_title">Wyszukuj dowolne słowa</string>
+    <string name="welcome_selling_point_translations_description">Przykłady, odmiany, zwroty i synonimy — wszystko w jednym miejscu.</string>
+    <string name="welcome_selling_point_collection_title">Twoja własna lista słówek</string>
+    <string name="welcome_selling_point_collection_description">Zapisuj to, co chcesz zapamiętać. Twoja kolekcja zostaje tylko na Twoim urządzeniu.</string>
+    <string name="welcome_selling_point_practice_title">Utrwalaj wiedzę</string>
+    <string name="welcome_selling_point_practice_description">Metoda powtórek i różne tryby pomogą Ci na dobre zapamiętać nowe słowa.</string>
+    <string name="welcome_cta_explore_now">Zacznij teraz</string>
 
     <string name="search_placeholder">Wyszukaj słowo...</string>
     <string name="search_open_item">Otwórz %1$s</string>
@@ -66,13 +66,15 @@
     <string name="favorites_title">Moje słowa</string>
     <string name="favorites_loading">Ładowanie...</string>
     <string name="favorites_search_placeholder">Wyszukaj słowo...</string>
-    <string name="favorites_empty_title">Brak ulubionych</string>
-    <string name="favorites_empty_description">Zapisuj słowa, które chcesz zapamiętać.</string>
+    <string name="favorites_empty_title">Twoja lista słówek zaczyna się tutaj.</string>
+    <string name="favorites_empty_description">Wyszukaj dowolne słowo i kliknij serduszko, aby zapisać je do nauki.</string>
     <string name="favorites_empty_action_start_searching">Zacznij szukać</string>
     <string name="favorites_no_results_title">Brak wyników dla „%1$s"</string>
     <string name="favorites_no_results_description">Sprawdź pisownię lub wyszukaj w całym słowniku.</string>
     <string name="favorites_no_results_action_search_dictionary">Szukaj w słowniku</string>
     <string name="favorites_stats">%1$d znaczeń • %2$d słów</string>
+    <string name="favorites_removed_message">Słowo usunięte</string>
+    <string name="favorites_removed_undo">Cofnij</string>
 
     <string name="language_setup_title">Wybierz języki</string>
     <string name="language_setup_subtitle">Wybierz język, którego się uczysz, i preferencje tłumaczeń.</string>
@@ -183,6 +185,8 @@
     <string name="acknowledgements_dictionary_extracts_body">Korzystamy z przetworzonych danych z serwisu Kaikki.org, wyodrębnionych z Wiktionary za pomocą otwartoźródłowego narzędzia wiktextract autorstwa Tatu Ylonena.</string>
     <string name="acknowledgements_application_code_title">Kod źródłowy</string>
     <string name="acknowledgements_application_code_body">Kod aplikacji jest dostępny na licencji CC-BY-SA-4.0.</string>
+    <string name="acknowledgements_fsrs_title">Algorytm powtórek FSRS</string>
+    <string name="acknowledgements_fsrs_body">Korzystamy z portu FSRS-Kotlin dla Kotlina, dostępnego na licencji MIT. FSRS został pierwotnie opracowany przez Jarretta Ye wraz ze społecznością Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Źródła danych</string>
     <string name="acknowledgements_words_sources_body">Wszystkie dane słownikowe są dostępne na licencji CC-BY-SA-4.0.</string>
     <string name="acknowledgements_thanks">Dziękujemy społeczności Wiktionary oraz Tatu Ylonenowi za udostępnienie tych danych.</string>
@@ -429,4 +433,48 @@
     <string name="scheme_label_passive_adjectival_participle">imiesł. przym. bierny</string>
     <string name="scheme_label_contemporary_adverbial_participle">imiesł. przysł. współczesny</string>
     <string name="scheme_label_verbal_noun">rzeczownik odczasownikowy</string>
+    <string name="study_action_close">Zamknij sesję nauki</string>
+    <string name="study_action_retry">Spróbuj ponownie</string>
+    <string name="study_loading">Przygotowujemy powtórkę…</string>
+    <string name="study_empty_title">Nic nie jest teraz do powtórki</string>
+    <string name="study_empty_description">Zapisane słowa pojawią się tutaj, gdy będą gotowe do powtórki.</string>
+    <string name="study_error_title">Nie udało się wczytać tej karty</string>
+    <string name="study_error_prepare_failed">Nie udało się przygotować sesji nauki.</string>
+    <string name="study_error_next_card_failed">Nie udało się wczytać następnej karty.</string>
+    <string name="study_error_review_save_failed">Nie udało się zapisać powtórki.</string>
+    <string name="study_error_card_data_missing">Na tej karcie brakuje danych do nauki.</string>
+    <plurals name="study_complete_description">
+        <item quantity="one">Przerobiono %1$d kartę.</item>
+        <item quantity="few">Przerobiono %1$d karty.</item>
+        <item quantity="many">Przerobiono %1$d kart.</item>
+        <item quantity="other">Przerobiono %1$d karty.</item>
+    </plurals>
+    <string name="study_complete_supporting">Właśnie tak utrwalasz słownictwo.</string>
+    <string name="study_action_done_for_now">Na dziś wystarczy</string>
+    <string name="study_progress_count">%1$d z %2$d</string>
+    <string name="study_tap_to_flip">Dotknij, aby odwrócić</string>
+    <string name="study_tap_to_check">Dotknij, aby sprawdzić</string>
+    <string name="study_chip_source_only">tylko %1$s</string>
+    <string name="study_chip_fill_in">Uzupełnij</string>
+    <string name="study_chip_listen">Słuchanie</string>
+    <string name="study_prompt_recall_word">Przypomnij sobie słowo</string>
+    <string name="study_prompt_translate_to">Przetłumacz na %1$s</string>
+    <string name="study_fill_blank">Uzupełnij lukę</string>
+    <string name="study_play_word_audio">Odtwórz słowo</string>
+    <string name="study_play_prompt_audio">Odtwórz zadanie</string>
+    <string name="study_stop_audio">Zatrzymaj audio</string>
+    <string name="study_listen_prompt">Dotknij, aby odtworzyć. Jakie słowo słyszysz?</string>
+    <string name="study_rating_again">Jeszcze raz</string>
+    <string name="study_rating_hard">Trudne</string>
+    <string name="study_rating_good">Dobrze</string>
+    <string name="study_rating_easy">Łatwe</string>
+    <string name="favorites_study_due_title">DO POWTÓRKI</string>
+    <plurals name="favorites_study_due_count">
+        <item quantity="one">%1$d karta</item>
+        <item quantity="few">%1$d karty</item>
+        <item quantity="many">%1$d kart</item>
+        <item quantity="other">%1$d kart</item>
+    </plurals>
+    <string name="favorites_study_due_subtitle">Około %1$d min</string>
+    <string name="favorites_study_due_action">Rozpocznij powtórkę</string>
 </resources>

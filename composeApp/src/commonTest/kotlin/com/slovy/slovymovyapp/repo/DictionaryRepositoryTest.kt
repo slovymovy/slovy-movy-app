@@ -6,7 +6,9 @@ import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
 import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.local.LocalDbManager
+import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.data.settings.Setting
@@ -754,9 +756,9 @@ class DictionaryRepositoryTest : BaseTest() {
             val initialSuggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
             assertTrue(initialSuggestions.isNotEmpty(), "Should have initial suggestions")
 
-            // Add the first suggestion to favorites (using a dummy sense ID since we just need the lemma match)
+            // Add the first suggestion to favorites (using a stable UUID since FavoritesRepository syncs cards by ID)
             val wordToFavorite = initialSuggestions.first()
-            runBlocking { favoritesRepo.add("dummy-sense-id", Language.ENGLISH, wordToFavorite) }
+            runBlocking { favoritesRepo.add("00000000-0000-0000-0000-000000000999", Language.ENGLISH, wordToFavorite) }
 
             // Get suggestions again
             val newSuggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, offset = 5) }
@@ -768,6 +770,145 @@ class DictionaryRepositoryTest : BaseTest() {
             assertEquals(5, newSuggestions.size, "Should still return 5 suggestions after excluding favorite")
         } finally {
             runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+        }
+    }
+
+    @Test
+    fun loadRelatedWords_does_not_redirect_lemma_to_parent_when_also_a_form() {
+        // "vergieten" is both a standalone lemma (verb, online-only) and a form of "vergiet" (noun plural).
+        // When viewing "vergiet", the family chip for "vergieten" must navigate to the verb lemma
+        // "vergieten", not be hijacked by the form-fallback into navigating back to "vergiet".
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking { mgr.deleteDictionary(Language.DUTCH) }
+
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
+
+        try {
+            val q = localMgr.openLocalDictionary().dictionaryQueries
+
+            // "vergiet" (noun, offline) — the card we request; "vergieten" is its plural form
+            // and also its family member.  Higher zipf so it wins the form query ORDER BY.
+            val nounId = Uuid.random()
+            val nounPosId = Uuid.random()
+            q.insertLemma(nounId, "nl", "vergiet", "vergiet", 5.0, false)
+            q.insertLemmaPos(nounPosId, nounId, DictionaryPos.NOUN)
+            q.insertSense(
+                sense_id = Uuid.random(),
+                lemma_pos_id = nounPosId,
+                sense_definition = "colander",
+                learner_level = LearnerLevel.A2,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "g1",
+                name_type = null
+            )
+            q.insertForm(Uuid.random(), nounPosId, "vergieten", "vergieten", FormSource.NATIVE)
+            q.insertLemmaWordFamily(nounId, "vergieten")
+
+            // "vergieten" (verb, online-only) — a standalone lemma that shares its text with the
+            // noun's plural form.  Online-only so it would previously trigger the fallback.
+            val verbId = Uuid.random()
+            val verbPosId = Uuid.random()
+            q.insertLemma(verbId, "nl", "vergieten", "vergieten", 4.0, true)
+            q.insertLemmaPos(verbPosId, verbId, DictionaryPos.VERB)
+            q.insertSense(
+                sense_id = Uuid.random(),
+                lemma_pos_id = verbPosId,
+                sense_definition = "to spill",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "g2",
+                name_type = null
+            )
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+            val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "vergiet") }
+            assertNotNull(card, "Card should be built for 'vergiet'")
+
+            val resolved = card.relatedWords["vergieten"]
+            assertNotNull(resolved, "'vergieten' must be present in relatedWords of 'vergiet'")
+            assertEquals(
+                "vergieten", resolved.lemma,
+                "Online-only lemma 'vergieten' must not be redirected by form-fallback to parent 'vergiet'"
+            )
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
+        }
+    }
+
+    @Test
+    fun loadRelatedWords_local_standalone_lemma_overrides_ro_form_fallback() {
+        // "vergieten" appears only as a form of "vergiet" in the RO database (no standalone lemma
+        // there), and as a standalone offline lemma in the local database.
+        // The RO-first pass fires the form-fallback and writes an offline result pointing to
+        // "vergiet". The subsequent local pass must replace it with the direct lemma hit
+        // pointing to "vergieten", even though both results are offline.
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking { mgr.deleteDictionary(Language.DUTCH) }
+
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
+
+        val roDictPath = platform.getDatabasePath(DataDbManager.dictionaryFileName(Language.DUTCH))
+
+        try {
+            // Fake RO dictionary: "vergiet" noun with form "vergieten", no standalone "vergieten".
+            val roDriver = platform.createDictionaryDataDriver(roDictPath, readOnly = false)
+            val roQ = DatabaseProvider.createDictionaryDatabase(roDriver).dictionaryQueries
+            val nounId = Uuid.random()
+            val nounPosId = Uuid.random()
+            roQ.insertLemma(nounId, "nl", "vergiet", "vergiet", 5.0, false)
+            roQ.insertLemmaPos(nounPosId, nounId, DictionaryPos.NOUN)
+            roQ.insertSense(
+                sense_id = Uuid.random(),
+                lemma_pos_id = nounPosId,
+                sense_definition = "colander",
+                learner_level = LearnerLevel.A2,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "g1",
+                name_type = null
+            )
+            roQ.insertForm(Uuid.random(), nounPosId, "vergieten", "vergieten", FormSource.NATIVE)
+            roQ.insertLemmaWordFamily(nounId, "vergieten")
+            roDriver.close()
+
+            // Local dictionary: "vergieten" verb as a standalone offline lemma only.
+            val localQ = localMgr.openLocalDictionary().dictionaryQueries
+            val verbId = Uuid.random()
+            val verbPosId = Uuid.random()
+            localQ.insertLemma(verbId, "nl", "vergieten", "vergieten", 4.0, false)
+            localQ.insertLemmaPos(verbPosId, verbId, DictionaryPos.VERB)
+            localQ.insertSense(
+                sense_id = Uuid.random(),
+                lemma_pos_id = verbPosId,
+                sense_definition = "to spill",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "g2",
+                name_type = null
+            )
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+            val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "vergiet") }
+            assertNotNull(card, "Card should be built for 'vergiet'")
+
+            val resolved = card.relatedWords["vergieten"]
+            assertNotNull(resolved, "'vergieten' must be present in relatedWords of 'vergiet'")
+            assertEquals(
+                "vergieten", resolved.lemma,
+                "Standalone offline lemma in local DB must override the RO form-fallback result"
+            )
+        } finally {
+            localMgr.closeAll()
+            runBlocking { mgr.deleteDictionary(Language.DUTCH) }
+            if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
         }
     }
 
@@ -988,6 +1129,59 @@ class DictionaryRepositoryTest : BaseTest() {
             if (platform.fileExists(localTransPath)) {
                 platform.deleteFile(localTransPath)
             }
+        }
+    }
+
+    @Test
+    fun getLanguageCard_withMissingLocalTranslationDb_returnsBaseCardWithoutCreatingTranslationDb() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+
+        runBlocking {
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
+        if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
+        if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
+
+        try {
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
+            val localDictDb = localMgr.openLocalDictionary()
+            localDictDb.dictionaryQueries.apply {
+                insertLemma(lemmaId, "en", "missinglocaltranslation", "missinglocaltranslation", 5.0, false)
+                insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.NOUN)
+                insertSense(
+                    sense_id = senseId,
+                    lemma_pos_id = lemmaPosId,
+                    sense_definition = "base definition",
+                    learner_level = LearnerLevel.A1,
+                    frequency = SenseFrequency.HIGH,
+                    semantic_group_id = "sg",
+                    name_type = null,
+                )
+            }
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+            val card = runBlocking {
+                repo.getLanguageCard(
+                    Language.ENGLISH,
+                    "missinglocaltranslation",
+                    translationTargets = listOf(Language.RUSSIAN),
+                )
+            }
+
+            val sense = assertNotNull(card).entries.single().senses.single()
+            assertTrue(sense.translations.isEmpty())
+            assertTrue(sense.targetLangDefinitions.isEmpty())
+            assertFalse(platform.fileExists(localTransPath), "Read path must not create local translation DB")
+        } finally {
+            localMgr.closeAll()
+            if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
+            if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
         }
     }
 }

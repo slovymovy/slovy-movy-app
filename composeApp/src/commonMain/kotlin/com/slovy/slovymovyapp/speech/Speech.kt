@@ -4,6 +4,7 @@ import com.slovy.slovymovyapp.data.Language
 
 expect class TextToSpeechManager(androidContext: Any? = null) {
     fun speak(text: String)
+    fun speak(text: String, language: Language)
     fun stop()
     suspend fun getAvailableLanguages(): List<Text2SpeechLanguage>
     suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice>
@@ -11,7 +12,8 @@ expect class TextToSpeechManager(androidContext: Any? = null) {
     fun openSettings()
 
     fun setOnWordBoundaryListener(listener: (wordRange: IntRange) -> Unit)
-    fun setOnStatusChangeListener(listener: (status: TTSStatus) -> Unit)
+    fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit)
+    fun removeOnStatusChangeListener(key: Any)
 }
 
 data class Text2SpeechLanguage(

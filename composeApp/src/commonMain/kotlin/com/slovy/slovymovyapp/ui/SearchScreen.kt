@@ -44,8 +44,10 @@ import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
+import com.slovy.slovymovyapp.ui.icons.NoDictionaryIcon
 import com.slovy.slovymovyapp.ui.icons.SearchOtter
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
+import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
@@ -468,7 +470,7 @@ private fun SearchResultCard(
     showLanguageIndicator: Boolean = false,
     onClick: () -> Unit
 ) {
-    val containerColor = colorForLemma(item.lemma, MaterialTheme.colorScheme.surface)
+    val containerColor = colorForLemma(item.lemma, MaterialTheme.colorScheme.surface, LocalIsDarkTheme.current)
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -626,7 +628,7 @@ private fun EmptySearchState(
 
 @Composable
 private fun SuggestionCard(lemma: String, onClick: () -> Unit) {
-    val containerColor = colorForLemma(lemma, MaterialTheme.colorScheme.surface)
+    val containerColor = colorForLemma(lemma, MaterialTheme.colorScheme.surface, LocalIsDarkTheme.current)
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -657,34 +659,28 @@ private fun SuggestionCard(lemma: String, onClick: () -> Unit) {
 private fun NoDictionaryState(
     onNavigateToSettings: () -> Unit
 ) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .verticalScroll(rememberScrollState()),
+        contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
     ) {
-        Text(
-            text = stringResource(Res.string.search_no_dictionary_title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
+        EmptyState(
+            iconContent = {
+                Image(
+                    imageVector = SlovyIcons.NoDictionaryIcon,
+                    contentDescription = null,
+                    modifier = Modifier.size(180.dp)
+                )
+            },
+            title = stringResource(Res.string.search_no_dictionary_title),
+            description = stringResource(Res.string.search_no_dictionary_description),
+            action = {
+                FilledTonalButton(onClick = onNavigateToSettings) {
+                    Text(stringResource(Res.string.search_go_to_settings))
+                }
+            }
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(Res.string.search_no_dictionary_description),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        FilledTonalButton(onClick = onNavigateToSettings) {
-            Text(stringResource(Res.string.search_go_to_settings))
-        }
     }
 }
 

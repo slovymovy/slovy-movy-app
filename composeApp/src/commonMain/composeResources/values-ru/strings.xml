@@ -3,18 +3,18 @@
     <string name="common_app_name">OpenWords</string>
 
     <string name="nav_search">Поиск</string>
-    <string name="nav_favorites">Избранное</string>
+    <string name="nav_favorites">Мои слова</string>
     <string name="nav_word_detail">Слово</string>
     <string name="nav_settings">Настройки</string>
 
-    <string name="welcome_tagline">Глубокое погружение в язык\nдля тех, кто ценит детали.</string>
-    <string name="welcome_selling_point_translations_title">Больше, чем просто перевод</string>
-    <string name="welcome_selling_point_translations_description">Все значения, частотность, устойчивые фразы и живые примеры из речи.</string>
-    <string name="welcome_selling_point_collection_title">Личный словарь</string>
-    <string name="welcome_selling_point_collection_description">Сохраняйте слова в свою библиотеку и пополняйте словарный запас.</string>
-    <string name="welcome_selling_point_no_ads_title">Без рекламы и подписок</string>
-    <string name="welcome_selling_point_no_ads_description">Полный доступ без платных преград. Все данные хранятся только у вас.</string>
-    <string name="welcome_cta_explore_now">Выбрать языки</string>
+    <string name="welcome_tagline">Приложение, чтобы не просто искать слова, а учить их. Бесплатно.</string>
+    <string name="welcome_selling_point_translations_title">Ищите любые слова</string>
+    <string name="welcome_selling_point_translations_description">Примеры, формы, фразы и синонимы — всё в одном месте.</string>
+    <string name="welcome_selling_point_collection_title">Свой список слов</string>
+    <string name="welcome_selling_point_collection_description">Сохраняйте то, что хотите запомнить. Ваша подборка остается только на устройстве.</string>
+    <string name="welcome_selling_point_practice_title">Закрепляйте результат</string>
+    <string name="welcome_selling_point_practice_description">Интервальные повторения и разные режимы помогут по-настоящему запомнить новые слова.</string>
+    <string name="welcome_cta_explore_now">Начать</string>
 
     <string name="search_placeholder">Найти слово...</string>
     <string name="search_open_item">Открыть %1$s</string>
@@ -66,13 +66,15 @@
     <string name="favorites_title">Мои слова</string>
     <string name="favorites_loading">Загрузка...</string>
     <string name="favorites_search_placeholder">Найти слово...</string>
-    <string name="favorites_empty_title">Здесь пока пусто</string>
-    <string name="favorites_empty_description">Сохраняйте слова, которые хотите выучить или всегда иметь под рукой.</string>
-    <string name="favorites_empty_action_start_searching">Найти слово</string>
+    <string name="favorites_empty_title">Ваш список слов начинается здесь.</string>
+    <string name="favorites_empty_description">Найдите нужное слово и нажмите на сердечко, чтобы сохранить его для изучения.</string>
+    <string name="favorites_empty_action_start_searching">Начать поиск</string>
     <string name="favorites_no_results_title">В списке нет "%1$s"</string>
     <string name="favorites_no_results_description">Проверьте написание или поищите это слово во всём словаре.</string>
     <string name="favorites_no_results_action_search_dictionary">Искать в словаре</string>
     <string name="favorites_stats">%1$d значений · %2$d слов</string>
+    <string name="favorites_removed_message">Слово удалено</string>
+    <string name="favorites_removed_undo">Отменить</string>
 
     <string name="language_setup_title">Выбор языков</string>
     <string name="language_setup_subtitle">Укажите язык, который вы учите, и на каком показывать перевод.</string>
@@ -183,6 +185,8 @@
     <string name="acknowledgements_dictionary_extracts_body">Мы используем данные проекта Kaikki.org, извлечённые из Викисловаря с помощью инструмента wiktextract (автор — Тату Илонен).</string>
     <string name="acknowledgements_application_code_title">Исходный код</string>
     <string name="acknowledgements_application_code_body">Код приложения распространяется по лицензии CC-BY-SA-4.0.</string>
+    <string name="acknowledgements_fsrs_title">Алгоритм повторения FSRS</string>
+    <string name="acknowledgements_fsrs_body">Мы используем Kotlin-порт FSRS-Kotlin, распространяемый по лицензии MIT. FSRS изначально разработал Джарретт Йе совместно с сообществом Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Источники данных</string>
     <string name="acknowledgements_words_sources_body">Все материалы доступны по лицензии CC-BY-SA-4.0.</string>
     <string name="acknowledgements_thanks">Благодарим сообщество Викисловаря и Тату Илонена за свободный доступ к этим данным.</string>
@@ -429,4 +433,48 @@
     <string name="scheme_label_passive_adjectival_participle">страд. прич. (прил.)</string>
     <string name="scheme_label_contemporary_adverbial_participle">дееприч. (совр.)</string>
     <string name="scheme_label_verbal_noun">отглагольное сущ.</string>
+    <string name="study_action_close">Закрыть учебную сессию</string>
+    <string name="study_action_retry">Повторить</string>
+    <string name="study_loading">Готовим повторение…</string>
+    <string name="study_empty_title">Сейчас нечего повторять</string>
+    <string name="study_empty_description">Сохранённые слова появятся здесь, когда придёт время повторения.</string>
+    <string name="study_error_title">Не удалось загрузить карточку</string>
+    <string name="study_error_prepare_failed">Не удалось подготовить учебную сессию.</string>
+    <string name="study_error_next_card_failed">Не удалось загрузить следующую карточку.</string>
+    <string name="study_error_review_save_failed">Не удалось сохранить повторение.</string>
+    <string name="study_error_card_data_missing">В этой карточке не хватает данных для обучения.</string>
+    <plurals name="study_complete_description">
+        <item quantity="one">Пройдена %1$d карточка.</item>
+        <item quantity="few">Пройдено %1$d карточки.</item>
+        <item quantity="many">Пройдено %1$d карточек.</item>
+        <item quantity="other">Пройдено %1$d карточки.</item>
+    </plurals>
+    <string name="study_complete_supporting">Вот так слова и запоминаются.</string>
+    <string name="study_action_done_for_now">На сегодня хватит</string>
+    <string name="study_progress_count">%1$d из %2$d</string>
+    <string name="study_tap_to_flip">Нажмите, чтобы перевернуть</string>
+    <string name="study_tap_to_check">Нажмите, чтобы проверить</string>
+    <string name="study_chip_source_only">только %1$s</string>
+    <string name="study_chip_fill_in">Пропуск</string>
+    <string name="study_chip_listen">Аудирование</string>
+    <string name="study_prompt_recall_word">Вспомните слово</string>
+    <string name="study_prompt_translate_to">Переведите на %1$s</string>
+    <string name="study_fill_blank">Заполните пропуск</string>
+    <string name="study_play_word_audio">Воспроизвести слово</string>
+    <string name="study_play_prompt_audio">Воспроизвести задание</string>
+    <string name="study_stop_audio">Остановить аудио</string>
+    <string name="study_listen_prompt">Нажмите для воспроизведения. Какое слово вы слышите?</string>
+    <string name="study_rating_again">Снова</string>
+    <string name="study_rating_hard">Трудно</string>
+    <string name="study_rating_good">Хорошо</string>
+    <string name="study_rating_easy">Легко</string>
+    <string name="favorites_study_due_title">ЗАКРЕПИТЬ МАТЕРИАЛ</string>
+    <plurals name="favorites_study_due_count">
+        <item quantity="one">%1$d карточка</item>
+        <item quantity="few">%1$d карточки</item>
+        <item quantity="many">%1$d карточек</item>
+        <item quantity="other">%1$d карточек</item>
+    </plurals>
+    <string name="favorites_study_due_subtitle">около %1$d мин</string>
+    <string name="favorites_study_due_action">Начать повторение</string>
 </resources>

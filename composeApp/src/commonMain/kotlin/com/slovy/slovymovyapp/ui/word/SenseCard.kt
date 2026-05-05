@@ -29,6 +29,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
@@ -72,7 +73,7 @@ internal fun SenseCard(
             },
         shape = MaterialTheme.shapes.small,
         colors = CardDefaults.outlinedCardColors(
-            containerColor = colorForLemma(data.lemma, MaterialTheme.colorScheme.surface)
+            containerColor = colorForLemma(data.lemma, MaterialTheme.colorScheme.surface, LocalIsDarkTheme.current)
         ),
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
@@ -521,14 +522,22 @@ internal fun LanguageCardResponseSense.translationsHeader(): String? {
 private fun List<LanguageCardTranslation>.orderedByIdx(): List<LanguageCardTranslation> =
     sortedBy { it.idx }
 
-internal fun colorForLemma(lemma: String?, baseColor: Color): Color {
+internal fun colorForLemma(lemma: String?, baseColor: Color, isDark: Boolean = false): Color {
     if (lemma == null) return baseColor
 
     val hash = lemma.hashCode()
 
-    val hue = (hash and 0x3FF) / 1023f * 360f
+    val hue = if (isDark) {
+        200f + (hash and 0x3FF) / 1023f * 120f  // 200–320°: blue → purple
+    } else {
+        (hash and 0x3FF) / 1023f * 360f
+    }
     val saturation = 0.45f + ((hash shr 10) and 0x3F) / 63f * 0.30f
-    val lightness = 0.45f + ((hash shr 16) and 0x1F) / 31f * 0.20f
+    val lightness = if (isDark) {
+        0.55f + ((hash shr 16) and 0x1F) / 31f * 0.20f
+    } else {
+        0.45f + ((hash shr 16) and 0x1F) / 31f * 0.20f
+    }
     val tintColor = Color.hsl(hue = hue, saturation = saturation, lightness = lightness)
 
     val percent = 0.08f

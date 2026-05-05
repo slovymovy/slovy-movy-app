@@ -197,7 +197,9 @@ class DictionaryRepository(
             if (dataDbManager.hasDictionary(language)) {
                 add(dataDbManager.openDictionaryReadOnly(language))
             }
-            add(localDbManager.openLocalDictionary())
+            if (localDbManager.hasLocalDictionary()) {
+                add(localDbManager.openLocalDictionary())
+            }
         }
     }
 
@@ -207,11 +209,14 @@ class DictionaryRepository(
             if (dataDbManager.hasTranslation(src, tgt)) {
                 add(dataDbManager.openTranslationReadOnly(src, tgt))
             }
-            add(localDbManager.openLocalTranslation())
+            if (localDbManager.hasLocalTranslation()) {
+                add(localDbManager.openLocalTranslation())
+            }
         }
     }
 
     // Loads related words from all databases. Offline rows replace online-only rows.
+    // Direct lemma hits always beat form-fallback results, even offline ones from an earlier DB.
     private fun loadRelatedWords(
         databases: List<DictionaryDatabase>,
         language: Language,
@@ -222,10 +227,23 @@ class DictionaryRepository(
         val result = mutableMapOf<String, RelatedWord>()
         // Normalize to lowercase for case-insensitive matching (DB stores lemmas lowercase)
         val lookupWords = relatedWords.map { it.lowercase() }.toSet()
+        // Forms confirmed as standalone lemmas — the fallback must never redirect these to a parent.
+        val foundAsLemmaKeys = mutableSetOf<String>()
+        // Keys whose current result came from a form-fallback; a direct lemma hit may still override them.
+        val formFallbackKeys = mutableSetOf<String>()
 
-        fun putIfMissingOrOnline(key: String, relatedWord: RelatedWord) {
+        fun putFromLemma(key: String, relatedWord: RelatedWord) {
+            // A direct lemma hit wins over: (1) any online-only result, (2) any form-fallback result.
+            if (result[key]?.online != false || key in formFallbackKeys) {
+                result[key] = relatedWord
+                formFallbackKeys.remove(key)
+            }
+        }
+
+        fun putFromFallback(key: String, relatedWord: RelatedWord) {
             if (result[key]?.online != false) {
                 result[key] = relatedWord
+                formFallbackKeys.add(key)
             }
         }
 
@@ -234,20 +252,20 @@ class DictionaryRepository(
             q.selectLemmasByWords(language.code, lookupWords.toList())
                 .executeAsList()
                 .forEach { row ->
-                    putIfMissingOrOnline(
-                        row.lemma,
-                        relatedWord(row.lemma, row.zipf_frequency, row.online_only)
-                    )
+                    putFromLemma(row.lemma, relatedWord(row.lemma, row.zipf_frequency, row.online_only))
+                    foundAsLemmaKeys.add(row.lemma)
                 }
 
             // Fallback: resolve inflected forms (e.g. "Gebogen" → parent lemma "buigen").
+            // Only applies to forms that are not standalone lemmas; standalone lemmas navigate
+            // to themselves regardless of online/offline status.
             // Keep the form as the map key so chip text stays unchanged, while
             // RelatedWord.lemma points navigation at the parent lemma.
             lookupWords
-                .filter { form -> result[form]?.online != false }
+                .filter { form -> form !in foundAsLemmaKeys }
                 .forEach { form ->
                     q.resolveRelatedForm(language, form)?.let { relatedWord ->
-                        putIfMissingOrOnline(form, relatedWord)
+                        putFromFallback(form, relatedWord)
                     }
                 }
         }
@@ -338,7 +356,9 @@ class DictionaryRepository(
 
             // Build database list: local first, then RO
             val databases = buildList {
-                add(localDbManager.openLocalDictionary())
+                if (localDbManager.hasLocalDictionary()) {
+                    add(localDbManager.openLocalDictionary())
+                }
                 if (dataDbManager.hasDictionary(lang)) {
                     add(dataDbManager.openDictionaryReadOnly(lang))
                 }
@@ -507,8 +527,10 @@ class DictionaryRepository(
             for (tgt in targets) {
                 // Build translation database pairs: (translation DB, dictionary DB for lemma lookup)
                 val transDatabasePairs = buildList {
-                    add(localDbManager.openLocalTranslation() to localDbManager.openLocalDictionary())
-                    if (dataDbManager.hasTranslation(lang, tgt)) {
+                    if (localDbManager.hasLocalTranslation() && localDbManager.hasLocalDictionary()) {
+                        add(localDbManager.openLocalTranslation() to localDbManager.openLocalDictionary())
+                    }
+                    if (dataDbManager.hasTranslation(lang, tgt) && dataDbManager.hasDictionary(lang)) {
                         add(
                             dataDbManager.openTranslationReadOnly(lang, tgt) to
                                     dataDbManager.openDictionaryReadOnly(lang)
@@ -1060,10 +1082,13 @@ class DictionaryRepository(
         currentCoroutineContext().ensureActive()
 
         // Search the local translation DB
-        val localTransDb = localDbManager.openLocalTranslation()
-        val translationQueries = localTransDb.translationQueries
-        val results = searchSensesByTranslations(translationQueries, sourceLanguage, prefixStart, prefixEnd, senseUuids)
-        matchingSenseIds.addAll(results.map { it.toString() })
+        if (localDbManager.hasLocalTranslation()) {
+            val localTransDb = localDbManager.openLocalTranslation()
+            val translationQueries = localTransDb.translationQueries
+            val results =
+                searchSensesByTranslations(translationQueries, sourceLanguage, prefixStart, prefixEnd, senseUuids)
+            matchingSenseIds.addAll(results.map { it.toString() })
+        }
         matchingSenseIds
     }
 
@@ -1141,12 +1166,16 @@ class DictionaryRepository(
         var result = out.take(maxItems)
         val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
         if (onlineOnlyIds.isNotEmpty()) {
-            val localDb = localDbManager.openLocalDictionary()
-            val localLemmaIds = localDb.dictionaryQueries
-                .selectLemmasByIds(onlineOnlyIds)
-                .executeAsList()
-                .map { it.id }
-                .toSet()
+            val localLemmaIds = if (localDbManager.hasLocalDictionary()) {
+                val localDb = localDbManager.openLocalDictionary()
+                localDb.dictionaryQueries
+                    .selectLemmasByIds(onlineOnlyIds)
+                    .executeAsList()
+                    .map { it.id }
+                    .toSet()
+            } else {
+                emptySet()
+            }
 
             result = result.map { item ->
                 if (item.onlineOnly && item.lemmaId in localLemmaIds) {
