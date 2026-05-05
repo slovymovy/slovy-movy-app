@@ -120,7 +120,9 @@ fun LanguageSetupScreen(
         onNext = {
             val learning = viewModel.state.learningLanguage
             val native = viewModel.state.nativeLanguages.sortedBy { it.selfName }
-            Analytics.logEvent(AnalyticsEvent.LANG_TO_TRANSLATE_SELECTED, mapOf("lang" to native.joinToString(",") { it.code }))
+            native.forEach { language ->
+                Analytics.logEvent(AnalyticsEvent.LANG_TO_TRANSLATE_SELECTED, mapOf("lang" to language.code))
+            }
             if (learning != null) {
                 onNext(learning, native)
                 Analytics.logEvent(AnalyticsEvent.LANG_TO_LEARN_SELECTED, mapOf("lang" to learning.code))
