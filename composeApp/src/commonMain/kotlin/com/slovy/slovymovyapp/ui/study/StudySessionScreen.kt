@@ -69,7 +69,6 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.study_action_close
-import slovymovyapp.composeapp.generated.resources.study_action_done_for_now
 import slovymovyapp.composeapp.generated.resources.study_action_retry
 import slovymovyapp.composeapp.generated.resources.study_complete_description
 import slovymovyapp.composeapp.generated.resources.study_complete_supporting
@@ -202,6 +201,7 @@ fun StudySessionScreenContent(
 
         is StudySessionUiState.Complete -> StudySessionCompleteContent(
             reviewedCount = state.reviewedCount,
+            message = state.message,
             scrollState = completeScrollState,
             onClose = onEnd,
             modifier = modifier,
@@ -257,6 +257,7 @@ private fun StudySessionLoadingContent(
 @Composable
 private fun StudySessionCompleteContent(
     reviewedCount: Int,
+    message: String,
     scrollState: ScrollState,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
@@ -333,7 +334,7 @@ private fun StudySessionCompleteContent(
                 contentPadding = PaddingValues(horizontal = AppSpacing.lg),
             ) {
                 Text(
-                    text = stringResource(Res.string.study_action_done_for_now),
+                    text = message,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -1431,7 +1432,7 @@ private fun StudySessionCompletePreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
-            state = StudySessionUiState.Complete(reviewedCount = 12),
+            state = StudySessionUiState.Complete(reviewedCount = 12, message = "Goed gedaan!"),
             onCancel = {},
             onEnd = {},
         )

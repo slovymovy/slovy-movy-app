@@ -451,7 +451,6 @@
         <item quantity="other">%1$d cards completed.</item>
     </plurals>
     <string name="study_complete_supporting">That’s how words stick.</string>
-    <string name="study_action_done_for_now">Done for now</string>
     <string name="study_progress_count">%1$d of %2$d</string>
     <string name="study_tap_to_flip">Tap to flip</string>
     <string name="study_tap_to_check">Tap to check</string>

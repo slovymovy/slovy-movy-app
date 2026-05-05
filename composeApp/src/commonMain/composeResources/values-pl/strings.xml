@@ -451,7 +451,6 @@
         <item quantity="other">Przerobiono %1$d karty.</item>
     </plurals>
     <string name="study_complete_supporting">Właśnie tak utrwalasz słownictwo.</string>
-    <string name="study_action_done_for_now">Na dziś wystarczy</string>
     <string name="study_progress_count">%1$d z %2$d</string>
     <string name="study_tap_to_flip">Dotknij, aby odwrócić</string>
     <string name="study_tap_to_check">Dotknij, aby sprawdzić</string>

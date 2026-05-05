@@ -197,7 +197,10 @@ class StudySessionViewModel(
                                 state = if (reviewedCount == 0) {
                                     StudySessionUiState.Empty
                                 } else {
-                                    StudySessionUiState.Complete(reviewedCount)
+                                    StudySessionUiState.Complete(
+                                        reviewedCount = reviewedCount,
+                                        message = randomCompletionMessage(language),
+                                    )
                                 }
                             }
 
