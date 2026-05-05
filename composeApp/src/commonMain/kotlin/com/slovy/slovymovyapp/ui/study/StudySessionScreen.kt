@@ -27,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
@@ -425,37 +426,21 @@ private fun StudySessionActiveContent(
                 isPreparingAudio = state.isPreparingAudio,
                 onPlayAudio = onPlayAudio,
                 onStopAudio = onStopAudio,
+                onReveal = onReveal,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
             )
             Spacer(Modifier.height(AppSpacing.lg))
-            if (state.side == StudyCardSide.FRONT) {
-                Button(
-                    onClick = onReveal,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = MaterialTheme.shapes.extraLarge,
-                    contentPadding = PaddingValues(horizontal = AppSpacing.lg),
-                ) {
-                    Text(
-                        text = stringResource(
-                            if (state.card is StudyCardUiState.Recognition) {
-                                Res.string.study_tap_to_flip
-                            } else {
-                                Res.string.study_tap_to_check
-                            },
-                        ),
+            Box(Modifier.fillMaxWidth().height(56.dp)) {
+                if (state.side == StudyCardSide.BACK) {
+                    StudyRatingRow(
+                        ratings = state.ratingOptions,
+                        enabled = !state.isSubmittingReview,
+                        onRate = onRate,
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                     )
                 }
-            } else {
-                StudyRatingRow(
-                    ratings = state.ratingOptions,
-                    enabled = !state.isSubmittingReview,
-                    onRate = onRate,
-                    modifier = Modifier.fillMaxWidth(),
-                )
             }
         }
     }
@@ -542,34 +527,80 @@ private fun StudyCardSurface(
     isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
     onStopAudio: () -> Unit,
+    onReveal: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val flipLabel = stringResource(
+        if (card is StudyCardUiState.Recognition) Res.string.study_tap_to_flip else Res.string.study_tap_to_check,
+    )
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         tonalElevation = 0.dp,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(AppSpacing.xl),
-        ) {
-            StudyChip(label = card.chipLabel)
-            Spacer(Modifier.height(AppSpacing.xl))
-            if (side == StudyCardSide.FRONT) {
-                StudyCardFront(
-                    card = card,
-                    isPlayingAudio = isPlayingAudio,
-                    isPreparingAudio = isPreparingAudio,
-                    onPlayAudio = onPlayAudio,
-                    onStopAudio = onStopAudio,
+        if (side == StudyCardSide.FRONT) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(
+                            start = AppSpacing.xl,
+                            top = AppSpacing.xl,
+                            end = AppSpacing.xl,
+                            bottom = AppSpacing.xl + 88.dp,
+                        ),
+                ) {
+                    StudyChip(label = card.chipLabel)
+                    Spacer(Modifier.height(AppSpacing.xl))
+                    StudyCardFront(
+                        card = card,
+                        isPlayingAudio = isPlayingAudio,
+                        isPreparingAudio = isPreparingAudio,
+                        onPlayAudio = onPlayAudio,
+                        onStopAudio = onStopAudio,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 360.dp),
+                    )
+                }
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 360.dp),
-                )
-            } else {
+                        .height(88.dp)
+                        .align(Alignment.BottomCenter)
+                        .clip(MaterialTheme.shapes.extraLarge)
+                        .clickable(role = Role.Button, onClickLabel = flipLabel) { onReveal() },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            text = flipLabel,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(AppSpacing.xl),
+            ) {
+                StudyChip(label = card.chipLabel)
+                Spacer(Modifier.height(AppSpacing.xl))
                 StudyCardBack(
                     back = card.back,
                     isPlayingAudio = isPlayingAudio,
