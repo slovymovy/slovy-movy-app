@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.server.ai
 
 import com.google.genai.Client
 import com.google.genai.types.*
+import io.ktor.util.logging.KtorSimpleLogger
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -23,6 +24,7 @@ data class GeminiParameters(
 object Gemini {
 
     const val DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com"
+    private val logger = KtorSimpleLogger("Gemini")
 
     fun clientProvider(baseUrl: String = DEFAULT_BASE_URL): () -> Client = {
         val apiKey = System.getenv("AISTUDIO_KEY")?.takeIf { it.isNotBlank() } ?: run {
@@ -82,10 +84,12 @@ object Gemini {
             .build()
 
         val response = client.models.generateContent(parameters.model, contents, config)
-        if (response.text() == null) {
-            println(response)
+        val text = response.text()
+        if (text == null) {
+            logger.warn("Gemini returned a response without text: $response")
+            error("Gemini returned a response without text")
         }
-        return response.text()!!
+        return text
     }
 }
 

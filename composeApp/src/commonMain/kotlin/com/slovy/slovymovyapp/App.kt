@@ -120,6 +120,9 @@ fun App(
     val wordFetchManager = remember(dictionaryClient) {
         WordFetchManager(dictionaryClient)
     }
+    val favoriteLemmaRecovery = remember(favoritesRepository, dataManager, dictionaryRepository, wordFetchManager) {
+        FavoriteLemmaRecovery(favoritesRepository, dataManager, dictionaryRepository, wordFetchManager)
+    }
     val fsrsConfig = remember { FsrsDefaults.config() }
     val fsrsScheduler = remember(fsrsConfig) {
         FsrsScheduler(
@@ -179,7 +182,8 @@ fun App(
                 dictionaryClient,
                 appDataExporter,
                 settingsRepository,
-                buildConfig
+                buildConfig,
+                onDictionaryDataChanged = { favoritesViewModel.dropCachedFavoriteDetails() },
             )
         }
     val coroutineScope = rememberCoroutineScope()
@@ -380,6 +384,11 @@ fun App(
                                         cancelToken = cancel
                                     )
                                 }
+                            },
+                            finalize = {
+                                dictionaryRepository.clearSenseCache()
+                                favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                                favoritesViewModel.dropCachedFavoriteDetails()
                             },
                             onSuccess = {
                                 navController.navigate(AppDestination.Search) {
@@ -674,6 +683,7 @@ fun App(
                             dataManager.deleteAllDownloadedData()
                             localDbManager.deleteAll()
                             dictionaryRepository.clearSenseCache()
+                            favoritesViewModel.dropCachedFavoriteDetails()
                             val target = selectInitialDestination()
                             navController.navigate(target) {
                                 popUpTo<AppDestination.DataVersionMismatch> { inclusive = true }

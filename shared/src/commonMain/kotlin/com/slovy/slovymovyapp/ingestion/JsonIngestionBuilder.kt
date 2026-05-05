@@ -38,10 +38,12 @@ val LANG_TO_SOURCE_FILE: Map<String, String> = mapOf(
  *
  * @param translationDbProvider The database provider for opening translation databases
  * @param frequencyMap Map of lemma words to their Zipf frequency values
+ * @param warningLogger Optional warning sink for recoverable ingestion anomalies
  */
 class JsonIngestionBuilder(
     private val translationDbProvider: (from: String, to: String) -> TranslationDatabase,
-    private val frequencyMap: Map<String, Double>
+    private val frequencyMap: Map<String, Double>,
+    private val warningLogger: (String) -> Unit = {},
 ) {
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -518,7 +520,7 @@ class JsonIngestionBuilder(
             processed, senseIdToLemmaPosId, lemmaPosMapping, dictQ, word, skipMissingPos = true
         )
         if (skippedPos.isNotEmpty()) {
-            println("Warning: Skipped POS entries for lemma '$word': ${skippedPos.joinToString()}")
+            warningLogger("Skipped POS entries for lemma '$word': ${skippedPos.joinToString()}")
         }
 
         val translationOps = buildTranslationOperations(

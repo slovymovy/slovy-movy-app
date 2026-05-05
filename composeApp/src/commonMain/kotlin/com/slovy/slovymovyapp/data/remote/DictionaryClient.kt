@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
+import com.slovy.slovymovyapp.logging.AppLogger
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
@@ -85,6 +86,7 @@ class DictionaryClient(
 ) {
     companion object {
         const val PRODUCTION_SERVER_URL = "https://backend.openwords.ai"
+        private const val TAG = "DictionaryClient"
     }
 
     private val serverBaseUrl: String = baseUrl.trimEnd('/')
@@ -347,7 +349,8 @@ class DictionaryClient(
 
         val ingestionBuilder = JsonIngestionBuilder(
             translationDbProvider = { _, _ -> localDbManager.openLocalTranslation() },
-            frequencyMap = mapOf(lemma to frequency)
+            frequencyMap = mapOf(lemma to frequency),
+            warningLogger = { message -> AppLogger.warn(TAG, message, null) },
         )
 
         when (chunk.stage) {

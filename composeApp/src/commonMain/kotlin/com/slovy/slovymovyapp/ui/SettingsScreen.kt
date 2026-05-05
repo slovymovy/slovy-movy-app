@@ -109,7 +109,8 @@ class SettingsViewModel(
     private val dictionaryClient: DictionaryClient,
     private val appDataExporter: AppDataExporter,
     private val settingsRepository: SettingsRepository,
-    buildConfig: AppBuildConfig
+    buildConfig: AppBuildConfig,
+    private val onDictionaryDataChanged: () -> Unit = {},
 ) : ViewModel() {
 
     var state by mutableStateOf(
@@ -465,6 +466,7 @@ class SettingsViewModel(
             }
         ) {
             dictionaryRepository.clearSenseCache()
+            onDictionaryDataChanged()
             reloadSettings()
         }
     }
@@ -490,6 +492,7 @@ class SettingsViewModel(
             }
         ) {
             dictionaryRepository.clearSenseCache()
+            onDictionaryDataChanged()
             loadLearningLanguages()
         }
     }

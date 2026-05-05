@@ -18,7 +18,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -31,12 +30,14 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.icons.DownloadScreenTransparent
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
+import kotlin.time.Duration.Companion.milliseconds
 
 data class DownloadItem(
     val label: String,
@@ -48,6 +49,7 @@ class DownloadViewModel(
     private val downloadCoordinator: DownloadCoordinator,
     private val downloadKey: String,
     private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
+    private val finalize: suspend () -> Unit = {},
     private val onSuccess: suspend () -> Unit,
     private val onCancel: () -> Unit,
     private val onError: (Throwable) -> Unit,
@@ -141,11 +143,19 @@ class DownloadViewModel(
                         if (!terminalHandled) {
                             terminalHandled = true
                             downloadCoordinator.clear(downloadKey)
-                            for (i in 3 downTo 1) {
-                                state = DownloadUiState.Done(countdown = i)
-                                delay(1_000)
+                            try {
+                                state = DownloadUiState.Finalizing
+                                finalize()
+                                for (i in 3 downTo 1) {
+                                    state = DownloadUiState.Done(countdown = i)
+                                    delay(1_000.milliseconds)
+                                }
+                                onSuccess()
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                state = DownloadUiState.Failed(e)
                             }
-                            onSuccess()
                         }
                     }
 
@@ -341,6 +351,9 @@ fun DownloadScreenContent(
                 is DownloadUiState.Done ->
                     stringResource(Res.string.download_title_done) to stringResource(Res.string.download_subtitle_done)
 
+                is DownloadUiState.Finalizing ->
+                    stringResource(Res.string.download_title_setting_up) to stringResource(Res.string.download_subtitle_setting_up)
+
                 else -> if (hadConfirmation) {
                     stringResource(Res.string.download_title_downloading) to stringResource(Res.string.download_subtitle_downloading)
                 } else {
@@ -447,7 +460,8 @@ fun DownloadScreenContent(
                     }
                 }
 
-                is DownloadUiState.Idle -> {
+                is DownloadUiState.Idle,
+                is DownloadUiState.Finalizing -> {
                     val preparingContentDescription = stringResource(Res.string.download_content_desc_preparing)
                     CircularProgressIndicator(
                         modifier = Modifier.semantics {
@@ -532,6 +546,7 @@ sealed interface DownloadUiState {
     data class ReadyToDownload(val items: List<DownloadItem>) : DownloadUiState
     data object Idle : DownloadUiState
     data class Running(val percent: Int, val total: Long?, val currentFile: String? = null) : DownloadUiState
+    data object Finalizing : DownloadUiState
     data class Failed(val error: Throwable) : DownloadUiState
     data object Cancelled : DownloadUiState
     data class Done(val countdown: Int) : DownloadUiState
@@ -582,6 +597,16 @@ private fun DownloadScreenPreviewRunning(
 ) {
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(state = DownloadUiState.Running(percent = 42, total = 1000L))
+    }
+}
+
+@Preview
+@Composable
+private fun DownloadScreenPreviewFinalizing(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DownloadScreenContent(state = DownloadUiState.Finalizing)
     }
 }
 

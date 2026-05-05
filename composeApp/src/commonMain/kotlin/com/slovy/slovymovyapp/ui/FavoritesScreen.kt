@@ -98,6 +98,19 @@ sealed interface FavoritesUiState {
     }
 }
 
+internal fun FavoritesUiState.Content.withoutCachedFavoriteDetails(): FavoritesUiState.Content =
+    copy(senses = senses.map { it.withoutCachedDetails() })
+
+private fun FavoriteSenseItem.withoutCachedDetails(): FavoriteSenseItem =
+    copy(
+        sense = null,
+        relatedWords = emptyMap(),
+        pos = null,
+        expanded = false,
+        loading = false,
+        error = null,
+    )
+
 class FavoritesViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val dictionaryRepository: DictionaryRepository,
@@ -118,6 +131,12 @@ class FavoritesViewModel(
     /** Called from outside (e.g. word detail) when a favorite was just added. */
     fun requestScrollToTop() {
         pendingScrollToTop = true
+    }
+
+    /** Called after dictionary/local DB changes when loaded favorite details may be stale. */
+    fun dropCachedFavoriteDetails() {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.withoutCachedFavoriteDetails()
     }
 
     private val queryFlow = MutableStateFlow(QueryState("", Uuid.random(), runIntake = true))
@@ -171,7 +190,11 @@ class FavoritesViewModel(
 
     fun loadFavorites() {
         val currentQuery = (state as? FavoritesUiState.Content)?.query ?: ""
-        queryFlow.value = QueryState(currentQuery, Uuid.random(), runIntake = true)
+        queryFlow.value = QueryState(
+            query = currentQuery,
+            force = Uuid.random(),
+            runIntake = true,
+        )
     }
 
     fun setSelectedLanguage(language: Language) {
@@ -315,7 +338,10 @@ class FavoritesViewModel(
 
     /** Computes and applies favorites state. Exposed for tests; production code uses the
      *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
-    internal suspend fun loadAndApplyState(query: String, runIntake: Boolean = false) {
+    internal suspend fun loadAndApplyState(
+        query: String,
+        runIntake: Boolean = false,
+    ) {
         applyNewState(
             computeFavoritesState(
                 query = query,
