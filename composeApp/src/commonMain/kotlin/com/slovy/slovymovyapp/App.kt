@@ -547,6 +547,7 @@ fun App(
                         statsService = statsService,
                         clock = Clock.System,
                         ttsManager = ttsManager,
+                        voiceFilterHelper = voiceFilterHelper,
                     )
                 }
                 StudySessionScreen(
