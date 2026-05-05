@@ -18,6 +18,7 @@ import com.slovy.slovymovyapp.speech.TTSStatus
 import com.slovy.slovymovyapp.speech.Text2SpeechVoice
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
@@ -62,40 +63,49 @@ class StudySessionViewModel(
     }
 
     private fun loadVoices() {
-        val lang = language ?: return
         viewModelScope.launch {
             try {
-                val ttsLanguage = ttsManager.getAvailableLanguages()
-                    .firstOrNull { it.language == lang } ?: return@launch
-                val allVoices = ttsManager.getVoicesForLanguage(ttsLanguage)
-                if (!voiceFilterHelper.hasEnabledVoices(ttsLanguage)) {
-                    voiceFilterHelper.initializeDefaultVoices(ttsLanguage, allVoices)
-                }
-                availableVoices = voiceFilterHelper.filterVoicesByEnabled(allVoices, ttsLanguage)
-                if (availableVoices.isNotEmpty()) {
-                    currentVoiceIndex = availableVoices.indices.random()
-                }
+                loadVoicesSync()
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
                 availableVoices = emptyList()
             }
         }
     }
 
+    private suspend fun loadVoicesSync() {
+        val lang = language ?: return
+        val ttsLanguage = ttsManager.getAvailableLanguages()
+            .firstOrNull { it.language == lang } ?: return
+        val allVoices = ttsManager.getVoicesForLanguage(ttsLanguage)
+        if (!voiceFilterHelper.hasEnabledVoices(ttsLanguage)) {
+            voiceFilterHelper.initializeDefaultVoices(ttsLanguage, allVoices)
+        }
+        availableVoices = voiceFilterHelper.filterVoicesByEnabled(allVoices, ttsLanguage)
+        if (availableVoices.isNotEmpty()) {
+            currentVoiceIndex = availableVoices.indices.random()
+        }
+    }
+
     fun playAudio(text: String) {
         val active = state as? StudySessionUiState.Active ?: return
         state = active.copy(isPreparingAudio = true, isPlayingAudio = false)
-        try {
-            if (availableVoices.isNotEmpty()) {
-                currentVoiceIndex = (currentVoiceIndex + 1) % availableVoices.size
-                ttsManager.setVoice(availableVoices[currentVoiceIndex])
-                ttsManager.speak(text)
-            } else if (language != null) {
-                ttsManager.speak(text, language)
-            } else {
-                ttsManager.speak(text)
+        viewModelScope.launch {
+            try {
+                if (availableVoices.isEmpty()) loadVoicesSync()
+                if (availableVoices.isNotEmpty()) {
+                    currentVoiceIndex = (currentVoiceIndex + 1) % availableVoices.size
+                    ttsManager.setVoice(availableVoices[currentVoiceIndex])
+                    ttsManager.speak(text)
+                } else if (language != null) {
+                    ttsManager.speak(text, language)
+                } else {
+                    ttsManager.speak(text)
+                }
+            } catch (_: Exception) {
+                state = active.copy(isPreparingAudio = false, isPlayingAudio = false)
             }
-        } catch (_: Exception) {
-            state = active.copy(isPreparingAudio = false, isPlayingAudio = false)
         }
     }
 
