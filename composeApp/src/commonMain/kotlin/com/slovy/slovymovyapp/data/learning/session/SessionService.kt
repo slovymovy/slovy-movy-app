@@ -394,6 +394,9 @@ class SessionService(
             card.card.family == CardFamily.PRODUCE_WORD &&
                     stability >= config.contextUnlockStability -> CardFamily.PRODUCE_WORD_IN_CONTEXT
 
+            card.card.family == CardFamily.PRODUCE_WORD_IN_CONTEXT &&
+                    stability >= config.contextUnlockStability -> CardFamily.RECOGNIZE_VOICE
+
             else -> null
         } ?: return
 

@@ -7,14 +7,14 @@
     <string name="nav_word_detail">Słowo</string>
     <string name="nav_settings">Ustawienia</string>
 
-    <string name="welcome_tagline">Poznaj język od podszewki.\nSłownik dla ambitnych uczniów.</string>
-    <string name="welcome_selling_point_translations_title">Więcej niż proste tłumaczenia</string>
-    <string name="welcome_selling_point_translations_description">Wszystkie znaczenia, częstotliwość, typowe zwroty i żywe przykłady.</string>
-    <string name="welcome_selling_point_collection_title">Twoja kolekcja</string>
-    <string name="welcome_selling_point_collection_description">Zapisuj słowa w bibliotece i rozwijaj swoje słownictwo.</string>
-    <string name="welcome_selling_point_no_ads_title">Bez reklam i subskrypcji</string>
-    <string name="welcome_selling_point_no_ads_description">Pełen dostęp bez płatnych blokad. Dane pozostają na Twoim urządzeniu.</string>
-    <string name="welcome_cta_explore_now">Wybierz języki</string>
+    <string name="welcome_tagline">Aplikacja, by nie tylko sprawdzać słowa, ale faktycznie się ich uczyć. Za darmo.</string>
+    <string name="welcome_selling_point_translations_title">Wyszukuj dowolne słowa</string>
+    <string name="welcome_selling_point_translations_description">Przykłady, odmiany, zwroty i synonimy — wszystko w jednym miejscu.</string>
+    <string name="welcome_selling_point_collection_title">Twoja własna lista słówek</string>
+    <string name="welcome_selling_point_collection_description">Zapisuj to, co chcesz zapamiętać. Twoja kolekcja zostaje tylko na Twoim urządzeniu.</string>
+    <string name="welcome_selling_point_practice_title">Utrwalaj wiedzę</string>
+    <string name="welcome_selling_point_practice_description">Metoda powtórek i różne tryby pomogą Ci na dobre zapamiętać nowe słowa.</string>
+    <string name="welcome_cta_explore_now">Zacznij teraz</string>
 
     <string name="search_placeholder">Wyszukaj słowo...</string>
     <string name="search_open_item">Otwórz %1$s</string>
@@ -443,7 +443,6 @@
     <string name="study_error_next_card_failed">Nie udało się wczytać następnej karty.</string>
     <string name="study_error_review_save_failed">Nie udało się zapisać powtórki.</string>
     <string name="study_error_card_data_missing">Na tej karcie brakuje danych do nauki.</string>
-    <string name="study_complete_title">Świetna robota!</string>
     <plurals name="study_complete_description">
         <item quantity="one">Przerobiono %1$d kartę.</item>
         <item quantity="few">Przerobiono %1$d karty.</item>
@@ -469,7 +468,7 @@
     <string name="study_rating_hard">Trudne</string>
     <string name="study_rating_good">Dobrze</string>
     <string name="study_rating_easy">Łatwe</string>
-    <string name="favorites_study_due_title">DO POWTÓRKI DZISIAJ</string>
+    <string name="favorites_study_due_title">DO POWTÓRKI</string>
     <plurals name="favorites_study_due_count">
         <item quantity="one">%1$d karta</item>
         <item quantity="few">%1$d karty</item>
