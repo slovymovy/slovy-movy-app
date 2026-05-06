@@ -445,7 +445,7 @@ class FavoritesViewModel(
             val result = loaded[item.senseId]
             val sense = result?.sense
             val error = if (sense == null) {
-                result?.missingReason?.toFavoriteSenseLoadError()
+                result?.missingReason?.toFavoriteSenseLoadError(item.targetLang)
                     ?: UiText.Resource(Res.string.favorites_error_meaning_not_found)
             } else null
             updateSense(item.senseId) {
@@ -483,10 +483,13 @@ class FavoritesViewModel(
     }
 }
 
-private fun DictionaryRepository.FavoriteSenseMissingReason.toFavoriteSenseLoadError(): UiText {
+private fun DictionaryRepository.FavoriteSenseMissingReason.toFavoriteSenseLoadError(language: Language): UiText {
     return when (this) {
         DictionaryRepository.FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED ->
-            UiText.Resource(Res.string.favorites_error_dictionary_not_downloaded)
+            UiText.Resource(
+                Res.string.favorites_error_dictionary_not_downloaded,
+                args = listOf(language.selfName)
+            )
 
         DictionaryRepository.FavoriteSenseMissingReason.MEANING_NOT_FOUND ->
             UiText.Resource(Res.string.favorites_error_meaning_not_found)

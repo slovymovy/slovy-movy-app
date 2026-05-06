@@ -82,7 +82,7 @@
     <string name="favorites_stats">%1$d betekenissen · %2$d woorden</string>
     <string name="favorites_removed_message">Woord verwijderd</string>
     <string name="favorites_removed_undo">Ongedaan maken</string>
-    <string name="favorites_error_dictionary_not_downloaded">Woordenboek niet gedownload</string>
+    <string name="favorites_error_dictionary_not_downloaded">Download het %1$s-woordenboek in Instellingen</string>
     <string name="favorites_error_meaning_not_found">Betekenis niet gevonden</string>
     <string name="favorites_error_word_needs_download">Woord moet worden gedownload</string>
     <string name="favorites_error_load_meaning_failed">Betekenis laden mislukt</string>
