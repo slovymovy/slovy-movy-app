@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.shape.CircleShape
@@ -61,6 +63,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -694,10 +697,12 @@ private fun RecognitionFront(
     onStopAudio: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    BoxWithConstraints(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
     ) {
+        val availableWidth = maxWidth
+        val speakerSpace = if (card.promptAudioText != null) 36.dp + AppSpacing.sm else 0.dp
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
             verticalAlignment = Alignment.CenterVertically,
@@ -709,6 +714,13 @@ private fun RecognitionFront(
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = 14.sp,
+                    maxFontSize = MaterialTheme.typography.displayMedium.fontSize,
+                    stepSize = 1.sp,
+                ),
+                modifier = Modifier.widthIn(max = availableWidth - speakerSpace),
             )
             card.promptAudioText?.let { audioText ->
                 StudySpeakerButton(
@@ -906,9 +918,10 @@ private fun StudyCardBack(
             Spacer(Modifier.height(AppSpacing.xs))
         }
 
+        val headlineIsLemma = back.audioText != null
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
         ) {
             StudyTaggedText(
                 text = back.headline,
@@ -917,6 +930,12 @@ private fun StudyCardBack(
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Start,
+                maxLines = if (headlineIsLemma) 1 else Int.MAX_VALUE,
+                autoSize = if (headlineIsLemma) TextAutoSize.StepBased(
+                    minFontSize = 14.sp,
+                    maxFontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                    stepSize = 1.sp,
+                ) else null,
                 modifier = Modifier.weight(1f, fill = false),
             )
             back.audioText?.let { audioText ->
@@ -1130,6 +1149,8 @@ private fun StudyTaggedText(
     color: Color,
     modifier: Modifier = Modifier,
     textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    autoSize: TextAutoSize? = null,
 ) {
     val highlightColor = MaterialTheme.colorScheme.primary
     val annotated = buildAnnotatedString {
@@ -1148,13 +1169,26 @@ private fun StudyTaggedText(
             }
         }
     }
-    Text(
-        text = annotated,
-        style = style,
-        color = color,
-        textAlign = textAlign,
-        modifier = modifier,
-    )
+    if (autoSize != null) {
+        Text(
+            text = annotated,
+            style = style,
+            color = color,
+            textAlign = textAlign,
+            maxLines = maxLines,
+            autoSize = autoSize,
+            modifier = modifier,
+        )
+    } else {
+        Text(
+            text = annotated,
+            style = style,
+            color = color,
+            textAlign = textAlign,
+            maxLines = maxLines,
+            modifier = modifier,
+        )
+    }
 }
 
 @Composable
