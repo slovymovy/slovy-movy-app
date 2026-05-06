@@ -720,7 +720,7 @@ private fun RecognitionFront(
                     maxFontSize = MaterialTheme.typography.displayMedium.fontSize,
                     stepSize = 1.sp,
                 ),
-                modifier = Modifier.widthIn(max = availableWidth - speakerSpace),
+                modifier = Modifier.widthIn(max = (availableWidth - speakerSpace).coerceAtLeast(0.dp)),
             )
             card.promptAudioText?.let { audioText ->
                 StudySpeakerButton(
@@ -918,7 +918,7 @@ private fun StudyCardBack(
             Spacer(Modifier.height(AppSpacing.xs))
         }
 
-        val headlineIsLemma = back.audioText != null
+        val headlineIsLemma = back.isLemmaHeadline
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
             verticalAlignment = Alignment.Top,

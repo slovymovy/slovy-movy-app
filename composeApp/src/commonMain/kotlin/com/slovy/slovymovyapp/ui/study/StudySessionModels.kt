@@ -91,6 +91,7 @@ enum class StudyRecognitionMode {
 
 data class StudyCardBackUiState(
     val headline: String,
+    val isLemmaHeadline: Boolean = false,
     val secondary: String? = null,
     val definition: String? = null,
     val examples: List<StudyExampleUiState> = emptyList(),
