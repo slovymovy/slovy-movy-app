@@ -53,11 +53,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -93,6 +95,7 @@ import slovymovyapp.composeapp.generated.resources.study_listen_prompt
 import slovymovyapp.composeapp.generated.resources.study_loading
 import slovymovyapp.composeapp.generated.resources.study_play_prompt_audio
 import slovymovyapp.composeapp.generated.resources.study_play_word_audio
+import slovymovyapp.composeapp.generated.resources.study_hint_starts_with
 import slovymovyapp.composeapp.generated.resources.study_stop_audio
 import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
 import slovymovyapp.composeapp.generated.resources.study_progress_count
@@ -753,10 +756,15 @@ private fun ProductionFront(
                 modifier = Modifier.fillMaxWidth(),
             )
             card.firstLetterHint?.let { hint ->
+                val hintContentDescription = pluralStringResource(Res.plurals.study_hint_starts_with, hint.letterCount, hint.letter.toString(), hint.letterCount)
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.clearAndSetSemantics {
+                        role = Role.Image
+                        contentDescription = hintContentDescription
+                    },
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -764,17 +772,18 @@ private fun ProductionFront(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         Text(
-                            text = hint.take(1),
+                            text = hint.letter.toString(),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 0.sp,
+                            fontFamily = MaterialTheme.serifFontFamily,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = hint.drop(2),
+                            text = "·".repeat(hint.dotCount),
                             fontSize = 16.sp,
-                            fontFamily = FontFamily.Monospace,
-                            letterSpacing = 4.sp,
+                            fontFamily = MaterialTheme.serifFontFamily,
+                            letterSpacing = 8.sp,
                         )
                     }
                 }
@@ -1250,7 +1259,7 @@ private fun productionCard() = StudyCardUiState.Production(
     chipLabel = UiText.Plain("EN -> NL"),
     promptLabel = UiText.Resource(Res.string.study_prompt_translate_to, listOf("Dutch")),
     promptText = "cosy, sociable",
-    firstLetterHint = "g _ _ _ _ _ _ _ _",
+    firstLetterHint = FirstLetterHint(letter = 'g', letterCount = 8, dotCount = 7),
     back = StudyCardBackUiState(
         headline = "gezellig",
         secondary = "cosy, sociable",

@@ -464,6 +464,12 @@
     <string name="study_play_word_audio">Play word audio</string>
     <string name="study_play_prompt_audio">Play prompt audio</string>
     <string name="study_stop_audio">Stop audio</string>
+    <plurals name="study_hint_starts_with">
+        <item quantity="one">Hint: starts with %1$s, %2$d letter</item>
+        <item quantity="few">Hint: starts with %1$s, %2$d letters</item>
+        <item quantity="many">Hint: starts with %1$s, %2$d letters</item>
+        <item quantity="other">Hint: starts with %1$s, %2$d letters</item>
+    </plurals>
     <string name="study_listen_prompt">Tap to play. What word do you hear?</string>
     <string name="study_rating_again">Again</string>
     <string name="study_rating_hard">Hard</string>

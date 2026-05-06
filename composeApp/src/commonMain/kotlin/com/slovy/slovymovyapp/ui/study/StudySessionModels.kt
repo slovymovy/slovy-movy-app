@@ -2,6 +2,8 @@ package com.slovy.slovymovyapp.ui.study
 
 import com.slovy.slovymovyapp.i18n.UiText
 
+data class FirstLetterHint(val letter: Char, val letterCount: Int, val dotCount: Int)
+
 sealed interface StudySessionUiState {
     data class Loading(
         val progress: StudySessionProgressUiState? = null,
@@ -62,7 +64,7 @@ sealed interface StudyCardUiState {
         override val chipLabel: UiText,
         val promptLabel: UiText,
         val promptText: String,
-        val firstLetterHint: String? = null,
+        val firstLetterHint: FirstLetterHint? = null,
         override val back: StudyCardBackUiState,
     ) : StudyCardUiState
 
