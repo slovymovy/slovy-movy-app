@@ -57,7 +57,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -774,7 +773,6 @@ private fun ProductionFront(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.clearAndSetSemantics {
-                        role = Role.Image
                         contentDescription = hintContentDescription
                     },
                 ) {
@@ -792,10 +790,11 @@ private fun ProductionFront(
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = "·".repeat(hint.dotCount),
+                            text = "·".repeat(hint.dotCount.coerceAtMost(15)),
                             fontSize = 16.sp,
                             fontFamily = MaterialTheme.serifFontFamily,
                             letterSpacing = 8.sp,
+                            maxLines = 1,
                         )
                     }
                 }
