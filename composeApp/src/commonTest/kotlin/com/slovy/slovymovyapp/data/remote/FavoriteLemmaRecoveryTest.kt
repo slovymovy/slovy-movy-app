@@ -2,13 +2,14 @@ package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
+import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class FavoriteLemmaRecoveryTest {
+class FavoriteLemmaRecoveryTest : BaseTest() {
     private val sense1 = "00000000-0000-0000-0000-000000000001"
     private val sense2 = "00000000-0000-0000-0000-000000000002"
 
