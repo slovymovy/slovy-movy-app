@@ -36,7 +36,9 @@ fun buildTaskVariants(
 
         CardFamily.PRODUCE_WORD_IN_CONTEXT -> buildList {
             if (sense.examples.any { it.hasCloze() }) {
-                add(CardVariant(CardKind.CLOZE_SOURCE, targetLang = null))
+                targets
+                    .filter { target -> sense.examples.any { sense.hasTranslationCue(target) } }
+                    .forEach { add(CardVariant(CardKind.CLOZE_SOURCE, targetLang = it.code)) }
             }
             targets
                 .filter { target -> sense.examples.any { it.hasTranslatedCloze(target) } }

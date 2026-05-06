@@ -104,6 +104,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
         }
 
         CardKind.CLOZE_SOURCE -> {
+            val target = targetLanguage ?: return null
             val cloze = example?.toClozeText() ?: return null
             StudyCardUiState.Cloze(
                 id = card.id.toString(),
@@ -114,10 +115,10 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     ?.targetLangTranslations
                     ?.values
                     ?.firstOrNull(),
-                back = sourceBack(
+                back = sourceClozeBack(
                     lemma = lemma,
                     sense = sense,
-                    targetLanguage = null,
+                    targetLanguage = target,
                     cloze = cloze.copy(filled = true),
                 ),
             )
@@ -142,7 +143,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                 ),
                 prompt = cloze.copy(filled = true),
                 translationHint = null,
-                back = sourceBack(
+                back = sourceClozeBack(
                     lemma = lemma,
                     sense = sense,
                     targetLanguage = target,
@@ -196,14 +197,29 @@ private fun sourceBack(
     sense: LanguageCardResponseSense,
     targetLanguage: Language?,
     cloze: StudyClozeTextUiState? = null,
-    examples: List<StudyExampleUiState>? = null,
 ): StudyCardBackUiState =
     StudyCardBackUiState(
         headline = lemma,
         isLemmaHeadline = true,
         secondary = targetLanguage?.let { sense.translationWords(it) },
         definition = sense.senseDefinition,
-        examples = examples ?: sense.studyExamples(targetLanguage),
+        cloze = cloze,
+        audioText = lemma,
+    )
+
+private fun sourceClozeBack(
+    lemma: String,
+    sense: LanguageCardResponseSense,
+    targetLanguage: Language?,
+    cloze: StudyClozeTextUiState? = null,
+    examples: List<StudyExampleUiState> = emptyList(),
+): StudyCardBackUiState =
+    StudyCardBackUiState(
+        headline = lemma,
+        isLemmaHeadline = true,
+        secondary = targetLanguage?.let { sense.translationWords(it) },
+        definition = sense.senseDefinition,
+        examples = examples,
         cloze = cloze,
         audioText = lemma,
     )
