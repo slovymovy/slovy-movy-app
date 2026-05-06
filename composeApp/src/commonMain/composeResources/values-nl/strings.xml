@@ -271,10 +271,10 @@
     <string name="sense_frequency_low">Laag</string>
     <string name="sense_frequency_very_low">Zeer laag</string>
     <string name="pos_article">Lidwoord</string>
-    <string name="pos_noun">Zelfstandig naamwoord</string>
+    <string name="pos_noun">Zelfst. naamwoord</string>
     <string name="pos_name">Naam</string>
     <string name="pos_verb">Werkwoord</string>
-    <string name="pos_adjective">Bijvoeglijk naamwoord</string>
+    <string name="pos_adjective">Bijv. naamwoord</string>
     <string name="pos_adverb">Bijwoord</string>
     <string name="pos_pronoun">Voornaamwoord</string>
     <string name="pos_preposition">Voorzetsel</string>

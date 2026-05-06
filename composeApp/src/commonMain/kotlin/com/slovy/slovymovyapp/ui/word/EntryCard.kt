@@ -531,11 +531,10 @@ internal fun EntryCard(
                 pos = entry.pos,
                 meaningCount = if (showContent) entry.senses.size else null,
                 cardLoading = cardLoading,
-                cardError = cardError
+                cardError = cardError,
+                modifier = Modifier.weight(1f)
             )
             if (showContent) {
-                Spacer(modifier = Modifier.weight(1f))
-
                 if (entry.formsViews.isNotEmpty()) {
                     Box(
                         modifier = Modifier
