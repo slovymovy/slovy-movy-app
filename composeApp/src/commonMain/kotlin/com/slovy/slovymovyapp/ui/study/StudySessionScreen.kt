@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.shape.CircleShape
@@ -39,17 +41,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -84,6 +97,7 @@ import slovymovyapp.composeapp.generated.resources.study_listen_prompt
 import slovymovyapp.composeapp.generated.resources.study_loading
 import slovymovyapp.composeapp.generated.resources.study_play_prompt_audio
 import slovymovyapp.composeapp.generated.resources.study_play_word_audio
+import slovymovyapp.composeapp.generated.resources.study_hint_starts_with
 import slovymovyapp.composeapp.generated.resources.study_stop_audio
 import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
 import slovymovyapp.composeapp.generated.resources.study_progress_count
@@ -682,10 +696,12 @@ private fun RecognitionFront(
     onStopAudio: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    BoxWithConstraints(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
     ) {
+        val availableWidth = maxWidth
+        val speakerSpace = if (card.promptAudioText != null) 36.dp + AppSpacing.sm else 0.dp
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
             verticalAlignment = Alignment.CenterVertically,
@@ -697,6 +713,13 @@ private fun RecognitionFront(
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = 14.sp,
+                    maxFontSize = MaterialTheme.typography.displayMedium.fontSize,
+                    stepSize = 1.sp,
+                ),
+                modifier = Modifier.widthIn(max = (availableWidth - speakerSpace).coerceAtLeast(0.dp)),
             )
             card.promptAudioText?.let { audioText ->
                 StudySpeakerButton(
@@ -744,10 +767,14 @@ private fun ProductionFront(
                 modifier = Modifier.fillMaxWidth(),
             )
             card.firstLetterHint?.let { hint ->
+                val hintContentDescription = pluralStringResource(Res.plurals.study_hint_starts_with, hint.letterCount, hint.letter.toString(), hint.letterCount)
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.clearAndSetSemantics {
+                        contentDescription = hintContentDescription
+                    },
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -755,17 +782,19 @@ private fun ProductionFront(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         Text(
-                            text = hint.take(1),
+                            text = hint.letter.toString(),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 0.sp,
+                            fontFamily = MaterialTheme.serifFontFamily,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = hint.drop(2),
+                            text = "·".repeat(hint.dotCount.coerceAtMost(15)),
                             fontSize = 16.sp,
-                            fontFamily = FontFamily.Monospace,
-                            letterSpacing = 4.sp,
+                            fontFamily = MaterialTheme.serifFontFamily,
+                            letterSpacing = 8.sp,
+                            maxLines = 1,
                         )
                     }
                 }
@@ -888,9 +917,10 @@ private fun StudyCardBack(
             Spacer(Modifier.height(AppSpacing.xs))
         }
 
+        val headlineIsLemma = back.isLemmaHeadline
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
         ) {
             StudyTaggedText(
                 text = back.headline,
@@ -899,6 +929,12 @@ private fun StudyCardBack(
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Start,
+                maxLines = if (headlineIsLemma) 1 else Int.MAX_VALUE,
+                autoSize = if (headlineIsLemma) TextAutoSize.StepBased(
+                    minFontSize = 14.sp,
+                    maxFontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                    stepSize = 1.sp,
+                ) else null,
                 modifier = Modifier.weight(1f, fill = false),
             )
             back.audioText?.let { audioText ->
@@ -1054,35 +1090,54 @@ private fun StudyClozeText(
     val highlightColor = MaterialTheme.colorScheme.primary
     val highlightBackground = MaterialTheme.colorScheme.primaryContainer
     val blank = " ".repeat(cloze.answer.length.coerceAtLeast(6))
+
+    val prefixPlain = HtmlTagParser.plainText(cloze.prefix)
+    val answerPlain = HtmlTagParser.plainText(cloze.answer)
+    val highlightStart = prefixPlain.length
+    val highlightEnd = highlightStart + answerPlain.length
+
     val text = buildAnnotatedString {
-        append(HtmlTagParser.plainText(cloze.prefix))
+        append(prefixPlain)
         if (cloze.filled) {
-            pushStyle(
-                SpanStyle(
-                    color = highlightColor,
-                    background = highlightBackground,
-                    fontWeight = FontWeight.SemiBold,
-                ),
-            )
-            append(HtmlTagParser.plainText(cloze.answer))
+            pushStyle(SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold))
+            append(answerPlain)
             pop()
         } else {
-            pushStyle(
-                SpanStyle(
-                    color = highlightColor,
-                    textDecoration = TextDecoration.Underline,
-                ),
-            )
+            pushStyle(SpanStyle(color = highlightColor, textDecoration = TextDecoration.Underline))
             append(blank)
             pop()
         }
         append(HtmlTagParser.plainText(cloze.suffix))
     }
+
+    var layoutResult by remember(text) { mutableStateOf<TextLayoutResult?>(null) }
+
     Text(
         text = text,
         style = style,
         color = MaterialTheme.colorScheme.onSurface,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .drawBehind {
+                if (!cloze.filled) return@drawBehind
+                val layout = layoutResult ?: return@drawBehind
+                val startLine = layout.getLineForOffset(highlightStart)
+                val endLine = layout.getLineForOffset((highlightEnd - 1).coerceAtLeast(highlightStart))
+                for (line in startLine..endLine) {
+                    val lineRangeStart = maxOf(layout.getLineStart(line), highlightStart)
+                    val lineRangeEnd = minOf(layout.getLineEnd(line), highlightEnd)
+                    if (lineRangeStart >= lineRangeEnd) continue
+                    val startBound = layout.getBoundingBox(lineRangeStart)
+                    val endBound = layout.getBoundingBox((lineRangeEnd - 1).coerceAtLeast(lineRangeStart))
+                    drawRoundRect(
+                        color = highlightBackground,
+                        topLeft = Offset(startBound.left, layout.getLineTop(line)),
+                        size = Size(endBound.right - startBound.left, layout.getLineBottom(line) - layout.getLineTop(line)),
+                        cornerRadius = CornerRadius(4.dp.toPx()),
+                    )
+                }
+            },
+        onTextLayout = { layoutResult = it },
     )
 }
 
@@ -1093,6 +1148,8 @@ private fun StudyTaggedText(
     color: Color,
     modifier: Modifier = Modifier,
     textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    autoSize: TextAutoSize? = null,
 ) {
     val highlightColor = MaterialTheme.colorScheme.primary
     val annotated = buildAnnotatedString {
@@ -1111,13 +1168,26 @@ private fun StudyTaggedText(
             }
         }
     }
-    Text(
-        text = annotated,
-        style = style,
-        color = color,
-        textAlign = textAlign,
-        modifier = modifier,
-    )
+    if (autoSize != null) {
+        Text(
+            text = annotated,
+            style = style,
+            color = color,
+            textAlign = textAlign,
+            maxLines = maxLines,
+            autoSize = autoSize,
+            modifier = modifier,
+        )
+    } else {
+        Text(
+            text = annotated,
+            style = style,
+            color = color,
+            textAlign = textAlign,
+            maxLines = maxLines,
+            modifier = modifier,
+        )
+    }
 }
 
 @Composable
@@ -1222,7 +1292,7 @@ private fun productionCard() = StudyCardUiState.Production(
     chipLabel = UiText.Plain("EN -> NL"),
     promptLabel = UiText.Resource(Res.string.study_prompt_translate_to, listOf("Dutch")),
     promptText = "cosy, sociable",
-    firstLetterHint = "g _ _ _ _ _ _ _ _",
+    firstLetterHint = FirstLetterHint(letter = 'g', letterCount = 8, dotCount = 7),
     back = StudyCardBackUiState(
         headline = "gezellig",
         secondary = "cosy, sociable",

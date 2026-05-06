@@ -190,6 +190,7 @@ private fun sourceBack(
 ): StudyCardBackUiState =
     StudyCardBackUiState(
         headline = lemma,
+        isLemmaHeadline = true,
         secondary = targetLanguage?.let { sense.translationWords(it) },
         definition = sense.senseDefinition,
         examples = sense.studyExamples(targetLanguage),
@@ -231,13 +232,11 @@ private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
     )
 }
 
-private fun String.firstLetterHint(): String? {
+internal fun String.firstLetterHint(): FirstLetterHint? {
     val first = firstOrNull { it.isLetter() } ?: return null
-    val hiddenCount = count { it.isLetter() }.minus(1).coerceAtLeast(3)
-    return buildString {
-        append(first)
-        repeat(hiddenCount) { append(" _") }
-    }
+    val letterCount = count { it.isLetter() }
+    val dotCount = letterCount.minus(1).coerceAtLeast(3)
+    return FirstLetterHint(letter = first, letterCount = letterCount, dotCount = dotCount)
 }
 
 private fun Language.studyCode(): String = code.uppercase()
