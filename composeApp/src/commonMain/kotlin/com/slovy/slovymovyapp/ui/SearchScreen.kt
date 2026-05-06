@@ -41,6 +41,10 @@ import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.data.settings.Setting
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
@@ -74,7 +78,8 @@ data class SearchUiState(
 )
 
 class SearchViewModel(
-    private val repository: DictionaryRepository
+    private val repository: DictionaryRepository,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     data class Search(
@@ -100,6 +105,7 @@ class SearchViewModel(
 
     private val queryFlow = MutableStateFlow(Search("", state.selectedLanguage, Uuid.random()))
     private var suggestionsInitialized = false
+    private var savedSearchLanguage: Language? = null
 
     init {
         viewModelScope.launch {
@@ -129,8 +135,16 @@ class SearchViewModel(
                     }
                 }
         }
-        // Load initial suggestions
         viewModelScope.launch {
+            // Restore saved language before loading suggestions so they load for the right language.
+            val savedCode = settingsRepository.getById(Setting.Name.SEARCH_LANGUAGE)
+                ?.value?.jsonPrimitive?.content
+            val savedLang = savedCode?.let { Language.fromCodeOrNull(it) }
+            savedSearchLanguage = savedLang
+            if (savedLang != null && savedLang in state.availableLanguages && savedLang != state.selectedLanguage) {
+                state = state.copy(selectedLanguage = savedLang)
+                queryFlow.value = queryFlow.value.copy(language = savedLang)
+            }
             loadSuggestionsForCurrentLanguage()
             suggestionsInitialized = true
         }
@@ -192,17 +206,30 @@ class SearchViewModel(
 
     fun refreshLanguageIndicators() {
         val installed = repository.installedDictionaries()
-        state = state.copy(
-            availableLanguages = installed
-        )
-        if (state.selectedLanguage !in state.availableLanguages) {
-            setSelectedLanguage(state.availableLanguages.firstOrNull())
+        state = state.copy(availableLanguages = installed)
+        val preferred = savedSearchLanguage?.takeIf { it in installed }
+        val target = when {
+            state.selectedLanguage in installed && preferred == state.selectedLanguage -> return
+            state.selectedLanguage in installed && preferred != null -> preferred
+            else -> preferred ?: installed.firstOrNull()
         }
+        // Do not call setSelectedLanguage — that would overwrite the saved preference.
+        state = state.copy(selectedLanguage = target)
+        queryFlow.value = queryFlow.value.copy(language = target)
+        viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
     }
 
     fun setSelectedLanguage(language: Language?) {
         val langChanged = state.selectedLanguage != language
         state = state.copy(selectedLanguage = language)
+        savedSearchLanguage = language
+        viewModelScope.launch {
+            if (language != null) {
+                settingsRepository.insert(Setting(Setting.Name.SEARCH_LANGUAGE, JsonPrimitive(language.code)))
+            } else {
+                settingsRepository.deleteById(Setting.Name.SEARCH_LANGUAGE)
+            }
+        }
         // Re-trigger search with new language filter
         val normalized = state.query.trim()
         if (normalized.isNotEmpty()) {

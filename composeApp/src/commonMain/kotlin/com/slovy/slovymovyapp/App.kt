@@ -165,7 +165,7 @@ fun App(
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember {
-        FavoritesViewModel(favoritesRepository, dictionaryRepository, statsService, intakeService)
+        FavoritesViewModel(favoritesRepository, dictionaryRepository, statsService, intakeService, settingsRepository)
     }
     val buildConfig = remember { appBuildConfig }
     val settingsViewModel =
@@ -451,7 +451,7 @@ fun App(
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
                 ) {
-                    SearchViewModel(dictionaryRepository)
+                    SearchViewModel(dictionaryRepository, settingsRepository)
                 }
 
                 LaunchedEffect(pendingSearchQuery) {

@@ -35,6 +35,10 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.data.settings.Setting
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
@@ -99,6 +103,7 @@ class FavoritesViewModel(
     private val dictionaryRepository: DictionaryRepository,
     private val statsService: StatsService,
     private val intakeService: LearningIntake,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     var state by mutableStateOf<FavoritesUiState>(FavoritesUiState.Loading)
@@ -108,6 +113,7 @@ class FavoritesViewModel(
     val snackbarHostState = SnackbarHostState()
 
     private var pendingScrollToTop: Boolean = false
+    private var savedFavoritesLanguage: Language? = null
 
     /** Called from outside (e.g. word detail) when a favorite was just added. */
     fun requestScrollToTop() {
@@ -129,6 +135,11 @@ class FavoritesViewModel(
 
     init {
         viewModelScope.launch {
+            // Restore saved language before observing queryFlow so the first load uses the right language.
+            val savedCode = settingsRepository.getById(Setting.Name.FAVORITES_LANGUAGE)
+                ?.value?.jsonPrimitive?.content
+            savedFavoritesLanguage = savedCode?.let { Language.fromCodeOrNull(it) }
+
             @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
             queryFlow
                 .debounce(QUERY_DEBOUNCE_MS.milliseconds)
@@ -167,6 +178,10 @@ class FavoritesViewModel(
         val content = state as? FavoritesUiState.Content ?: return
         if (content.selectedLanguage == language) return
         state = content.copy(selectedLanguage = language)
+        savedFavoritesLanguage = language
+        viewModelScope.launch {
+            settingsRepository.insert(Setting(Setting.Name.FAVORITES_LANGUAGE, JsonPrimitive(language.code)))
+        }
         queryFlow.value = QueryState(content.query, Uuid.random(), runIntake = true)
     }
 
@@ -278,6 +293,7 @@ class FavoritesViewModel(
     ): Language? =
         when {
             availableLanguages.size <= 1 -> availableLanguages.firstOrNull()
+            savedFavoritesLanguage in availableLanguages -> savedFavoritesLanguage
             currentContent?.selectedLanguage in availableLanguages -> currentContent?.selectedLanguage
             else -> availableLanguages.firstOrNull()
         }

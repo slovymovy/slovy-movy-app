@@ -9,6 +9,7 @@ import com.slovy.slovymovyapp.data.learning.intake.IntakeResult
 import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.test.BaseTest
@@ -44,6 +45,14 @@ open class FavoritesViewModelTest : BaseTest() {
             IntakeResult(activated = emptyList(), skipped = emptyList(), cardsCreated = 0)
     }
 
+    @BeforeTest
+    fun setUp() = runTest {
+        // Clear persisted language prefs so tests don't see each other's selections.
+        val repo = SettingsRepository(testAppDatabaseHolder().database)
+        repo.deleteById(Setting.Name.FAVORITES_LANGUAGE)
+        repo.deleteById(Setting.Name.SEARCH_LANGUAGE)
+    }
+
     @AfterTest
     fun tearDown() {
         viewModelStore.clear()
@@ -71,8 +80,9 @@ open class FavoritesViewModelTest : BaseTest() {
         dictRepo: DictionaryRepository = dictionaryRepository(favRepo),
         statsService: StatsService = StatsService(testAppDatabaseHolder().database.favoritesQueries, clock = Clock.System),
         intakeService: LearningIntake = NoopIntake,
+        settingsRepo: SettingsRepository = SettingsRepository(testAppDatabaseHolder().database),
     ): FavoritesViewModel {
-        val vm = FavoritesViewModel(favRepo, dictRepo, statsService, intakeService)
+        val vm = FavoritesViewModel(favRepo, dictRepo, statsService, intakeService, settingsRepo)
         viewModelStore.put("test", vm)
         return vm
     }
