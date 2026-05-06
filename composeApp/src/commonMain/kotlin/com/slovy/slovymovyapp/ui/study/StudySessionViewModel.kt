@@ -19,9 +19,11 @@ import com.slovy.slovymovyapp.speech.Text2SpeechVoice
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -187,13 +189,19 @@ class StudySessionViewModel(
 
     private fun loadNextCard() {
         ttsManager.stop()
-        state = StudySessionUiState.Loading(nextCardProgress())
         viewModelScope.launch {
+            // Debounce the loading indicator: keep showing the previous card briefly so a
+            // fast-loading next card doesn't cause a visible Loading flash.
+            val showLoadingJob = launch {
+                delay(LOADING_DEBOUNCE_MS.milliseconds)
+                state = StudySessionUiState.Loading(nextCardProgress())
+            }
             runCatching {
                 sessionService.nextCard(langCode, sessionStartedAt)
                     .collect { sessionCard ->
                         when (sessionCard?.loadState()) {
                             null -> {
+                                showLoadingJob.cancel()
                                 state = if (reviewedCount == 0) {
                                     StudySessionUiState.Empty
                                 } else {
@@ -205,15 +213,19 @@ class StudySessionViewModel(
                             }
 
                             SessionCardLoadState.LOADING -> {
-                                state = StudySessionUiState.Loading(nextCardProgress())
+                                // Let showLoadingJob switch to Loading after the debounce.
                             }
 
                             SessionCardLoadState.READY,
                             SessionCardLoadState.ERROR,
-                                -> showLoadedCard(sessionCard)
+                                -> {
+                                showLoadingJob.cancel()
+                                showLoadedCard(sessionCard)
+                            }
                         }
                     }
             }.onFailure { error ->
+                showLoadingJob.cancel()
                 state = StudySessionUiState.Error(
                     message = error.message?.let(UiText::Plain)
                         ?: UiText.Resource(Res.string.study_error_next_card_failed),
@@ -253,5 +265,9 @@ class StudySessionViewModel(
         super.onCleared()
         ttsManager.removeOnStatusChangeListener(this)
         ttsManager.stop()
+    }
+
+    companion object {
+        private const val LOADING_DEBOUNCE_MS = 150L
     }
 }

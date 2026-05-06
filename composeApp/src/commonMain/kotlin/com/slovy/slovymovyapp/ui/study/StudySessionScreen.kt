@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material.icons.Icons
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import androidx.compose.material.icons.filled.Close
@@ -78,7 +79,6 @@ import com.slovy.slovymovyapp.ui.icons.ImageOtterSessionComplete
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
-import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
@@ -245,7 +245,7 @@ private fun StudySessionLoadingContent(
                 onClose = onClose,
             )
             Spacer(Modifier.height(AppSpacing.md))
-            StudySegmentProgress(progress = progress)
+            StudyProgressBar(progress = progress)
             Spacer(Modifier.height(AppSpacing.md))
             Surface(
                 modifier = Modifier
@@ -431,7 +431,7 @@ private fun StudySessionActiveContent(
                 onClose = onClose,
             )
             Spacer(Modifier.height(AppSpacing.md))
-            StudySegmentProgress(progress = state.progress)
+            StudyProgressBar(progress = state.progress)
             Spacer(Modifier.height(AppSpacing.md))
             StudyCardSurface(
                 card = state.card,
@@ -497,39 +497,27 @@ private fun StudySessionTopBar(
 }
 
 @Composable
-private fun StudySegmentProgress(
+private fun StudyProgressBar(
     progress: StudySessionProgressUiState,
     modifier: Modifier = Modifier,
 ) {
     val total = progress.safeTotal.coerceAtLeast(1)
-    val segments = total.coerceAtMost(20)
-    val filledSegments = if (total <= 20) {
-        progress.safeCurrent.coerceIn(0, segments)
-    } else {
-        ((progress.safeCurrent.toFloat() / total) * segments)
-            .roundToInt()
-            .coerceIn(if (progress.safeCurrent > 0) 1 else 0, segments)
-    }
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs),
+    val target = (progress.safeCurrent.toFloat() / total).coerceIn(0f, 1f)
+    val fraction by animateFloatAsState(targetValue = target, label = "studyProgress")
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(4.dp)
+            .clip(MaterialTheme.shapes.extraSmall)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
     ) {
-        repeat(segments) { index ->
-            val selected = index < filledSegments
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(4.dp)
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .background(
-                        if (selected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerHighest
-                        },
-                    ),
-            )
-        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(fraction)
+                .fillMaxHeight()
+                .clip(MaterialTheme.shapes.extraSmall)
+                .background(MaterialTheme.colorScheme.primary),
+        )
     }
 }
 
