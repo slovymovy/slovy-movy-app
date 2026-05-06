@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
@@ -84,7 +85,9 @@ fun PartOfSpeechIndicator(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.2.sp
                 ),
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         } else if (cardLoading) {
             Text(
