@@ -53,14 +53,13 @@ class StudySessionMapperTest {
         assertEquals("gezellig", mapped.back.headline)
         assertEquals("cosy, sociable", mapped.back.secondary)
         assertEquals("a feeling of warmth", mapped.back.definition)
-        assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
-        assertEquals("It was so cosy.", mapped.back.examples.single().translation)
+        assertEquals(emptyList(), mapped.back.examples)
     }
 
     @Test
     fun mapsSourceClozeCard() {
         val sessionCard = sessionCard(
-            variant = CardVariant(CardKind.CLOZE_SOURCE, targetLang = null),
+            variant = CardVariant(CardKind.CLOZE_SOURCE, targetLang = Language.ENGLISH.code),
             example = ExamplePair(
                 exampleIndex = 0,
                 text = "Het was zo gezellig.",
@@ -73,6 +72,7 @@ class StudySessionMapperTest {
         assertEquals("Het was zo ", mapped.prompt.prefix)
         assertEquals("gezellig", mapped.prompt.answer)
         assertEquals(".", mapped.prompt.suffix)
+        assertEquals("It was so cosy.", mapped.translationHint)
         assertNotNull(mapped.back.cloze)
         assertEquals("gezellig", mapped.back.headline)
     }

@@ -105,11 +105,11 @@ class SettingsViewModel(
     private val voiceFilterHelper: VoiceFilterHelper,
     private val dataDbManager: DataDbManager,
     private val downloadCoordinator: DownloadCoordinator,
-    private val dictionaryRepository: DictionaryRepository,
     private val dictionaryClient: DictionaryClient,
     private val appDataExporter: AppDataExporter,
     private val settingsRepository: SettingsRepository,
-    buildConfig: AppBuildConfig
+    buildConfig: AppBuildConfig,
+    private val onDictionaryDataChanged: suspend (recoverFavorites: Boolean) -> Unit = { _ -> },
 ) : ViewModel() {
 
     var state by mutableStateOf(
@@ -333,7 +333,7 @@ class SettingsViewModel(
                 val current = state.translationLanguages
                 val jsonArray = JsonArray(current.sortedBy { it.ordinal }.map { JsonPrimitive(it.code) })
                 settingsRepository.insert(Setting(Setting.Name.LANGUAGE, jsonArray))
-                dictionaryRepository.clearSenseCache()
+                onDictionaryDataChanged(false)
                 loadLearningLanguages()
             } catch (e: CancellationException) {
                 throw e
@@ -384,7 +384,7 @@ class SettingsViewModel(
                     .forEach { downloadCoordinator.cancel(it) }
 
                 dataDbManager.deleteDictionary(language)
-                dictionaryRepository.clearSenseCache()
+                onDictionaryDataChanged(false)
 
                 // If deleted dictionary was the active one, switch to another or clear
                 val activeDictCode = settingsRepository
@@ -430,7 +430,7 @@ class SettingsViewModel(
             viewModelScope.launch {
                 try {
                     dataDbManager.deleteTranslation(src, tgt)
-                    dictionaryRepository.clearSenseCache()
+                    onDictionaryDataChanged(false)
                     loadLearningLanguages()
                     showSnackbar(toastMsg)
                 } catch (e: Exception) {
@@ -464,7 +464,7 @@ class SettingsViewModel(
                 UiText.Resource(Res.string.settings_error_download_dictionary_with_reason, listOf(reason))
             }
         ) {
-            dictionaryRepository.clearSenseCache()
+            onDictionaryDataChanged(true)
             reloadSettings()
         }
     }
@@ -489,7 +489,7 @@ class SettingsViewModel(
                 UiText.Resource(Res.string.settings_error_download_translation_with_reason, listOf(reason))
             }
         ) {
-            dictionaryRepository.clearSenseCache()
+            onDictionaryDataChanged(false)
             loadLearningLanguages()
         }
     }

@@ -37,25 +37,29 @@ import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonPrimitive
+import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
-import com.slovy.slovymovyapp.ui.theme.AppSpacing
-import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.icons.NoFavsImage
 import com.slovy.slovymovyapp.ui.icons.SearchOtter
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
-import com.slovy.slovymovyapp.ui.word.*
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.word.LoadingPlaceholder
+import com.slovy.slovymovyapp.ui.word.SenseCard
+import com.slovy.slovymovyapp.ui.word.SenseCardData
+import com.slovy.slovymovyapp.ui.word.SenseUiState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.format.char
-import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -69,7 +73,7 @@ data class FavoriteSenseItem(
     val pos: PartOfSpeech? = null,
     val expanded: Boolean = false,
     val loading: Boolean = false,
-    val error: String? = null
+    val error: UiText? = null
 )
 
 data class FavoritesStudyUiState(
@@ -98,6 +102,19 @@ sealed interface FavoritesUiState {
     }
 }
 
+internal fun FavoritesUiState.Content.withoutCachedFavoriteDetails(): FavoritesUiState.Content =
+    copy(senses = senses.map { it.withoutCachedDetails() })
+
+private fun FavoriteSenseItem.withoutCachedDetails(): FavoriteSenseItem =
+    copy(
+        sense = null,
+        relatedWords = emptyMap(),
+        pos = null,
+        expanded = false,
+        loading = false,
+        error = null,
+    )
+
 class FavoritesViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val dictionaryRepository: DictionaryRepository,
@@ -118,6 +135,12 @@ class FavoritesViewModel(
     /** Called from outside (e.g. word detail) when a favorite was just added. */
     fun requestScrollToTop() {
         pendingScrollToTop = true
+    }
+
+    /** Called after dictionary/local DB changes when loaded favorite details may be stale. */
+    fun dropCachedFavoriteDetails() {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.withoutCachedFavoriteDetails()
     }
 
     private val queryFlow = MutableStateFlow(QueryState("", Uuid.random(), runIntake = true))
@@ -171,7 +194,11 @@ class FavoritesViewModel(
 
     fun loadFavorites() {
         val currentQuery = (state as? FavoritesUiState.Content)?.query ?: ""
-        queryFlow.value = QueryState(currentQuery, Uuid.random(), runIntake = true)
+        queryFlow.value = QueryState(
+            query = currentQuery,
+            force = Uuid.random(),
+            runIntake = true,
+        )
     }
 
     fun setSelectedLanguage(language: Language) {
@@ -315,7 +342,10 @@ class FavoritesViewModel(
 
     /** Computes and applies favorites state. Exposed for tests; production code uses the
      *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
-    internal suspend fun loadAndApplyState(query: String, runIntake: Boolean = false) {
+    internal suspend fun loadAndApplyState(
+        query: String,
+        runIntake: Boolean = false,
+    ) {
         applyNewState(
             computeFavoritesState(
                 query = query,
@@ -407,20 +437,33 @@ class FavoritesViewModel(
     private suspend fun loadSense(item: FavoriteSenseItem) {
         updateSense(item.senseId) { it.copy(loading = true, error = null) }
         try {
-            val loaded = dictionaryRepository.getSenses(item.targetLang, item.lemma, setOf(item.senseId))
+            val loaded = dictionaryRepository.getSenses(
+                item.targetLang,
+                item.lemma,
+                setOf(item.senseId),
+            )
             val result = loaded[item.senseId]
+            val sense = result?.sense
+            val error = if (sense == null) {
+                result?.missingReason?.toFavoriteSenseLoadError(item.targetLang)
+                    ?: UiText.Resource(Res.string.favorites_error_meaning_not_found)
+            } else null
             updateSense(item.senseId) {
                 it.copy(
-                    sense = result?.sense,
-                    relatedWords = result?.relatedWords ?: it.relatedWords,
-                    pos = result?.pos,
+                    sense = sense?.sense,
+                    relatedWords = sense?.relatedWords ?: it.relatedWords,
+                    pos = sense?.pos,
                     loading = false,
-                    error = if (result == null) "Meaning not found" else null
+                    error = error
                 )
             }
         } catch (e: Throwable) {
             updateSense(item.senseId) {
-                it.copy(loading = false, error = e.message ?: "Failed to load meaning")
+                it.copy(
+                    loading = false,
+                    error = e.message?.let(UiText::Plain)
+                        ?: UiText.Resource(Res.string.favorites_error_load_meaning_failed)
+                )
             }
         }
     }
@@ -437,6 +480,22 @@ class FavoritesViewModel(
         val safeRange = range.first.coerceAtLeast(0)..minOf(range.last, senses.lastIndex)
         if (safeRange.isEmpty()) return
         prefetchSenses(senses.slice(safeRange).take(PREFETCH_LIMIT))
+    }
+}
+
+private fun DictionaryRepository.FavoriteSenseMissingReason.toFavoriteSenseLoadError(language: Language): UiText {
+    return when (this) {
+        DictionaryRepository.FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED ->
+            UiText.Resource(
+                Res.string.favorites_error_dictionary_not_downloaded,
+                args = listOf(language.selfName)
+            )
+
+        DictionaryRepository.FavoriteSenseMissingReason.MEANING_NOT_FOUND ->
+            UiText.Resource(Res.string.favorites_error_meaning_not_found)
+
+        DictionaryRepository.FavoriteSenseMissingReason.ONLINE_ONLY ->
+            UiText.Resource(Res.string.favorites_error_word_needs_download)
     }
 }
 
@@ -663,106 +722,109 @@ fun FavoritesScreenContent(
                             }
                     ) {
                         when {
-                        !state.hasAnyFavorites -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
-                            ) {
-                                EmptyState(
-                                    iconContent = {
-                                        Image(
-                                            imageVector = SlovyIcons.NoFavsImage,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(180.dp)
-                                        )
-                                    },
-                                    title = stringResource(Res.string.favorites_empty_title),
-                                    description = stringResource(Res.string.favorites_empty_description),
-                                    action = {
-                                        FilledTonalButton(onClick = onNavigateToSearch) {
-                                            Text(stringResource(Res.string.favorites_empty_action_start_searching))
+                            !state.hasAnyFavorites -> {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
+                                ) {
+                                    EmptyState(
+                                        iconContent = {
+                                            Image(
+                                                imageVector = SlovyIcons.NoFavsImage,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(180.dp)
+                                            )
+                                        },
+                                        title = stringResource(Res.string.favorites_empty_title),
+                                        description = stringResource(Res.string.favorites_empty_description),
+                                        action = {
+                                            FilledTonalButton(onClick = onNavigateToSearch) {
+                                                Text(stringResource(Res.string.favorites_empty_action_start_searching))
+                                            }
                                         }
-                                    }
-                                )
-                            }
-                        }
-
-                        state.showNoResults -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
-                            ) {
-                                EmptyState(
-                                    iconContent = {
-                                        Image(
-                                            imageVector = SlovyIcons.SearchOtter,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(140.dp)
-                                        )
-                                    },
-                                    title = stringResource(Res.string.favorites_no_results_title, state.query),
-                                    description = stringResource(Res.string.favorites_no_results_description),
-                                    action = {
-                                        FilledTonalButton(
-                                            onClick = { onSearchInDictionary(state.query) }
-                                        ) {
-                                            Text(stringResource(Res.string.favorites_no_results_action_search_dictionary))
-                                        }
-                                    }
-                                )
-                            }
-                        }
-
-                        else -> {
-                            Column(modifier = Modifier.fillMaxSize()) {
-                                val words = state.senses.distinctBy { it.lemma }
-                                state.study?.let { study ->
-                                    StudyDueCard(
-                                        study = study,
-                                        onStartStudy = { onStartStudy(study.language) },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 8.dp),
                                     )
                                 }
-                                Text(
-                                    text = stringResource(
-                                        Res.string.favorites_stats,
-                                        state.senses.size,
-                                        words.size
-                                    ),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
-                                )
+                            }
 
-                                LazyColumn(
-                                    state = scrollState,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    contentPadding = PaddingValues(bottom = 16.dp)
+                            state.showNoResults -> {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
                                 ) {
-                                    items(state.senses, key = { it.senseId }, contentType = { "sense_card" }) { item ->
-                                        FavoriteSenseCard(
-                                            item = item,
-                                            onToggle = { onSenseToggle(item.senseId) },
-                                            onFavoriteToggle = { onFavoriteToggle(item.senseId) },
-                                            onViewFullDetails = {
-                                                onNavigateToWordDetail(item.targetLang, item.lemma, item.senseId)
-                                            },
-                                            onWordClick = { word ->
-                                                Analytics.logEvent(AnalyticsEvent.FAVORITES_WORD_SHOW)
-                                                onNavigateToWordDetail(item.targetLang, word, null)
-                                            },
-                                            favoriteLemmas = state.favoriteLemmas
+                                    EmptyState(
+                                        iconContent = {
+                                            Image(
+                                                imageVector = SlovyIcons.SearchOtter,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(140.dp)
+                                            )
+                                        },
+                                        title = stringResource(Res.string.favorites_no_results_title, state.query),
+                                        description = stringResource(Res.string.favorites_no_results_description),
+                                        action = {
+                                            FilledTonalButton(
+                                                onClick = { onSearchInDictionary(state.query) }
+                                            ) {
+                                                Text(stringResource(Res.string.favorites_no_results_action_search_dictionary))
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+
+                            else -> {
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    val words = state.senses.distinctBy { it.lemma }
+                                    state.study?.let { study ->
+                                        StudyDueCard(
+                                            study = study,
+                                            onStartStudy = { onStartStudy(study.language) },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 8.dp),
                                         )
+                                    }
+                                    Text(
+                                        text = stringResource(
+                                            Res.string.favorites_stats,
+                                            state.senses.size,
+                                            words.size
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+                                    )
+
+                                    LazyColumn(
+                                        state = scrollState,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(bottom = 16.dp)
+                                    ) {
+                                        items(
+                                            state.senses,
+                                            key = { it.senseId },
+                                            contentType = { "sense_card" }) { item ->
+                                            FavoriteSenseCard(
+                                                item = item,
+                                                onToggle = { onSenseToggle(item.senseId) },
+                                                onFavoriteToggle = { onFavoriteToggle(item.senseId) },
+                                                onViewFullDetails = {
+                                                    onNavigateToWordDetail(item.targetLang, item.lemma, item.senseId)
+                                                },
+                                                onWordClick = { word ->
+                                                    Analytics.logEvent(AnalyticsEvent.FAVORITES_WORD_SHOW)
+                                                    onNavigateToWordDetail(item.targetLang, word, null)
+                                                },
+                                                favoriteLemmas = state.favoriteLemmas
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
                     }
                 }
             }
@@ -796,7 +858,7 @@ private fun FavoriteSenseCard(
             sense = item.sense,
             pos = item.pos,
             loading = item.loading,
-            error = item.error,
+            error = item.error?.resolve(),
             diagnosticInfoOnError = buildDiagnosticInfo(item.senseId, item.createdAt)
         ),
         state = senseState,
@@ -845,7 +907,11 @@ private fun StudyDueCard(
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = pluralStringResource(Res.plurals.favorites_study_due_count, study.dueCount, study.dueCount),
+                        text = pluralStringResource(
+                            Res.plurals.favorites_study_due_count,
+                            study.dueCount,
+                            study.dueCount
+                        ),
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Medium,
@@ -918,7 +984,7 @@ private fun createSenseItem(
     pos: PartOfSpeech? = null,
     expanded: Boolean = false,
     loading: Boolean = false,
-    error: String? = null
+    error: UiText? = null
 ) = FavoriteSenseItem(
     senseId = senseId,
     targetLang = targetLang,
@@ -1074,7 +1140,7 @@ fun PreviewFavoritesScreenLoadingAndError(
                 createSenseItem(
                     senseId = "ready-3",
                     lemma = "ready",
-                    error = "Failed to load meaning"
+                    error = UiText.Resource(Res.string.favorites_error_load_meaning_failed)
                 )
             ),
             hasAnyFavorites = true

@@ -8,14 +8,15 @@ import com.slovy.slovymovyapp.data.learning.CardState
 import com.slovy.slovymovyapp.data.learning.intake.IntakeResult
 import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
-import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
+import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Clock
 import kotlin.test.*
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 open class FavoritesViewModelTest : BaseTest() {
@@ -78,7 +79,10 @@ open class FavoritesViewModelTest : BaseTest() {
     private fun createViewModel(
         favRepo: FavoritesRepository,
         dictRepo: DictionaryRepository = dictionaryRepository(favRepo),
-        statsService: StatsService = StatsService(testAppDatabaseHolder().database.favoritesQueries, clock = Clock.System),
+        statsService: StatsService = StatsService(
+            testAppDatabaseHolder().database.favoritesQueries,
+            clock = Clock.System
+        ),
         intakeService: LearningIntake = NoopIntake,
         settingsRepo: SettingsRepository = SettingsRepository(testAppDatabaseHolder().database),
     ): FavoritesViewModel {
@@ -346,6 +350,45 @@ open class FavoritesViewModelTest : BaseTest() {
         val content = contentState(vm)
         assertEquals(setOf(SENSE_1, SENSE_2), content.senses.map { it.senseId }.toSet())
         assertEquals(setOf("hello", "world"), content.favoriteLemmas)
+    }
+
+    @Test
+    fun withoutCachedFavoriteDetails_dropsLoadedSenseDetails() {
+        val state = FavoritesUiState.Content(
+            senses = listOf(
+                FavoriteSenseItem(
+                    senseId = SENSE_1,
+                    targetLang = Language.ENGLISH,
+                    lemma = "hello",
+                    createdAt = 0L,
+                    sense = LanguageCardResponseSense(
+                        senseId = SENSE_1,
+                        senseDefinition = "stale definition",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.HIGH,
+                        semanticGroupId = "group",
+                    ),
+                    relatedWords = mapOf("world" to RelatedWord("world", 5f, online = false)),
+                    pos = PartOfSpeech.NOUN,
+                    expanded = true,
+                    loading = true,
+                    error = UiText.Plain("stale error"),
+                )
+            ),
+            hasAnyFavorites = true,
+        )
+
+        val item = state.withoutCachedFavoriteDetails().senses.single()
+
+        assertEquals(SENSE_1, item.senseId)
+        assertEquals(Language.ENGLISH, item.targetLang)
+        assertEquals("hello", item.lemma)
+        assertNull(item.sense)
+        assertTrue(item.relatedWords.isEmpty())
+        assertNull(item.pos)
+        assertFalse(item.expanded)
+        assertFalse(item.loading)
+        assertNull(item.error)
     }
 
     @Test

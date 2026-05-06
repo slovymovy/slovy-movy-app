@@ -78,7 +78,11 @@ fun main(args: Array<String>) {
                     serverDbManager.openTranslationForBulkInsert(from, to)
                 }
             }
-        val builder = JsonIngestionBuilder(translationDbProvider, frequencyMap)
+        val builder = JsonIngestionBuilder(
+            translationDbProvider = translationDbProvider,
+            frequencyMap = frequencyMap,
+            warningLogger = { warning -> println("Warning: $warning") }
+        )
 
         val procDir = File(processedRoot, lang)
         val rawDir = File(dbExtractRoot, lang)
