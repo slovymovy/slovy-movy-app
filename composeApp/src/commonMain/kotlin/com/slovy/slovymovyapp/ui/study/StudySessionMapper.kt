@@ -126,6 +126,14 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
         CardKind.CLOZE_TRANSLATION -> {
             val target = targetLanguage ?: return null
             val cloze = example?.toClozeText() ?: return null
+            val backExamples = sense.examples[example.exampleIndex.toInt()].let {
+                listOf(
+                    StudyExampleUiState(
+                        text = it.text,
+                        translation = it.targetLangTranslations[target],
+                    )
+                )
+            }
             StudyCardUiState.Cloze(
                 id = card.id.toString(),
                 chipLabel = UiText.Resource(
@@ -137,7 +145,8 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                 back = sourceBack(
                     lemma = lemma,
                     sense = sense,
-                    targetLanguage = target
+                    targetLanguage = target,
+                    examples = backExamples,
                 ),
             )
         }
@@ -187,13 +196,14 @@ private fun sourceBack(
     sense: LanguageCardResponseSense,
     targetLanguage: Language?,
     cloze: StudyClozeTextUiState? = null,
+    examples: List<StudyExampleUiState>? = null,
 ): StudyCardBackUiState =
     StudyCardBackUiState(
         headline = lemma,
         isLemmaHeadline = true,
         secondary = targetLanguage?.let { sense.translationWords(it) },
         definition = sense.senseDefinition,
-        examples = sense.studyExamples(targetLanguage),
+        examples = examples ?: sense.studyExamples(targetLanguage),
         cloze = cloze,
         audioText = lemma,
     )
