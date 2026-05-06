@@ -1,16 +1,17 @@
 package com.slovy.slovymovyapp.repo
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
 import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
-import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
+import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
@@ -33,6 +34,14 @@ class DictionaryRepositoryTest : BaseTest() {
 
     private fun settingsRepository(): SettingsRepository {
         return SettingsRepository(testAppDatabaseHolder().database)
+    }
+
+    private fun deleteLocalDictionary(platform: PlatformDbSupport, localMgr: LocalDbManager) {
+        localMgr.closeAll()
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
     }
 
     @Test
@@ -466,7 +475,7 @@ class DictionaryRepositoryTest : BaseTest() {
                 repo.getSenses(Language.ENGLISH, "localfavorite", setOf(senseId.toString()))
             }
 
-            val sense = loaded[senseId.toString()]?.sense
+            val sense = loaded[senseId.toString()]?.sense?.sense
             assertNotNull(sense, "Should load the local favorite sense")
             assertEquals(
                 "Локальный",
@@ -550,7 +559,7 @@ class DictionaryRepositoryTest : BaseTest() {
                 repo.getSenses(Language.ENGLISH, "emptytargets", setOf(senseId.toString()))
             }
 
-            val sense = loaded[senseId.toString()]?.sense
+            val sense = loaded[senseId.toString()]?.sense?.sense
             assertNotNull(sense, "Should still load the local favorite sense")
             assertTrue(
                 sense.translations.isEmpty(),
@@ -564,6 +573,112 @@ class DictionaryRepositoryTest : BaseTest() {
             if (platform.fileExists(localTransPath)) {
                 platform.deleteFile(localTransPath)
             }
+        }
+    }
+
+    @Test
+    fun getSenses_reports_dictionary_not_downloaded_for_missing_favorite_without_sources() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+        val missingSenseId = Uuid.random().toString()
+
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+        }
+        deleteLocalDictionary(platform, localMgr)
+
+        val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+        val loaded = runBlocking {
+            repo.getSenses(
+                Language.ENGLISH,
+                "notinstalled",
+                setOf(missingSenseId)
+            )
+        }
+
+        val result = loaded[missingSenseId]
+        assertNull(result?.sense, "Missing favorite should not return stale sense data")
+        assertEquals(
+            DictionaryRepository.FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED,
+            result?.missingReason,
+            "Should report missing dictionary when no downloaded or local dictionary can serve the favorite"
+        )
+    }
+
+    @Test
+    fun getSenses_reports_online_only_for_missing_favorite_in_online_only_lemma() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+        val missingSenseId = Uuid.random().toString()
+
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+        }
+        deleteLocalDictionary(platform, localMgr)
+
+        try {
+            val localDictDb = localMgr.openLocalDictionary()
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            localDictDb.dictionaryQueries.insertLemma(lemmaId, "en", "needsdownload", "needsdownload", 5.0, true)
+            localDictDb.dictionaryQueries.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.NOUN)
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+            val loaded = runBlocking {
+                repo.getSenses(
+                    Language.ENGLISH,
+                    "needsdownload",
+                    setOf(missingSenseId)
+                )
+            }
+
+            assertEquals(
+                DictionaryRepository.FavoriteSenseMissingReason.ONLINE_ONLY,
+                loaded[missingSenseId]?.missingReason,
+                "Should report that an online-only favorite lemma needs download"
+            )
+        } finally {
+            deleteLocalDictionary(platform, localMgr)
+        }
+    }
+
+    @Test
+    fun getSenses_reports_meaning_not_found_for_missing_favorite_in_installed_lemma() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+        val missingSenseId = Uuid.random().toString()
+
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+        }
+        deleteLocalDictionary(platform, localMgr)
+
+        try {
+            val localDictDb = localMgr.openLocalDictionary()
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            localDictDb.dictionaryQueries.insertLemma(lemmaId, "en", "knownlemma", "knownlemma", 5.0, false)
+            localDictDb.dictionaryQueries.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.NOUN)
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+            val loaded = runBlocking {
+                repo.getSenses(
+                    Language.ENGLISH,
+                    "knownlemma",
+                    setOf(missingSenseId)
+                )
+            }
+
+            assertEquals(
+                DictionaryRepository.FavoriteSenseMissingReason.MEANING_NOT_FOUND,
+                loaded[missingSenseId]?.missingReason,
+                "Should report missing meaning when the lemma exists but the old favorite sense does not"
+            )
+        } finally {
+            deleteLocalDictionary(platform, localMgr)
         }
     }
 

@@ -221,6 +221,12 @@ FROM lemma l
 WHERE l.lang_code = ? AND l.lemma IN ?
 ORDER BY l.zipf_frequency DESC;
 
+selectLemmasByNormalizedWords:
+SELECT l.id, l.lemma, l.lemma_normalized, l.zipf_frequency, l.online_only
+FROM lemma l
+WHERE l.lang_code = ? AND l.lemma_normalized IN ?
+ORDER BY l.zipf_frequency DESC;
+
 -- Queries returning explicit lemma_pos_id to avoid ambiguity in generated code
 selectLemmaPosIdAndLemmaByWord:
 SELECT l.id AS lemma_pos_id, l.lemma, l.zipf_frequency, l.online_only

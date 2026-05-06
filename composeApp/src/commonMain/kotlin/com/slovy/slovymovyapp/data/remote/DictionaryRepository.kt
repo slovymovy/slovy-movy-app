@@ -145,6 +145,17 @@ class DictionaryRepository(
         val relatedWords: Map<String, RelatedWord> = emptyMap()
     )
 
+    data class SenseLookupResult(
+        val sense: SenseWithPos? = null,
+        val missingReason: FavoriteSenseMissingReason? = null,
+    )
+
+    enum class FavoriteSenseMissingReason {
+        DICTIONARY_NOT_DOWNLOADED,
+        MEANING_NOT_FOUND,
+        ONLINE_ONLY,
+    }
+
     // Cache for loaded senses - reusable across the app
     private val senseCache = linkedMapOf<String, SenseWithPos>()
 
@@ -903,34 +914,90 @@ class DictionaryRepository(
 
     /**
      * Gets senses by IDs, using cache when available.
-     * Results are automatically cached for future use.
+     * Results are automatically cached for future use. Requested IDs that cannot
+     * be resolved are returned with a missing reason.
      */
     suspend fun getSenses(
         language: Language,
         lemma: String,
         senseIds: Set<String>,
-        translationTargets: List<Language>? = null
-    ): Map<String, SenseWithPos> {
+        translationTargets: List<Language>? = null,
+    ): Map<String, SenseLookupResult> {
         if (senseIds.isEmpty()) return emptyMap()
 
         // Check cache first
         val cached = getCachedSenses(senseIds)
+        val results = LinkedHashMap<String, SenseLookupResult>()
+        cached.forEach { (senseId, sense) ->
+            results[senseId] = SenseLookupResult(sense = sense)
+        }
+
         val missingIds = senseIds - cached.keys
-        if (missingIds.isEmpty()) return cached
+        if (missingIds.isEmpty()) return results
 
         // Load missing senses (getLanguageCard will cache them automatically)
-        val card = getLanguageCard(language, lemma, translationTargets, missingIds) ?: return cached
-        val loaded = card.entries.flatMap { entry ->
-            entry.senses.map { sense ->
-                sense.senseId to SenseWithPos(
-                    sense = sense,
-                    pos = entry.pos,
-                    relatedWords = card.relatedWords
+        val card = getLanguageCard(language, lemma, translationTargets, missingIds)
+        card?.entries?.forEach { entry ->
+            entry.senses.forEach { sense ->
+                results[sense.senseId] = SenseLookupResult(
+                    sense = SenseWithPos(
+                        sense = sense,
+                        pos = entry.pos,
+                        relatedWords = card.relatedWords
+                    )
                 )
             }
-        }.toMap()
+        }
 
-        return cached + loaded
+        val stillMissingIds = senseIds - results.keys
+        if (stillMissingIds.isNotEmpty()) {
+            val reason = resolveSenseLookupMissingReason(language, lemma, card)
+            stillMissingIds.forEach { senseId ->
+                results[senseId] = SenseLookupResult(missingReason = reason)
+            }
+        }
+
+        return results
+    }
+
+    private suspend fun resolveSenseLookupMissingReason(
+        language: Language,
+        lemma: String,
+        card: LanguageCard?,
+    ): FavoriteSenseMissingReason = withContext(Dispatchers.IO) {
+        when (card?.online) {
+            true -> return@withContext FavoriteSenseMissingReason.ONLINE_ONLY
+            false -> return@withContext FavoriteSenseMissingReason.MEANING_NOT_FOUND
+            null -> Unit
+        }
+
+        val dictDatabases = openDictionaryDatabases(language)
+        if (dictDatabases.isEmpty()) {
+            return@withContext FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED
+        }
+
+        val normalizedLemma = stripAccents(lemma.trim().lowercase())
+        var foundLemma = false
+        var foundOnlineOnly = false
+
+        for (db in dictDatabases) {
+            val rows = db.dictionaryQueries
+                .selectLemmasByNormalized(language.code, normalizedLemma)
+                .executeAsList()
+            if (rows.isEmpty()) continue
+
+            foundLemma = true
+            if (rows.any { !it.online_only }) {
+                return@withContext FavoriteSenseMissingReason.MEANING_NOT_FOUND
+            }
+            foundOnlineOnly = true
+        }
+
+        when {
+            foundOnlineOnly -> FavoriteSenseMissingReason.ONLINE_ONLY
+            !dataDbManager.hasDictionary(language) && !foundLemma -> FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED
+            else -> FavoriteSenseMissingReason.MEANING_NOT_FOUND
+        }
     }
 
     /**

@@ -4,16 +4,10 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.logging.AppLogger
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import kotlinx.coroutines.withContext
 
 class FavoriteLemmaRecovery internal constructor(
     private val favoritesProvider: suspend () -> List<Favorite>,
@@ -39,7 +33,7 @@ class FavoriteLemmaRecovery internal constructor(
                 language = language,
                 lemma = lemma,
                 translationTargets = translationTargets,
-                pushToRepo = true,
+                pushToRepo = false,
             ).first { result ->
                 !result.isWordLoading && !result.isTranslationLoading
             }
@@ -153,8 +147,8 @@ private suspend fun DataDbManager.downloadedLemmasNeedingRecovery(
     if (!hasDictionary(language)) return@withContext emptySet()
     val queries = openDictionaryReadOnly(language).dictionaryQueries
     val rowsByLemma = normalizedLemmas.chunked(999)
-        .flatMap { chunk -> queries.selectLemmasByWords(language.code, chunk).executeAsList() }
-        .groupBy { it.lemma.lowercase() }
+        .flatMap { chunk -> queries.selectLemmasByNormalizedWords(language.code, chunk).executeAsList() }
+        .groupBy { it.lemma_normalized.lowercase() }
 
     val missingLemmas = normalizedLemmas - rowsByLemma.keys
     val onlineOnlyLemmas = rowsByLemma

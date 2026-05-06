@@ -12,6 +12,7 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
+import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
@@ -371,7 +372,7 @@ open class FavoritesViewModelTest : BaseTest() {
                     pos = PartOfSpeech.NOUN,
                     expanded = true,
                     loading = true,
-                    error = "stale error",
+                    error = UiText.Plain("stale error"),
                 )
             ),
             hasAnyFavorites = true,

@@ -178,12 +178,17 @@ fun App(
                 voiceFilterHelper,
                 dataManager,
                 downloadCoordinator,
-                dictionaryRepository,
                 dictionaryClient,
                 appDataExporter,
                 settingsRepository,
                 buildConfig,
-                onDictionaryDataChanged = { favoritesViewModel.dropCachedFavoriteDetails() },
+                onDictionaryDataChanged = { recoverFavorites ->
+                    dictionaryRepository.clearSenseCache()
+                    if (recoverFavorites) {
+                        favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                    }
+                    favoritesViewModel.dropCachedFavoriteDetails()
+                },
             )
         }
     val coroutineScope = rememberCoroutineScope()

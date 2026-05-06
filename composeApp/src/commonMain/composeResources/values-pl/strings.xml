@@ -7,13 +7,20 @@
     <string name="nav_word_detail">Słowo</string>
     <string name="nav_settings">Ustawienia</string>
 
-    <string name="welcome_tagline">Aplikacja, by nie tylko sprawdzać słowa, ale faktycznie się ich uczyć. Za darmo.</string>
+    <string name="welcome_tagline">Aplikacja, by nie tylko sprawdzać słowa, ale faktycznie się ich uczyć. Za darmo.
+    </string>
     <string name="welcome_selling_point_translations_title">Wyszukuj dowolne słowa</string>
-    <string name="welcome_selling_point_translations_description">Przykłady, odmiany, zwroty i synonimy — wszystko w jednym miejscu.</string>
+    <string name="welcome_selling_point_translations_description">Przykłady, odmiany, zwroty i synonimy — wszystko w
+        jednym miejscu.
+    </string>
     <string name="welcome_selling_point_collection_title">Twoja własna lista słówek</string>
-    <string name="welcome_selling_point_collection_description">Zapisuj to, co chcesz zapamiętać. Twoja kolekcja zostaje tylko na Twoim urządzeniu.</string>
+    <string name="welcome_selling_point_collection_description">Zapisuj to, co chcesz zapamiętać. Twoja kolekcja zostaje
+        tylko na Twoim urządzeniu.
+    </string>
     <string name="welcome_selling_point_practice_title">Utrwalaj wiedzę</string>
-    <string name="welcome_selling_point_practice_description">Metoda powtórek i różne tryby pomogą Ci na dobre zapamiętać nowe słowa.</string>
+    <string name="welcome_selling_point_practice_description">Metoda powtórek i różne tryby pomogą Ci na dobre
+        zapamiętać nowe słowa.
+    </string>
     <string name="welcome_cta_explore_now">Zacznij teraz</string>
 
     <string name="search_placeholder">Wyszukaj słowo...</string>
@@ -67,7 +74,8 @@
     <string name="favorites_loading">Ładowanie...</string>
     <string name="favorites_search_placeholder">Wyszukaj słowo...</string>
     <string name="favorites_empty_title">Twoja lista słówek zaczyna się tutaj.</string>
-    <string name="favorites_empty_description">Wyszukaj dowolne słowo i kliknij serduszko, aby zapisać je do nauki.</string>
+    <string name="favorites_empty_description">Wyszukaj dowolne słowo i kliknij serduszko, aby zapisać je do nauki.
+    </string>
     <string name="favorites_empty_action_start_searching">Zacznij szukać</string>
     <string name="favorites_no_results_title">Brak wyników dla „%1$s"</string>
     <string name="favorites_no_results_description">Sprawdź pisownię lub wyszukaj w całym słowniku.</string>
@@ -75,6 +83,10 @@
     <string name="favorites_stats">%1$d znaczeń • %2$d słów</string>
     <string name="favorites_removed_message">Słowo usunięte</string>
     <string name="favorites_removed_undo">Cofnij</string>
+    <string name="favorites_error_dictionary_not_downloaded">Słownik nie został pobrany</string>
+    <string name="favorites_error_meaning_not_found">Nie znaleziono znaczenia</string>
+    <string name="favorites_error_word_needs_download">Słowo trzeba pobrać</string>
+    <string name="favorites_error_load_meaning_failed">Nie udało się załadować znaczenia</string>
 
     <string name="language_setup_title">Wybierz języki</string>
     <string name="language_setup_subtitle">Wybierz język, którego się uczysz, i preferencje tłumaczeń.</string>
@@ -95,7 +107,9 @@
     <string name="feedback_dialog_title">Opinia o aplikacji</string>
     <string name="feedback_dialog_placeholder">Napisz, co myślisz...</string>
 
-    <string name="app_data_version_mismatch_message">Zaktualizowaliśmy format słowników. Musisz pobrać je ponownie — Twoje zapisane słowa są bezpieczne.</string>
+    <string name="app_data_version_mismatch_message">Zaktualizowaliśmy format słowników. Musisz pobrać je ponownie —
+        Twoje zapisane słowa są bezpieczne.
+    </string>
 
     <string name="word_details_title">O słowie</string>
     <string name="word_details_action_stop">Zatrzymaj</string>
@@ -141,7 +155,9 @@
     <string name="common_status_online_only">Tylko online</string>
 
     <string name="feedback_dialog_sent_title">Opinia wysłana!</string>
-    <string name="feedback_dialog_sent_message">Dziękujemy! Utworzyliśmy zgłoszenie na GitHubie, aby śledzić Twoją opinię. Możesz tam sprawdzać postępy.</string>
+    <string name="feedback_dialog_sent_message">Dziękujemy! Utworzyliśmy zgłoszenie na GitHubie, aby śledzić Twoją
+        opinię. Możesz tam sprawdzać postępy.
+    </string>
     <string name="feedback_dialog_track_on_github">Śledź na GitHubie</string>
     <string name="feedback_dialog_comment_label">Twój komentarz</string>
     <string name="feedback_dialog_email_label">E-mail (opcjonalnie)</string>
@@ -151,9 +167,14 @@
 
     <string name="voice_setup_title">Lepsza wymowa</string>
     <string name="voice_setup_description">Domyślny głos może brzmieć mechanicznie. Oto jak to zmienić:</string>
-    <string name="voice_setup_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos dla języka %1$s.</string>
-    <string name="voice_setup_step_ios">Przejdź do: Ustawienia > Dostępność > Czytaj zawartość > Głosy i pobierz głos dla języka %1$s.</string>
-    <string name="voice_setup_step_other">Pobierz wysokiej jakości głos dla języka %1$s w ustawieniach systemowych.</string>
+    <string name="voice_setup_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos
+        dla języka %1$s.
+    </string>
+    <string name="voice_setup_step_ios">Przejdź do: Ustawienia > Dostępność > Czytaj zawartość > Głosy i pobierz głos
+        dla języka %1$s.
+    </string>
+    <string name="voice_setup_step_other">Pobierz wysokiej jakości głos dla języka %1$s w ustawieniach systemowych.
+    </string>
     <string name="voice_setup_step_two">Wróć do: Ustawienia Open Words > Głosy i włącz nowy głos.</string>
 
     <string name="voice_no_voices_enabled">Brak włączonych głosów</string>
@@ -162,8 +183,12 @@
     <string name="voice_many_enabled">%1$d aktywnych głosów</string>
     <string name="voice_no_voices_available">Brak dostępnych głosów</string>
     <string name="voice_download_more_title">Pobierz więcej głosów</string>
-    <string name="voice_download_more_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos.</string>
-    <string name="voice_download_more_step_ios">Przejdź do: Ustawienia > Dostępność > Czytaj zawartość > Głosy i pobierz wysokiej jakości głos.</string>
+    <string name="voice_download_more_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej
+        jakości głos.
+    </string>
+    <string name="voice_download_more_step_ios">Przejdź do: Ustawienia > Dostępność > Czytaj zawartość > Głosy i pobierz
+        wysokiej jakości głos.
+    </string>
     <string name="voice_download_more_step_other">Pobierz wysokiej jakości głos w ustawieniach systemowych.</string>
     <string name="voice_download_more_step_two">Wróć do: Ustawienia Open Words > Głos i włącz nowy głos.</string>
     <string name="voice_quality_high">Wysoka</string>
@@ -180,19 +205,30 @@
     <string name="about_version_title">Wersja</string>
     <string name="acknowledgements_title">Podziękowania</string>
     <string name="acknowledgements_vocab_data_title">Dane słownikowe</string>
-    <string name="acknowledgements_vocab_data_body">Dane o słowach pochodzą z Wiktionary – wolnego, wielojęzycznego słownika tworzonego przez wolontariuszy z całego świata.</string>
+    <string name="acknowledgements_vocab_data_body">Dane o słowach pochodzą z Wiktionary – wolnego, wielojęzycznego
+        słownika tworzonego przez wolontariuszy z całego świata.
+    </string>
     <string name="acknowledgements_dictionary_extracts_title">Przetwarzanie danych</string>
-    <string name="acknowledgements_dictionary_extracts_body">Korzystamy z przetworzonych danych z serwisu Kaikki.org, wyodrębnionych z Wiktionary za pomocą otwartoźródłowego narzędzia wiktextract autorstwa Tatu Ylonena.</string>
+    <string name="acknowledgements_dictionary_extracts_body">Korzystamy z przetworzonych danych z serwisu Kaikki.org,
+        wyodrębnionych z Wiktionary za pomocą otwartoźródłowego narzędzia wiktextract autorstwa Tatu Ylonena.
+    </string>
     <string name="acknowledgements_application_code_title">Kod źródłowy</string>
     <string name="acknowledgements_application_code_body">Kod źródłowy aplikacji jest dostępny na licencji BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">Algorytm powtórek FSRS</string>
-    <string name="acknowledgements_fsrs_body">Korzystamy z portu FSRS-Kotlin dla Kotlina, dostępnego na licencji MIT. FSRS został pierwotnie opracowany przez Jarretta Ye wraz ze społecznością Open Spaced Repetition.</string>
+    <string name="acknowledgements_fsrs_body">Korzystamy z portu FSRS-Kotlin dla Kotlina, dostępnego na licencji MIT.
+        FSRS został pierwotnie opracowany przez Jarretta Ye wraz ze społecznością Open Spaced Repetition.
+    </string>
     <string name="acknowledgements_words_sources_title">Źródła danych</string>
-    <string name="acknowledgements_words_sources_body">Wszystkie dane słownikowe są dostępne na licencji CC-BY-SA-4.0.</string>
-    <string name="acknowledgements_thanks">Dziękujemy społeczności Wiktionary oraz Tatu Ylonenowi za udostępnienie tych danych.</string>
+    <string name="acknowledgements_words_sources_body">Wszystkie dane słownikowe są dostępne na licencji CC-BY-SA-4.0.
+    </string>
+    <string name="acknowledgements_thanks">Dziękujemy społeczności Wiktionary oraz Tatu Ylonenowi za udostępnienie tych
+        danych.
+    </string>
 
     <string name="app_data_backup_title">Kopia zapasowa Twoich słów</string>
-    <string name="app_data_backup_description">Eksportuj zapisane słowa i ustawienia do archiwum. Przydatne, aby zachować kopię lub przenieść dane na nowe urządzenie.</string>
+    <string name="app_data_backup_description">Eksportuj zapisane słowa i ustawienia do archiwum. Przydatne, aby
+        zachować kopię lub przenieść dane na nowe urządzenie.
+    </string>
     <string name="app_data_exporting">Eksportowanie...</string>
     <string name="app_data_export_now">Eksportuj teraz</string>
 
@@ -228,7 +264,9 @@
     <string name="settings_languages_more">+%1$d więcej</string>
     <string name="settings_toggle_translation_for_language">Przełącz tłumaczenie %1$s</string>
     <string name="settings_remove_language_confirm_title">Usunąć %1$s?</string>
-    <string name="settings_remove_language_confirm_message">Słownik i wszystkie jego tłumaczenia zostaną usunięte. Możesz je pobrać ponownie w dowolnym momencie.</string>
+    <string name="settings_remove_language_confirm_message">Słownik i wszystkie jego tłumaczenia zostaną usunięte.
+        Możesz je pobrać ponownie w dowolnym momencie.
+    </string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">To usunie również %1$d tłumaczenie.</item>
         <item quantity="few">To usunie również %1$d tłumaczenia.</item>
@@ -249,8 +287,10 @@
     <string name="settings_error_test_voice_with_reason">Nie udało się przetestować głosu: %1$s</string>
     <string name="settings_export_success">Wyeksportowano %1$s do %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Nie udało się otworzyć okna udostępniania: %1$s</string>
-    <string name="settings_error_export_app_data_with_reason">Nie udało się wyeksportować danych aplikacji: %1$s</string>
-    <string name="settings_error_update_voice_selection_with_reason">Nie udało się zaktualizować wyboru głosu: %1$s</string>
+    <string name="settings_error_export_app_data_with_reason">Nie udało się wyeksportować danych aplikacji: %1$s
+    </string>
+    <string name="settings_error_update_voice_selection_with_reason">Nie udało się zaktualizować wyboru głosu: %1$s
+    </string>
     <string name="settings_feedback_sent">Opinia została wysłana</string>
     <string name="settings_feedback_view">Pokaż</string>
     <string name="settings_feedback_comment_required">Komentarz jest wymagany</string>
