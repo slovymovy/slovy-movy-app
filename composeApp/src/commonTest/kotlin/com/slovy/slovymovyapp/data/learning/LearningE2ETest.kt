@@ -591,7 +591,7 @@ class LearningE2ETest : BaseTest() {
                 fixture = fixture,
                 family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
             )
-            env.insertReviewLog(clozeCard.id, CardKind.CLOZE_SOURCE)
+            env.insertReviewLog(clozeCard.id, CardKind.CLOZE_SOURCE, Language.RUSSIAN.code)
 
             val card = env.nextLoadedCard("en")
 
