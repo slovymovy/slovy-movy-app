@@ -205,6 +205,7 @@ private fun sourceBack(
         definition = sense.senseDefinition,
         cloze = cloze,
         audioText = lemma,
+        examples = sense.studyExamples(targetLanguage)
     )
 
 private fun sourceClozeBack(

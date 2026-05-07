@@ -53,7 +53,8 @@ class StudySessionMapperTest {
         assertEquals("gezellig", mapped.back.headline)
         assertEquals("cosy, sociable", mapped.back.secondary)
         assertEquals("a feeling of warmth", mapped.back.definition)
-        assertEquals(emptyList(), mapped.back.examples)
+        assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
+        assertEquals("It was so cosy.", mapped.back.examples.single().translation)
     }
 
     @Test
