@@ -28,7 +28,9 @@ fun buildTaskVariants(
         }
 
         CardFamily.PRODUCE_WORD -> buildList {
+            if (!sense.senseDefinition.hasTaggedWord()) {
             add(CardVariant(CardKind.SOURCE_DEFINITION_TO_WORD, targetLang = null))
+            }
             targets
                 .filter { sense.hasTranslationCue(it) }
                 .forEach { add(CardVariant(CardKind.TRANSLATION_TO_WORD, targetLang = it.code)) }
