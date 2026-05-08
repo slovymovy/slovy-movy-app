@@ -290,7 +290,6 @@ class SessionService(
         val generated = sense
             ?.let { buildTaskVariants(card.family, it, translationTargetsFor(it)) }
             .orEmpty()
-            .ifEmpty { listOf(fallbackVariant(card.family)) }
         val lastVariant = learning.selectLastReviewVariantByCard(card.id).executeAsOneOrNull()
 
         return generated.sortedWith(
@@ -316,29 +315,6 @@ class SessionService(
             CardKind.CLOZE_SOURCE -> 0
             CardKind.CLOZE_TRANSLATION -> 1
             CardKind.LISTENING_TRANSLATION -> 1
-        }
-
-    private fun fallbackVariant(family: CardFamily): CardVariant =
-        when (family) {
-            CardFamily.RECOGNIZE_SENSE -> CardVariant(
-                CardKind.WORD_TO_SOURCE_DEFINITION,
-                targetLang = null,
-            )
-
-            CardFamily.PRODUCE_WORD -> CardVariant(
-                CardKind.SOURCE_DEFINITION_TO_WORD,
-                targetLang = null,
-            )
-
-            CardFamily.PRODUCE_WORD_IN_CONTEXT -> CardVariant(
-                CardKind.CLOZE_SOURCE,
-                targetLang = null,
-            )
-
-            CardFamily.RECOGNIZE_VOICE -> CardVariant(
-                CardKind.LISTENING_TRANSLATION,
-                targetLang = null,
-            )
         }
 
     private fun WordResult.toSessionCard(card: Card): SessionCard? {
