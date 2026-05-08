@@ -781,18 +781,11 @@ private fun ProductionFront(
             )
             StudyTaggedText(
                 text = card.promptText,
-                style = MaterialTheme.typography.displaySmall.copy(
+                style = (if (card.isDefinitionPrompt) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.displaySmall).copy(
                     fontFamily = MaterialTheme.serifFontFamily,
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
-                maxLines = if (card.isDefinitionPrompt) 8 else Int.MAX_VALUE,
-                overflow = if (card.isDefinitionPrompt) TextOverflow.Ellipsis else TextOverflow.Clip,
-                autoSize = if (card.isDefinitionPrompt) TextAutoSize.StepBased(
-                    minFontSize = 14.sp,
-                    maxFontSize = MaterialTheme.typography.displaySmall.fontSize,
-                    stepSize = 1.sp,
-                ) else null,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
