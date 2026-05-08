@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -50,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -66,6 +68,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -107,6 +110,10 @@ import slovymovyapp.composeapp.generated.resources.study_rating_good
 import slovymovyapp.composeapp.generated.resources.study_rating_hard
 import slovymovyapp.composeapp.generated.resources.study_tap_to_check
 import slovymovyapp.composeapp.generated.resources.study_tap_to_flip
+
+// Warm dark brown (rgb 31,22,8) — harmonises with linen/paper backgrounds in light theme;
+// effectively invisible on dark surfaces, where elevation comes from surface.container alone.
+private val CardShadowColor = Color(red = 31, green = 22, blue = 8, alpha = 255)
 
 @Composable
 fun StudySessionScreen(
@@ -250,9 +257,17 @@ private fun StudySessionLoadingContent(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .weight(1f)
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = MaterialTheme.shapes.extraLarge,
+                        clip = false,
+                        ambientColor = CardShadowColor.copy(alpha = 0.04f),
+                        spotColor = CardShadowColor.copy(alpha = 0.06f),
+                    ),
                 shape = MaterialTheme.shapes.extraLarge,
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f)),
                 tonalElevation = 0.dp,
             ) {
                 Box(
@@ -536,12 +551,21 @@ private fun StudyCardSurface(
         if (card is StudyCardUiState.Recognition) Res.string.study_tap_to_flip else Res.string.study_tap_to_check,
     )
     Surface(
-        modifier = modifier,
+        modifier = modifier.shadow(
+            elevation = 8.dp,
+            shape = MaterialTheme.shapes.extraLarge,
+            clip = false,
+            ambientColor = CardShadowColor.copy(alpha = 0.04f),
+            spotColor = CardShadowColor.copy(alpha = 0.06f),
+        ),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f)),
         tonalElevation = 0.dp,
     ) {
         if (side == StudyCardSide.FRONT) {
+            val productionHint = (card as? StudyCardUiState.Production)?.firstLetterHint
+            val hintOverlayHeight = if (productionHint != null) 56.dp else 0.dp
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(
                     modifier = Modifier
@@ -551,7 +575,7 @@ private fun StudyCardSurface(
                             start = AppSpacing.xl,
                             top = AppSpacing.xl,
                             end = AppSpacing.xl,
-                            bottom = AppSpacing.xl + 88.dp,
+                            bottom = AppSpacing.xl + 88.dp + hintOverlayHeight,
                         ),
                 ) {
                     StudyChip(label = card.chipLabel)
@@ -566,6 +590,16 @@ private fun StudyCardSurface(
                             .fillMaxWidth()
                             .heightIn(min = 360.dp),
                     )
+                }
+                if (productionHint != null) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 88.dp + AppSpacing.md),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        FirstLetterHintView(hint = productionHint)
+                    }
                 }
                 Box(
                     modifier = Modifier
@@ -752,41 +786,15 @@ private fun ProductionFront(
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
+                maxLines = if (card.isDefinitionPrompt) 8 else Int.MAX_VALUE,
+                overflow = if (card.isDefinitionPrompt) TextOverflow.Ellipsis else TextOverflow.Clip,
+                autoSize = if (card.isDefinitionPrompt) TextAutoSize.StepBased(
+                    minFontSize = 14.sp,
+                    maxFontSize = MaterialTheme.typography.displaySmall.fontSize,
+                    stepSize = 1.sp,
+                ) else null,
                 modifier = Modifier.fillMaxWidth(),
             )
-            card.firstLetterHint?.let { hint ->
-                val hintContentDescription = pluralStringResource(Res.plurals.study_hint_starts_with, hint.letterCount, hint.letter.toString(), hint.letterCount)
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.clearAndSetSemantics {
-                        contentDescription = hintContentDescription
-                    },
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        Text(
-                            text = hint.letter.toString(),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 0.sp,
-                            fontFamily = MaterialTheme.serifFontFamily,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            text = "·".repeat(hint.dotCount.coerceAtMost(15)),
-                            fontSize = 16.sp,
-                            fontFamily = MaterialTheme.serifFontFamily,
-                            letterSpacing = 8.sp,
-                            maxLines = 1,
-                        )
-                    }
-                }
-            }
         }
     }
 }
@@ -1137,6 +1145,7 @@ private fun StudyTaggedText(
     modifier: Modifier = Modifier,
     textAlign: TextAlign? = null,
     maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
     autoSize: TextAutoSize? = null,
 ) {
     val highlightColor = MaterialTheme.colorScheme.primary
@@ -1163,6 +1172,7 @@ private fun StudyTaggedText(
             color = color,
             textAlign = textAlign,
             maxLines = maxLines,
+            overflow = overflow,
             autoSize = autoSize,
             modifier = modifier,
         )
@@ -1173,8 +1183,50 @@ private fun StudyTaggedText(
             color = color,
             textAlign = textAlign,
             maxLines = maxLines,
+            overflow = overflow,
             modifier = modifier,
         )
+    }
+}
+
+@Composable
+private fun FirstLetterHintView(
+    hint: FirstLetterHint,
+    modifier: Modifier = Modifier,
+) {
+    val hintContentDescription = pluralStringResource(
+        Res.plurals.study_hint_starts_with,
+        hint.letterCount,
+        hint.letter.toString(),
+        hint.letterCount,
+    )
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        modifier = modifier.clearAndSetSemantics { contentDescription = hintContentDescription },
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = hint.letter.toString(),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.sp,
+                fontFamily = MaterialTheme.serifFontFamily,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = "·".repeat(hint.dotCount.coerceAtMost(15)),
+                fontSize = 16.sp,
+                fontFamily = MaterialTheme.serifFontFamily,
+                letterSpacing = 8.sp,
+                maxLines = 1,
+            )
+        }
     }
 }
 

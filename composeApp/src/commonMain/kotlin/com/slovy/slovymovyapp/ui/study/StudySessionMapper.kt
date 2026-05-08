@@ -76,6 +76,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
             promptLabel = UiText.Resource(Res.string.study_prompt_recall_word),
             promptText = sense.senseDefinition,
             firstLetterHint = lemma.firstLetterHint(),
+            isDefinitionPrompt = true,
             back = sourceBack(
                 lemma = lemma,
                 sense = sense,
