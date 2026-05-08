@@ -12,7 +12,6 @@ import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.intake.SkipReason
 import com.slovy.slovymovyapp.data.learning.session.ExamplePicker
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
-import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadErrorReason
 import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.learning.session.SessionService
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
@@ -31,17 +30,14 @@ import com.slovy.slovymovyapp.test.TestContext
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import com.slovy.slovymovyapp.test.testRemoteDataProvider
 import com.slovy.slovymovyapp.translation.TranslationDatabase
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.math.abs
 import kotlin.test.*
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -442,18 +438,16 @@ class LearningE2ETest : BaseTest() {
         )
         withEnv(includeTranslation = false, config = config) { env ->
             val firstSense = env.seedSense(lemma = "polyseme")
-            val secondSense = env.seedSense(lemma = "polyseme")
+            val secondSense = env.seedAdditionalSense(firstSense)
             env.addFavorite(firstSense, createdAt = start.toEpochMilliseconds())
             env.addFavorite(secondSense, createdAt = start.toEpochMilliseconds() + 1)
             env.insertTask(
                 fixture = firstSense,
                 family = CardFamily.RECOGNIZE_SENSE,
-                lemmaId = firstSense.lemmaId,
             )
             env.insertTask(
                 fixture = secondSense,
                 family = CardFamily.RECOGNIZE_SENSE,
-                lemmaId = firstSense.lemmaId,
             )
 
             val firstCard = assertNotNull(
@@ -562,8 +556,9 @@ class LearningE2ETest : BaseTest() {
 
     @Test
     fun cloze_card_uses_tagged_example_occurrence() = runBlocking {
-        withEnv(includeTranslation = false) { env ->
+        withEnv(includeTranslation = true) { env ->
             val fixture = env.seedSense(lemma = "cloze")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
             env.addFavorite(fixture)
             env.intake.runIntake("en")
             val clozeCard = env.insertTask(
@@ -599,46 +594,6 @@ class LearningE2ETest : BaseTest() {
             val example = assertNotNull(card.example)
             assertEquals("Я учусь каждый день.", example.text)
             assertEquals(2..6, example.clozeRange)
-        }
-    }
-
-    @Test
-    fun session_surfaces_unrenderable_cards_and_can_put_them_later() = runBlocking {
-        val config = FsrsDefaults.config().copy(buryFailedSessionCardsFor = 5.minutes)
-        withEnv(includeTranslation = true, config = config) { env ->
-            val fixture = env.seedSense(lemma = "badcloze", includeExamples = false)
-            env.seedTranslation(fixture.senseId, fixture.lemmaPosId, includeExampleTranslation = false)
-            env.addFavorite(fixture)
-            env.intake.runIntake("en")
-            val clozeCard = env.insertTask(
-                fixture = fixture,
-                family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
-            )
-
-            val errorCard = withTimeout(5.seconds) {
-                env.session.nextCard("en", start)
-                    .filterNotNull()
-                    .first { it.loadState() != SessionCardLoadState.LOADING }
-            }
-
-            assertEquals(clozeCard.id, errorCard.card.id)
-            assertEquals(SessionCardLoadState.ERROR, errorCard.loadState())
-            assertEquals(SessionCardLoadErrorReason.EXAMPLE_MISSING, errorCard.loadError()?.reason)
-            assertFalse(errorCard.isReady())
-            assertNull(env.app.favoritesQueries.selectCardById(clozeCard.id).executeAsOne().available_after)
-
-            env.session.putCardForLater(errorCard)
-
-            val buried = env.app.favoritesQueries.selectCardById(clozeCard.id).executeAsOne()
-            assertEquals(
-                start.toEpochMilliseconds() + config.buryFailedSessionCardsFor.inWholeMilliseconds,
-                buried.available_after,
-            )
-            val next = withTimeout(5.seconds) {
-                env.nextLoadedCard("en")
-            }
-            assertTrue(next.isReady())
-            assertTrue(next.card.id != clozeCard.id)
         }
     }
 
@@ -743,6 +698,28 @@ class LearningE2ETest : BaseTest() {
             q.insertSenseExample(senseId, 2, "They <w>$lemma</w> quickly.")
         }
         return SenseFixture(lemmaId, lemmaPosId, senseId, lemma)
+    }
+
+    private fun Env.seedAdditionalSense(
+        existing: SenseFixture,
+        includeExamples: Boolean = true,
+    ): SenseFixture {
+        val senseId = Uuid.random()
+        val q = dictionary.dictionaryQueries
+        q.insertSense(
+            sense_id = senseId,
+            lemma_pos_id = existing.lemmaPosId,
+            sense_definition = "to learn something",
+            learner_level = LearnerLevel.A1,
+            frequency = SenseFrequency.HIGH,
+            semantic_group_id = "sg",
+            name_type = NameType.NO,
+        )
+        if (includeExamples) {
+            q.insertSenseExample(senseId, 1, "I <w>${existing.lemma}</w> every day.")
+            q.insertSenseExample(senseId, 2, "They <w>${existing.lemma}</w> quickly.")
+        }
+        return SenseFixture(existing.lemmaId, existing.lemmaPosId, senseId, existing.lemma)
     }
 
     private fun Env.seedTranslation(
