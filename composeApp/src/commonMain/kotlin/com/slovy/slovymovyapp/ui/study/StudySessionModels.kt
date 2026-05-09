@@ -65,6 +65,7 @@ sealed interface StudyCardUiState {
         val promptLabel: UiText,
         val promptText: String,
         val firstLetterHint: FirstLetterHint? = null,
+        val isDefinitionPrompt: Boolean = false,
         override val back: StudyCardBackUiState,
     ) : StudyCardUiState
 
