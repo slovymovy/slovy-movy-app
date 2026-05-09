@@ -4,6 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 
+// Warm dark brown (rgb 31,22,8) — harmonises with linen/paper backgrounds in light theme;
+// effectively invisible on dark surfaces, where elevation comes from surface.container alone.
+internal val StudySessionCardShadowColor = Color(red = 31, green = 22, blue = 8, alpha = 255)
+
 @Composable
 internal fun colorsForRating(rating: StudyRating): Pair<Color, Color> {
     val dark = LocalIsDarkTheme.current

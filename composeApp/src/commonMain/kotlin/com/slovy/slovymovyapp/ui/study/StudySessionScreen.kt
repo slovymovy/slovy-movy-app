@@ -111,10 +111,6 @@ import slovymovyapp.composeapp.generated.resources.study_rating_hard
 import slovymovyapp.composeapp.generated.resources.study_tap_to_check
 import slovymovyapp.composeapp.generated.resources.study_tap_to_flip
 
-// Warm dark brown (rgb 31,22,8) — harmonises with linen/paper backgrounds in light theme;
-// effectively invisible on dark surfaces, where elevation comes from surface.container alone.
-private val CardShadowColor = Color(red = 31, green = 22, blue = 8, alpha = 255)
-
 @Composable
 fun StudySessionScreen(
     viewModel: StudySessionViewModel,
@@ -262,8 +258,8 @@ private fun StudySessionLoadingContent(
                         elevation = 8.dp,
                         shape = MaterialTheme.shapes.extraLarge,
                         clip = false,
-                        ambientColor = CardShadowColor.copy(alpha = 0.04f),
-                        spotColor = CardShadowColor.copy(alpha = 0.06f),
+                        ambientColor = StudySessionCardShadowColor.copy(alpha = 0.04f),
+                        spotColor = StudySessionCardShadowColor.copy(alpha = 0.06f),
                     ),
                 shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.surfaceContainer,
@@ -555,8 +551,8 @@ private fun StudyCardSurface(
             elevation = 8.dp,
             shape = MaterialTheme.shapes.extraLarge,
             clip = false,
-            ambientColor = CardShadowColor.copy(alpha = 0.04f),
-            spotColor = CardShadowColor.copy(alpha = 0.06f),
+            ambientColor = StudySessionCardShadowColor.copy(alpha = 0.04f),
+            spotColor = StudySessionCardShadowColor.copy(alpha = 0.06f),
         ),
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surfaceContainer,
