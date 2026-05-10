@@ -206,17 +206,20 @@ class SearchViewModel(
 
     fun refreshLanguageIndicators() {
         val installed = repository.installedDictionaries()
-        state = state.copy(availableLanguages = installed)
+        val currentLanguage = state.selectedLanguage
         val preferred = savedSearchLanguage?.takeIf { it in installed }
         val target = when {
-            state.selectedLanguage in installed && preferred == state.selectedLanguage -> return
-            state.selectedLanguage in installed && preferred != null -> preferred
+            currentLanguage in installed && (preferred == null || preferred == currentLanguage) -> currentLanguage
+            currentLanguage in installed && preferred != null -> preferred
             else -> preferred ?: installed.firstOrNull()
         }
+        val languageChanged = currentLanguage != target
         // Do not call setSelectedLanguage — that would overwrite the saved preference.
-        state = state.copy(selectedLanguage = target)
+        state = state.copy(availableLanguages = installed, selectedLanguage = target)
         queryFlow.value = queryFlow.value.copy(language = target)
-        viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
+        if (languageChanged) {
+            viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
+        }
     }
 
     fun setSelectedLanguage(language: Language?) {
