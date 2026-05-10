@@ -107,9 +107,9 @@
     <string name="feedback_dialog_title">Opinia o aplikacji</string>
     <string name="feedback_dialog_placeholder">Napisz, co myślisz...</string>
 
-    <string name="app_data_version_mismatch_message">Zaktualizowaliśmy format słowników. Musisz pobrać je ponownie —
-        Twoje zapisane słowa są bezpieczne.
-    </string>
+    <string name="app_data_version_mismatch_title">Twoje słowniki wymagają odświeżenia</string>
+    <string name="app_data_version_mismatch_body">Poprawiliśmy format słowników. Pobierz je ponownie, aby korzystać z nowej wersji—przez Wi-Fi zajmie to kilka minut. Twoje zapisane słowa i postępy są bezpieczne.</string>
+    <string name="app_data_version_mismatch_action">Odśwież słowniki</string>
 
     <string name="word_details_title">O słowie</string>
     <string name="word_details_action_stop">Zatrzymaj</string>

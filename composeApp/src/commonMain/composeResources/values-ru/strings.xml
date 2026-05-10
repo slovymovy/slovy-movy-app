@@ -107,9 +107,9 @@
     <string name="feedback_dialog_title">Отзыв о приложении</string>
     <string name="feedback_dialog_placeholder">Напишите, что вы думаете...</string>
 
-    <string name="app_data_version_mismatch_message">Мы обновили формат словарей. Их нужно скачать заново — ваши
-        сохранённые слова в безопасности.
-    </string>
+    <string name="app_data_version_mismatch_title">Словари нужно обновить</string>
+    <string name="app_data_version_mismatch_body">Мы улучшили формат словарей. Скачайте их заново, чтобы получить новую версию. На это уйдет пара минут при подключении к Wi-Fi. Ваши сохраненные слова и прогресс не пропадут.</string>
+    <string name="app_data_version_mismatch_action">Обновить словари</string>
 
     <string name="word_details_title">О слове</string>
     <string name="word_details_action_stop">Стоп</string>

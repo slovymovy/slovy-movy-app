@@ -38,7 +38,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
-import slovymovyapp.composeapp.generated.resources.app_data_version_mismatch_message
 import slovymovyapp.composeapp.generated.resources.download_title_downloading
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -270,7 +269,6 @@ fun App(
     }
 
     val resolvedStart = startDestination ?: return
-    val dataVersionMismatchMessage = stringResource(Res.string.app_data_version_mismatch_message)
 
     AppTheme {
         NavHost(
@@ -679,17 +677,10 @@ fun App(
                     }
                 )
             }
-            composable<AppDestination.DataVersionMismatch> { backStackEntry ->
+            composable<AppDestination.DataVersionMismatch> {
                 val coroutineScope = rememberCoroutineScope()
-                val viewModel = viewModel(
-                    viewModelStoreOwner = backStackEntry
-                ) {
-                    ErrorViewModel(dataVersionMismatchMessage)
-                }
-
-                ErrorScreen(
-                    viewModel = viewModel,
-                    onOkay = {
+                DataVersionMismatchScreen(
+                    onRedownload = {
                         coroutineScope.launch {
                             dataManager.deleteAllDownloadedData()
                             localDbManager.deleteAll()

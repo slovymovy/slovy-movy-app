@@ -107,9 +107,9 @@
     <string name="feedback_dialog_title">App feedback</string>
     <string name="feedback_dialog_placeholder">Share your thoughts…</string>
 
-    <string name="app_data_version_mismatch_message">We've updated the dictionary format. You'll need to re-download
-        your dictionaries — your saved words are safe.
-    </string>
+    <string name="app_data_version_mismatch_title">Your dictionaries need a refresh</string>
+    <string name="app_data_version_mismatch_body">We've improved the dictionary format. Re-download to get the latest version—it takes a couple of minutes on Wi-Fi. Your saved words and progress are safe.</string>
+    <string name="app_data_version_mismatch_action">Re-download dictionaries</string>
 
     <string name="word_details_title">Word Details</string>
     <string name="word_details_action_stop">Stop</string>
