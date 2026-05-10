@@ -36,6 +36,8 @@ import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -44,30 +46,72 @@ import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.download_title_downloading
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-private data class FavoritesReviewState(
+internal data class FavoritesReviewState(
     val dueCountByLanguage: Map<Language, Int>,
 ) {
     val hasDueCards: Boolean get() = dueCountByLanguage.values.any { it > 0 }
 }
 
-private suspend fun computeFavoritesReviewState(
-    favoritesRepository: FavoritesRepository,
-    intakeService: LearningIntake,
-    statsService: StatsService,
-): FavoritesReviewState = withContext(Dispatchers.Default) {
-    val languages = favoritesRepository.getAllGroupedByLangAndLemma()
-        .map { it.language }
-        .distinct()
-    languages.forEach { language ->
-        intakeService.runIntake(language.code)
+@OptIn(ExperimentalTime::class)
+internal class FavoritesReviewCoordinator(
+    private val clock: Clock = Clock.System,
+) {
+    private val refreshMutex = Mutex()
+    private var lastIntakeAtByLanguage: Map<Language, Instant> = emptyMap()
+
+    suspend fun refresh(
+        favoritesRepository: FavoritesRepository,
+        intakeService: LearningIntake,
+        statsService: StatsService,
+        invalidateIntakeCache: Boolean = false,
+    ): FavoritesReviewState = refreshMutex.withLock {
+        if (invalidateIntakeCache) {
+            invalidateIntakeCache()
+        }
+        computeFavoritesReviewState(favoritesRepository, intakeService, statsService)
     }
-    FavoritesReviewState(
-        dueCountByLanguage = languages.associateWith { language ->
-            statsService.globalStats(language.code).dueToday
-        },
-    )
+
+    fun invalidateIntakeCache() {
+        lastIntakeAtByLanguage = emptyMap()
+    }
+
+    private suspend fun computeFavoritesReviewState(
+        favoritesRepository: FavoritesRepository,
+        intakeService: LearningIntake,
+        statsService: StatsService,
+    ): FavoritesReviewState = withContext(Dispatchers.Default) {
+        val languages = favoritesRepository.getAllGroupedByLangAndLemma()
+            .map { it.language }
+            .distinct()
+        languages.forEach { language ->
+            if (shouldRunIntake(language)) {
+                intakeService.runIntake(language.code)
+                markIntakeRun(language)
+            }
+        }
+        FavoritesReviewState(
+            dueCountByLanguage = languages.associateWith { language ->
+                statsService.globalStats(language.code).dueToday
+            },
+        )
+    }
+
+    internal fun shouldRunIntake(language: Language): Boolean {
+        val lastRunAt = lastIntakeAtByLanguage[language] ?: return true
+        return clock.now() - lastRunAt >= INTAKE_CACHE_TTL
+    }
+
+    internal fun markIntakeRun(language: Language) {
+        lastIntakeAtByLanguage += language to clock.now()
+    }
+
+    private companion object {
+        val INTAKE_CACHE_TTL = 5.minutes
+    }
 }
 
 @Serializable
@@ -198,6 +242,7 @@ fun App(
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
     val coroutineScope = rememberCoroutineScope()
     var hasFavoritesToReview by remember { mutableStateOf(false) }
+    val favoritesReviewCoordinator = remember { FavoritesReviewCoordinator() }
 
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember {
@@ -208,8 +253,13 @@ fun App(
         )
     }
 
-    suspend fun refreshFavoritesReviewState() {
-        val reviewState = computeFavoritesReviewState(favoritesRepository, intakeService, statsService)
+    suspend fun refreshFavoritesReviewState(invalidateIntakeCache: Boolean = false) {
+        val reviewState = favoritesReviewCoordinator.refresh(
+            favoritesRepository = favoritesRepository,
+            intakeService = intakeService,
+            statsService = statsService,
+            invalidateIntakeCache = invalidateIntakeCache,
+        )
         favoritesViewModel.updateReviewDueCounts(reviewState.dueCountByLanguage)
         hasFavoritesToReview = reviewState.hasDueCards
     }
@@ -615,7 +665,7 @@ fun App(
                         navController.navigate(AppDestination.StudySession(language.code))
                     },
                     onFavoritesChanged = {
-                        coroutineScope.launch { refreshFavoritesReviewState() }
+                        coroutineScope.launch { refreshFavoritesReviewState(invalidateIntakeCache = true) }
                     },
                 )
             }
@@ -741,7 +791,7 @@ fun App(
                             if (added) {
                                 favoritesViewModel.requestScrollToTop()
                             }
-                            coroutineScope.launch { refreshFavoritesReviewState() }
+                            coroutineScope.launch { refreshFavoritesReviewState(invalidateIntakeCache = true) }
                         },
                     ).also { created ->
                         wordDetailViewModels[args] = created
