@@ -594,7 +594,6 @@ class LearningE2ETest : BaseTest() {
             )
             val stats = StatsService(
                 learning = app.database.favoritesQueries,
-                config = config,
                 clock = clock,
             )
             block(Env(app.database, dictionary, translation, intake, session, stats, favorites, clock))
