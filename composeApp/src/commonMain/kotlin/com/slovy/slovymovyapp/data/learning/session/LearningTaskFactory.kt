@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.data.learning.CardVariant
 import com.slovy.slovymovyapp.data.remote.LanguageCardExample
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
+import kotlin.time.Duration
 
 fun buildTaskVariants(
     family: CardFamily,
@@ -53,6 +54,29 @@ fun buildTaskVariants(
                 .forEach { add(CardVariant(CardKind.LISTENING_TRANSLATION, targetLang = it.code)) }
         }
     }
+}
+
+fun selectVariantsForReview(
+    family: CardFamily,
+    sense: LanguageCardResponseSense,
+    translationTargets: List<Language>,
+    cardStability: Duration,
+    lastVariant: CardVariant?,
+): List<CardVariant> {
+    val all = buildTaskVariants(family, sense, translationTargets)
+    val gated = all.filter { it.kind.minStability <= cardStability }
+    val pool = if (gated.isEmpty() && all.isNotEmpty()) all else gated
+
+    return pool.sortedWith(
+        compareBy<CardVariant> { variant ->
+            if (lastVariant != null &&
+                lastVariant.kind == variant.kind &&
+                lastVariant.targetLang == variant.targetLang
+            ) 1 else 0
+        }
+            .thenBy { it.kind.priority }
+            .thenBy { it.targetLang ?: "" }
+    )
 }
 
 private fun LanguageCardResponseSense.hasTranslationCue(language: Language): Boolean =
