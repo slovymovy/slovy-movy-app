@@ -15,6 +15,8 @@ import kotlinx.serialization.json.jsonPrimitive
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.*
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class ApplicationTest {
 
@@ -302,7 +304,7 @@ class RaceWithFallbackTest {
             fallbackAvailable = true,
             primary = { "primary" },
             fallback = { "fallback" },
-            timeoutMs = 1000
+            timeoutMs = 1.seconds.inWholeMilliseconds
         )
         assertEquals("primary", result)
     }
@@ -315,12 +317,12 @@ class RaceWithFallbackTest {
             primaryAvailable = true,
             fallbackAvailable = true,
             primary = {
-                delay(500) // Longer than timeout
+                delay(500.milliseconds) // Longer than timeout
                 "primary"
             },
             fallback = { "fallback" },
             onPrimaryTimeout = { timeoutCalled.set(true) },
-            timeoutMs = 100
+            timeoutMs = 100.milliseconds.inWholeMilliseconds
         )
 
         assertEquals("fallback", result)
@@ -341,7 +343,7 @@ class RaceWithFallbackTest {
                 errorCalled.set(true)
                 caughtError = e
             },
-            timeoutMs = 1000
+            timeoutMs = 1.seconds.inWholeMilliseconds
         )
 
         assertEquals("fallback", result)
@@ -359,15 +361,15 @@ class RaceWithFallbackTest {
             fallbackAvailable = true,
             primary = {
                 primaryCalls.incrementAndGet()
-                delay(150) // Takes longer than timeout but finishes before fallback
+                delay(150.milliseconds) // Takes longer than timeout but finishes before fallback
                 "primary"
             },
             fallback = {
                 fallbackCalls.incrementAndGet()
-                delay(300) // Slower than primary
+                delay(300.milliseconds) // Slower than primary
                 "fallback"
             },
-            timeoutMs = 100
+            timeoutMs = 100.milliseconds.inWholeMilliseconds
         )
 
         assertEquals("primary", result)
@@ -381,14 +383,14 @@ class RaceWithFallbackTest {
             primaryAvailable = true,
             fallbackAvailable = true,
             primary = {
-                delay(500) // Very slow
+                delay(500.milliseconds) // Very slow
                 "primary"
             },
             fallback = {
-                delay(50) // Fast fallback
+                delay(50.milliseconds) // Fast fallback
                 "fallback"
             },
-            timeoutMs = 100
+            timeoutMs = 100.milliseconds.inWholeMilliseconds
         )
 
         assertEquals("fallback", result)
@@ -402,7 +404,7 @@ class RaceWithFallbackTest {
                 fallbackAvailable = true,
                 primary = { throw RuntimeException("Primary failed") },
                 fallback = { throw RuntimeException("Fallback failed") },
-                timeoutMs = 1000
+                timeoutMs = 1.seconds.inWholeMilliseconds
             )
         }
 
@@ -421,7 +423,7 @@ class RaceWithFallbackTest {
                 fallbackCalled.set(true)
                 "fallback"
             },
-            timeoutMs = 1000
+            timeoutMs = 1.seconds.inWholeMilliseconds
         )
 
         assertEquals("primary", result)
@@ -440,7 +442,7 @@ class RaceWithFallbackTest {
                 "primary"
             },
             fallback = { "fallback" },
-            timeoutMs = 1000
+            timeoutMs = 1.seconds.inWholeMilliseconds
         )
 
         assertEquals("fallback", result)
@@ -455,7 +457,7 @@ class RaceWithFallbackTest {
                 fallbackAvailable = false,
                 primary = { "primary" },
                 fallback = { "fallback" },
-                timeoutMs = 1000
+                timeoutMs = 1.seconds.inWholeMilliseconds
             )
         }
 
@@ -470,7 +472,7 @@ class RaceWithFallbackTest {
                 fallbackAvailable = true,
                 primary = { throw IllegalArgumentException("Primary error") },
                 fallback = { throw IllegalStateException("Fallback error") },
-                timeoutMs = 1000
+                timeoutMs = 1.seconds.inWholeMilliseconds
             )
         }
 
@@ -489,7 +491,7 @@ class RaceWithFallbackTest {
             fallback = { "fallback" },
             onPrimaryError = { errorCalled.set(true) },
             onPrimaryTimeout = { timeoutCalled.set(true) },
-            timeoutMs = 1000
+            timeoutMs = 1.seconds.inWholeMilliseconds
         )
 
         assertTrue(errorCalled.get(), "Error callback should be called")
@@ -508,7 +510,7 @@ class RaceWithFallbackTest {
                 fallbackStarted.set(true)
                 "fallback"
             },
-            timeoutMs = 1000
+            timeoutMs = 1.seconds.inWholeMilliseconds
         )
 
         assertEquals("primary", result)
@@ -522,13 +524,13 @@ class RaceWithFallbackTest {
             primaryAvailable = true,
             fallbackAvailable = true,
             primary = {
-                delay(200) // Slow but succeeds
+                delay(200.milliseconds) // Slow but succeeds
                 "primary"
             },
             fallback = {
                 throw RuntimeException("Fallback failed immediately")
             },
-            timeoutMs = 50 // Short timeout triggers fallback
+            timeoutMs = 50.milliseconds.inWholeMilliseconds // Short timeout triggers fallback
         )
 
         assertEquals("primary", result, "Should return primary result even if fallback fails first")
@@ -541,14 +543,14 @@ class RaceWithFallbackTest {
             primaryAvailable = true,
             fallbackAvailable = true,
             primary = {
-                delay(150)
+                delay(150.milliseconds)
                 "primary"
             },
             fallback = {
-                delay(100) // Fallback completes first but fails
+                delay(100.milliseconds) // Fallback completes first but fails
                 throw RuntimeException("Fallback failed")
             },
-            timeoutMs = 50
+            timeoutMs = 50.milliseconds.inWholeMilliseconds
         )
 
         assertEquals("primary", result, "Should return primary result when fallback fails")
@@ -560,14 +562,14 @@ class RaceWithFallbackTest {
             primaryAvailable = true,
             fallbackAvailable = true,
             primary = {
-                delay(100)
+                delay(100.milliseconds)
                 throw RuntimeException("Primary failed")
             },
             fallback = {
-                delay(200)
+                delay(200.milliseconds)
                 "fallback"
             },
-            timeoutMs = 50
+            timeoutMs = 50.milliseconds.inWholeMilliseconds
         )
 
         assertEquals("fallback", result, "Should return fallback result when primary fails first")

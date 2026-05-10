@@ -36,7 +36,10 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlin.math.abs
 import kotlin.test.*
 import kotlin.time.*
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalTime::class)
@@ -115,7 +118,7 @@ class LearningE2ETest : BaseTest() {
             env.addFavorite(fixture)
             env.intake.runIntake("en")
             val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
-            val availableAfter = start.toEpochMilliseconds() + 10.minutes.inWholeMilliseconds
+            val availableAfter = (start + 10.minutes).toEpochMilliseconds()
             env.app.favoritesQueries.setCardAvailableAfter(
                 availableAfter = availableAfter,
                 id = cards.first().id,
@@ -150,7 +153,7 @@ class LearningE2ETest : BaseTest() {
             val first = env.seedSense(lemma = "firstbudget")
             val second = env.seedSense(lemma = "secondbudget")
             env.addFavorite(first, createdAt = start.toEpochMilliseconds())
-            env.addFavorite(second, createdAt = start.toEpochMilliseconds() + 1)
+            env.addFavorite(second, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
 
             val result = env.intake.runIntake("en")
 
@@ -211,7 +214,11 @@ class LearningE2ETest : BaseTest() {
             assertEquals(Rating.entries.toList(), preview.map { it.rating })
             env.clock.advance(2.minutes)
 
-            env.session.submitReview(card, preview.first { it.rating == Rating.GOOD }, durationMs = 2_000)
+            env.session.submitReview(
+                card,
+                preview.first { it.rating == Rating.GOOD },
+                durationMs = 2.seconds.inWholeMilliseconds
+            )
 
             val reviewed = env.app.favoritesQueries.selectCardById(card.card.id).executeAsOne()
             assertEquals(1, reviewed.reps)
@@ -221,7 +228,7 @@ class LearningE2ETest : BaseTest() {
             val siblings = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
                 .filter { it.id != card.card.id }
             assertTrue(siblings.isNotEmpty())
-            assertTrue(siblings.all { assertNotNull(it.available_after) > start.toEpochMilliseconds() + 2.minutes.inWholeMilliseconds })
+            assertTrue(siblings.all { assertNotNull(it.available_after) > (start + 2.minutes).toEpochMilliseconds() })
 
             val progress = env.stats.progressForSense(fixture.senseId, "en")
             assertEquals(2, progress.totalCards)
@@ -244,7 +251,7 @@ class LearningE2ETest : BaseTest() {
             val reviewed = env.session.submitReview(
                 card,
                 env.session.previewRatings(card).first { it.rating == Rating.GOOD },
-                durationMs = 2_000,
+                durationMs = 2.seconds.inWholeMilliseconds,
             )
 
             val progress = env.stats.progressForSense(fixture.senseId, "en")
@@ -294,7 +301,7 @@ class LearningE2ETest : BaseTest() {
             assertEquals(CardState.NEW, entry.stateBefore)
             assertEquals(0.0, entry.stabilityBefore)
             assertEquals(reviewed.card.scheduling.stability, entry.stabilityAfter)
-            assertEquals(2_000, entry.durationMs)
+            assertEquals(2.seconds.inWholeMilliseconds, entry.durationMs)
 
             val global = env.stats.globalStats("en")
             assertEquals(2, global.totalCards)
@@ -323,7 +330,7 @@ class LearningE2ETest : BaseTest() {
 
             val card = env.nextLoadedCard("en")
             val outcome = env.session.previewRatings(card).first { it.rating == Rating.GOOD }
-            env.session.submitReview(card, outcome, durationMs = 1_000)
+            env.session.submitReview(card, outcome, durationMs = 1.seconds.inWholeMilliseconds)
 
             val unlocked = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
                 .executeAsList()
@@ -352,13 +359,13 @@ class LearningE2ETest : BaseTest() {
                 state = CardState.REVIEW,
                 stability = 4.0,
                 difficulty = 5.0,
-                lastReview = start.toEpochMilliseconds() - 3.minutes.inWholeMilliseconds,
+                lastReview = (start - 3.minutes).toEpochMilliseconds(),
                 reps = 3,
             )
 
             val card = env.nextLoadedCard("en")
             val outcome = env.session.previewRatings(card).first { it.rating == Rating.GOOD }
-            env.session.submitReview(card, outcome, durationMs = 1_000)
+            env.session.submitReview(card, outcome, durationMs = 1.seconds.inWholeMilliseconds)
 
             val unlocked = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
                 .executeAsList()
@@ -385,13 +392,13 @@ class LearningE2ETest : BaseTest() {
                 state = CardState.REVIEW,
                 stability = 4.0,
                 difficulty = 5.0,
-                lastReview = start.toEpochMilliseconds() - 3.minutes.inWholeMilliseconds,
+                lastReview = (start - 3.minutes).toEpochMilliseconds(),
                 reps = 3,
             )
 
             val card = env.nextLoadedCard("en")
             val outcome = env.session.previewRatings(card).first { it.rating == Rating.GOOD }
-            env.session.submitReview(card, outcome, durationMs = 1_000)
+            env.session.submitReview(card, outcome, durationMs = 1.seconds.inWholeMilliseconds)
 
             val unlocked = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
                 .executeAsList()
@@ -414,7 +421,7 @@ class LearningE2ETest : BaseTest() {
                 stability = 4.0,
                 difficulty = 5.0,
                 due = start.toEpochMilliseconds(),
-                lastReview = start.toEpochMilliseconds() - 3 * 86_400_000L,
+                lastReview = (start - 3.days).toEpochMilliseconds(),
                 reps = 3,
             )
 
@@ -422,7 +429,7 @@ class LearningE2ETest : BaseTest() {
             env.session.submitReview(
                 card,
                 env.session.previewRatings(card).first { it.rating == Rating.GOOD },
-                durationMs = 1_000,
+                durationMs = 1.seconds.inWholeMilliseconds,
             )
 
             val log = env.app.favoritesQueries.selectReviewLogsByCard(card.card.id, 10).executeAsList().single()
@@ -456,7 +463,7 @@ class LearningE2ETest : BaseTest() {
             env.session.submitReview(
                 card,
                 env.session.previewRatings(card).first { it.rating == Rating.AGAIN },
-                durationMs = 1_000,
+                durationMs = 1.seconds.inWholeMilliseconds,
             )
 
             val siblings = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
@@ -478,7 +485,7 @@ class LearningE2ETest : BaseTest() {
 
             val card = env.nextLoadedCard("en")
             val again = env.session.previewRatings(card).first { it.rating == Rating.AGAIN }
-            env.session.submitReview(card, again, durationMs = 1_000)
+            env.session.submitReview(card, again, durationMs = 1.seconds.inWholeMilliseconds)
 
             val reviewed = env.app.favoritesQueries.selectCardById(card.card.id).executeAsOne()
             assertEquals(reviewed.due, reviewed.available_after)
@@ -507,8 +514,8 @@ class LearningE2ETest : BaseTest() {
                 family = CardFamily.RECOGNIZE_SENSE,
                 state = CardState.REVIEW,
                 stability = 30.0,
-                due = start.toEpochMilliseconds() - 1,
-                lastReview = start.toEpochMilliseconds() - 30.minutes.inWholeMilliseconds,
+                due = (start - 1.milliseconds).toEpochMilliseconds(),
+                lastReview = (start - 30.minutes).toEpochMilliseconds(),
                 reps = 5,
             )
 
@@ -516,7 +523,7 @@ class LearningE2ETest : BaseTest() {
             env.session.submitReview(
                 card,
                 env.session.previewRatings(card).first { it.rating == Rating.AGAIN },
-                durationMs = 1_000,
+                durationMs = 1.seconds.inWholeMilliseconds,
             )
 
             val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
@@ -535,7 +542,7 @@ class LearningE2ETest : BaseTest() {
             val firstSense = env.seedSense(lemma = "polyseme")
             val secondSense = env.seedAdditionalSense(firstSense)
             env.addFavorite(firstSense, createdAt = start.toEpochMilliseconds())
-            env.addFavorite(secondSense, createdAt = start.toEpochMilliseconds() + 1)
+            env.addFavorite(secondSense, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
             env.insertTask(
                 fixture = firstSense,
                 family = CardFamily.RECOGNIZE_SENSE,
@@ -555,7 +562,7 @@ class LearningE2ETest : BaseTest() {
             env.session.submitReview(
                 firstCard,
                 env.session.previewRatings(firstCard).first { it.rating == Rating.GOOD },
-                durationMs = 1_000,
+                durationMs = 1.seconds.inWholeMilliseconds,
             )
 
             assertNull(env.session.nextCard("en", start).first())
@@ -600,7 +607,7 @@ class LearningE2ETest : BaseTest() {
             env.session.submitReview(
                 reviewed,
                 env.session.previewRatings(reviewed).first { it.rating == Rating.GOOD },
-                durationMs = 1_000,
+                durationMs = 1.seconds.inWholeMilliseconds,
             )
 
             val siblingAvailableAfter = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
@@ -611,8 +618,8 @@ class LearningE2ETest : BaseTest() {
             assertEquals(2, siblingAvailableAfter.toSet().size)
             assertTrue(
                 siblingAvailableAfter.all {
-                    it in start.toEpochMilliseconds() + 5.minutes.inWholeMilliseconds..
-                            start.toEpochMilliseconds() + 15.minutes.inWholeMilliseconds
+                    it in (start + 5.minutes).toEpochMilliseconds()..
+                            (start + 15.minutes).toEpochMilliseconds()
                 }
             )
         }
@@ -632,7 +639,7 @@ class LearningE2ETest : BaseTest() {
                 state = CardState.REVIEW,
                 stability = translationCard.stability,
                 difficulty = translationCard.difficulty,
-                due = start.toEpochMilliseconds() - 1,
+                due = (start - 1.milliseconds).toEpochMilliseconds(),
                 last_review = null,
                 reps = 0,
                 lapses = 0,
@@ -848,7 +855,7 @@ class LearningE2ETest : BaseTest() {
         state: CardState = CardState.LEARNING,
         stability: Double = 1.0,
         difficulty: Double = 1.0,
-        due: Long = start.toEpochMilliseconds() - 1,
+        due: Long = (start - 1.milliseconds).toEpochMilliseconds(),
         lastReview: Long? = null,
         reps: Long = 0,
     ): com.slovy.slovymovyapp.db.Card {
@@ -881,7 +888,7 @@ class LearningE2ETest : BaseTest() {
         app.favoritesQueries.insertReviewLog(
             id = Uuid.random(),
             card_id = cardId,
-            reviewed_at = start.toEpochMilliseconds() - 1,
+            reviewed_at = (start - 1.milliseconds).toEpochMilliseconds(),
             rating = Rating.GOOD,
             variant_kind = variantKind,
             variant_target_lang = variantTargetLang,
@@ -893,7 +900,7 @@ class LearningE2ETest : BaseTest() {
             scheduled_days = 0,
             stability_after = 1.0,
             difficulty_after = 1.0,
-            duration_ms = 1_000,
+            duration_ms = 1.seconds.inWholeMilliseconds,
         )
     }
 
@@ -979,7 +986,7 @@ private class DbHandle<T>(
 private class MutableClock(private var current: Instant) : Clock {
     override fun now(): Instant = current
 
-    fun advance(duration: kotlin.time.Duration) {
+    fun advance(duration: Duration) {
         current += duration
     }
 }

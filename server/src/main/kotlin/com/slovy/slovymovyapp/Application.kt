@@ -36,6 +36,7 @@ import org.kohsuke.github.GHFileNotFoundException
 import org.kohsuke.github.HttpException
 import org.slf4j.event.Level
 import java.nio.file.Files
+import kotlin.time.Duration.Companion.seconds
 
 const val updateRepoPath = "/internal/update-repo/"
 const val SERVER_PORT_ENV = "SERVER_PORT"
@@ -407,7 +408,7 @@ private fun parseTranslationCodes(source: String?): List<String> {
         .toList()
 }
 
-internal const val AI_FALLBACK_TIMEOUT_MS = 20_000L
+internal val AI_FALLBACK_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 
 /**
  * Races between primary (Gemini) and fallback (OpenAI) AI providers.

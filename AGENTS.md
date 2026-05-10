@@ -354,6 +354,9 @@ if (GitHubClient.isAvailable()) {
 - Avoid default parameter values if possible. Prefer explicit call sites so behaviour is obvious at the call and
   refactors don't silently change semantics for existing callers. Use defaults only when omission has a single,
   obvious meaning that all callers genuinely share.
+- For time arithmetic, use `kotlin.time.Duration` helpers (`1.seconds`, `7.days`, `500.milliseconds`) and
+  `Instant +/- Duration`; avoid raw millisecond constants like `86_400_000L` or manual multipliers. Convert to epoch
+  milliseconds only at API/database boundaries with `toEpochMilliseconds()` or `inWholeMilliseconds`.
 
 ## Testing Guidelines
 

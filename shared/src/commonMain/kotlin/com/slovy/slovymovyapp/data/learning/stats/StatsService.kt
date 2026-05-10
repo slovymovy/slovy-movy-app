@@ -1,22 +1,14 @@
 package com.slovy.slovymovyapp.data.learning.stats
 
-import com.slovy.slovymovyapp.data.learning.Card
-import com.slovy.slovymovyapp.data.learning.CardFamily
-import com.slovy.slovymovyapp.data.learning.CardState
-import com.slovy.slovymovyapp.data.learning.CardVariant
-import com.slovy.slovymovyapp.data.learning.Rating
+import com.slovy.slovymovyapp.data.learning.*
 import com.slovy.slovymovyapp.data.learning.fsrs.DAY
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
-import com.slovy.slovymovyapp.data.learning.toCard
 import com.slovy.slovymovyapp.db.FavoritesQueries
 import com.slovy.slovymovyapp.db.SelectReviewLogsBySense
 import kotlin.math.pow
-import kotlin.time.Clock
-import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-import kotlin.time.toDuration
+import kotlin.time.*
+import kotlin.time.Duration.Companion.days
 import kotlin.uuid.Uuid
 
 class StatsService(
@@ -108,8 +100,9 @@ class StatsService(
 
     @OptIn(ExperimentalTime::class)
     fun globalStats(langCode: String): GlobalStats {
-        val now = clock.now().toEpochMilliseconds()
-        val since = now - 7 * DAY.inWholeMilliseconds
+        val nowInstant = clock.now()
+        val now = nowInstant.toEpochMilliseconds()
+        val since = (nowInstant - 7.days).toEpochMilliseconds()
         val totalReviews = learning.countReviewsSince(langCode, since).executeAsOne()
         val successfulReviews = learning.countSuccessfulReviewsSince(langCode, since).executeAsOne()
         return GlobalStats(

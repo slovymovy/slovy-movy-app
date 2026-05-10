@@ -1,11 +1,12 @@
 package com.slovy.slovymovyapp.ui.word
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import com.slovy.slovymovyapp.ui.SpeakerVector
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -13,8 +14,6 @@ import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -23,12 +22,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -38,13 +37,10 @@ import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
-import com.slovy.slovymovyapp.speech.TTSStatus
-import com.slovy.slovymovyapp.speech.Text2SpeechVoice
-import com.slovy.slovymovyapp.speech.TextToSpeechManager
-import com.slovy.slovymovyapp.speech.VoiceFilterHelper
-import com.slovy.slovymovyapp.speech.VoiceQuality
+import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.AppScreen
+import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.cancel
@@ -54,6 +50,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.milliseconds
 
 sealed interface WordDetailUiState {
     data class Empty(
@@ -348,6 +345,7 @@ class WordDetailViewModel(
                     isPreparing = false
                     isPlaying = true
                 }
+
                 TTSStatus.IDLE -> {
                     isPreparing = false
                     isPlaying = false
@@ -426,7 +424,7 @@ class WordDetailViewModel(
             }
         }
         viewModelScope.launch {
-            delay(200)
+            delay(200.milliseconds)
             state = when (val s = state) {
                 is WordDetailUiState.Empty -> s.copy(isRefreshing = false)
                 is WordDetailUiState.Content -> s.copy(isRefreshing = false)
@@ -908,6 +906,7 @@ fun WordDetailScreenContent(
                                             strokeWidth = 2.dp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
+
                                         else -> Icon(
                                             imageVector = if (isPlaying) Icons.Filled.StopCircle else SpeakerVector,
                                             contentDescription = if (isPlaying) {
@@ -1081,64 +1080,65 @@ private fun WordDetailContent(
                 if (size.height > 0) onHeroMeasured(size.height.toFloat())
             }
         ) {
-        val fontScale = LocalDensity.current.fontScale
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val maxWidth = constraints.maxWidth
-        var lemmaFontSize by remember(card.lemma, maxWidth, fontScale) { mutableStateOf(42.sp) }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = card.lemma,
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontSize = lemmaFontSize,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = (lemmaFontSize.value * 1.05f).sp,
-                    letterSpacing = (-0.3).sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
-                onTextLayout = { result ->
-                    if (result.hasVisualOverflow && lemmaFontSize > 22.sp) {
-                        lemmaFontSize = (lemmaFontSize.value * 0.9f).sp
+            val fontScale = LocalDensity.current.fontScale
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val maxWidth = constraints.maxWidth
+                var lemmaFontSize by remember(card.lemma, maxWidth, fontScale) { mutableStateOf(42.sp) }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = card.lemma,
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            fontSize = lemmaFontSize,
+                            fontWeight = FontWeight.Medium,
+                            lineHeight = (lemmaFontSize.value * 1.05f).sp,
+                            letterSpacing = (-0.3).sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                        onTextLayout = { result ->
+                            if (result.hasVisualOverflow && lemmaFontSize > 22.sp) {
+                                lemmaFontSize = (lemmaFontSize.value * 0.9f).sp
+                            }
+                        }
+                    )
+                    IconButton(
+                        onClick = { if (isPlaying) onStopWord() else onPlayWord() },
+                        enabled = canPlay && !isPreparing,
+                        modifier = Modifier
+                            .padding(bottom = 4.dp)
+                            .size(36.dp)
+                    ) {
+                        when {
+                            isPreparing -> CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            else -> Icon(
+                                imageVector = if (isPlaying) Icons.Filled.StopCircle else SpeakerVector,
+                                contentDescription = if (isPlaying) {
+                                    stringResource(Res.string.word_details_action_stop)
+                                } else {
+                                    stringResource(Res.string.word_details_action_play_word)
+                                },
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    .copy(alpha = if (canPlay) 1f else 0.38f)
+                            )
+                        }
                     }
                 }
-            )
-            IconButton(
-                onClick = { if (isPlaying) onStopWord() else onPlayWord() },
-                enabled = canPlay && !isPreparing,
-                modifier = Modifier
-                    .padding(bottom = 4.dp)
-                    .size(36.dp)
-            ) {
-                when {
-                    isPreparing -> CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    else -> Icon(
-                        imageVector = if (isPlaying) Icons.Filled.StopCircle else SpeakerVector,
-                        contentDescription = if (isPlaying) {
-                            stringResource(Res.string.word_details_action_stop)
-                        } else {
-                            stringResource(Res.string.word_details_action_play_word)
-                        },
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            .copy(alpha = if (canPlay) 1f else 0.38f)
-                    )
-                }
-            }
-        }
-        } // end BoxWithConstraints
+            } // end BoxWithConstraints
 
-        ChapterRule()
+            ChapterRule()
         } // end hero measurement Column
 
         Column(
@@ -1148,83 +1148,83 @@ private fun WordDetailContent(
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
 
-        if (card.entries.isEmpty()) {
-            Text(
-                text = stringResource(Res.string.word_details_no_entries),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        } else {
-            card.entries.forEachIndexed { index, entry ->
-                val entryState = entryStates.getOrNull(index) ?: entry.toEntryUiState(
-                    index,
-                    isSenseFavorite = isSenseFavorite,
-                    numPos = card.entries.size
+            if (card.entries.isEmpty()) {
+                Text(
+                    text = stringResource(Res.string.word_details_no_entries),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                EntryCard(
-                    entry = entry,
-                    lemma = card.lemma,
-                    entryState = entryState,
-                    cardLoading = cardLoading,
-                    cardError = cardError,
-                    translationLoading = translationLoading,
-                    translationError = translationError,
-                    onFormsToggle = { onFormsToggle(entryState.entryId) },
-                    onFormsViewSelect = { viewId -> onFormsViewSelect(entryState.entryId, viewId) },
-                    onSenseToggle = { senseId -> onSenseToggle(entryState.entryId, senseId) },
-                    onSensePositioned = { senseId, windowY ->
-                        // Calculate position relative to scroll container
-                        val relativeY = windowY - scrollContainerY
-                        onSensePositioned(senseId, relativeY)
-                    },
-                    onSenseFavoriteToggle = onSenseFavoriteToggle,
-                    relatedWords = card.relatedWords,
-                    onWordClick = onWordClick,
-                    favoriteLemmas = favoriteLemmas
-                )
+            } else {
+                card.entries.forEachIndexed { index, entry ->
+                    val entryState = entryStates.getOrNull(index) ?: entry.toEntryUiState(
+                        index,
+                        isSenseFavorite = isSenseFavorite,
+                        numPos = card.entries.size
+                    )
+                    EntryCard(
+                        entry = entry,
+                        lemma = card.lemma,
+                        entryState = entryState,
+                        cardLoading = cardLoading,
+                        cardError = cardError,
+                        translationLoading = translationLoading,
+                        translationError = translationError,
+                        onFormsToggle = { onFormsToggle(entryState.entryId) },
+                        onFormsViewSelect = { viewId -> onFormsViewSelect(entryState.entryId, viewId) },
+                        onSenseToggle = { senseId -> onSenseToggle(entryState.entryId, senseId) },
+                        onSensePositioned = { senseId, windowY ->
+                            // Calculate position relative to scroll container
+                            val relativeY = windowY - scrollContainerY
+                            onSensePositioned(senseId, relativeY)
+                        },
+                        onSenseFavoriteToggle = onSenseFavoriteToggle,
+                        relatedWords = card.relatedWords,
+                        onWordClick = onWordClick,
+                        favoriteLemmas = favoriteLemmas
+                    )
+                }
             }
-        }
 
-        if (card.wordFamily.isNotEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            if (card.wordFamily.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    EntryList(
+                        label = stringResource(Res.string.word_details_word_family),
+                        values = card.wordFamily,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        relatedWords = card.relatedWords,
+                        onWordClick = onWordClick,
+                        favoriteLemmas = favoriteLemmas,
+                        chipShape = RoundedCornerShape(50),
+                        chipBorder = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        chipSpacing = 8.dp
+                    )
+                }
+            }
+
+            TextButton(
+                onClick = onOpenFeedback,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             ) {
-                EntryList(
-                    label = stringResource(Res.string.word_details_word_family),
-                    values = card.wordFamily,
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    relatedWords = card.relatedWords,
-                    onWordClick = onWordClick,
-                    favoriteLemmas = favoriteLemmas,
-                    chipShape = RoundedCornerShape(50),
-                    chipBorder = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                    chipSpacing = 8.dp
+                Icon(
+                    imageVector = Icons.Outlined.Flag,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(Res.string.word_details_suggest_correction),
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
-        }
-
-        TextButton(
-            onClick = onOpenFeedback,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Flag,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = stringResource(Res.string.word_details_suggest_correction),
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
         } // end inner content Column
     }
 }

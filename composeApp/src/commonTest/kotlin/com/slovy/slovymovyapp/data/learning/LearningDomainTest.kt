@@ -17,6 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -126,7 +127,7 @@ class LearningDomainTest {
             state = CardState.REVIEW,
             stability = 4.0,
             difficulty = 5.0,
-            lastReviewEpochMs = now.toEpochMilliseconds() - 3 * 86_400_000L,
+            lastReviewEpochMs = (now - 3.days).toEpochMilliseconds(),
             reps = 3,
         )
 
