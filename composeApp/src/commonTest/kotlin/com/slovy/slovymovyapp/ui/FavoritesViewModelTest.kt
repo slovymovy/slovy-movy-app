@@ -5,8 +5,6 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardState
-import com.slovy.slovymovyapp.data.learning.intake.IntakeResult
-import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
@@ -29,23 +27,6 @@ open class FavoritesViewModelTest : BaseTest() {
         const val SENSE_1 = "00000000-0000-0000-0000-000000000101"
         const val SENSE_2 = "00000000-0000-0000-0000-000000000102"
         const val SENSE_3 = "00000000-0000-0000-0000-000000000103"
-    }
-
-    private class RecordingIntake(
-        private val onRun: suspend (String) -> Unit = {},
-    ) : LearningIntake {
-        val langCodes = mutableListOf<String>()
-
-        override suspend fun runIntake(langCode: String): IntakeResult {
-            langCodes += langCode
-            onRun(langCode)
-            return IntakeResult(activated = emptyList(), skipped = emptyList(), cardsCreated = 0)
-        }
-    }
-
-    private object NoopIntake : LearningIntake {
-        override suspend fun runIntake(langCode: String): IntakeResult =
-            IntakeResult(activated = emptyList(), skipped = emptyList(), cardsCreated = 0)
     }
 
     @BeforeTest
@@ -90,10 +71,9 @@ open class FavoritesViewModelTest : BaseTest() {
             testAppDatabaseHolder().database.favoritesQueries,
             clock = Clock.System
         ),
-        intakeService: LearningIntake = NoopIntake,
         settingsRepo: SettingsRepository = SettingsRepository(testAppDatabaseHolder().database),
     ): FavoritesViewModel {
-        val vm = FavoritesViewModel(favRepo, dictRepo, statsService, intakeService, settingsRepo)
+        val vm = FavoritesViewModel(favRepo, dictRepo, statsService, settingsRepo)
         viewModelStore.put("test", vm)
         createdViewModels += vm
         return vm
@@ -329,38 +309,6 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
-    fun loadAndApplyState_runsIntakeWhenRequestedForSelectedLanguage() = runTest {
-        val favRepo = favoritesRepository()
-        val intake = RecordingIntake()
-        favRepo.deleteAll()
-        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
-
-        val vm = createViewModel(favRepo, intakeService = intake)
-        vm.loadAndApplyState("", runIntake = true)
-        vm.loadAndApplyState("", runIntake = true)
-
-        assertEquals(listOf(Language.ENGLISH.code, Language.ENGLISH.code), intake.langCodes)
-        assertFalse(contentState(vm).scrollToTop)
-    }
-
-    @Test
-    fun loadAndApplyState_usesFavoritesSnapshotAfterIntake() = runTest {
-        val favRepo = favoritesRepository()
-        favRepo.deleteAll()
-        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
-        val intake = RecordingIntake {
-            favRepo.add(SENSE_2, Language.ENGLISH, "world")
-        }
-
-        val vm = createViewModel(favRepo, intakeService = intake)
-        vm.loadAndApplyState("", runIntake = true)
-
-        val content = contentState(vm)
-        assertEquals(setOf(SENSE_1, SENSE_2), content.senses.map { it.senseId }.toSet())
-        assertEquals(setOf("hello", "world"), content.favoriteLemmas)
-    }
-
-    @Test
     fun withoutCachedFavoriteDetails_dropsLoadedSenseDetails() {
         val state = FavoritesUiState.Content(
             senses = listOf(
@@ -400,38 +348,35 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
-    fun loadAndApplyState_showsStudyCardForNewCardCreatedByIntake() = runTest {
+    fun loadAndApplyState_showsStudyCardForDueCard() = runTest {
         val app = testAppDatabaseHolder().database
         val favRepo = favoritesRepository(app)
         favRepo.deleteAll()
         favRepo.add(SENSE_1, Language.ENGLISH, "hello")
-        val intake = RecordingIntake {
-            app.favoritesQueries.insertCard(
-                id = Uuid.parse("00000000-0000-0000-0000-000000000401"),
-                sense_id = Uuid.parse(SENSE_1),
-                lemma_id = Uuid.parse("00000000-0000-0000-0000-000000000402"),
-                lang_code = Language.ENGLISH.code,
-                family = CardFamily.RECOGNIZE_SENSE,
-                state = CardState.NEW,
-                stability = 0.0,
-                difficulty = 0.0,
-                due = 0L,
-                last_review = null,
-                reps = 0,
-                lapses = 0,
-                created_at = 0L,
-                available_after = null,
-                answer_key = "hello",
-                suspended = false,
-            )
-        }
+        app.favoritesQueries.insertCard(
+            id = Uuid.parse("00000000-0000-0000-0000-000000000401"),
+            sense_id = Uuid.parse(SENSE_1),
+            lemma_id = Uuid.parse("00000000-0000-0000-0000-000000000402"),
+            lang_code = Language.ENGLISH.code,
+            family = CardFamily.RECOGNIZE_SENSE,
+            state = CardState.NEW,
+            stability = 0.0,
+            difficulty = 0.0,
+            due = 0L,
+            last_review = null,
+            reps = 0,
+            lapses = 0,
+            created_at = 0L,
+            available_after = null,
+            answer_key = "hello",
+            suspended = false,
+        )
 
         val vm = createViewModel(
             favRepo = favRepo,
             statsService = StatsService(app.favoritesQueries, clock = Clock.System),
-            intakeService = intake,
         )
-        vm.loadAndApplyState("", runIntake = true)
+        vm.loadAndApplyState("")
 
         val study = assertNotNull(contentState(vm).study)
         assertEquals(Language.ENGLISH, study.language)

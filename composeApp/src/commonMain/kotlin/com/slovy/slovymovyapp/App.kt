@@ -188,7 +188,7 @@ fun App(
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember {
-        FavoritesViewModel(favoritesRepository, dictionaryRepository, statsService, intakeService, settingsRepository)
+        FavoritesViewModel(favoritesRepository, dictionaryRepository, statsService, settingsRepository)
     }
     var hasFavoritesToReview by remember { mutableStateOf(false) }
     val buildConfig = remember { appBuildConfig }
