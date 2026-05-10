@@ -187,9 +187,17 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         destPath: Path,
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken,
-    ) {
+    ) = withForegroundService {
+        downloadViaKtor(url, headers, destPath, onProgress, cancelToken)
+    }
+
+    actual suspend fun runWithProcessKeepAlive(block: suspend () -> Unit) = withForegroundService {
+        block()
+    }
+
+    private suspend fun withForegroundService(block: suspend () -> Unit) {
         val intent = Intent(ctx, DownloadForegroundService::class.java)
-        val startedService = if (activeDownloads.getAndIncrement() == 0) {
+        val startedService = if (activeBackgroundJobs.getAndIncrement() == 0) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     ctx.startForegroundService(intent)
@@ -197,20 +205,20 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
                     ctx.startService(intent)
                 }
                 true
-            } catch (t: Throwable) {
+            } catch (_: Throwable) {
                 // e.g. ForegroundServiceStartNotAllowedException on Android 12+
                 // when launched from background. Fall through to a foregroundless
-                // download instead of leaking the ref-count.
-                activeDownloads.decrementAndGet()
+                // execution instead of leaking the ref-count.
+                activeBackgroundJobs.decrementAndGet()
                 false
             }
         } else {
             true
         }
         try {
-            downloadViaKtor(url, headers, destPath, onProgress, cancelToken)
+            block()
         } finally {
-            if (startedService && activeDownloads.decrementAndGet() == 0) {
+            if (startedService && activeBackgroundJobs.decrementAndGet() == 0) {
                 ctx.stopService(intent)
             }
         }
@@ -288,9 +296,9 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     companion object {
-        // Process-global so concurrent downloads from multiple PlatformDbSupport
-        // instances cannot stop the foreground service while another download
-        // is still running.
-        private val activeDownloads = AtomicInteger(0)
+        // Process-global so concurrent foreground-service users (downloads, post-download
+        // recovery, etc.) from multiple PlatformDbSupport instances cannot stop the service
+        // while another job is still running.
+        private val activeBackgroundJobs = AtomicInteger(0)
     }
 }

@@ -185,7 +185,9 @@ fun App(
                 onDictionaryDataChanged = { recoverFavorites ->
                     dictionaryRepository.clearSenseCache()
                     if (recoverFavorites) {
-                        favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                        platform.runWithProcessKeepAlive {
+                            favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                        }
                     }
                     favoritesViewModel.dropCachedFavoriteDetails()
                 },
@@ -392,7 +394,9 @@ fun App(
                             },
                             finalize = {
                                 dictionaryRepository.clearSenseCache()
-                                favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                                platform.runWithProcessKeepAlive {
+                                    favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                                }
                                 favoritesViewModel.dropCachedFavoriteDetails()
                             },
                             onSuccess = {

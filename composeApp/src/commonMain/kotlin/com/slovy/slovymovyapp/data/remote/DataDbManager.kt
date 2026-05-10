@@ -471,6 +471,10 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken,
     )
+
+    // Keeps the process alive across the [block]'s lifetime so background-aware platforms (Android,
+    // iOS) don't suspend or kill mid-execution. Desktop is a no-op.
+    suspend fun runWithProcessKeepAlive(block: suspend () -> Unit)
 }
 
 interface PlatformFileOutput {

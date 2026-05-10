@@ -260,4 +260,9 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
             client.close()
         }
     }
+
+    actual suspend fun runWithProcessKeepAlive(block: suspend () -> Unit) {
+        // Desktop processes are not subject to OS-imposed background suspension; just run the block.
+        block()
+    }
 }
