@@ -32,7 +32,9 @@ import com.slovy.slovymovyapp.ui.theme.AppTheme
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
@@ -394,7 +396,9 @@ fun App(
                             finalize = {
                                 dictionaryRepository.clearSenseCache()
                                 platform.runWithProcessKeepAlive {
-                                    favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                                    withContext(Dispatchers.Default) {
+                                        favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                                    }
                                 }
                                 favoritesViewModel.dropCachedFavoriteDetails()
                             },
