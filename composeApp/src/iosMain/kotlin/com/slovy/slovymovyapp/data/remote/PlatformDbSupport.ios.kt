@@ -16,12 +16,11 @@ import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import platform.Foundation.*
 import platform.UIKit.UIApplication
 import platform.UIKit.UIBackgroundTaskInvalid
+import kotlin.concurrent.Volatile
 
 actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     val lock: ReentrantLock = reentrantLock()
@@ -237,15 +236,15 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         getAvailableBytesForDestination = { getAvailableBytesForPath(destPath) },
     )
 
-    actual suspend fun runWithProcessKeepAlive(block: suspend () -> Unit) {
+    actual fun acquireProcessKeepAlive(): ProcessKeepAlive {
         val app = UIApplication.sharedApplication
         val taskLock = reentrantLock()
         var taskId = UIBackgroundTaskInvalid
 
         // beginBackgroundTaskWithName MUST end with endBackgroundTask, including from the expiration
         // handler — otherwise iOS terminates the app. We guard the taskId with a lock so a racing
-        // expiration handler and the finally block can't double-end (or both miss) the same task.
-        val started = app.beginBackgroundTaskWithName("FavoriteLemmaRecovery") {
+        // expiration handler and the release call can't double-end (or both miss) the same task.
+        val started = app.beginBackgroundTaskWithName("ProcessKeepAlive") {
             synchronized(taskLock) {
                 val current = taskId
                 if (current != UIBackgroundTaskInvalid) {
@@ -255,18 +254,26 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
             }
         }
         synchronized(taskLock) { taskId = started }
-        try {
-            block()
-        } finally {
-            withContext(NonCancellable) {
-                synchronized(taskLock) {
-                    val current = taskId
-                    if (current != UIBackgroundTaskInvalid) {
-                        app.endBackgroundTask(current)
-                        taskId = UIBackgroundTaskInvalid
-                    }
+        return IosProcessKeepAlive {
+            synchronized(taskLock) {
+                val current = taskId
+                if (current != UIBackgroundTaskInvalid) {
+                    app.endBackgroundTask(current)
+                    taskId = UIBackgroundTaskInvalid
                 }
             }
+        }
+    }
+
+    private class IosProcessKeepAlive(
+        private val endTask: () -> Unit,
+    ) : ProcessKeepAlive {
+        @Volatile
+        private var released = false
+        override fun release() {
+            if (released) return
+            released = true
+            endTask()
         }
     }
 }

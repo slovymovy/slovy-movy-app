@@ -207,7 +207,11 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
                 headers.forEach { (key, value) -> header(key, value) }
             }.execute { response ->
                 if (!response.status.isSuccess()) {
-                    val snippet = try { response.bodyAsText().take(512) } catch (_: Throwable) { null }
+                    val snippet = try {
+                        response.bodyAsText().take(512)
+                    } catch (_: Throwable) {
+                        null
+                    }
                     val baseMsg = "HTTP ${response.status.value} ${response.status.description} while downloading $url"
                     throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
                 }
@@ -261,8 +265,12 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         }
     }
 
-    actual suspend fun runWithProcessKeepAlive(block: suspend () -> Unit) {
-        // Desktop processes are not subject to OS-imposed background suspension; just run the block.
-        block()
+    actual fun acquireProcessKeepAlive(): ProcessKeepAlive {
+        // Desktop processes are not subject to OS-imposed background suspension.
+        return NoopProcessKeepAlive
+    }
+
+    private object NoopProcessKeepAlive : ProcessKeepAlive {
+        override fun release() {}
     }
 }

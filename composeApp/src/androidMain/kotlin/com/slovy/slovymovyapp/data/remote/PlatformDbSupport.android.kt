@@ -187,15 +187,16 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         destPath: Path,
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken,
-    ) = withForegroundService {
-        downloadViaKtor(url, headers, destPath, onProgress, cancelToken)
+    ) {
+        val handle = acquireProcessKeepAlive()
+        try {
+            downloadViaKtor(url, headers, destPath, onProgress, cancelToken)
+        } finally {
+            handle.release()
+        }
     }
 
-    actual suspend fun runWithProcessKeepAlive(block: suspend () -> Unit) = withForegroundService {
-        block()
-    }
-
-    private suspend fun withForegroundService(block: suspend () -> Unit) {
+    actual fun acquireProcessKeepAlive(): ProcessKeepAlive {
         val intent = Intent(ctx, DownloadForegroundService::class.java)
         val startedService = if (activeBackgroundJobs.getAndIncrement() == 0) {
             try {
@@ -206,18 +207,29 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
                 }
                 true
             } catch (_: Throwable) {
-                // e.g. ForegroundServiceStartNotAllowedException on Android 12+
-                // when launched from background. Fall through to a foregroundless
-                // execution instead of leaking the ref-count.
+                // e.g. ForegroundServiceStartNotAllowedException on Android 12+ when launched
+                // from background. Fall through to a foregroundless execution instead of leaking
+                // the ref-count. Outer holders acquired while the app was foregrounded keep the
+                // service alive across this call so this fallback is rare in practice.
                 activeBackgroundJobs.decrementAndGet()
                 false
             }
         } else {
             true
         }
-        try {
-            block()
-        } finally {
+        return AndroidProcessKeepAlive(ctx, intent, startedService)
+    }
+
+    private class AndroidProcessKeepAlive(
+        private val ctx: Context,
+        private val intent: Intent,
+        private val startedService: Boolean,
+    ) : ProcessKeepAlive {
+        @Volatile
+        private var released = false
+        override fun release() {
+            if (released) return
+            released = true
             if (startedService && activeBackgroundJobs.decrementAndGet() == 0) {
                 ctx.stopService(intent)
             }
@@ -241,7 +253,11 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
                 headers.forEach { (key, value) -> header(key, value) }
             }.execute { response ->
                 if (!response.status.isSuccess()) {
-                    val snippet = try { response.bodyAsText().take(512) } catch (_: Throwable) { null }
+                    val snippet = try {
+                        response.bodyAsText().take(512)
+                    } catch (_: Throwable) {
+                        null
+                    }
                     val baseMsg = "HTTP ${response.status.value} ${response.status.description} while downloading $url"
                     throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
                 }

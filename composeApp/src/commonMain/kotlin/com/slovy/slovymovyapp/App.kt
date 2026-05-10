@@ -181,6 +181,7 @@ fun App(
                 dictionaryClient,
                 appDataExporter,
                 settingsRepository,
+                platform,
                 buildConfig,
                 onDictionaryDataChanged = { recoverFavorites ->
                     dictionaryRepository.clearSenseCache()
@@ -414,6 +415,7 @@ fun App(
                                     popUpTo<AppDestination.DownloadSetup> { inclusive = true }
                                 }
                             },
+                            platform = platform,
                             loadItems = {
                                 downloadDict = !dataManager.hasDictionary(dictLang)
                                 val available = dataManager.fetchAvailableLanguages()
