@@ -14,6 +14,7 @@ import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.max
+import kotlin.uuid.Uuid
 
 /**
  * Remote data manager for prebuilt dictionary and translation databases.
@@ -170,6 +171,88 @@ class DataDbManager(
     suspend fun openTranslationReadOnly(src: Language, tgt: Language): TranslationDatabase {
         if (!hasTranslation(src, tgt)) throw IllegalArgumentException("Translation from $src to $tgt does not exist")
         return databaseCache.getTranslation(src, tgt)
+    }
+
+    /**
+     * Returns the subset of [normalizedLemmas] that should be re-fetched because the local dictionary
+     * either does not contain them at all, or only has placeholder `online_only` rows.
+     */
+    suspend fun downloadedLemmasNeedingRecovery(
+        language: Language,
+        normalizedLemmas: Set<String>,
+    ): Set<String> = withContext(Dispatchers.IO) {
+        if (normalizedLemmas.isEmpty()) return@withContext emptySet()
+        if (!hasDictionary(language)) return@withContext emptySet()
+        val queries = openDictionaryReadOnly(language).dictionaryQueries
+        val rowsByLemma = normalizedLemmas.chunked(999)
+            .flatMap { chunk -> queries.selectLemmasByNormalizedWords(language.code, chunk).executeAsList() }
+            .groupBy { it.lemma_normalized.lowercase() }
+
+        val missingLemmas = normalizedLemmas - rowsByLemma.keys
+        val onlineOnlyLemmas = rowsByLemma
+            .filterValues { rows -> rows.isNotEmpty() && rows.all { it.online_only } }
+            .keys
+
+        missingLemmas + onlineOnlyLemmas
+    }
+
+    /**
+     * Returns the subset of normalized lemmas (keys of [senseIdsByNormalizedLemma]) whose favorited
+     * sense_ids are missing translations in any of [translationTargets].
+     *
+     * A lemma is reported as needing recovery if any target language either:
+     *  - has no translation database file on disk (so no senses can possibly have translations), or
+     *  - has a translation database that does not contain a row for at least one favorited sense_id.
+     *
+     * Sense_ids that fail to parse as a [Uuid] are treated as missing — they cannot match any stored
+     * row, so the safest action is to refetch.
+     */
+    suspend fun downloadedFavoritesNeedingTranslationRecovery(
+        language: Language,
+        senseIdsByNormalizedLemma: Map<String, Set<String>>,
+        translationTargets: List<Language>,
+    ): Set<String> = withContext(Dispatchers.IO) {
+        if (senseIdsByNormalizedLemma.isEmpty() || translationTargets.isEmpty()) return@withContext emptySet()
+        if (!hasDictionary(language)) return@withContext emptySet()
+
+        val targets = translationTargets.filter { it != language }.distinctBy { it.code }
+        if (targets.isEmpty()) return@withContext emptySet()
+
+        val needsRecovery = mutableSetOf<String>()
+        for (target in targets) {
+            val remaining = senseIdsByNormalizedLemma.keys - needsRecovery
+            if (remaining.isEmpty()) break
+
+            if (!hasTranslation(language, target)) {
+                // No translation file at all → every favorite lemma in this language needs the target fetched.
+                needsRecovery += remaining
+                continue
+            }
+
+            val queries = openTranslationReadOnly(language, target).translationQueries
+            val parsedSenseIds: List<Uuid> = remaining.flatMap { lemma ->
+                (senseIdsByNormalizedLemma[lemma] ?: emptySet()).mapNotNull { raw ->
+                    runCatching { Uuid.parse(raw) }.getOrNull()
+                }
+            }.distinct()
+
+            val present: Set<Uuid> = parsedSenseIds.chunked(999)
+                .flatMap { chunk ->
+                    queries.selectSenseTranslationsBySenseIds(chunk, language.code, target.code).executeAsList()
+                }
+                .map { it.sense_id }
+                .toSet()
+
+            for (lemma in remaining) {
+                val needed = senseIdsByNormalizedLemma[lemma] ?: continue
+                val anyMissing = needed.any { raw ->
+                    val parsed = runCatching { Uuid.parse(raw) }.getOrNull() ?: return@any true
+                    parsed !in present
+                }
+                if (anyMissing) needsRecovery += lemma
+            }
+        }
+        needsRecovery
     }
 
     suspend fun hasRequiredVersion(): Boolean = withContext(Dispatchers.Default) {

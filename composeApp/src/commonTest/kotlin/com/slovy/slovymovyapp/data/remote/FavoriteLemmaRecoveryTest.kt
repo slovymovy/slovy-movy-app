@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FavoriteLemmaRecoveryTest : BaseTest() {
     private val sense1 = "00000000-0000-0000-0000-000000000001"
@@ -61,16 +62,22 @@ class FavoriteLemmaRecoveryTest : BaseTest() {
     @Test
     fun recoverAllInstalledFavorites_skips_languages_without_downloaded_dictionary() = runBlocking {
         val fetches = mutableListOf<FetchCall>()
+        val translationChecks = mutableListOf<TranslationCheck>()
         val recovery = recovery(
             favorites = listOf(Favorite(sense1, Language.ENGLISH, "test")),
             installedDictionaries = emptySet(),
             lemmasNeedingRecovery = emptySet(),
             fetches = fetches,
+            translationChecks = translationChecks,
         )
 
         recovery.recoverAllInstalledFavorites()
 
         assertEquals(emptyList(), fetches)
+        assertTrue(
+            translationChecks.isEmpty(),
+            "Translation check must be skipped when the dictionary is not downloaded",
+        )
     }
 
     @Test
@@ -123,6 +130,94 @@ class FavoriteLemmaRecoveryTest : BaseTest() {
     }
 
     @Test
+    fun recoverAllInstalledFavorites_recovers_lemma_when_translation_missing() = runBlocking {
+        val fetches = mutableListOf<FetchCall>()
+        val translationChecks = mutableListOf<TranslationCheck>()
+        val recovery = recovery(
+            favorites = listOf(Favorite(sense1, Language.ENGLISH, "test")),
+            installedDictionaries = setOf(Language.ENGLISH),
+            lemmasNeedingRecovery = emptySet(),
+            translationsMissingFor = setOf("test"),
+            fetches = fetches,
+            translationChecks = translationChecks,
+        )
+
+        recovery.recoverAllInstalledFavorites()
+
+        assertEquals(
+            listOf(
+                TranslationCheck(
+                    language = Language.ENGLISH,
+                    senseIdsByLemma = mapOf("test" to setOf(sense1)),
+                    translationTargets = listOf(Language.RUSSIAN),
+                )
+            ),
+            translationChecks,
+        )
+        assertEquals(
+            listOf(FetchCall(Language.ENGLISH, "test", listOf(Language.RUSSIAN))),
+            fetches,
+        )
+    }
+
+    @Test
+    fun recoverAllInstalledFavorites_unions_dictionary_and_translation_recovery_sets() = runBlocking {
+        val fetches = mutableListOf<FetchCall>()
+        val translationChecks = mutableListOf<TranslationCheck>()
+        val recovery = recovery(
+            favorites = listOf(
+                Favorite(sense1, Language.ENGLISH, "alpha"),
+                Favorite(sense2, Language.ENGLISH, "beta"),
+            ),
+            installedDictionaries = setOf(Language.ENGLISH),
+            lemmasNeedingRecovery = setOf("alpha"),
+            translationsMissingFor = setOf("beta"),
+            fetches = fetches,
+            translationChecks = translationChecks,
+        )
+
+        recovery.recoverAllInstalledFavorites()
+
+        assertEquals(1, translationChecks.size, "Translation check should fire exactly once")
+        // The lemma already flagged for dictionary recovery must not be re-checked for translations.
+        assertEquals(
+            mapOf("beta" to setOf(sense2)),
+            translationChecks.single().senseIdsByLemma,
+        )
+        assertEquals(
+            setOf(
+                FetchCall(Language.ENGLISH, "alpha", listOf(Language.RUSSIAN)),
+                FetchCall(Language.ENGLISH, "beta", listOf(Language.RUSSIAN)),
+            ),
+            fetches.toSet(),
+        )
+    }
+
+    @Test
+    fun recoverAllInstalledFavorites_continues_when_translation_check_throws() = runBlocking {
+        val fetches = mutableListOf<FetchCall>()
+        val recovery = recovery(
+            favorites = listOf(
+                Favorite(sense1, Language.ENGLISH, "alpha"),
+                Favorite(sense2, Language.ENGLISH, "beta"),
+            ),
+            installedDictionaries = setOf(Language.ENGLISH),
+            lemmasNeedingRecovery = setOf("alpha"),
+            translationsMissingFor = emptySet(),
+            translationCheckThrows = true,
+            fetches = fetches,
+        )
+
+        recovery.recoverAllInstalledFavorites()
+
+        // Dictionary recovery still fetches "alpha"; translation failure is swallowed.
+        assertEquals(
+            listOf(FetchCall(Language.ENGLISH, "alpha", listOf(Language.RUSSIAN))),
+            fetches,
+        )
+    }
+
+    @Test
     fun recoverAllInstalledFavorites_fetches_missing_lemmas_in_parallel() = runBlocking {
         val startedTogether = CompletableDeferred<Unit>()
         val activeFetches = mutableSetOf<String>()
@@ -136,6 +231,7 @@ class FavoriteLemmaRecoveryTest : BaseTest() {
             },
             hasDownloadedDictionary = { language -> language == Language.ENGLISH },
             downloadedLemmasNeedingRecovery = { _, lemmas -> lemmas },
+            downloadedFavoritesNeedingTranslationRecovery = { _, _, _ -> emptySet() },
             translationTargetsProvider = { listOf(Language.RUSSIAN) },
             fetchLemma = { _, lemma, _ ->
                 activeFetches += lemma
@@ -161,6 +257,9 @@ class FavoriteLemmaRecoveryTest : BaseTest() {
         lemmasNeedingRecovery: Set<String>,
         fetches: MutableList<FetchCall>,
         lemmaChecks: MutableList<LemmaCheck> = mutableListOf(),
+        translationChecks: MutableList<TranslationCheck> = mutableListOf(),
+        translationsMissingFor: Set<String> = emptySet(),
+        translationCheckThrows: Boolean = false,
         failLemma: String? = null,
     ): FavoriteLemmaRecovery {
         return FavoriteLemmaRecovery(
@@ -169,6 +268,11 @@ class FavoriteLemmaRecoveryTest : BaseTest() {
             downloadedLemmasNeedingRecovery = { language, lemmas ->
                 lemmaChecks += LemmaCheck(language, lemmas)
                 lemmas.intersect(lemmasNeedingRecovery)
+            },
+            downloadedFavoritesNeedingTranslationRecovery = { language, senseIdsByLemma, targets ->
+                translationChecks += TranslationCheck(language, senseIdsByLemma, targets)
+                if (translationCheckThrows) throw RuntimeException("Translation check failed")
+                senseIdsByLemma.keys.intersect(translationsMissingFor)
             },
             translationTargetsProvider = { listOf(Language.RUSSIAN, it, Language.RUSSIAN) },
             fetchLemma = { language, lemma, translationTargets ->
@@ -187,5 +291,11 @@ class FavoriteLemmaRecoveryTest : BaseTest() {
     private data class LemmaCheck(
         val language: Language,
         val lemmas: Set<String>,
+    )
+
+    private data class TranslationCheck(
+        val language: Language,
+        val senseIdsByLemma: Map<String, Set<String>>,
+        val translationTargets: List<Language>,
     )
 }

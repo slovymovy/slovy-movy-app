@@ -13,6 +13,8 @@ class FavoriteLemmaRecovery internal constructor(
     private val favoritesProvider: suspend () -> List<Favorite>,
     private val hasDownloadedDictionary: (Language) -> Boolean,
     private val downloadedLemmasNeedingRecovery: suspend (Language, Set<String>) -> Set<String>,
+    private val downloadedFavoritesNeedingTranslationRecovery:
+    suspend (Language, Map<String, Set<String>>, List<Language>) -> Set<String>,
     private val translationTargetsProvider: suspend (Language) -> List<Language>,
     private val fetchLemma: suspend (Language, String, List<Language>) -> Unit,
 ) {
@@ -26,6 +28,9 @@ class FavoriteLemmaRecovery internal constructor(
         hasDownloadedDictionary = { language -> dataDbManager.hasDictionary(language) },
         downloadedLemmasNeedingRecovery = { language, lemmas ->
             dataDbManager.downloadedLemmasNeedingRecovery(language, lemmas)
+        },
+        downloadedFavoritesNeedingTranslationRecovery = { language, senseIdsByLemma, targets ->
+            dataDbManager.downloadedFavoritesNeedingTranslationRecovery(language, senseIdsByLemma, targets)
         },
         translationTargetsProvider = { language -> dictionaryRepository.defaultTranslationTargets(language) },
         fetchLemma = { language, lemma, translationTargets ->
@@ -84,18 +89,29 @@ class FavoriteLemmaRecovery internal constructor(
     private suspend fun groupsByDownloadedLemmaStatus(
         groups: Map<FavoriteLemmaGroupKey, List<Favorite>>,
     ): Map<FavoriteLemmaGroupKey, List<Favorite>> {
-        val recoverableByLanguage = groups.keys
-            .groupBy { it.language }
-            .mapValues { (language, keys) ->
-                if (!hasDownloadedDictionary(language)) {
-                    emptySet()
-                } else {
-                    downloadedFavoriteLemmasNeedingRecovery(
-                        language = language,
-                        normalizedLemmas = keys.map { it.normalizedLemma }.toSet(),
-                    )
-                }
+        val byLanguage = groups.entries.groupBy({ it.key.language }) { it.key to it.value }
+        val recoverableByLanguage: Map<Language, Set<String>> = byLanguage.mapValues { (language, entries) ->
+            if (!hasDownloadedDictionary(language)) return@mapValues emptySet()
+
+            val normalizedLemmas = entries.map { it.first.normalizedLemma }.toSet()
+            val lemmasMissingDictionary = downloadedFavoriteLemmasNeedingRecovery(language, normalizedLemmas)
+
+            val remainingForTranslationCheck = normalizedLemmas - lemmasMissingDictionary
+            val senseIdsByLemma = entries
+                .filter { it.first.normalizedLemma in remainingForTranslationCheck }
+                .associate { (key, favs) -> key.normalizedLemma to favs.map { it.senseId }.toSet() }
+
+            val translationTargets = translationTargetsProvider(language)
+                .filter { it != language }
+                .distinctBy { it.code }
+
+            val lemmasMissingTranslations = if (senseIdsByLemma.isEmpty() || translationTargets.isEmpty()) {
+                emptySet()
+            } else {
+                downloadedFavoritesNeedingTranslationRecoverySafe(language, senseIdsByLemma, translationTargets)
             }
+            lemmasMissingDictionary + lemmasMissingTranslations
+        }
 
         return groups.filterKeys { key ->
             key.normalizedLemma in recoverableByLanguage[key.language].orEmpty()
@@ -129,6 +145,25 @@ class FavoriteLemmaRecovery internal constructor(
             emptySet()
         }
     }
+
+    private suspend fun downloadedFavoritesNeedingTranslationRecoverySafe(
+        language: Language,
+        senseIdsByLemma: Map<String, Set<String>>,
+        translationTargets: List<Language>,
+    ): Set<String> {
+        return try {
+            downloadedFavoritesNeedingTranslationRecovery(language, senseIdsByLemma, translationTargets)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(
+                TAG,
+                "Unable to check favorite translations (${language.code})",
+                e,
+            )
+            emptySet()
+        }
+    }
 }
 
 private data class FavoriteLemmaGroupKey(
@@ -138,22 +173,3 @@ private data class FavoriteLemmaGroupKey(
 
 private const val TAG = "FavoriteLemmaRecovery"
 private const val MAX_PARALLEL_RECOVERY_GROUPS = 4
-
-private suspend fun DataDbManager.downloadedLemmasNeedingRecovery(
-    language: Language,
-    normalizedLemmas: Set<String>,
-): Set<String> = withContext(Dispatchers.IO) {
-    if (normalizedLemmas.isEmpty()) return@withContext emptySet()
-    if (!hasDictionary(language)) return@withContext emptySet()
-    val queries = openDictionaryReadOnly(language).dictionaryQueries
-    val rowsByLemma = normalizedLemmas.chunked(999)
-        .flatMap { chunk -> queries.selectLemmasByNormalizedWords(language.code, chunk).executeAsList() }
-        .groupBy { it.lemma_normalized.lowercase() }
-
-    val missingLemmas = normalizedLemmas - rowsByLemma.keys
-    val onlineOnlyLemmas = rowsByLemma
-        .filterValues { rows -> rows.isNotEmpty() && rows.all { it.online_only } }
-        .keys
-
-    missingLemmas + onlineOnlyLemmas
-}
