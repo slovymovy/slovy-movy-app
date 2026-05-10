@@ -36,7 +36,6 @@ class FsrsScheduler(
                 newState = nextState(card.state, rating, intervalDays),
                 stability = grade.stability,
                 difficulty = grade.difficulty,
-                intervalDays = intervalDays,
                 intervalMillis = intervalMillis,
             )
         }
