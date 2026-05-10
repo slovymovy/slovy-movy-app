@@ -17,6 +17,7 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
+import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
 import com.slovy.slovymovyapp.data.learning.session.ExamplePicker
 import com.slovy.slovymovyapp.data.learning.session.SessionService
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
@@ -47,12 +48,16 @@ import kotlin.time.ExperimentalTime
 
 private suspend fun computeHasFavoritesToReview(
     favoritesRepository: FavoritesRepository,
+    intakeService: LearningIntake,
     statsService: StatsService,
 ): Boolean = withContext(Dispatchers.Default) {
-    favoritesRepository.getAllGroupedByLangAndLemma()
+    val languages = favoritesRepository.getAllGroupedByLangAndLemma()
         .map { it.language }
         .distinct()
-        .any { language -> statsService.globalStats(language.code).dueToday > 0 }
+    languages.forEach { language ->
+        intakeService.runIntake(language.code)
+    }
+    languages.any { language -> statsService.globalStats(language.code).dueToday > 0 }
 }
 
 @Serializable
@@ -186,10 +191,6 @@ fun App(
         FavoritesViewModel(favoritesRepository, dictionaryRepository, statsService, intakeService, settingsRepository)
     }
     var hasFavoritesToReview by remember { mutableStateOf(false) }
-    var favoriteReviewIndicatorRefreshToken by remember { mutableIntStateOf(0) }
-    fun refreshFavoriteReviewIndicator() {
-        favoriteReviewIndicatorRefreshToken++
-    }
     val buildConfig = remember { appBuildConfig }
     val settingsViewModel =
         remember {
@@ -220,8 +221,8 @@ fun App(
         onDispose { downloadCoordinator.close() }
     }
 
-    LaunchedEffect(navBackStackEntry, favoriteReviewIndicatorRefreshToken) {
-        hasFavoritesToReview = computeHasFavoritesToReview(favoritesRepository, statsService)
+    LaunchedEffect(navBackStackEntry) {
+        hasFavoritesToReview = computeHasFavoritesToReview(favoritesRepository, intakeService, statsService)
     }
 
     // Keep nativeLanguages and dictionaryLanguage in sync with settings changes from SettingsScreen
@@ -717,7 +718,6 @@ fun App(
                             if (added) {
                                 favoritesViewModel.requestScrollToTop()
                             }
-                            refreshFavoriteReviewIndicator()
                         },
                     ).also { created ->
                         wordDetailViewModels[args] = created
