@@ -19,6 +19,7 @@ import slovymovyapp.composeapp.generated.resources.*
 enum class AppScreen {
     SEARCH,
     FAVORITES,
+    STATS,
     WORD_DETAIL,
     SETTINGS
 }
@@ -28,12 +29,14 @@ fun AppNavigationBar(
     currentScreen: AppScreen,
     onNavigateToSearch: () -> Unit,
     onNavigateToFavorites: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit,
     wordDetailLabel: String? = null,
     onNavigateToSettings: () -> Unit = {}
 ) {
     val searchLabel = stringResource(Res.string.nav_search)
     val favoritesLabel = stringResource(Res.string.nav_favorites)
+    val statsLabel = stringResource(Res.string.nav_stats)
     val wordDetailLabelText = stringResource(Res.string.nav_word_detail)
     val settingsLabel = stringResource(Res.string.nav_settings)
 
@@ -77,6 +80,30 @@ fun AppNavigationBar(
         NavigationBarItem(
             icon = {
                 Icon(
+                    imageVector = if (currentScreen == AppScreen.WORD_DETAIL) {
+                        Icons.Filled.Book
+                    } else {
+                        Icons.Outlined.Book
+                    },
+                    contentDescription = wordDetailLabelText
+                )
+            },
+            label = {
+                Text(
+                    wordDetailLabel ?: wordDetailLabelText,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
+            selected = currentScreen == AppScreen.WORD_DETAIL,
+            enabled = wordDetailLabel != null,
+            onClick = onNavigateToWordDetail,
+            colors = itemColors
+        )
+        NavigationBarItem(
+            icon = {
+                Icon(
                     imageVector = if (currentScreen == AppScreen.FAVORITES) {
                         Icons.Filled.Favorite
                     } else {
@@ -100,25 +127,24 @@ fun AppNavigationBar(
         NavigationBarItem(
             icon = {
                 Icon(
-                    imageVector = if (currentScreen == AppScreen.WORD_DETAIL) {
-                        Icons.Filled.Book
+                    imageVector = if (currentScreen == AppScreen.STATS) {
+                        StatsFilledVector
                     } else {
-                        Icons.Outlined.Book
+                        StatsOutlineVector
                     },
-                    contentDescription = wordDetailLabelText
+                    contentDescription = statsLabel
                 )
             },
             label = {
                 Text(
-                    wordDetailLabel ?: wordDetailLabelText,
+                    statsLabel,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall
                 )
             },
-            selected = currentScreen == AppScreen.WORD_DETAIL,
-            enabled = wordDetailLabel != null,
-            onClick = onNavigateToWordDetail,
+            selected = currentScreen == AppScreen.STATS,
+            onClick = onNavigateToStats,
             colors = itemColors
         )
         NavigationBarItem(
@@ -157,6 +183,7 @@ fun PreviewAppNavigationBar(
             currentScreen = AppScreen.SEARCH,
             onNavigateToSearch = {},
             onNavigateToFavorites = {},
+            onNavigateToStats = {},
             onNavigateToWordDetail = {},
             wordDetailLabel = "example"
         )

@@ -894,6 +894,7 @@ fun SettingsScreen(
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit = {}
 ) {
     LifecycleResumeEffect(Unit) {
@@ -939,6 +940,7 @@ fun SettingsScreen(
         wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
+        onNavigateToStats = onNavigateToStats,
         onNavigateToWordDetail = onNavigateToWordDetail
     )
 }
@@ -975,6 +977,7 @@ fun SettingsScreenContent(
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit = {}
 ) {
     val dismissActionLabel = stringResource(Res.string.common_dismiss)
@@ -1010,6 +1013,7 @@ fun SettingsScreenContent(
                     currentScreen = AppScreen.SETTINGS,
                     onNavigateToSearch = onNavigateToSearch,
                     onNavigateToFavorites = onNavigateToFavorites,
+                    onNavigateToStats = onNavigateToStats,
                     onNavigateToWordDetail = onNavigateToWordDetail,
                     wordDetailLabel = wordDetailLabel,
                     onNavigateToSettings = {}
