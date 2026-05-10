@@ -148,7 +148,6 @@ private fun MyScreenPreview(
       ...
   ) { ... }
   ```
-
 ### Localization
 
 - Localization uses Compose Multiplatform resources from `composeApp/src/commonMain/composeResources/`.
@@ -347,6 +346,14 @@ if (GitHubClient.isAvailable()) {
 - Test resources in `server/src/test/resources/`
 - Use `@EnabledIf` or `assumeTrue(Client.isAvailable())` for tests requiring credentials
 - JUnit 5 with `@ParameterizedTest` for testing multiple providers
+
+## Code Style
+
+- Avoid adding free-standing helper methods (top-level functions or private extensions) in unrelated files. Place new
+  methods on the actual class/service that owns the behaviour, in the file where that class is implemented.
+- Avoid default parameter values if possible. Prefer explicit call sites so behaviour is obvious at the call and
+  refactors don't silently change semantics for existing callers. Use defaults only when omission has a single,
+  obvious meaning that all callers genuinely share.
 
 ## Testing Guidelines
 

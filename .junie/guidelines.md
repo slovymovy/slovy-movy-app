@@ -148,6 +148,45 @@ private fun MyScreenPreview(
       ...
   ) { ... }
   ```
+### Localization
+
+- Localization uses Compose Multiplatform resources from `composeApp/src/commonMain/composeResources/`.
+- Base locale is `values/strings.xml`.
+- Supported locales are separate folders (for example `values-ru`, `values-nl`, `values-pl`).
+- App language follows the OS locale (no in-app language override).
+
+#### Adding or changing text
+
+- For UI text in composables, use `stringResource(Res.string.<key>)`.
+- Localize accessibility text too (`contentDescription`, `onClickLabel`, `stateDescription`).
+- For parameterized strings, use placeholders in XML (`%1$s`, `%1$d`) and pass args from code.
+- If pluralization is needed, add `<plurals>` resources instead of manual `"s"` suffix logic.
+- Keep user-visible copy out of Kotlin literals in `commonMain` UI code.
+- Preview-only literals are acceptable in `@Preview` functions.
+- Exception: copy that must render in the *studied* language (not the user's UI locale) does not belong in
+  `composeResources/`. `stringResource` resolves by OS locale, so it cannot pick by a per-session language code. For
+  these cases, hold the strings in a Kotlin map keyed by `Language` (see
+  `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/ui/study/StudyCompletionMessages.kt`) and resolve in the
+  ViewModel/state — not in the composable, so random picks are stable across recompositions.
+
+#### Non-composable and shared text
+
+- `stringResource(...)` is composable-only. For non-composable flows, prefer passing localized text from UI layer.
+- If text must be represented before rendering, use the `UiText` pattern in
+  `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/i18n/` and resolve at the composable boundary.
+
+#### Platform-specific localization
+
+- Android platform UI surfaces (notifications, foreground service channel names, chooser titles) must be localized too.
+- iOS app metadata shown by the system (for example display name and permission copy) should use localized
+  `InfoPlist.strings` where applicable.
+- Keep Compose resources as source of truth for shared UI, and use native platform resources only for
+  platform-owned surfaces.
+
+#### Quality gates
+
+- Key parity check task: `gradlew :composeApp:verifyLocalizationKeys`.
+- CI runs the same parity task and fails if any locale is missing/has extra keys vs base `values/`.
 
 ### SVG Icons (Valkyrie)
 
@@ -307,6 +346,14 @@ if (GitHubClient.isAvailable()) {
 - Test resources in `server/src/test/resources/`
 - Use `@EnabledIf` or `assumeTrue(Client.isAvailable())` for tests requiring credentials
 - JUnit 5 with `@ParameterizedTest` for testing multiple providers
+
+## Code Style
+
+- Avoid adding free-standing helper methods (top-level functions or private extensions) in unrelated files. Place new
+  methods on the actual class/service that owns the behaviour, in the file where that class is implemented.
+- Avoid default parameter values if possible. Prefer explicit call sites so behaviour is obvious at the call and
+  refactors don't silently change semantics for existing callers. Use defaults only when omission has a single,
+  obvious meaning that all callers genuinely share.
 
 ## Testing Guidelines
 
