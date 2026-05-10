@@ -21,6 +21,9 @@ object FsrsDefaults {
     val MATURE_STABILITY: Duration = 21.days
     val PRODUCTION_UNLOCK_STABILITY: Duration = 48.hours
     val CONTEXT_UNLOCK_STABILITY: Duration = 72.hours
+    const val RECOGNITION_TO_PRODUCTION_STABILITY_FACTOR: Double = 0.70
+    const val PRODUCTION_TO_CONTEXT_STABILITY_FACTOR: Double = 0.60
+    const val CONTEXT_TO_VOICE_STABILITY_FACTOR: Double = 0.80
     val BURY_FAILED_SESSION_CARDS_FOR: Duration = 10.minutes
     val SAME_SENSE_COOLDOWN: Duration = 30.minutes
     val SAME_LEMMA_COOLDOWN: Duration = 10.minutes
@@ -44,6 +47,9 @@ object FsrsDefaults {
         defaultIntakeFamilies = DEFAULT_INTAKE_FAMILIES,
         productionUnlockStability = PRODUCTION_UNLOCK_STABILITY,
         contextUnlockStability = CONTEXT_UNLOCK_STABILITY,
+        recognitionToProductionStabilityFactor = RECOGNITION_TO_PRODUCTION_STABILITY_FACTOR,
+        productionToContextStabilityFactor = PRODUCTION_TO_CONTEXT_STABILITY_FACTOR,
+        contextToVoiceStabilityFactor = CONTEXT_TO_VOICE_STABILITY_FACTOR,
         buryFailedSessionCardsFor = BURY_FAILED_SESSION_CARDS_FOR,
         sameSenseCooldown = SAME_SENSE_COOLDOWN,
         sameLemmaCooldown = SAME_LEMMA_COOLDOWN,

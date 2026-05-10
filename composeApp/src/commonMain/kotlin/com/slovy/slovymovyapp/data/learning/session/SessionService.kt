@@ -1,38 +1,21 @@
 package com.slovy.slovymovyapp.data.learning.session
 
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.learning.Card
-import com.slovy.slovymovyapp.data.learning.CardFamily
-import com.slovy.slovymovyapp.data.learning.CardKind
-import com.slovy.slovymovyapp.data.learning.CardState
-import com.slovy.slovymovyapp.data.learning.CardVariant
-import com.slovy.slovymovyapp.data.learning.GradeOutcome
-import com.slovy.slovymovyapp.data.learning.Rating
+import com.slovy.slovymovyapp.data.learning.*
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
 import com.slovy.slovymovyapp.data.learning.stats.retrievability
-import com.slovy.slovymovyapp.data.learning.toCard
 import com.slovy.slovymovyapp.data.remote.LanguageCard
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.WordFetchManager
 import com.slovy.slovymovyapp.data.remote.WordResult
 import com.slovy.slovymovyapp.db.FavoritesQueries
 import com.slovy.slovymovyapp.db.SelectRecentReviewedCards
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlin.math.roundToLong
-import kotlin.time.Clock
-import kotlin.time.Duration
+import kotlin.time.*
 import kotlin.time.Duration.Companion.days
-import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-import kotlin.time.toDuration
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalTime::class)
@@ -222,7 +205,7 @@ class SessionService(
         val memoryUrgency = when (scheduling.state) {
             CardState.LEARNING,
             CardState.RELEARNING,
-            -> 1000.0
+                -> 1000.0
 
             CardState.REVIEW -> {
                 val elapsedDays = scheduling.lastReviewEpochMs
@@ -361,32 +344,41 @@ class SessionService(
         entry.senses.firstOrNull { it.senseId == senseId }
     }
 
-    private fun unlockNextFamilyIfEligible(card: SessionCard, after: com.slovy.slovymovyapp.data.learning.CardScheduling, now: Long) {
+    private fun unlockNextFamilyIfEligible(card: SessionCard, after: CardScheduling, now: Long) {
         val stability = after.stability.toDuration(DurationUnit.DAYS)
-        val familyToUnlock = when {
-            card.card.family == CardFamily.RECOGNIZE_SENSE &&
-                    stability >= config.productionUnlockStability -> CardFamily.PRODUCE_WORD
+        val unlock = when (card.card.family) {
+            CardFamily.RECOGNIZE_SENSE if stability >= config.productionUnlockStability -> Unlock(
+                family = CardFamily.PRODUCE_WORD,
+                stabilityFactor = config.recognitionToProductionStabilityFactor,
+            )
 
-            card.card.family == CardFamily.PRODUCE_WORD &&
-                    stability >= config.contextUnlockStability -> CardFamily.PRODUCE_WORD_IN_CONTEXT
+            CardFamily.PRODUCE_WORD if stability >= config.contextUnlockStability -> Unlock(
+                family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                stabilityFactor = config.productionToContextStabilityFactor,
+            )
 
-            card.card.family == CardFamily.PRODUCE_WORD_IN_CONTEXT &&
-                    stability >= config.contextUnlockStability -> CardFamily.RECOGNIZE_VOICE
+            CardFamily.PRODUCE_WORD_IN_CONTEXT if stability >= config.contextUnlockStability -> Unlock(
+                family = CardFamily.RECOGNIZE_VOICE,
+                stabilityFactor = config.contextToVoiceStabilityFactor,
+            )
 
             else -> null
         } ?: return
 
         val sense = card.wordResult.card?.findSense(card.senseId) ?: return
-        val variants = buildTaskVariants(familyToUnlock, sense, translationTargetsFor(sense))
+        val variants = buildTaskVariants(unlock.family, sense, translationTargetsFor(sense))
         if (variants.isEmpty()) return
         insertTaskIfMissing(
             source = card.card,
-            family = familyToUnlock,
+            family = unlock.family,
             now = now,
+            state = CardState.LEARNING,
+            stability = (after.stability * unlock.stabilityFactor).coerceAtLeast(MIN_INHERITED_STABILITY),
+            difficulty = after.difficulty,
             availableAfter = availableAfter(
                 nowMs = now,
                 cooldown = config.sameSenseCooldown,
-                salt = "${card.card.id}:unlock-$familyToUnlock",
+                salt = "${card.card.id}:unlock-${unlock.family}",
             ),
         )
     }
@@ -395,6 +387,9 @@ class SessionService(
         source: Card,
         family: CardFamily,
         now: Long,
+        state: CardState,
+        stability: Double,
+        difficulty: Double,
         availableAfter: Long?,
     ) {
         val existing = learning.selectCardBySenseAndFamily(source.senseId, source.langCode, family)
@@ -408,9 +403,9 @@ class SessionService(
             lemma_id = source.lemmaId,
             lang_code = source.langCode,
             family = family,
-            state = CardState.NEW,
-            stability = 0.0,
-            difficulty = 0.0,
+            state = state,
+            stability = stability,
+            difficulty = difficulty,
             due = now,
             last_review = null,
             reps = 0,
@@ -434,8 +429,14 @@ class SessionService(
     private fun Rating.unlocksNextFamily(): Boolean =
         this == Rating.GOOD || this == Rating.EASY
 
+    private data class Unlock(
+        val family: CardFamily,
+        val stabilityFactor: Double,
+    )
+
     private companion object {
         const val HARD_EXCLUDE: Double = 1_000_000.0
+        const val MIN_INHERITED_STABILITY: Double = 0.001
         val DAY: Duration = 1.days
         const val RECENT_LIMIT: Int = 20
     }

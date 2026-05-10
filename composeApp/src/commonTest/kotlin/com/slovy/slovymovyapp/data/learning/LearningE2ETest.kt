@@ -4,6 +4,9 @@ import app.cash.sqldelight.db.SqlDriver
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.dictionary.*
+import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
+import com.slovy.slovymovyapp.data.dictionary.NameType
+import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
@@ -16,11 +19,7 @@ import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.learning.session.SessionService
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.local.LocalDbManager
-import com.slovy.slovymovyapp.data.remote.DataDbManager
-import com.slovy.slovymovyapp.data.remote.DictionaryClient
-import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
-import com.slovy.slovymovyapp.data.remote.WordFetchManager
+import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
@@ -36,12 +35,8 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.math.abs
 import kotlin.test.*
-import kotlin.time.Clock
+import kotlin.time.*
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-import kotlin.time.toDuration
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalTime::class)
@@ -254,8 +249,8 @@ class LearningE2ETest : BaseTest() {
 
             val progress = env.stats.progressForSense(fixture.senseId, "en")
             assertEquals(2, progress.totalCards)
-            assertEquals(1, progress.newCards)
-            assertEquals(1, progress.learningCards)
+            assertEquals(0, progress.newCards)
+            assertEquals(2, progress.learningCards)
             assertEquals(0, progress.reviewCards)
             assertEquals(0, progress.matureCards)
             assertTrue(assertNotNull(progress.avgStability) > 0.0)
@@ -273,7 +268,10 @@ class LearningE2ETest : BaseTest() {
             assertEquals(1, productionProgress.totalCards)
             assertEquals(0, productionProgress.reviews)
             val definitionVariantProgress = progress.variantProgress.single()
-            assertEquals(CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null), definitionVariantProgress.variant)
+            assertEquals(
+                CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null),
+                definitionVariantProgress.variant
+            )
             assertEquals(1, definitionVariantProgress.reviews)
             assertEquals(1.0, definitionVariantProgress.retention)
 
@@ -304,6 +302,103 @@ class LearningE2ETest : BaseTest() {
             assertEquals(1, global.reviewedLast7d)
             assertClose(1.0, assertNotNull(global.rollingRetention7d))
             assertEquals(0, global.matureCount)
+        }
+    }
+
+    @Test
+    fun unlocked_production_card_inherits_discounted_recognition_fsrs_state() = runBlocking {
+        val config = FsrsDefaults.config().copy(
+            sameSenseCooldown = 0.minutes,
+        )
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "inheritproduction")
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+            )
+
+            val card = env.nextLoadedCard("en")
+            val outcome = env.session.previewRatings(card).first { it.rating == Rating.GOOD }
+            env.session.submitReview(card, outcome, durationMs = 1_000)
+
+            val unlocked = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
+                .executeAsList()
+                .single { it.family == CardFamily.PRODUCE_WORD }
+            assertEquals(CardState.LEARNING, unlocked.state)
+            assertClose(outcome.stability * config.recognitionToProductionStabilityFactor, unlocked.stability)
+            assertEquals(outcome.difficulty, unlocked.difficulty)
+            assertEquals(0L, unlocked.reps)
+            assertNull(unlocked.last_review)
+        }
+    }
+
+    @Test
+    fun unlocked_context_card_inherits_discounted_production_fsrs_state() = runBlocking {
+        val config = FsrsDefaults.config().copy(
+            contextUnlockStability = 0.minutes,
+            sameSenseCooldown = 0.minutes,
+        )
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixture = env.seedSense(lemma = "inheritcontext")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.REVIEW,
+                stability = 4.0,
+                difficulty = 5.0,
+                lastReview = start.toEpochMilliseconds() - 3.minutes.inWholeMilliseconds,
+                reps = 3,
+            )
+
+            val card = env.nextLoadedCard("en")
+            val outcome = env.session.previewRatings(card).first { it.rating == Rating.GOOD }
+            env.session.submitReview(card, outcome, durationMs = 1_000)
+
+            val unlocked = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
+                .executeAsList()
+                .single { it.family == CardFamily.PRODUCE_WORD_IN_CONTEXT }
+            assertEquals(CardState.LEARNING, unlocked.state)
+            assertClose(outcome.stability * config.productionToContextStabilityFactor, unlocked.stability)
+            assertEquals(outcome.difficulty, unlocked.difficulty)
+        }
+    }
+
+    @Test
+    fun unlocked_voice_card_inherits_discounted_context_fsrs_state() = runBlocking {
+        val config = FsrsDefaults.config().copy(
+            contextUnlockStability = 0.minutes,
+            sameSenseCooldown = 0.minutes,
+        )
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixture = env.seedSense(lemma = "inheritvoice")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                state = CardState.REVIEW,
+                stability = 4.0,
+                difficulty = 5.0,
+                lastReview = start.toEpochMilliseconds() - 3.minutes.inWholeMilliseconds,
+                reps = 3,
+            )
+
+            val card = env.nextLoadedCard("en")
+            val outcome = env.session.previewRatings(card).first { it.rating == Rating.GOOD }
+            env.session.submitReview(card, outcome, durationMs = 1_000)
+
+            val unlocked = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
+                .executeAsList()
+                .single { it.family == CardFamily.RECOGNIZE_VOICE }
+            assertEquals(CardState.LEARNING, unlocked.state)
+            assertClose(outcome.stability * config.contextToVoiceStabilityFactor, unlocked.stability)
+            assertEquals(outcome.difficulty, unlocked.difficulty)
         }
     }
 
@@ -821,9 +916,17 @@ class LearningE2ETest : BaseTest() {
             .let { card ->
                 assertNotNull(
                     card,
-                    "Expected a session card; cards=${app.favoritesQueries.countCardsByLang(langCode).executeAsOne()} " +
-                            "new=${app.favoritesQueries.selectNewCards(langCode, clock.now().toEpochMilliseconds(), 10).executeAsList().size} " +
-                            "due=${app.favoritesQueries.selectDueCards(langCode, clock.now().toEpochMilliseconds(), 10).executeAsList().size}",
+                    "Expected a session card; cards=${
+                        app.favoritesQueries.countCardsByLang(langCode).executeAsOne()
+                    } " +
+                            "new=${
+                                app.favoritesQueries.selectNewCards(langCode, clock.now().toEpochMilliseconds(), 10)
+                                    .executeAsList().size
+                            } " +
+                            "due=${
+                                app.favoritesQueries.selectDueCards(langCode, clock.now().toEpochMilliseconds(), 10)
+                                    .executeAsList().size
+                            }",
                 )
             }
             .also {
