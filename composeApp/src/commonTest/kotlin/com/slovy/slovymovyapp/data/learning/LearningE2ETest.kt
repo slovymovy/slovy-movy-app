@@ -594,10 +594,14 @@ class LearningE2ETest : BaseTest() {
             env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
             env.addFavorite(fixture)
             env.intake.runIntake("en")
+            // CLOZE_SOURCE is gated below 7 days of stability and ranks behind CLOZE_TRANSLATION;
+            // bump stability past the gate and bury the translation variant so the source variant is picked.
             val clozeCard = env.insertTask(
                 fixture = fixture,
                 family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                stability = 8.0,
             )
+            env.insertReviewLog(clozeCard.id, CardKind.CLOZE_TRANSLATION, Language.RUSSIAN.code)
 
             val card = env.nextLoadedCard("en")
 

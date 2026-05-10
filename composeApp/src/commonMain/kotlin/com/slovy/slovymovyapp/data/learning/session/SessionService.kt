@@ -270,35 +270,17 @@ class SessionService(
     }
 
     private fun sortedVariants(card: Card, sense: LanguageCardResponseSense?): List<CardVariant> {
-        val generated = sense
-            ?.let { buildTaskVariants(card.family, it, translationTargetsFor(it)) }
-            .orEmpty()
-        val lastVariant = learning.selectLastReviewVariantByCard(card.id).executeAsOneOrNull()
-
-        return generated.sortedWith(
-            compareBy<CardVariant> { variant ->
-                if (lastVariant?.variant_kind == variant.kind &&
-                    lastVariant.variant_target_lang == variant.targetLang
-                ) {
-                    1
-                } else {
-                    0
-                }
-            }.thenBy { variantPriority(it.kind) }
-                .thenBy { it.targetLang ?: "" }
+        sense ?: return emptyList()
+        val lastReview = learning.selectLastReviewVariantByCard(card.id).executeAsOneOrNull()
+        val lastVariant = lastReview?.let { CardVariant(it.variant_kind, it.variant_target_lang) }
+        return selectVariantsForReview(
+            family = card.family,
+            sense = sense,
+            translationTargets = translationTargetsFor(sense),
+            cardStability = card.scheduling.stability.toDuration(DurationUnit.DAYS),
+            lastVariant = lastVariant,
         )
     }
-
-    private fun variantPriority(kind: CardKind): Int =
-        when (kind) {
-            CardKind.WORD_TO_SOURCE_DEFINITION -> 0
-            CardKind.WORD_TO_TRANSLATION -> 1
-            CardKind.SOURCE_DEFINITION_TO_WORD -> 0
-            CardKind.TRANSLATION_TO_WORD -> 1
-            CardKind.CLOZE_SOURCE -> 0
-            CardKind.CLOZE_TRANSLATION -> 1
-            CardKind.LISTENING_TRANSLATION -> 1
-        }
 
     private fun WordResult.toSessionCard(card: Card): SessionCard? {
         val senseId = card.senseId.toString()
