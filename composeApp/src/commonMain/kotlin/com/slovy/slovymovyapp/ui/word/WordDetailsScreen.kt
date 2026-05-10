@@ -267,8 +267,7 @@ class WordDetailViewModel(
     private val lemma: String = "",
     val targetSenseId: String? = null,
     private val translationLanguages: List<Language>? = null,
-    private val onFavoriteAdded: (() -> Unit)? = null,
-    private val onFavoriteChanged: (() -> Unit)? = null,
+    private val onFavoriteChanged: ((added: Boolean) -> Unit)? = null,
 ) : ViewModel() {
     var state by mutableStateOf<WordDetailUiState>(
         WordDetailUiState.Empty(
@@ -542,17 +541,16 @@ class WordDetailViewModel(
     fun toggleFavorite(senseId: String) {
         viewModelScope.launch {
             dictionaryLanguage.let { lang ->
-                if (senseId in favoriteSenses) {
+                val added = if (senseId in favoriteSenses) {
                     favoritesRepository.remove(senseId, lang)
                     Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_REMOVE)
-
-
+                    false
                 } else {
                     favoritesRepository.add(senseId, lang, lemma)
                     Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_SAVE)
-                    onFavoriteAdded?.invoke()
+                    true
                 }
-                onFavoriteChanged?.invoke()
+                onFavoriteChanged?.invoke(added)
                 loadFavorites()
             }
         }
@@ -754,7 +752,7 @@ fun WordDetailScreen(
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToWordDetail: (Language, String) -> Unit = { _, _ -> },
-    dueCount: Int = 0,
+    hasFavoritesToReview: Boolean = false,
 ) {
     DisposableEffect(viewModel) {
         viewModel.attachTtsListener()
@@ -823,7 +821,7 @@ fun WordDetailScreen(
         onWordClick = { word ->
             onNavigateToWordDetail(viewModel.dictionaryLanguage, word)
         },
-        dueCount = dueCount,
+        hasFavoritesToReview = hasFavoritesToReview,
     )
 }
 
@@ -862,7 +860,7 @@ fun WordDetailScreenContent(
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {},
     onWordClick: (String) -> Unit = {},
-    dueCount: Int = 0,
+    hasFavoritesToReview: Boolean = false,
 ) {
     val fallbackTitle = stringResource(Res.string.word_details_title)
     val titleText = when (state) {
@@ -956,7 +954,7 @@ fun WordDetailScreenContent(
                 onNavigateToWordDetail = {},
                 onNavigateToSettings = onNavigateToSettings,
                 wordDetailLabel = titleText,
-                dueCount = dueCount,
+                hasFavoritesToReview = hasFavoritesToReview,
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },

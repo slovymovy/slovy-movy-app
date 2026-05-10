@@ -896,7 +896,7 @@ fun SettingsScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit = {},
-    dueCount: Int = 0,
+    hasFavoritesToReview: Boolean = false,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.reloadSettings()
@@ -943,7 +943,7 @@ fun SettingsScreen(
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
         onNavigateToWordDetail = onNavigateToWordDetail,
-        dueCount = dueCount,
+        hasFavoritesToReview = hasFavoritesToReview,
     )
 }
 
@@ -981,7 +981,7 @@ fun SettingsScreenContent(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit = {},
-    dueCount: Int = 0,
+    hasFavoritesToReview: Boolean = false,
 ) {
     val dismissActionLabel = stringResource(Res.string.common_dismiss)
     state.errorMessage?.let { error ->
@@ -1020,7 +1020,7 @@ fun SettingsScreenContent(
                     onNavigateToWordDetail = onNavigateToWordDetail,
                     wordDetailLabel = wordDetailLabel,
                     onNavigateToSettings = {},
-                    dueCount = dueCount,
+                    hasFavoritesToReview = hasFavoritesToReview,
                 )
             },
             snackbarHost = {

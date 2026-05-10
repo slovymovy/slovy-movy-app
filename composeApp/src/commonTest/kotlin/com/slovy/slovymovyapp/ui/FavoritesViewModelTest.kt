@@ -273,7 +273,7 @@ open class FavoritesViewModelTest : BaseTest() {
         vm.loadAndApplyState("")
         assertFalse(contentState(vm).scrollToTop)
 
-        // Favorite is added and onFavoriteAdded fires after the initial load
+        // Favorite is added and the app asks Favorites to scroll after the initial load
         favRepo.add(SENSE_1, Language.ENGLISH, "hello")
         vm.requestScrollToTop() // sets the pending flag
         vm.loadAndApplyState("") // simulate the subsequent Favorites reload (debounced queryFlow)
@@ -282,7 +282,7 @@ open class FavoritesViewModelTest : BaseTest() {
         assertEquals(1, content.senses.size, "New favorite should be present")
         assertTrue(
             content.scrollToTop,
-            "Should scroll to top even when the initial Favorites load ran before onFavoriteAdded"
+            "Should scroll to top even when the initial Favorites load ran before the app requested it"
         )
     }
 
@@ -581,7 +581,7 @@ open class FavoritesViewModelTest : BaseTest() {
         vm.loadAndApplyState("")
 
         val content = contentState(vm)
-        assertEquals(2, vm.reviewDueCount)
+        assertEquals(2, content.reviewDueCount)
         assertEquals(1, assertNotNull(content.study).dueCount)
     }
 }

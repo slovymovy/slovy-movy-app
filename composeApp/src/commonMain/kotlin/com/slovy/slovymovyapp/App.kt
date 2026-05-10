@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.slovy.slovymovyapp.analytics.Analytics.logEvent
@@ -43,6 +44,16 @@ import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.download_title_downloading
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+
+private suspend fun computeHasFavoritesToReview(
+    favoritesRepository: FavoritesRepository,
+    statsService: StatsService,
+): Boolean = withContext(Dispatchers.Default) {
+    favoritesRepository.getAllGroupedByLangAndLemma()
+        .map { it.language }
+        .distinct()
+        .any { language -> statsService.globalStats(language.code).dueToday > 0 }
+}
 
 @Serializable
 private sealed interface AppDestination {
@@ -167,13 +178,18 @@ fun App(
     val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
 
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember {
         FavoritesViewModel(favoritesRepository, dictionaryRepository, statsService, intakeService, settingsRepository)
     }
-    val favoritesDueCount = favoritesViewModel.reviewDueCount
+    var hasFavoritesToReview by remember { mutableStateOf(false) }
+    var favoriteReviewIndicatorRefreshToken by remember { mutableIntStateOf(0) }
+    fun refreshFavoriteReviewIndicator() {
+        favoriteReviewIndicatorRefreshToken++
+    }
     val buildConfig = remember { appBuildConfig }
     val settingsViewModel =
         remember {
@@ -204,8 +220,8 @@ fun App(
         onDispose { downloadCoordinator.close() }
     }
 
-    LaunchedEffect(Unit) {
-        favoritesViewModel.refreshReviewDueCount()
+    LaunchedEffect(navBackStackEntry, favoriteReviewIndicatorRefreshToken) {
+        hasFavoritesToReview = computeHasFavoritesToReview(favoritesRepository, statsService)
     }
 
     // Keep nativeLanguages and dictionaryLanguage in sync with settings changes from SettingsScreen
@@ -533,7 +549,7 @@ fun App(
                         if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
                             navController.navigate(AppDestination.Settings)
                     },
-                    dueCount = favoritesDueCount,
+                    hasFavoritesToReview = hasFavoritesToReview,
                 )
             }
             composable<AppDestination.Favorites> {
@@ -627,14 +643,12 @@ fun App(
                 StudySessionScreen(
                     viewModel = viewModel,
                     onCancel = {
-                        favoritesViewModel.refreshReviewDueCount()
                         logEvent(AnalyticsEvent.STUDY_CANCEL_SESSION)
                         if (!navController.popBackStack()) {
                             navController.navigate(AppDestination.Favorites)
                         }
                     },
                     onEnd = {
-                        favoritesViewModel.refreshReviewDueCount()
                         logEvent(AnalyticsEvent.STUDY_END_SESSION)
                         if (!navController.popBackStack()) {
                             navController.navigate(AppDestination.Favorites)
@@ -663,7 +677,7 @@ fun App(
                             navController.navigate(destination)
                         }
                     },
-                    dueCount = favoritesDueCount,
+                    hasFavoritesToReview = hasFavoritesToReview,
                 )
             }
             composable<AppDestination.WordDetail> { backStackEntry ->
@@ -699,8 +713,12 @@ fun App(
                         args.lemma,
                         args.targetSenseId,
                         args.translationLanguages,
-                        onFavoriteAdded = { favoritesViewModel.requestScrollToTop() },
-                        onFavoriteChanged = { favoritesViewModel.refreshReviewDueCount() },
+                        onFavoriteChanged = { added ->
+                            if (added) {
+                                favoritesViewModel.requestScrollToTop()
+                            }
+                            refreshFavoriteReviewIndicator()
+                        },
                     ).also { created ->
                         wordDetailViewModels[args] = created
                     }
@@ -740,7 +758,7 @@ fun App(
                         )
                         navController.navigate(destination)
                     },
-                    dueCount = favoritesDueCount,
+                    hasFavoritesToReview = hasFavoritesToReview,
                 )
             }
             composable<AppDestination.DataVersionMismatch> {

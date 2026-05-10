@@ -43,14 +43,14 @@ fun AppNavigationBar(
     onNavigateToWordDetail: () -> Unit,
     wordDetailLabel: String? = null,
     onNavigateToSettings: () -> Unit = {},
-    dueCount: Int = 0,
+    hasFavoritesToReview: Boolean = false,
 ) {
     val searchLabel = stringResource(Res.string.nav_search)
     val favoritesLabel = stringResource(Res.string.nav_favorites)
     val statsLabel = stringResource(Res.string.nav_stats)
     val wordDetailLabelText = stringResource(Res.string.nav_word_detail)
     val settingsLabel = stringResource(Res.string.nav_settings)
-    val showFavoritesDueDot = dueCount > 0 && currentScreen != AppScreen.FAVORITES
+    val showFavoritesDueDot = hasFavoritesToReview && currentScreen != AppScreen.FAVORITES
 
     val itemColors = NavigationBarItemDefaults.colors(
         indicatorColor = Color.Transparent,
@@ -234,7 +234,7 @@ fun PreviewAppNavigationBar(
             onNavigateToStats = {},
             onNavigateToWordDetail = {},
             wordDetailLabel = "example",
-            dueCount = 3,
+            hasFavoritesToReview = true,
         )
     }
 }
@@ -252,7 +252,7 @@ fun PreviewAppNavigationBarFavoritesSelected(
             onNavigateToStats = {},
             onNavigateToWordDetail = {},
             wordDetailLabel = "example",
-            dueCount = 3,
+            hasFavoritesToReview = true,
         )
     }
 }
