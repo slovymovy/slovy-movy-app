@@ -9,7 +9,10 @@ import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import io.ktor.client.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
@@ -471,6 +474,33 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken,
     )
+
+    // Acquires a handle that keeps the process alive on background-aware platforms (Android,
+    // iOS); desktop returns a no-op. Callers MUST [ProcessKeepAlive.release] in a finally block.
+    // Acquisitions are reference-counted process-wide so nested holders are safe.
+    fun acquireProcessKeepAlive(): ProcessKeepAlive
+}
+
+/**
+ * Handle for an active keep-alive acquired from [PlatformDbSupport.acquireProcessKeepAlive].
+ * [release] is non-suspending and idempotent so it can be called safely from cancellation paths
+ * (e.g. ViewModel.onCleared) without a coroutine context.
+ */
+interface ProcessKeepAlive {
+    fun release()
+}
+
+/**
+ * Convenience wrapper that acquires a keep-alive for the duration of [block]. The release runs in
+ * a finally block so it survives cancellation of [block].
+ */
+suspend fun PlatformDbSupport.runWithProcessKeepAlive(block: suspend () -> Unit) {
+    val handle = acquireProcessKeepAlive()
+    try {
+        block()
+    } finally {
+        handle.release()
+    }
 }
 
 interface PlatformFileOutput {

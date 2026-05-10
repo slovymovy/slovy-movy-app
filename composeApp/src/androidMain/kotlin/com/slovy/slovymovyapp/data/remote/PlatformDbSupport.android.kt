@@ -188,8 +188,17 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         onProgress: (DownloadProgress) -> Unit,
         cancelToken: CancelToken,
     ) {
+        val handle = acquireProcessKeepAlive()
+        try {
+            downloadViaKtor(url, headers, destPath, onProgress, cancelToken)
+        } finally {
+            handle.release()
+        }
+    }
+
+    actual fun acquireProcessKeepAlive(): ProcessKeepAlive {
         val intent = Intent(ctx, DownloadForegroundService::class.java)
-        val startedService = if (activeDownloads.getAndIncrement() == 0) {
+        val startedService = if (activeBackgroundJobs.getAndIncrement() == 0) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     ctx.startForegroundService(intent)
@@ -197,20 +206,31 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
                     ctx.startService(intent)
                 }
                 true
-            } catch (t: Throwable) {
-                // e.g. ForegroundServiceStartNotAllowedException on Android 12+
-                // when launched from background. Fall through to a foregroundless
-                // download instead of leaking the ref-count.
-                activeDownloads.decrementAndGet()
+            } catch (_: Throwable) {
+                // e.g. ForegroundServiceStartNotAllowedException on Android 12+ when launched
+                // from background. Fall through to a foregroundless execution instead of leaking
+                // the ref-count. Outer holders acquired while the app was foregrounded keep the
+                // service alive across this call so this fallback is rare in practice.
+                activeBackgroundJobs.decrementAndGet()
                 false
             }
         } else {
             true
         }
-        try {
-            downloadViaKtor(url, headers, destPath, onProgress, cancelToken)
-        } finally {
-            if (startedService && activeDownloads.decrementAndGet() == 0) {
+        return AndroidProcessKeepAlive(ctx, intent, startedService)
+    }
+
+    private class AndroidProcessKeepAlive(
+        private val ctx: Context,
+        private val intent: Intent,
+        private val startedService: Boolean,
+    ) : ProcessKeepAlive {
+        @Volatile
+        private var released = false
+        override fun release() {
+            if (released) return
+            released = true
+            if (startedService && activeBackgroundJobs.decrementAndGet() == 0) {
                 ctx.stopService(intent)
             }
         }
@@ -233,7 +253,11 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
                 headers.forEach { (key, value) -> header(key, value) }
             }.execute { response ->
                 if (!response.status.isSuccess()) {
-                    val snippet = try { response.bodyAsText().take(512) } catch (_: Throwable) { null }
+                    val snippet = try {
+                        response.bodyAsText().take(512)
+                    } catch (_: Throwable) {
+                        null
+                    }
                     val baseMsg = "HTTP ${response.status.value} ${response.status.description} while downloading $url"
                     throw IllegalStateException(if (snippet.isNullOrBlank()) baseMsg else "$baseMsg: $snippet")
                 }
@@ -288,9 +312,9 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     companion object {
-        // Process-global so concurrent downloads from multiple PlatformDbSupport
-        // instances cannot stop the foreground service while another download
-        // is still running.
-        private val activeDownloads = AtomicInteger(0)
+        // Process-global so concurrent foreground-service users (downloads, post-download
+        // recovery, etc.) from multiple PlatformDbSupport instances cannot stop the service
+        // while another job is still running.
+        private val activeBackgroundJobs = AtomicInteger(0)
     }
 }

@@ -18,6 +18,9 @@ import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import kotlinx.io.files.Path
 import platform.Foundation.*
+import platform.UIKit.UIApplication
+import platform.UIKit.UIBackgroundTaskInvalid
+import kotlin.concurrent.Volatile
 
 actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     val lock: ReentrantLock = reentrantLock()
@@ -232,4 +235,45 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         moveFile = { from, to -> moveFile(from, to) },
         getAvailableBytesForDestination = { getAvailableBytesForPath(destPath) },
     )
+
+    actual fun acquireProcessKeepAlive(): ProcessKeepAlive {
+        val app = UIApplication.sharedApplication
+        val taskLock = reentrantLock()
+        var taskId = UIBackgroundTaskInvalid
+
+        // beginBackgroundTaskWithName MUST end with endBackgroundTask, including from the expiration
+        // handler — otherwise iOS terminates the app. We guard the taskId with a lock so a racing
+        // expiration handler and the release call can't double-end (or both miss) the same task.
+        val started = app.beginBackgroundTaskWithName("ProcessKeepAlive") {
+            synchronized(taskLock) {
+                val current = taskId
+                if (current != UIBackgroundTaskInvalid) {
+                    app.endBackgroundTask(current)
+                    taskId = UIBackgroundTaskInvalid
+                }
+            }
+        }
+        synchronized(taskLock) { taskId = started }
+        return IosProcessKeepAlive {
+            synchronized(taskLock) {
+                val current = taskId
+                if (current != UIBackgroundTaskInvalid) {
+                    app.endBackgroundTask(current)
+                    taskId = UIBackgroundTaskInvalid
+                }
+            }
+        }
+    }
+
+    private class IosProcessKeepAlive(
+        private val endTask: () -> Unit,
+    ) : ProcessKeepAlive {
+        @Volatile
+        private var released = false
+        override fun release() {
+            if (released) return
+            released = true
+            endTask()
+        }
+    }
 }

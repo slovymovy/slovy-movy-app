@@ -181,11 +181,14 @@ fun App(
                 dictionaryClient,
                 appDataExporter,
                 settingsRepository,
+                platform,
                 buildConfig,
                 onDictionaryDataChanged = { recoverFavorites ->
                     dictionaryRepository.clearSenseCache()
                     if (recoverFavorites) {
-                        favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                        platform.runWithProcessKeepAlive {
+                            favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                        }
                     }
                     favoritesViewModel.dropCachedFavoriteDetails()
                 },
@@ -392,7 +395,9 @@ fun App(
                             },
                             finalize = {
                                 dictionaryRepository.clearSenseCache()
-                                favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                                platform.runWithProcessKeepAlive {
+                                    favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                                }
                                 favoritesViewModel.dropCachedFavoriteDetails()
                             },
                             onSuccess = {
@@ -410,6 +415,7 @@ fun App(
                                     popUpTo<AppDestination.DownloadSetup> { inclusive = true }
                                 }
                             },
+                            platform = platform,
                             loadItems = {
                                 downloadDict = !dataManager.hasDictionary(dictLang)
                                 val available = dataManager.fetchAvailableLanguages()

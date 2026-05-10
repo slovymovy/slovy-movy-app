@@ -108,6 +108,7 @@ class SettingsViewModel(
     private val dictionaryClient: DictionaryClient,
     private val appDataExporter: AppDataExporter,
     private val settingsRepository: SettingsRepository,
+    private val platform: PlatformDbSupport,
     buildConfig: AppBuildConfig,
     private val onDictionaryDataChanged: suspend (recoverFavorites: Boolean) -> Unit = { _ -> },
 ) : ViewModel() {
@@ -449,6 +450,7 @@ class SettingsViewModel(
         val downloadKey = "dict_${language.code}"
         if (downloadCoordinator.isRunning(downloadKey)) return
 
+        val keepAlive = platform.acquireProcessKeepAlive()
         val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
             dataDbManager.ensureDictionary(
                 lang = language,
@@ -462,7 +464,8 @@ class SettingsViewModel(
             successMessage = UiText.Resource(Res.string.settings_dictionary_download_success),
             errorMessageBuilder = { reason ->
                 UiText.Resource(Res.string.settings_error_download_dictionary_with_reason, listOf(reason))
-            }
+            },
+            onTerminal = { keepAlive.release() }
         ) {
             onDictionaryDataChanged(true)
             reloadSettings()
@@ -473,6 +476,7 @@ class SettingsViewModel(
         val downloadKey = "trans_${sourceLanguage.code}_${targetLanguage.code}"
         if (downloadCoordinator.isRunning(downloadKey)) return
 
+        val keepAlive = platform.acquireProcessKeepAlive()
         val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
             dataDbManager.ensureTranslation(
                 src = sourceLanguage,
@@ -487,7 +491,8 @@ class SettingsViewModel(
             successMessage = UiText.Resource(Res.string.settings_translation_download_success),
             errorMessageBuilder = { reason ->
                 UiText.Resource(Res.string.settings_error_download_translation_with_reason, listOf(reason))
-            }
+            },
+            onTerminal = { keepAlive.release() }
         ) {
             onDictionaryDataChanged(false)
             loadLearningLanguages()
@@ -821,24 +826,39 @@ class SettingsViewModel(
         downloadFlow: Flow<DownloadEntry?>,
         successMessage: UiText,
         errorMessageBuilder: (String) -> UiText,
+        onTerminal: () -> Unit = {},
         onSuccess: suspend () -> Unit
     ) {
-        if (downloadJobs[downloadKey]?.isActive == true) return
+        if (downloadJobs[downloadKey]?.isActive == true) {
+            onTerminal()
+            return
+        }
 
-        downloadJobs[downloadKey] = viewModelScope.launch {
+        val job = viewModelScope.launch {
             try {
                 downloadFlow.collect { entry ->
                     when (entry?.status) {
                         DownloadStatus.Done -> {
                             downloadCoordinator.clear(downloadKey)
-                            onSuccess()
-                            showSnackbar(successMessage)
+                            try {
+                                onSuccess()
+                            } finally {
+                                onTerminal()
+                            }
+                            // Snackbar runs in a sibling coroutine so this observer can exit
+                            // immediately. Otherwise its suspend would keep [downloadJobs]
+                            // marked active, and a quick retry for the same key would skip
+                            // its own callback wiring.
+                            viewModelScope.launch { showSnackbar(successMessage) }
                             cancel()
                         }
 
                         DownloadStatus.Cancelled -> {
                             downloadCoordinator.clear(downloadKey)
-                            showSnackbar(UiText.Resource(Res.string.settings_download_cancelled))
+                            onTerminal()
+                            viewModelScope.launch {
+                                showSnackbar(UiText.Resource(Res.string.settings_download_cancelled))
+                            }
                             cancel()
                         }
 
@@ -848,6 +868,7 @@ class SettingsViewModel(
                                 if (entry.error != null) NetworkErrorClassifier.userMessage(entry.error)
                                 else resolveUiText(UiText.Resource(Res.string.common_unknown_error))
                             state = state.copy(errorMessage = errorMessageBuilder(message))
+                            onTerminal()
                             cancel()
                         }
 
@@ -855,9 +876,14 @@ class SettingsViewModel(
                     }
                 }
             } finally {
-                downloadJobs.remove(downloadKey)
+                // Identity check guards against a fresh attach for the same key replacing
+                // [downloadJobs] before this finally runs.
+                if (downloadJobs[downloadKey] === coroutineContext[Job]) {
+                    downloadJobs.remove(downloadKey)
+                }
             }
         }
+        downloadJobs[downloadKey] = job
     }
 }
 

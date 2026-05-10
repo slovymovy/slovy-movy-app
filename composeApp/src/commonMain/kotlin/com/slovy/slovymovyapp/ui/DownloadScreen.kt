@@ -53,7 +53,8 @@ class DownloadViewModel(
     private val onSuccess: suspend () -> Unit,
     private val onCancel: () -> Unit,
     private val onError: (Throwable) -> Unit,
-    private val loadItems: (suspend () -> List<DownloadItem>)? = null
+    private val loadItems: (suspend () -> List<DownloadItem>)? = null,
+    private val platform: PlatformDbSupport? = null,
 ) : ViewModel() {
 
     var state by mutableStateOf(
@@ -66,6 +67,12 @@ class DownloadViewModel(
 
     private var terminalHandled = false
     private var failedDuringLoadItems = false
+
+    // Held for the lifetime of one download attempt — from beginDownload() until the terminal
+    // handler runs. Bridges the gap between the last per-file download (which would otherwise
+    // stop the foreground service) and finalize(), so on Android 12+ we never have to attempt
+    // a fresh startForegroundService from the background-observer coroutine.
+    private var keepAliveHandle: ProcessKeepAlive? = null
 
     init {
         if (loadItems != null) {
@@ -109,7 +116,20 @@ class DownloadViewModel(
 
     private fun beginDownload(): Flow<DownloadEntry?> {
         Analytics.logEvent(AnalyticsEvent.DOWNLOAD_DICTIONARY_CLICK)
+        acquireKeepAlive()
         return downloadCoordinator.startDownload(downloadKey, download)
+    }
+
+    private fun acquireKeepAlive() {
+        val platform = platform ?: return
+        if (keepAliveHandle != null) return
+        keepAliveHandle = platform.acquireProcessKeepAlive()
+    }
+
+    private fun releaseKeepAlive() {
+        val handle = keepAliveHandle ?: return
+        keepAliveHandle = null
+        handle.release()
     }
 
     private fun observeProgress(downloadFlow: Flow<DownloadEntry?>) {
@@ -155,6 +175,8 @@ class DownloadViewModel(
                                 throw e
                             } catch (e: Exception) {
                                 state = DownloadUiState.Failed(e)
+                            } finally {
+                                releaseKeepAlive()
                             }
                         }
                     }
@@ -164,6 +186,7 @@ class DownloadViewModel(
                             terminalHandled = true
                             state = DownloadUiState.Cancelled
                             downloadCoordinator.clear(downloadKey)
+                            releaseKeepAlive()
                         }
                     }
 
@@ -172,6 +195,7 @@ class DownloadViewModel(
                             terminalHandled = true
                             state = DownloadUiState.Failed(entry?.error ?: Throwable("Unknown error"))
                             downloadCoordinator.clear(downloadKey)
+                            releaseKeepAlive()
                         }
                     }
 
@@ -196,6 +220,7 @@ class DownloadViewModel(
     override fun onCleared() {
         super.onCleared()
         downloadCoordinator.cancel(downloadKey)
+        releaseKeepAlive()
     }
 
     fun retry() {
