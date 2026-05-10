@@ -157,7 +157,6 @@ fun App(
     val statsService = remember(appDatabase, fsrsConfig) {
         StatsService(
             learning = appDatabase.favoritesQueries,
-            config = fsrsConfig,
             clock = Clock.System,
         )
     }
