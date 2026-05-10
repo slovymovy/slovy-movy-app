@@ -46,18 +46,28 @@ import slovymovyapp.composeapp.generated.resources.download_title_downloading
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-private suspend fun computeHasFavoritesToReview(
+private data class FavoritesReviewState(
+    val dueCountByLanguage: Map<Language, Int>,
+) {
+    val hasDueCards: Boolean get() = dueCountByLanguage.values.any { it > 0 }
+}
+
+private suspend fun computeFavoritesReviewState(
     favoritesRepository: FavoritesRepository,
     intakeService: LearningIntake,
     statsService: StatsService,
-): Boolean = withContext(Dispatchers.Default) {
+): FavoritesReviewState = withContext(Dispatchers.Default) {
     val languages = favoritesRepository.getAllGroupedByLangAndLemma()
         .map { it.language }
         .distinct()
     languages.forEach { language ->
         intakeService.runIntake(language.code)
     }
-    languages.any { language -> statsService.globalStats(language.code).dueToday > 0 }
+    FavoritesReviewState(
+        dueCountByLanguage = languages.associateWith { language ->
+            statsService.globalStats(language.code).dueToday
+        },
+    )
 }
 
 @Serializable
@@ -186,11 +196,23 @@ fun App(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
+    val coroutineScope = rememberCoroutineScope()
+    var hasFavoritesToReview by remember { mutableStateOf(false) }
+
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember {
-        FavoritesViewModel(favoritesRepository, dictionaryRepository, statsService, settingsRepository)
+        FavoritesViewModel(
+            favoritesRepository = favoritesRepository,
+            dictionaryRepository = dictionaryRepository,
+            settingsRepository = settingsRepository,
+        )
     }
-    var hasFavoritesToReview by remember { mutableStateOf(false) }
+
+    suspend fun refreshFavoritesReviewState() {
+        val reviewState = computeFavoritesReviewState(favoritesRepository, intakeService, statsService)
+        favoritesViewModel.updateReviewDueCounts(reviewState.dueCountByLanguage)
+        hasFavoritesToReview = reviewState.hasDueCards
+    }
     val buildConfig = remember { appBuildConfig }
     val settingsViewModel =
         remember {
@@ -215,14 +237,12 @@ fun App(
                 },
             )
         }
-    val coroutineScope = rememberCoroutineScope()
-
     DisposableEffect(Unit) {
         onDispose { downloadCoordinator.close() }
     }
 
     LaunchedEffect(navBackStackEntry) {
-        hasFavoritesToReview = computeHasFavoritesToReview(favoritesRepository, intakeService, statsService)
+        refreshFavoritesReviewState()
     }
 
     // Keep nativeLanguages and dictionaryLanguage in sync with settings changes from SettingsScreen
@@ -593,7 +613,10 @@ fun App(
                     onStartStudy = { language ->
                         logEvent(AnalyticsEvent.STUDY_START_SESSION)
                         navController.navigate(AppDestination.StudySession(language.code))
-                    }
+                    },
+                    onFavoritesChanged = {
+                        coroutineScope.launch { refreshFavoritesReviewState() }
+                    },
                 )
             }
             composable<AppDestination.Stats> { backStackEntry ->
@@ -718,13 +741,7 @@ fun App(
                             if (added) {
                                 favoritesViewModel.requestScrollToTop()
                             }
-                            coroutineScope.launch {
-                                hasFavoritesToReview = computeHasFavoritesToReview(
-                                    favoritesRepository,
-                                    intakeService,
-                                    statsService,
-                                )
-                            }
+                            coroutineScope.launch { refreshFavoritesReviewState() }
                         },
                     ).also { created ->
                         wordDetailViewModels[args] = created

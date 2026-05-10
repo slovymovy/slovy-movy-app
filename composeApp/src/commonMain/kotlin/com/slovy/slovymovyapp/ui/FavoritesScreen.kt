@@ -32,7 +32,6 @@ import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
-import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
@@ -118,7 +117,6 @@ private fun FavoriteSenseItem.withoutCachedDetails(): FavoriteSenseItem =
 class FavoritesViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val dictionaryRepository: DictionaryRepository,
-    private val statsService: StatsService,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
@@ -130,6 +128,7 @@ class FavoritesViewModel(
 
     private var pendingScrollToTop: Boolean = false
     private var savedFavoritesLanguage: Language? = null
+    private var dueCountByLanguage: Map<Language, Int> = emptyMap()
 
     /** Called from outside (e.g. word detail) when a favorite was just added. */
     fun requestScrollToTop() {
@@ -140,6 +139,12 @@ class FavoritesViewModel(
     fun dropCachedFavoriteDetails() {
         val content = state as? FavoritesUiState.Content ?: return
         state = content.withoutCachedFavoriteDetails()
+    }
+
+    fun updateReviewDueCounts(updatedDueCountByLanguage: Map<Language, Int>) {
+        dueCountByLanguage = updatedDueCountByLanguage
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.withReviewDueCounts()
     }
 
     private val queryFlow = MutableStateFlow(QueryState("", Uuid.random()))
@@ -230,10 +235,9 @@ class FavoritesViewModel(
         val hasAnyFavorites = allFavorites.isNotEmpty()
         val availableLanguages = allFavorites.availableLanguages()
         val selectedLanguage = selectedLanguageFor(availableLanguages, currentContent)
-        val dueCountByLanguage = availableLanguages.associateWith { language ->
-            statsService.globalStats(language.code).dueToday
+        val visibleDueCountByLanguage = availableLanguages.associateWith { language ->
+            dueCountByLanguage[language] ?: 0
         }
-        val reviewDueCount = dueCountByLanguage.values.sum()
 
         // Filter favorites to selected language when multi-language
         val langFiltered = if (availableLanguages.size > 1 && selectedLanguage != null) {
@@ -278,7 +282,7 @@ class FavoritesViewModel(
         }
         val study = selectedLanguage
             ?.let { language ->
-                dueCountByLanguage[language]
+                visibleDueCountByLanguage[language]
                     ?.takeIf { it > 0 }
                     ?.let { dueCount -> FavoritesStudyUiState(language, dueCount) }
             }
@@ -293,7 +297,23 @@ class FavoritesViewModel(
             isLanguageDropdownExpanded = if (availableLanguages.size > 1)
                 currentContent?.isLanguageDropdownExpanded ?: false else false,
             study = study,
-            reviewDueCount = reviewDueCount,
+            reviewDueCount = visibleDueCountByLanguage.values.sum(),
+        )
+    }
+
+    private fun FavoritesUiState.Content.withReviewDueCounts(): FavoritesUiState.Content {
+        val visibleDueCountByLanguage = availableLanguages.associateWith { language ->
+            dueCountByLanguage[language] ?: 0
+        }
+        val updatedStudy = selectedLanguage
+            ?.let { language ->
+                visibleDueCountByLanguage[language]
+                    ?.takeIf { it > 0 }
+                    ?.let { dueCount -> FavoritesStudyUiState(language, dueCount) }
+            }
+        return copy(
+            study = updatedStudy,
+            reviewDueCount = visibleDueCountByLanguage.values.sum(),
         )
     }
 
@@ -381,7 +401,12 @@ class FavoritesViewModel(
         }
     }
 
-    fun toggleFavorite(senseId: String, removedMessage: String, undoLabel: String) {
+    fun toggleFavorite(
+        senseId: String,
+        removedMessage: String,
+        undoLabel: String,
+        onFavoritesChanged: () -> Unit = {},
+    ) {
         val item = findSense(senseId) ?: return
         viewModelScope.launch {
             // Fetch the favorite to get its createdAt before removal
@@ -390,6 +415,7 @@ class FavoritesViewModel(
             // Remove from repository, then remove from displayed list for immediate feedback
             favoritesRepository.remove(senseId, favorite.language)
             Analytics.logEvent(AnalyticsEvent.FAVOURITES_REMOVE)
+            onFavoritesChanged()
             val content = state as? FavoritesUiState.Content ?: return@launch
             state = content.copy(senses = content.senses.filter { it.senseId != senseId })
 
@@ -411,6 +437,7 @@ class FavoritesViewModel(
                 // Re-add with the original createdAt to preserve position
                 favoritesRepository.add(senseId, favorite.language, favorite.lemma, favorite.createdAt)
                 Analytics.logEvent(AnalyticsEvent.FAVOURITES_SAVE)
+                onFavoritesChanged()
                 loadFavorites()
             }
         }
@@ -497,6 +524,7 @@ fun FavoritesScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
+    onFavoritesChanged: () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     val removedMessage = stringResource(Res.string.favorites_removed_message)
@@ -529,7 +557,7 @@ fun FavoritesScreen(
         onSearchInDictionary = onSearchInDictionary,
         onQueryChange = { viewModel.updateQuery(it) },
         onSenseToggle = { viewModel.toggleSense(it) },
-        onFavoriteToggle = { viewModel.toggleFavorite(it, removedMessage, undoLabel) },
+        onFavoriteToggle = { viewModel.toggleFavorite(it, removedMessage, undoLabel, onFavoritesChanged) },
         onNavigateToWordDetail = onNavigateToWordDetail,
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
