@@ -115,6 +115,11 @@ private fun FavoriteSenseItem.withoutCachedDetails(): FavoriteSenseItem =
         error = null,
     )
 
+internal data class FavoritesStateResult(
+    val state: FavoritesUiState.Content,
+    val reviewDueCount: Int,
+)
+
 class FavoritesViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val dictionaryRepository: DictionaryRepository,
@@ -126,11 +131,15 @@ class FavoritesViewModel(
     var state by mutableStateOf<FavoritesUiState>(FavoritesUiState.Loading)
         private set
 
+    var reviewDueCount by mutableStateOf(0)
+        private set
+
     val scrollState = LazyListState()
     val snackbarHostState = SnackbarHostState()
 
     private var pendingScrollToTop: Boolean = false
     private var savedFavoritesLanguage: Language? = null
+    private var reviewDueCountRefreshJob: Job? = null
 
     /** Called from outside (e.g. word detail) when a favorite was just added. */
     fun requestScrollToTop() {
@@ -180,8 +189,8 @@ class FavoritesViewModel(
                         .flowOn(Dispatchers.Default)
                 }
                 .collect { newState ->
-                    applyNewState(newState)
-                    prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
+                    applyStateResult(newState)
+                    prefetchSenses(newState.state.senses.take(PREFETCH_LIMIT))
                 }
         }
     }
@@ -199,6 +208,13 @@ class FavoritesViewModel(
             force = Uuid.random(),
             runIntake = true,
         )
+    }
+
+    fun refreshReviewDueCount() {
+        reviewDueCountRefreshJob?.cancel()
+        reviewDueCountRefreshJob = viewModelScope.launch {
+            reviewDueCount = computeReviewDueCount()
+        }
     }
 
     fun setSelectedLanguage(language: Language) {
@@ -219,7 +235,7 @@ class FavoritesViewModel(
 
     /**
      * Computes the new favorites state from the repository. Safe to call from any dispatcher.
-     * Returns the new [FavoritesUiState.Content] without mutating [state].
+     * Returns the new [FavoritesUiState.Content] and the due count without mutating [state].
      *
      * @param currentContent snapshot of the current UI state, captured on Main before dispatching.
      */
@@ -227,7 +243,7 @@ class FavoritesViewModel(
         query: String,
         currentContent: FavoritesUiState.Content?,
         runIntake: Boolean = false,
-    ): FavoritesUiState.Content {
+    ): FavoritesStateResult {
         val currentSenses = currentContent?.senses.orEmpty()
         val currentById = currentSenses.associateBy { it.senseId }
 
@@ -248,6 +264,10 @@ class FavoritesViewModel(
         val hasAnyFavorites = allFavorites.isNotEmpty()
         val availableLanguages = allFavorites.availableLanguages()
         val selectedLanguage = selectedLanguageFor(availableLanguages, currentContent)
+        val dueCountByLanguage = availableLanguages.associateWith { language ->
+            statsService.globalStats(language.code).dueToday
+        }
+        val reviewDueCount = dueCountByLanguage.values.sum()
 
         // Filter favorites to selected language when multi-language
         val langFiltered = if (availableLanguages.size > 1 && selectedLanguage != null) {
@@ -292,27 +312,36 @@ class FavoritesViewModel(
         }
         val study = selectedLanguage
             ?.let { language ->
-                statsService.globalStats(language.code)
-                    .dueToday
-                    .takeIf { it > 0 }
+                dueCountByLanguage[language]
+                    ?.takeIf { it > 0 }
                     ?.let { dueCount -> FavoritesStudyUiState(language, dueCount) }
             }
 
-        return FavoritesUiState.Content(
-            senses = senses,
-            query = query,
-            hasAnyFavorites = hasAnyFavorites,
-            favoriteLemmas = langFiltered.map { it.lemma }.toSet(),
-            availableLanguages = availableLanguages,
-            selectedLanguage = selectedLanguage,
-            isLanguageDropdownExpanded = if (availableLanguages.size > 1)
-                currentContent?.isLanguageDropdownExpanded ?: false else false,
-            study = study,
+        return FavoritesStateResult(
+            state = FavoritesUiState.Content(
+                senses = senses,
+                query = query,
+                hasAnyFavorites = hasAnyFavorites,
+                favoriteLemmas = langFiltered.map { it.lemma }.toSet(),
+                availableLanguages = availableLanguages,
+                selectedLanguage = selectedLanguage,
+                isLanguageDropdownExpanded = if (availableLanguages.size > 1)
+                    currentContent?.isLanguageDropdownExpanded ?: false else false,
+                study = study,
+            ),
+            reviewDueCount = reviewDueCount,
         )
     }
 
     private fun List<Favorite>.availableLanguages(): List<Language> =
         map { it.language }.distinct().sorted()
+
+    private suspend fun computeReviewDueCount(): Int =
+        withContext(Dispatchers.Default) {
+            favoritesRepository.getAllGroupedByLangAndLemma()
+                .availableLanguages()
+                .sumOf { language -> statsService.globalStats(language.code).dueToday }
+        }
 
     private fun selectedLanguageFor(
         availableLanguages: List<Language>,
@@ -340,13 +369,20 @@ class FavoritesViewModel(
         }
     }
 
+    private fun applyStateResult(result: FavoritesStateResult) {
+        reviewDueCountRefreshJob?.cancel()
+        reviewDueCountRefreshJob = null
+        reviewDueCount = result.reviewDueCount
+        applyNewState(result.state)
+    }
+
     /** Computes and applies favorites state. Exposed for tests; production code uses the
      *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
     internal suspend fun loadAndApplyState(
         query: String,
         runIntake: Boolean = false,
     ) {
-        applyNewState(
+        applyStateResult(
             computeFavoritesState(
                 query = query,
                 currentContent = state as? FavoritesUiState.Content,
@@ -415,8 +451,8 @@ class FavoritesViewModel(
             // filtering, language switches, and all edge cases correctly)
             val snapshot = state as? FavoritesUiState.Content
             val newState = withContext(Dispatchers.Default) { computeFavoritesState(content.query, snapshot) }
-            state = newState
-            prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
+            applyStateResult(newState)
+            prefetchSenses(newState.state.senses.take(PREFETCH_LIMIT))
 
             // Show snackbar with an undo option
             val result = snackbarHostState.showSnackbar(

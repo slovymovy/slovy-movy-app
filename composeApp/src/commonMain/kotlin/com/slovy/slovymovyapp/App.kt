@@ -173,6 +173,7 @@ fun App(
     val favoritesViewModel = remember {
         FavoritesViewModel(favoritesRepository, dictionaryRepository, statsService, intakeService, settingsRepository)
     }
+    val favoritesDueCount = favoritesViewModel.reviewDueCount
     val buildConfig = remember { appBuildConfig }
     val settingsViewModel =
         remember {
@@ -201,6 +202,10 @@ fun App(
 
     DisposableEffect(Unit) {
         onDispose { downloadCoordinator.close() }
+    }
+
+    LaunchedEffect(Unit) {
+        favoritesViewModel.refreshReviewDueCount()
     }
 
     // Keep nativeLanguages and dictionaryLanguage in sync with settings changes from SettingsScreen
@@ -527,7 +532,8 @@ fun App(
                     onNavigateToSettings = {
                         if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
                             navController.navigate(AppDestination.Settings)
-                    }
+                    },
+                    dueCount = favoritesDueCount,
                 )
             }
             composable<AppDestination.Favorites> {
@@ -621,12 +627,14 @@ fun App(
                 StudySessionScreen(
                     viewModel = viewModel,
                     onCancel = {
+                        favoritesViewModel.refreshReviewDueCount()
                         logEvent(AnalyticsEvent.STUDY_CANCEL_SESSION)
                         if (!navController.popBackStack()) {
                             navController.navigate(AppDestination.Favorites)
                         }
                     },
                     onEnd = {
+                        favoritesViewModel.refreshReviewDueCount()
                         logEvent(AnalyticsEvent.STUDY_END_SESSION)
                         if (!navController.popBackStack()) {
                             navController.navigate(AppDestination.Favorites)
@@ -654,7 +662,8 @@ fun App(
                         wordDetailViewModels.keys.lastOrNull()?.let { destination ->
                             navController.navigate(destination)
                         }
-                    }
+                    },
+                    dueCount = favoritesDueCount,
                 )
             }
             composable<AppDestination.WordDetail> { backStackEntry ->
@@ -690,7 +699,8 @@ fun App(
                         args.lemma,
                         args.targetSenseId,
                         args.translationLanguages,
-                        onFavoriteAdded = { favoritesViewModel.requestScrollToTop() }
+                        onFavoriteAdded = { favoritesViewModel.requestScrollToTop() },
+                        onFavoriteChanged = { favoritesViewModel.refreshReviewDueCount() },
                     ).also { created ->
                         wordDetailViewModels[args] = created
                     }
@@ -729,7 +739,8 @@ fun App(
                             translationLanguageCodes = translationCodes
                         )
                         navController.navigate(destination)
-                    }
+                    },
+                    dueCount = favoritesDueCount,
                 )
             }
             composable<AppDestination.DataVersionMismatch> {

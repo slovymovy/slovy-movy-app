@@ -267,7 +267,8 @@ class WordDetailViewModel(
     private val lemma: String = "",
     val targetSenseId: String? = null,
     private val translationLanguages: List<Language>? = null,
-    private val onFavoriteAdded: (() -> Unit)? = null
+    private val onFavoriteAdded: (() -> Unit)? = null,
+    private val onFavoriteChanged: (() -> Unit)? = null,
 ) : ViewModel() {
     var state by mutableStateOf<WordDetailUiState>(
         WordDetailUiState.Empty(
@@ -551,6 +552,7 @@ class WordDetailViewModel(
                     Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_SAVE)
                     onFavoriteAdded?.invoke()
                 }
+                onFavoriteChanged?.invoke()
                 loadFavorites()
             }
         }
@@ -751,7 +753,8 @@ fun WordDetailScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
-    onNavigateToWordDetail: (Language, String) -> Unit = { _, _ -> }
+    onNavigateToWordDetail: (Language, String) -> Unit = { _, _ -> },
+    dueCount: Int = 0,
 ) {
     DisposableEffect(viewModel) {
         viewModel.attachTtsListener()
@@ -819,7 +822,8 @@ fun WordDetailScreen(
         },
         onWordClick = { word ->
             onNavigateToWordDetail(viewModel.dictionaryLanguage, word)
-        }
+        },
+        dueCount = dueCount,
     )
 }
 
@@ -857,7 +861,8 @@ fun WordDetailScreenContent(
     onSensePositioned: (String, Float) -> Unit = { _, _ -> },
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {},
-    onWordClick: (String) -> Unit = {}
+    onWordClick: (String) -> Unit = {},
+    dueCount: Int = 0,
 ) {
     val fallbackTitle = stringResource(Res.string.word_details_title)
     val titleText = when (state) {
@@ -950,7 +955,8 @@ fun WordDetailScreenContent(
                 onNavigateToStats = onNavigateToStats,
                 onNavigateToWordDetail = {},
                 onNavigateToSettings = onNavigateToSettings,
-                wordDetailLabel = titleText
+                wordDetailLabel = titleText,
+                dueCount = dueCount,
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },

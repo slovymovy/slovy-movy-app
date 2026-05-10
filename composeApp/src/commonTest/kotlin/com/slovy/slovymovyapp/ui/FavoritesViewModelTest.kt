@@ -529,4 +529,59 @@ open class FavoritesViewModelTest : BaseTest() {
         assertEquals(1, study.dueCount)
         assertEquals(1, study.estimatedMinutes)
     }
+
+    @Test
+    fun reviewDueCount_aggregatesDueCardsAcrossFavoriteLanguages() = runTest {
+        val app = testAppDatabaseHolder().database
+        val favRepo = favoritesRepository(app)
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+        favRepo.add(SENSE_2, Language.RUSSIAN, "привет")
+        app.favoritesQueries.insertCard(
+            id = Uuid.parse("00000000-0000-0000-0000-000000000501"),
+            sense_id = Uuid.parse(SENSE_1),
+            lemma_id = Uuid.parse("00000000-0000-0000-0000-000000000601"),
+            lang_code = Language.ENGLISH.code,
+            family = CardFamily.RECOGNIZE_SENSE,
+            state = CardState.REVIEW,
+            stability = 1.0,
+            difficulty = 1.0,
+            due = 0L,
+            last_review = null,
+            reps = 1,
+            lapses = 0,
+            created_at = 0L,
+            available_after = null,
+            answer_key = "hello",
+            suspended = false,
+        )
+        app.favoritesQueries.insertCard(
+            id = Uuid.parse("00000000-0000-0000-0000-000000000502"),
+            sense_id = Uuid.parse(SENSE_2),
+            lemma_id = Uuid.parse("00000000-0000-0000-0000-000000000602"),
+            lang_code = Language.RUSSIAN.code,
+            family = CardFamily.RECOGNIZE_SENSE,
+            state = CardState.REVIEW,
+            stability = 1.0,
+            difficulty = 1.0,
+            due = 0L,
+            last_review = null,
+            reps = 1,
+            lapses = 0,
+            created_at = 0L,
+            available_after = null,
+            answer_key = "привет",
+            suspended = false,
+        )
+
+        val vm = createViewModel(
+            favRepo = favRepo,
+            statsService = StatsService(app.favoritesQueries, clock = Clock.System),
+        )
+        vm.loadAndApplyState("")
+
+        val content = contentState(vm)
+        assertEquals(2, vm.reviewDueCount)
+        assertEquals(1, assertNotNull(content.study).dueCount)
+    }
 }

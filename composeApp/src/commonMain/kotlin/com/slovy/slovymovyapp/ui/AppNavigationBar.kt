@@ -1,5 +1,11 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Favorite
@@ -11,8 +17,12 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 
@@ -32,13 +42,15 @@ fun AppNavigationBar(
     onNavigateToStats: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit,
     wordDetailLabel: String? = null,
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    dueCount: Int = 0,
 ) {
     val searchLabel = stringResource(Res.string.nav_search)
     val favoritesLabel = stringResource(Res.string.nav_favorites)
     val statsLabel = stringResource(Res.string.nav_stats)
     val wordDetailLabelText = stringResource(Res.string.nav_word_detail)
     val settingsLabel = stringResource(Res.string.nav_settings)
+    val showFavoritesDueDot = dueCount > 0 && currentScreen != AppScreen.FAVORITES
 
     val itemColors = NavigationBarItemDefaults.colors(
         indicatorColor = Color.Transparent,
@@ -103,13 +115,14 @@ fun AppNavigationBar(
         )
         NavigationBarItem(
             icon = {
-                Icon(
+                NavigationIconWithReviewDot(
                     imageVector = if (currentScreen == AppScreen.FAVORITES) {
                         Icons.Filled.Favorite
                     } else {
                         Icons.Outlined.FavoriteBorder
                     },
-                    contentDescription = favoritesLabel
+                    contentDescription = favoritesLabel,
+                    showDot = showFavoritesDueDot,
                 )
             },
             label = {
@@ -173,6 +186,41 @@ fun AppNavigationBar(
     }
 }
 
+@Composable
+private fun NavigationIconWithReviewDot(
+    imageVector: ImageVector,
+    contentDescription: String,
+    showDot: Boolean,
+) {
+    Box(
+        modifier = Modifier
+            .size(22.dp)
+            .wrapContentSize(unbounded = true)
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = contentDescription,
+            modifier = Modifier.size(22.dp),
+        )
+        if (showDot) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 4.dp, y = (-3.5).dp)
+                    .size(11.dp)
+                    .background(MaterialTheme.colorScheme.surfaceContainer, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(MaterialTheme.colorScheme.error, CircleShape),
+                )
+            }
+        }
+    }
+}
+
 @androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun PreviewAppNavigationBar(
@@ -185,7 +233,26 @@ fun PreviewAppNavigationBar(
             onNavigateToFavorites = {},
             onNavigateToStats = {},
             onNavigateToWordDetail = {},
-            wordDetailLabel = "example"
+            wordDetailLabel = "example",
+            dueCount = 3,
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview
+@Composable
+fun PreviewAppNavigationBarFavoritesSelected(
+    @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        AppNavigationBar(
+            currentScreen = AppScreen.FAVORITES,
+            onNavigateToSearch = {},
+            onNavigateToFavorites = {},
+            onNavigateToStats = {},
+            onNavigateToWordDetail = {},
+            wordDetailLabel = "example",
+            dueCount = 3,
         )
     }
 }
