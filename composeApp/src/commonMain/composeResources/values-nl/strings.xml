@@ -4,6 +4,7 @@
 
     <string name="nav_search">Zoeken</string>
     <string name="nav_favorites">Mijn woorden</string>
+    <string name="nav_stats">Stats</string>
     <string name="nav_word_detail">Woord</string>
     <string name="nav_settings">Instellingen</string>
 
@@ -35,6 +36,67 @@
     <string name="search_go_to_settings">Ga naar Instellingen</string>
     <string name="search_no_results_title">Geen resultaten voor "%1$s"</string>
     <string name="search_no_results_description">Probeer een andere spelling of zoekterm</string>
+
+    <string name="stats_title">Je voortgang</string>
+    <string name="stats_previous_month">Vorige maand</string>
+    <string name="stats_next_month">Volgende maand</string>
+    <plurals name="stats_day_streak">
+        <item quantity="one">dagenreeks</item>
+        <item quantity="few">dagenreeks</item>
+        <item quantity="many">dagenreeks</item>
+        <item quantity="other">dagenreeks</item>
+    </plurals>
+    <string name="stats_legend_today">vandaag</string>
+    <string name="stats_legend_practiced">geoefend</string>
+    <string name="stats_legend_missed">gemist</string>
+    <string name="stats_reviews_section">Herhalingen deze week</string>
+    <plurals name="stats_cards_unit">
+        <item quantity="one">kaart</item>
+        <item quantity="few">kaarten</item>
+        <item quantity="many">kaarten</item>
+        <item quantity="other">kaarten</item>
+    </plurals>
+    <string name="stats_today_label">vandaag</string>
+    <string name="stats_this_week_label">deze week</string>
+    <string name="stats_library_section">Je bibliotheek</string>
+    <plurals name="stats_words_label">
+        <item quantity="one">woord</item>
+        <item quantity="few">woorden</item>
+        <item quantity="many">woorden</item>
+        <item quantity="other">woorden</item>
+    </plurals>
+    <plurals name="stats_senses_label">
+        <item quantity="one">betekenis</item>
+        <item quantity="few">betekenissen</item>
+        <item quantity="many">betekenissen</item>
+        <item quantity="other">betekenissen</item>
+    </plurals>
+    <string name="stats_stage_new">Nieuw</string>
+    <string name="stats_stage_fresh">Vers</string>
+    <string name="stats_stage_middle">Herinneren</string>
+    <string name="stats_stage_strong">Stabiel</string>
+    <string name="stats_stage_learned">Geleerd</string>
+    <string name="stats_caption_before_learned">Betekenissen schuiven omlaag als je ze bij herhalingen goed blijft onthouden, en weer omhoog als je ze vergeet.</string>
+    <string name="stats_caption_after_learned">is afgerond — uit de actieve herhaling.</string>
+    <string name="stats_month_january">Januari</string>
+    <string name="stats_month_february">Februari</string>
+    <string name="stats_month_march">Maart</string>
+    <string name="stats_month_april">April</string>
+    <string name="stats_month_may">Mei</string>
+    <string name="stats_month_june">Juni</string>
+    <string name="stats_month_july">Juli</string>
+    <string name="stats_month_august">Augustus</string>
+    <string name="stats_month_september">September</string>
+    <string name="stats_month_october">Oktober</string>
+    <string name="stats_month_november">November</string>
+    <string name="stats_month_december">December</string>
+    <string name="stats_weekday_initial_monday">M</string>
+    <string name="stats_weekday_initial_tuesday">D</string>
+    <string name="stats_weekday_initial_wednesday">W</string>
+    <string name="stats_weekday_initial_thursday">D</string>
+    <string name="stats_weekday_initial_friday">V</string>
+    <string name="stats_weekday_initial_saturday">Z</string>
+    <string name="stats_weekday_initial_sunday">Z</string>
 
     <string name="common_back">Terug</string>
     <string name="common_cancel">Annuleren</string>

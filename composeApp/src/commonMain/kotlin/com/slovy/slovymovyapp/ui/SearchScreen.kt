@@ -266,6 +266,7 @@ fun SearchScreen(
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
@@ -317,6 +318,7 @@ fun SearchScreen(
         wordDetailLabel = wordDetailLabel,
         onNavigateToWordDetail = onNavigateToWordDetail,
         onNavigateToFavorites = onNavigateToFavorites,
+        onNavigateToStats = onNavigateToStats,
         onNavigateToSettings = onNavigateToSettings
     )
 }
@@ -334,6 +336,7 @@ fun SearchScreenContent(
     wordDetailLabel: String? = null,
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
@@ -344,6 +347,7 @@ fun SearchScreenContent(
                 currentScreen = AppScreen.SEARCH,
                 onNavigateToSearch = {},
                 onNavigateToFavorites = onNavigateToFavorites,
+                onNavigateToStats = onNavigateToStats,
                 onNavigateToWordDetail = onNavigateToWordDetail,
                 wordDetailLabel = wordDetailLabel,
                 onNavigateToSettings = onNavigateToSettings

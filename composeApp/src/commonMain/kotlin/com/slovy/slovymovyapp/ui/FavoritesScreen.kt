@@ -513,6 +513,7 @@ fun FavoritesScreen(
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
@@ -551,6 +552,7 @@ fun FavoritesScreen(
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
         onNavigateToSettings = onNavigateToSettings,
+        onNavigateToStats = onNavigateToStats,
         onPrefetchVisible = { senses, range -> viewModel.prefetchVisibleRange(senses, range) },
         onLanguageSelected = { viewModel.setSelectedLanguage(it) },
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
@@ -573,6 +575,7 @@ fun FavoritesScreenContent(
     wordDetailLabel: String? = null,
     onNavigateToLastWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
     onPrefetchVisible: (List<FavoriteSenseItem>, IntRange) -> Unit = { _, _ -> },
     onLanguageSelected: (Language) -> Unit = {},
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
@@ -599,6 +602,7 @@ fun FavoritesScreenContent(
                 currentScreen = AppScreen.FAVORITES,
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToFavorites = {},
+                onNavigateToStats = onNavigateToStats,
                 onNavigateToWordDetail = onNavigateToLastWordDetail,
                 wordDetailLabel = wordDetailLabel,
                 onNavigateToSettings = onNavigateToSettings

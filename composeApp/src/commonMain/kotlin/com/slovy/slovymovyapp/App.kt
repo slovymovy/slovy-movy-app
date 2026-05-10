@@ -62,6 +62,9 @@ private sealed interface AppDestination {
     data object Favorites : AppDestination
 
     @Serializable
+    data object Stats : AppDestination
+
+    @Serializable
     data class StudySession(
         val langCode: String,
     ) : AppDestination
@@ -155,7 +158,6 @@ fun App(
     val statsService = remember(appDatabase, fsrsConfig) {
         StatsService(
             learning = appDatabase.favoritesQueries,
-            config = fsrsConfig,
             clock = Clock.System,
         )
     }
@@ -204,6 +206,9 @@ fun App(
     // Keep nativeLanguages and dictionaryLanguage in sync with settings changes from SettingsScreen
     // Only sync after settings have successfully loaded at least once
     val settingsState = settingsViewModel.state
+    val learningLanguagesForStats = settingsState.learningLanguages
+        .map { it.language }
+        .ifEmpty { dictionaryLanguage?.let { listOf(it) }.orEmpty() }
     LaunchedEffect(settingsState.translationLanguages, settingsState.settingsLoaded) {
         if (settingsState.settingsLoaded) {
             nativeLanguages = settingsState.translationLanguages.sortedBy { it.ordinal }
@@ -515,6 +520,10 @@ fun App(
                         if (!navController.popBackStack(AppDestination.Favorites, inclusive = false))
                             navController.navigate(AppDestination.Favorites)
                     },
+                    onNavigateToStats = {
+                        if (!navController.popBackStack(AppDestination.Stats, inclusive = false))
+                            navController.navigate(AppDestination.Stats)
+                    },
                     onNavigateToSettings = {
                         if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
                             navController.navigate(AppDestination.Settings)
@@ -554,10 +563,44 @@ fun App(
                         if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
                             navController.navigate(AppDestination.Settings)
                     },
+                    onNavigateToStats = {
+                        if (!navController.popBackStack(AppDestination.Stats, inclusive = false))
+                            navController.navigate(AppDestination.Stats)
+                    },
                     onStartStudy = { language ->
                         logEvent(AnalyticsEvent.STUDY_START_SESSION)
                         navController.navigate(AppDestination.StudySession(language.code))
                     }
+                )
+            }
+            composable<AppDestination.Stats> { backStackEntry ->
+                val viewModel = viewModel(
+                    viewModelStoreOwner = backStackEntry
+                ) {
+                    StatsViewModel(learningLanguagesForStats, statsService, Clock.System)
+                }
+
+                StatsScreen(
+                    viewModel = viewModel,
+                    learningLanguages = learningLanguagesForStats,
+                    wordDetailLabel = wordDetailViewModels.keys.lastOrNull()?.lemma,
+                    onNavigateToSearch = {
+                        if (!navController.popBackStack(AppDestination.Search, inclusive = false))
+                            navController.navigate(AppDestination.Search)
+                    },
+                    onNavigateToFavorites = {
+                        if (!navController.popBackStack(AppDestination.Favorites, inclusive = false))
+                            navController.navigate(AppDestination.Favorites)
+                    },
+                    onNavigateToWordDetail = {
+                        wordDetailViewModels.keys.lastOrNull()?.let { destination ->
+                            navController.navigate(destination)
+                        }
+                    },
+                    onNavigateToSettings = {
+                        if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
+                            navController.navigate(AppDestination.Settings)
+                    },
                 )
             }
             composable<AppDestination.StudySession> { backStackEntry ->
@@ -601,6 +644,10 @@ fun App(
                     onNavigateToFavorites = {
                         if (!navController.popBackStack(AppDestination.Favorites, inclusive = false))
                             navController.navigate(AppDestination.Favorites)
+                    },
+                    onNavigateToStats = {
+                        if (!navController.popBackStack(AppDestination.Stats, inclusive = false))
+                            navController.navigate(AppDestination.Stats)
                     },
                     wordDetailLabel = wordDetailViewModels.keys.lastOrNull()?.lemma,
                     onNavigateToWordDetail = {
@@ -664,6 +711,10 @@ fun App(
                     onNavigateToFavorites = {
                         if (!navController.popBackStack(AppDestination.Favorites, inclusive = false))
                             navController.navigate(AppDestination.Favorites)
+                    },
+                    onNavigateToStats = {
+                        if (!navController.popBackStack(AppDestination.Stats, inclusive = false))
+                            navController.navigate(AppDestination.Stats)
                     },
                     onNavigateToSettings = {
                         if (!navController.popBackStack(AppDestination.Settings, inclusive = false))

@@ -4,6 +4,7 @@
 
     <string name="nav_search">Поиск</string>
     <string name="nav_favorites">Мои слова</string>
+    <string name="nav_stats">Статистика</string>
     <string name="nav_word_detail">Слово</string>
     <string name="nav_settings">Настройки</string>
 
@@ -35,6 +36,67 @@
     <string name="search_go_to_settings">Перейти в настройки</string>
     <string name="search_no_results_title">Ничего не нашлось по запросу "%1$s"</string>
     <string name="search_no_results_description">Проверьте написание или попробуйте другое слово.</string>
+
+    <string name="stats_title">Ваш прогресс</string>
+    <string name="stats_previous_month">Предыдущий месяц</string>
+    <string name="stats_next_month">Следующий месяц</string>
+    <plurals name="stats_day_streak">
+        <item quantity="one">день подряд</item>
+        <item quantity="few">дня подряд</item>
+        <item quantity="many">дней подряд</item>
+        <item quantity="other">дня подряд</item>
+    </plurals>
+    <string name="stats_legend_today">сегодня</string>
+    <string name="stats_legend_practiced">занятие</string>
+    <string name="stats_legend_missed">пропуск</string>
+    <string name="stats_reviews_section">Повторы за неделю</string>
+    <plurals name="stats_cards_unit">
+        <item quantity="one">карточка</item>
+        <item quantity="few">карточки</item>
+        <item quantity="many">карточек</item>
+        <item quantity="other">карточки</item>
+    </plurals>
+    <string name="stats_today_label">сегодня</string>
+    <string name="stats_this_week_label">за неделю</string>
+    <string name="stats_library_section">Ваша библиотека</string>
+    <plurals name="stats_words_label">
+        <item quantity="one">слово</item>
+        <item quantity="few">слова</item>
+        <item quantity="many">слов</item>
+        <item quantity="other">слова</item>
+    </plurals>
+    <plurals name="stats_senses_label">
+        <item quantity="one">значение</item>
+        <item quantity="few">значения</item>
+        <item quantity="many">значений</item>
+        <item quantity="other">значения</item>
+    </plurals>
+    <string name="stats_stage_new">Новые</string>
+    <string name="stats_stage_fresh">Свежие</string>
+    <string name="stats_stage_middle">Средние</string>
+    <string name="stats_stage_strong">Сильные</string>
+    <string name="stats_stage_learned">Выучены</string>
+    <string name="stats_caption_before_learned">Значения двигаются вниз по списку, когда вы стабильно вспоминаете их на повторах, и поднимаются обратно, когда забываете.</string>
+    <string name="stats_caption_after_learned">значит, что они выпущены из активного повтора.</string>
+    <string name="stats_month_january">Январь</string>
+    <string name="stats_month_february">Февраль</string>
+    <string name="stats_month_march">Март</string>
+    <string name="stats_month_april">Апрель</string>
+    <string name="stats_month_may">Май</string>
+    <string name="stats_month_june">Июнь</string>
+    <string name="stats_month_july">Июль</string>
+    <string name="stats_month_august">Август</string>
+    <string name="stats_month_september">Сентябрь</string>
+    <string name="stats_month_october">Октябрь</string>
+    <string name="stats_month_november">Ноябрь</string>
+    <string name="stats_month_december">Декабрь</string>
+    <string name="stats_weekday_initial_monday">П</string>
+    <string name="stats_weekday_initial_tuesday">В</string>
+    <string name="stats_weekday_initial_wednesday">С</string>
+    <string name="stats_weekday_initial_thursday">Ч</string>
+    <string name="stats_weekday_initial_friday">П</string>
+    <string name="stats_weekday_initial_saturday">С</string>
+    <string name="stats_weekday_initial_sunday">В</string>
 
     <string name="common_back">Назад</string>
     <string name="common_cancel">Отмена</string>

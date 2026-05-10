@@ -749,6 +749,7 @@ fun WordDetailScreen(
     onBack: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToWordDetail: (Language, String) -> Unit = { _, _ -> }
 ) {
@@ -794,6 +795,7 @@ fun WordDetailScreen(
         onBack = onBack,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
+        onNavigateToStats = onNavigateToStats,
         onNavigateToSettings = onNavigateToSettings,
         onPlayWord = { viewModel.playWord() },
         onStopWord = { viewModel.stopPlayback() },
@@ -835,6 +837,7 @@ fun WordDetailScreenContent(
     onBack: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
@@ -944,6 +947,7 @@ fun WordDetailScreenContent(
                 currentScreen = AppScreen.WORD_DETAIL,
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToFavorites = onNavigateToFavorites,
+                onNavigateToStats = onNavigateToStats,
                 onNavigateToWordDetail = {},
                 onNavigateToSettings = onNavigateToSettings,
                 wordDetailLabel = titleText

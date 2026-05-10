@@ -4,6 +4,7 @@
 
     <string name="nav_search">Search</string>
     <string name="nav_favorites">My words</string>
+    <string name="nav_stats">Stats</string>
     <string name="nav_word_detail">Word Detail</string>
     <string name="nav_settings">Settings</string>
 
@@ -35,6 +36,67 @@
     <string name="search_go_to_settings">Go to Settings</string>
     <string name="search_no_results_title">No results for "%1$s"</string>
     <string name="search_no_results_description">Try a different spelling or search term?</string>
+
+    <string name="stats_title">Your progress</string>
+    <string name="stats_previous_month">Previous month</string>
+    <string name="stats_next_month">Next month</string>
+    <plurals name="stats_day_streak">
+        <item quantity="one">day streak</item>
+        <item quantity="few">day streak</item>
+        <item quantity="many">day streak</item>
+        <item quantity="other">day streak</item>
+    </plurals>
+    <string name="stats_legend_today">today</string>
+    <string name="stats_legend_practiced">practiced</string>
+    <string name="stats_legend_missed">missed</string>
+    <string name="stats_reviews_section">This week's reviews</string>
+    <plurals name="stats_cards_unit">
+        <item quantity="one">card</item>
+        <item quantity="few">cards</item>
+        <item quantity="many">cards</item>
+        <item quantity="other">cards</item>
+    </plurals>
+    <string name="stats_today_label">today</string>
+    <string name="stats_this_week_label">this week</string>
+    <string name="stats_library_section">Your library</string>
+    <plurals name="stats_words_label">
+        <item quantity="one">word</item>
+        <item quantity="few">words</item>
+        <item quantity="many">words</item>
+        <item quantity="other">words</item>
+    </plurals>
+    <plurals name="stats_senses_label">
+        <item quantity="one">sense</item>
+        <item quantity="few">senses</item>
+        <item quantity="many">senses</item>
+        <item quantity="other">senses</item>
+    </plurals>
+    <string name="stats_stage_new">New</string>
+    <string name="stats_stage_fresh">Fresh</string>
+    <string name="stats_stage_middle">Recalling</string>
+    <string name="stats_stage_strong">Solid</string>
+    <string name="stats_stage_learned">Learned</string>
+    <string name="stats_caption_before_learned">Senses move down the list as your recall holds up across reviews, and slip back up when you forget.</string>
+    <string name="stats_caption_after_learned">is graduated — out of active rotation.</string>
+    <string name="stats_month_january">January</string>
+    <string name="stats_month_february">February</string>
+    <string name="stats_month_march">March</string>
+    <string name="stats_month_april">April</string>
+    <string name="stats_month_may">May</string>
+    <string name="stats_month_june">June</string>
+    <string name="stats_month_july">July</string>
+    <string name="stats_month_august">August</string>
+    <string name="stats_month_september">September</string>
+    <string name="stats_month_october">October</string>
+    <string name="stats_month_november">November</string>
+    <string name="stats_month_december">December</string>
+    <string name="stats_weekday_initial_monday">M</string>
+    <string name="stats_weekday_initial_tuesday">T</string>
+    <string name="stats_weekday_initial_wednesday">W</string>
+    <string name="stats_weekday_initial_thursday">T</string>
+    <string name="stats_weekday_initial_friday">F</string>
+    <string name="stats_weekday_initial_saturday">S</string>
+    <string name="stats_weekday_initial_sunday">S</string>
 
     <string name="common_back">Back</string>
     <string name="common_cancel">Cancel</string>
