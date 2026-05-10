@@ -267,7 +267,8 @@ fun SearchScreen(
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    hasFavoritesToReview: Boolean = false,
 ) {
     val focusManager = LocalFocusManager.current
     // restore after process death
@@ -319,7 +320,8 @@ fun SearchScreen(
         onNavigateToWordDetail = onNavigateToWordDetail,
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
-        onNavigateToSettings = onNavigateToSettings
+        onNavigateToSettings = onNavigateToSettings,
+        hasFavoritesToReview = hasFavoritesToReview,
     )
 }
 
@@ -337,7 +339,8 @@ fun SearchScreenContent(
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    hasFavoritesToReview: Boolean = false,
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -350,7 +353,8 @@ fun SearchScreenContent(
                 onNavigateToStats = onNavigateToStats,
                 onNavigateToWordDetail = onNavigateToWordDetail,
                 wordDetailLabel = wordDetailLabel,
-                onNavigateToSettings = onNavigateToSettings
+                onNavigateToSettings = onNavigateToSettings,
+                hasFavoritesToReview = hasFavoritesToReview,
             )
         }
     ) { innerPadding ->

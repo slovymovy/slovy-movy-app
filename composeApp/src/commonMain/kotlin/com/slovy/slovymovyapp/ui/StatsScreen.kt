@@ -140,6 +140,7 @@ fun StatsScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    hasFavoritesToReview: Boolean = false,
 ) {
     LaunchedEffect(learningLanguages) {
         viewModel.updateLearningLanguages(learningLanguages)
@@ -159,6 +160,7 @@ fun StatsScreen(
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToWordDetail = onNavigateToWordDetail,
         onNavigateToSettings = onNavigateToSettings,
+        hasFavoritesToReview = hasFavoritesToReview,
     )
 }
 
@@ -175,6 +177,7 @@ fun StatsScreenContent(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    hasFavoritesToReview: Boolean = false,
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -187,6 +190,7 @@ fun StatsScreenContent(
                 onNavigateToWordDetail = onNavigateToWordDetail,
                 wordDetailLabel = wordDetailLabel,
                 onNavigateToSettings = onNavigateToSettings,
+                hasFavoritesToReview = hasFavoritesToReview,
             )
         },
         containerColor = MaterialTheme.colorScheme.background,

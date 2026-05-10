@@ -32,8 +32,6 @@ import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
-import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
-import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
@@ -95,6 +93,7 @@ sealed interface FavoritesUiState {
         val selectedLanguage: Language? = null,
         val isLanguageDropdownExpanded: Boolean = false,
         val study: FavoritesStudyUiState? = null,
+        val reviewDueCount: Int = 0,
         val scrollToTop: Boolean = false
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotBlank()
@@ -118,8 +117,6 @@ private fun FavoriteSenseItem.withoutCachedDetails(): FavoriteSenseItem =
 class FavoritesViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val dictionaryRepository: DictionaryRepository,
-    private val statsService: StatsService,
-    private val intakeService: LearningIntake,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
@@ -131,6 +128,7 @@ class FavoritesViewModel(
 
     private var pendingScrollToTop: Boolean = false
     private var savedFavoritesLanguage: Language? = null
+    private var dueCountByLanguage: Map<Language, Int> = emptyMap()
 
     /** Called from outside (e.g. word detail) when a favorite was just added. */
     fun requestScrollToTop() {
@@ -143,12 +141,17 @@ class FavoritesViewModel(
         state = content.withoutCachedFavoriteDetails()
     }
 
-    private val queryFlow = MutableStateFlow(QueryState("", Uuid.random(), runIntake = true))
+    fun updateReviewDueCounts(updatedDueCountByLanguage: Map<Language, Int>) {
+        dueCountByLanguage = updatedDueCountByLanguage
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.withReviewDueCounts()
+    }
+
+    private val queryFlow = MutableStateFlow(QueryState("", Uuid.random()))
 
     private data class QueryState(
         val query: String,
         val force: Uuid,
-        val runIntake: Boolean = false,
     )
 
     companion object {
@@ -173,7 +176,6 @@ class FavoritesViewModel(
                             computeFavoritesState(
                                 query = queryState.query,
                                 currentContent = snapshot,
-                                runIntake = queryState.runIntake,
                             ),
                         )
                     }
@@ -189,7 +191,7 @@ class FavoritesViewModel(
     fun updateQuery(newQuery: String) {
         val content = state as? FavoritesUiState.Content ?: return
         state = content.copy(query = newQuery)
-        queryFlow.value = QueryState(newQuery, Uuid.random(), runIntake = false)
+        queryFlow.value = QueryState(newQuery, Uuid.random())
     }
 
     fun loadFavorites() {
@@ -197,7 +199,6 @@ class FavoritesViewModel(
         queryFlow.value = QueryState(
             query = currentQuery,
             force = Uuid.random(),
-            runIntake = true,
         )
     }
 
@@ -209,7 +210,7 @@ class FavoritesViewModel(
         viewModelScope.launch {
             settingsRepository.insert(Setting(Setting.Name.FAVORITES_LANGUAGE, JsonPrimitive(language.code)))
         }
-        queryFlow.value = QueryState(content.query, Uuid.random(), runIntake = true)
+        queryFlow.value = QueryState(content.query, Uuid.random())
     }
 
     fun setLanguageDropdownExpanded(expanded: Boolean) {
@@ -226,28 +227,17 @@ class FavoritesViewModel(
     internal suspend fun computeFavoritesState(
         query: String,
         currentContent: FavoritesUiState.Content?,
-        runIntake: Boolean = false,
     ): FavoritesUiState.Content {
         val currentSenses = currentContent?.senses.orEmpty()
         val currentById = currentSenses.associateBy { it.senseId }
 
-        val initialFavorites = favoritesRepository.getAllGroupedByLangAndLemma()
-        val initialSelectedLanguage = selectedLanguageFor(
-            availableLanguages = initialFavorites.availableLanguages(),
-            currentContent = currentContent,
-        )
-        if (runIntake && initialSelectedLanguage != null) {
-            intakeService.runIntake(initialSelectedLanguage.code)
-        }
-
-        val allFavorites = if (runIntake) {
-            favoritesRepository.getAllGroupedByLangAndLemma()
-        } else {
-            initialFavorites
-        }
+        val allFavorites = favoritesRepository.getAllGroupedByLangAndLemma()
         val hasAnyFavorites = allFavorites.isNotEmpty()
         val availableLanguages = allFavorites.availableLanguages()
         val selectedLanguage = selectedLanguageFor(availableLanguages, currentContent)
+        val visibleDueCountByLanguage = availableLanguages.associateWith { language ->
+            dueCountByLanguage[language] ?: 0
+        }
 
         // Filter favorites to selected language when multi-language
         val langFiltered = if (availableLanguages.size > 1 && selectedLanguage != null) {
@@ -292,9 +282,8 @@ class FavoritesViewModel(
         }
         val study = selectedLanguage
             ?.let { language ->
-                statsService.globalStats(language.code)
-                    .dueToday
-                    .takeIf { it > 0 }
+                visibleDueCountByLanguage[language]
+                    ?.takeIf { it > 0 }
                     ?.let { dueCount -> FavoritesStudyUiState(language, dueCount) }
             }
 
@@ -308,6 +297,23 @@ class FavoritesViewModel(
             isLanguageDropdownExpanded = if (availableLanguages.size > 1)
                 currentContent?.isLanguageDropdownExpanded ?: false else false,
             study = study,
+            reviewDueCount = visibleDueCountByLanguage.values.sum(),
+        )
+    }
+
+    private fun FavoritesUiState.Content.withReviewDueCounts(): FavoritesUiState.Content {
+        val visibleDueCountByLanguage = availableLanguages.associateWith { language ->
+            dueCountByLanguage[language] ?: 0
+        }
+        val updatedStudy = selectedLanguage
+            ?.let { language ->
+                visibleDueCountByLanguage[language]
+                    ?.takeIf { it > 0 }
+                    ?.let { dueCount -> FavoritesStudyUiState(language, dueCount) }
+            }
+        return copy(
+            study = updatedStudy,
+            reviewDueCount = visibleDueCountByLanguage.values.sum(),
         )
     }
 
@@ -342,15 +348,11 @@ class FavoritesViewModel(
 
     /** Computes and applies favorites state. Exposed for tests; production code uses the
      *  debounced flow or [toggleFavorite] which handle threading via [Dispatchers.Default]. */
-    internal suspend fun loadAndApplyState(
-        query: String,
-        runIntake: Boolean = false,
-    ) {
+    internal suspend fun loadAndApplyState(query: String) {
         applyNewState(
             computeFavoritesState(
                 query = query,
                 currentContent = state as? FavoritesUiState.Content,
-                runIntake = runIntake,
             ),
         )
     }
@@ -399,7 +401,12 @@ class FavoritesViewModel(
         }
     }
 
-    fun toggleFavorite(senseId: String, removedMessage: String, undoLabel: String) {
+    fun toggleFavorite(
+        senseId: String,
+        removedMessage: String,
+        undoLabel: String,
+        onFavoritesChanged: () -> Unit = {},
+    ) {
         val item = findSense(senseId) ?: return
         viewModelScope.launch {
             // Fetch the favorite to get its createdAt before removal
@@ -408,6 +415,7 @@ class FavoritesViewModel(
             // Remove from repository, then remove from displayed list for immediate feedback
             favoritesRepository.remove(senseId, favorite.language)
             Analytics.logEvent(AnalyticsEvent.FAVOURITES_REMOVE)
+            onFavoritesChanged()
             val content = state as? FavoritesUiState.Content ?: return@launch
             state = content.copy(senses = content.senses.filter { it.senseId != senseId })
 
@@ -415,7 +423,7 @@ class FavoritesViewModel(
             // filtering, language switches, and all edge cases correctly)
             val snapshot = state as? FavoritesUiState.Content
             val newState = withContext(Dispatchers.Default) { computeFavoritesState(content.query, snapshot) }
-            state = newState
+            applyNewState(newState)
             prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
 
             // Show snackbar with an undo option
@@ -429,6 +437,7 @@ class FavoritesViewModel(
                 // Re-add with the original createdAt to preserve position
                 favoritesRepository.add(senseId, favorite.language, favorite.lemma, favorite.createdAt)
                 Analytics.logEvent(AnalyticsEvent.FAVOURITES_SAVE)
+                onFavoritesChanged()
                 loadFavorites()
             }
         }
@@ -515,6 +524,7 @@ fun FavoritesScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
+    onFavoritesChanged: () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     val removedMessage = stringResource(Res.string.favorites_removed_message)
@@ -547,7 +557,7 @@ fun FavoritesScreen(
         onSearchInDictionary = onSearchInDictionary,
         onQueryChange = { viewModel.updateQuery(it) },
         onSenseToggle = { viewModel.toggleSense(it) },
-        onFavoriteToggle = { viewModel.toggleFavorite(it, removedMessage, undoLabel) },
+        onFavoriteToggle = { viewModel.toggleFavorite(it, removedMessage, undoLabel, onFavoritesChanged) },
         onNavigateToWordDetail = onNavigateToWordDetail,
         wordDetailLabel = wordDetailLabel,
         onNavigateToLastWordDetail = onNavigateToLastWordDetail,
