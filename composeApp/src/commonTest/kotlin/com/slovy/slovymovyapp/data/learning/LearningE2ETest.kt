@@ -170,6 +170,110 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun intake_activates_pending_favorites_of_same_lemma_together() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            val first = env.seedSense(lemma = "polysamefirst")
+            val second = env.seedAdditionalSense(first)
+            env.addFavorite(first, createdAt = start.toEpochMilliseconds())
+            env.addFavorite(second, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(2, result.cardsCreated)
+            assertTrue(result.skipped.isEmpty(), "unexpected skips: ${result.skipped}")
+            assertEquals(setOf(first.senseId, second.senseId), result.activated.toSet())
+            assertEquals(
+                1,
+                env.app.favoritesQueries.selectCardsByFavorite(first.senseId, "en").executeAsList().size,
+            )
+            assertEquals(
+                1,
+                env.app.favoritesQueries.selectCardsByFavorite(second.senseId, "en").executeAsList().size,
+            )
+            assertNotNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(first.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+            assertNotNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(second.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
+    fun intake_skips_lemma_group_when_total_exceeds_budget() = runBlocking {
+        val config = FsrsDefaults.config().copy(dailyNewTaskFamilyBudget = 1)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val first = env.seedSense(lemma = "groupbudget")
+            val second = env.seedAdditionalSense(first)
+            env.addFavorite(first, createdAt = start.toEpochMilliseconds())
+            env.addFavorite(second, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(0, result.cardsCreated)
+            assertTrue(result.activated.isEmpty(), "unexpected activated: ${result.activated}")
+            assertEquals(listOf(SkipReason.BUDGET_EXHAUSTED), result.skipped)
+            assertEquals(
+                0,
+                env.app.favoritesQueries.selectCardsByFavorite(first.senseId, "en").executeAsList().size,
+            )
+            assertEquals(
+                0,
+                env.app.favoritesQueries.selectCardsByFavorite(second.senseId, "en").executeAsList().size,
+            )
+            assertNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(first.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+            assertNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(second.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
+    fun intake_activates_smaller_group_when_larger_group_overflows_budget() = runBlocking {
+        val config = FsrsDefaults.config().copy(dailyNewTaskFamilyBudget = 1)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val pairFirst = env.seedSense(lemma = "twoseat")
+            val pairSecond = env.seedAdditionalSense(pairFirst)
+            val solo = env.seedSense(lemma = "oneseat")
+            env.addFavorite(pairFirst, createdAt = start.toEpochMilliseconds())
+            env.addFavorite(pairSecond, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+            env.addFavorite(solo, createdAt = (start + 2.milliseconds).toEpochMilliseconds())
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.cardsCreated)
+            assertEquals(listOf(solo.senseId), result.activated)
+            assertEquals(listOf(SkipReason.BUDGET_EXHAUSTED), result.skipped)
+            assertEquals(
+                0,
+                env.app.favoritesQueries.selectCardsByFavorite(pairFirst.senseId, "en").executeAsList().size,
+            )
+            assertEquals(
+                0,
+                env.app.favoritesQueries.selectCardsByFavorite(pairSecond.senseId, "en").executeAsList().size,
+            )
+            assertEquals(
+                1,
+                env.app.favoritesQueries.selectCardsByFavorite(solo.senseId, "en").executeAsList().size,
+            )
+            assertNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(pairFirst.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+            assertNotNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(solo.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
     fun intake_creates_recognition_task_before_translation_exists() = runBlocking {
         withEnv(includeTranslation = true) { env ->
             val fixture = env.seedSense(lemma = "configured")

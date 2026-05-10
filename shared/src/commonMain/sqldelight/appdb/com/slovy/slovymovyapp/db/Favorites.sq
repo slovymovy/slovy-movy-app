@@ -125,12 +125,19 @@ SELECT DISTINCT lemma FROM favorites WHERE lang_code = ?;
 deleteAll:
 DELETE FROM favorites;
 
-selectFavoritesPendingActivation:
-SELECT sense_id, lang_code, lemma, created_at, activated_at
+selectPendingActivationLemmas:
+SELECT lemma, COUNT(*) AS pending_count
 FROM favorites
 WHERE lang_code = ? AND activated_at IS NULL
-ORDER BY created_at ASC
+GROUP BY lemma
+ORDER BY MIN(created_at) ASC
 LIMIT ?;
+
+selectPendingActivationByLemma:
+SELECT sense_id, lang_code, lemma, created_at, activated_at
+FROM favorites
+WHERE lang_code = ? AND lemma = ? AND activated_at IS NULL
+ORDER BY created_at ASC;
 
 markFavoriteActivated:
 UPDATE favorites

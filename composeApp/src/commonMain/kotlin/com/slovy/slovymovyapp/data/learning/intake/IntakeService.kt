@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.data.learning.intake
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardState
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
@@ -64,81 +65,97 @@ class IntakeService(
             return@withContext IntakeResult(emptyList(), listOf(SkipReason.BUDGET_EXHAUSTED), 0)
         }
 
-        val candidates = learning.selectFavoritesPendingActivation(langCode, (remaining * 10).toLong()).executeAsList()
+        val familiesPerSense = config.defaultIntakeFamilies.size
+        val pendingLemmas = learning
+            .selectPendingActivationLemmas(langCode, (remaining * 10).toLong())
+            .executeAsList()
         val activated = mutableListOf<Uuid>()
         val skipped = mutableListOf<SkipReason>()
         val invalidatedSenses = mutableSetOf<String>()
         var cardsCreated = 0
 
-        for (favorite in candidates) {
-            val senseId = Uuid.parse(favorite.sense_id)
+        for (row in pendingLemmas) {
+            val upperBoundCards = row.pending_count.toInt() * familiesPerSense
+            if (upperBoundCards > remaining) {
+                skipped += SkipReason.BUDGET_EXHAUSTED
+                continue
+            }
+
+            val group = learning.selectPendingActivationByLemma(langCode, row.lemma).executeAsList()
+            if (group.isEmpty()) continue
+
             val languageCard = dictionary.getLanguageCard(
                 language = language,
-                lemma = favorite.lemma,
+                lemma = row.lemma,
                 translationTargets = translationTargets,
-                senseIds = setOf(senseId.toString()),
+                senseIds = group.mapTo(mutableSetOf()) { it.sense_id },
             )
             if (languageCard == null) {
                 skipped += SkipReason.CARD_DATA_UNAVAILABLE
                 continue
             }
-            val sense = languageCard.entries
+            val sensesById = languageCard.entries
                 .flatMap { it.senses }
-                .firstOrNull { it.senseId == senseId.toString() }
-            if (sense == null) {
-                skipped += SkipReason.CARD_DATA_UNAVAILABLE
-                continue
-            }
-            val tasksToCreate = config.defaultIntakeFamilies.mapNotNull { family ->
-                val variants = buildTaskVariants(family, sense, translationTargets)
-                if (variants.isEmpty()) null else family
-            }
-            if (tasksToCreate.isEmpty()) {
-                skipped += SkipReason.NO_EXAMPLES
-                continue
-            }
-            if (tasksToCreate.size > remaining) {
-                skipped += SkipReason.BUDGET_EXHAUSTED
-                continue
+                .associateBy { it.senseId }
+
+            val groupPlan = mutableListOf<IntakePlanItem>()
+            for (favorite in group) {
+                val sense = sensesById[favorite.sense_id]
+                if (sense == null) {
+                    skipped += SkipReason.CARD_DATA_UNAVAILABLE
+                    continue
+                }
+                val tasksToCreate = config.defaultIntakeFamilies.mapNotNull { family ->
+                    val variants = buildTaskVariants(family, sense, translationTargets)
+                    if (variants.isEmpty()) null else family
+                }
+                if (tasksToCreate.isEmpty()) {
+                    skipped += SkipReason.NO_TASKS_VARIANT_AVAILABLE
+                    continue
+                }
+                groupPlan += IntakePlanItem(Uuid.parse(favorite.sense_id), tasksToCreate)
             }
 
+            if (groupPlan.isEmpty()) continue
+            val groupTotal = groupPlan.sumOf { it.families.size }
+
+            val lemmaId = JsonIngestionBuilder.generateLemmaId(row.lemma)
+            val answerKey = row.lemma.lowercase()
             learning.transaction {
-                val lemmaId = JsonIngestionBuilder.generateLemmaId(favorite.lemma)
-                val answerKey = favorite.lemma.lowercase()
-                tasksToCreate.forEach { family ->
-                    val cardId = Uuid.random()
-                    learning.insertCard(
-                        id = cardId,
-                        sense_id = senseId,
-                        lemma_id = lemmaId,
-                        lang_code = langCode,
-                        family = family,
-                        state = CardState.NEW,
-                        stability = 0.0,
-                        difficulty = 0.0,
-                        due = now,
-                        last_review = null,
-                        reps = 0,
-                        lapses = 0,
-                        created_at = now,
-                        available_after = null,
-                        answer_key = answerKey,
-                        suspended = false,
-                    )
+                groupPlan.forEach { item ->
+                    item.families.forEach { family ->
+                        learning.insertCard(
+                            id = Uuid.random(),
+                            sense_id = item.senseId,
+                            lemma_id = lemmaId,
+                            lang_code = langCode,
+                            family = family,
+                            state = CardState.NEW,
+                            stability = 0.0,
+                            difficulty = 0.0,
+                            due = now,
+                            last_review = null,
+                            reps = 0,
+                            lapses = 0,
+                            created_at = now,
+                            available_after = null,
+                            answer_key = answerKey,
+                            suspended = false,
+                        )
+                    }
+                    learning.markFavoriteActivated(now, item.senseId.toString(), langCode)
                 }
-                learning.markFavoriteActivated(now, favorite.sense_id, favorite.lang_code)
             }
-            invalidatedSenses += senseId.toString()
-            activated += senseId
-            cardsCreated += tasksToCreate.size
-            remaining -= tasksToCreate.size
+            groupPlan.forEach { item ->
+                invalidatedSenses += item.senseId.toString()
+                activated += item.senseId
+            }
+            cardsCreated += groupTotal
+            remaining -= groupTotal
         }
 
         if (invalidatedSenses.isNotEmpty()) {
             dictionary.invalidateSenses(invalidatedSenses)
-        }
-        if (cardsCreated == 0 && skipped.isEmpty() && candidates.isNotEmpty() && remaining <= 0) {
-            skipped += SkipReason.BUDGET_EXHAUSTED
         }
         IntakeResult(activated, skipped, cardsCreated)
     }
@@ -154,6 +171,11 @@ enum class SkipReason {
     QUEUE_TOO_FULL,
     RETENTION_TOO_LOW,
     BUDGET_EXHAUSTED,
-    NO_EXAMPLES,
+    NO_TASKS_VARIANT_AVAILABLE,
     CARD_DATA_UNAVAILABLE,
 }
+
+private data class IntakePlanItem(
+    val senseId: Uuid,
+    val families: List<CardFamily>,
+)
