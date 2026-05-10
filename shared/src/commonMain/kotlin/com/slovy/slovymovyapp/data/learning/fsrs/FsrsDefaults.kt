@@ -17,6 +17,7 @@ object FsrsDefaults {
     const val ENABLE_FUZZ: Boolean = false
     const val DAILY_NEW_TASK_FAMILY_BUDGET: Int = 20
     const val PAUSE_INTAKE_IF_QUEUE_ABOVE: Int = 100
+    const val PAUSE_INTAKE_RETENTION_MIN_REVIEWS: Long = 50L
     const val PAUSE_INTAKE_IF_RETENTION_BELOW: Double = 0.75
     val MATURE_STABILITY: Duration = 21.days
     val PRODUCTION_UNLOCK_STABILITY: Duration = 48.hours
@@ -42,6 +43,7 @@ object FsrsDefaults {
         enableFuzz = ENABLE_FUZZ,
         dailyNewTaskFamilyBudget = DAILY_NEW_TASK_FAMILY_BUDGET,
         pauseIntakeIfQueueAbove = PAUSE_INTAKE_IF_QUEUE_ABOVE,
+        pauseIntakeRetentionMinReviews = PAUSE_INTAKE_RETENTION_MIN_REVIEWS,
         pauseIntakeIfRetentionBelow = PAUSE_INTAKE_IF_RETENTION_BELOW,
         matureStability = MATURE_STABILITY,
         defaultIntakeFamilies = DEFAULT_INTAKE_FAMILIES,

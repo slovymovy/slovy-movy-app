@@ -10,6 +10,7 @@ data class FsrsConfig(
     val enableFuzz: Boolean,
     val dailyNewTaskFamilyBudget: Int,
     val pauseIntakeIfQueueAbove: Int,
+    val pauseIntakeRetentionMinReviews: Long,
     val pauseIntakeIfRetentionBelow: Double,
     val matureStability: Duration,
     val defaultIntakeFamilies: List<CardFamily>,

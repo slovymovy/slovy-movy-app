@@ -46,7 +46,7 @@ class IntakeService(
 
         val weekAgo = (nowInstant - 7.days).toEpochMilliseconds()
         val reviewCount = learning.countReviewsSince(langCode, weekAgo).executeAsOne()
-        if (reviewCount >= 50L) {
+        if (reviewCount >= config.pauseIntakeRetentionMinReviews) {
             val successful = learning.countSuccessfulReviewsSince(langCode, weekAgo).executeAsOne()
             val retention = successful.toDouble() / reviewCount
             if (retention < config.pauseIntakeIfRetentionBelow) {

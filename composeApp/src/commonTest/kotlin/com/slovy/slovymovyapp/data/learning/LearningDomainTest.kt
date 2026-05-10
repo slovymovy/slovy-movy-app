@@ -164,6 +164,7 @@ class LearningDomainTest {
         assertEquals(FsrsDefaults.DEFAULT_INTAKE_FAMILIES, config.defaultIntakeFamilies)
         assertEquals(FsrsDefaults.PRODUCTION_UNLOCK_STABILITY, config.productionUnlockStability)
         assertEquals(FsrsDefaults.CONTEXT_UNLOCK_STABILITY, config.contextUnlockStability)
+        assertEquals(FsrsDefaults.PAUSE_INTAKE_RETENTION_MIN_REVIEWS, config.pauseIntakeRetentionMinReviews)
         assertEquals(
             FsrsDefaults.RECOGNITION_TO_PRODUCTION_STABILITY_FACTOR,
             config.recognitionToProductionStabilityFactor,
