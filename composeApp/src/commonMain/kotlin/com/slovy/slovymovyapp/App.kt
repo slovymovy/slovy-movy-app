@@ -718,6 +718,13 @@ fun App(
                             if (added) {
                                 favoritesViewModel.requestScrollToTop()
                             }
+                            coroutineScope.launch {
+                                hasFavoritesToReview = computeHasFavoritesToReview(
+                                    favoritesRepository,
+                                    intakeService,
+                                    statsService,
+                                )
+                            }
                         },
                     ).also { created ->
                         wordDetailViewModels[args] = created
