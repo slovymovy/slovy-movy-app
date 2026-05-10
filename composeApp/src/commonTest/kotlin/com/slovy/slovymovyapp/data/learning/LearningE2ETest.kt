@@ -4,6 +4,9 @@ import app.cash.sqldelight.db.SqlDriver
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.dictionary.*
+import com.slovy.slovymovyapp.data.dictionary.LearnerLevel
+import com.slovy.slovymovyapp.data.dictionary.NameType
+import com.slovy.slovymovyapp.data.dictionary.SenseFrequency
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
@@ -16,11 +19,7 @@ import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.learning.session.SessionService
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.local.LocalDbManager
-import com.slovy.slovymovyapp.data.remote.DataDbManager
-import com.slovy.slovymovyapp.data.remote.DictionaryClient
-import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
-import com.slovy.slovymovyapp.data.remote.WordFetchManager
+import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
@@ -36,12 +35,11 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.math.abs
 import kotlin.test.*
-import kotlin.time.Clock
+import kotlin.time.*
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-import kotlin.time.toDuration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalTime::class)
@@ -120,7 +118,7 @@ class LearningE2ETest : BaseTest() {
             env.addFavorite(fixture)
             env.intake.runIntake("en")
             val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
-            val availableAfter = start.toEpochMilliseconds() + 10.minutes.inWholeMilliseconds
+            val availableAfter = (start + 10.minutes).toEpochMilliseconds()
             env.app.favoritesQueries.setCardAvailableAfter(
                 availableAfter = availableAfter,
                 id = cards.first().id,
@@ -155,7 +153,7 @@ class LearningE2ETest : BaseTest() {
             val first = env.seedSense(lemma = "firstbudget")
             val second = env.seedSense(lemma = "secondbudget")
             env.addFavorite(first, createdAt = start.toEpochMilliseconds())
-            env.addFavorite(second, createdAt = start.toEpochMilliseconds() + 1)
+            env.addFavorite(second, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
 
             val result = env.intake.runIntake("en")
 
@@ -216,7 +214,11 @@ class LearningE2ETest : BaseTest() {
             assertEquals(Rating.entries.toList(), preview.map { it.rating })
             env.clock.advance(2.minutes)
 
-            env.session.submitReview(card, preview.first { it.rating == Rating.GOOD }, durationMs = 2_000)
+            env.session.submitReview(
+                card,
+                preview.first { it.rating == Rating.GOOD },
+                durationMs = 2.seconds.inWholeMilliseconds
+            )
 
             val reviewed = env.app.favoritesQueries.selectCardById(card.card.id).executeAsOne()
             assertEquals(1, reviewed.reps)
@@ -226,7 +228,7 @@ class LearningE2ETest : BaseTest() {
             val siblings = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
                 .filter { it.id != card.card.id }
             assertTrue(siblings.isNotEmpty())
-            assertTrue(siblings.all { assertNotNull(it.available_after) > start.toEpochMilliseconds() + 2.minutes.inWholeMilliseconds })
+            assertTrue(siblings.all { assertNotNull(it.available_after) > (start + 2.minutes).toEpochMilliseconds() })
 
             val progress = env.stats.progressForSense(fixture.senseId, "en")
             assertEquals(2, progress.totalCards)
@@ -249,13 +251,13 @@ class LearningE2ETest : BaseTest() {
             val reviewed = env.session.submitReview(
                 card,
                 env.session.previewRatings(card).first { it.rating == Rating.GOOD },
-                durationMs = 2_000,
+                durationMs = 2.seconds.inWholeMilliseconds,
             )
 
             val progress = env.stats.progressForSense(fixture.senseId, "en")
             assertEquals(2, progress.totalCards)
-            assertEquals(1, progress.newCards)
-            assertEquals(1, progress.learningCards)
+            assertEquals(0, progress.newCards)
+            assertEquals(2, progress.learningCards)
             assertEquals(0, progress.reviewCards)
             assertEquals(0, progress.matureCards)
             assertTrue(assertNotNull(progress.avgStability) > 0.0)
@@ -273,7 +275,10 @@ class LearningE2ETest : BaseTest() {
             assertEquals(1, productionProgress.totalCards)
             assertEquals(0, productionProgress.reviews)
             val definitionVariantProgress = progress.variantProgress.single()
-            assertEquals(CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null), definitionVariantProgress.variant)
+            assertEquals(
+                CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null),
+                definitionVariantProgress.variant
+            )
             assertEquals(1, definitionVariantProgress.reviews)
             assertEquals(1.0, definitionVariantProgress.retention)
 
@@ -296,7 +301,7 @@ class LearningE2ETest : BaseTest() {
             assertEquals(CardState.NEW, entry.stateBefore)
             assertEquals(0.0, entry.stabilityBefore)
             assertEquals(reviewed.card.scheduling.stability, entry.stabilityAfter)
-            assertEquals(2_000, entry.durationMs)
+            assertEquals(2.seconds.inWholeMilliseconds, entry.durationMs)
 
             val global = env.stats.globalStats("en")
             assertEquals(2, global.totalCards)
@@ -304,6 +309,103 @@ class LearningE2ETest : BaseTest() {
             assertEquals(1, global.reviewedLast7d)
             assertClose(1.0, assertNotNull(global.rollingRetention7d))
             assertEquals(0, global.matureCount)
+        }
+    }
+
+    @Test
+    fun unlocked_production_card_inherits_discounted_recognition_fsrs_state() = runBlocking {
+        val config = FsrsDefaults.config().copy(
+            sameSenseCooldown = 0.minutes,
+        )
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "inheritproduction")
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+            )
+
+            val card = env.nextLoadedCard("en")
+            val outcome = env.session.previewRatings(card).first { it.rating == Rating.GOOD }
+            env.session.submitReview(card, outcome, durationMs = 1.seconds.inWholeMilliseconds)
+
+            val unlocked = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
+                .executeAsList()
+                .single { it.family == CardFamily.PRODUCE_WORD }
+            assertEquals(CardState.LEARNING, unlocked.state)
+            assertClose(outcome.stability * config.recognitionToProductionStabilityFactor, unlocked.stability)
+            assertEquals(outcome.difficulty, unlocked.difficulty)
+            assertEquals(0L, unlocked.reps)
+            assertNull(unlocked.last_review)
+        }
+    }
+
+    @Test
+    fun unlocked_context_card_inherits_discounted_production_fsrs_state() = runBlocking {
+        val config = FsrsDefaults.config().copy(
+            contextUnlockStability = 0.minutes,
+            sameSenseCooldown = 0.minutes,
+        )
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixture = env.seedSense(lemma = "inheritcontext")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.REVIEW,
+                stability = 4.0,
+                difficulty = 5.0,
+                lastReview = (start - 3.minutes).toEpochMilliseconds(),
+                reps = 3,
+            )
+
+            val card = env.nextLoadedCard("en")
+            val outcome = env.session.previewRatings(card).first { it.rating == Rating.GOOD }
+            env.session.submitReview(card, outcome, durationMs = 1.seconds.inWholeMilliseconds)
+
+            val unlocked = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
+                .executeAsList()
+                .single { it.family == CardFamily.PRODUCE_WORD_IN_CONTEXT }
+            assertEquals(CardState.LEARNING, unlocked.state)
+            assertClose(outcome.stability * config.productionToContextStabilityFactor, unlocked.stability)
+            assertEquals(outcome.difficulty, unlocked.difficulty)
+        }
+    }
+
+    @Test
+    fun unlocked_voice_card_inherits_discounted_context_fsrs_state() = runBlocking {
+        val config = FsrsDefaults.config().copy(
+            contextUnlockStability = 0.minutes,
+            sameSenseCooldown = 0.minutes,
+        )
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixture = env.seedSense(lemma = "inheritvoice")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                state = CardState.REVIEW,
+                stability = 4.0,
+                difficulty = 5.0,
+                lastReview = (start - 3.minutes).toEpochMilliseconds(),
+                reps = 3,
+            )
+
+            val card = env.nextLoadedCard("en")
+            val outcome = env.session.previewRatings(card).first { it.rating == Rating.GOOD }
+            env.session.submitReview(card, outcome, durationMs = 1.seconds.inWholeMilliseconds)
+
+            val unlocked = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
+                .executeAsList()
+                .single { it.family == CardFamily.RECOGNIZE_VOICE }
+            assertEquals(CardState.LEARNING, unlocked.state)
+            assertClose(outcome.stability * config.contextToVoiceStabilityFactor, unlocked.stability)
+            assertEquals(outcome.difficulty, unlocked.difficulty)
         }
     }
 
@@ -319,7 +421,7 @@ class LearningE2ETest : BaseTest() {
                 stability = 4.0,
                 difficulty = 5.0,
                 due = start.toEpochMilliseconds(),
-                lastReview = start.toEpochMilliseconds() - 3 * 86_400_000L,
+                lastReview = (start - 3.days).toEpochMilliseconds(),
                 reps = 3,
             )
 
@@ -327,7 +429,7 @@ class LearningE2ETest : BaseTest() {
             env.session.submitReview(
                 card,
                 env.session.previewRatings(card).first { it.rating == Rating.GOOD },
-                durationMs = 1_000,
+                durationMs = 1.seconds.inWholeMilliseconds,
             )
 
             val log = env.app.favoritesQueries.selectReviewLogsByCard(card.card.id, 10).executeAsList().single()
@@ -361,7 +463,7 @@ class LearningE2ETest : BaseTest() {
             env.session.submitReview(
                 card,
                 env.session.previewRatings(card).first { it.rating == Rating.AGAIN },
-                durationMs = 1_000,
+                durationMs = 1.seconds.inWholeMilliseconds,
             )
 
             val siblings = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
@@ -383,7 +485,7 @@ class LearningE2ETest : BaseTest() {
 
             val card = env.nextLoadedCard("en")
             val again = env.session.previewRatings(card).first { it.rating == Rating.AGAIN }
-            env.session.submitReview(card, again, durationMs = 1_000)
+            env.session.submitReview(card, again, durationMs = 1.seconds.inWholeMilliseconds)
 
             val reviewed = env.app.favoritesQueries.selectCardById(card.card.id).executeAsOne()
             assertEquals(reviewed.due, reviewed.available_after)
@@ -412,8 +514,8 @@ class LearningE2ETest : BaseTest() {
                 family = CardFamily.RECOGNIZE_SENSE,
                 state = CardState.REVIEW,
                 stability = 30.0,
-                due = start.toEpochMilliseconds() - 1,
-                lastReview = start.toEpochMilliseconds() - 30.minutes.inWholeMilliseconds,
+                due = (start - 1.milliseconds).toEpochMilliseconds(),
+                lastReview = (start - 30.minutes).toEpochMilliseconds(),
                 reps = 5,
             )
 
@@ -421,7 +523,7 @@ class LearningE2ETest : BaseTest() {
             env.session.submitReview(
                 card,
                 env.session.previewRatings(card).first { it.rating == Rating.AGAIN },
-                durationMs = 1_000,
+                durationMs = 1.seconds.inWholeMilliseconds,
             )
 
             val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
@@ -440,7 +542,7 @@ class LearningE2ETest : BaseTest() {
             val firstSense = env.seedSense(lemma = "polyseme")
             val secondSense = env.seedAdditionalSense(firstSense)
             env.addFavorite(firstSense, createdAt = start.toEpochMilliseconds())
-            env.addFavorite(secondSense, createdAt = start.toEpochMilliseconds() + 1)
+            env.addFavorite(secondSense, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
             env.insertTask(
                 fixture = firstSense,
                 family = CardFamily.RECOGNIZE_SENSE,
@@ -460,7 +562,7 @@ class LearningE2ETest : BaseTest() {
             env.session.submitReview(
                 firstCard,
                 env.session.previewRatings(firstCard).first { it.rating == Rating.GOOD },
-                durationMs = 1_000,
+                durationMs = 1.seconds.inWholeMilliseconds,
             )
 
             assertNull(env.session.nextCard("en", start).first())
@@ -505,7 +607,7 @@ class LearningE2ETest : BaseTest() {
             env.session.submitReview(
                 reviewed,
                 env.session.previewRatings(reviewed).first { it.rating == Rating.GOOD },
-                durationMs = 1_000,
+                durationMs = 1.seconds.inWholeMilliseconds,
             )
 
             val siblingAvailableAfter = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
@@ -516,8 +618,8 @@ class LearningE2ETest : BaseTest() {
             assertEquals(2, siblingAvailableAfter.toSet().size)
             assertTrue(
                 siblingAvailableAfter.all {
-                    it in start.toEpochMilliseconds() + 5.minutes.inWholeMilliseconds..
-                            start.toEpochMilliseconds() + 15.minutes.inWholeMilliseconds
+                    it in (start + 5.minutes).toEpochMilliseconds()..
+                            (start + 15.minutes).toEpochMilliseconds()
                 }
             )
         }
@@ -537,7 +639,7 @@ class LearningE2ETest : BaseTest() {
                 state = CardState.REVIEW,
                 stability = translationCard.stability,
                 difficulty = translationCard.difficulty,
-                due = start.toEpochMilliseconds() - 1,
+                due = (start - 1.milliseconds).toEpochMilliseconds(),
                 last_review = null,
                 reps = 0,
                 lapses = 0,
@@ -753,7 +855,7 @@ class LearningE2ETest : BaseTest() {
         state: CardState = CardState.LEARNING,
         stability: Double = 1.0,
         difficulty: Double = 1.0,
-        due: Long = start.toEpochMilliseconds() - 1,
+        due: Long = (start - 1.milliseconds).toEpochMilliseconds(),
         lastReview: Long? = null,
         reps: Long = 0,
     ): com.slovy.slovymovyapp.db.Card {
@@ -786,7 +888,7 @@ class LearningE2ETest : BaseTest() {
         app.favoritesQueries.insertReviewLog(
             id = Uuid.random(),
             card_id = cardId,
-            reviewed_at = start.toEpochMilliseconds() - 1,
+            reviewed_at = (start - 1.milliseconds).toEpochMilliseconds(),
             rating = Rating.GOOD,
             variant_kind = variantKind,
             variant_target_lang = variantTargetLang,
@@ -798,7 +900,7 @@ class LearningE2ETest : BaseTest() {
             scheduled_days = 0,
             stability_after = 1.0,
             difficulty_after = 1.0,
-            duration_ms = 1_000,
+            duration_ms = 1.seconds.inWholeMilliseconds,
         )
     }
 
@@ -821,9 +923,17 @@ class LearningE2ETest : BaseTest() {
             .let { card ->
                 assertNotNull(
                     card,
-                    "Expected a session card; cards=${app.favoritesQueries.countCardsByLang(langCode).executeAsOne()} " +
-                            "new=${app.favoritesQueries.selectNewCards(langCode, clock.now().toEpochMilliseconds(), 10).executeAsList().size} " +
-                            "due=${app.favoritesQueries.selectDueCards(langCode, clock.now().toEpochMilliseconds(), 10).executeAsList().size}",
+                    "Expected a session card; cards=${
+                        app.favoritesQueries.countCardsByLang(langCode).executeAsOne()
+                    } " +
+                            "new=${
+                                app.favoritesQueries.selectNewCards(langCode, clock.now().toEpochMilliseconds(), 10)
+                                    .executeAsList().size
+                            } " +
+                            "due=${
+                                app.favoritesQueries.selectDueCards(langCode, clock.now().toEpochMilliseconds(), 10)
+                                    .executeAsList().size
+                            }",
                 )
             }
             .also {
@@ -876,7 +986,7 @@ private class DbHandle<T>(
 private class MutableClock(private var current: Instant) : Clock {
     override fun now(): Instant = current
 
-    fun advance(duration: kotlin.time.Duration) {
+    fun advance(duration: Duration) {
         current += duration
     }
 }

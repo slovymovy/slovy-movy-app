@@ -6,8 +6,8 @@ import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.session.buildTaskVariants
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import com.slovy.slovymovyapp.db.FavoritesQueries
+import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -15,6 +15,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.Uuid
 
@@ -43,9 +44,9 @@ class IntakeService(
             return@withContext IntakeResult(emptyList(), listOf(SkipReason.QUEUE_TOO_FULL), 0)
         }
 
-        val weekAgo = now - 7 * 86_400_000L
+        val weekAgo = (nowInstant - 7.days).toEpochMilliseconds()
         val reviewCount = learning.countReviewsSince(langCode, weekAgo).executeAsOne()
-        if (reviewCount >= 50L) {
+        if (reviewCount >= config.pauseIntakeRetentionMinReviews) {
             val successful = learning.countSuccessfulReviewsSince(langCode, weekAgo).executeAsOne()
             val retention = successful.toDouble() / reviewCount
             if (retention < config.pauseIntakeIfRetentionBelow) {

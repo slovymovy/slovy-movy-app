@@ -11,6 +11,8 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URI
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 private val logger = Logging.getLogger(TestServerService::class.java)
 
@@ -57,7 +59,7 @@ abstract class TestServerService : BuildService<TestServerService.Parameters>, A
 
     private fun waitForServer(port: Int) {
         val start = System.currentTimeMillis()
-        val timeoutMs = 60_000L
+        val timeoutMs = 1.minutes.inWholeMilliseconds
         val healthUrl = URI.create("http://127.0.0.1:$port/health").toURL()
         var lastLogTime = 0L
 
@@ -91,7 +93,7 @@ abstract class TestServerService : BuildService<TestServerService.Parameters>, A
             } catch (_: Exception) {
                 // retry
             }
-            Thread.sleep(200)
+            Thread.sleep(200.milliseconds.inWholeMilliseconds)
         }
         throw RuntimeException(
             "Test server did not become ready within ${timeoutMs}ms. " +
@@ -136,7 +138,8 @@ abstract class TestServerService : BuildService<TestServerService.Parameters>, A
             }
 
             // Fall back to finding java on PATH
-            val whichCommand = if (OperatingSystem.current().isWindows) listOf("where", "java") else listOf("which", "java")
+            val whichCommand =
+                if (OperatingSystem.current().isWindows) listOf("where", "java") else listOf("which", "java")
             try {
                 val process = ProcessBuilder(whichCommand)
                     .redirectErrorStream(true)
@@ -195,7 +198,7 @@ abstract class TestServerService : BuildService<TestServerService.Parameters>, A
                     }
                 }
                 // Give the OS a moment to release the port
-                Thread.sleep(500)
+                Thread.sleep(500.milliseconds.inWholeMilliseconds)
             } catch (e: Exception) {
                 logger.lifecycle("Could not check/kill process on port $port: ${e.message}")
             }

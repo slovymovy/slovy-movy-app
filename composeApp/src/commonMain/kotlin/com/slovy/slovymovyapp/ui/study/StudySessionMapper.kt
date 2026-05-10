@@ -10,14 +10,12 @@ import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.i18n.UiText
+import slovymovyapp.composeapp.generated.resources.*
 import kotlin.math.roundToLong
-import slovymovyapp.composeapp.generated.resources.Res
-import slovymovyapp.composeapp.generated.resources.study_chip_fill_in
-import slovymovyapp.composeapp.generated.resources.study_chip_listen
-import slovymovyapp.composeapp.generated.resources.study_chip_recall
-import slovymovyapp.composeapp.generated.resources.study_chip_source_only
-import slovymovyapp.composeapp.generated.resources.study_prompt_recall_word
-import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
     if (loadState() != SessionCardLoadState.READY) return null
@@ -228,6 +226,7 @@ private fun sourceClozeBack(
 
 private fun LanguageCardResponseSense.translationCue(language: Language): String? =
     translationWords(language)
+
 private fun LanguageCardResponseSense.translationDef(language: Language): String? =
     targetLangDefinitions[language]
 
@@ -270,14 +269,16 @@ internal fun String.firstLetterHint(): FirstLetterHint? {
 private fun Language.studyCode(): String = code.uppercase()
 
 private fun GradeOutcome.intervalLabel(): String {
-    val minutes = intervalMillis / 60_000
-    val hours = intervalMillis / 3_600_000
+    val interval = intervalMillis.milliseconds
+    val minutes = interval.inWholeMinutes
+    val hours = interval.inWholeHours
+    val days = interval.inWholeDays
     return when {
-        intervalMillis < 60_000 -> "< 1m"
-        minutes < 60 -> "${minutes.coerceAtLeast(1)}m"
-        hours < 24 -> "${hours.coerceAtLeast(1)}h"
-        intervalDays < 30 -> "${intervalDays.coerceAtLeast(1)}d"
-        intervalDays < 365 -> "${(intervalDays / 30.0).roundToLong().coerceAtLeast(1)}mo"
-        else -> "${(intervalDays / 365.0).roundToLong().coerceAtLeast(1)}y"
+        interval < 1.minutes -> "< 1m"
+        interval < 1.hours -> "${minutes.coerceAtLeast(1)}m"
+        interval < 1.days -> "${hours.coerceAtLeast(1)}h"
+        days < 30 -> "${days.coerceAtLeast(1)}d"
+        days < 365 -> "${(days / 30.0).roundToLong().coerceAtLeast(1)}mo"
+        else -> "${(days / 365.0).roundToLong().coerceAtLeast(1)}y"
     }
 }

@@ -17,6 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -126,7 +127,7 @@ class LearningDomainTest {
             state = CardState.REVIEW,
             stability = 4.0,
             difficulty = 5.0,
-            lastReviewEpochMs = now.toEpochMilliseconds() - 3 * 86_400_000L,
+            lastReviewEpochMs = (now - 3.days).toEpochMilliseconds(),
             reps = 3,
         )
 
@@ -163,6 +164,19 @@ class LearningDomainTest {
         assertEquals(FsrsDefaults.DEFAULT_INTAKE_FAMILIES, config.defaultIntakeFamilies)
         assertEquals(FsrsDefaults.PRODUCTION_UNLOCK_STABILITY, config.productionUnlockStability)
         assertEquals(FsrsDefaults.CONTEXT_UNLOCK_STABILITY, config.contextUnlockStability)
+        assertEquals(FsrsDefaults.PAUSE_INTAKE_RETENTION_MIN_REVIEWS, config.pauseIntakeRetentionMinReviews)
+        assertEquals(
+            FsrsDefaults.RECOGNITION_TO_PRODUCTION_STABILITY_FACTOR,
+            config.recognitionToProductionStabilityFactor,
+        )
+        assertEquals(
+            FsrsDefaults.PRODUCTION_TO_CONTEXT_STABILITY_FACTOR,
+            config.productionToContextStabilityFactor,
+        )
+        assertEquals(
+            FsrsDefaults.CONTEXT_TO_VOICE_STABILITY_FACTOR,
+            config.contextToVoiceStabilityFactor,
+        )
         assertEquals(FsrsDefaults.BURY_FAILED_SESSION_CARDS_FOR, config.buryFailedSessionCardsFor)
         assertEquals(FsrsDefaults.SAME_SENSE_COOLDOWN, config.sameSenseCooldown)
         assertEquals(FsrsDefaults.SAME_LEMMA_COOLDOWN, config.sameLemmaCooldown)

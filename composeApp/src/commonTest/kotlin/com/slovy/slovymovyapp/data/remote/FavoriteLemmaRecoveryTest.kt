@@ -9,6 +9,7 @@ import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 class FavoriteLemmaRecoveryTest : BaseTest() {
     private val sense1 = "00000000-0000-0000-0000-000000000001"
@@ -239,7 +240,7 @@ class FavoriteLemmaRecoveryTest : BaseTest() {
                 if (activeFetches.size == 2) {
                     startedTogether.complete(Unit)
                 }
-                withTimeout(1_000) {
+                withTimeout(1.seconds.inWholeMilliseconds) {
                     startedTogether.await()
                 }
                 activeFetches -= lemma

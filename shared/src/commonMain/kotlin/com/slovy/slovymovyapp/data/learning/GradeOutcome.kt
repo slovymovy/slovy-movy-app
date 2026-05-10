@@ -5,7 +5,6 @@ data class GradeOutcome(
     val newState: CardState,
     val stability: Double,
     val difficulty: Double,
-    val intervalDays: Long,
     val intervalMillis: Long,
 )
 
