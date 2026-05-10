@@ -834,7 +834,7 @@ class SettingsViewModel(
             return
         }
 
-        downloadJobs[downloadKey] = viewModelScope.launch {
+        val job = viewModelScope.launch {
             try {
                 downloadFlow.collect { entry ->
                     when (entry?.status) {
@@ -845,14 +845,20 @@ class SettingsViewModel(
                             } finally {
                                 onTerminal()
                             }
-                            showSnackbar(successMessage)
+                            // Snackbar runs in a sibling coroutine so this observer can exit
+                            // immediately. Otherwise its suspend would keep [downloadJobs]
+                            // marked active, and a quick retry for the same key would skip
+                            // its own callback wiring.
+                            viewModelScope.launch { showSnackbar(successMessage) }
                             cancel()
                         }
 
                         DownloadStatus.Cancelled -> {
                             downloadCoordinator.clear(downloadKey)
                             onTerminal()
-                            showSnackbar(UiText.Resource(Res.string.settings_download_cancelled))
+                            viewModelScope.launch {
+                                showSnackbar(UiText.Resource(Res.string.settings_download_cancelled))
+                            }
                             cancel()
                         }
 
@@ -870,9 +876,14 @@ class SettingsViewModel(
                     }
                 }
             } finally {
-                downloadJobs.remove(downloadKey)
+                // Identity check guards against a fresh attach for the same key replacing
+                // [downloadJobs] before this finally runs.
+                if (downloadJobs[downloadKey] === coroutineContext[Job]) {
+                    downloadJobs.remove(downloadKey)
+                }
             }
         }
+        downloadJobs[downloadKey] = job
     }
 }
 
