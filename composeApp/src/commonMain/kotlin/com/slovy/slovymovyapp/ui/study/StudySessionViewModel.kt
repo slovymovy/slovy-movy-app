@@ -36,6 +36,7 @@ class StudySessionViewModel(
     private val clock: Clock,
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
+    private val onReviewSubmitted: () -> Unit,
 ) : ViewModel() {
 
     var state by mutableStateOf<StudySessionUiState>(StudySessionUiState.Loading())
@@ -156,6 +157,7 @@ class StudySessionViewModel(
                     durationMs = (clock.now() - cardShownAt).inWholeMilliseconds,
                 )
             }.onSuccess {
+                onReviewSubmitted()
                 reviewedCount += 1
                 currentCard = null
                 currentOutcomes = emptyList()

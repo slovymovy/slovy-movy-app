@@ -277,6 +277,7 @@ fun App(
                 platform,
                 buildConfig,
                 onDictionaryDataChanged = { recoverFavorites ->
+                    favoritesReviewCoordinator.invalidateIntakeCache()
                     dictionaryRepository.clearSenseCache()
                     if (recoverFavorites) {
                         platform.runWithProcessKeepAlive {
@@ -491,6 +492,7 @@ fun App(
                                 }
                             },
                             finalize = {
+                                favoritesReviewCoordinator.invalidateIntakeCache()
                                 dictionaryRepository.clearSenseCache()
                                 platform.runWithProcessKeepAlive {
                                     withContext(Dispatchers.Default) {
@@ -697,6 +699,7 @@ fun App(
                         if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
                             navController.navigate(AppDestination.Settings)
                     },
+                    hasFavoritesToReview = hasFavoritesToReview,
                 )
             }
             composable<AppDestination.StudySession> { backStackEntry ->
@@ -712,6 +715,9 @@ fun App(
                         clock = Clock.System,
                         ttsManager = ttsManager,
                         voiceFilterHelper = voiceFilterHelper,
+                        onReviewSubmitted = {
+                            favoritesReviewCoordinator.invalidateIntakeCache()
+                        },
                     )
                 }
                 StudySessionScreen(
@@ -843,6 +849,7 @@ fun App(
                             dataManager.deleteAllDownloadedData()
                             localDbManager.deleteAll()
                             dictionaryRepository.clearSenseCache()
+                            favoritesReviewCoordinator.invalidateIntakeCache()
                             favoritesViewModel.dropCachedFavoriteDetails()
                             val target = selectInitialDestination()
                             navController.navigate(target) {
