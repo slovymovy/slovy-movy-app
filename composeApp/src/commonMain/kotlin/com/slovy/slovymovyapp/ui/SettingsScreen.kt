@@ -450,6 +450,10 @@ class SettingsViewModel(
         val downloadKey = "dict_${language.code}"
         if (downloadCoordinator.isRunning(downloadKey)) return
 
+        Analytics.logEvent(
+            AnalyticsEvent.SETTINGS_DOWNLOAD_DICTIONARY_CLICK,
+            mapOf("lang" to language.code),
+        )
         val keepAlive = platform.acquireProcessKeepAlive()
         val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
             dataDbManager.ensureDictionary(
@@ -476,6 +480,10 @@ class SettingsViewModel(
         val downloadKey = "trans_${sourceLanguage.code}_${targetLanguage.code}"
         if (downloadCoordinator.isRunning(downloadKey)) return
 
+        Analytics.logEvent(
+            AnalyticsEvent.SETTINGS_DOWNLOAD_TRANSLATION_CLICK,
+            mapOf("src" to sourceLanguage.code, "tgt" to targetLanguage.code),
+        )
         val keepAlive = platform.acquireProcessKeepAlive()
         val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
             dataDbManager.ensureTranslation(
@@ -685,6 +693,10 @@ class SettingsViewModel(
     }
 
     fun cancelDownload(downloadKey: String) {
+        Analytics.logEvent(
+            AnalyticsEvent.SETTINGS_DOWNLOAD_CANCEL_CLICK,
+            mapOf("key" to downloadKey),
+        )
         downloadCoordinator.cancel(downloadKey)
     }
 

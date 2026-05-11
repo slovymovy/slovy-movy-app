@@ -569,15 +569,49 @@ class DataDbManagerTest : BaseTest() {
         if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)
 
         try {
-            val validSize = (DataDbManager.MIN_VALID_DOWNLOADED_DB_BYTES + 1L).toInt()
-            writeBytes(platform, dictPath, ByteArray(validSize))
-            assertTrue(platform.fileExists(dictPath), "Valid-sized dictionary fixture should exist before cleanup")
+            // Create a real dictionary DB on disk so it carries the `lemma` table and passes the
+            // schema probe used by cleanup.
+            val driver = platform.createDictionaryDataDriver(dictPath, readOnly = false)
+            driver.close()
+            assertTrue(platform.fileExists(dictPath), "Valid dictionary fixture should exist before cleanup")
+            val size = platform.getFileSize(dictPath) ?: 0L
+            assertTrue(
+                size >= DataDbManager.MIN_VALID_DOWNLOADED_DB_BYTES,
+                "Real dictionary fixture should be >= ${DataDbManager.MIN_VALID_DOWNLOADED_DB_BYTES} bytes; was $size"
+            )
 
             runBlocking { mgr.cleanupCorruptDownloadedDbs() }
 
             assertTrue(
                 platform.fileExists(dictPath),
-                "Valid-sized dictionary should be retained by cleanup"
+                "Real dictionary with schema should be retained by cleanup"
+            )
+        } finally {
+            if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)
+        }
+    }
+
+    @Test
+    fun cleanupCorruptDownloadedDbs_deletes_large_but_schemaless_dictionary_files() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+
+        platform.ensureDatabasesDir()
+        val dictPath = platform.getDatabasePath(DataDbManager.dictionaryFileName(Language.POLISH))
+        if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)
+
+        try {
+            // Simulate a truncated download: file is well above 16 KB but contains junk bytes
+            // and therefore does NOT have a `lemma` table. The size check alone would let this
+            // through; the schema probe must catch it.
+            writeBytes(platform, dictPath, ByteArray(64 * 1024) { 0xFF.toByte() })
+            assertTrue(platform.fileExists(dictPath))
+
+            runBlocking { mgr.cleanupCorruptDownloadedDbs() }
+
+            assertFalse(
+                platform.fileExists(dictPath),
+                "Schema-less dictionary above the size threshold should be deleted by cleanup"
             )
         } finally {
             if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)

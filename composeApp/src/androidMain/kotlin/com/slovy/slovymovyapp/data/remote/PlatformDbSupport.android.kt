@@ -271,10 +271,10 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
                     }
                 }
                 val out = openOutput(tempPath)
+                var downloaded = 0L
                 try {
                     val channel = response.bodyAsChannel()
                     val buffer = ByteArray(1024 * 1024)
-                    var downloaded = 0L
 
                     while (!channel.isClosedForRead) {
                         if (cancelToken.isCancelled) {
@@ -294,6 +294,11 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
                     }
                 } finally {
                     out.close()
+                }
+                if (total != null && downloaded != total) {
+                    throw IllegalStateException(
+                        "Truncated download from $url: expected $total bytes, got $downloaded"
+                    )
                 }
             }
             if (!moveFile(tempPath, destPath)) {
