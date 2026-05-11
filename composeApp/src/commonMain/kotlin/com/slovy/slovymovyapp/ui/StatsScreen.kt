@@ -27,10 +27,15 @@ import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStageId
 import com.slovy.slovymovyapp.data.learning.stats.StatsPracticeDay
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.learning.stats.StatsYearMonth
+import com.slovy.slovymovyapp.data.settings.Setting
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -61,6 +66,7 @@ data class StatsUiState(
 class StatsViewModel(
     initialLearningLanguages: List<Language>,
     private val statsService: StatsService,
+    private val settingsRepository: SettingsRepository,
     private val clock: Clock,
 ) : ViewModel() {
     val scrollState = ScrollState(0)
@@ -68,13 +74,29 @@ class StatsViewModel(
     var state by mutableStateOf(initialStatsState(initialLearningLanguages, clock))
         private set
 
+    private var savedStatsLanguage: Language? = null
+    private var savedStatsLanguageLoaded = false
+    private var languageSelectedDuringRestore = false
+
     init {
-        scheduleReload()
+        viewModelScope.launch {
+            val savedCode = settingsRepository.getById(Setting.Name.STATS_LANGUAGE)
+                ?.value?.jsonPrimitive?.contentOrNull
+            if (!languageSelectedDuringRestore) {
+                savedStatsLanguage = savedCode?.let { Language.fromCodeOrNull(it) }
+            }
+            savedStatsLanguageLoaded = true
+            val selected = selectedLanguageFor(state.learningLanguages)
+            if (selected != state.selectedLanguage) {
+                state = state.copy(selectedLanguage = selected)
+            }
+            scheduleReload()
+        }
     }
 
     fun updateLearningLanguages(languages: List<Language>) {
         val normalized = languages.ifEmpty { listOf(Language.ENGLISH) }.distinct().sortedBy { it.ordinal }
-        val selected = state.selectedLanguage.takeIf { it in normalized } ?: normalized.first()
+        val selected = selectedLanguageFor(normalized)
         if (normalized == state.learningLanguages && selected == state.selectedLanguage) return
         state = state.copy(learningLanguages = normalized, selectedLanguage = selected)
         scheduleReload()
@@ -83,6 +105,13 @@ class StatsViewModel(
     fun setSelectedLanguage(language: Language) {
         if (state.selectedLanguage == language) return
         state = state.copy(selectedLanguage = language, languageDropdownExpanded = false)
+        savedStatsLanguage = language
+        if (!savedStatsLanguageLoaded) {
+            languageSelectedDuringRestore = true
+        }
+        viewModelScope.launch {
+            settingsRepository.insert(Setting(Setting.Name.STATS_LANGUAGE, JsonPrimitive(language.code)))
+        }
         scheduleReload()
     }
 
@@ -108,6 +137,7 @@ class StatsViewModel(
     }
 
     private fun scheduleReload() {
+        if (!savedStatsLanguageLoaded) return
         val today = currentLocalDate(clock)
         val langCode = state.selectedLanguage.code
         val viewMonth = state.viewMonth
@@ -126,6 +156,15 @@ class StatsViewModel(
                 wordsTotal = data.wordsTotal,
                 pipeline = data.pipeline,
             )
+        }
+    }
+
+    private fun selectedLanguageFor(languages: List<Language>): Language {
+        val saved = savedStatsLanguage
+        return when {
+            saved != null && saved in languages -> saved
+            state.selectedLanguage in languages -> state.selectedLanguage
+            else -> languages.first()
         }
     }
 }
@@ -491,14 +530,17 @@ private fun CalendarGrid(state: StatsUiState) {
                 LegendDot(
                     color = MaterialTheme.colorScheme.primary,
                     label = stringResource(Res.string.stats_legend_today),
+                    borderStroke = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
                 )
                 LegendDot(
                     color = MaterialTheme.colorScheme.primaryContainer,
                     label = stringResource(Res.string.stats_legend_practiced),
+                    borderStroke = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
                 )
                 LegendDot(
                     color = MaterialTheme.colorScheme.surfaceContainerHighest,
                     label = stringResource(Res.string.stats_legend_missed),
+                    borderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 )
             }
         }
@@ -539,14 +581,14 @@ private fun CalendarCell(
 
         isFuture -> {
             background = Color.Transparent
-            content = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-            weight = FontWeight.Normal
+            content = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+            weight = FontWeight.Medium
         }
 
         else -> {
             background = MaterialTheme.colorScheme.surfaceContainerHighest
-            content = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-            weight = FontWeight.Normal
+            content = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            weight = FontWeight.Medium
         }
     }
 
@@ -572,8 +614,8 @@ private fun CalendarCell(
             text = day.toString(),
             style = MaterialTheme.typography.bodySmall.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
-                fontSize = 10.5.sp,
-                lineHeight = 11.sp,
+                fontSize = 12.sp,
+                lineHeight = 12.sp,
                 fontWeight = weight,
             ),
             color = content,
@@ -582,25 +624,29 @@ private fun CalendarCell(
 }
 
 @Composable
-private fun LegendDot(color: Color, label: String) {
+private fun LegendDot(color: Color, label: String, borderStroke: BorderStroke) {
+    val shape = RoundedCornerShape(3.dp)
     Row(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(9.dp)
-                .clip(RoundedCornerShape(3.dp))
+                .size(11.dp)
+                .clip(shape)
                 .background(color)
                 .border(
-                    BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
-                    RoundedCornerShape(3.dp),
+                    borderStroke,
+                    shape,
                 ),
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -790,9 +836,14 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>) {
 @Composable
 private fun PipelineCaption() {
     val learned = stringResource(Res.string.stats_stage_learned)
+    val captionText = stringResource(Res.string.stats_caption_learned, learned)
+    val learnedStart = captionText.indexOf(learned)
     val caption = buildAnnotatedString {
-        append(stringResource(Res.string.stats_caption_before_learned))
-        append(" ")
+        if (learnedStart == -1) {
+            append(captionText)
+            return@buildAnnotatedString
+        }
+        append(captionText.substring(0, learnedStart))
         withStyle(
             SpanStyle(
                 color = MaterialTheme.colorScheme.onSurface,
@@ -802,8 +853,7 @@ private fun PipelineCaption() {
         ) {
             append(learned)
         }
-        append(" ")
-        append(stringResource(Res.string.stats_caption_after_learned))
+        append(captionText.substring(learnedStart + learned.length))
     }
     Text(
         text = caption,
