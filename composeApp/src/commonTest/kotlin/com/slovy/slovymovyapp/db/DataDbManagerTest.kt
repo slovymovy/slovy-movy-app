@@ -570,9 +570,15 @@ class DataDbManagerTest : BaseTest() {
 
         try {
             // Create a real dictionary DB on disk so it carries the `lemma` table and passes the
-            // schema probe used by cleanup.
+            // schema probe used by cleanup. AndroidSqliteDriver opens lazily, so we must touch
+            // the database (insert one row) to actually materialize the file with the schema.
             val driver = platform.createDictionaryDataDriver(dictPath, readOnly = false)
-            driver.close()
+            try {
+                val db = DatabaseProvider.createDictionaryDatabase(driver)
+                db.dictionaryQueries.insertLemma(Uuid.random(), "pl", "test", "test", 0.0, false)
+            } finally {
+                driver.close()
+            }
             assertTrue(platform.fileExists(dictPath), "Valid dictionary fixture should exist before cleanup")
             val size = platform.getFileSize(dictPath) ?: 0L
             assertTrue(
