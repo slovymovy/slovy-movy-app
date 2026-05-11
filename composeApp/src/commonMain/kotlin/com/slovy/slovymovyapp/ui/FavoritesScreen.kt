@@ -490,10 +490,6 @@ class FavoritesViewModel(
         if (safeRange.isEmpty()) return
         prefetchSenses(senses.slice(safeRange).take(PREFETCH_LIMIT))
     }
-
-    internal suspend fun cancelAndDrainScope() {
-        viewModelScope.coroutineContext[Job]?.cancelAndJoin()
-    }
 }
 
 private fun DictionaryRepository.FavoriteSenseMissingReason.toFavoriteSenseLoadError(language: Language): UiText {
