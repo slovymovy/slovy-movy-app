@@ -178,9 +178,11 @@ class LearningDomainTest {
             config.contextToVoiceStabilityFactor,
         )
         assertEquals(FsrsDefaults.BURY_FAILED_SESSION_CARDS_FOR, config.buryFailedSessionCardsFor)
-        assertEquals(FsrsDefaults.SAME_SENSE_COOLDOWN, config.sameSenseCooldown)
-        assertEquals(FsrsDefaults.SAME_LEMMA_COOLDOWN, config.sameLemmaCooldown)
-        assertEquals(FsrsDefaults.SAME_ANSWER_COOLDOWN, config.sameAnswerCooldown)
+        assertEquals(FsrsDefaults.SAME_SENSE_COOLDOWN_RATIO, config.sameSenseCooldownRatio)
+        assertEquals(FsrsDefaults.SAME_LEMMA_COOLDOWN_RATIO, config.sameLemmaCooldownRatio)
+        assertEquals(FsrsDefaults.SAME_ANSWER_COOLDOWN_RATIO, config.sameAnswerCooldownRatio)
+        assertEquals(FsrsDefaults.SIBLING_COOLDOWN_FLOOR, config.siblingCooldownFloor)
+        assertEquals(FsrsDefaults.SIBLING_COOLDOWN_CAP, config.siblingCooldownCap)
         assertEquals(FsrsDefaults.COOLDOWN_JITTER_RATIO, config.cooldownJitterRatio)
     }
 

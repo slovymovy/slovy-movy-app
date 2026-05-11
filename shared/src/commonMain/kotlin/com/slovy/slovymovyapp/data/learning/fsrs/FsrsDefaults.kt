@@ -15,7 +15,7 @@ object FsrsDefaults {
     const val REQUEST_RETENTION: Double = 0.9
     val MAXIMUM_INTERVAL: Duration = 36500.days
     const val ENABLE_FUZZ: Boolean = false
-    const val DAILY_NEW_TASK_FAMILY_BUDGET: Int = 20
+    const val DAILY_NEW_TASK_FAMILY_BUDGET: Int = 40
     const val PAUSE_INTAKE_IF_QUEUE_ABOVE: Int = 100
     const val PAUSE_INTAKE_RETENTION_MIN_REVIEWS: Long = 50L
     const val PAUSE_INTAKE_IF_RETENTION_BELOW: Double = 0.75
@@ -26,9 +26,11 @@ object FsrsDefaults {
     const val PRODUCTION_TO_CONTEXT_STABILITY_FACTOR: Double = 0.60
     const val CONTEXT_TO_VOICE_STABILITY_FACTOR: Double = 0.80
     val BURY_FAILED_SESSION_CARDS_FOR: Duration = 10.minutes
-    val SAME_SENSE_COOLDOWN: Duration = 30.minutes
-    val SAME_LEMMA_COOLDOWN: Duration = 10.minutes
-    val SAME_ANSWER_COOLDOWN: Duration = 10.minutes
+    const val SAME_SENSE_COOLDOWN_RATIO: Double = 0.30
+    const val SAME_LEMMA_COOLDOWN_RATIO: Double = 0.15
+    const val SAME_ANSWER_COOLDOWN_RATIO: Double = 0.05
+    val SIBLING_COOLDOWN_FLOOR: Duration = 10.minutes
+    val SIBLING_COOLDOWN_CAP: Duration = 3.days
     const val COOLDOWN_JITTER_RATIO: Double = 0.2
     const val SELECTION_CANDIDATE_LIMIT: Int = 50
 
@@ -53,9 +55,11 @@ object FsrsDefaults {
         productionToContextStabilityFactor = PRODUCTION_TO_CONTEXT_STABILITY_FACTOR,
         contextToVoiceStabilityFactor = CONTEXT_TO_VOICE_STABILITY_FACTOR,
         buryFailedSessionCardsFor = BURY_FAILED_SESSION_CARDS_FOR,
-        sameSenseCooldown = SAME_SENSE_COOLDOWN,
-        sameLemmaCooldown = SAME_LEMMA_COOLDOWN,
-        sameAnswerCooldown = SAME_ANSWER_COOLDOWN,
+        sameSenseCooldownRatio = SAME_SENSE_COOLDOWN_RATIO,
+        sameLemmaCooldownRatio = SAME_LEMMA_COOLDOWN_RATIO,
+        sameAnswerCooldownRatio = SAME_ANSWER_COOLDOWN_RATIO,
+        siblingCooldownFloor = SIBLING_COOLDOWN_FLOOR,
+        siblingCooldownCap = SIBLING_COOLDOWN_CAP,
         cooldownJitterRatio = COOLDOWN_JITTER_RATIO,
         selectionCandidateLimit = SELECTION_CANDIDATE_LIMIT,
     )

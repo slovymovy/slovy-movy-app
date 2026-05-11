@@ -466,7 +466,11 @@ class LearningE2ETest : BaseTest() {
     @Test
     fun same_lemma_different_sense_waits_for_session_cooldown() = runBlocking {
         val config = FsrsDefaults.config().copy(
-            sameLemmaCooldown = 10.minutes,
+            sameSenseCooldownRatio = 0.0,
+            sameLemmaCooldownRatio = 0.15,
+            sameAnswerCooldownRatio = 0.0,
+            siblingCooldownFloor = 10.minutes,
+            siblingCooldownCap = 10.minutes,
             cooldownJitterRatio = 0.0,
         )
         withEnv(includeTranslation = false, config = config) { env ->
@@ -510,9 +514,11 @@ class LearningE2ETest : BaseTest() {
     @Test
     fun same_sense_siblings_get_per_card_jittered_cooldowns() = runBlocking {
         val config = FsrsDefaults.config().copy(
-            sameSenseCooldown = 10.minutes,
-            sameLemmaCooldown = 0.minutes,
-            sameAnswerCooldown = 0.minutes,
+            sameSenseCooldownRatio = 0.15,
+            sameLemmaCooldownRatio = 0.0,
+            sameAnswerCooldownRatio = 0.0,
+            siblingCooldownFloor = 10.minutes,
+            siblingCooldownCap = 10.minutes,
             cooldownJitterRatio = 0.5,
         )
         withEnv(includeTranslation = false, config = config) { env ->
