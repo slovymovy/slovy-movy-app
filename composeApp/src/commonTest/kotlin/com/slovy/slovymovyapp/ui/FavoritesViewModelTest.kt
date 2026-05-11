@@ -15,6 +15,7 @@ import kotlin.test.*
 open class FavoritesViewModelTest : BaseTest() {
 
     private val viewModelStore = ViewModelStore()
+
     private companion object {
         const val SENSE_1 = "00000000-0000-0000-0000-000000000101"
         const val SENSE_2 = "00000000-0000-0000-0000-000000000102"

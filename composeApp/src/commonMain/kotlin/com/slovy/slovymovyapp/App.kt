@@ -250,7 +250,7 @@ fun App(
             favoritesRepository = favoritesRepository,
             dictionaryRepository = dictionaryRepository,
             settingsRepository = settingsRepository,
-        )
+        ).also { it.start() }
     }
 
     suspend fun refreshFavoritesReviewState(invalidateIntakeCache: Boolean = false) {
