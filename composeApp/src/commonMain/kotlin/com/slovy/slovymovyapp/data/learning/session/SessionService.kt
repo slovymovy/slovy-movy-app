@@ -80,9 +80,9 @@ class SessionService(
                 difficulty_after = after.difficulty,
                 duration_ms = durationMs,
             )
+            val nextInterval = (after.dueEpochMs - nowMs).coerceAtLeast(0L)
+                .toDuration(DurationUnit.MILLISECONDS)
             if (outcome.rating.buriesSiblings()) {
-                val nextInterval = (after.dueEpochMs - nowMs).coerceAtLeast(0L)
-                    .toDuration(DurationUnit.MILLISECONDS)
                 applyAvailableAfter(
                     cards = learning.selectAvailableAfterCandidatesBySense(
                         sense_id = card.card.senseId,
@@ -121,7 +121,7 @@ class SessionService(
                 )
             }
             if (outcome.rating.unlocksNextFamily()) {
-                unlockNextFamilyIfEligible(card, after, nowMs)
+                unlockNextFamilyIfEligible(card, after, nowMs, nextInterval)
             }
         }
 
@@ -326,7 +326,12 @@ class SessionService(
         entry.senses.firstOrNull { it.senseId == senseId }
     }
 
-    private fun unlockNextFamilyIfEligible(card: SessionCard, after: CardScheduling, now: Long) {
+    private fun unlockNextFamilyIfEligible(
+        card: SessionCard,
+        after: CardScheduling,
+        now: Long,
+        nextInterval: Duration,
+    ) {
         val stability = after.stability.toDuration(DurationUnit.DAYS)
         val unlock = when (card.card.family) {
             CardFamily.RECOGNIZE_SENSE if stability >= config.productionUnlockStability -> Unlock(
@@ -359,7 +364,7 @@ class SessionService(
             difficulty = after.difficulty,
             availableAfter = availableAfter(
                 nowMs = now,
-                cooldown = config.siblingCooldownFloor,
+                cooldown = siblingCooldown(nextInterval, config.sameSenseCooldownRatio),
             ),
         )
     }
