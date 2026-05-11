@@ -263,6 +263,7 @@ fun App(
         favoritesViewModel.updateReviewDueCounts(reviewState.dueCountByLanguage)
         hasFavoritesToReview = reviewState.hasDueCards
     }
+
     val buildConfig = remember { appBuildConfig }
     val settingsViewModel =
         remember {
@@ -314,6 +315,10 @@ fun App(
     }
 
     suspend fun selectInitialDestination(): AppDestination {
+        // Sweep any zero-byte / partial downloaded DBs left behind by past interrupted downloads
+        // so the routing below sees an accurate `hasDictionary` / `hasTranslation` picture.
+        dataManager.cleanupCorruptDownloadedDbs()
+
         // Check if data version is current (before welcome, so existing users see mismatch)
         if (!dataManager.hasRequiredVersion()) {
             val savedVersion = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content

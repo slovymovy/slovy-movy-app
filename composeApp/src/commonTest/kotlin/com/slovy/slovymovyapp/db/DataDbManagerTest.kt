@@ -5,6 +5,7 @@ import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
@@ -12,6 +13,7 @@ import com.slovy.slovymovyapp.test.IgnoreIos
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import com.slovy.slovymovyapp.test.testRemoteDataProvider
 import kotlinx.coroutines.runBlocking
+import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -505,6 +507,157 @@ class DataDbManagerTest : BaseTest() {
         } finally {
             appDriver.close()
             platform.deleteFile(appDbPath)
+        }
+    }
+
+    @Test
+    fun cleanupCorruptDownloadedDbs_deletes_undersized_dictionary_files() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+
+        platform.ensureDatabasesDir()
+        val dictPath = platform.getDatabasePath(DataDbManager.dictionaryFileName(Language.POLISH))
+        if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)
+
+        try {
+            writeBytes(platform, dictPath, ByteArray(100))
+            assertTrue(platform.fileExists(dictPath), "Undersized dictionary fixture should exist before cleanup")
+
+            runBlocking { mgr.cleanupCorruptDownloadedDbs() }
+
+            assertFalse(platform.fileExists(dictPath), "Undersized dictionary should be removed by cleanup")
+            assertFalse(mgr.hasDictionary(Language.POLISH), "hasDictionary should be false after cleanup")
+        } finally {
+            if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)
+        }
+    }
+
+    @Test
+    fun cleanupCorruptDownloadedDbs_deletes_undersized_translation_files() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+
+        platform.ensureDatabasesDir()
+        val transPath = platform.getDatabasePath(
+            DataDbManager.translationFileName(Language.POLISH, Language.FRENCH)
+        )
+        if (platform.fileExists(transPath)) platform.deleteFile(transPath)
+
+        try {
+            writeBytes(platform, transPath, ByteArray(100))
+            assertTrue(platform.fileExists(transPath), "Undersized translation fixture should exist before cleanup")
+
+            runBlocking { mgr.cleanupCorruptDownloadedDbs() }
+
+            assertFalse(platform.fileExists(transPath), "Undersized translation should be removed by cleanup")
+            assertFalse(
+                mgr.hasTranslation(Language.POLISH, Language.FRENCH),
+                "hasTranslation should be false after cleanup"
+            )
+        } finally {
+            if (platform.fileExists(transPath)) platform.deleteFile(transPath)
+        }
+    }
+
+    @Test
+    fun cleanupCorruptDownloadedDbs_keeps_valid_sized_dictionary_files() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+
+        platform.ensureDatabasesDir()
+        val dictPath = platform.getDatabasePath(DataDbManager.dictionaryFileName(Language.POLISH))
+        if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)
+
+        try {
+            val validSize = (DataDbManager.MIN_VALID_DOWNLOADED_DB_BYTES + 1L).toInt()
+            writeBytes(platform, dictPath, ByteArray(validSize))
+            assertTrue(platform.fileExists(dictPath), "Valid-sized dictionary fixture should exist before cleanup")
+
+            runBlocking { mgr.cleanupCorruptDownloadedDbs() }
+
+            assertTrue(
+                platform.fileExists(dictPath),
+                "Valid-sized dictionary should be retained by cleanup"
+            )
+        } finally {
+            if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)
+        }
+    }
+
+    @Test
+    fun cleanupCorruptDownloadedDbs_leaves_unrelated_files_alone() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+
+        platform.ensureDatabasesDir()
+        val unrelated1 = platform.getDatabasePath("local_dictionary.db.cleanup_test_marker")
+        val unrelated2 = platform.getDatabasePath("random_artifact.cleanup_test_marker")
+        if (platform.fileExists(unrelated1)) platform.deleteFile(unrelated1)
+        if (platform.fileExists(unrelated2)) platform.deleteFile(unrelated2)
+
+        try {
+            writeBytes(platform, unrelated1, ByteArray(50))
+            writeBytes(platform, unrelated2, ByteArray(50))
+
+            runBlocking { mgr.cleanupCorruptDownloadedDbs() }
+
+            assertTrue(
+                platform.fileExists(unrelated1),
+                "Cleanup must not touch files that don't match the downloaded-DB prefixes"
+            )
+            assertTrue(
+                platform.fileExists(unrelated2),
+                "Cleanup must not touch files that don't match the downloaded-DB prefixes"
+            )
+        } finally {
+            if (platform.fileExists(unrelated1)) platform.deleteFile(unrelated1)
+            if (platform.fileExists(unrelated2)) platform.deleteFile(unrelated2)
+        }
+    }
+
+    @Test
+    fun cleanupCorruptDownloadedDbs_removes_part_orphans() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+
+        platform.ensureDatabasesDir()
+        val dictPart = platform.getDatabasePath(
+            DataDbManager.dictionaryFileName(Language.POLISH) + ".part"
+        )
+        val transPart = platform.getDatabasePath(
+            DataDbManager.translationFileName(Language.POLISH, Language.FRENCH) + ".part"
+        )
+        if (platform.fileExists(dictPart)) platform.deleteFile(dictPart)
+        if (platform.fileExists(transPart)) platform.deleteFile(transPart)
+
+        try {
+            // Make the .part orphans larger than the size threshold to prove suffix-based deletion
+            // (not size-based) is what removes them.
+            val sizeAboveThreshold = (DataDbManager.MIN_VALID_DOWNLOADED_DB_BYTES + 1L).toInt()
+            writeBytes(platform, dictPart, ByteArray(sizeAboveThreshold))
+            writeBytes(platform, transPart, ByteArray(sizeAboveThreshold))
+
+            runBlocking { mgr.cleanupCorruptDownloadedDbs() }
+
+            assertFalse(platform.fileExists(dictPart), "Dictionary .part orphan should be removed by cleanup")
+            assertFalse(platform.fileExists(transPart), "Translation .part orphan should be removed by cleanup")
+        } finally {
+            if (platform.fileExists(dictPart)) platform.deleteFile(dictPart)
+            if (platform.fileExists(transPart)) platform.deleteFile(transPart)
+        }
+    }
+
+    private fun writeBytes(
+        platform: PlatformDbSupport,
+        path: Path,
+        bytes: ByteArray,
+    ) {
+        val out = platform.openOutput(path)
+        try {
+            out.write(bytes, 0, bytes.size)
+            out.flush()
+        } finally {
+            out.close()
         }
     }
 }

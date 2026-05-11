@@ -41,6 +41,19 @@ class DataDbManager(
         private const val DICTIONARY_PREFIX = "dictionary_"
         private const val TRANSLATION_PREFIX = "translation_"
         private const val DB_EXTENSION = ".db"
+        private const val PART_SUFFIX = ".part"
+
+        /**
+         * Lower bound for a plausible downloaded dictionary/translation DB. Anything smaller is
+         * treated as corrupt and removed at startup so the next launch will re-download.
+         *
+         * Why: a 200-with-empty-body download or a torn rename can leave a 0-byte file at the
+         * dest path. SQLite (via Android's SupportSQLiteOpenHelper) then opens it as a fresh
+         * schema-less DB and the first real query fails with "no such table: lemma". A real
+         * dictionary is in the megabytes; even an empty SQLite carrying our schema is well above
+         * 16 KB, so this threshold catches the corrupt case without false positives.
+         */
+        internal const val MIN_VALID_DOWNLOADED_DB_BYTES: Long = 16L * 1024L
 
         fun dictionaryFileName(lang: Language): String = "$DICTIONARY_PREFIX${lang.code.lowercase()}$DB_EXTENSION"
         fun translationFileName(src: Language, tgt: Language): String =
@@ -110,6 +123,36 @@ class DataDbManager(
 
         val name = translationFileName(src, tgt)
         platform.deleteFile(platform.getDatabasePath(name))
+    }
+
+    /**
+     * Removes downloaded dictionary/translation DB files that are too small to be valid SQLite
+     * databases with our schema, plus any `.part` orphans from interrupted downloads. Should be
+     * called at app startup, before any caller consults [hasDictionary]/[hasTranslation], so
+     * routing can correctly send the user back through the download flow.
+     */
+    suspend fun cleanupCorruptDownloadedDbs() {
+        databaseCache.closeAll()
+
+        val databasesDir = platform.getDatabasePath("")
+        if (!platform.fileExists(databasesDir)) return
+
+        val files = platform.listFiles(databasesDir)
+        files.forEach { file ->
+            val fileName = file.name
+            val isDownloadedDb = fileName.startsWith(DICTIONARY_PREFIX) || fileName.startsWith(TRANSLATION_PREFIX)
+            if (!isDownloadedDb) return@forEach
+
+            if (fileName.endsWith(PART_SUFFIX)) {
+                platform.deleteFile(file)
+                return@forEach
+            }
+
+            val size = platform.getFileSize(file)
+            if (size != null && size < MIN_VALID_DOWNLOADED_DB_BYTES) {
+                platform.deleteFile(file)
+            }
+        }
     }
 
     /**
