@@ -9,14 +9,12 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.test.BaseTest
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
 open class FavoritesViewModelTest : BaseTest() {
 
     private val viewModelStore = ViewModelStore()
-    private val createdViewModels = mutableListOf<FavoritesViewModel>()
 
     private companion object {
         const val SENSE_1 = "00000000-0000-0000-0000-000000000101"
@@ -33,12 +31,7 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @AfterTest
-    fun tearDown() = runBlocking {
-        // Drain each VM's viewModelScope before BaseTestImpl.baseCleanup closes the DB driver,
-        // so Dispatchers.IO/Default work launched from setSelectedLanguage, prefetch, or the
-        // debounced query collector can't hit a closed connection pool.
-        createdViewModels.forEach { it.cancelAndDrainScope() }
-        createdViewModels.clear()
+    fun tearDown() {
         viewModelStore.clear()
     }
 
@@ -66,7 +59,6 @@ open class FavoritesViewModelTest : BaseTest() {
     ): FavoritesViewModel {
         val vm = FavoritesViewModel(favRepo, dictRepo, settingsRepo)
         viewModelStore.put("test", vm)
-        createdViewModels += vm
         return vm
     }
 

@@ -159,7 +159,15 @@ class FavoritesViewModel(
         private const val PREFETCH_LIMIT = 16
     }
 
-    init {
+    private var started = false
+
+    /**
+     * Starts the debounced query collector. Call once after construction from the UI layer.
+     * Tests omit this so viewModelScope stays empty and there's no async DB work racing teardown.
+     */
+    fun start() {
+        if (started) return
+        started = true
         viewModelScope.launch {
             // Restore saved language before observing queryFlow so the first load uses the right language.
             val savedCode = settingsRepository.getById(Setting.Name.FAVORITES_LANGUAGE)
@@ -207,8 +215,10 @@ class FavoritesViewModel(
         if (content.selectedLanguage == language) return
         state = content.copy(selectedLanguage = language)
         savedFavoritesLanguage = language
-        viewModelScope.launch {
-            settingsRepository.insert(Setting(Setting.Name.FAVORITES_LANGUAGE, JsonPrimitive(language.code)))
+        if (started) {
+            viewModelScope.launch {
+                settingsRepository.insert(Setting(Setting.Name.FAVORITES_LANGUAGE, JsonPrimitive(language.code)))
+            }
         }
         queryFlow.value = QueryState(content.query, Uuid.random())
     }
@@ -489,10 +499,6 @@ class FavoritesViewModel(
         val safeRange = range.first.coerceAtLeast(0)..minOf(range.last, senses.lastIndex)
         if (safeRange.isEmpty()) return
         prefetchSenses(senses.slice(safeRange).take(PREFETCH_LIMIT))
-    }
-
-    internal suspend fun cancelAndDrainScope() {
-        viewModelScope.coroutineContext[Job]?.cancelAndJoin()
     }
 }
 
