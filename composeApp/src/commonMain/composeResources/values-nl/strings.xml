@@ -37,7 +37,7 @@
     <string name="search_no_results_title">Geen resultaten voor "%1$s"</string>
     <string name="search_no_results_description">Probeer een andere spelling of zoekterm</string>
 
-    <string name="stats_title">Je voortgang</string>
+    <string name="stats_title">Mijn voortgang</string>
     <string name="stats_previous_month">Vorige maand</string>
     <string name="stats_next_month">Volgende maand</string>
     <plurals name="stats_day_streak">
@@ -58,7 +58,7 @@
     </plurals>
     <string name="stats_today_label">vandaag</string>
     <string name="stats_this_week_label">deze week</string>
-    <string name="stats_library_section">Je bibliotheek</string>
+    <string name="stats_library_section">Mijn woordenschat</string>
     <plurals name="stats_words_label">
         <item quantity="one">woord</item>
         <item quantity="few">woorden</item>
@@ -76,8 +76,7 @@
     <string name="stats_stage_middle">Herinneren</string>
     <string name="stats_stage_strong">Stabiel</string>
     <string name="stats_stage_learned">Geleerd</string>
-    <string name="stats_caption_before_learned">Betekenissen schuiven omlaag als je ze bij herhalingen goed blijft onthouden, en weer omhoog als je ze vergeet.</string>
-    <string name="stats_caption_after_learned">is afgerond — uit de actieve herhaling.</string>
+    <string name="stats_caption_learned">Woorden zakken naar beneden in de lijst naarmate je ze bij overhoringen goed blijft onthouden, en schuiven weer omhoog als je ze vergeet. «%1$s» betekent dat ze zijn voltooid — ze doen niet meer mee in de actieve herhaling.</string>
     <string name="stats_month_january">Januari</string>
     <string name="stats_month_february">Februari</string>
     <string name="stats_month_march">Maart</string>

@@ -19,6 +19,7 @@ data class Setting(
         ENABLED_VOICES,
         VOICE_SETUP_SHOWN,
         SEARCH_LANGUAGE,
-        FAVORITES_LANGUAGE
+        FAVORITES_LANGUAGE,
+        STATS_LANGUAGE
     }
 }
