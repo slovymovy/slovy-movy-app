@@ -283,6 +283,7 @@ fun DownloadScreenContent(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .navigationBarsPadding()
                         .padding(horizontal = AppSpacing.xl)
                         .padding(bottom = AppSpacing.xxl),
                     horizontalAlignment = Alignment.CenterHorizontally
