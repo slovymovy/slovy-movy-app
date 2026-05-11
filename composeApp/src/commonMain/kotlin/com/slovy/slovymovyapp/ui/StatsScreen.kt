@@ -76,12 +76,15 @@ class StatsViewModel(
 
     private var savedStatsLanguage: Language? = null
     private var savedStatsLanguageLoaded = false
+    private var languageSelectedDuringRestore = false
 
     init {
         viewModelScope.launch {
             val savedCode = settingsRepository.getById(Setting.Name.STATS_LANGUAGE)
                 ?.value?.jsonPrimitive?.contentOrNull
-            savedStatsLanguage = savedCode?.let { Language.fromCodeOrNull(it) }
+            if (!languageSelectedDuringRestore) {
+                savedStatsLanguage = savedCode?.let { Language.fromCodeOrNull(it) }
+            }
             savedStatsLanguageLoaded = true
             val selected = selectedLanguageFor(state.learningLanguages)
             if (selected != state.selectedLanguage) {
@@ -103,6 +106,9 @@ class StatsViewModel(
         if (state.selectedLanguage == language) return
         state = state.copy(selectedLanguage = language, languageDropdownExpanded = false)
         savedStatsLanguage = language
+        if (!savedStatsLanguageLoaded) {
+            languageSelectedDuringRestore = true
+        }
         viewModelScope.launch {
             settingsRepository.insert(Setting(Setting.Name.STATS_LANGUAGE, JsonPrimitive(language.code)))
         }
