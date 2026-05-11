@@ -37,7 +37,7 @@
     <string name="search_no_results_title">No results for "%1$s"</string>
     <string name="search_no_results_description">Try a different spelling or search term?</string>
 
-    <string name="stats_title">Your progress</string>
+    <string name="stats_title">My progress</string>
     <string name="stats_previous_month">Previous month</string>
     <string name="stats_next_month">Next month</string>
     <plurals name="stats_day_streak">
@@ -58,7 +58,7 @@
     </plurals>
     <string name="stats_today_label">today</string>
     <string name="stats_this_week_label">this week</string>
-    <string name="stats_library_section">Your library</string>
+    <string name="stats_library_section">My vocabulary</string>
     <plurals name="stats_words_label">
         <item quantity="one">word</item>
         <item quantity="few">words</item>
@@ -66,18 +66,17 @@
         <item quantity="other">words</item>
     </plurals>
     <plurals name="stats_senses_label">
-        <item quantity="one">sense</item>
-        <item quantity="few">senses</item>
-        <item quantity="many">senses</item>
-        <item quantity="other">senses</item>
+        <item quantity="one">meaning</item>
+        <item quantity="few">meanings</item>
+        <item quantity="many">meanings</item>
+        <item quantity="other">meanings</item>
     </plurals>
     <string name="stats_stage_new">New</string>
     <string name="stats_stage_fresh">Fresh</string>
     <string name="stats_stage_middle">Recalling</string>
     <string name="stats_stage_strong">Solid</string>
     <string name="stats_stage_learned">Learned</string>
-    <string name="stats_caption_before_learned">Senses move down the list as your recall holds up across reviews, and slip back up when you forget.</string>
-    <string name="stats_caption_after_learned">is graduated — out of active rotation.</string>
+    <string name="stats_caption_learned">Meanings move down the list as your recall holds up across reviews, and slip back up when you forget. %1$s means the card is learned and out of active rotation.</string>
     <string name="stats_month_january">January</string>
     <string name="stats_month_february">February</string>
     <string name="stats_month_march">March</string>

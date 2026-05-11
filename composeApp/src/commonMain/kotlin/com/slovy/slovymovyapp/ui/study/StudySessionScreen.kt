@@ -560,8 +560,6 @@ private fun StudyCardSurface(
         tonalElevation = 0.dp,
     ) {
         if (side == StudyCardSide.FRONT) {
-            val productionHint = (card as? StudyCardUiState.Production)?.firstLetterHint
-            val hintOverlayHeight = if (productionHint != null) 56.dp else 0.dp
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(
                     modifier = Modifier
@@ -571,7 +569,7 @@ private fun StudyCardSurface(
                             start = AppSpacing.xl,
                             top = AppSpacing.xl,
                             end = AppSpacing.xl,
-                            bottom = AppSpacing.xl + 88.dp + hintOverlayHeight,
+                            bottom = AppSpacing.xl + 88.dp,
                         ),
                 ) {
                     StudyChip(label = card.chipLabel)
@@ -586,16 +584,6 @@ private fun StudyCardSurface(
                             .fillMaxWidth()
                             .heightIn(min = 360.dp),
                     )
-                }
-                if (productionHint != null) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 88.dp + AppSpacing.md),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        FirstLetterHintView(hint = productionHint)
-                    }
                 }
                 Box(
                     modifier = Modifier
@@ -759,31 +747,32 @@ private fun ProductionFront(
     card: StudyCardUiState.Production,
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
-        ) {
-            Text(
-                text = card.promptLabel.resolve().uppercase(),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.4.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-            StudyTaggedText(
-                text = card.promptText,
-                style = (if (card.isDefinitionPrompt) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.displaySmall).copy(
-                    fontFamily = MaterialTheme.serifFontFamily,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
+        Text(
+            text = card.promptLabel.resolve().uppercase(),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.4.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(AppSpacing.md))
+        StudyTaggedText(
+            text = card.promptText,
+            style = (if (card.isDefinitionPrompt) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.displaySmall).copy(
+                fontFamily = MaterialTheme.serifFontFamily,
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        card.firstLetterHint?.let { hint ->
+            Spacer(Modifier.height(AppSpacing.xl))
+            FirstLetterHintView(hint = hint)
         }
     }
 }
