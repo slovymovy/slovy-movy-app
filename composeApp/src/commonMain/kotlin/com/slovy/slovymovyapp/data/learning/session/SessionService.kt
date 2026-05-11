@@ -14,6 +14,7 @@ import com.slovy.slovymovyapp.db.FavoritesQueries
 import com.slovy.slovymovyapp.db.SelectRecentReviewedCards
 import kotlinx.coroutines.flow.*
 import kotlin.math.roundToLong
+import kotlin.random.Random
 import kotlin.time.*
 import kotlin.time.Duration.Companion.days
 import kotlin.uuid.Uuid
@@ -79,6 +80,8 @@ class SessionService(
                 difficulty_after = after.difficulty,
                 duration_ms = durationMs,
             )
+            val nextInterval = (after.dueEpochMs - nowMs).coerceAtLeast(0L)
+                .toDuration(DurationUnit.MILLISECONDS)
             if (outcome.rating.buriesSiblings()) {
                 applyAvailableAfter(
                     cards = learning.selectAvailableAfterCandidatesBySense(
@@ -87,8 +90,7 @@ class SessionService(
                         id = card.card.id,
                     ).executeAsList().map { it.toCard() },
                     nowMs = nowMs,
-                    cooldown = config.sameSenseCooldown,
-                    relation = "same-sense",
+                    cooldown = siblingCooldown(nextInterval, config.sameSenseCooldownRatio),
                 )
                 applyAvailableAfter(
                     cards = learning.selectAvailableAfterCandidatesByLemma(
@@ -97,8 +99,7 @@ class SessionService(
                         sense_id = card.card.senseId,
                     ).executeAsList().map { it.toCard() },
                     nowMs = nowMs,
-                    cooldown = config.sameLemmaCooldown,
-                    relation = "same-lemma",
+                    cooldown = siblingCooldown(nextInterval, config.sameLemmaCooldownRatio),
                 )
                 if (card.card.family.testsWordRecall) {
                     applyAvailableAfter(
@@ -110,8 +111,7 @@ class SessionService(
                             .map { it.toCard() }
                             .filter { it.family.testsWordRecall },
                         nowMs = nowMs,
-                        cooldown = config.sameAnswerCooldown,
-                        relation = "same-answer",
+                        cooldown = siblingCooldown(nextInterval, config.sameAnswerCooldownRatio),
                     )
                 }
             } else {
@@ -121,7 +121,7 @@ class SessionService(
                 )
             }
             if (outcome.rating.unlocksNextFamily()) {
-                unlockNextFamilyIfEligible(card, after, nowMs)
+                unlockNextFamilyIfEligible(card, after, nowMs, nextInterval)
             }
         }
 
@@ -234,38 +234,38 @@ class SessionService(
         return penalty
     }
 
-    private fun availableAfter(nowMs: Long, cooldown: Duration, salt: String): Long? {
+    private fun availableAfter(nowMs: Long, cooldown: Duration): Long? {
         if (cooldown <= Duration.ZERO) return null
-        return nowMs + jitteredCooldown(cooldown, salt).inWholeMilliseconds
+        return nowMs + jitteredCooldown(cooldown).inWholeMilliseconds
     }
 
     private fun applyAvailableAfter(
         cards: List<Card>,
         nowMs: Long,
         cooldown: Duration,
-        relation: String,
     ) {
         if (cooldown <= Duration.ZERO) return
 
         cards.forEach { affected ->
             learning.setCardAvailableAfter(
-                availableAfter = nowMs + jitteredCooldown(
-                    cooldown = cooldown,
-                    salt = "$relation:${affected.id}",
-                ).inWholeMilliseconds,
+                availableAfter = nowMs + jitteredCooldown(cooldown).inWholeMilliseconds,
                 id = affected.id,
             )
         }
     }
 
-    private fun jitteredCooldown(cooldown: Duration, salt: String): Duration {
+    private fun siblingCooldown(nextInterval: Duration, ratio: Double): Duration {
+        if (ratio <= 0.0) return Duration.ZERO
+        val scaled = nextInterval * ratio
+        return scaled.coerceIn(config.siblingCooldownFloor, config.siblingCooldownCap)
+    }
+
+    private fun jitteredCooldown(cooldown: Duration): Duration {
         val cooldownMillis = cooldown.inWholeMilliseconds
         val spread = (cooldownMillis * config.cooldownJitterRatio.coerceAtLeast(0.0)).roundToLong()
         if (spread <= 0) return cooldown
 
-        val range = spread * 2 + 1
-        val hash = salt.hashCode().toUInt().toLong()
-        val offset = (hash % range) - spread
+        val offset = Random.nextLong(-spread, spread + 1)
         return (cooldownMillis + offset).coerceAtLeast(1L).toDuration(DurationUnit.MILLISECONDS)
     }
 
@@ -326,7 +326,12 @@ class SessionService(
         entry.senses.firstOrNull { it.senseId == senseId }
     }
 
-    private fun unlockNextFamilyIfEligible(card: SessionCard, after: CardScheduling, now: Long) {
+    private fun unlockNextFamilyIfEligible(
+        card: SessionCard,
+        after: CardScheduling,
+        now: Long,
+        nextInterval: Duration,
+    ) {
         val stability = after.stability.toDuration(DurationUnit.DAYS)
         val unlock = when (card.card.family) {
             CardFamily.RECOGNIZE_SENSE if stability >= config.productionUnlockStability -> Unlock(
@@ -359,8 +364,7 @@ class SessionService(
             difficulty = after.difficulty,
             availableAfter = availableAfter(
                 nowMs = now,
-                cooldown = config.sameSenseCooldown,
-                salt = "${card.card.id}:unlock-${unlock.family}",
+                cooldown = siblingCooldown(nextInterval, config.sameSenseCooldownRatio),
             ),
         )
     }

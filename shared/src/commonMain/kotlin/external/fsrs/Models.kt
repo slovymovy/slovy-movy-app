@@ -24,19 +24,19 @@ enum class CardPhase(val value: Int) {
 
 data class Grade(
     val title: String,
-    val durationMillis: Long = 0,
-    val interval: Int = 0,
-    val text: String = "0",
+    val durationMillis: Long,
+    val interval: Int,
+    val text: String,
     val choice: Rating,
-    val stability: Double = 0.0,
-    val difficulty: Double = 0.0,
+    val stability: Double,
+    val difficulty: Double,
 )
 
 data class FlashCard(
-    val stability: Double = 0.0,
-    val difficulty: Double = 0.0,
-    val interval: Int = 0,
-    val elapsedDays: Double = interval.toDouble(),
-    val reviewCount: Int = 0,
-    val phase: Int = CardPhase.Added.value,
+    val stability: Double,
+    val difficulty: Double,
+    val interval: Int,
+    val elapsedDays: Double,
+    val reviewCount: Int,
+    val phase: Int,
 )
