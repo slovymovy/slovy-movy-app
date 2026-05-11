@@ -491,14 +491,17 @@ private fun CalendarGrid(state: StatsUiState) {
                 LegendDot(
                     color = MaterialTheme.colorScheme.primary,
                     label = stringResource(Res.string.stats_legend_today),
+                    borderStroke = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
                 )
                 LegendDot(
                     color = MaterialTheme.colorScheme.primaryContainer,
                     label = stringResource(Res.string.stats_legend_practiced),
+                    borderStroke = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
                 )
                 LegendDot(
                     color = MaterialTheme.colorScheme.surfaceContainerHighest,
                     label = stringResource(Res.string.stats_legend_missed),
+                    borderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 )
             }
         }
@@ -539,14 +542,14 @@ private fun CalendarCell(
 
         isFuture -> {
             background = Color.Transparent
-            content = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-            weight = FontWeight.Normal
+            content = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+            weight = FontWeight.Medium
         }
 
         else -> {
             background = MaterialTheme.colorScheme.surfaceContainerHighest
-            content = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-            weight = FontWeight.Normal
+            content = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            weight = FontWeight.Medium
         }
     }
 
@@ -572,8 +575,8 @@ private fun CalendarCell(
             text = day.toString(),
             style = MaterialTheme.typography.bodySmall.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
-                fontSize = 10.5.sp,
-                lineHeight = 11.sp,
+                fontSize = 12.sp,
+                lineHeight = 12.sp,
                 fontWeight = weight,
             ),
             color = content,
@@ -582,25 +585,29 @@ private fun CalendarCell(
 }
 
 @Composable
-private fun LegendDot(color: Color, label: String) {
+private fun LegendDot(color: Color, label: String, borderStroke: BorderStroke) {
+    val shape = RoundedCornerShape(3.dp)
     Row(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(9.dp)
-                .clip(RoundedCornerShape(3.dp))
+                .size(11.dp)
+                .clip(shape)
                 .background(color)
                 .border(
-                    BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
-                    RoundedCornerShape(3.dp),
+                    borderStroke,
+                    shape,
                 ),
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -790,9 +797,14 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>) {
 @Composable
 private fun PipelineCaption() {
     val learned = stringResource(Res.string.stats_stage_learned)
+    val captionText = stringResource(Res.string.stats_caption_learned, learned)
+    val learnedStart = captionText.indexOf(learned)
     val caption = buildAnnotatedString {
-        append(stringResource(Res.string.stats_caption_before_learned))
-        append(" ")
+        if (learnedStart == -1) {
+            append(captionText)
+            return@buildAnnotatedString
+        }
+        append(captionText.substring(0, learnedStart))
         withStyle(
             SpanStyle(
                 color = MaterialTheme.colorScheme.onSurface,
@@ -802,8 +814,7 @@ private fun PipelineCaption() {
         ) {
             append(learned)
         }
-        append(" ")
-        append(stringResource(Res.string.stats_caption_after_learned))
+        append(captionText.substring(learnedStart + learned.length))
     }
     Text(
         text = caption,
