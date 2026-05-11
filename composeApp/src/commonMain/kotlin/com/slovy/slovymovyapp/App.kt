@@ -675,7 +675,7 @@ fun App(
                 val viewModel = viewModel(
                     viewModelStoreOwner = backStackEntry
                 ) {
-                    StatsViewModel(learningLanguagesForStats, statsService, Clock.System)
+                    StatsViewModel(learningLanguagesForStats, statsService, settingsRepository, Clock.System)
                 }
 
                 StatsScreen(

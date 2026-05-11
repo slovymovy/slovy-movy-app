@@ -38,7 +38,7 @@
     <string name="search_no_results_title">Brak wyników dla „%1$s"</string>
     <string name="search_no_results_description">Sprawdź pisownię lub spróbuj innego słowa.</string>
 
-    <string name="stats_title">Twoje postępy</string>
+    <string name="stats_title">Moje postępy</string>
     <string name="stats_previous_month">Poprzedni miesiąc</string>
     <string name="stats_next_month">Następny miesiąc</string>
     <plurals name="stats_day_streak">
@@ -59,7 +59,7 @@
     </plurals>
     <string name="stats_today_label">dziś</string>
     <string name="stats_this_week_label">w tym tygodniu</string>
-    <string name="stats_library_section">Twoja biblioteka</string>
+    <string name="stats_library_section">Moje słownictwo</string>
     <plurals name="stats_words_label">
         <item quantity="one">słowo</item>
         <item quantity="few">słowa</item>
@@ -77,8 +77,7 @@
     <string name="stats_stage_middle">Średnie</string>
     <string name="stats_stage_strong">Mocne</string>
     <string name="stats_stage_learned">Nauczone</string>
-    <string name="stats_caption_before_learned">Znaczenia przesuwają się w dół listy, gdy dobrze je pamiętasz w powtórkach, i wracają wyżej, gdy je zapominasz.</string>
-    <string name="stats_caption_after_learned">oznacza ukończone — poza aktywnymi powtórkami.</string>
+    <string name="stats_caption_learned">Znaczenia spadają niżej na liście, jeśli bez problemu przypominasz je sobie podczas powtórek, i wracają w górę, gdy je zapomnisz. Status «%1$s» oznacza, że materiał został opanowany i wypada z aktywnego cyklu powtórzeń.</string>
     <string name="stats_month_january">Styczeń</string>
     <string name="stats_month_february">Luty</string>
     <string name="stats_month_march">Marzec</string>    <string name="stats_month_april">Kwiecień</string>
