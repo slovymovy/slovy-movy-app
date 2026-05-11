@@ -1,5 +1,9 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +56,7 @@ data class StatsUiState(
     val languageDropdownExpanded: Boolean = false,
     val today: LocalDate,
     val viewMonth: StatsYearMonth,
+    val isLoading: Boolean,
     val streakDays: Int,
     val practiceLog: Set<StatsPracticeDay>,
     val reviewsToday: Int,
@@ -77,6 +83,7 @@ class StatsViewModel(
     private var savedStatsLanguage: Language? = null
     private var savedStatsLanguageLoaded = false
     private var languageSelectedDuringRestore = false
+    private var reloadRequestId = 0
 
     init {
         viewModelScope.launch {
@@ -141,23 +148,35 @@ class StatsViewModel(
         val today = currentLocalDate(clock)
         val langCode = state.selectedLanguage.code
         val viewMonth = state.viewMonth
+        val requestId = ++reloadRequestId
+        state = state.copy(today = today, isLoading = true)
         viewModelScope.launch {
-            val data = withContext(Dispatchers.Default) {
-                statsService.statsScreenData(langCode, viewMonth, today)
+            runCatching {
+                withContext(Dispatchers.Default) {
+                    statsService.statsScreenData(langCode, viewMonth, today)
+                }
+            }.onSuccess { data ->
+                if (!isCurrentReload(requestId)) return@launch
+                state = state.copy(
+                    today = today,
+                    isLoading = false,
+                    streakDays = data.streakDays,
+                    practiceLog = data.practiceLog,
+                    reviewsToday = data.reviewsToday,
+                    reviewsWeek = data.reviewsWeek,
+                    wordsTotal = data.wordsTotal,
+                    pipeline = data.pipeline,
+                )
+            }.onFailure {
+                if (isCurrentReload(requestId)) {
+                    state = state.copy(isLoading = false)
+                }
             }
-            // Drop the result if the user has navigated away from this scope.
-            if (state.selectedLanguage.code != langCode || state.viewMonth != viewMonth) return@launch
-            state = state.copy(
-                today = today,
-                streakDays = data.streakDays,
-                practiceLog = data.practiceLog,
-                reviewsToday = data.reviewsToday,
-                reviewsWeek = data.reviewsWeek,
-                wordsTotal = data.wordsTotal,
-                pipeline = data.pipeline,
-            )
         }
     }
+
+    private fun isCurrentReload(requestId: Int): Boolean =
+        reloadRequestId == requestId
 
     private fun selectedLanguageFor(languages: List<Language>): Language {
         val saved = savedStatsLanguage
@@ -259,12 +278,14 @@ fun StatsScreenContent(
                         value = state.reviewsToday,
                         unit = pluralStringResource(Res.plurals.stats_cards_unit, state.reviewsToday),
                         label = stringResource(Res.string.stats_today_label),
+                        isLoading = state.isLoading,
                         modifier = Modifier.weight(1f),
                     )
                     StatCell(
                         value = state.reviewsWeek,
                         unit = pluralStringResource(Res.plurals.stats_cards_unit, state.reviewsWeek),
                         label = stringResource(Res.string.stats_this_week_label),
+                        isLoading = state.isLoading,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -396,8 +417,8 @@ private fun StreakCard(
                     verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(
-                        text = state.streakDays.toString(),
+                    CountText(
+                        text = formatCount(state.streakDays, state.isLoading),
                         style = MaterialTheme.typography.displaySmall.copy(
                             fontFamily = MaterialTheme.serifFontFamily,
                             fontWeight = FontWeight.Medium,
@@ -405,7 +426,7 @@ private fun StreakCard(
                             lineHeight = 32.sp,
                             letterSpacing = (-0.8).sp,
                         ),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = loadingAwareContentColor(state.isLoading),
                     )
                     Text(
                         text = pluralStringResource(Res.plurals.stats_day_streak, state.streakDays),
@@ -567,6 +588,12 @@ private fun CalendarCell(
     val content: Color
     val weight: FontWeight
     when {
+        state.isLoading -> {
+            background = MaterialTheme.colorScheme.surfaceContainerHighest
+            content = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            weight = FontWeight.Medium
+        }
+
         isToday -> {
             background = MaterialTheme.colorScheme.primary
             content = MaterialTheme.colorScheme.onPrimary
@@ -598,7 +625,7 @@ private fun CalendarCell(
             .clip(shape)
             .background(background)
             .then(
-                if (isToday) {
+                if (!state.isLoading && isToday) {
                     Modifier.border(
                         width = 2.dp,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
@@ -672,6 +699,7 @@ private fun StatCell(
     value: Int,
     unit: String,
     label: String,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     StatsCard(
@@ -684,8 +712,8 @@ private fun StatCell(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Text(
-                    text = formatCount(value),
+                CountText(
+                    text = formatCount(value, isLoading),
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontWeight = FontWeight.Medium,
@@ -693,7 +721,7 @@ private fun StatCell(
                         lineHeight = 32.sp,
                         letterSpacing = (-0.5).sp,
                     ),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = loadingAwareContentColor(isLoading),
                 )
                 Text(
                     text = unit,
@@ -730,11 +758,13 @@ private fun LibraryCard(state: StatsUiState) {
                 LibraryMetric(
                     value = state.wordsTotal,
                     label = pluralStringResource(Res.plurals.stats_words_label, state.wordsTotal),
+                    isLoading = state.isLoading,
                     modifier = Modifier.weight(1f),
                 )
                 LibraryMetric(
                     value = state.sensesTotal,
                     label = pluralStringResource(Res.plurals.stats_senses_label, state.sensesTotal),
+                    isLoading = state.isLoading,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -744,7 +774,7 @@ private fun LibraryCard(state: StatsUiState) {
                     .height(0.5.dp)
                     .background(MaterialTheme.colorScheme.outlineVariant),
             )
-            PipelineBars(pipeline = state.pipeline)
+            PipelineBars(pipeline = state.pipeline, isLoading = state.isLoading)
             PipelineCaption()
         }
     }
@@ -754,11 +784,12 @@ private fun LibraryCard(state: StatsUiState) {
 private fun LibraryMetric(
     value: Int,
     label: String,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(
-            text = formatCount(value),
+        CountText(
+            text = formatCount(value, isLoading),
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
                 fontWeight = FontWeight.Medium,
@@ -766,7 +797,7 @@ private fun LibraryMetric(
                 lineHeight = 30.sp,
                 letterSpacing = (-0.5).sp,
             ),
-            color = MaterialTheme.colorScheme.onSurface,
+            color = loadingAwareContentColor(isLoading),
         )
         Text(
             text = label,
@@ -781,11 +812,30 @@ private fun LibraryMetric(
 }
 
 @Composable
-private fun PipelineBars(pipeline: List<StatsPipelineStage>) {
+private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean) {
     val maxCount = pipeline.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         pipeline.forEach { stage ->
-            val pct = stage.count.toFloat() / maxCount.toFloat()
+            val pct = if (isLoading) {
+                loadingPipelineWidth(stage.id)
+            } else {
+                stage.count.toFloat() / maxCount.toFloat()
+            }
+            val animatedPct by animateFloatAsState(
+                targetValue = pct,
+                animationSpec = tween(durationMillis = STATS_REVEAL_ANIMATION_MS),
+                label = "statsPipelineWidth",
+            )
+            val targetColor = if (isLoading) {
+                MaterialTheme.colorScheme.outlineVariant
+            } else {
+                stageColor(stage.id)
+            }
+            val animatedColor by animateColorAsState(
+                targetValue = targetColor,
+                animationSpec = tween(durationMillis = STATS_REVEAL_ANIMATION_MS),
+                label = "statsPipelineColor",
+            )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -809,14 +859,14 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>) {
                 ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(pct)
+                            .fillMaxWidth(animatedPct)
                             .height(10.dp)
                             .clip(RoundedCornerShape(5.dp))
-                            .background(stageColor(stage.id)),
+                            .background(animatedColor),
                     )
                 }
-                Text(
-                    text = formatCount(stage.count),
+                CountText(
+                    text = formatCount(stage.count, isLoading),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontWeight = FontWeight.Medium,
@@ -824,7 +874,7 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>) {
                         lineHeight = 15.sp,
                         letterSpacing = (-0.1).sp,
                     ),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = loadingAwareContentColor(isLoading),
                     textAlign = TextAlign.End,
                     modifier = Modifier.width(36.dp),
                 )
@@ -867,6 +917,35 @@ private fun PipelineCaption() {
         modifier = Modifier.padding(top = 2.dp),
     )
 }
+
+@Composable
+private fun CountText(
+    text: String,
+    style: TextStyle,
+    color: Color,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign? = null,
+) {
+    Crossfade(
+        targetState = CountTextTarget(text, color),
+        animationSpec = tween(durationMillis = STATS_REVEAL_ANIMATION_MS),
+        modifier = modifier,
+        label = "statsCountText",
+    ) { target ->
+        Text(
+            text = target.text,
+            style = style,
+            color = target.color,
+            textAlign = textAlign,
+            modifier = if (textAlign == null) Modifier else Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+private data class CountTextTarget(
+    val text: String,
+    val color: Color,
+)
 
 @Composable
 private fun StatsCard(
@@ -922,6 +1001,23 @@ private fun stageColor(stage: StatsPipelineStageId): Color = when (stage) {
     StatsPipelineStageId.LEARNED -> Color(0xFF7CB078)
 }
 
+// Visual-only skeleton proportions; the loaded values come from the stats pipeline.
+private fun loadingPipelineWidth(stage: StatsPipelineStageId): Float = when (stage) {
+    StatsPipelineStageId.NEW -> 0.74f
+    StatsPipelineStageId.FRESH -> 0.58f
+    StatsPipelineStageId.MIDDLE -> 0.82f
+    StatsPipelineStageId.STRONG -> 0.48f
+    StatsPipelineStageId.LEARNED -> 0.64f
+}
+
+@Composable
+private fun loadingAwareContentColor(isLoading: Boolean): Color =
+    if (isLoading) {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
 private fun calendarCells(viewMonth: StatsYearMonth): List<Int?> {
     val first = LocalDate(viewMonth.year, viewMonth.monthZeroBased + 1, 1)
     val leading = first.dayOfWeek.ordinal
@@ -955,6 +1051,7 @@ private fun initialStatsState(
         selectedLanguage = normalized.first(),
         today = today,
         viewMonth = StatsYearMonth(today.year, today.month.ordinal),
+        isLoading = true,
         streakDays = 0,
         practiceLog = emptySet(),
         reviewsToday = 0,
@@ -978,6 +1075,7 @@ private fun previewStatsState(languages: List<Language>, today: LocalDate): Stat
         selectedLanguage = selected,
         today = today,
         viewMonth = viewMonth,
+        isLoading = false,
         streakDays = 12 + variant,
         practiceLog = previewPracticeLog(today),
         reviewsToday = 28 + variant * 3,
@@ -1016,11 +1114,14 @@ private fun previewPracticeLog(today: LocalDate): Set<StatsPracticeDay> {
     return log
 }
 
-private fun formatCount(value: Int): String {
+private fun formatCount(value: Int, isLoading: Boolean): String {
+    if (isLoading) return "--"
     val raw = value.toString()
     if (raw.length <= 3) return raw
     return raw.reversed().chunked(3).joinToString(",").reversed()
 }
+
+private const val STATS_REVEAL_ANIMATION_MS = 260
 
 @Preview
 @Composable
@@ -1047,6 +1148,21 @@ private fun StatsScreenSingleLanguagePreview(
             state = previewStatsState(
                 languages = listOf(Language.DUTCH),
                 today = LocalDate(2026, 5, 8),
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StatsScreenLoadingPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StatsScreenContent(
+            state = initialStatsState(
+                languages = listOf(Language.DUTCH, Language.GERMAN),
+                clock = Clock.System,
             ),
         )
     }
