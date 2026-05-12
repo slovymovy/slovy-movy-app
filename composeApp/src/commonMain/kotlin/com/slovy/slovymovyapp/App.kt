@@ -35,6 +35,7 @@ import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -47,6 +48,7 @@ import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.download_title_downloading
 import kotlin.concurrent.Volatile
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -74,16 +76,39 @@ internal class FavoritesReviewCoordinator(
         favoritesRepository: FavoritesRepository,
         intakeService: LearningIntake,
         statsService: StatsService,
-        invalidateIntakeCache: Boolean = false,
     ): FavoritesReviewState = refreshMutex.withLock {
         if (!enabled) return@withLock FavoritesReviewState(emptyMap())
-        if (invalidateIntakeCache) {
-            invalidateIntakeCache()
-        }
         computeFavoritesReviewState(favoritesRepository, intakeService, statsService)
     }
 
-    fun invalidateIntakeCache() {
+    /**
+     * Re-reads due counts without running intake. Cheap enough to call right after a
+     * favorite toggle: remove/add already mutate `card.suspended` synchronously, so
+     * `dueToday` is accurate. Skipping intake here avoids serializing the dictionary-DB
+     * driver against the screen's own queries on iOS.
+     */
+    suspend fun refreshDueCountsOnly(
+        favoritesRepository: FavoritesRepository,
+        statsService: StatsService,
+    ): FavoritesReviewState = refreshMutex.withLock {
+        if (!enabled) return@withLock FavoritesReviewState(emptyMap())
+        withContext(Dispatchers.Default) {
+            val languages = favoritesRepository.getAllGroupedByLangAndLemma()
+                .map { it.language }
+                .distinct()
+            FavoritesReviewState(
+                dueCountByLanguage = languages.associateWith { language ->
+                    statsService.globalStats(language.code).dueToday
+                },
+            )
+        }
+    }
+
+    fun invalidateIntakeCacheForLanguage(language: Language) {
+        lastIntakeAtByLanguage = lastIntakeAtByLanguage - language
+    }
+
+    fun invalidateAllIntakeCache() {
         lastIntakeAtByLanguage = emptyMap()
     }
 
@@ -261,12 +286,20 @@ fun App(
         ).also { it.start() }
     }
 
-    suspend fun refreshFavoritesReviewState(invalidateIntakeCache: Boolean = false) {
+    suspend fun refreshFavoritesReviewState() {
         val reviewState = favoritesReviewCoordinator.refresh(
             favoritesRepository = favoritesRepository,
             intakeService = intakeService,
             statsService = statsService,
-            invalidateIntakeCache = invalidateIntakeCache,
+        )
+        favoritesViewModel.updateReviewDueCounts(reviewState.dueCountByLanguage)
+        hasFavoritesToReview = reviewState.hasDueCards
+    }
+
+    suspend fun refreshFavoritesDueCountsOnly() {
+        val reviewState = favoritesReviewCoordinator.refreshDueCountsOnly(
+            favoritesRepository = favoritesRepository,
+            statsService = statsService,
         )
         favoritesViewModel.updateReviewDueCounts(reviewState.dueCountByLanguage)
         hasFavoritesToReview = reviewState.hasDueCards
@@ -286,7 +319,7 @@ fun App(
                 platform,
                 buildConfig,
                 onDictionaryDataChanged = { recoverFavorites ->
-                    favoritesReviewCoordinator.invalidateIntakeCache()
+                    favoritesReviewCoordinator.invalidateAllIntakeCache()
                     dictionaryRepository.clearSenseCache()
                     if (recoverFavorites) {
                         platform.runWithProcessKeepAlive {
@@ -301,7 +334,18 @@ fun App(
         onDispose { downloadCoordinator.close() }
     }
 
+    // Update the badge/due counts immediately from current SR state so the bottom-nav dot
+    // and Study Due card are correct as soon as the user lands on a screen.
     LaunchedEffect(navBackStackEntry) {
+        refreshFavoritesDueCountsOnly()
+    }
+
+    // Intake reads the dictionary DB and on iOS serializes against the visible screen's
+    // queries (e.g. FavoritesScreen's computeFavoritesState, which itself debounces ~200ms).
+    // Defer it so the destination gets to paint first; after the delay it runs only for
+    // languages whose cache is stale.
+    LaunchedEffect(navBackStackEntry) {
+        delay(500.milliseconds)
         refreshFavoritesReviewState()
     }
 
@@ -509,7 +553,7 @@ fun App(
                                 }
                             },
                             finalize = {
-                                favoritesReviewCoordinator.invalidateIntakeCache()
+                                favoritesReviewCoordinator.invalidateAllIntakeCache()
                                 dictionaryRepository.clearSenseCache()
                                 platform.runWithProcessKeepAlive {
                                     withContext(Dispatchers.Default) {
@@ -683,8 +727,13 @@ fun App(
                         logEvent(AnalyticsEvent.STUDY_START_SESSION)
                         navController.navigate(AppDestination.StudySession(language.code))
                     },
-                    onFavoritesChanged = {
-                        coroutineScope.launch { refreshFavoritesReviewState(invalidateIntakeCache = true) }
+                    onFavoritesChanged = { language ->
+                        favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(language)
+                        // Toggle stays on Favorites, so navBackStackEntry doesn't change and the
+                        // nav effects don't refire. remove() and undo's add() already update
+                        // card.suspended in-DB, so a stats-only refresh shows correct counts
+                        // without paying for intake on the dictionary-DB driver.
+                        coroutineScope.launch { refreshFavoritesDueCountsOnly() }
                     },
                 )
             }
@@ -733,7 +782,13 @@ fun App(
                         ttsManager = ttsManager,
                         voiceFilterHelper = voiceFilterHelper,
                         onReviewSubmitted = {
-                            favoritesReviewCoordinator.invalidateIntakeCache()
+                            Language.fromCodeOrNull(args.langCode)?.let { lang ->
+                                favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
+                            }
+                            // A submitted review can push the card past today; refresh the
+                            // bottom-nav dot from stats. No intake needed — review changes
+                            // hit `card.due_at` directly.
+                            coroutineScope.launch { refreshFavoritesDueCountsOnly() }
                         },
                     )
                 }
@@ -814,7 +869,12 @@ fun App(
                             if (added) {
                                 favoritesViewModel.requestScrollToTop()
                             }
-                            coroutineScope.launch { refreshFavoritesReviewState(invalidateIntakeCache = true) }
+                            favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(args.dictionaryLanguage)
+                            // Remove flips card.suspended in-DB so the dot updates immediately.
+                            // Add creates a pending favorite with no SR cards yet — the dot
+                            // catches up when the user navigates back and the delayed intake
+                            // effect runs intake for this language.
+                            coroutineScope.launch { refreshFavoritesDueCountsOnly() }
                         },
                     ).also { created ->
                         wordDetailViewModels[args] = created
@@ -866,7 +926,7 @@ fun App(
                             dataManager.deleteAllDownloadedData()
                             localDbManager.deleteAll()
                             dictionaryRepository.clearSenseCache()
-                            favoritesReviewCoordinator.invalidateIntakeCache()
+                            favoritesReviewCoordinator.invalidateAllIntakeCache()
                             favoritesViewModel.dropCachedFavoriteDetails()
                             val target = selectInitialDestination()
                             navController.navigate(target) {
