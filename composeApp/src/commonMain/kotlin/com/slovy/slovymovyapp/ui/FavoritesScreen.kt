@@ -348,12 +348,15 @@ class FavoritesViewModel(
     }
 
     private fun applyNewState(newState: FavoritesUiState.Content) {
-        state = if (pendingScrollToTop) {
+        val current = state as? FavoritesUiState.Content
+        val preservedQuery = current?.query ?: newState.query
+        val scrollToTop = if (pendingScrollToTop) {
             pendingScrollToTop = false
-            newState.copy(scrollToTop = true)
+            true
         } else {
-            newState.copy(scrollToTop = (state as? FavoritesUiState.Content)?.scrollToTop ?: false)
+            current?.scrollToTop ?: false
         }
+        state = newState.copy(query = preservedQuery, scrollToTop = scrollToTop)
     }
 
     /** Computes and applies favorites state. Exposed for tests; production code uses the
