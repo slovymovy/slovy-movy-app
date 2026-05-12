@@ -415,7 +415,7 @@ class FavoritesViewModel(
         senseId: String,
         removedMessage: String,
         undoLabel: String,
-        onFavoritesChanged: () -> Unit = {},
+        onFavoritesChanged: (Language) -> Unit = {},
     ) {
         val item = findSense(senseId) ?: return
         viewModelScope.launch {
@@ -425,7 +425,7 @@ class FavoritesViewModel(
             // Remove from repository, then remove from displayed list for immediate feedback
             favoritesRepository.remove(senseId, favorite.language)
             Analytics.logEvent(AnalyticsEvent.FAVOURITES_REMOVE)
-            onFavoritesChanged()
+            onFavoritesChanged(favorite.language)
             val content = state as? FavoritesUiState.Content ?: return@launch
             state = content.copy(senses = content.senses.filter { it.senseId != senseId })
 
@@ -447,7 +447,7 @@ class FavoritesViewModel(
                 // Re-add with the original createdAt to preserve position
                 favoritesRepository.add(senseId, favorite.language, favorite.lemma, favorite.createdAt)
                 Analytics.logEvent(AnalyticsEvent.FAVOURITES_SAVE)
-                onFavoritesChanged()
+                onFavoritesChanged(favorite.language)
                 loadFavorites()
             }
         }
@@ -530,7 +530,7 @@ fun FavoritesScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
-    onFavoritesChanged: () -> Unit = {},
+    onFavoritesChanged: (Language) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     val removedMessage = stringResource(Res.string.favorites_removed_message)

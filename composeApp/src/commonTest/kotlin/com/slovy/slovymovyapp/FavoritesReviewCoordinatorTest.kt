@@ -35,17 +35,28 @@ class FavoritesReviewCoordinatorTest {
     }
 
     @Test
-    fun invalidateIntakeCacheDropsCachedLanguages() {
+    fun invalidateAllIntakeCacheDropsCachedLanguages() {
         coordinator.markIntakeRun(Language.ENGLISH)
         coordinator.markIntakeRun(Language.POLISH)
 
         assertFalse(coordinator.shouldRunIntake(Language.ENGLISH))
         assertFalse(coordinator.shouldRunIntake(Language.POLISH))
 
-        coordinator.invalidateIntakeCache()
+        coordinator.invalidateAllIntakeCache()
 
         assertTrue(coordinator.shouldRunIntake(Language.ENGLISH))
         assertTrue(coordinator.shouldRunIntake(Language.POLISH))
+    }
+
+    @Test
+    fun invalidateIntakeCacheForLanguageDropsOnlyThatLanguage() {
+        coordinator.markIntakeRun(Language.ENGLISH)
+        coordinator.markIntakeRun(Language.POLISH)
+
+        coordinator.invalidateIntakeCacheForLanguage(Language.ENGLISH)
+
+        assertTrue(coordinator.shouldRunIntake(Language.ENGLISH))
+        assertFalse(coordinator.shouldRunIntake(Language.POLISH))
     }
 }
 

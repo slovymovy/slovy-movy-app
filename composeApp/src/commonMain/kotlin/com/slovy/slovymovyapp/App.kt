@@ -74,16 +74,16 @@ internal class FavoritesReviewCoordinator(
         favoritesRepository: FavoritesRepository,
         intakeService: LearningIntake,
         statsService: StatsService,
-        invalidateIntakeCache: Boolean = false,
     ): FavoritesReviewState = refreshMutex.withLock {
         if (!enabled) return@withLock FavoritesReviewState(emptyMap())
-        if (invalidateIntakeCache) {
-            invalidateIntakeCache()
-        }
         computeFavoritesReviewState(favoritesRepository, intakeService, statsService)
     }
 
-    fun invalidateIntakeCache() {
+    fun invalidateIntakeCacheForLanguage(language: Language) {
+        lastIntakeAtByLanguage = lastIntakeAtByLanguage - language
+    }
+
+    fun invalidateAllIntakeCache() {
         lastIntakeAtByLanguage = emptyMap()
     }
 
@@ -261,12 +261,11 @@ fun App(
         ).also { it.start() }
     }
 
-    suspend fun refreshFavoritesReviewState(invalidateIntakeCache: Boolean = false) {
+    suspend fun refreshFavoritesReviewState() {
         val reviewState = favoritesReviewCoordinator.refresh(
             favoritesRepository = favoritesRepository,
             intakeService = intakeService,
             statsService = statsService,
-            invalidateIntakeCache = invalidateIntakeCache,
         )
         favoritesViewModel.updateReviewDueCounts(reviewState.dueCountByLanguage)
         hasFavoritesToReview = reviewState.hasDueCards
@@ -286,7 +285,7 @@ fun App(
                 platform,
                 buildConfig,
                 onDictionaryDataChanged = { recoverFavorites ->
-                    favoritesReviewCoordinator.invalidateIntakeCache()
+                    favoritesReviewCoordinator.invalidateAllIntakeCache()
                     dictionaryRepository.clearSenseCache()
                     if (recoverFavorites) {
                         platform.runWithProcessKeepAlive {
@@ -509,7 +508,7 @@ fun App(
                                 }
                             },
                             finalize = {
-                                favoritesReviewCoordinator.invalidateIntakeCache()
+                                favoritesReviewCoordinator.invalidateAllIntakeCache()
                                 dictionaryRepository.clearSenseCache()
                                 platform.runWithProcessKeepAlive {
                                     withContext(Dispatchers.Default) {
@@ -683,8 +682,8 @@ fun App(
                         logEvent(AnalyticsEvent.STUDY_START_SESSION)
                         navController.navigate(AppDestination.StudySession(language.code))
                     },
-                    onFavoritesChanged = {
-                        coroutineScope.launch { refreshFavoritesReviewState(invalidateIntakeCache = true) }
+                    onFavoritesChanged = { language ->
+                        favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(language)
                     },
                 )
             }
@@ -733,7 +732,9 @@ fun App(
                         ttsManager = ttsManager,
                         voiceFilterHelper = voiceFilterHelper,
                         onReviewSubmitted = {
-                            favoritesReviewCoordinator.invalidateIntakeCache()
+                            Language.fromCodeOrNull(args.langCode)?.let { lang ->
+                                favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
+                            }
                         },
                     )
                 }
@@ -814,7 +815,7 @@ fun App(
                             if (added) {
                                 favoritesViewModel.requestScrollToTop()
                             }
-                            coroutineScope.launch { refreshFavoritesReviewState(invalidateIntakeCache = true) }
+                            favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(args.dictionaryLanguage)
                         },
                     ).also { created ->
                         wordDetailViewModels[args] = created
@@ -866,7 +867,7 @@ fun App(
                             dataManager.deleteAllDownloadedData()
                             localDbManager.deleteAll()
                             dictionaryRepository.clearSenseCache()
-                            favoritesReviewCoordinator.invalidateIntakeCache()
+                            favoritesReviewCoordinator.invalidateAllIntakeCache()
                             favoritesViewModel.dropCachedFavoriteDetails()
                             val target = selectInitialDestination()
                             navController.navigate(target) {
