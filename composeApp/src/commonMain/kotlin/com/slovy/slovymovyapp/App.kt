@@ -45,6 +45,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.download_title_downloading
+import kotlin.concurrent.Volatile
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
@@ -63,12 +64,19 @@ internal class FavoritesReviewCoordinator(
     private val refreshMutex = Mutex()
     private var lastIntakeAtByLanguage: Map<Language, Instant> = emptyMap()
 
+    // Intake reads the local dictionary DB. The data-version-mismatch flow wipes that DB
+    // (LocalDbManager.deleteAll closes the driver), so we must keep the coordinator disabled
+    // until the routing layer has confirmed we're past that check.
+    @Volatile
+    var enabled: Boolean = false
+
     suspend fun refresh(
         favoritesRepository: FavoritesRepository,
         intakeService: LearningIntake,
         statsService: StatsService,
         invalidateIntakeCache: Boolean = false,
     ): FavoritesReviewState = refreshMutex.withLock {
+        if (!enabled) return@withLock FavoritesReviewState(emptyMap())
         if (invalidateIntakeCache) {
             invalidateIntakeCache()
         }
@@ -319,14 +327,18 @@ fun App(
         // so the routing below sees an accurate `hasDictionary` / `hasTranslation` picture.
         dataManager.cleanupCorruptDownloadedDbs()
 
-        // Check if data version is current (before welcome, so existing users see mismatch)
+        // Check if data version is current (before welcome, so existing users see mismatch).
+        // The coordinator defaults to disabled, so returning DataVersionMismatch here keeps
+        // intake off — the redownload flow calls localDbManager.deleteAll(), and any concurrent
+        // intake query against the cached driver would crash.
         if (!dataManager.hasRequiredVersion()) {
             val savedVersion = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
-            // If version exists but is outdated, show error before deleting
             if (savedVersion != null) {
                 return AppDestination.DataVersionMismatch
             }
         }
+
+        favoritesReviewCoordinator.enabled = true
 
         val nativeSetting = settingsRepository.getById(Setting.Name.LANGUAGE)
         val natives = settingsRepository.getTranslationLanguages().sortedBy { it.ordinal }
