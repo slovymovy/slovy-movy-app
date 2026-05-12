@@ -785,6 +785,10 @@ fun App(
                             Language.fromCodeOrNull(args.langCode)?.let { lang ->
                                 favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
                             }
+                            // A submitted review can push the card past today; refresh the
+                            // bottom-nav dot from stats. No intake needed — review changes
+                            // hit `card.due_at` directly.
+                            coroutineScope.launch { refreshFavoritesDueCountsOnly() }
                         },
                     )
                 }
@@ -866,6 +870,11 @@ fun App(
                                 favoritesViewModel.requestScrollToTop()
                             }
                             favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(args.dictionaryLanguage)
+                            // Remove flips card.suspended in-DB so the dot updates immediately.
+                            // Add creates a pending favorite with no SR cards yet — the dot
+                            // catches up when the user navigates back and the delayed intake
+                            // effect runs intake for this language.
+                            coroutineScope.launch { refreshFavoritesDueCountsOnly() }
                         },
                     ).also { created ->
                         wordDetailViewModels[args] = created
