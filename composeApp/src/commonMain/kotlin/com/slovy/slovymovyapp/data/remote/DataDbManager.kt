@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.data.remote
 
+import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
@@ -54,6 +55,12 @@ class DataDbManager(
          * 16 KB, so this threshold catches the corrupt case without false positives.
          */
         internal const val MIN_VALID_DOWNLOADED_DB_BYTES: Long = 16L * 1024L
+
+        /** Table that must exist in a non-corrupt dictionary DB. */
+        private const val DICTIONARY_PROBE_TABLE = "lemma"
+
+        /** Table that must exist in a non-corrupt translation DB. */
+        private const val TRANSLATION_PROBE_TABLE = "sense_translation"
 
         fun dictionaryFileName(lang: Language): String = "$DICTIONARY_PREFIX${lang.code.lowercase()}$DB_EXTENSION"
         fun translationFileName(src: Language, tgt: Language): String =
@@ -151,7 +158,60 @@ class DataDbManager(
             val size = platform.getFileSize(file)
             if (size != null && size < MIN_VALID_DOWNLOADED_DB_BYTES) {
                 platform.deleteFile(file)
+                return@forEach
             }
+
+            // Size alone won't catch a truncated download that landed past the 16 KB mark but
+            // lost the page holding the schema entry. Open the file and confirm the must-exist
+            // table is present.
+            val schemaOk = if (fileName.startsWith(DICTIONARY_PREFIX)) {
+                probeDownloadedDb(file, isDictionary = true)
+            } else {
+                probeDownloadedDb(file, isDictionary = false)
+            }
+            if (!schemaOk) {
+                platform.deleteFile(file)
+            }
+        }
+    }
+
+    /**
+     * Opens the file with a read-only SqlDelight driver and confirms the must-exist table is
+     * present. Returns false if the file is not a valid SQLite DB, the driver fails to open, or
+     * the schema lookup fails for any reason. Caller is responsible for deleting the file when
+     * this returns false. Must only be called on files that already exist on disk — otherwise the
+     * underlying SupportSQLiteOpenHelper would auto-create an empty schema-less file.
+     */
+    private fun probeDownloadedDb(path: Path, isDictionary: Boolean): Boolean {
+        val table = if (isDictionary) DICTIONARY_PROBE_TABLE else TRANSLATION_PROBE_TABLE
+        val driver = try {
+            if (isDictionary) platform.createDictionaryDataDriver(path, readOnly = true)
+            else platform.createTranslationDataDriver(path, readOnly = true)
+        } catch (_: Throwable) {
+            return false
+        }
+        return try {
+            var hasTable = false
+            driver.executeQuery(
+                identifier = null,
+                sql = "SELECT 1 FROM sqlite_master WHERE type='table' AND name=? LIMIT 1",
+                mapper = { cursor ->
+                    val nextResult = cursor.next()
+                    val hasRow = when (nextResult) {
+                        is QueryResult.Value -> nextResult.value
+                        else -> nextResult.value
+                    }
+                    hasTable = hasRow
+                    QueryResult.Value(hasRow)
+                },
+                parameters = 1,
+                binders = { bindString(0, table) },
+            )
+            hasTable
+        } catch (_: Throwable) {
+            false
+        } finally {
+            runCatching { driver.close() }
         }
     }
 
@@ -413,6 +473,14 @@ class DataDbManager(
             val url = remoteDataProvider.downloadUrlFor(name)
             platform.ensureDatabasesDir()
             downloadToFile(url, remoteDataProvider.headersForHttp(), path, onProgress, cancelToken ?: CancelToken())
+            // Belt-and-suspenders against partial downloads that slipped past byte-count checks
+            // (e.g. server response without Content-Length): verify the file actually carries our
+            // schema before we stamp DATA_VERSION and report success.
+            val isDictionary = name.startsWith(DICTIONARY_PREFIX)
+            if (!probeDownloadedDb(file, isDictionary = isDictionary)) {
+                platform.deleteFile(file)
+                throw IllegalStateException("Downloaded $name is missing expected schema; deleted")
+            }
             platform.markNoBackup(path)
             // After first successful download, save version
             setDownloadedVersion()

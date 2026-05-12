@@ -214,6 +214,7 @@ class DownloadViewModel(
     }
 
     fun cancelDownload() {
+        Analytics.logEvent(AnalyticsEvent.DOWNLOAD_CANCEL_CLICK)
         downloadCoordinator.cancel(downloadKey)
     }
 
