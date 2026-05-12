@@ -72,6 +72,7 @@
         <item quantity="many">znaczeń</item>
         <item quantity="other">znaczeń</item>
     </plurals>
+    <string name="stats_stage_queue">Kolejka</string>
     <string name="stats_stage_new">Nowe</string>
     <string name="stats_stage_fresh">Świeźe</string>
     <string name="stats_stage_middle">Średnie</string>

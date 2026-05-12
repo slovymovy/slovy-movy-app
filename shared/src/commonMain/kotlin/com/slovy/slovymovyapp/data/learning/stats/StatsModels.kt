@@ -9,6 +9,7 @@ data class GlobalStats(
 )
 
 enum class StatsPipelineStageId {
+    QUEUE,
     NEW,
     FRESH,
     MIDDLE,
