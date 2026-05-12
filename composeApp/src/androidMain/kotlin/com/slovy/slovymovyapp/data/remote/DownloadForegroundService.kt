@@ -10,7 +10,11 @@ import android.os.Build
 class DownloadForegroundService : Service() {
     override fun onBind(intent: Intent?) = null
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onCreate() {
+        super.onCreate()
+        // Call startForeground in onCreate (not onStartCommand) to satisfy the
+        // startForegroundService -> startForeground 5s contract even when the
+        // service is stopped before onStartCommand is delivered.
         val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
             Notification.Builder(this, CHANNEL_ID)
@@ -28,6 +32,9 @@ class DownloadForegroundService : Service() {
                 .build()
         }
         startForeground(NOTIFICATION_ID, notification)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return START_NOT_STICKY
     }
 
