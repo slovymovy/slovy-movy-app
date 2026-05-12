@@ -182,11 +182,7 @@ class DataDbManager(
      * this returns false. Must only be called on files that already exist on disk — otherwise the
      * underlying SupportSQLiteOpenHelper would auto-create an empty schema-less file.
      */
-    private fun probeDownloadedDb(
-        path: Path,
-        isDictionary: Boolean,
-        runIntegrityCheck: Boolean = false,
-    ): Boolean {
+    private fun probeDownloadedDb(path: Path, isDictionary: Boolean): Boolean {
         val table = if (isDictionary) DICTIONARY_PROBE_TABLE else TRANSLATION_PROBE_TABLE
         val driver = try {
             if (isDictionary) platform.createDictionaryDataDriver(path, readOnly = true)
@@ -211,31 +207,7 @@ class DataDbManager(
                 parameters = 1,
                 binders = { bindString(0, table) },
             )
-            when {
-                !hasTable -> false
-                !runIntegrityCheck -> true
-                else -> {
-                    // PRAGMA quick_check is the cheap variant of integrity_check; it scans every
-                    // page and verifies B-tree linkage and page checksums. On success it returns
-                    // a single row "ok"; otherwise it returns one or more rows describing the
-                    // problem. Accept only the single "ok" row.
-                    var firstResult: String? = null
-                    var rowCount = 0
-                    driver.executeQuery(
-                        identifier = null,
-                        sql = "PRAGMA quick_check",
-                        mapper = { cursor ->
-                            while (cursor.next().value) {
-                                if (rowCount == 0) firstResult = cursor.getString(0)
-                                rowCount++
-                            }
-                            QueryResult.Value(Unit)
-                        },
-                        parameters = 0,
-                    )
-                    rowCount == 1 && firstResult == "ok"
-                }
-            }
+            hasTable
         } catch (_: Throwable) {
             false
         } finally {
@@ -502,15 +474,12 @@ class DataDbManager(
             platform.ensureDatabasesDir()
             downloadToFile(url, remoteDataProvider.headersForHttp(), path, onProgress, cancelToken ?: CancelToken())
             // Belt-and-suspenders against partial downloads that slipped past byte-count checks
-            // (e.g. server response without Content-Length, or platforms where the stream layer
-            // doesn't surface mid-transfer drops): verify the file carries our schema AND passes
-            // PRAGMA quick_check before we stamp DATA_VERSION. quick_check catches truncations
-            // where sqlite_master + the must-exist table entry survive at the start of the file
-            // but later data pages are missing or unreadable.
+            // (e.g. server response without Content-Length): verify the file actually carries our
+            // schema before we stamp DATA_VERSION and report success.
             val isDictionary = name.startsWith(DICTIONARY_PREFIX)
-            if (!probeDownloadedDb(file, isDictionary = isDictionary, runIntegrityCheck = true)) {
+            if (!probeDownloadedDb(file, isDictionary = isDictionary)) {
                 platform.deleteFile(file)
-                throw IllegalStateException("Downloaded $name failed integrity check; deleted")
+                throw IllegalStateException("Downloaded $name is missing expected schema; deleted")
             }
             platform.markNoBackup(path)
             // After first successful download, save version
