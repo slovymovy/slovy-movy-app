@@ -5,6 +5,7 @@ import com.slovy.slovymovyapp.data.learning.CardState
 import com.slovy.slovymovyapp.data.learning.Rating
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.db.FavoritesQueries
+import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -71,6 +72,7 @@ class StatsScreenDataTest : BaseTest() {
         val data = service.statsScreenData("en", currentMonth(), today, tz)
 
         val counts = data.pipeline.associate { it.id to it.count }
+        assertEquals(0, counts[StatsPipelineStageId.QUEUE])
         assertEquals(1, counts[StatsPipelineStageId.NEW])
         assertEquals(1, counts[StatsPipelineStageId.FRESH])
         assertEquals(1, counts[StatsPipelineStageId.MIDDLE])
@@ -88,6 +90,39 @@ class StatsScreenDataTest : BaseTest() {
 
         val data = newService().statsScreenData("en", currentMonth(), today, tz)
         assertEquals(2, data.wordsTotal)
+    }
+
+    @Test
+    fun queue_counts_pending_favorites_and_includes_unique_queued_lemmas_in_words_total() {
+        insertCard(
+            senseId = Uuid.random(),
+            lemmaId = JsonIngestionBuilder.generateLemmaId("scheduled"),
+            state = CardState.REVIEW,
+            stability = 1.0
+        )
+        insertCard(
+            senseId = Uuid.random(),
+            lemmaId = JsonIngestionBuilder.generateLemmaId("shared"),
+            state = CardState.REVIEW,
+            stability = 1.0
+        )
+
+        insertFavorite(senseId = Uuid.random(), lemma = "shared")
+        insertFavorite(senseId = Uuid.random(), lemma = "shared")
+        insertFavorite(senseId = Uuid.random(), lemma = "queued-only")
+        insertFavorite(senseId = Uuid.random(), lemma = "activated", activatedAt = nowInstant.toEpochMilliseconds())
+        insertFavorite(senseId = Uuid.random(), lemma = "other-language", langCode = "nl")
+
+        val data = newService().statsScreenData("en", currentMonth(), today, tz)
+        val counts = data.pipeline.associate { it.id to it.count }
+
+        assertEquals(3, counts[StatsPipelineStageId.QUEUE])
+        assertEquals(3, data.wordsTotal)
+
+        val otherLanguage = newService().statsScreenData("nl", currentMonth(), today, tz)
+        val otherCounts = otherLanguage.pipeline.associate { it.id to it.count }
+        assertEquals(1, otherCounts[StatsPipelineStageId.QUEUE])
+        assertEquals(1, otherLanguage.wordsTotal)
     }
 
     @Test
@@ -320,6 +355,21 @@ class StatsScreenDataTest : BaseTest() {
         )
     }
 
+    private fun insertFavorite(
+        senseId: Uuid,
+        lemma: String,
+        langCode: String = "en",
+        activatedAt: Long? = null,
+    ) {
+        queries.insertFavorite(
+            sense_id = senseId.toString(),
+            lang_code = langCode,
+            lemma = lemma,
+            created_at = nowInstant.toEpochMilliseconds(),
+            activated_at = activatedAt,
+        )
+    }
+
     private fun insertReviewLog(cardId: Uuid, at: Instant) {
         queries.insertReviewLog(
             id = Uuid.random(),
@@ -340,4 +390,3 @@ class StatsScreenDataTest : BaseTest() {
         )
     }
 }
-

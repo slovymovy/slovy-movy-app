@@ -71,6 +71,7 @@
         <item quantity="many">betekenissen</item>
         <item quantity="other">betekenissen</item>
     </plurals>
+    <string name="stats_stage_queue">Wachtrij</string>
     <string name="stats_stage_new">Nieuw</string>
     <string name="stats_stage_fresh">Vers</string>
     <string name="stats_stage_middle">Herinneren</string>

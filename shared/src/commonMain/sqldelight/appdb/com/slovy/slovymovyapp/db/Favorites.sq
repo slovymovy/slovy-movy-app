@@ -139,6 +139,18 @@ FROM favorites
 WHERE lang_code = ? AND lemma = ? AND activated_at IS NULL
 ORDER BY created_at ASC;
 
+countPendingFavoritesByLang:
+SELECT COUNT(*)
+FROM favorites
+WHERE lang_code = :lang_code
+  AND activated_at IS NULL;
+
+selectPendingFavoriteLemmasByLang:
+SELECT DISTINCT lemma
+FROM favorites
+WHERE lang_code = :lang_code
+  AND activated_at IS NULL;
+
 markFavoriteActivated:
 UPDATE favorites
 SET activated_at = ?

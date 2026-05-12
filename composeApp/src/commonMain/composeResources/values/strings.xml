@@ -71,6 +71,7 @@
         <item quantity="many">meanings</item>
         <item quantity="other">meanings</item>
     </plurals>
+    <string name="stats_stage_queue">Queue</string>
     <string name="stats_stage_new">New</string>
     <string name="stats_stage_fresh">Fresh</string>
     <string name="stats_stage_middle">Recalling</string>

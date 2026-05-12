@@ -986,6 +986,7 @@ private fun statsMonthName(month: Int): String = when (month) {
 
 @Composable
 private fun stageLabel(stage: StatsPipelineStageId): String = when (stage) {
+    StatsPipelineStageId.QUEUE -> stringResource(Res.string.stats_stage_queue)
     StatsPipelineStageId.NEW -> stringResource(Res.string.stats_stage_new)
     StatsPipelineStageId.FRESH -> stringResource(Res.string.stats_stage_fresh)
     StatsPipelineStageId.MIDDLE -> stringResource(Res.string.stats_stage_middle)
@@ -994,6 +995,7 @@ private fun stageLabel(stage: StatsPipelineStageId): String = when (stage) {
 }
 
 private fun stageColor(stage: StatsPipelineStageId): Color = when (stage) {
+    StatsPipelineStageId.QUEUE -> Color(0xFF9B8FB8)
     StatsPipelineStageId.NEW -> Color(0xFFC8B59A)
     StatsPipelineStageId.FRESH -> Color(0xFFD9866C)
     StatsPipelineStageId.MIDDLE -> Color(0xFFD6A85C)
@@ -1003,6 +1005,7 @@ private fun stageColor(stage: StatsPipelineStageId): Color = when (stage) {
 
 // Visual-only skeleton proportions; the loaded values come from the stats pipeline.
 private fun loadingPipelineWidth(stage: StatsPipelineStageId): Float = when (stage) {
+    StatsPipelineStageId.QUEUE -> 0.66f
     StatsPipelineStageId.NEW -> 0.74f
     StatsPipelineStageId.FRESH -> 0.58f
     StatsPipelineStageId.MIDDLE -> 0.82f
@@ -1086,6 +1089,7 @@ private fun previewStatsState(languages: List<Language>, today: LocalDate): Stat
 }
 
 private fun previewPipeline(variant: Int): List<StatsPipelineStage> = listOf(
+    StatsPipelineStage(StatsPipelineStageId.QUEUE, 21 + variant),
     StatsPipelineStage(StatsPipelineStageId.NEW, 47 + variant * 2),
     StatsPipelineStage(StatsPipelineStageId.FRESH, 86 + variant * 3),
     StatsPipelineStage(StatsPipelineStageId.MIDDLE, 132 + variant * 4),

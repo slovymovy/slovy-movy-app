@@ -71,6 +71,7 @@
         <item quantity="many">значений</item>
         <item quantity="other">значения</item>
     </plurals>
+    <string name="stats_stage_queue">Очередь</string>
     <string name="stats_stage_new">Новые</string>
     <string name="stats_stage_fresh">Свежие</string>
     <string name="stats_stage_middle">Средние</string>

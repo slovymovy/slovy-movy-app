@@ -4,6 +4,7 @@ import com.slovy.slovymovyapp.data.learning.CardState
 import com.slovy.slovymovyapp.data.learning.fsrs.DAY
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.db.FavoritesQueries
+import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import kotlinx.datetime.*
 import kotlin.math.pow
 import kotlin.time.Clock
@@ -64,8 +65,16 @@ class StatsService(
             .toSet()
 
         val cardRows = learning.selectCardSchedulingByLang(langCode).executeAsList()
-        val wordsTotal = cardRows.asSequence().map { it.lemma_id }.toSet().size
-        val pipeline = computePipeline(cardRows)
+        val queuedLemmas = learning.selectPendingFavoriteLemmasByLang(langCode).executeAsList()
+        val wordsTotal = cardRows.asSequence()
+            .map { it.lemma_id }
+            .plus(queuedLemmas.asSequence().map { JsonIngestionBuilder.generateLemmaId(it) })
+            .toSet()
+            .size
+        val pipeline = computePipeline(
+            cardRows = cardRows,
+            queuedCount = learning.countPendingFavoritesByLang(langCode).executeAsOne().toInt(),
+        )
 
         return StatsScreenData(
             streakDays = streakDays,
@@ -94,8 +103,10 @@ class StatsService(
 
     private fun computePipeline(
         cardRows: List<com.slovy.slovymovyapp.db.SelectCardSchedulingByLang>,
+        queuedCount: Int,
     ): List<StatsPipelineStage> {
         val counts = StatsPipelineStageId.entries.associateWith { 0 }.toMutableMap()
+        counts[StatsPipelineStageId.QUEUE] = queuedCount
         cardRows
             .groupBy { it.sense_id }
             .values
