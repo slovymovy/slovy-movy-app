@@ -35,6 +35,7 @@ import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -47,6 +48,7 @@ import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.download_title_downloading
 import kotlin.concurrent.Volatile
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -77,6 +79,29 @@ internal class FavoritesReviewCoordinator(
     ): FavoritesReviewState = refreshMutex.withLock {
         if (!enabled) return@withLock FavoritesReviewState(emptyMap())
         computeFavoritesReviewState(favoritesRepository, intakeService, statsService)
+    }
+
+    /**
+     * Re-reads due counts without running intake. Cheap enough to call right after a
+     * favorite toggle: remove/add already mutate `card.suspended` synchronously, so
+     * `dueToday` is accurate. Skipping intake here avoids serializing the dictionary-DB
+     * driver against the screen's own queries on iOS.
+     */
+    suspend fun refreshDueCountsOnly(
+        favoritesRepository: FavoritesRepository,
+        statsService: StatsService,
+    ): FavoritesReviewState = refreshMutex.withLock {
+        if (!enabled) return@withLock FavoritesReviewState(emptyMap())
+        withContext(Dispatchers.Default) {
+            val languages = favoritesRepository.getAllGroupedByLangAndLemma()
+                .map { it.language }
+                .distinct()
+            FavoritesReviewState(
+                dueCountByLanguage = languages.associateWith { language ->
+                    statsService.globalStats(language.code).dueToday
+                },
+            )
+        }
     }
 
     fun invalidateIntakeCacheForLanguage(language: Language) {
@@ -271,6 +296,15 @@ fun App(
         hasFavoritesToReview = reviewState.hasDueCards
     }
 
+    suspend fun refreshFavoritesDueCountsOnly() {
+        val reviewState = favoritesReviewCoordinator.refreshDueCountsOnly(
+            favoritesRepository = favoritesRepository,
+            statsService = statsService,
+        )
+        favoritesViewModel.updateReviewDueCounts(reviewState.dueCountByLanguage)
+        hasFavoritesToReview = reviewState.hasDueCards
+    }
+
     val buildConfig = remember { appBuildConfig }
     val settingsViewModel =
         remember {
@@ -300,7 +334,18 @@ fun App(
         onDispose { downloadCoordinator.close() }
     }
 
+    // Update the badge/due counts immediately from current SR state so the bottom-nav dot
+    // and Study Due card are correct as soon as the user lands on a screen.
     LaunchedEffect(navBackStackEntry) {
+        refreshFavoritesDueCountsOnly()
+    }
+
+    // Intake reads the dictionary DB and on iOS serializes against the visible screen's
+    // queries (e.g. FavoritesScreen's computeFavoritesState, which itself debounces ~200ms).
+    // Defer it so the destination gets to paint first; after the delay it runs only for
+    // languages whose cache is stale.
+    LaunchedEffect(navBackStackEntry) {
+        delay(500.milliseconds)
         refreshFavoritesReviewState()
     }
 
@@ -684,6 +729,11 @@ fun App(
                     },
                     onFavoritesChanged = { language ->
                         favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(language)
+                        // Toggle stays on Favorites, so navBackStackEntry doesn't change and the
+                        // nav effects don't refire. remove() and undo's add() already update
+                        // card.suspended in-DB, so a stats-only refresh shows correct counts
+                        // without paying for intake on the dictionary-DB driver.
+                        coroutineScope.launch { refreshFavoritesDueCountsOnly() }
                     },
                 )
             }
