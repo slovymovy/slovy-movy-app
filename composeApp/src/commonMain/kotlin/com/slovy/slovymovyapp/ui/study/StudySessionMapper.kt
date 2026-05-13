@@ -50,12 +50,17 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
             val target = targetLanguage ?: return null
             val answer = sense.translationCue(target) ?: return null
             val definition = sense.translationDef(target) ?: return null
+            val senses = cardData.entries
+                .flatMap { it.senses }
+                .toStudySenseUiStates(target)
             StudyCardUiState.Recognition(
                 id = card.id.toString(),
                 chipLabel = UiText.Plain("${sourceLanguage.studyCode()} -> ${target.studyCode()}"),
                 promptWord = lemma,
                 promptAudioText = lemma,
                 mode = StudyRecognitionMode.BILINGUAL,
+                senses = senses,
+                activeSenseId = sense.senseId,
                 back = StudyCardBackUiState(
                     headline = answer,
                     definition = definition,
@@ -238,6 +243,22 @@ private fun LanguageCardResponseSense.translationWords(language: Language): Stri
         .distinct()
         .joinToString(", ")
         .takeIf { it.isNotBlank() }
+
+private fun List<LanguageCardResponseSense>.toStudySenseUiStates(targetLanguage: Language): List<StudyCardSenseUiState> =
+    mapNotNull { sense ->
+        val translation = sense.translationWords(targetLanguage) ?: return@mapNotNull null
+        sense to translation
+    }.mapIndexed { index, (sense, translation) ->
+        val example = sense.examples.firstOrNull()
+        StudyCardSenseUiState(
+            id = sense.senseId,
+            num = index + 1,
+            translation = translation,
+            definition = sense.translationDef(targetLanguage),
+            example = example?.text,
+            exampleTranslation = example?.targetLangTranslations?.get(targetLanguage),
+        )
+    }
 
 private fun LanguageCardResponseSense.studyExamples(targetLanguage: Language?): List<StudyExampleUiState> {
     val example = examples.randomOrNull() ?: return emptyList()

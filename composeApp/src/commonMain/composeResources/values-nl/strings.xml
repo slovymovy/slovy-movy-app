@@ -558,6 +558,14 @@
     <string name="study_progress_count">%1$d van %2$d</string>
     <string name="study_tap_to_flip">Tik om te draaien</string>
     <string name="study_tap_to_check">Tik om te controleren</string>
+    <plurals name="study_multi_sense_front_hint">
+        <item quantity="one">Je leert %1$d betekenis van dit woord.</item>
+        <item quantity="few">Je leert %1$d betekenissen van dit woord.</item>
+        <item quantity="many">Je leert %1$d betekenissen van dit woord.</item>
+        <item quantity="other">Je leert %1$d betekenissen van dit woord.</item>
+    </plurals>
+    <string name="study_sense_position_label">betekenis %1$d van %2$d</string>
+    <string name="study_sense_position_accessibility">Betekenis %1$d van %2$d</string>
     <string name="study_chip_source_only">alleen %1$s</string>
     <string name="study_chip_fill_in">Invullen</string>
     <string name="study_chip_listen">Luisteren</string>

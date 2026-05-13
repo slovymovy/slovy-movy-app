@@ -27,6 +27,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material.icons.Icons
 import com.slovy.slovymovyapp.ui.SpeakerVector
@@ -98,9 +99,12 @@ import slovymovyapp.composeapp.generated.resources.study_chip_fill_in
 import slovymovyapp.composeapp.generated.resources.study_chip_listen
 import slovymovyapp.composeapp.generated.resources.study_listen_prompt
 import slovymovyapp.composeapp.generated.resources.study_loading
+import slovymovyapp.composeapp.generated.resources.study_multi_sense_front_hint
 import slovymovyapp.composeapp.generated.resources.study_play_prompt_audio
 import slovymovyapp.composeapp.generated.resources.study_play_word_audio
 import slovymovyapp.composeapp.generated.resources.study_hint_starts_with
+import slovymovyapp.composeapp.generated.resources.study_sense_position_accessibility
+import slovymovyapp.composeapp.generated.resources.study_sense_position_label
 import slovymovyapp.composeapp.generated.resources.study_stop_audio
 import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
 import slovymovyapp.composeapp.generated.resources.study_progress_count
@@ -622,7 +626,7 @@ private fun StudyCardSurface(
                 StudyChip(label = card.chipLabel)
                 Spacer(Modifier.height(AppSpacing.xl))
                 StudyCardBack(
-                    back = card.back,
+                    card = card,
                     isPlayingAudio = isPlayingAudio,
                     isPreparingAudio = isPreparingAudio,
                     onPlayAudio = onPlayAudio,
@@ -708,34 +712,56 @@ private fun RecognitionFront(
     ) {
         val availableWidth = maxWidth
         val speakerSpace = if (card.promptAudioText != null) 36.dp + AppSpacing.sm else 0.dp
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            StudyTaggedText(
-                text = card.promptWord,
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontFamily = MaterialTheme.serifFontFamily,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                autoSize = TextAutoSize.StepBased(
-                    minFontSize = 14.sp,
-                    maxFontSize = MaterialTheme.typography.displayMedium.fontSize,
-                    stepSize = 1.sp,
-                ),
-                modifier = Modifier.widthIn(max = (availableWidth - speakerSpace).coerceAtLeast(0.dp)),
-            )
-            card.promptAudioText?.let { audioText ->
-                StudySpeakerButton(
-                    audioText = audioText,
-                    playContentDescription = stringResource(Res.string.study_play_word_audio),
-                    stopContentDescription = stringResource(Res.string.study_stop_audio),
-                    isPlayingAudio = isPlayingAudio,
-                    isPreparingAudio = isPreparingAudio,
-                    onPlayAudio = onPlayAudio,
-                    onStopAudio = onStopAudio,
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                StudyTaggedText(
+                    text = card.promptWord,
+                    style = MaterialTheme.typography.displayMedium.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    autoSize = TextAutoSize.StepBased(
+                        minFontSize = 14.sp,
+                        maxFontSize = MaterialTheme.typography.displayMedium.fontSize,
+                        stepSize = 1.sp,
+                    ),
+                    modifier = Modifier.widthIn(max = (availableWidth - speakerSpace).coerceAtLeast(0.dp)),
+                )
+                card.promptAudioText?.let { audioText ->
+                    StudySpeakerButton(
+                        audioText = audioText,
+                        playContentDescription = stringResource(Res.string.study_play_word_audio),
+                        stopContentDescription = stringResource(Res.string.study_stop_audio),
+                        isPlayingAudio = isPlayingAudio,
+                        isPreparingAudio = isPreparingAudio,
+                        onPlayAudio = onPlayAudio,
+                        onStopAudio = onStopAudio,
+                    )
+                }
+            }
+            if (card.hasMultiSense) {
+                Spacer(Modifier.height(AppSpacing.md))
+                FrontSenseDots(count = card.senses.size)
+                Spacer(Modifier.height(AppSpacing.md))
+                Text(
+                    text = pluralStringResource(
+                        Res.plurals.study_multi_sense_front_hint,
+                        card.senses.size,
+                        card.senses.size,
+                    ),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontStyle = FontStyle.Italic,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
             }
         }
@@ -871,16 +897,25 @@ private fun ListeningFront(
 
 @Composable
 private fun StudyCardBack(
-    back: StudyCardBackUiState,
+    card: StudyCardUiState,
     isPlayingAudio: Boolean,
     isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
     onStopAudio: () -> Unit,
 ) {
+    val activeSense = (card as? StudyCardUiState.Recognition)?.activeSense
+    val back = activeSense?.toBackUiState() ?: card.back
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
     ) {
+        if (card is StudyCardUiState.Recognition && card.hasMultiSense && activeSense != null) {
+            SensePositionIndicator(
+                activeSense = activeSense,
+                senses = card.senses,
+            )
+        }
+
         back.cloze?.let { cloze ->
             StudyClozeText(
                 cloze = cloze,
@@ -900,6 +935,8 @@ private fun StudyCardBack(
                 text = back.headline,
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontFamily = MaterialTheme.serifFontFamily,
+                    fontSize = if (activeSense != null) 30.sp else MaterialTheme.typography.headlineLarge.fontSize,
+                    lineHeight = if (activeSense != null) 33.sp else MaterialTheme.typography.headlineLarge.lineHeight,
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Start,
@@ -944,6 +981,99 @@ private fun StudyCardBack(
 
         back.examples.forEach { example ->
             StudyExampleBlock(example = example)
+        }
+    }
+}
+
+@Composable
+private fun FrontSenseDots(
+    count: Int,
+    modifier: Modifier = Modifier,
+) {
+    SenseDotRow(
+        count = count,
+        activeIndex = null,
+        activeColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+        inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+        modifier = modifier.clearAndSetSemantics {},
+    )
+}
+
+@Composable
+private fun SensePositionIndicator(
+    activeSense: StudyCardSenseUiState,
+    senses: List<StudyCardSenseUiState>,
+    modifier: Modifier = Modifier,
+) {
+    val activeIndex = senses.indexOfFirst { it.id == activeSense.id }.takeIf { it >= 0 } ?: 0
+    val label = stringResource(
+        Res.string.study_sense_position_label,
+        activeSense.num,
+        senses.size,
+    )
+    val accessibilityLabel = stringResource(
+        Res.string.study_sense_position_accessibility,
+        activeSense.num,
+        senses.size,
+    )
+    Surface(
+        modifier = modifier.clearAndSetSemantics { contentDescription = accessibilityLabel },
+        shape = RoundedCornerShape(999.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontSize = 12.5.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFeatureSettings = "tnum",
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            SenseDotRow(
+                count = senses.size,
+                activeIndex = activeIndex,
+                activeColor = MaterialTheme.colorScheme.primary,
+                inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+                modifier = Modifier.clearAndSetSemantics {},
+            )
+        }
+    }
+}
+
+@Composable
+private fun SenseDotRow(
+    count: Int,
+    activeIndex: Int?,
+    activeColor: Color,
+    inactiveColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        repeat(count) { index ->
+            val active = activeIndex == index
+            val dotWidth by animateDpAsState(
+                targetValue = if (active) 16.dp else 6.dp,
+                label = "senseDotWidth",
+            )
+            Box(
+                modifier = Modifier
+                    .width(dotWidth)
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(if (active) activeColor else inactiveColor),
+            )
         }
     }
 }
@@ -1282,6 +1412,32 @@ private fun ratingLabel(rating: StudyRating): String =
         },
     )
 
+private val StudyCardUiState.Recognition.hasMultiSense: Boolean
+    get() = senses.size > 1
+
+private val StudyCardUiState.Recognition.activeSense: StudyCardSenseUiState?
+    // The render contract keeps the session usable if activeSenseId is stale.
+    get() = if (hasMultiSense) {
+        senses.firstOrNull { it.id == activeSenseId } ?: senses.firstOrNull()
+    } else {
+        null
+    }
+
+private fun StudyCardSenseUiState.toBackUiState(): StudyCardBackUiState =
+    StudyCardBackUiState(
+        headline = translation,
+        definition = definition,
+        examples = listOfNotNull(
+            example?.let { text ->
+                StudyExampleUiState(
+                    text = text,
+                    translation = exampleTranslation,
+                )
+            },
+        ),
+        audioText = null,
+    )
+
 private fun sampleRatings() = listOf(
     StudyRatingUiState(StudyRating.AGAIN, "< 1min"),
     StudyRatingUiState(StudyRating.HARD, "6min"),
@@ -1301,6 +1457,51 @@ private fun recognitionCard() = StudyCardUiState.Recognition(
             StudyExampleUiState(
                 text = "Het was zo <w>gezellig</w> bij jullie thuis.",
                 translation = "It was so lovely at your place.",
+            ),
+        ),
+        audioText = null,
+    ),
+)
+
+private fun multiSenseRecognitionCard() = StudyCardUiState.Recognition(
+    id = "multi-sense-recognition",
+    chipLabel = UiText.Plain("NL -> EN"),
+    promptWord = "zetten",
+    mode = StudyRecognitionMode.BILINGUAL,
+    senses = listOf(
+        StudyCardSenseUiState(
+            id = "sense-1",
+            num = 1,
+            translation = "to put, place",
+            definition = "place something somewhere with intent.",
+            example = "Zet de vaas op <w>tafel</w>.",
+            exampleTranslation = "Put the vase on the table.",
+        ),
+        StudyCardSenseUiState(
+            id = "sense-2",
+            num = 2,
+            translation = "to set",
+            definition = "adjust something to a particular position or value.",
+            example = "Zet de wekker op zeven uur.",
+            exampleTranslation = "Set the alarm for seven.",
+        ),
+        StudyCardSenseUiState(
+            id = "sense-3",
+            num = 3,
+            translation = "to turn on",
+            definition = "start a device or source of light.",
+            example = "Zet het licht aan.",
+            exampleTranslation = "Turn on the light.",
+        ),
+    ),
+    activeSenseId = "sense-1",
+    back = StudyCardBackUiState(
+        headline = "to put, place",
+        definition = "place something somewhere with intent.",
+        examples = listOf(
+            StudyExampleUiState(
+                text = "Zet de vaas op <w>tafel</w>.",
+                translation = "Put the vase on the table.",
             ),
         ),
         audioText = null,
@@ -1456,6 +1657,34 @@ private fun StudySessionRecognitionBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(recognitionCard(), StudyCardSide.BACK),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionMultiSenseRecognitionFrontPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(multiSenseRecognitionCard(), StudyCardSide.FRONT),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionMultiSenseRecognitionBackPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(multiSenseRecognitionCard(), StudyCardSide.BACK),
             onCancel = {},
             onEnd = {},
         )

@@ -56,6 +56,8 @@ sealed interface StudyCardUiState {
         val promptWord: String,
         val promptAudioText: String? = promptWord,
         val mode: StudyRecognitionMode,
+        val senses: List<StudyCardSenseUiState> = emptyList(),
+        val activeSenseId: String? = null,
         override val back: StudyCardBackUiState,
     ) : StudyCardUiState
 
@@ -98,6 +100,15 @@ data class StudyCardBackUiState(
     val examples: List<StudyExampleUiState> = emptyList(),
     val cloze: StudyClozeTextUiState? = null,
     val audioText: String? = headline,
+)
+
+data class StudyCardSenseUiState(
+    val id: String,
+    val num: Int,
+    val translation: String,
+    val definition: String? = null,
+    val example: String? = null,
+    val exampleTranslation: String? = null,
 )
 
 data class StudyExampleUiState(
