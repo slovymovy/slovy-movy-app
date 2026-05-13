@@ -1281,8 +1281,8 @@ private fun ratingLabel(rating: StudyRating): String =
     )
 
 private fun sampleRatings() = listOf(
-    StudyRatingUiState(StudyRating.AGAIN, "< 1m"),
-    StudyRatingUiState(StudyRating.HARD, "6m"),
+    StudyRatingUiState(StudyRating.AGAIN, "< 1min"),
+    StudyRatingUiState(StudyRating.HARD, "6min"),
     StudyRatingUiState(StudyRating.GOOD, "1d"),
     StudyRatingUiState(StudyRating.EASY, "4d"),
 )

@@ -274,8 +274,8 @@ private fun GradeOutcome.intervalLabel(): String {
     val hours = interval.inWholeHours
     val days = interval.inWholeDays
     return when {
-        interval < 1.minutes -> "< 1m"
-        interval < 1.hours -> "${minutes.coerceAtLeast(1)}m"
+        interval < 1.minutes -> "< 1min"
+        interval < 1.hours -> "${minutes.coerceAtLeast(1)}min"
         interval < 1.days -> "${hours.coerceAtLeast(1)}h"
         days < 30 -> "${days.coerceAtLeast(1)}d"
         days < 365 -> "${(days / 30.0).roundToLong().coerceAtLeast(1)}mo"
