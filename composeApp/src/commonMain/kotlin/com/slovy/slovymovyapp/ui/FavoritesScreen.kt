@@ -1,22 +1,34 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +93,12 @@ data class FavoritesStudyUiState(
     val estimatedMinutes: Int = ((dueCount + 3) / 4).coerceAtLeast(1)
 }
 
+data class FavoritesStudyDoneUiState(
+    val language: Language,
+    val nextReviewLabel: String,
+    val nextReviewAccessibilityValue: UiText,
+)
+
 sealed interface FavoritesUiState {
     data object Loading : FavoritesUiState
 
@@ -93,6 +111,7 @@ sealed interface FavoritesUiState {
         val selectedLanguage: Language? = null,
         val isLanguageDropdownExpanded: Boolean = false,
         val study: FavoritesStudyUiState? = null,
+        val studyDone: FavoritesStudyDoneUiState? = null,
         val reviewDueCount: Int = 0,
         val scrollToTop: Boolean = false
     ) : FavoritesUiState {
@@ -296,6 +315,7 @@ class FavoritesViewModel(
                     ?.takeIf { it > 0 }
                     ?.let { dueCount -> FavoritesStudyUiState(language, dueCount) }
             }
+        val studyDone = mockStudyDoneState(study, selectedLanguage, hasAnyFavorites, trimmedQuery)
 
         return FavoritesUiState.Content(
             senses = senses,
@@ -307,6 +327,7 @@ class FavoritesViewModel(
             isLanguageDropdownExpanded = if (availableLanguages.size > 1)
                 currentContent?.isLanguageDropdownExpanded ?: false else false,
             study = study,
+            studyDone = studyDone,
             reviewDueCount = visibleDueCountByLanguage.values.sum(),
         )
     }
@@ -321,10 +342,34 @@ class FavoritesViewModel(
                     ?.takeIf { it > 0 }
                     ?.let { dueCount -> FavoritesStudyUiState(language, dueCount) }
             }
+        val updatedStudyDone = mockStudyDoneState(updatedStudy, selectedLanguage, hasAnyFavorites, query)
         return copy(
             study = updatedStudy,
+            studyDone = updatedStudyDone,
             reviewDueCount = visibleDueCountByLanguage.values.sum(),
         )
+    }
+
+    private fun mockStudyDoneState(
+        study: FavoritesStudyUiState?,
+        selectedLanguage: Language?,
+        hasAnyFavorites: Boolean,
+        query: String,
+    ): FavoritesStudyDoneUiState? {
+        // Temporary UI mock until nextReviewAt/bonus-session logic is wired.
+        return selectedLanguage
+            ?.takeIf { study == null && hasAnyFavorites && query.trim().isEmpty() }
+            ?.let { language ->
+                FavoritesStudyDoneUiState(
+                    language = language,
+                    nextReviewLabel = "4 h",
+                    nextReviewAccessibilityValue = UiText.Plural(
+                        Res.plurals.favorites_study_done_duration_hours,
+                        quantity = 4,
+                        args = listOf(4),
+                    ),
+                )
+            }
     }
 
     private fun List<Favorite>.availableLanguages(): List<Language> =
@@ -533,6 +578,7 @@ fun FavoritesScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
+    onContinueStudyingNow: (Language) -> Unit = {},
     onFavoritesChanged: (Language) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
@@ -576,6 +622,7 @@ fun FavoritesScreen(
         onLanguageSelected = { viewModel.setSelectedLanguage(it) },
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onStartStudy = onStartStudy,
+        onContinueStudyingNow = onContinueStudyingNow,
     )
 }
 
@@ -599,6 +646,7 @@ fun FavoritesScreenContent(
     onLanguageSelected: (Language) -> Unit = {},
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
+    onContinueStudyingNow: (Language) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -810,6 +858,16 @@ fun FavoritesScreenContent(
                                                 .fillMaxWidth()
                                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                                         )
+                                    } ?: state.studyDone?.let { studyDone ->
+                                        StudyDoneCard(
+                                            studyDone = studyDone,
+                                            onContinueStudyingNow = {
+                                                onContinueStudyingNow(studyDone.language)
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                        )
                                     }
                                     Text(
                                         text = stringResource(
@@ -896,6 +954,146 @@ private fun FavoriteSenseCard(
         onWordClick = onWordClick,
         favoriteLemmas = favoriteLemmas
     )
+}
+
+@Composable
+private fun StudyDoneCard(
+    studyDone: FavoritesStudyDoneUiState,
+    onContinueStudyingNow: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val regionLabel = stringResource(Res.string.favorites_study_done_region)
+    val continueLabel = stringResource(Res.string.favorites_study_done_continue)
+    val nextReviewAccessibilityLabel = stringResource(
+        Res.string.favorites_study_done_next_review_a11y,
+        studyDone.nextReviewAccessibilityValue.resolve()
+    )
+    val isPreview = LocalInspectionMode.current
+    var visible by remember { mutableStateOf(isPreview) }
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+    val cardProgress by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(durationMillis = 240),
+        label = "studyDoneCard"
+    )
+    val checkProgress by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.6f,
+        animationSpec = tween(durationMillis = 280, delayMillis = 40),
+        label = "studyDoneCheck"
+    )
+    val slidePx = with(LocalDensity.current) { 6.dp.toPx() }
+
+    Surface(
+        modifier = modifier
+            .graphicsLayer {
+                alpha = cardProgress
+                translationY = slidePx * (1f - cardProgress)
+            }
+            .semantics { contentDescription = regionLabel },
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f)),
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.favorites_study_done_title),
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.4.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.Bottom,
+                    ) {
+                        Text(
+                            text = studyDone.nextReviewLabel,
+                            fontFamily = MaterialTheme.serifFontFamily,
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.sp,
+                            lineHeight = 27.3.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .alignByBaseline()
+                                .semantics { contentDescription = nextReviewAccessibilityLabel },
+                        )
+                        Text(
+                            text = stringResource(Res.string.favorites_study_done_until_next_review),
+                            fontFamily = MaterialTheme.serifFontFamily,
+                            fontSize = 13.sp,
+                            fontStyle = FontStyle.Italic,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.alignByBaseline(),
+                        )
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .graphicsLayer {
+                            scaleX = checkProgress
+                            scaleY = checkProgress
+                        }
+                        .background(
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                            shape = CircleShape,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+            HorizontalDivider(
+                modifier = Modifier.padding(top = 13.dp, bottom = 11.dp),
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        onClickLabel = continueLabel,
+                        role = Role.Button,
+                        onClick = onContinueStudyingNow,
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = continueLabel,
+                    fontFamily = MaterialTheme.serifFontFamily,
+                    fontSize = 13.5.sp,
+                    fontStyle = FontStyle.Italic,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(15.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -1073,6 +1271,60 @@ fun PreviewFavoritesScreenCollapsed(
                 )
             ),
             hasAnyFavorites = true
+        )
+        FavoritesScreenContent(state = state)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewFavoritesScreenStudyDone(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val state = FavoritesUiState.Content(
+            senses = listOf(
+                createSenseItem(
+                    senseId = "sleep-1",
+                    lemma = "slapen",
+                    sense = createMockSense("sleep-1", "to sleep", LearnerLevel.A1, SenseFrequency.HIGH),
+                    pos = PartOfSpeech.VERB
+                ),
+                createSenseItem(
+                    senseId = "gezelligheid-1",
+                    lemma = "gezelligheid",
+                    sense = createMockSense(
+                        "gezelligheid-1",
+                        "coziness, togetherness",
+                        LearnerLevel.B2,
+                        SenseFrequency.MIDDLE
+                    ),
+                    pos = PartOfSpeech.NOUN
+                ),
+                createSenseItem(
+                    senseId = "uitzonderlijk-1",
+                    lemma = "uitzonderlijk",
+                    sense = createMockSense(
+                        "uitzonderlijk-1",
+                        "exceptional, remarkable",
+                        LearnerLevel.C1,
+                        SenseFrequency.LOW
+                    ),
+                    pos = PartOfSpeech.ADJECTIVE
+                )
+            ),
+            hasAnyFavorites = true,
+            availableLanguages = listOf(Language.DUTCH),
+            selectedLanguage = Language.DUTCH,
+            studyDone = FavoritesStudyDoneUiState(
+                language = Language.DUTCH,
+                nextReviewLabel = "4 h",
+                nextReviewAccessibilityValue = UiText.Plural(
+                    Res.plurals.favorites_study_done_duration_hours,
+                    quantity = 4,
+                    args = listOf(4),
+                ),
+            ),
         )
         FavoritesScreenContent(state = state)
     }
