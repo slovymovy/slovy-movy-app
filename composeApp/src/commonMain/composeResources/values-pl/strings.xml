@@ -72,12 +72,12 @@
         <item quantity="many">znaczeń</item>
         <item quantity="other">znaczeń</item>
     </plurals>
-    <string name="stats_stage_queue">Kolejka</string>
+    <string name="stats_stage_queue">W kolejce</string>
     <string name="stats_stage_new">Nowe</string>
-    <string name="stats_stage_fresh">Świeźe</string>
-    <string name="stats_stage_middle">Średnie</string>
-    <string name="stats_stage_strong">Mocne</string>
-    <string name="stats_stage_learned">Nauczone</string>
+    <string name="stats_stage_fresh">Niedawne</string>
+    <string name="stats_stage_middle">Powtórka</string>
+    <string name="stats_stage_strong">Utrwalone</string>
+    <string name="stats_stage_learned">Opanowane</string>
     <string name="stats_caption_learned">Znaczenia spadają niżej na liście, jeśli bez problemu przypominasz je sobie podczas powtórek, i wracają w górę, gdy je zapomnisz. Status «%1$s» oznacza, że materiał został opanowany i wypada z aktywnego cyklu powtórzeń.</string>
     <string name="stats_month_january">Styczeń</string>
     <string name="stats_month_february">Luty</string>

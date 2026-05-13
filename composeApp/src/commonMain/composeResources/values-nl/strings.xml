@@ -73,9 +73,9 @@
     </plurals>
     <string name="stats_stage_queue">Wachtrij</string>
     <string name="stats_stage_new">Nieuw</string>
-    <string name="stats_stage_fresh">Vers</string>
-    <string name="stats_stage_middle">Herinneren</string>
-    <string name="stats_stage_strong">Stabiel</string>
+    <string name="stats_stage_fresh">Recent</string>
+    <string name="stats_stage_middle">Herhaling</string>
+    <string name="stats_stage_strong">Beheerst</string>
     <string name="stats_stage_learned">Geleerd</string>
     <string name="stats_caption_learned">Woorden zakken naar beneden in de lijst naarmate je ze bij overhoringen goed blijft onthouden, en schuiven weer omhoog als je ze vergeet. «%1$s» betekent dat ze zijn voltooid — ze doen niet meer mee in de actieve herhaling.</string>
     <string name="stats_month_january">Januari</string>

@@ -71,12 +71,12 @@
         <item quantity="many">значений</item>
         <item quantity="other">значения</item>
     </plurals>
-    <string name="stats_stage_queue">Очередь</string>
+    <string name="stats_stage_queue">В очереди</string>
     <string name="stats_stage_new">Новые</string>
-    <string name="stats_stage_fresh">Свежие</string>
-    <string name="stats_stage_middle">Средние</string>
-    <string name="stats_stage_strong">Сильные</string>
-    <string name="stats_stage_learned">Выучены</string>
+    <string name="stats_stage_fresh">Недавние</string>
+    <string name="stats_stage_middle">Повторение</string>
+    <string name="stats_stage_strong">Закреплено</string>
+    <string name="stats_stage_learned">Выучено</string>
     <string name="stats_caption_learned">Значения опускаются ниже по списку, если вы стабильно их вспоминаете, и возвращаются наверх, если вы их забыли. Статус «%1$s» означает, что карточка освоена и исключена из активного цикла повторений.</string>
     <string name="stats_month_january">Январь</string>
     <string name="stats_month_february">Февраль</string>
