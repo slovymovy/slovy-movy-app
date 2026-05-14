@@ -552,6 +552,15 @@
     <string name="study_progress_count">%1$d из %2$d</string>
     <string name="study_tap_to_flip">Нажмите, чтобы перевернуть</string>
     <string name="study_tap_to_check">Нажмите, чтобы проверить</string>
+    <plurals name="study_multi_sense_front_hint">
+        <item quantity="one">Вы учите %1$d значение этого слова.</item>
+        <item quantity="few">Вы учите %1$d значения этого слова.</item>
+        <item quantity="many">Вы учите %1$d значений этого слова.</item>
+        <item quantity="other">Вы учите %1$d значения этого слова.</item>
+    </plurals>
+    <string name="study_sense_position_label">значение %1$d из %2$d</string>
+    <string name="study_sense_position_accessibility">Значение %1$d из %2$d</string>
+    <string name="study_swipe_back_to_rate">Вернитесь, чтобы оценить значение, которое вы учили.</string>
     <string name="study_chip_source_only">только %1$s</string>
     <string name="study_chip_fill_in">Пропуск</string>
     <string name="study_chip_listen">Аудирование</string>

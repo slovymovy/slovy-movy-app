@@ -555,6 +555,15 @@
     <string name="study_progress_count">%1$d z %2$d</string>
     <string name="study_tap_to_flip">Dotknij, aby odwrócić</string>
     <string name="study_tap_to_check">Dotknij, aby sprawdzić</string>
+    <plurals name="study_multi_sense_front_hint">
+        <item quantity="one">Uczysz się %1$d znaczenia tego słowa.</item>
+        <item quantity="few">Uczysz się %1$d znaczeń tego słowa.</item>
+        <item quantity="many">Uczysz się %1$d znaczeń tego słowa.</item>
+        <item quantity="other">Uczysz się %1$d znaczeń tego słowa.</item>
+    </plurals>
+    <string name="study_sense_position_label">znaczenie %1$d z %2$d</string>
+    <string name="study_sense_position_accessibility">Znaczenie %1$d z %2$d</string>
+    <string name="study_swipe_back_to_rate">Wróć, aby ocenić znaczenie, którego się uczyłeś.</string>
     <string name="study_chip_source_only">tylko %1$s</string>
     <string name="study_chip_fill_in">Uzupełnij</string>
     <string name="study_chip_listen">Słuchanie</string>

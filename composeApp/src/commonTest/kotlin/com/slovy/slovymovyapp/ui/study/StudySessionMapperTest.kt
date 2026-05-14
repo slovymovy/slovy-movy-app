@@ -42,6 +42,80 @@ class StudySessionMapperTest {
     }
 
     @Test
+    fun bilingualRecognitionFiltersSensesToStudiedOnly() {
+        val studiedSenseId = "00000000-0000-0000-0000-000000000101"
+        val otherSenseId = "00000000-0000-0000-0000-000000000102"
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.WORD_TO_TRANSLATION, targetLang = Language.ENGLISH.code),
+            studiedSenseIds = setOf(studiedSenseId, otherSenseId),
+            extraSenses = listOf(
+                buildSense(
+                    senseId = otherSenseId,
+                    definition = "convivial gathering",
+                    translation = "sociable evening",
+                    exampleText = "Een <w>gezellig</w> avondje.",
+                    exampleTranslation = "A cosy evening.",
+                ),
+                buildSense(
+                    senseId = "00000000-0000-0000-0000-000000000103",
+                    definition = "not-studied",
+                    translation = "not-studied-translation",
+                    exampleText = "Niet bestudeerd.",
+                    exampleTranslation = "Not studied.",
+                ),
+            ),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState())
+
+        assertEquals(studiedSenseId, mapped.activeSenseId)
+        assertEquals(listOf(studiedSenseId, otherSenseId), mapped.senses.map { it.id })
+        assertEquals(listOf(1, 2), mapped.senses.map { it.num })
+        val activeSenseBack = mapped.senses.single { it.id == studiedSenseId }.back
+        assertEquals(mapped.back.headline, activeSenseBack.headline)
+        assertEquals(mapped.back.definition, activeSenseBack.definition)
+        assertEquals(
+            mapped.back.examples.single().text,
+            activeSenseBack.examples.single().text,
+        )
+        val otherBack = mapped.senses.single { it.id == otherSenseId }.back
+        assertEquals("sociable evening", otherBack.headline)
+        assertEquals("convivial gathering", otherBack.definition)
+        assertEquals("Een <w>gezellig</w> avondje.", otherBack.examples.single().text)
+        assertEquals("A cosy evening.", otherBack.examples.single().translation)
+    }
+
+    @Test
+    fun monolingualRecognitionPopulatesStudiedSenses() {
+        val studiedSenseId = "00000000-0000-0000-0000-000000000101"
+        val otherSenseId = "00000000-0000-0000-0000-000000000102"
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null),
+            studiedSenseIds = setOf(studiedSenseId, otherSenseId),
+            extraSenses = listOf(
+                buildSense(
+                    senseId = otherSenseId,
+                    definition = "convivial gathering",
+                    translation = "sociable evening",
+                    exampleText = "Een <w>gezellig</w> avondje.",
+                    exampleTranslation = "A cosy evening.",
+                ),
+            ),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState())
+
+        assertEquals(StudyRecognitionMode.MONOLINGUAL, mapped.mode)
+        assertEquals(studiedSenseId, mapped.activeSenseId)
+        assertEquals(listOf(studiedSenseId, otherSenseId), mapped.senses.map { it.id })
+        mapped.senses.forEach { senseUi ->
+            assertEquals("gezellig", senseUi.back.headline)
+        }
+        assertEquals("a feeling of warmth", mapped.senses.first().back.definition)
+        assertEquals("convivial gathering", mapped.senses.last().back.definition)
+    }
+
+    @Test
     fun mapsListeningTranslationCard() {
         val sessionCard = sessionCard(
             variant = CardVariant(CardKind.LISTENING_TRANSLATION, targetLang = Language.ENGLISH.code),
@@ -81,6 +155,8 @@ class StudySessionMapperTest {
     private fun sessionCard(
         variant: CardVariant,
         example: ExamplePair? = null,
+        studiedSenseIds: Set<String> = emptySet(),
+        extraSenses: List<LanguageCardResponseSense> = emptyList(),
     ): SessionCard {
         val senseId = "00000000-0000-0000-0000-000000000101"
         return SessionCard(
@@ -105,13 +181,17 @@ class StudySessionMapperTest {
                 ),
             ),
             variant = variant,
-            wordResult = WordResult(card = languageCard(senseId)),
+            wordResult = WordResult(card = languageCard(senseId, extraSenses)),
             senseId = senseId,
             example = example,
+            studiedSenseIds = studiedSenseIds,
         )
     }
 
-    private fun languageCard(senseId: String): LanguageCard =
+    private fun languageCard(
+        senseId: String,
+        extraSenses: List<LanguageCardResponseSense>,
+    ): LanguageCard =
         LanguageCard(
             lemma = "gezellig",
             zipfFrequency = 4.2f,
@@ -140,8 +220,33 @@ class StudySessionMapperTest {
                                 ),
                             ),
                         ),
-                    ),
+                    ) + extraSenses,
                 ),
+            ),
+        )
+
+    private fun buildSense(
+        senseId: String,
+        definition: String,
+        translation: String,
+        exampleText: String,
+        exampleTranslation: String,
+    ): LanguageCardResponseSense =
+        LanguageCardResponseSense(
+            senseId = senseId,
+            senseDefinition = definition,
+            learnerLevel = LearnerLevel.A2,
+            frequency = SenseFrequency.HIGH,
+            semanticGroupId = senseId,
+            examples = listOf(
+                LanguageCardExample(
+                    text = exampleText,
+                    targetLangTranslations = mapOf(Language.ENGLISH to exampleTranslation),
+                ),
+            ),
+            targetLangDefinitions = mapOf(Language.ENGLISH to definition),
+            translations = mapOf(
+                Language.ENGLISH to listOf(LanguageCardTranslation(targetLangWord = translation)),
             ),
         )
 }

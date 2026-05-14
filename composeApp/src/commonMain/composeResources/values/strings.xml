@@ -554,6 +554,15 @@
     <string name="study_progress_count">%1$d of %2$d</string>
     <string name="study_tap_to_flip">Tap to flip</string>
     <string name="study_tap_to_check">Tap to check</string>
+    <plurals name="study_multi_sense_front_hint">
+        <item quantity="one">You learn %1$d meaning of this word.</item>
+        <item quantity="few">You learn %1$d meanings of this word.</item>
+        <item quantity="many">You learn %1$d meanings of this word.</item>
+        <item quantity="other">You learn %1$d meanings of this word.</item>
+    </plurals>
+    <string name="study_sense_position_label">meaning %1$d of %2$d</string>
+    <string name="study_sense_position_accessibility">Meaning %1$d of %2$d</string>
+    <string name="study_swipe_back_to_rate">Swipe back to rate the meaning you were learning.</string>
     <string name="study_chip_source_only">%1$s only</string>
     <string name="study_chip_fill_in">Fill in</string>
     <string name="study_chip_listen">Listen</string>

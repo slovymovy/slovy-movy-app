@@ -13,6 +13,7 @@ data class SessionCard(
     val wordResult: WordResult,
     val senseId: String,
     val example: ExamplePair?,
+    val studiedSenseIds: Set<String> = emptySet(),
 ) {
     fun loadState(): SessionCardLoadState {
         if (wordResult.isWordLoading) return SessionCardLoadState.LOADING
