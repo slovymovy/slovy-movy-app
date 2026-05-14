@@ -599,7 +599,8 @@
     <string name="favorites_study_due_action">Herhaling starten</string>
     <string name="favorites_study_done_title">HELEMAAL BIJ</string>
     <string name="favorites_study_done_until_next_review">tot de volgende herhaling</string>
-    <string name="favorites_study_done_continue">Verder studeren</string>
+    <string name="favorites_study_done_review_more">Nog even herhalen</string>
+    <string name="favorites_study_done_study_new">Nieuwe woorden leren</string>
     <string name="favorites_study_done_region">Herhaling voltooid</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d uur</item>

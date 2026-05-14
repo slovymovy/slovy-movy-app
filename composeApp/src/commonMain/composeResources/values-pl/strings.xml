@@ -596,7 +596,8 @@
     <string name="favorites_study_due_action">Rozpocznij powtórkę</string>
     <string name="favorites_study_done_title">JESTEŚ NA BIEŻĄCO</string>
     <string name="favorites_study_done_until_next_review">do następnej powtórki</string>
-    <string name="favorites_study_done_continue">Kontynuuj naukę</string>
+    <string name="favorites_study_done_review_more">Powtórz jeszcze trochę</string>
+    <string name="favorites_study_done_study_new">Ucz się nowych słów</string>
     <string name="favorites_study_done_region">Powtórka zakończona</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d godzinę</item>

@@ -17,6 +17,7 @@ object FsrsDefaults {
     const val ENABLE_FUZZ: Boolean = false
     const val DAILY_NEW_TASK_FAMILY_BUDGET: Int = 40
     const val CONTINUE_NOW_LEMMA_LIMIT: Int = 10
+    const val CONTINUE_NOW_PENDING_LEMMA_LIMIT: Int = 5
     const val PAUSE_INTAKE_IF_QUEUE_ABOVE: Int = 100
     const val PAUSE_INTAKE_RETENTION_MIN_REVIEWS: Long = 50L
     const val PAUSE_INTAKE_IF_RETENTION_BELOW: Double = 0.75
@@ -46,6 +47,7 @@ object FsrsDefaults {
         enableFuzz = ENABLE_FUZZ,
         dailyNewTaskFamilyBudget = DAILY_NEW_TASK_FAMILY_BUDGET,
         continueNowLemmaLimit = CONTINUE_NOW_LEMMA_LIMIT,
+        continueNowPendingLemmaLimit = CONTINUE_NOW_PENDING_LEMMA_LIMIT,
         pauseIntakeIfQueueAbove = PAUSE_INTAKE_IF_QUEUE_ABOVE,
         pauseIntakeRetentionMinReviews = PAUSE_INTAKE_RETENTION_MIN_REVIEWS,
         pauseIntakeIfRetentionBelow = PAUSE_INTAKE_IF_RETENTION_BELOW,

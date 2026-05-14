@@ -64,6 +64,7 @@ internal data class FavoriteLanguageReviewState(
     val dueCount: Int,
     val activeCardCount: Int,
     val delayedDueLemmaCount: Int,
+    val pendingFavoriteLemmaCount: Int,
     val nextReviewAtEpochMs: Long?,
 )
 
@@ -146,6 +147,7 @@ internal class FavoritesReviewCoordinator(
             dueCount = dueToday,
             activeCardCount = activeCardCount,
             delayedDueLemmaCount = delayedDueLemmaCount,
+            pendingFavoriteLemmaCount = pendingFavoriteLemmaCount,
             nextReviewAtEpochMs = nextReviewAtEpochMs,
         )
 
@@ -169,6 +171,7 @@ private fun FavoritesReviewState.toFavoriteLanguageReviewUiState(): Map<Language
             dueCount = reviewState.dueCount,
             activeCardCount = reviewState.activeCardCount,
             delayedDueLemmaCount = reviewState.delayedDueLemmaCount,
+            pendingFavoriteLemmaCount = reviewState.pendingFavoriteLemmaCount,
             nextReviewAtEpochMs = reviewState.nextReviewAtEpochMs,
         )
     }
@@ -754,12 +757,22 @@ fun App(
                         logEvent(AnalyticsEvent.STUDY_START_SESSION)
                         navController.navigate(AppDestination.StudySession(language.code))
                     },
-                    onContinueStudyingNow = { language ->
+                    onContinueStudyingNow = { language, action ->
                         coroutineScope.launch {
-                            sessionService.continueDelayedCardsNow(language.code)
+                            val shouldStartStudy = when (action) {
+                                FavoritesStudyDoneAction.REVIEW_MORE -> {
+                                    sessionService.continueDelayedCardsNow(language.code)
+                                    true
+                                }
+
+                                FavoritesStudyDoneAction.STUDY_NEW ->
+                                    intakeService.continueWithPendingFavoritesNow(language.code).cardsCreated > 0
+                            }
                             refreshFavoritesDueCountsOnly()
-                            logEvent(AnalyticsEvent.STUDY_START_SESSION)
-                            navController.navigate(AppDestination.StudySession(language.code))
+                            if (shouldStartStudy) {
+                                logEvent(AnalyticsEvent.STUDY_START_SESSION)
+                                navController.navigate(AppDestination.StudySession(language.code))
+                            }
                         }
                     },
                     onFavoritesChanged = { language ->

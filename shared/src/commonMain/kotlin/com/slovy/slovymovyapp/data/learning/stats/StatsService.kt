@@ -155,6 +155,7 @@ class StatsService(
             activeCardCount = learning.countCardsByLang(langCode).executeAsOne().toInt(),
             dueToday = learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt(),
             delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, now).executeAsOne().toInt(),
+            pendingFavoriteLemmaCount = learning.countPendingFavoriteLemmasByLang(langCode).executeAsOne().toInt(),
             nextReviewAtEpochMs = learning.selectNextReviewAtByLang(langCode).executeAsOne().next_review_at,
         )
     }

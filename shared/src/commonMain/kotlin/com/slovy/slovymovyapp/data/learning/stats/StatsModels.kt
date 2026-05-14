@@ -12,6 +12,7 @@ data class ReviewQueueStats(
     val activeCardCount: Int,
     val dueToday: Int,
     val delayedDueLemmaCount: Int,
+    val pendingFavoriteLemmaCount: Int,
     val nextReviewAtEpochMs: Long?,
 )
 

@@ -472,11 +472,12 @@ open class FavoritesViewModelTest : BaseTest() {
         val studyDone = assertNotNull(contentState(vm).studyDone)
         assertEquals(Language.ENGLISH, studyDone.language)
         assertEquals("1 h 15 min", studyDone.nextReviewLabel)
+        assertNull(studyDone.action)
         assertFalse(studyDone.canContinueNow)
     }
 
     @Test
-    fun studyDoneState_continueOnlyWhenDueCardsAreDelayed() = runTest {
+    fun studyDoneState_reviewMoreOnlyWhenDueCardsAreDelayed() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()
         favRepo.add(SENSE_1, Language.ENGLISH, "hello")
@@ -496,6 +497,7 @@ open class FavoritesViewModelTest : BaseTest() {
 
         val delayedStudyDone = assertNotNull(contentState(vm).studyDone)
         assertEquals("12 min", delayedStudyDone.nextReviewLabel)
+        assertEquals(FavoritesStudyDoneAction.REVIEW_MORE, delayedStudyDone.action)
         assertTrue(delayedStudyDone.canContinueNow)
 
         vm.updateReviewState(
@@ -509,7 +511,34 @@ open class FavoritesViewModelTest : BaseTest() {
             )
         )
 
-        assertFalse(assertNotNull(contentState(vm).studyDone).canContinueNow)
+        val notDelayedStudyDone = assertNotNull(contentState(vm).studyDone)
+        assertNull(notDelayedStudyDone.action)
+        assertFalse(notDelayedStudyDone.canContinueNow)
+    }
+
+    @Test
+    fun studyDoneState_studyNewWhenQueuedFavoritesRemain() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.updateReviewState(
+            mapOf(
+                Language.ENGLISH to FavoriteLanguageReviewUiState(
+                    dueCount = 0,
+                    activeCardCount = 1,
+                    delayedDueLemmaCount = 0,
+                    pendingFavoriteLemmaCount = 2,
+                    nextReviewAtEpochMs = (TEST_NOW + 12.minutes).toEpochMilliseconds(),
+                )
+            )
+        )
+        vm.loadAndApplyState("")
+
+        val studyDone = assertNotNull(contentState(vm).studyDone)
+        assertEquals(FavoritesStudyDoneAction.STUDY_NEW, studyDone.action)
+        assertTrue(studyDone.canContinueNow)
     }
 
     @Test

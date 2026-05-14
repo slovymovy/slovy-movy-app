@@ -171,6 +171,116 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun continue_now_pending_intake_activates_five_queued_lemmas() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            val fixtures = (1..7).map { index ->
+                env.seedSense(lemma = "continuepending$index").also { fixture ->
+                    env.addFavorite(
+                        fixture = fixture,
+                        createdAt = (start + index.milliseconds).toEpochMilliseconds(),
+                    )
+                }
+            }
+
+            val result = env.intake.continueWithPendingFavoritesNow("en")
+
+            assertEquals(5, result.cardsCreated)
+            assertEquals(fixtures.take(5).map { it.senseId }, result.activated)
+            fixtures.take(5).forEach { fixture ->
+                assertEquals(
+                    1,
+                    env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().size,
+                )
+                assertNotNull(
+                    env.app.favoritesQueries.selectFavoriteWithActivation(fixture.senseId.toString(), "en")
+                        .executeAsOne().activated_at,
+                )
+            }
+            fixtures.drop(5).forEach { fixture ->
+                assertEquals(
+                    0,
+                    env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().size,
+                )
+                assertNull(
+                    env.app.favoritesQueries.selectFavoriteWithActivation(fixture.senseId.toString(), "en")
+                        .executeAsOne().activated_at,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun continue_now_pending_intake_bypasses_daily_new_card_budget() = runBlocking {
+        val config = FsrsDefaults.config().copy(dailyNewTaskFamilyBudget = 0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "continueignoresbudget")
+            env.addFavorite(fixture)
+
+            val result = env.intake.continueWithPendingFavoritesNow("en")
+
+            assertEquals(1, result.cardsCreated)
+            assertTrue(result.skipped.isEmpty(), "unexpected skips: ${result.skipped}")
+            assertNotNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(fixture.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
+    fun continue_now_pending_intake_respects_full_queue_pause() = runBlocking {
+        val config = FsrsDefaults.config().copy(pauseIntakeIfQueueAbove = 0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val queued = env.seedSense(lemma = "continuequeuequeued")
+            val due = env.seedSense(lemma = "continuequeuedue")
+            env.addFavorite(queued)
+            env.addFavorite(due)
+            env.insertTask(
+                fixture = due,
+                family = CardFamily.RECOGNIZE_SENSE,
+            )
+
+            val result = env.intake.continueWithPendingFavoritesNow("en")
+
+            assertEquals(0, result.cardsCreated)
+            assertEquals(listOf(SkipReason.QUEUE_TOO_FULL), result.skipped)
+            assertNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(queued.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
+    fun continue_now_pending_intake_respects_retention_pause() = runBlocking {
+        val config = FsrsDefaults.config().copy(pauseIntakeRetentionMinReviews = 1L)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val reviewed = env.seedSense(lemma = "continueretentionreviewed")
+            val queued = env.seedSense(lemma = "continueretentionqueued")
+            env.addFavorite(reviewed)
+            env.addFavorite(queued, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+            val card = env.insertTask(
+                fixture = reviewed,
+                family = CardFamily.RECOGNIZE_SENSE,
+            )
+            env.insertReviewLog(
+                cardId = card.id,
+                variantKind = CardKind.WORD_TO_SOURCE_DEFINITION,
+                rating = Rating.AGAIN,
+            )
+
+            val result = env.intake.continueWithPendingFavoritesNow("en")
+
+            assertEquals(0, result.cardsCreated)
+            assertEquals(listOf(SkipReason.RETENTION_TOO_LOW), result.skipped)
+            assertNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(queued.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
     fun intake_activates_pending_favorites_of_same_lemma_together() = runBlocking {
         withEnv(includeTranslation = false) { env ->
             val first = env.seedSense(lemma = "polysamefirst")
@@ -668,7 +778,7 @@ class LearningE2ETest : BaseTest() {
     @Test
     fun cloze_card_uses_tagged_example_occurrence() = runBlocking {
         withEnv(includeTranslation = true) { env ->
-            val fixture = env.seedSense(lemma = "cloze")
+            val fixture = env.seedSense(lemma = "clozetaggedfixture")
             env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
             env.addFavorite(fixture)
             env.intake.runIntake("en")
@@ -685,8 +795,8 @@ class LearningE2ETest : BaseTest() {
 
             assertEquals(CardKind.CLOZE_SOURCE, card.variant.kind)
             val example = assertNotNull(card.example)
-            assertEquals("I cloze every day.", example.text)
-            assertEquals(2..6, example.clozeRange)
+            assertEquals("I ${fixture.lemma} every day.", example.text)
+            assertEquals(2..(fixture.lemma.length + 1), example.clozeRange)
         }
     }
 
@@ -897,12 +1007,13 @@ class LearningE2ETest : BaseTest() {
         cardId: Uuid,
         variantKind: CardKind,
         variantTargetLang: String? = null,
+        rating: Rating = Rating.GOOD,
     ) {
         app.favoritesQueries.insertReviewLog(
             id = Uuid.random(),
             card_id = cardId,
             reviewed_at = (start - 1.milliseconds).toEpochMilliseconds(),
-            rating = Rating.GOOD,
+            rating = rating,
             variant_kind = variantKind,
             variant_target_lang = variantTargetLang,
             example_id = null,

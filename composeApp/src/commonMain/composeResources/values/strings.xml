@@ -595,7 +595,8 @@
     <string name="favorites_study_due_action">Start study session</string>
     <string name="favorites_study_done_title">ALL CAUGHT UP</string>
     <string name="favorites_study_done_until_next_review">until next review</string>
-    <string name="favorites_study_done_continue">Continue studying now</string>
+    <string name="favorites_study_done_review_more">Review a bit more</string>
+    <string name="favorites_study_done_study_new">Study new words</string>
     <string name="favorites_study_done_region">Review complete</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d hour</item>
