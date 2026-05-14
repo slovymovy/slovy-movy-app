@@ -542,6 +542,32 @@ open class FavoritesViewModelTest : BaseTest() {
     }
 
     @Test
+    fun studyDoneState_hidesStudyNewWhenQueuedFavoriteIntakeIsPaused() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.updateReviewState(
+            mapOf(
+                Language.ENGLISH to FavoriteLanguageReviewUiState(
+                    dueCount = 0,
+                    activeCardCount = 1,
+                    delayedDueLemmaCount = 0,
+                    pendingFavoriteLemmaCount = 2,
+                    canStudyPendingFavoritesNow = false,
+                    nextReviewAtEpochMs = (TEST_NOW + 12.minutes).toEpochMilliseconds(),
+                )
+            )
+        )
+        vm.loadAndApplyState("")
+
+        val studyDone = assertNotNull(contentState(vm).studyDone)
+        assertNull(studyDone.action)
+        assertFalse(studyDone.canContinueNow)
+    }
+
+    @Test
     fun studyDoneState_hiddenWhenDueCardsAreAvailable() = runTest {
         val favRepo = favoritesRepository()
         favRepo.deleteAll()

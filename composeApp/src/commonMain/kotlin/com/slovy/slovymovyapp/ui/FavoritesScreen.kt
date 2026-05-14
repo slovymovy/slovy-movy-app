@@ -114,6 +114,7 @@ data class FavoriteLanguageReviewUiState(
     val activeCardCount: Int = 0,
     val delayedDueLemmaCount: Int = 0,
     val pendingFavoriteLemmaCount: Int = 0,
+    val canStudyPendingFavoritesNow: Boolean = true,
     val nextReviewAtEpochMs: Long? = null,
 )
 
@@ -405,7 +406,9 @@ class FavoritesViewModel(
             nextReviewAccessibilityValue = timeLabel.accessibilityValue,
             action = when {
                 reviewState.delayedDueLemmaCount > 0 -> FavoritesStudyDoneAction.REVIEW_MORE
-                reviewState.pendingFavoriteLemmaCount > 0 -> FavoritesStudyDoneAction.STUDY_NEW
+                reviewState.pendingFavoriteLemmaCount > 0 && reviewState.canStudyPendingFavoritesNow ->
+                    FavoritesStudyDoneAction.STUDY_NEW
+
                 else -> null
             },
         )

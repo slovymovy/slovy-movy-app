@@ -240,6 +240,8 @@ class LearningE2ETest : BaseTest() {
                 family = CardFamily.RECOGNIZE_SENSE,
             )
 
+            assertFalse(env.intake.canContinueWithPendingFavoritesNow("en"))
+
             val result = env.intake.continueWithPendingFavoritesNow("en")
 
             assertEquals(0, result.cardsCreated)
@@ -268,6 +270,8 @@ class LearningE2ETest : BaseTest() {
                 variantKind = CardKind.WORD_TO_SOURCE_DEFINITION,
                 rating = Rating.AGAIN,
             )
+
+            assertFalse(env.intake.canContinueWithPendingFavoritesNow("en"))
 
             val result = env.intake.continueWithPendingFavoritesNow("en")
 

@@ -370,12 +370,12 @@ class StatsScreenDataTest : BaseTest() {
         )
     }
 
-    private fun insertReviewLog(cardId: Uuid, at: Instant) {
+    private fun insertReviewLog(cardId: Uuid, at: Instant, rating: Rating = Rating.GOOD) {
         queries.insertReviewLog(
             id = Uuid.random(),
             card_id = cardId,
             reviewed_at = at.toEpochMilliseconds(),
-            rating = Rating.GOOD,
+            rating = rating,
             variant_kind = com.slovy.slovymovyapp.data.learning.CardKind.WORD_TO_SOURCE_DEFINITION,
             variant_target_lang = null,
             example_id = null,

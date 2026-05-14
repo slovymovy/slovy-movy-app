@@ -18,11 +18,13 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 interface LearningIntake {
     suspend fun runIntake(langCode: String): IntakeResult
     suspend fun continueWithPendingFavoritesNow(langCode: String): IntakeResult
+    fun canContinueWithPendingFavoritesNow(langCode: String): Boolean
 }
 
 class IntakeService(
@@ -44,6 +46,10 @@ class IntakeService(
         }
 
     @OptIn(ExperimentalTime::class)
+    override fun canContinueWithPendingFavoritesNow(langCode: String): Boolean =
+        pendingFavoritePauseReason(langCode, clock.now()) == null
+
+    @OptIn(ExperimentalTime::class)
     private suspend fun activatePendingFavorites(
         langCode: String,
         mode: IntakeRunMode,
@@ -56,19 +62,9 @@ class IntakeService(
         val nowInstant = clock.now()
         val now = nowInstant.toEpochMilliseconds()
 
-        val due = learning.countDueCardsByLang(langCode, now).executeAsOne()
-        if (due > config.pauseIntakeIfQueueAbove) {
-            return IntakeResult(emptyList(), listOf(SkipReason.QUEUE_TOO_FULL), 0)
-        }
-
-        val weekAgo = (nowInstant - 7.days).toEpochMilliseconds()
-        val reviewCount = learning.countReviewsSince(langCode, weekAgo).executeAsOne()
-        if (reviewCount >= config.pauseIntakeRetentionMinReviews) {
-            val successful = learning.countSuccessfulReviewsSince(langCode, weekAgo).executeAsOne()
-            val retention = successful.toDouble() / reviewCount
-            if (retention < config.pauseIntakeIfRetentionBelow) {
-                return IntakeResult(emptyList(), listOf(SkipReason.RETENTION_TOO_LOW), 0)
-            }
+        val pauseReason = pendingFavoritePauseReason(langCode, nowInstant)
+        if (pauseReason != null) {
+            return IntakeResult(emptyList(), listOf(pauseReason), 0)
         }
 
         val timeZone = TimeZone.currentSystemDefault()
@@ -190,6 +186,25 @@ class IntakeService(
             dictionary.invalidateSenses(invalidatedSenses)
         }
         return IntakeResult(activated, skipped, cardsCreated)
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun pendingFavoritePauseReason(langCode: String, now: Instant): SkipReason? {
+        val nowMs = now.toEpochMilliseconds()
+        val due = learning.countDueCardsByLang(langCode, nowMs).executeAsOne()
+        if (due > config.pauseIntakeIfQueueAbove) return SkipReason.QUEUE_TOO_FULL
+
+        val weekAgo = (now - 7.days).toEpochMilliseconds()
+        val reviewCount = learning.countReviewsSince(langCode, weekAgo).executeAsOne()
+        if (reviewCount < config.pauseIntakeRetentionMinReviews) return null
+
+        val successful = learning.countSuccessfulReviewsSince(langCode, weekAgo).executeAsOne()
+        val retention = successful.toDouble() / reviewCount
+        return if (retention < config.pauseIntakeIfRetentionBelow) {
+            SkipReason.RETENTION_TOO_LOW
+        } else {
+            null
+        }
     }
 }
 
