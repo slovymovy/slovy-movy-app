@@ -24,6 +24,7 @@ sealed interface StudySessionUiState {
         val isSubmittingReview: Boolean = false,
         val isPlayingAudio: Boolean = false,
         val isPreparingAudio: Boolean = false,
+        val viewedSenseId: String? = null,
     ) : StudySessionUiState
 
     data class Complete(

@@ -136,6 +136,7 @@ fun StudySessionScreen(
         onPlayAudio = viewModel::playAudio,
         onStopAudio = viewModel::stopAudio,
         onRetry = viewModel::retry,
+        onViewedSenseChange = viewModel::setViewedSense,
     )
 }
 
@@ -150,6 +151,7 @@ fun StudySessionScreenContent(
     onPlayAudio: (String) -> Unit = {},
     onStopAudio: () -> Unit = {},
     onRetry: () -> Unit = {},
+    onViewedSenseChange: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     when (state) {
@@ -223,6 +225,7 @@ fun StudySessionScreenContent(
             onRate = onRate,
             onPlayAudio = onPlayAudio,
             onStopAudio = onStopAudio,
+            onViewedSenseChange = onViewedSenseChange,
             modifier = modifier,
         )
 
@@ -434,11 +437,12 @@ private fun StudySessionActiveContent(
     onRate: (StudyRating) -> Unit,
     onPlayAudio: (String) -> Unit,
     onStopAudio: () -> Unit,
+    onViewedSenseChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val recognition = state.card as? StudyCardUiState.Recognition
     val originalSenseId = recognition?.activeSenseId
-    var viewedSenseId by remember(state.card.id) { mutableStateOf(originalSenseId) }
+    val viewedSenseId = state.viewedSenseId ?: originalSenseId
     val isOnOriginalSense = recognition == null ||
         !recognition.hasMultiSense ||
         viewedSenseId == originalSenseId
@@ -469,7 +473,7 @@ private fun StudySessionActiveContent(
                 onStopAudio = onStopAudio,
                 onReveal = onReveal,
                 viewedSenseId = viewedSenseId,
-                onViewedSenseChange = { viewedSenseId = it },
+                onViewedSenseChange = onViewedSenseChange,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
