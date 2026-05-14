@@ -561,9 +561,13 @@
         <item quantity="many">Uczysz się %1$d znaczeń tego słowa.</item>
         <item quantity="other">Uczysz się %1$d znaczeń tego słowa.</item>
     </plurals>
-    <string name="study_sense_position_label">znaczenie %1$d z %2$d</string>
-    <string name="study_sense_position_accessibility">Znaczenie %1$d z %2$d</string>
-    <string name="study_swipe_back_to_rate">Wróć, aby ocenić znaczenie, którego się uczyłeś.</string>
+    <plurals name="study_swipe_other_meanings_hint">
+        <item quantity="one">Przesuń w lewo, aby zobaczyć %1$d inne znaczenie, którego się uczysz</item>
+        <item quantity="few">Przesuń w lewo, aby zobaczyć %1$d inne znaczenia, których się uczysz</item>
+        <item quantity="many">Przesuń w lewo, aby zobaczyć %1$d innych znaczeń, których się uczysz</item>
+        <item quantity="other">Przesuń w lewo, aby zobaczyć %1$d innych znaczeń, których się uczysz</item>
+    </plurals>
+    <string name="study_swipe_back_to_rate">Zostałeś sprawdzony z innego znaczenia. Wróć i oceń, jak dobrze je znasz.</string>
     <string name="study_chip_source_only">tylko %1$s</string>
     <string name="study_chip_fill_in">Uzupełnij</string>
     <string name="study_chip_listen">Słuchanie</string>

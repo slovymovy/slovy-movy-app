@@ -108,8 +108,7 @@ import slovymovyapp.composeapp.generated.resources.study_multi_sense_front_hint
 import slovymovyapp.composeapp.generated.resources.study_play_prompt_audio
 import slovymovyapp.composeapp.generated.resources.study_play_word_audio
 import slovymovyapp.composeapp.generated.resources.study_hint_starts_with
-import slovymovyapp.composeapp.generated.resources.study_sense_position_accessibility
-import slovymovyapp.composeapp.generated.resources.study_sense_position_label
+import slovymovyapp.composeapp.generated.resources.study_swipe_other_meanings_hint
 import slovymovyapp.composeapp.generated.resources.study_stop_audio
 import slovymovyapp.composeapp.generated.resources.study_swipe_back_to_rate
 import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
@@ -705,17 +704,34 @@ private fun MultiSenseBack(
             }
         }
         val currentSense = senses.getOrNull(pagerState.currentPage) ?: senses.first()
+        val otherCount = (senses.size - 1).coerceAtLeast(0)
+        val swipeHint = pluralStringResource(
+            Res.plurals.study_swipe_other_meanings_hint,
+            otherCount,
+            otherCount,
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(AppSpacing.xl),
         ) {
-            StudyChip(label = card.chipLabel)
-            Spacer(Modifier.height(AppSpacing.xl))
             SensePositionIndicator(
                 activeSense = currentSense,
                 senses = senses,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
             )
+            Spacer(Modifier.height(AppSpacing.xs))
+            Text(
+                text = swipeHint,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontStyle = FontStyle.Italic,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(AppSpacing.md))
+            StudyChip(label = card.chipLabel)
             Spacer(Modifier.height(AppSpacing.md))
             HorizontalPager(
                 state = pagerState,
@@ -1119,45 +1135,19 @@ private fun SensePositionIndicator(
     modifier: Modifier = Modifier,
 ) {
     val activeIndex = senses.indexOfFirst { it.id == activeSense.id }.takeIf { it >= 0 } ?: 0
-    val label = stringResource(
-        Res.string.study_sense_position_label,
-        activeSense.num,
-        senses.size,
-    )
-    val accessibilityLabel = stringResource(
-        Res.string.study_sense_position_accessibility,
-        activeSense.num,
-        senses.size,
-    )
     Surface(
-        modifier = modifier.clearAndSetSemantics { contentDescription = accessibilityLabel },
+        modifier = modifier.clearAndSetSemantics {},
         shape = RoundedCornerShape(999.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
-        Row(
+        SenseDotRow(
+            count = senses.size,
+            activeIndex = activeIndex,
+            activeColor = MaterialTheme.colorScheme.primary,
+            inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontSize = 12.5.sp,
-                    lineHeight = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    fontFeatureSettings = "tnum",
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            SenseDotRow(
-                count = senses.size,
-                activeIndex = activeIndex,
-                activeColor = MaterialTheme.colorScheme.primary,
-                inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
-                modifier = Modifier.clearAndSetSemantics {},
-            )
-        }
+        )
     }
 }
 
