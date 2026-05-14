@@ -715,22 +715,6 @@ private fun MultiSenseBack(
                 .fillMaxSize()
                 .padding(AppSpacing.xl),
         ) {
-            SensePositionIndicator(
-                activeSense = currentSense,
-                senses = senses,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
-            Spacer(Modifier.height(AppSpacing.xs))
-            Text(
-                text = swipeHint,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontStyle = FontStyle.Italic,
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(AppSpacing.md))
             StudyChip(label = card.chipLabel)
             Spacer(Modifier.height(AppSpacing.md))
             HorizontalPager(
@@ -754,6 +738,22 @@ private fun MultiSenseBack(
                     )
                 }
             }
+            Spacer(Modifier.height(AppSpacing.md))
+            SensePositionIndicator(
+                activeSense = currentSense,
+                senses = senses,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
+            Spacer(Modifier.height(AppSpacing.xs))
+            Text(
+                text = swipeHint,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontStyle = FontStyle.Italic,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }
@@ -1135,20 +1135,13 @@ private fun SensePositionIndicator(
     modifier: Modifier = Modifier,
 ) {
     val activeIndex = senses.indexOfFirst { it.id == activeSense.id }.takeIf { it >= 0 } ?: 0
-    Surface(
+    SenseDotRow(
+        count = senses.size,
+        activeIndex = activeIndex,
+        activeColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+        inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f),
         modifier = modifier.clearAndSetSemantics {},
-        shape = RoundedCornerShape(999.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-    ) {
-        SenseDotRow(
-            count = senses.size,
-            activeIndex = activeIndex,
-            activeColor = MaterialTheme.colorScheme.primary,
-            inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-        )
-    }
+    )
 }
 
 @Composable
