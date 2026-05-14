@@ -814,6 +814,7 @@ private fun LibraryMetric(
 @Composable
 private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean) {
     val maxCount = pipeline.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
+    val countColumnWidth = if (pipeline.any { formatCount(it.count, isLoading = false).length > 3 }) 52.dp else 36.dp
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         pipeline.forEach { stage ->
             val pct = if (isLoading) {
@@ -876,7 +877,7 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
                     ),
                     color = loadingAwareContentColor(isLoading),
                     textAlign = TextAlign.End,
-                    modifier = Modifier.width(36.dp),
+                    modifier = Modifier.width(countColumnWidth),
                 )
             }
         }
@@ -936,6 +937,8 @@ private fun CountText(
             text = target.text,
             style = style,
             color = target.color,
+            maxLines = 1,
+            softWrap = false,
             textAlign = textAlign,
             modifier = if (textAlign == null) Modifier else Modifier.fillMaxWidth(),
         )
@@ -1083,13 +1086,13 @@ private fun previewStatsState(languages: List<Language>, today: LocalDate): Stat
         practiceLog = previewPracticeLog(today),
         reviewsToday = 28 + variant * 3,
         reviewsWeek = 184 + variant * 11,
-        wordsTotal = 287 + variant * 19,
+        wordsTotal = 3_008 + variant * 19,
         pipeline = previewPipeline(variant),
     )
 }
 
 private fun previewPipeline(variant: Int): List<StatsPipelineStage> = listOf(
-    StatsPipelineStage(StatsPipelineStageId.QUEUE, 21 + variant),
+    StatsPipelineStage(StatsPipelineStageId.QUEUE, 3_485 + variant),
     StatsPipelineStage(StatsPipelineStageId.NEW, 47 + variant * 2),
     StatsPipelineStage(StatsPipelineStageId.FRESH, 86 + variant * 3),
     StatsPipelineStage(StatsPipelineStageId.MIDDLE, 132 + variant * 4),
