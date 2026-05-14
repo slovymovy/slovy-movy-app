@@ -248,7 +248,7 @@ class SessionService(
             jitter_range = params.jitterRange,
             lang_code = card.langCode,
             answer_key = card.answerKey,
-            excluded_family = CardFamily.RECOGNIZE_SENSE,
+            allowed_families = WORD_RECALL_FAMILIES,
             id = card.id,
         )
     }
@@ -439,5 +439,7 @@ class SessionService(
         const val MIN_INHERITED_STABILITY: Double = 0.001
         val DAY: Duration = 1.days
         const val RECENT_LIMIT: Int = 20
+        val WORD_RECALL_FAMILIES: List<CardFamily> =
+            CardFamily.entries.filter { it.testsWordRecall }
     }
 }

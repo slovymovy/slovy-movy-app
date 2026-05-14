@@ -258,8 +258,7 @@ WHERE lang_code = :lang_code
   AND sense_id != :sense_id
   AND suspended = 0;
 
--- :excluded_family is CardFamily.RECOGNIZE_SENSE (the only family with
--- testsWordRecall = false). Update if a new non-recall family is added.
+-- :allowed_families should be CardFamily entries with testsWordRecall = true.
 burySiblingCardsByAnswer:
 UPDATE card
 SET available_after = max(
@@ -268,7 +267,7 @@ SET available_after = max(
 )
 WHERE lang_code = :lang_code
   AND answer_key = :answer_key
-  AND family != :excluded_family
+  AND family IN :allowed_families
   AND id != :id
   AND suspended = 0;
 
