@@ -48,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -693,47 +694,49 @@ private fun MultiSenseBack(
         .indexOfFirst { it.id == viewedSenseId }
         .takeIf { it >= 0 }
         ?: senses.indexOfFirst { it.id == card.activeSenseId }.coerceAtLeast(0)
-    val pagerState = rememberPagerState(
-        initialPage = initialPage,
-        pageCount = { senses.size },
-    )
-    LaunchedEffect(pagerState, senses) {
-        snapshotFlow { pagerState.currentPage }.collect { page ->
-            senses.getOrNull(page)?.let { onViewedSenseChange(it.id) }
-        }
-    }
-    val currentSense = senses.getOrNull(pagerState.currentPage) ?: senses.first()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(AppSpacing.xl),
-    ) {
-        StudyChip(label = card.chipLabel)
-        Spacer(Modifier.height(AppSpacing.xl))
-        SensePositionIndicator(
-            activeSense = currentSense,
-            senses = senses,
+    key(card.id) {
+        val pagerState = rememberPagerState(
+            initialPage = initialPage,
+            pageCount = { senses.size },
         )
-        Spacer(Modifier.height(AppSpacing.md))
-        HorizontalPager(
-            state = pagerState,
+        LaunchedEffect(pagerState, senses) {
+            snapshotFlow { pagerState.currentPage }.collect { page ->
+                senses.getOrNull(page)?.let { onViewedSenseChange(it.id) }
+            }
+        }
+        val currentSense = senses.getOrNull(pagerState.currentPage) ?: senses.first()
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-        ) { page ->
-            Column(
+                .fillMaxSize()
+                .padding(AppSpacing.xl),
+        ) {
+            StudyChip(label = card.chipLabel)
+            Spacer(Modifier.height(AppSpacing.xl))
+            SensePositionIndicator(
+                activeSense = currentSense,
+                senses = senses,
+            )
+            Spacer(Modifier.height(AppSpacing.md))
+            HorizontalPager(
+                state = pagerState,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                StudyCardBackContent(
-                    back = senses[page].back,
-                    isPlayingAudio = isPlayingAudio,
-                    isPreparingAudio = isPreparingAudio,
-                    onPlayAudio = onPlayAudio,
-                    onStopAudio = onStopAudio,
-                    headlineEmphasized = true,
-                )
+                    .fillMaxWidth()
+                    .weight(1f),
+            ) { page ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    StudyCardBackContent(
+                        back = senses[page].back,
+                        isPlayingAudio = isPlayingAudio,
+                        isPreparingAudio = isPreparingAudio,
+                        onPlayAudio = onPlayAudio,
+                        onStopAudio = onStopAudio,
+                        headlineEmphasized = true,
+                    )
+                }
             }
         }
     }
