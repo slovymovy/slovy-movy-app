@@ -51,6 +51,9 @@ ON card(lang_code, state, created_at);
 CREATE INDEX idx_card_collision
 ON card(lang_code, lemma_id, answer_key);
 
+CREATE INDEX idx_card_answer
+ON card(lang_code, answer_key);
+
 CREATE TABLE review_log (
   id BLOB AS Uuid NOT NULL PRIMARY KEY,
   card_id BLOB AS Uuid NOT NULL,
@@ -231,33 +234,40 @@ WHERE sense_id = :sense_id
   AND lang_code = :lang_code
 ORDER BY family ASC;
 
-selectAvailableAfterCandidatesBySense:
-SELECT id, sense_id, lemma_id, lang_code, family, state,
-       stability, difficulty, due, last_review, reps, lapses, created_at,
-       available_after, answer_key, suspended
-FROM card
+-- Per-row jittered available_after target = :min_value + uniform[0, :jitter_range).
+-- max() ensures we only push cards later, never pull them forward.
+burySiblingCardsBySense:
+UPDATE card
+SET available_after = max(
+    coalesce(available_after, 0),
+    :min_value + ((random() % :jitter_range) + :jitter_range) % :jitter_range
+)
 WHERE sense_id = :sense_id
   AND lang_code = :lang_code
   AND id != :id
   AND suspended = 0;
 
-selectAvailableAfterCandidatesByLemma:
-SELECT id, sense_id, lemma_id, lang_code, family, state,
-       stability, difficulty, due, last_review, reps, lapses, created_at,
-       available_after, answer_key, suspended
-FROM card
+burySiblingCardsByLemma:
+UPDATE card
+SET available_after = max(
+    coalesce(available_after, 0),
+    :min_value + ((random() % :jitter_range) + :jitter_range) % :jitter_range
+)
 WHERE lang_code = :lang_code
   AND lemma_id = :lemma_id
   AND sense_id != :sense_id
   AND suspended = 0;
 
-selectAvailableAfterCandidatesByAnswer:
-SELECT id, sense_id, lemma_id, lang_code, family, state,
-       stability, difficulty, due, last_review, reps, lapses, created_at,
-       available_after, answer_key, suspended
-FROM card
+-- :allowed_families should be CardFamily entries with testsWordRecall = true.
+burySiblingCardsByAnswer:
+UPDATE card
+SET available_after = max(
+    coalesce(available_after, 0),
+    :min_value + ((random() % :jitter_range) + :jitter_range) % :jitter_range
+)
 WHERE lang_code = :lang_code
   AND answer_key = :answer_key
+  AND family IN :allowed_families
   AND id != :id
   AND suspended = 0;
 
