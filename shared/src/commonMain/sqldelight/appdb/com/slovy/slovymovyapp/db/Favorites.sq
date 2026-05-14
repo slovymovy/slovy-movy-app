@@ -300,6 +300,26 @@ WHERE lang_code = :lang_code
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now);
 
+countDelayedDueLemmasByLang:
+SELECT COUNT(DISTINCT lemma_id)
+FROM card
+WHERE lang_code = :lang_code
+  AND due <= :now
+  AND suspended = 0
+  AND available_after IS NOT NULL
+  AND available_after > :now;
+
+selectNextReviewAtByLang:
+SELECT MIN(
+  CASE
+    WHEN available_after IS NOT NULL AND available_after > due THEN available_after
+    ELSE due
+  END
+) AS next_review_at
+FROM card
+WHERE lang_code = :lang_code
+  AND suspended = 0;
+
 countNewCardsCreatedSince:
 SELECT COUNT(*)
 FROM card
@@ -344,6 +364,27 @@ SET available_after = :availableAfter
 WHERE id = :id
   AND suspended = 0
   AND (available_after IS NULL OR available_after < :availableAfter);
+
+clearAvailableAfterForDelayedLemmas:
+UPDATE card
+SET available_after = NULL
+WHERE lang_code = :lang_code
+  AND suspended = 0
+  AND due <= :now
+  AND available_after IS NOT NULL
+  AND available_after > :now
+  AND lemma_id IN (
+    SELECT lemma_id
+    FROM card
+    WHERE lang_code = :lang_code
+      AND suspended = 0
+      AND due <= :now
+      AND available_after IS NOT NULL
+      AND available_after > :now
+    GROUP BY lemma_id
+    ORDER BY MIN(available_after) ASC, MIN(created_at) ASC
+    LIMIT :lemma_limit
+  );
 
 suspendCardsByFavorite:
 UPDATE card

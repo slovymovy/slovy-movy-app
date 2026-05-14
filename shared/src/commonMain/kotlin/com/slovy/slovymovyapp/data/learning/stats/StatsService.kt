@@ -4,6 +4,7 @@ import com.slovy.slovymovyapp.data.learning.CardState
 import com.slovy.slovymovyapp.data.learning.fsrs.DAY
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.db.FavoritesQueries
+import com.slovy.slovymovyapp.db.SelectCardSchedulingByLang
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import kotlinx.datetime.*
 import kotlin.math.pow
@@ -102,7 +103,7 @@ class StatsService(
     }
 
     private fun computePipeline(
-        cardRows: List<com.slovy.slovymovyapp.db.SelectCardSchedulingByLang>,
+        cardRows: List<SelectCardSchedulingByLang>,
         queuedCount: Int,
     ): List<StatsPipelineStage> {
         val counts = StatsPipelineStageId.entries.associateWith { 0 }.toMutableMap()
@@ -120,7 +121,7 @@ class StatsService(
     }
 
     private fun classifySense(
-        senseCards: List<com.slovy.slovymovyapp.db.SelectCardSchedulingByLang>
+        senseCards: List<SelectCardSchedulingByLang>
     ): StatsPipelineStageId {
         if (senseCards.any { it.state == CardState.NEW }) return StatsPipelineStageId.NEW
         val minStability = senseCards.minOf { it.stability }
@@ -144,6 +145,17 @@ class StatsService(
             reviewedLast7d = totalReviews.toInt(),
             rollingRetention7d = if (totalReviews == 0L) null else successfulReviews.toDouble() / totalReviews,
             matureCount = learning.countMatureCardsByLang(langCode, MATURITY_STABILITY_DAYS).executeAsOne().toInt(),
+        )
+    }
+
+    @OptIn(ExperimentalTime::class)
+    fun reviewQueueStats(langCode: String): ReviewQueueStats {
+        val now = clock.now().toEpochMilliseconds()
+        return ReviewQueueStats(
+            activeCardCount = learning.countCardsByLang(langCode).executeAsOne().toInt(),
+            dueToday = learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt(),
+            delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, now).executeAsOne().toInt(),
+            nextReviewAtEpochMs = learning.selectNextReviewAtByLang(langCode).executeAsOne().next_review_at,
         )
     }
 
