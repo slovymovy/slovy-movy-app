@@ -13,6 +13,7 @@ import com.slovy.slovymovyapp.data.remote.WordResult
 import com.slovy.slovymovyapp.db.FavoritesQueries
 import com.slovy.slovymovyapp.db.SelectRecentReviewedCards
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToLong
