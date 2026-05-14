@@ -364,9 +364,9 @@ class JsonIngestionBuilder(
                     entryIdToLemmaPosId[uuidParse(e.entry.entryId.toString())] = lemmaPosId
                 }
             } else {
-                // Primary cluster = root with most forms; tie-break: alphabetically first entryId
+                // Primary cluster = root with most ingestible forms; tie-break: alphabetically first entryId
                 val primaryRoot = activeRoots.sortedWith(
-                    compareByDescending<ExtractedWordEntry> { it.forms.size }
+                    compareByDescending<ExtractedWordEntry> { ingestibleForms(it).size }
                         .thenBy { it.entryId.toString() }
                 ).first()
                 val primaryLemmaPosId = uuidParse(primaryRoot.entryId.toString())
