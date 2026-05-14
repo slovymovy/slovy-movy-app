@@ -149,6 +149,12 @@ class StatsService(
     }
 
     @OptIn(ExperimentalTime::class)
+    fun dueNow(langCode: String): Int {
+        val now = clock.now().toEpochMilliseconds()
+        return learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt()
+    }
+
+    @OptIn(ExperimentalTime::class)
     fun reviewQueueStats(langCode: String): ReviewQueueStats {
         val now = clock.now().toEpochMilliseconds()
         return ReviewQueueStats(

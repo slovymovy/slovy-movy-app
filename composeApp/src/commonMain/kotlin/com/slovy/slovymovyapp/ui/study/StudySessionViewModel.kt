@@ -188,7 +188,7 @@ class StudySessionViewModel(
         viewModelScope.launch {
             runCatching {
                 intakeService.runIntake(langCode)
-                sessionTotal = statsService.globalStats(langCode).dueToday
+                sessionTotal = statsService.dueNow(langCode)
                 loadNextCard()
             }.onFailure { error ->
                 state = StudySessionUiState.Error(
@@ -269,11 +269,15 @@ class StudySessionViewModel(
         )
     }
 
-    private fun nextCardProgress(): StudySessionProgressUiState =
-        StudySessionProgressUiState(
-            current = reviewedCount + 1,
-            total = maxOf(sessionTotal, reviewedCount + 1),
+    private fun nextCardProgress(): StudySessionProgressUiState {
+        val current = reviewedCount + 1
+        val projectedTotal = reviewedCount + statsService.dueNow(langCode)
+        sessionTotal = maxOf(sessionTotal, projectedTotal, current)
+        return StudySessionProgressUiState(
+            current = current,
+            total = sessionTotal,
         )
+    }
 
     override fun onCleared() {
         super.onCleared()
