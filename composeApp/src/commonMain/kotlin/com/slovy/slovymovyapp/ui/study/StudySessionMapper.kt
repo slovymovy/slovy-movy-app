@@ -29,30 +29,37 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
     val targetLanguage = variant.targetLang?.let(Language::fromCodeOrNull)
     val lemma = cardData.lemma
 
+    val studiedSenses = cardData.entries
+        .flatMap { it.senses }
+        .filter { it.senseId in studiedSenseIds }
+
     return when (variant.kind) {
-        CardKind.WORD_TO_SOURCE_DEFINITION -> StudyCardUiState.Recognition(
-            id = card.id.toString(),
-            chipLabel = UiText.Resource(
-                Res.string.study_chip_source_only,
-                listOf(sourceLanguage.studyCode()),
-            ),
-            promptWord = lemma,
-            promptAudioText = lemma,
-            mode = StudyRecognitionMode.MONOLINGUAL,
-            back = sourceBack(
-                lemma = lemma,
-                sense = sense,
-                targetLanguage = null,
-            ),
-        )
+        CardKind.WORD_TO_SOURCE_DEFINITION -> {
+            val senses = studiedSenses.toMonolingualSenseUiStates(lemma)
+            StudyCardUiState.Recognition(
+                id = card.id.toString(),
+                chipLabel = UiText.Resource(
+                    Res.string.study_chip_source_only,
+                    listOf(sourceLanguage.studyCode()),
+                ),
+                promptWord = lemma,
+                promptAudioText = lemma,
+                mode = StudyRecognitionMode.MONOLINGUAL,
+                senses = senses,
+                activeSenseId = sense.senseId,
+                back = sourceBack(
+                    lemma = lemma,
+                    sense = sense,
+                    targetLanguage = null,
+                ),
+            )
+        }
 
         CardKind.WORD_TO_TRANSLATION -> {
             val target = targetLanguage ?: return null
             val answer = sense.translationCue(target) ?: return null
             val definition = sense.translationDef(target) ?: return null
-            val senses = cardData.entries
-                .flatMap { it.senses }
-                .toStudySenseUiStates(target)
+            val senses = studiedSenses.toBilingualSenseUiStates(target)
             StudyCardUiState.Recognition(
                 id = card.id.toString(),
                 chipLabel = UiText.Plain("${sourceLanguage.studyCode()} -> ${target.studyCode()}"),
@@ -244,19 +251,38 @@ private fun LanguageCardResponseSense.translationWords(language: Language): Stri
         .joinToString(", ")
         .takeIf { it.isNotBlank() }
 
-private fun List<LanguageCardResponseSense>.toStudySenseUiStates(targetLanguage: Language): List<StudyCardSenseUiState> =
+private fun List<LanguageCardResponseSense>.toBilingualSenseUiStates(
+    targetLanguage: Language,
+): List<StudyCardSenseUiState> =
     mapNotNull { sense ->
-        val translation = sense.translationWords(targetLanguage) ?: return@mapNotNull null
-        sense to translation
-    }.mapIndexed { index, (sense, translation) ->
-        val example = sense.examples.firstOrNull()
+        val answer = sense.translationCue(targetLanguage) ?: return@mapNotNull null
+        val definition = sense.translationDef(targetLanguage) ?: return@mapNotNull null
+        Triple(sense, answer, definition)
+    }.mapIndexed { index, (sense, answer, definition) ->
         StudyCardSenseUiState(
             id = sense.senseId,
             num = index + 1,
-            translation = translation,
-            definition = sense.translationDef(targetLanguage),
-            example = example?.text,
-            exampleTranslation = example?.targetLangTranslations?.get(targetLanguage),
+            back = StudyCardBackUiState(
+                headline = answer,
+                definition = definition,
+                examples = sense.studyExamples(targetLanguage),
+                audioText = null,
+            ),
+        )
+    }
+
+private fun List<LanguageCardResponseSense>.toMonolingualSenseUiStates(
+    lemma: String,
+): List<StudyCardSenseUiState> =
+    mapIndexed { index, sense ->
+        StudyCardSenseUiState(
+            id = sense.senseId,
+            num = index + 1,
+            back = sourceBack(
+                lemma = lemma,
+                sense = sense,
+                targetLanguage = null,
+            ),
         )
     }
 

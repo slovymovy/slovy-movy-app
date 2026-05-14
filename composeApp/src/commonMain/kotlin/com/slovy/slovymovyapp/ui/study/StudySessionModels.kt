@@ -105,10 +105,7 @@ data class StudyCardBackUiState(
 data class StudyCardSenseUiState(
     val id: String,
     val num: Int,
-    val translation: String,
-    val definition: String? = null,
-    val example: String? = null,
-    val exampleTranslation: String? = null,
+    val back: StudyCardBackUiState,
 )
 
 data class StudyExampleUiState(

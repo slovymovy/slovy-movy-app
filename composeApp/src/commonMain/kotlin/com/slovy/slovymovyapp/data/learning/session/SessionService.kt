@@ -300,8 +300,12 @@ class SessionService(
     private fun WordResult.toSessionCard(card: Card): SessionCard? {
         val senseId = card.senseId.toString()
         val sense = this.card?.findSense(senseId)
+        val studiedSenseIds = learning.selectActiveSenseIdsByLemma(
+            lang_code = card.langCode,
+            lemma_id = card.lemmaId,
+        ).executeAsList().mapTo(HashSet()) { it.toString() }
         val sessionCards = sortedVariants(card, sense).map { variant ->
-            toSessionCard(card, variant, senseId, sense)
+            toSessionCard(card, variant, senseId, sense, studiedSenseIds)
         }
 
         return sessionCards.firstOrNull { it.loadState() == SessionCardLoadState.READY }
@@ -314,6 +318,7 @@ class SessionService(
         variant: CardVariant,
         senseId: String,
         sense: LanguageCardResponseSense?,
+        studiedSenseIds: Set<String>,
     ): SessionCard {
         val example = if (variant.kind.isCloze && sense != null) {
             val targetLanguage = variant.targetLang?.let(Language::fromCodeOrNull)
@@ -332,6 +337,7 @@ class SessionService(
             wordResult = this,
             senseId = senseId,
             example = example,
+            studiedSenseIds = studiedSenseIds,
         )
     }
 

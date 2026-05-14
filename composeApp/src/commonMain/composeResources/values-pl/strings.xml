@@ -563,6 +563,7 @@
     </plurals>
     <string name="study_sense_position_label">znaczenie %1$d z %2$d</string>
     <string name="study_sense_position_accessibility">Znaczenie %1$d z %2$d</string>
+    <string name="study_swipe_back_to_rate">Wróć, aby ocenić znaczenie, którego się uczyłeś.</string>
     <string name="study_chip_source_only">tylko %1$s</string>
     <string name="study_chip_fill_in">Uzupełnij</string>
     <string name="study_chip_listen">Słuchanie</string>
