@@ -593,7 +593,8 @@
     <string name="favorites_study_due_action">Начать повторение</string>
     <string name="favorites_study_done_title">ВЫ ВСЁ ПОВТОРИЛИ</string>
     <string name="favorites_study_done_until_next_review">до следующего повторения</string>
-    <string name="favorites_study_done_continue">Продолжить обучение</string>
+    <string name="favorites_study_done_review_more">Повторить ещё немного</string>
+    <string name="favorites_study_done_study_new">Учить новые слова</string>
     <string name="favorites_study_done_region">Повторение завершено</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d час</item>

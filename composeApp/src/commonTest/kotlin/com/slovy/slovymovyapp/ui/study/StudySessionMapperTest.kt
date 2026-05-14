@@ -132,6 +132,66 @@ class StudySessionMapperTest {
     }
 
     @Test
+    fun listeningCardPopulatesStudiedSenses() {
+        val studiedSenseId = "00000000-0000-0000-0000-000000000101"
+        val otherSenseId = "00000000-0000-0000-0000-000000000102"
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.LISTENING_TRANSLATION, targetLang = Language.ENGLISH.code),
+            studiedSenseIds = setOf(studiedSenseId, otherSenseId),
+            extraSenses = listOf(
+                buildSense(
+                    senseId = otherSenseId,
+                    definition = "convivial gathering",
+                    translation = "sociable evening",
+                    exampleText = "Een <w>gezellig</w> avondje.",
+                    exampleTranslation = "A cosy evening.",
+                ),
+            ),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Listening>(sessionCard.toStudyCardUiState())
+
+        assertEquals(studiedSenseId, mapped.activeSenseId)
+        assertEquals(listOf(studiedSenseId, otherSenseId), mapped.senses.map { it.id })
+        assertEquals(listOf(1, 2), mapped.senses.map { it.num })
+        val activeSenseBack = mapped.senses.single { it.id == studiedSenseId }.back
+        assertEquals("gezellig", activeSenseBack.headline)
+        assertEquals("cosy, sociable", activeSenseBack.secondary)
+        assertEquals("a feeling of warmth", activeSenseBack.definition)
+        val otherBack = mapped.senses.single { it.id == otherSenseId }.back
+        assertEquals("gezellig", otherBack.headline)
+        assertEquals("sociable evening", otherBack.secondary)
+        assertEquals("convivial gathering", otherBack.definition)
+    }
+
+    @Test
+    fun productionCardPopulatesStudiedSensesForBackSide() {
+        val studiedSenseId = "00000000-0000-0000-0000-000000000101"
+        val otherSenseId = "00000000-0000-0000-0000-000000000102"
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.TRANSLATION_TO_WORD, targetLang = Language.ENGLISH.code),
+            studiedSenseIds = setOf(studiedSenseId, otherSenseId),
+            extraSenses = listOf(
+                buildSense(
+                    senseId = otherSenseId,
+                    definition = "convivial gathering",
+                    translation = "sociable evening",
+                    exampleText = "Een <w>gezellig</w> avondje.",
+                    exampleTranslation = "A cosy evening.",
+                ),
+            ),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Production>(sessionCard.toStudyCardUiState())
+
+        assertEquals(studiedSenseId, mapped.activeSenseId)
+        assertEquals(listOf(studiedSenseId, otherSenseId), mapped.senses.map { it.id })
+        assertEquals("gezellig", mapped.senses.first().back.headline)
+        assertEquals("cosy, sociable", mapped.senses.first().back.secondary)
+        assertEquals("sociable evening", mapped.senses.last().back.secondary)
+    }
+
+    @Test
     fun mapsSourceClozeCard() {
         val sessionCard = sessionCard(
             variant = CardVariant(CardKind.CLOZE_SOURCE, targetLang = Language.ENGLISH.code),

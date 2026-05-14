@@ -147,8 +147,7 @@ class StudySessionViewModel(
 
     fun setViewedSense(senseId: String) {
         val active = state as? StudySessionUiState.Active ?: return
-        val recognition = active.card as? StudyCardUiState.Recognition ?: return
-        if (recognition.senses.none { it.id == senseId }) return
+        if (active.card.senses.none { it.id == senseId }) return
         if (active.viewedSenseId == senseId) return
         state = active.copy(viewedSenseId = senseId)
     }
@@ -189,7 +188,7 @@ class StudySessionViewModel(
         viewModelScope.launch {
             runCatching {
                 intakeService.runIntake(langCode)
-                sessionTotal = statsService.globalStats(langCode).dueToday
+                sessionTotal = statsService.dueNow(langCode)
                 loadNextCard()
             }.onFailure { error ->
                 state = StudySessionUiState.Error(
@@ -266,15 +265,19 @@ class StudySessionViewModel(
             card = uiCard,
             side = StudyCardSide.FRONT,
             ratingOptions = emptyList(),
-            viewedSenseId = (uiCard as? StudyCardUiState.Recognition)?.activeSenseId,
+            viewedSenseId = uiCard.activeSenseId,
         )
     }
 
-    private fun nextCardProgress(): StudySessionProgressUiState =
-        StudySessionProgressUiState(
-            current = reviewedCount + 1,
-            total = maxOf(sessionTotal, reviewedCount + 1),
+    private fun nextCardProgress(): StudySessionProgressUiState {
+        val current = reviewedCount + 1
+        val projectedTotal = reviewedCount + statsService.dueNow(langCode)
+        sessionTotal = maxOf(sessionTotal, projectedTotal, current)
+        return StudySessionProgressUiState(
+            current = current,
+            total = sessionTotal,
         )
+    }
 
     override fun onCleared() {
         super.onCleared()

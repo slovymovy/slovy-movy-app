@@ -64,6 +64,8 @@ internal data class FavoriteLanguageReviewState(
     val dueCount: Int,
     val activeCardCount: Int,
     val delayedDueLemmaCount: Int,
+    val pendingFavoriteLemmaCount: Int,
+    val canStudyPendingFavoritesNow: Boolean,
     val nextReviewAtEpochMs: Long?,
 )
 
@@ -97,6 +99,7 @@ internal class FavoritesReviewCoordinator(
      */
     suspend fun refreshDueCountsOnly(
         favoritesRepository: FavoritesRepository,
+        intakeService: LearningIntake,
         statsService: StatsService,
     ): FavoritesReviewState = refreshMutex.withLock {
         if (!enabled) return@withLock FavoritesReviewState(emptyMap())
@@ -106,7 +109,8 @@ internal class FavoritesReviewCoordinator(
                 .distinct()
             FavoritesReviewState(
                 reviewByLanguage = languages.associateWith { language ->
-                    statsService.reviewQueueStats(language.code).toFavoriteLanguageReviewState()
+                    statsService.reviewQueueStats(language.code)
+                        .toFavoriteLanguageReviewState(language, intakeService)
                 },
             )
         }
@@ -136,16 +140,22 @@ internal class FavoritesReviewCoordinator(
         }
         FavoritesReviewState(
             reviewByLanguage = languages.associateWith { language ->
-                statsService.reviewQueueStats(language.code).toFavoriteLanguageReviewState()
+                statsService.reviewQueueStats(language.code)
+                    .toFavoriteLanguageReviewState(language, intakeService)
             },
         )
     }
 
-    private fun ReviewQueueStats.toFavoriteLanguageReviewState() =
+    private fun ReviewQueueStats.toFavoriteLanguageReviewState(
+        language: Language,
+        intakeService: LearningIntake,
+    ) =
         FavoriteLanguageReviewState(
             dueCount = dueToday,
             activeCardCount = activeCardCount,
             delayedDueLemmaCount = delayedDueLemmaCount,
+            pendingFavoriteLemmaCount = pendingFavoriteLemmaCount,
+            canStudyPendingFavoritesNow = intakeService.canContinueWithPendingFavoritesNow(language.code),
             nextReviewAtEpochMs = nextReviewAtEpochMs,
         )
 
@@ -169,6 +179,8 @@ private fun FavoritesReviewState.toFavoriteLanguageReviewUiState(): Map<Language
             dueCount = reviewState.dueCount,
             activeCardCount = reviewState.activeCardCount,
             delayedDueLemmaCount = reviewState.delayedDueLemmaCount,
+            pendingFavoriteLemmaCount = reviewState.pendingFavoriteLemmaCount,
+            canStudyPendingFavoritesNow = reviewState.canStudyPendingFavoritesNow,
             nextReviewAtEpochMs = reviewState.nextReviewAtEpochMs,
         )
     }
@@ -326,6 +338,7 @@ fun App(
     suspend fun refreshFavoritesDueCountsOnly() {
         val reviewState = favoritesReviewCoordinator.refreshDueCountsOnly(
             favoritesRepository = favoritesRepository,
+            intakeService = intakeService,
             statsService = statsService,
         )
         favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
@@ -754,12 +767,22 @@ fun App(
                         logEvent(AnalyticsEvent.STUDY_START_SESSION)
                         navController.navigate(AppDestination.StudySession(language.code))
                     },
-                    onContinueStudyingNow = { language ->
+                    onContinueStudyingNow = { language, action ->
                         coroutineScope.launch {
-                            sessionService.continueDelayedCardsNow(language.code)
+                            val shouldStartStudy = when (action) {
+                                FavoritesStudyDoneAction.REVIEW_MORE -> {
+                                    sessionService.continueDelayedCardsNow(language.code)
+                                    true
+                                }
+
+                                FavoritesStudyDoneAction.STUDY_NEW ->
+                                    intakeService.continueWithPendingFavoritesNow(language.code).cardsCreated > 0
+                            }
                             refreshFavoritesDueCountsOnly()
-                            logEvent(AnalyticsEvent.STUDY_START_SESSION)
-                            navController.navigate(AppDestination.StudySession(language.code))
+                            if (shouldStartStudy) {
+                                logEvent(AnalyticsEvent.STUDY_START_SESSION)
+                                navController.navigate(AppDestination.StudySession(language.code))
+                            }
                         }
                     },
                     onFavoritesChanged = { language ->

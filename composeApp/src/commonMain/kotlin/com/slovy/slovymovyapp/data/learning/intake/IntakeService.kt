@@ -18,10 +18,13 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 interface LearningIntake {
     suspend fun runIntake(langCode: String): IntakeResult
+    suspend fun continueWithPendingFavoritesNow(langCode: String): IntakeResult
+    fun canContinueWithPendingFavoritesNow(langCode: String): Boolean
 }
 
 class IntakeService(
@@ -31,52 +34,73 @@ class IntakeService(
     private val clock: Clock,
 ) : LearningIntake {
     @OptIn(ExperimentalTime::class)
-    override suspend fun runIntake(langCode: String): IntakeResult = withContext(Dispatchers.IO) {
+    override suspend fun runIntake(langCode: String): IntakeResult =
+        withContext(Dispatchers.IO) {
+            activatePendingFavorites(langCode, IntakeRunMode.DAILY)
+        }
+
+    @OptIn(ExperimentalTime::class)
+    override suspend fun continueWithPendingFavoritesNow(langCode: String): IntakeResult =
+        withContext(Dispatchers.IO) {
+            activatePendingFavorites(langCode, IntakeRunMode.CONTINUE_NOW)
+        }
+
+    @OptIn(ExperimentalTime::class)
+    override fun canContinueWithPendingFavoritesNow(langCode: String): Boolean =
+        pendingFavoritePauseReason(langCode, clock.now()) == null
+
+    @OptIn(ExperimentalTime::class)
+    private suspend fun activatePendingFavorites(
+        langCode: String,
+        mode: IntakeRunMode,
+    ): IntakeResult {
         val language = Language.fromCodeOrNull(langCode)
-            ?: return@withContext IntakeResult(emptyList(), emptyList(), 0)
+            ?: return IntakeResult(emptyList(), emptyList(), 0)
         val translationTargets = dictionary.defaultTranslationTargets(language)
             .filter { it != language }
             .distinctBy { it.code }
         val nowInstant = clock.now()
         val now = nowInstant.toEpochMilliseconds()
 
-        val due = learning.countDueCardsByLang(langCode, now).executeAsOne()
-        if (due > config.pauseIntakeIfQueueAbove) {
-            return@withContext IntakeResult(emptyList(), listOf(SkipReason.QUEUE_TOO_FULL), 0)
-        }
-
-        val weekAgo = (nowInstant - 7.days).toEpochMilliseconds()
-        val reviewCount = learning.countReviewsSince(langCode, weekAgo).executeAsOne()
-        if (reviewCount >= config.pauseIntakeRetentionMinReviews) {
-            val successful = learning.countSuccessfulReviewsSince(langCode, weekAgo).executeAsOne()
-            val retention = successful.toDouble() / reviewCount
-            if (retention < config.pauseIntakeIfRetentionBelow) {
-                return@withContext IntakeResult(emptyList(), listOf(SkipReason.RETENTION_TOO_LOW), 0)
-            }
+        val pauseReason = pendingFavoritePauseReason(langCode, nowInstant)
+        if (pauseReason != null) {
+            return IntakeResult(emptyList(), listOf(pauseReason), 0)
         }
 
         val timeZone = TimeZone.currentSystemDefault()
         val startOfToday = nowInstant.toLocalDateTime(timeZone).date
             .atStartOfDayIn(timeZone)
             .toEpochMilliseconds()
-        val addedToday = learning.countNewCardsCreatedSince(langCode, startOfToday).executeAsOne()
-        var remaining = config.dailyNewTaskFamilyBudget - addedToday.toInt()
-        if (remaining <= 0) {
-            return@withContext IntakeResult(emptyList(), listOf(SkipReason.BUDGET_EXHAUSTED), 0)
+        var remainingDailyTaskFamilies: Int? = null
+        if (mode == IntakeRunMode.DAILY) {
+            val addedToday = learning.countNewCardsCreatedSince(langCode, startOfToday).executeAsOne()
+            remainingDailyTaskFamilies = config.dailyNewTaskFamilyBudget - addedToday.toInt()
+            if (remainingDailyTaskFamilies <= 0) {
+                return IntakeResult(emptyList(), listOf(SkipReason.BUDGET_EXHAUSTED), 0)
+            }
         }
 
         val familiesPerSense = config.defaultIntakeFamilies.size
+        val pendingLemmaLimit = when (mode) {
+            IntakeRunMode.DAILY -> requireNotNull(remainingDailyTaskFamilies) * 10
+            IntakeRunMode.CONTINUE_NOW -> config.continueNowPendingLemmaLimit * 10
+        }
         val pendingLemmas = learning
-            .selectPendingActivationLemmas(langCode, (remaining * 10).toLong())
+            .selectPendingActivationLemmas(langCode, pendingLemmaLimit.toLong())
             .executeAsList()
         val activated = mutableListOf<Uuid>()
         val skipped = mutableListOf<SkipReason>()
         val invalidatedSenses = mutableSetOf<String>()
         var cardsCreated = 0
+        var activatedLemmaCount = 0
 
         for (row in pendingLemmas) {
+            if (mode == IntakeRunMode.CONTINUE_NOW && activatedLemmaCount >= config.continueNowPendingLemmaLimit) {
+                break
+            }
+
             val upperBoundCards = row.pending_count.toInt() * familiesPerSense
-            if (upperBoundCards > remaining) {
+            if (remainingDailyTaskFamilies != null && upperBoundCards > remainingDailyTaskFamilies) {
                 skipped += SkipReason.BUDGET_EXHAUSTED
                 continue
             }
@@ -151,13 +175,36 @@ class IntakeService(
                 activated += item.senseId
             }
             cardsCreated += groupTotal
-            remaining -= groupTotal
+            if (remainingDailyTaskFamilies != null) {
+                remainingDailyTaskFamilies -= groupTotal
+            } else {
+                activatedLemmaCount += 1
+            }
         }
 
         if (invalidatedSenses.isNotEmpty()) {
             dictionary.invalidateSenses(invalidatedSenses)
         }
-        IntakeResult(activated, skipped, cardsCreated)
+        return IntakeResult(activated, skipped, cardsCreated)
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun pendingFavoritePauseReason(langCode: String, now: Instant): SkipReason? {
+        val nowMs = now.toEpochMilliseconds()
+        val due = learning.countDueCardsByLang(langCode, nowMs).executeAsOne()
+        if (due > config.pauseIntakeIfQueueAbove) return SkipReason.QUEUE_TOO_FULL
+
+        val weekAgo = (now - 7.days).toEpochMilliseconds()
+        val reviewCount = learning.countReviewsSince(langCode, weekAgo).executeAsOne()
+        if (reviewCount < config.pauseIntakeRetentionMinReviews) return null
+
+        val successful = learning.countSuccessfulReviewsSince(langCode, weekAgo).executeAsOne()
+        val retention = successful.toDouble() / reviewCount
+        return if (retention < config.pauseIntakeIfRetentionBelow) {
+            SkipReason.RETENTION_TOO_LOW
+        } else {
+            null
+        }
     }
 }
 
@@ -179,3 +226,8 @@ private data class IntakePlanItem(
     val senseId: Uuid,
     val families: List<CardFamily>,
 )
+
+private enum class IntakeRunMode {
+    DAILY,
+    CONTINUE_NOW,
+}

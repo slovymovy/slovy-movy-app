@@ -99,13 +99,22 @@ data class FavoritesStudyDoneUiState(
     val language: Language,
     val nextReviewLabel: String,
     val nextReviewAccessibilityValue: UiText,
-    val canContinueNow: Boolean,
-)
+    val action: FavoritesStudyDoneAction?,
+) {
+    val canContinueNow: Boolean get() = action != null
+}
+
+enum class FavoritesStudyDoneAction {
+    REVIEW_MORE,
+    STUDY_NEW,
+}
 
 data class FavoriteLanguageReviewUiState(
     val dueCount: Int = 0,
     val activeCardCount: Int = 0,
     val delayedDueLemmaCount: Int = 0,
+    val pendingFavoriteLemmaCount: Int = 0,
+    val canStudyPendingFavoritesNow: Boolean = true,
     val nextReviewAtEpochMs: Long? = null,
 )
 
@@ -395,7 +404,13 @@ class FavoritesViewModel(
             language = language,
             nextReviewLabel = timeLabel.label,
             nextReviewAccessibilityValue = timeLabel.accessibilityValue,
-            canContinueNow = reviewState.delayedDueLemmaCount > 0,
+            action = when {
+                reviewState.delayedDueLemmaCount > 0 -> FavoritesStudyDoneAction.REVIEW_MORE
+                reviewState.pendingFavoriteLemmaCount > 0 && reviewState.canStudyPendingFavoritesNow ->
+                    FavoritesStudyDoneAction.STUDY_NEW
+
+                else -> null
+            },
         )
     }
 
@@ -647,7 +662,7 @@ fun FavoritesScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
-    onContinueStudyingNow: (Language) -> Unit = {},
+    onContinueStudyingNow: (Language, FavoritesStudyDoneAction) -> Unit = { _, _ -> },
     onFavoritesChanged: (Language) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
@@ -715,7 +730,7 @@ fun FavoritesScreenContent(
     onLanguageSelected: (Language) -> Unit = {},
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
-    onContinueStudyingNow: (Language) -> Unit = {},
+    onContinueStudyingNow: (Language, FavoritesStudyDoneAction) -> Unit = { _, _ -> },
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -931,7 +946,9 @@ fun FavoritesScreenContent(
                                         StudyDoneCard(
                                             studyDone = studyDone,
                                             onContinueStudyingNow = {
-                                                onContinueStudyingNow(studyDone.language)
+                                                studyDone.action?.let { action ->
+                                                    onContinueStudyingNow(studyDone.language, action)
+                                                }
                                             },
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -1032,7 +1049,14 @@ private fun StudyDoneCard(
     modifier: Modifier = Modifier,
 ) {
     val regionLabel = stringResource(Res.string.favorites_study_done_region)
-    val continueLabel = stringResource(Res.string.favorites_study_done_continue)
+    val continueLabel = studyDone.action?.let { action ->
+        stringResource(
+            when (action) {
+                FavoritesStudyDoneAction.REVIEW_MORE -> Res.string.favorites_study_done_review_more
+                FavoritesStudyDoneAction.STUDY_NEW -> Res.string.favorites_study_done_study_new
+            },
+        )
+    }
     val nextReviewAccessibilityLabel = stringResource(
         Res.string.favorites_study_done_next_review_a11y,
         studyDone.nextReviewAccessibilityValue.resolve()
@@ -1131,7 +1155,7 @@ private fun StudyDoneCard(
                     )
                 }
             }
-            if (studyDone.canContinueNow) {
+            if (continueLabel != null) {
                 HorizontalDivider(
                     modifier = Modifier.padding(top = 13.dp, bottom = 11.dp),
                     thickness = 0.5.dp,
@@ -1395,7 +1419,7 @@ fun PreviewFavoritesScreenStudyDone(
                     quantity = 4,
                     args = listOf(4),
                 ),
-                canContinueNow = true,
+                action = FavoritesStudyDoneAction.REVIEW_MORE,
             ),
         )
         FavoritesScreenContent(state = state)
