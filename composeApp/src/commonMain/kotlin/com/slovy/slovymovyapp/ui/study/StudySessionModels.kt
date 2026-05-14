@@ -50,6 +50,10 @@ sealed interface StudyCardUiState {
     val id: String
     val chipLabel: UiText
     val back: StudyCardBackUiState
+    val senses: List<StudyCardSenseUiState>
+        get() = emptyList()
+    val activeSenseId: String?
+        get() = null
 
     data class Recognition(
         override val id: String,
@@ -57,8 +61,8 @@ sealed interface StudyCardUiState {
         val promptWord: String,
         val promptAudioText: String? = promptWord,
         val mode: StudyRecognitionMode,
-        val senses: List<StudyCardSenseUiState> = emptyList(),
-        val activeSenseId: String? = null,
+        override val senses: List<StudyCardSenseUiState> = emptyList(),
+        override val activeSenseId: String? = null,
         override val back: StudyCardBackUiState,
     ) : StudyCardUiState
 
@@ -69,6 +73,8 @@ sealed interface StudyCardUiState {
         val promptText: String,
         val firstLetterHint: FirstLetterHint? = null,
         val isDefinitionPrompt: Boolean = false,
+        override val senses: List<StudyCardSenseUiState> = emptyList(),
+        override val activeSenseId: String? = null,
         override val back: StudyCardBackUiState,
     ) : StudyCardUiState
 
@@ -84,6 +90,8 @@ sealed interface StudyCardUiState {
         override val id: String,
         override val chipLabel: UiText,
         val promptAudioText: String,
+        override val senses: List<StudyCardSenseUiState> = emptyList(),
+        override val activeSenseId: String? = null,
         override val back: StudyCardBackUiState,
     ) : StudyCardUiState
 }

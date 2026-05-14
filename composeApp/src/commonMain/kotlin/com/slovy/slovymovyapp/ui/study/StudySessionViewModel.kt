@@ -147,8 +147,7 @@ class StudySessionViewModel(
 
     fun setViewedSense(senseId: String) {
         val active = state as? StudySessionUiState.Active ?: return
-        val recognition = active.card as? StudyCardUiState.Recognition ?: return
-        if (recognition.senses.none { it.id == senseId }) return
+        if (active.card.senses.none { it.id == senseId }) return
         if (active.viewedSenseId == senseId) return
         state = active.copy(viewedSenseId = senseId)
     }
@@ -266,7 +265,7 @@ class StudySessionViewModel(
             card = uiCard,
             side = StudyCardSide.FRONT,
             ratingOptions = emptyList(),
-            viewedSenseId = (uiCard as? StudyCardUiState.Recognition)?.activeSenseId,
+            viewedSenseId = uiCard.activeSenseId,
         )
     }
 
