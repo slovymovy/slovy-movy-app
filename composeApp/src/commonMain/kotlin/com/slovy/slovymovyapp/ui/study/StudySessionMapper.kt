@@ -32,6 +32,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
     val studiedSenses = cardData.entries
         .flatMap { it.senses }
         .filter { it.senseId in studiedSenseIds }
+        .sortedByDescending { it.senseId == sense.senseId }
 
     return when (variant.kind) {
         CardKind.WORD_TO_SOURCE_DEFINITION -> {
@@ -134,6 +135,18 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
         CardKind.CLOZE_SOURCE -> {
             val target = targetLanguage ?: return null
             val cloze = example?.toClozeText() ?: return null
+            val activeBack = sourceClozeBack(
+                lemma = lemma,
+                sense = sense,
+                targetLanguage = target,
+                cloze = cloze.copy(filled = true),
+            )
+            val senses = studiedSenses.toSourceSenseUiStates(
+                lemma = lemma,
+                targetLanguage = target,
+            ).map { senseUi ->
+                if (senseUi.id == sense.senseId) senseUi.copy(back = activeBack) else senseUi
+            }
             StudyCardUiState.Cloze(
                 id = card.id.toString(),
                 chipLabel = UiText.Resource(Res.string.study_chip_fill_in),
@@ -143,12 +156,9 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     ?.targetLangTranslations
                     ?.values
                     ?.firstOrNull(),
-                back = sourceClozeBack(
-                    lemma = lemma,
-                    sense = sense,
-                    targetLanguage = target,
-                    cloze = cloze.copy(filled = true),
-                ),
+                senses = senses,
+                activeSenseId = sense.senseId,
+                back = activeBack,
             )
         }
 
@@ -163,6 +173,18 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     )
                 )
             }
+            val activeBack = sourceClozeBack(
+                lemma = lemma,
+                sense = sense,
+                targetLanguage = target,
+                examples = backExamples,
+            )
+            val senses = studiedSenses.toSourceSenseUiStates(
+                lemma = lemma,
+                targetLanguage = target,
+            ).map { senseUi ->
+                if (senseUi.id == sense.senseId) senseUi.copy(back = activeBack) else senseUi
+            }
             StudyCardUiState.Cloze(
                 id = card.id.toString(),
                 chipLabel = UiText.Resource(
@@ -171,12 +193,9 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                 ),
                 prompt = cloze.copy(filled = true),
                 translationHint = null,
-                back = sourceClozeBack(
-                    lemma = lemma,
-                    sense = sense,
-                    targetLanguage = target,
-                    examples = backExamples,
-                ),
+                senses = senses,
+                activeSenseId = sense.senseId,
+                back = activeBack,
             )
         }
 
