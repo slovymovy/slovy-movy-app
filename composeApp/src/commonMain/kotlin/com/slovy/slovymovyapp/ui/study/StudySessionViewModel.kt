@@ -122,7 +122,9 @@ class StudySessionViewModel(
     fun retry() {
         val failedCard = currentCard
         if (failedCard != null) {
-            sessionService.putCardForLater(failedCard)
+            viewModelScope.launch {
+                sessionService.putCardForLater(failedCard)
+            }
         }
         loadNextCard()
     }

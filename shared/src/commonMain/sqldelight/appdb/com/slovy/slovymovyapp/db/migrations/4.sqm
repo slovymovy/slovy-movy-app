@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS idx_card_answer
+ON card(lang_code, answer_key);

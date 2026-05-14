@@ -12,7 +12,9 @@ import com.slovy.slovymovyapp.data.remote.WordFetchManager
 import com.slovy.slovymovyapp.data.remote.WordResult
 import com.slovy.slovymovyapp.db.FavoritesQueries
 import com.slovy.slovymovyapp.db.SelectRecentReviewedCards
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToLong
 import kotlin.random.Random
 import kotlin.time.*
@@ -39,12 +41,16 @@ class SessionService(
             }
         }
         emit(null)
-    }
+    }.flowOn(Dispatchers.IO)
 
     fun previewRatings(card: SessionCard): List<GradeOutcome> =
         scheduler.preview(card.card.scheduling, clock.now())
 
-    fun submitReview(card: SessionCard, outcome: GradeOutcome, durationMs: Long): SessionCard {
+    suspend fun submitReview(
+        card: SessionCard,
+        outcome: GradeOutcome,
+        durationMs: Long,
+    ): SessionCard = withContext(Dispatchers.IO) {
         val now = clock.now()
         val nowMs = now.toEpochMilliseconds()
         val before = card.card.scheduling
@@ -83,36 +89,10 @@ class SessionService(
             val nextInterval = (after.dueEpochMs - nowMs).coerceAtLeast(0L)
                 .toDuration(DurationUnit.MILLISECONDS)
             if (outcome.rating.buriesSiblings()) {
-                applyAvailableAfter(
-                    cards = learning.selectAvailableAfterCandidatesBySense(
-                        sense_id = card.card.senseId,
-                        lang_code = card.card.langCode,
-                        id = card.card.id,
-                    ).executeAsList().map { it.toCard() },
-                    nowMs = nowMs,
-                    cooldown = siblingCooldown(nextInterval, config.sameSenseCooldownRatio),
-                )
-                applyAvailableAfter(
-                    cards = learning.selectAvailableAfterCandidatesByLemma(
-                        lang_code = card.card.langCode,
-                        lemma_id = card.card.lemmaId,
-                        sense_id = card.card.senseId,
-                    ).executeAsList().map { it.toCard() },
-                    nowMs = nowMs,
-                    cooldown = siblingCooldown(nextInterval, config.sameLemmaCooldownRatio),
-                )
+                burySense(card.card, nowMs, siblingCooldown(nextInterval, config.sameSenseCooldownRatio))
+                buryLemma(card.card, nowMs, siblingCooldown(nextInterval, config.sameLemmaCooldownRatio))
                 if (card.card.family.testsWordRecall) {
-                    applyAvailableAfter(
-                        cards = learning.selectAvailableAfterCandidatesByAnswer(
-                            lang_code = card.card.langCode,
-                            answer_key = card.card.answerKey,
-                            id = card.card.id,
-                        ).executeAsList()
-                            .map { it.toCard() }
-                            .filter { it.family.testsWordRecall },
-                        nowMs = nowMs,
-                        cooldown = siblingCooldown(nextInterval, config.sameAnswerCooldownRatio),
-                    )
+                    buryAnswer(card.card, nowMs, siblingCooldown(nextInterval, config.sameAnswerCooldownRatio))
                 }
             } else {
                 learning.setCardAvailableAfter(
@@ -125,10 +105,10 @@ class SessionService(
             }
         }
 
-        return card.copy(card = card.card.copy(scheduling = after))
+        card.copy(card = card.card.copy(scheduling = after))
     }
 
-    fun putCardForLater(card: SessionCard) {
+    suspend fun putCardForLater(card: SessionCard) = withContext(Dispatchers.IO) {
         setCardAvailableAfter(card.card)
     }
 
@@ -239,19 +219,48 @@ class SessionService(
         return nowMs + jitteredCooldown(cooldown).inWholeMilliseconds
     }
 
-    private fun applyAvailableAfter(
-        cards: List<Card>,
-        nowMs: Long,
-        cooldown: Duration,
-    ) {
-        if (cooldown <= Duration.ZERO) return
+    private fun burySense(card: Card, nowMs: Long, cooldown: Duration) {
+        val params = bulkBuryParams(nowMs, cooldown) ?: return
+        learning.burySiblingCardsBySense(
+            min_value = params.minValue,
+            jitter_range = params.jitterRange,
+            sense_id = card.senseId,
+            lang_code = card.langCode,
+            id = card.id,
+        )
+    }
 
-        cards.forEach { affected ->
-            learning.setCardAvailableAfter(
-                availableAfter = nowMs + jitteredCooldown(cooldown).inWholeMilliseconds,
-                id = affected.id,
-            )
-        }
+    private fun buryLemma(card: Card, nowMs: Long, cooldown: Duration) {
+        val params = bulkBuryParams(nowMs, cooldown) ?: return
+        learning.burySiblingCardsByLemma(
+            min_value = params.minValue,
+            jitter_range = params.jitterRange,
+            lang_code = card.langCode,
+            lemma_id = card.lemmaId,
+            sense_id = card.senseId,
+        )
+    }
+
+    private fun buryAnswer(card: Card, nowMs: Long, cooldown: Duration) {
+        val params = bulkBuryParams(nowMs, cooldown) ?: return
+        learning.burySiblingCardsByAnswer(
+            min_value = params.minValue,
+            jitter_range = params.jitterRange,
+            lang_code = card.langCode,
+            answer_key = card.answerKey,
+            excluded_family = CardFamily.RECOGNIZE_SENSE,
+            id = card.id,
+        )
+    }
+
+    private fun bulkBuryParams(nowMs: Long, cooldown: Duration): BulkBuryParams? {
+        if (cooldown <= Duration.ZERO) return null
+        val cooldownMillis = cooldown.inWholeMilliseconds
+        val spread = (cooldownMillis * config.cooldownJitterRatio.coerceAtLeast(0.0)).roundToLong()
+        return BulkBuryParams(
+            minValue = nowMs + cooldownMillis - spread,
+            jitterRange = (2 * spread + 1).coerceAtLeast(1L),
+        )
     }
 
     private fun siblingCooldown(nextInterval: Duration, ratio: Double): Duration {
@@ -268,6 +277,11 @@ class SessionService(
         val offset = Random.nextLong(-spread, spread + 1)
         return (cooldownMillis + offset).coerceAtLeast(1L).toDuration(DurationUnit.MILLISECONDS)
     }
+
+    private data class BulkBuryParams(
+        val minValue: Long,
+        val jitterRange: Long,
+    )
 
     private fun sortedVariants(card: Card, sense: LanguageCardResponseSense?): List<CardVariant> {
         sense ?: return emptyList()
