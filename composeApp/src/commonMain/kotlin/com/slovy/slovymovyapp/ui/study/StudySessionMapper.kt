@@ -262,7 +262,7 @@ private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
 internal fun String.firstLetterHint(): FirstLetterHint? {
     val first = firstOrNull { it.isLetter() } ?: return null
     val letterCount = count { it.isLetter() }
-    val dotCount = letterCount.minus(1).coerceAtLeast(3)
+    val dotCount = letterCount - 1
     return FirstLetterHint(letter = first, letterCount = letterCount, dotCount = dotCount)
 }
 
