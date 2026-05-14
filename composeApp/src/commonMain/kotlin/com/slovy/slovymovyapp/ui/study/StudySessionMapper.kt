@@ -239,13 +239,15 @@ private fun LanguageCardResponseSense.translationWords(language: Language): Stri
         .joinToString(", ")
         .takeIf { it.isNotBlank() }
 
-private fun LanguageCardResponseSense.studyExamples(targetLanguage: Language?): List<StudyExampleUiState> =
-    examples.take(1).map { example ->
+private fun LanguageCardResponseSense.studyExamples(targetLanguage: Language?): List<StudyExampleUiState> {
+    val example = examples.randomOrNull() ?: return emptyList()
+    return listOf(
         StudyExampleUiState(
             text = example.text,
-            translation = targetLanguage?.let { example.targetLangTranslations[it] }
-        )
-    }
+            translation = targetLanguage?.let { example.targetLangTranslations[it] },
+        ),
+    )
+}
 
 private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
     if (text.isBlank()) return null
