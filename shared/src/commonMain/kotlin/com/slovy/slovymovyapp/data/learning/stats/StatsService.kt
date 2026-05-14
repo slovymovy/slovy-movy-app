@@ -6,6 +6,9 @@ import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.db.FavoritesQueries
 import com.slovy.slovymovyapp.db.SelectCardSchedulingByLang
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.*
 import kotlin.math.pow
 import kotlin.time.Clock
@@ -149,9 +152,9 @@ class StatsService(
     }
 
     @OptIn(ExperimentalTime::class)
-    fun dueNow(langCode: String): Int {
+    suspend fun dueNow(langCode: String): Int = withContext(Dispatchers.IO) {
         val now = clock.now().toEpochMilliseconds()
-        return learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt()
+        learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt()
     }
 
     @OptIn(ExperimentalTime::class)

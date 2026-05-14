@@ -248,7 +248,7 @@ class StudySessionViewModel(
         }
     }
 
-    private fun showLoadedCard(sessionCard: SessionCard) {
+    private suspend fun showLoadedCard(sessionCard: SessionCard) {
         currentCard = sessionCard
         val uiCard = sessionCard.toStudyCardUiState()
         if (uiCard == null) {
@@ -269,7 +269,7 @@ class StudySessionViewModel(
         )
     }
 
-    private fun nextCardProgress(): StudySessionProgressUiState {
+    private suspend fun nextCardProgress(): StudySessionProgressUiState {
         val current = reviewedCount + 1
         val projectedTotal = reviewedCount + statsService.dueNow(langCode)
         sessionTotal = maxOf(sessionTotal, projectedTotal, current)
