@@ -8,6 +8,13 @@ data class GlobalStats(
     val matureCount: Int,
 )
 
+data class ReviewQueueStats(
+    val activeCardCount: Int,
+    val dueToday: Int,
+    val delayedDueLemmaCount: Int,
+    val nextReviewAtEpochMs: Long?,
+)
+
 enum class StatsPipelineStageId {
     QUEUE,
     NEW,

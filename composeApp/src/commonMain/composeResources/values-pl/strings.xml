@@ -594,4 +594,22 @@
     </plurals>
     <string name="favorites_study_due_subtitle">Około %1$d min</string>
     <string name="favorites_study_due_action">Rozpocznij powtórkę</string>
+    <string name="favorites_study_done_title">JESTEŚ NA BIEŻĄCO</string>
+    <string name="favorites_study_done_until_next_review">do następnej powtórki</string>
+    <string name="favorites_study_done_continue">Kontynuuj naukę</string>
+    <string name="favorites_study_done_region">Powtórka zakończona</string>
+    <plurals name="favorites_study_done_duration_hours">
+        <item quantity="one">%1$d godzinę</item>
+        <item quantity="few">%1$d godziny</item>
+        <item quantity="many">%1$d godzin</item>
+        <item quantity="other">%1$d godziny</item>
+    </plurals>
+    <plurals name="favorites_study_done_duration_minutes">
+        <item quantity="one">%1$d minutę</item>
+        <item quantity="few">%1$d minuty</item>
+        <item quantity="many">%1$d minut</item>
+        <item quantity="other">%1$d minuty</item>
+    </plurals>
+    <string name="favorites_study_done_duration_hours_minutes">%1$d godz. %2$d min</string>
+    <string name="favorites_study_done_next_review_a11y">Następna powtórka za %1$s</string>
 </resources>

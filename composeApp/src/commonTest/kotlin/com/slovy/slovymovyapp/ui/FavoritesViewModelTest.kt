@@ -10,8 +10,14 @@ import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.test.runTest
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlin.test.*
 
+@OptIn(ExperimentalTime::class)
 open class FavoritesViewModelTest : BaseTest() {
 
     private val viewModelStore = ViewModelStore()
@@ -20,6 +26,11 @@ open class FavoritesViewModelTest : BaseTest() {
         const val SENSE_1 = "00000000-0000-0000-0000-000000000101"
         const val SENSE_2 = "00000000-0000-0000-0000-000000000102"
         const val SENSE_3 = "00000000-0000-0000-0000-000000000103"
+        val TEST_NOW: Instant = Instant.parse("2026-05-14T12:00:00Z")
+    }
+
+    private val testClock = object : Clock {
+        override fun now(): Instant = TEST_NOW
     }
 
     @BeforeTest
@@ -56,8 +67,9 @@ open class FavoritesViewModelTest : BaseTest() {
         favRepo: FavoritesRepository,
         dictRepo: DictionaryRepository = dictionaryRepository(favRepo),
         settingsRepo: SettingsRepository = SettingsRepository(testAppDatabaseHolder().database),
+        clock: Clock = testClock,
     ): FavoritesViewModel {
-        val vm = FavoritesViewModel(favRepo, dictRepo, settingsRepo)
+        val vm = FavoritesViewModel(favRepo, dictRepo, settingsRepo, clock)
         viewModelStore.put("test", vm)
         return vm
     }
@@ -414,6 +426,114 @@ open class FavoritesViewModelTest : BaseTest() {
         assertEquals(Language.ENGLISH, study.language)
         assertEquals(1, study.dueCount)
         assertEquals(1, study.estimatedMinutes)
+    }
+
+    @Test
+    fun studyDoneState_hiddenWhenNoCardsAreInLearning() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.updateReviewState(
+            mapOf(
+                Language.ENGLISH to FavoriteLanguageReviewUiState(
+                    dueCount = 0,
+                    activeCardCount = 0,
+                    delayedDueLemmaCount = 0,
+                    nextReviewAtEpochMs = (TEST_NOW + 1.hours).toEpochMilliseconds(),
+                )
+            )
+        )
+        vm.loadAndApplyState("")
+
+        assertNull(contentState(vm).studyDone)
+    }
+
+    @Test
+    fun studyDoneState_showsActualHourMinuteTimeForFutureReview() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.updateReviewState(
+            mapOf(
+                Language.ENGLISH to FavoriteLanguageReviewUiState(
+                    dueCount = 0,
+                    activeCardCount = 1,
+                    delayedDueLemmaCount = 0,
+                    nextReviewAtEpochMs = (TEST_NOW + 1.hours + 15.minutes).toEpochMilliseconds(),
+                )
+            )
+        )
+        vm.loadAndApplyState("")
+
+        val studyDone = assertNotNull(contentState(vm).studyDone)
+        assertEquals(Language.ENGLISH, studyDone.language)
+        assertEquals("1 h 15 min", studyDone.nextReviewLabel)
+        assertFalse(studyDone.canContinueNow)
+    }
+
+    @Test
+    fun studyDoneState_continueOnlyWhenDueCardsAreDelayed() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.updateReviewState(
+            mapOf(
+                Language.ENGLISH to FavoriteLanguageReviewUiState(
+                    dueCount = 0,
+                    activeCardCount = 1,
+                    delayedDueLemmaCount = 2,
+                    nextReviewAtEpochMs = (TEST_NOW + 12.minutes).toEpochMilliseconds(),
+                )
+            )
+        )
+        vm.loadAndApplyState("")
+
+        val delayedStudyDone = assertNotNull(contentState(vm).studyDone)
+        assertEquals("12 min", delayedStudyDone.nextReviewLabel)
+        assertTrue(delayedStudyDone.canContinueNow)
+
+        vm.updateReviewState(
+            mapOf(
+                Language.ENGLISH to FavoriteLanguageReviewUiState(
+                    dueCount = 0,
+                    activeCardCount = 1,
+                    delayedDueLemmaCount = 0,
+                    nextReviewAtEpochMs = (TEST_NOW + 12.minutes).toEpochMilliseconds(),
+                )
+            )
+        )
+
+        assertFalse(assertNotNull(contentState(vm).studyDone).canContinueNow)
+    }
+
+    @Test
+    fun studyDoneState_hiddenWhenDueCardsAreAvailable() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.updateReviewState(
+            mapOf(
+                Language.ENGLISH to FavoriteLanguageReviewUiState(
+                    dueCount = 1,
+                    activeCardCount = 1,
+                    delayedDueLemmaCount = 0,
+                    nextReviewAtEpochMs = (TEST_NOW + 1.hours).toEpochMilliseconds(),
+                )
+            )
+        )
+        vm.loadAndApplyState("")
+
+        val content = contentState(vm)
+        assertNotNull(content.study)
+        assertNull(content.studyDone)
     }
 
     @Test

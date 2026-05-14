@@ -20,6 +20,7 @@ import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
 import com.slovy.slovymovyapp.data.learning.session.ExamplePicker
 import com.slovy.slovymovyapp.data.learning.session.SessionService
+import com.slovy.slovymovyapp.data.learning.stats.ReviewQueueStats
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.*
@@ -54,10 +55,17 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 internal data class FavoritesReviewState(
-    val dueCountByLanguage: Map<Language, Int>,
+    val reviewByLanguage: Map<Language, FavoriteLanguageReviewState>,
 ) {
-    val hasDueCards: Boolean get() = dueCountByLanguage.values.any { it > 0 }
+    val hasDueCards: Boolean get() = reviewByLanguage.values.any { it.dueCount > 0 }
 }
+
+internal data class FavoriteLanguageReviewState(
+    val dueCount: Int,
+    val activeCardCount: Int,
+    val delayedDueLemmaCount: Int,
+    val nextReviewAtEpochMs: Long?,
+)
 
 @OptIn(ExperimentalTime::class)
 internal class FavoritesReviewCoordinator(
@@ -82,9 +90,9 @@ internal class FavoritesReviewCoordinator(
     }
 
     /**
-     * Re-reads due counts without running intake. Cheap enough to call right after a
+     * Re-reads review queue state without running intake. Cheap enough to call right after a
      * favorite toggle: remove/add already mutate `card.suspended` synchronously, so
-     * `dueToday` is accurate. Skipping intake here avoids serializing the dictionary-DB
+     * due and delayed-card metadata are accurate. Skipping intake here avoids serializing the dictionary-DB
      * driver against the screen's own queries on iOS.
      */
     suspend fun refreshDueCountsOnly(
@@ -97,8 +105,8 @@ internal class FavoritesReviewCoordinator(
                 .map { it.language }
                 .distinct()
             FavoritesReviewState(
-                dueCountByLanguage = languages.associateWith { language ->
-                    statsService.globalStats(language.code).dueToday
+                reviewByLanguage = languages.associateWith { language ->
+                    statsService.reviewQueueStats(language.code).toFavoriteLanguageReviewState()
                 },
             )
         }
@@ -127,11 +135,19 @@ internal class FavoritesReviewCoordinator(
             }
         }
         FavoritesReviewState(
-            dueCountByLanguage = languages.associateWith { language ->
-                statsService.globalStats(language.code).dueToday
+            reviewByLanguage = languages.associateWith { language ->
+                statsService.reviewQueueStats(language.code).toFavoriteLanguageReviewState()
             },
         )
     }
+
+    private fun ReviewQueueStats.toFavoriteLanguageReviewState() =
+        FavoriteLanguageReviewState(
+            dueCount = dueToday,
+            activeCardCount = activeCardCount,
+            delayedDueLemmaCount = delayedDueLemmaCount,
+            nextReviewAtEpochMs = nextReviewAtEpochMs,
+        )
 
     internal fun shouldRunIntake(language: Language): Boolean {
         val lastRunAt = lastIntakeAtByLanguage[language] ?: return true
@@ -146,6 +162,16 @@ internal class FavoritesReviewCoordinator(
         val INTAKE_CACHE_TTL = 5.minutes
     }
 }
+
+private fun FavoritesReviewState.toFavoriteLanguageReviewUiState(): Map<Language, FavoriteLanguageReviewUiState> =
+    reviewByLanguage.mapValues { (_, reviewState) ->
+        FavoriteLanguageReviewUiState(
+            dueCount = reviewState.dueCount,
+            activeCardCount = reviewState.activeCardCount,
+            delayedDueLemmaCount = reviewState.delayedDueLemmaCount,
+            nextReviewAtEpochMs = reviewState.nextReviewAtEpochMs,
+        )
+    }
 
 @Serializable
 private sealed interface AppDestination {
@@ -283,6 +309,7 @@ fun App(
             favoritesRepository = favoritesRepository,
             dictionaryRepository = dictionaryRepository,
             settingsRepository = settingsRepository,
+            clock = Clock.System,
         ).also { it.start() }
     }
 
@@ -292,7 +319,7 @@ fun App(
             intakeService = intakeService,
             statsService = statsService,
         )
-        favoritesViewModel.updateReviewDueCounts(reviewState.dueCountByLanguage)
+        favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
         hasFavoritesToReview = reviewState.hasDueCards
     }
 
@@ -301,7 +328,7 @@ fun App(
             favoritesRepository = favoritesRepository,
             statsService = statsService,
         )
-        favoritesViewModel.updateReviewDueCounts(reviewState.dueCountByLanguage)
+        favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
         hasFavoritesToReview = reviewState.hasDueCards
     }
 
@@ -726,6 +753,14 @@ fun App(
                     onStartStudy = { language ->
                         logEvent(AnalyticsEvent.STUDY_START_SESSION)
                         navController.navigate(AppDestination.StudySession(language.code))
+                    },
+                    onContinueStudyingNow = { language ->
+                        coroutineScope.launch {
+                            sessionService.continueDelayedCardsNow(language.code)
+                            refreshFavoritesDueCountsOnly()
+                            logEvent(AnalyticsEvent.STUDY_START_SESSION)
+                            navController.navigate(AppDestination.StudySession(language.code))
+                        }
                     },
                     onFavoritesChanged = { language ->
                         favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(language)

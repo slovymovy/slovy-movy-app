@@ -37,6 +37,7 @@ import kotlin.math.abs
 import kotlin.test.*
 import kotlin.time.*
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -512,6 +513,77 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun continue_delayed_cards_now_clears_available_after_for_limited_lemmas() = runBlocking {
+        val config = FsrsDefaults.config().copy(continueNowLemmaLimit = 2)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val first = env.seedSense(lemma = "continueone")
+            val second = env.seedSense(lemma = "continuetwo")
+            val third = env.seedSense(lemma = "continuethree")
+            val futureDue = env.seedSense(lemma = "continuefuture")
+            env.addFavorite(first)
+            env.addFavorite(second)
+            env.addFavorite(third)
+            env.addFavorite(futureDue)
+
+            env.insertTask(
+                fixture = first,
+                family = CardFamily.RECOGNIZE_SENSE,
+                availableAfter = (start + 10.minutes).toEpochMilliseconds(),
+            )
+            env.insertTask(
+                fixture = second,
+                family = CardFamily.RECOGNIZE_SENSE,
+                availableAfter = (start + 11.minutes).toEpochMilliseconds(),
+            )
+            env.insertTask(
+                fixture = third,
+                family = CardFamily.RECOGNIZE_SENSE,
+                availableAfter = (start + 12.minutes).toEpochMilliseconds(),
+            )
+            env.insertTask(
+                fixture = futureDue,
+                family = CardFamily.RECOGNIZE_SENSE,
+                due = (start + 1.hours).toEpochMilliseconds(),
+                availableAfter = (start + 10.minutes).toEpochMilliseconds(),
+            )
+
+            env.session.continueDelayedCardsNow("en")
+
+            val cards = env.app.favoritesQueries.selectDueCards("en", start.toEpochMilliseconds(), 10)
+                .executeAsList()
+            assertEquals(setOf(first.senseId, second.senseId), cards.mapTo(HashSet()) { it.sense_id })
+            assertNotNull(
+                env.app.favoritesQueries.selectCardsByFavorite(third.senseId, "en")
+                    .executeAsOne().available_after
+            )
+            assertNotNull(
+                env.app.favoritesQueries.selectCardsByFavorite(futureDue.senseId, "en")
+                    .executeAsOne().available_after
+            )
+        }
+    }
+
+    @Test
+    fun continue_delayed_cards_now_unlocks_next_session_card() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            val fixture = env.seedSense(lemma = "continuesession")
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                availableAfter = (start + 10.minutes).toEpochMilliseconds(),
+            )
+
+            assertNull(env.session.nextCard("en", start).first())
+
+            env.session.continueDelayedCardsNow("en")
+
+            val card = env.nextLoadedCard("en")
+            assertEquals(fixture.senseId.toString(), card.senseId)
+        }
+    }
+
+    @Test
     fun same_sense_siblings_get_per_card_jittered_cooldowns() = runBlocking {
         val config = FsrsDefaults.config().copy(
             sameSenseCooldownRatio = 0.15,
@@ -796,6 +868,7 @@ class LearningE2ETest : BaseTest() {
         stability: Double = 1.0,
         difficulty: Double = 1.0,
         due: Long = (start - 1.milliseconds).toEpochMilliseconds(),
+        availableAfter: Long? = null,
         lastReview: Long? = null,
         reps: Long = 0,
     ): com.slovy.slovymovyapp.db.Card {
@@ -813,7 +886,7 @@ class LearningE2ETest : BaseTest() {
             reps = reps,
             lapses = 0,
             created_at = start.toEpochMilliseconds(),
-            available_after = null,
+            available_after = availableAfter,
             answer_key = fixture.lemma.lowercase(),
             suspended = false,
         )

@@ -9,6 +9,7 @@ data class FsrsConfig(
     val maximumInterval: Duration,
     val enableFuzz: Boolean,
     val dailyNewTaskFamilyBudget: Int,
+    val continueNowLemmaLimit: Int,
     val pauseIntakeIfQueueAbove: Int,
     val pauseIntakeRetentionMinReviews: Long,
     val pauseIntakeIfRetentionBelow: Double,

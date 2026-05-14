@@ -597,4 +597,22 @@
     </plurals>
     <string name="favorites_study_due_subtitle">Ongeveer %1$d min</string>
     <string name="favorites_study_due_action">Herhaling starten</string>
+    <string name="favorites_study_done_title">HELEMAAL BIJ</string>
+    <string name="favorites_study_done_until_next_review">tot de volgende herhaling</string>
+    <string name="favorites_study_done_continue">Verder studeren</string>
+    <string name="favorites_study_done_region">Herhaling voltooid</string>
+    <plurals name="favorites_study_done_duration_hours">
+        <item quantity="one">%1$d uur</item>
+        <item quantity="few">%1$d uur</item>
+        <item quantity="many">%1$d uur</item>
+        <item quantity="other">%1$d uur</item>
+    </plurals>
+    <plurals name="favorites_study_done_duration_minutes">
+        <item quantity="one">%1$d minuut</item>
+        <item quantity="few">%1$d minuten</item>
+        <item quantity="many">%1$d minuten</item>
+        <item quantity="other">%1$d minuten</item>
+    </plurals>
+    <string name="favorites_study_done_duration_hours_minutes">%1$d u %2$d min</string>
+    <string name="favorites_study_done_next_review_a11y">Volgende herhaling over %1$s</string>
 </resources>

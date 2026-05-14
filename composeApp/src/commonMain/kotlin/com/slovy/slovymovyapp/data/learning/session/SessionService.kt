@@ -113,6 +113,14 @@ class SessionService(
         setCardAvailableAfter(card.card)
     }
 
+    suspend fun continueDelayedCardsNow(langCode: String) = withContext(Dispatchers.IO) {
+        learning.clearAvailableAfterForDelayedLemmas(
+            lang_code = langCode,
+            now = clock.now().toEpochMilliseconds(),
+            lemma_limit = config.continueNowLemmaLimit.toLong(),
+        )
+    }
+
     private suspend fun loadSessionCard(card: Card): Flow<SessionCard?>? {
         val favorite =
             learning.selectFavoriteWithActivation(card.senseId.toString(), card.langCode).executeAsOneOrNull()
