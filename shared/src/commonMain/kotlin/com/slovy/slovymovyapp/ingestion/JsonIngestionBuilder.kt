@@ -258,6 +258,14 @@ class JsonIngestionBuilder(
         val source: FormSource
     )
 
+    private val ignoredFormNotes = setOf("binair", "hexadecimaal", "romeins")
+
+    private fun shouldIgnoreForm(form: ExtractedWordForm): Boolean =
+        form.note?.trim()?.lowercase() in ignoredFormNotes
+
+    private fun ingestibleForms(entry: ExtractedWordEntry): List<ExtractedWordForm> =
+        entry.forms.filterNot(::shouldIgnoreForm)
+
     private fun selectEntries(raw: ExtractedWordData): EntriesSelection {
         val nativeKey = LANG_TO_SOURCE_FILE[raw.langCode]!!
         val enWiktionarySourceKey = LANG_TO_SOURCE_FILE[Language.ENGLISH.code]!!
@@ -316,8 +324,12 @@ class JsonIngestionBuilder(
             .mapKeys { it.key!! }
 
         byPos.forEach { (pos, entriesForPos) ->
-            val nativeWithForms = entriesForPos.filter { it.sourceFile == nativeSource && it.entry.forms.isNotEmpty() }
-            val nativeNoForms = entriesForPos.filter { it.sourceFile == nativeSource && it.entry.forms.isEmpty() }
+            val nativeWithForms = entriesForPos.filter {
+                it.sourceFile == nativeSource && ingestibleForms(it.entry).isNotEmpty()
+            }
+            val nativeNoForms = entriesForPos.filter {
+                it.sourceFile == nativeSource && ingestibleForms(it.entry).isEmpty()
+            }
             val nonNativeEntries = entriesForPos.filter { it.sourceFile != nativeSource }
 
             // All native entries with forms are active roots (raw data alone determines clustering)
@@ -326,11 +338,11 @@ class JsonIngestionBuilder(
             // Use raw form texts (not accent-stripped) so entries with different stress markers
             // (e.g., Dutch vóórkomen vs voorkómen) are correctly kept as separate clusters.
             val activeRoots: List<ExtractedWordEntry> = activeRootCandidates
-                .groupBy { entry -> entry.forms.map { it.form }.toSet() }
+                .groupBy { entry -> ingestibleForms(entry).map { it.form }.toSet() }
                 .values
                 .map { group ->
                     group.sortedWith(
-                        compareByDescending<ExtractedWordEntry> { it.forms.size }
+                        compareByDescending<ExtractedWordEntry> { ingestibleForms(it).size }
                             .thenBy { it.entryId.toString() }
                     ).first()
                 }
@@ -352,9 +364,9 @@ class JsonIngestionBuilder(
                     entryIdToLemmaPosId[uuidParse(e.entry.entryId.toString())] = lemmaPosId
                 }
             } else {
-                // Primary cluster = root with most forms; tie-break: alphabetically first entryId
+                // Primary cluster = root with most ingestible forms; tie-break: alphabetically first entryId
                 val primaryRoot = activeRoots.sortedWith(
-                    compareByDescending<ExtractedWordEntry> { it.forms.size }
+                    compareByDescending<ExtractedWordEntry> { ingestibleForms(it).size }
                         .thenBy { it.entryId.toString() }
                 ).first()
                 val primaryLemmaPosId = uuidParse(primaryRoot.entryId.toString())
@@ -401,7 +413,7 @@ class JsonIngestionBuilder(
     }
 
     private fun formSet(entry: ExtractedWordEntry): Set<String> =
-        entry.forms.map { stripAccents(it.form) }.toSet()
+        ingestibleForms(entry).map { stripAccents(it.form) }.toSet()
 
     private fun jaccardSimilarity(a: Set<String>, b: Set<String>): Double {
         if (a.isEmpty() && b.isEmpty()) return 1.0
@@ -889,7 +901,7 @@ class JsonIngestionBuilder(
             val lemmaPosId = entryIdToLemmaPosId[entryId] ?: return@forEach
 
             val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
-            entry.forms.forEach { f ->
+            ingestibleForms(entry).forEach { f ->
                 val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet(), source)
                 if (!formsMap.containsKey(key)) {
                     formsMap[key] = Pair(f, source)
