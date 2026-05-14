@@ -1197,13 +1197,15 @@ private fun FirstLetterHintView(
                 fontFamily = MaterialTheme.serifFontFamily,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Text(
-                text = "·".repeat(hint.dotCount.coerceAtMost(15)),
-                fontSize = 16.sp,
-                fontFamily = MaterialTheme.serifFontFamily,
-                letterSpacing = 8.sp,
-                maxLines = 1,
-            )
+            if (hint.dotCount > 0) {
+                Text(
+                    text = "·".repeat(hint.dotCount.coerceAtMost(15)),
+                    fontSize = 16.sp,
+                    fontFamily = MaterialTheme.serifFontFamily,
+                    letterSpacing = 8.sp,
+                    maxLines = 1,
+                )
+            }
         }
     }
 }

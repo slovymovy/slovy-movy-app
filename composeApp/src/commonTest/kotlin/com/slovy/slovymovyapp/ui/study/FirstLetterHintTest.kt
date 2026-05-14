@@ -23,31 +23,31 @@ class FirstLetterHintTest {
     }
 
     @Test
-    fun oneLetter_dotCountClampedToThree() {
+    fun oneLetter_hasNoHiddenLetterDots() {
         val hint = "I".firstLetterHint()!!
         assertEquals('I', hint.letter)
         assertEquals(1, hint.letterCount)
-        assertEquals(3, hint.dotCount)
+        assertEquals(0, hint.dotCount)
     }
 
     @Test
-    fun twoLetters_dotCountClampedToThree() {
+    fun twoLetters_hasOneHiddenLetterDot() {
         val hint = "er".firstLetterHint()!!
         assertEquals('e', hint.letter)
         assertEquals(2, hint.letterCount)
-        assertEquals(3, hint.dotCount)
+        assertEquals(1, hint.dotCount)
     }
 
     @Test
-    fun threeLetters_dotCountClampedToThree() {
+    fun threeLetters_hasTwoHiddenLetterDots() {
         val hint = "het".firstLetterHint()!!
         assertEquals('h', hint.letter)
         assertEquals(3, hint.letterCount)
-        assertEquals(3, hint.dotCount)
+        assertEquals(2, hint.dotCount)
     }
 
     @Test
-    fun fourLetters_dotCountNotClamped() {
+    fun fourLetters_hasThreeHiddenLetterDots() {
         val hint = "vier".firstLetterHint()!!
         assertEquals('v', hint.letter)
         assertEquals(4, hint.letterCount)
@@ -77,6 +77,6 @@ class FirstLetterHintTest {
         val hint = "1abc".firstLetterHint()!!
         assertEquals('a', hint.letter)
         assertEquals(3, hint.letterCount)
-        assertEquals(3, hint.dotCount)
+        assertEquals(2, hint.dotCount)
     }
 }
