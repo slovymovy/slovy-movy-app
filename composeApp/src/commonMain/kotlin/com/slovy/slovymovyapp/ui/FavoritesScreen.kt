@@ -581,7 +581,7 @@ class FavoritesViewModel(
             // Remove from repository, then remove from displayed list for immediate feedback
             favoritesRepository.remove(senseId, favorite.language)
             Analytics.logEvent(
-                AnalyticsEvent.FAVOURITES_REMOVE,
+                AnalyticsEvent.FAVORITES_REMOVE,
                 mapOf("lang" to favorite.language.code, "source" to "favorites_list"),
             )
             onFavoritesChanged(favorite.language)
@@ -606,7 +606,7 @@ class FavoritesViewModel(
                 // Re-add with the original createdAt to preserve position
                 favoritesRepository.add(senseId, favorite.language, favorite.lemma, favorite.createdAt)
                 Analytics.logEvent(
-                    AnalyticsEvent.FAVOURITES_SAVE,
+                    AnalyticsEvent.FAVORITES_SAVE,
                     mapOf("lang" to favorite.language.code, "source" to "favorites_undo"),
                 )
                 onFavoritesChanged(favorite.language)
@@ -723,7 +723,7 @@ fun FavoritesScreen(
     LaunchedEffect(nextReviewAtEpochMs) {
         val target = nextReviewAtEpochMs ?: return@LaunchedEffect
         val remaining = target - Clock.System.now().toEpochMilliseconds()
-        if (remaining > 0) delay(remaining)
+        if (remaining > 0) delay(remaining.milliseconds)
         viewModel.loadFavorites()
     }
 

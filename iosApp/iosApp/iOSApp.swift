@@ -7,6 +7,10 @@ private class FirebaseAnalyticsLogger: AnalyticsLogger {
     func logEvent(name: String, params: [String: Any]) {
         FirebaseAnalytics.Analytics.logEvent(name, parameters: params)
     }
+
+    func setUserProperty(name: String, value: String?) {
+        FirebaseAnalytics.Analytics.setUserProperty(value, forName: name)
+    }
 }
 
 @main

@@ -546,13 +546,11 @@ class WordDetailViewModel(
                 val params = mapOf<String, Any>("lang" to lang.code, "source" to "word_detail")
                 val added = if (senseId in favoriteSenses) {
                     favoritesRepository.remove(senseId, lang)
-                    Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_REMOVE, params)
-                    Analytics.logEvent(AnalyticsEvent.FAVOURITES_REMOVE, params)
+                    Analytics.logEvent(AnalyticsEvent.FAVORITES_REMOVE, params)
                     false
                 } else {
                     favoritesRepository.add(senseId, lang, lemma)
-                    Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_SAVE, params)
-                    Analytics.logEvent(AnalyticsEvent.FAVOURITES_SAVE, params)
+                    Analytics.logEvent(AnalyticsEvent.FAVORITES_SAVE, params)
                     true
                 }
                 onFavoriteChanged?.invoke(added)

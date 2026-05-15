@@ -452,7 +452,7 @@ class SettingsViewModel(
 
         Analytics.logEvent(
             AnalyticsEvent.SETTINGS_DOWNLOAD_DICTIONARY_CLICK,
-            mapOf("lang" to language.code),
+            mapOf("kind" to "dictionary", "lang" to language.code),
         )
         val keepAlive = platform.acquireProcessKeepAlive()
         val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
@@ -482,7 +482,11 @@ class SettingsViewModel(
 
         Analytics.logEvent(
             AnalyticsEvent.SETTINGS_DOWNLOAD_TRANSLATION_CLICK,
-            mapOf("src" to sourceLanguage.code, "tgt" to targetLanguage.code),
+            mapOf(
+                "kind" to "translation",
+                "src_lang" to sourceLanguage.code,
+                "tgt_lang" to targetLanguage.code,
+            ),
         )
         val keepAlive = platform.acquireProcessKeepAlive()
         val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
