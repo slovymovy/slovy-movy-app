@@ -559,12 +559,12 @@
         <item quantity="other">Вы учите %1$d значения этого слова.</item>
     </plurals>
     <plurals name="study_swipe_other_meanings_hint">
-        <item quantity="one">Свайпните влево, чтобы увидеть ещё %1$d значение, которое вы учите</item>
-        <item quantity="few">Свайпните влево, чтобы увидеть ещё %1$d значения, которые вы учите</item>
-        <item quantity="many">Свайпните влево, чтобы увидеть ещё %1$d значений, которые вы учите</item>
-        <item quantity="other">Свайпните влево, чтобы увидеть ещё %1$d значения, которые вы учите</item>
+        <item quantity="one">Смахните влево, чтобы увидеть ещё %1$d значение.</item>
+        <item quantity="few">Смахните влево, чтобы увидеть ещё %1$d значения.</item>
+        <item quantity="many">Смахните влево, чтобы увидеть ещё %1$d значений.</item>
+        <item quantity="other">Смахните влево, чтобы увидеть ещё %1$d значения.</item>
     </plurals>
-    <string name="study_swipe_back_to_rate">Вас проверили на другом значении. Вернитесь и оцените, насколько хорошо вы его знаете.</string>
+    <string name="study_swipe_back_to_rate">Вернитесь к первой карточке, чтобы оценить её.</string>
     <string name="study_chip_source_only">только %1$s</string>
     <string name="study_chip_fill_in">Пропуск</string>
     <string name="study_chip_listen">Аудирование</string>

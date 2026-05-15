@@ -561,12 +561,12 @@
         <item quantity="other">You learn %1$d meanings of this word.</item>
     </plurals>
     <plurals name="study_swipe_other_meanings_hint">
-        <item quantity="one">Swipe left to see %1$d other meaning you are learning</item>
-        <item quantity="few">Swipe left to see %1$d other meanings you are learning</item>
-        <item quantity="many">Swipe left to see %1$d other meanings you are learning</item>
-        <item quantity="other">Swipe left to see %1$d other meanings you are learning</item>
+        <item quantity="one">Swipe left to see %1$d other meaning.</item>
+        <item quantity="few">Swipe left to see %1$d other meanings.</item>
+        <item quantity="many">Swipe left to see %1$d other meanings.</item>
+        <item quantity="other">Swipe left to see %1$d other meanings.</item>
     </plurals>
-    <string name="study_swipe_back_to_rate">You were checked on another meaning. Swipe back and rate how well you know it.</string>
+    <string name="study_swipe_back_to_rate">Swipe back to the first card to rate it.</string>
     <string name="study_chip_source_only">%1$s only</string>
     <string name="study_chip_fill_in">Fill in</string>
     <string name="study_chip_listen">Listen</string>
