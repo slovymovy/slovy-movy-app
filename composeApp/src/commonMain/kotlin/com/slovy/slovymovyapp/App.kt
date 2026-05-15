@@ -810,6 +810,9 @@ fun App(
                         // without paying for intake on the dictionary-DB driver.
                         coroutineScope.launch { refreshFavoritesDueCountsOnly() }
                     },
+                    onRefreshReviewState = {
+                        coroutineScope.launch { refreshFavoritesDueCountsOnly() }
+                    },
                 )
             }
             composable<AppDestination.Stats> { backStackEntry ->

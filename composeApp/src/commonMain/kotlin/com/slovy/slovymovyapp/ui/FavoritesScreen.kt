@@ -694,6 +694,7 @@ fun FavoritesScreen(
     onStartStudy: (Language) -> Unit = {},
     onContinueStudyingNow: (Language, FavoritesStudyDoneAction) -> Unit = { _, _ -> },
     onFavoritesChanged: (Language) -> Unit = {},
+    onRefreshReviewState: () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     val removedMessage = stringResource(Res.string.favorites_removed_message)
@@ -701,6 +702,7 @@ fun FavoritesScreen(
 
     LifecycleResumeEffect(viewModel) {
         viewModel.loadFavorites()
+        onRefreshReviewState()
         onPauseOrDispose { }
     }
 
@@ -724,7 +726,7 @@ fun FavoritesScreen(
         val target = nextReviewAtEpochMs ?: return@LaunchedEffect
         val remaining = target - Clock.System.now().toEpochMilliseconds()
         if (remaining > 0) delay(remaining.milliseconds)
-        viewModel.loadFavorites()
+        onRefreshReviewState()
     }
 
     FavoritesScreenContent(
