@@ -57,6 +57,7 @@ class DownloadViewModel(
     private val onError: (Throwable) -> Unit,
     private val loadItems: (suspend () -> List<DownloadItem>)? = null,
     private val platform: PlatformDbSupport? = null,
+    private val analyticsParams: Map<String, Any> = emptyMap(),
 ) : ViewModel() {
 
     var state by mutableStateOf(
@@ -119,7 +120,7 @@ class DownloadViewModel(
 
     @OptIn(ExperimentalTime::class)
     private fun beginDownload(): Flow<DownloadEntry?> {
-        Analytics.logEvent(AnalyticsEvent.DOWNLOAD_DICTIONARY_CLICK, mapOf("download_key" to downloadKey))
+        Analytics.logEvent(AnalyticsEvent.DOWNLOAD_DICTIONARY_CLICK, analyticsParams)
         downloadStartedAtMs = Clock.System.now().toEpochMilliseconds()
         acquireKeepAlive()
         return downloadCoordinator.startDownload(downloadKey, download)
@@ -171,8 +172,7 @@ class DownloadViewModel(
                             downloadCoordinator.clear(downloadKey)
                             Analytics.logEvent(
                                 AnalyticsEvent.DOWNLOAD_COMPLETED,
-                                mapOf(
-                                    "download_key" to downloadKey,
+                                analyticsParams + mapOf(
                                     "duration_ms" to (Clock.System.now().toEpochMilliseconds() - downloadStartedAtMs),
                                     "bytes" to (entry?.progress?.totalBytes ?: 0L),
                                 ),
@@ -210,8 +210,7 @@ class DownloadViewModel(
                             val error = entry?.error ?: Throwable("Unknown error")
                             Analytics.logEvent(
                                 AnalyticsEvent.DOWNLOAD_FAILED,
-                                mapOf(
-                                    "download_key" to downloadKey,
+                                analyticsParams + mapOf(
                                     "duration_ms" to (Clock.System.now().toEpochMilliseconds() - downloadStartedAtMs),
                                     "error" to (error.message ?: error::class.simpleName ?: "unknown"),
                                 ),

@@ -9,6 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import androidx.compose.ui.text.intl.Locale
+import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
@@ -406,9 +408,17 @@ fun App(
     LaunchedEffect(settingsState.activeDictionaryLanguage, settingsState.settingsLoaded) {
         if (settingsState.settingsLoaded) {
             dictionaryLanguage = settingsState.activeDictionaryLanguage
+            Analytics.setUserProperty("learning_lang", dictionaryLanguage?.code)
         }
     }
 
+    // GA4 user properties: stable per-user dimensions usable as report breakdowns
+    // across every event without adding params to each call site.
+    val uiLang = Locale.current.language
+    LaunchedEffect(Unit) {
+        Analytics.setUserProperty("ui_lang", uiLang)
+        Analytics.setUserProperty("data_version", DataDbManager.VERSION)
+    }
     suspend fun selectInitialDestination(): AppDestination {
         // Sweep any zero-byte / partial downloaded DBs left behind by past interrupted downloads
         // so the routing below sees an accurate `hasDictionary` / `hasTranslation` picture.
@@ -564,6 +574,10 @@ fun App(
                         DownloadViewModel(
                             downloadCoordinator = downloadCoordinator,
                             downloadKey = "setup_${dictLang.code}",
+                            analyticsParams = mapOf(
+                                "kind" to "setup",
+                                "lang" to dictLang.code,
+                            ),
                             download = { onProgress, cancel ->
                                 val totalItems = (if (downloadDict) 1 else 0) + downloadTranslations.size
                                 val translationOffset = if (downloadDict) 1 else 0
@@ -767,7 +781,7 @@ fun App(
                             navController.navigate(AppDestination.Stats)
                     },
                     onStartStudy = { language ->
-                        logEvent(AnalyticsEvent.STUDY_START_SESSION)
+                        logEvent(AnalyticsEvent.STUDY_START_SESSION, mapOf("lang" to language.code))
                         navController.navigate(AppDestination.StudySession(language.code))
                     },
                     onContinueStudyingNow = { language, action ->
@@ -783,7 +797,7 @@ fun App(
                             }
                             refreshFavoritesDueCountsOnly()
                             if (shouldStartStudy) {
-                                logEvent(AnalyticsEvent.STUDY_START_SESSION)
+                                logEvent(AnalyticsEvent.STUDY_START_SESSION, mapOf("lang" to language.code))
                                 navController.navigate(AppDestination.StudySession(language.code))
                             }
                         }

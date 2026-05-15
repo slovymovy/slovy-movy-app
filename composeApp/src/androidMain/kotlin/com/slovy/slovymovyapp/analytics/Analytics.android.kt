@@ -11,6 +11,10 @@ actual object Analytics {
     actual fun logEvent(event: AnalyticsEvent, params: Map<String, Any>) {
         logger.logEvent(event.name.lowercase(), params)
     }
+
+    actual fun setUserProperty(name: String, value: String?) {
+        logger.setUserProperty(name, value)
+    }
 }
 
 class FirebaseAnalyticsLogger : AnalyticsLogger {
@@ -29,5 +33,9 @@ class FirebaseAnalyticsLogger : AnalyticsLogger {
             }
         }
         Firebase.analytics.logEvent(name, bundle)
+    }
+
+    override fun setUserProperty(name: String, value: String?) {
+        Firebase.analytics.setUserProperty(name, value)
     }
 }

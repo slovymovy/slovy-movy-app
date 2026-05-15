@@ -127,7 +127,7 @@ fun LanguageSetupScreen(
                 onNext(learning, native)
                 Analytics.logEvent(AnalyticsEvent.LANG_TO_LEARN_SELECTED, mapOf("lang" to learning.code))
             } else {
-                Analytics.logEvent(AnalyticsEvent.LANG_TO_LEARN_NOT_SELECTED, mapOf("lang" to "not selected"))
+                Analytics.logEvent(AnalyticsEvent.LANG_TO_LEARN_NOT_SELECTED)
             }
         },
         onRetry = viewModel::retry

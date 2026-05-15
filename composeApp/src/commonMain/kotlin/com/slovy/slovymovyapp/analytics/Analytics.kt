@@ -11,11 +11,9 @@ enum class AnalyticsEvent {
     LANG_TO_TRANSLATE_SELECTED,
     LANG_TO_LEARN_SELECTED,
     LANG_TO_LEARN_NOT_SELECTED,
-    FAVOURITES_REMOVE,
-    FAVOURITES_SAVE,
+    FAVORITES_REMOVE,
+    FAVORITES_SAVE,
     FAVORITES_WORD_SHOW,
-    WORD_DETAILS_FAVOURITES_REMOVE,
-    WORD_DETAILS_FAVOURITES_SAVE,
     WORD_PLAY_CLICK,
     WORD_STOP_PLAY_CLICK,
     WORD_SEARCH_RESULT_SHOW,
@@ -51,4 +49,6 @@ expect object Analytics {
     var logger: AnalyticsLogger
 
     fun logEvent(event: AnalyticsEvent, params: Map<String, Any> = emptyMap())
+
+    fun setUserProperty(name: String, value: String?)
 }
