@@ -565,12 +565,12 @@
         <item quantity="other">Je leert %1$d betekenissen van dit woord.</item>
     </plurals>
     <plurals name="study_swipe_other_meanings_hint">
-        <item quantity="one">Veeg naar links om %1$d andere betekenis te zien die je leert</item>
-        <item quantity="few">Veeg naar links om %1$d andere betekenissen te zien die je leert</item>
-        <item quantity="many">Veeg naar links om %1$d andere betekenissen te zien die je leert</item>
-        <item quantity="other">Veeg naar links om %1$d andere betekenissen te zien die je leert</item>
+        <item quantity="one">Swipe naar links voor nog %1$d betekenis.</item>
+        <item quantity="few">Swipe naar links voor nog %1$d betekenissen.</item>
+        <item quantity="many">Swipe naar links voor nog %1$d betekenissen.</item>
+        <item quantity="other">Swipe naar links voor nog %1$d betekenissen.</item>
     </plurals>
-    <string name="study_swipe_back_to_rate">Je werd op een andere betekenis getest. Veeg terug en beoordeel hoe goed je die kent.</string>
+    <string name="study_swipe_back_to_rate">Swipe terug naar de eerste kaart om te beoordelen.</string>
     <string name="study_chip_source_only">alleen %1$s</string>
     <string name="study_chip_fill_in">Invullen</string>
     <string name="study_chip_listen">Luisteren</string>

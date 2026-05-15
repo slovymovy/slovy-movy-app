@@ -120,6 +120,8 @@ import slovymovyapp.composeapp.generated.resources.study_rating_hard
 import slovymovyapp.composeapp.generated.resources.study_tap_to_check
 import slovymovyapp.composeapp.generated.resources.study_tap_to_flip
 
+private val MultiSenseFrontHintTopSpacing = 20.dp
+
 @Composable
 fun StudySessionScreen(
     viewModel: StudySessionViewModel,
@@ -869,7 +871,7 @@ private fun RecognitionFront(
             }
             MultiSenseFrontHint(
                 card = card,
-                modifier = Modifier.padding(top = AppSpacing.md),
+                modifier = Modifier.padding(top = MultiSenseFrontHintTopSpacing),
             )
         }
     }
@@ -994,13 +996,45 @@ private fun ListeningFront(
             }
             Text(
                 text = stringResource(Res.string.study_listen_prompt),
-                style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontFamily = MaterialTheme.serifFontFamily,
+                    fontSize = 13.5.sp,
+                    fontWeight = FontWeight.Medium,
+                    fontStyle = FontStyle.Normal,
+                    lineHeight = 19.sp,
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-            MultiSenseFrontHint(card = card)
+            ListeningMultiSenseByline(card = card)
         }
     }
+}
+
+@Composable
+private fun ListeningMultiSenseByline(
+    card: StudyCardUiState,
+    modifier: Modifier = Modifier,
+) {
+    if (!card.hasMultiSense) return
+
+    Text(
+        text = pluralStringResource(
+            Res.plurals.study_multi_sense_front_hint,
+            card.senses.size,
+            card.senses.size,
+        ),
+        style = MaterialTheme.typography.bodySmall.copy(
+            fontFamily = MaterialTheme.serifFontFamily,
+            fontStyle = FontStyle.Italic,
+            fontWeight = FontWeight.Normal,
+            fontSize = 12.sp,
+            lineHeight = 17.sp,
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f),
+        textAlign = TextAlign.Center,
+        modifier = modifier.widthIn(max = 240.dp),
+    )
 }
 
 @Composable
@@ -1014,20 +1048,21 @@ private fun MultiSenseFrontHint(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        FrontSenseDots(count = card.senses.size)
-        Spacer(Modifier.height(AppSpacing.md))
         Text(
             text = pluralStringResource(
                 Res.plurals.study_multi_sense_front_hint,
                 card.senses.size,
                 card.senses.size,
             ),
-            style = MaterialTheme.typography.bodyMedium.copy(
+            style = MaterialTheme.typography.bodySmall.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
                 fontStyle = FontStyle.Italic,
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
             ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(max = 240.dp),
         )
     }
 }
@@ -1112,20 +1147,6 @@ private fun StudyCardBackContent(
             StudyExampleBlock(example = example)
         }
     }
-}
-
-@Composable
-private fun FrontSenseDots(
-    count: Int,
-    modifier: Modifier = Modifier,
-) {
-    SenseDotRow(
-        count = count,
-        activeIndex = null,
-        activeColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-        inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-        modifier = modifier.clearAndSetSemantics {},
-    )
 }
 
 @Composable
