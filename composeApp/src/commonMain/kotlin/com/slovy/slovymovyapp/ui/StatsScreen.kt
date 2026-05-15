@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStage
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStageId
@@ -36,6 +38,8 @@ import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonPrimitive
@@ -63,6 +67,8 @@ data class StatsUiState(
     val reviewsWeek: Int,
     val wordsTotal: Int,
     val pipeline: List<StatsPipelineStage>,
+    val delayedDueLemmaCount: Int = 0,
+    val delayedDueCardCount: Int = 0,
 ) {
     val sensesTotal: Int get() = pipeline.sumOf { it.count }
     val showLanguagePicker: Boolean get() = learningLanguages.size > 1
@@ -118,6 +124,10 @@ class StatsViewModel(
         }
         viewModelScope.launch {
             settingsRepository.insert(Setting(Setting.Name.STATS_LANGUAGE, JsonPrimitive(language.code)))
+            Analytics.logEvent(
+                AnalyticsEvent.SETTING_CHANGED,
+                mapOf("setting" to "stats_language", "value" to language.code),
+            )
         }
         scheduleReload()
     }
@@ -166,6 +176,8 @@ class StatsViewModel(
                     reviewsWeek = data.reviewsWeek,
                     wordsTotal = data.wordsTotal,
                     pipeline = data.pipeline,
+                    delayedDueLemmaCount = data.delayedDueLemmaCount,
+                    delayedDueCardCount = data.delayedDueCardCount,
                 )
             }.onFailure {
                 if (isCurrentReload(requestId)) {
@@ -205,6 +217,24 @@ fun StatsScreen(
     }
     LaunchedEffect(Unit) {
         viewModel.refresh()
+    }
+    LaunchedEffect(Unit) {
+        val loaded = snapshotFlow { viewModel.state }
+            .filter { !it.isLoading }
+            .first()
+        Analytics.logEvent(
+            AnalyticsEvent.STATS_SCREEN_OPEN,
+            mapOf(
+                "lang" to loaded.selectedLanguage.code,
+                "streak_days" to loaded.streakDays.toLong(),
+                "reviews_today" to loaded.reviewsToday.toLong(),
+                "reviews_week" to loaded.reviewsWeek.toLong(),
+                "words_total" to loaded.wordsTotal.toLong(),
+                "senses_total" to loaded.sensesTotal.toLong(),
+                "delayed_due_lemma_count" to loaded.delayedDueLemmaCount.toLong(),
+                "delayed_due_card_count" to loaded.delayedDueCardCount.toLong(),
+            ),
+        )
     }
 
     StatsScreenContent(

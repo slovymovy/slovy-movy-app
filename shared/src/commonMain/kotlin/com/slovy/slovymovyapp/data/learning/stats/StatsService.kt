@@ -80,6 +80,10 @@ class StatsService(
             queuedCount = learning.countPendingFavoritesByLang(langCode).executeAsOne().toInt(),
         )
 
+        val nowMs = clock.now().toEpochMilliseconds()
+        val delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, nowMs).executeAsOne().toInt()
+        val delayedDueCardCount = learning.countDelayedDueCardsByLang(langCode, nowMs).executeAsOne().toInt()
+
         return StatsScreenData(
             streakDays = streakDays,
             practiceLog = practiceLog,
@@ -87,6 +91,8 @@ class StatsService(
             reviewsWeek = reviewsWeek,
             wordsTotal = wordsTotal,
             pipeline = pipeline,
+            delayedDueLemmaCount = delayedDueLemmaCount,
+            delayedDueCardCount = delayedDueCardCount,
         )
     }
 
@@ -164,6 +170,7 @@ class StatsService(
             activeCardCount = learning.countCardsByLang(langCode).executeAsOne().toInt(),
             dueToday = learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt(),
             delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, now).executeAsOne().toInt(),
+            delayedDueCardCount = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne().toInt(),
             pendingFavoriteLemmaCount = learning.countPendingFavoriteLemmasByLang(langCode).executeAsOne().toInt(),
             nextReviewAtEpochMs = learning.selectNextReviewAtByLang(langCode).executeAsOne().next_review_at,
         )

@@ -4,7 +4,7 @@ import FirebaseCore
 import FirebaseAnalytics
 
 private class FirebaseAnalyticsLogger: AnalyticsLogger {
-    func logEvent(name: String, params: [String: String]) {
+    func logEvent(name: String, params: [String: Any]) {
         FirebaseAnalytics.Analytics.logEvent(name, parameters: params)
     }
 }

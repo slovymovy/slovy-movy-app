@@ -26,9 +26,22 @@ enum class AnalyticsEvent {
     SETTINGS_VOICE_ENABLE_CLICK,
     STUDY_START_SESSION,
     STUDY_CANCEL_SESSION,
-    STUDY_END_SESSION
+    STUDY_END_SESSION,
+    FAVORITES_STUDY_DUE_CLICK,
+    FAVORITES_STUDY_DONE_REVIEW_MORE_CLICK,
+    FAVORITES_STUDY_DONE_STUDY_NEW_CLICK,
+    STATS_SCREEN_OPEN,
+    LEARNING_INTAKE_RUN,
+    STUDY_CARD_GRADED,
+    WORD_SEARCH_QUERY,
+    WORD_DETAIL_OPEN,
+    DOWNLOAD_COMPLETED,
+    DOWNLOAD_FAILED,
+    DATA_VERSION_MISMATCH,
+    TTS_PLAY_FAILED,
+    SETTING_CHANGED
 }
 
 expect object Analytics {
-    fun logEvent(event: AnalyticsEvent, params: Map<String, String> = emptyMap())
+    fun logEvent(event: AnalyticsEvent, params: Map<String, Any> = emptyMap())
 }

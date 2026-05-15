@@ -37,7 +37,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.ExperimentalTime
 
 data class DownloadItem(
     val label: String,
@@ -67,6 +69,7 @@ class DownloadViewModel(
 
     private var terminalHandled = false
     private var failedDuringLoadItems = false
+    private var downloadStartedAtMs: Long = 0L
 
     // Held for the lifetime of one download attempt — from beginDownload() until the terminal
     // handler runs. Bridges the gap between the last per-file download (which would otherwise
@@ -114,8 +117,10 @@ class DownloadViewModel(
         attachDownloadCallbacks(downloadFlow)
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun beginDownload(): Flow<DownloadEntry?> {
-        Analytics.logEvent(AnalyticsEvent.DOWNLOAD_DICTIONARY_CLICK)
+        Analytics.logEvent(AnalyticsEvent.DOWNLOAD_DICTIONARY_CLICK, mapOf("download_key" to downloadKey))
+        downloadStartedAtMs = Clock.System.now().toEpochMilliseconds()
         acquireKeepAlive()
         return downloadCoordinator.startDownload(downloadKey, download)
     }
@@ -155,6 +160,7 @@ class DownloadViewModel(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun attachDownloadCallbacks(downloadFlow: Flow<DownloadEntry?>) {
         viewModelScope.launch {
             downloadFlow.collect { entry ->
@@ -163,6 +169,14 @@ class DownloadViewModel(
                         if (!terminalHandled) {
                             terminalHandled = true
                             downloadCoordinator.clear(downloadKey)
+                            Analytics.logEvent(
+                                AnalyticsEvent.DOWNLOAD_COMPLETED,
+                                mapOf(
+                                    "download_key" to downloadKey,
+                                    "duration_ms" to (Clock.System.now().toEpochMilliseconds() - downloadStartedAtMs),
+                                    "bytes" to (entry?.progress?.totalBytes ?: 0L),
+                                ),
+                            )
                             try {
                                 state = DownloadUiState.Finalizing
                                 finalize()
@@ -193,7 +207,16 @@ class DownloadViewModel(
                     DownloadStatus.Failed -> {
                         if (!terminalHandled) {
                             terminalHandled = true
-                            state = DownloadUiState.Failed(entry?.error ?: Throwable("Unknown error"))
+                            val error = entry?.error ?: Throwable("Unknown error")
+                            Analytics.logEvent(
+                                AnalyticsEvent.DOWNLOAD_FAILED,
+                                mapOf(
+                                    "download_key" to downloadKey,
+                                    "duration_ms" to (Clock.System.now().toEpochMilliseconds() - downloadStartedAtMs),
+                                    "error" to (error.message ?: error::class.simpleName ?: "unknown"),
+                                ),
+                            )
+                            state = DownloadUiState.Failed(error)
                             downloadCoordinator.clear(downloadKey)
                             releaseKeepAlive()
                         }

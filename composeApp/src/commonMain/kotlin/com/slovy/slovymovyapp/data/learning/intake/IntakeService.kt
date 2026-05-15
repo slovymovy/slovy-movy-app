@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.data.learning.intake
 
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardState
@@ -36,14 +38,51 @@ class IntakeService(
     @OptIn(ExperimentalTime::class)
     override suspend fun runIntake(langCode: String): IntakeResult =
         withContext(Dispatchers.IO) {
-            activatePendingFavorites(langCode, IntakeRunMode.DAILY)
+            runAndLog(langCode, IntakeRunMode.DAILY)
         }
 
     @OptIn(ExperimentalTime::class)
     override suspend fun continueWithPendingFavoritesNow(langCode: String): IntakeResult =
         withContext(Dispatchers.IO) {
-            activatePendingFavorites(langCode, IntakeRunMode.CONTINUE_NOW)
+            runAndLog(langCode, IntakeRunMode.CONTINUE_NOW)
         }
+
+    @OptIn(ExperimentalTime::class)
+    private suspend fun runAndLog(langCode: String, mode: IntakeRunMode): IntakeResult {
+        val result = activatePendingFavorites(langCode, mode)
+        Analytics.logEvent(
+            AnalyticsEvent.LEARNING_INTAKE_RUN,
+            buildIntakeAnalyticsParams(langCode, mode, result),
+        )
+        return result
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun buildIntakeAnalyticsParams(
+        langCode: String,
+        mode: IntakeRunMode,
+        result: IntakeResult,
+    ): Map<String, Any> {
+        val nowMs = clock.now().toEpochMilliseconds()
+        val params = mutableMapOf<String, Any>(
+            "lang" to langCode,
+            "mode" to when (mode) {
+                IntakeRunMode.DAILY -> "daily"
+                IntakeRunMode.CONTINUE_NOW -> "continue_now"
+            },
+            "cards_created" to result.cardsCreated.toLong(),
+            "activated_count" to result.activated.size.toLong(),
+            "active_card_count" to learning.countCardsByLang(langCode).executeAsOne(),
+            "due_count" to learning.countDueCardsByLang(langCode, nowMs).executeAsOne(),
+            "delayed_due_lemma_count" to learning.countDelayedDueLemmasByLang(langCode, nowMs).executeAsOne(),
+            "delayed_due_card_count" to learning.countDelayedDueCardsByLang(langCode, nowMs).executeAsOne(),
+            "pending_favorite_lemma_count" to learning.countPendingFavoriteLemmasByLang(langCode).executeAsOne(),
+        )
+        SkipReason.entries.forEach { reason ->
+            params["skip_${reason.name.lowercase()}"] = result.skipped.count { it == reason }.toLong()
+        }
+        return params
+    }
 
     @OptIn(ExperimentalTime::class)
     override fun canContinueWithPendingFavoritesNow(langCode: String): Boolean =

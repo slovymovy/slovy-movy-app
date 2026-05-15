@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +35,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
@@ -43,6 +46,9 @@ import slovymovyapp.composeapp.generated.resources.app_data_version_mismatch_tit
 
 @Composable
 fun DataVersionMismatchScreen(onRedownload: () -> Unit) {
+    LaunchedEffect(Unit) {
+        Analytics.logEvent(AnalyticsEvent.DATA_VERSION_MISMATCH)
+    }
     DataVersionMismatchContent(onRedownload = onRedownload)
 }
 
