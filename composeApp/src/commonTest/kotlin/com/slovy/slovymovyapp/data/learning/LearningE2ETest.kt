@@ -579,13 +579,46 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
-    fun same_lemma_different_sense_waits_for_session_cooldown() = runBlocking {
+    fun same_lemma_new_senses_remain_available_after_successful_review() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            val firstSense = env.seedSense(lemma = "polysemenew")
+            val secondSense = env.seedAdditionalSense(firstSense)
+            val thirdSense = env.seedAdditionalSense(firstSense)
+            env.addFavorite(firstSense, createdAt = start.toEpochMilliseconds())
+            env.addFavorite(secondSense, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+            env.addFavorite(thirdSense, createdAt = (start + 2.milliseconds).toEpochMilliseconds())
+            val result = env.intake.runIntake("en")
+            assertEquals(3, result.cardsCreated)
+
+            val firstCard = env.nextLoadedCard("en")
+            val expectedSenseIds = setOf(
+                firstSense.senseId.toString(),
+                secondSense.senseId.toString(),
+                thirdSense.senseId.toString(),
+            )
+            assertTrue(firstCard.senseId in expectedSenseIds)
+            env.session.submitReview(
+                firstCard,
+                env.session.previewRatings(firstCard).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val nextCard = assertNotNull(
+                env.session.nextCard("en", start)
+                    .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
+            )
+            assertTrue(nextCard.senseId in expectedSenseIds - firstCard.senseId)
+        }
+    }
+
+    @Test
+    fun same_lemma_started_sense_waits_for_lightweight_cooldown() = runBlocking {
         val config = FsrsDefaults.config().copy(
             sameSenseCooldownRatio = 0.0,
-            sameLemmaCooldownRatio = 0.15,
+            sameLemmaCooldownRatio = 0.02,
             sameAnswerCooldownRatio = 0.0,
-            siblingCooldownFloor = 10.minutes,
-            siblingCooldownCap = 10.minutes,
+            lemmaCooldownFloor = 2.minutes,
+            lemmaCooldownCap = 2.minutes,
             cooldownJitterRatio = 0.0,
         )
         withEnv(includeTranslation = false, config = config) { env ->
@@ -615,14 +648,19 @@ class LearningE2ETest : BaseTest() {
                 durationMs = 1.seconds.inWholeMilliseconds,
             )
 
+            val delayedSense = if (firstCard.senseId == firstSense.senseId.toString()) secondSense else firstSense
+            val delayedSenseId = delayedSense.senseId.toString()
+            val delayedCard = env.app.favoritesQueries.selectCardsByFavorite(delayedSense.senseId, "en")
+                .executeAsOne()
+            assertEquals((start + 3.minutes).toEpochMilliseconds(), delayedCard.available_after)
             assertNull(env.session.nextCard("en", start).first())
 
-            env.clock.advance(11.minutes)
+            env.clock.advance(3.minutes)
             val secondCard = assertNotNull(
                 env.session.nextCard("en", start)
                     .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
             )
-            assertEquals(expectedSenseIds - firstCard.senseId, setOf(secondCard.senseId))
+            assertEquals(setOf(delayedSenseId), setOf(secondCard.senseId))
         }
     }
 

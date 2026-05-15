@@ -27,6 +27,8 @@ data class FsrsConfig(
     val sameAnswerCooldownRatio: Double,
     val siblingCooldownFloor: Duration,
     val siblingCooldownCap: Duration,
+    val lemmaCooldownFloor: Duration,
+    val lemmaCooldownCap: Duration,
     val cooldownJitterRatio: Double,
     val selectionCandidateLimit: Int,
 )

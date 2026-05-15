@@ -90,10 +90,37 @@ class SessionService(
             val nextInterval = (after.dueEpochMs - nowMs).coerceAtLeast(0L)
                 .toDuration(DurationUnit.MILLISECONDS)
             if (outcome.rating.buriesSiblings()) {
-                burySense(card.card, nowMs, siblingCooldown(nextInterval, config.sameSenseCooldownRatio))
-                buryLemma(card.card, nowMs, siblingCooldown(nextInterval, config.sameLemmaCooldownRatio))
+                burySense(
+                    card.card,
+                    nowMs,
+                    siblingCooldown(
+                        nextInterval,
+                        config.sameSenseCooldownRatio,
+                        config.siblingCooldownFloor,
+                        config.siblingCooldownCap,
+                    ),
+                )
+                buryLemma(
+                    card.card,
+                    nowMs,
+                    siblingCooldown(
+                        nextInterval,
+                        config.sameLemmaCooldownRatio,
+                        config.lemmaCooldownFloor,
+                        config.lemmaCooldownCap,
+                    ),
+                )
                 if (card.card.family.testsWordRecall) {
-                    buryAnswer(card.card, nowMs, siblingCooldown(nextInterval, config.sameAnswerCooldownRatio))
+                    buryAnswer(
+                        card.card,
+                        nowMs,
+                        siblingCooldown(
+                            nextInterval,
+                            config.sameAnswerCooldownRatio,
+                            config.siblingCooldownFloor,
+                            config.siblingCooldownCap,
+                        ),
+                    )
                 }
             } else {
                 learning.setCardAvailableAfter(
@@ -272,10 +299,15 @@ class SessionService(
         )
     }
 
-    private fun siblingCooldown(nextInterval: Duration, ratio: Double): Duration {
+    private fun siblingCooldown(
+        nextInterval: Duration,
+        ratio: Double,
+        floor: Duration,
+        cap: Duration,
+    ): Duration {
         if (ratio <= 0.0) return Duration.ZERO
         val scaled = nextInterval * ratio
-        return scaled.coerceIn(config.siblingCooldownFloor, config.siblingCooldownCap)
+        return scaled.coerceIn(floor, cap)
     }
 
     private fun jitteredCooldown(cooldown: Duration): Duration {
@@ -393,7 +425,12 @@ class SessionService(
             difficulty = after.difficulty,
             availableAfter = availableAfter(
                 nowMs = now,
-                cooldown = siblingCooldown(nextInterval, config.sameSenseCooldownRatio),
+                cooldown = siblingCooldown(
+                    nextInterval,
+                    config.sameSenseCooldownRatio,
+                    config.siblingCooldownFloor,
+                    config.siblingCooldownCap,
+                ),
             ),
         )
     }

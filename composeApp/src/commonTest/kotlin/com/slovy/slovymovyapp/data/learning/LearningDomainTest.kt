@@ -183,6 +183,8 @@ class LearningDomainTest {
         assertEquals(FsrsDefaults.SAME_ANSWER_COOLDOWN_RATIO, config.sameAnswerCooldownRatio)
         assertEquals(FsrsDefaults.SIBLING_COOLDOWN_FLOOR, config.siblingCooldownFloor)
         assertEquals(FsrsDefaults.SIBLING_COOLDOWN_CAP, config.siblingCooldownCap)
+        assertEquals(FsrsDefaults.LEMMA_COOLDOWN_FLOOR, config.lemmaCooldownFloor)
+        assertEquals(FsrsDefaults.LEMMA_COOLDOWN_CAP, config.lemmaCooldownCap)
         assertEquals(FsrsDefaults.COOLDOWN_JITTER_RATIO, config.cooldownJitterRatio)
     }
 

@@ -29,10 +29,12 @@ object FsrsDefaults {
     const val CONTEXT_TO_VOICE_STABILITY_FACTOR: Double = 0.80
     val BURY_FAILED_SESSION_CARDS_FOR: Duration = 10.minutes
     const val SAME_SENSE_COOLDOWN_RATIO: Double = 0.30
-    const val SAME_LEMMA_COOLDOWN_RATIO: Double = 0.15
+    const val SAME_LEMMA_COOLDOWN_RATIO: Double = 0.02
     const val SAME_ANSWER_COOLDOWN_RATIO: Double = 0.05
     val SIBLING_COOLDOWN_FLOOR: Duration = 10.minutes
     val SIBLING_COOLDOWN_CAP: Duration = 3.days
+    val LEMMA_COOLDOWN_FLOOR: Duration = 2.minutes
+    val LEMMA_COOLDOWN_CAP: Duration = 6.hours
     const val COOLDOWN_JITTER_RATIO: Double = 0.2
     const val SELECTION_CANDIDATE_LIMIT: Int = 50
 
@@ -64,6 +66,8 @@ object FsrsDefaults {
         sameAnswerCooldownRatio = SAME_ANSWER_COOLDOWN_RATIO,
         siblingCooldownFloor = SIBLING_COOLDOWN_FLOOR,
         siblingCooldownCap = SIBLING_COOLDOWN_CAP,
+        lemmaCooldownFloor = LEMMA_COOLDOWN_FLOOR,
+        lemmaCooldownCap = LEMMA_COOLDOWN_CAP,
         cooldownJitterRatio = COOLDOWN_JITTER_RATIO,
         selectionCandidateLimit = SELECTION_CANDIDATE_LIMIT,
     )

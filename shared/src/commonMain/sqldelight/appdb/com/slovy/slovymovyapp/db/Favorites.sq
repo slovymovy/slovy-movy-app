@@ -262,6 +262,7 @@ SET available_after = max(
 WHERE lang_code = :lang_code
   AND lemma_id = :lemma_id
   AND sense_id != :sense_id
+  AND state != 0
   AND suspended = 0;
 
 -- :allowed_families should be CardFamily entries with testsWordRecall = true.
