@@ -6,7 +6,15 @@ import com.google.firebase.analytics.analytics
 
 
 actual object Analytics {
+    actual var logger: AnalyticsLogger = NoOpAnalyticsLogger
+
     actual fun logEvent(event: AnalyticsEvent, params: Map<String, Any>) {
+        logger.logEvent(event.name.lowercase(), params)
+    }
+}
+
+class FirebaseAnalyticsLogger : AnalyticsLogger {
+    override fun logEvent(name: String, params: Map<String, Any>) {
         val bundle = Bundle().apply {
             params.forEach { (key, value) ->
                 when (value) {
@@ -20,6 +28,6 @@ actual object Analytics {
                 }
             }
         }
-        Firebase.analytics.logEvent(event.name.lowercase(), bundle)
+        Firebase.analytics.logEvent(name, bundle)
     }
 }

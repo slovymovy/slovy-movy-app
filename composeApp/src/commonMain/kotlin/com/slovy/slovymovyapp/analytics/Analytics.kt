@@ -43,5 +43,12 @@ enum class AnalyticsEvent {
 }
 
 expect object Analytics {
+    /**
+     * Routes [logEvent] calls. Defaults to [NoOpAnalyticsLogger] so tests
+     * don't crash on platforms whose backing SDK isn't initialised; the
+     * production entry point (e.g. MainActivity) installs the real logger.
+     */
+    var logger: AnalyticsLogger
+
     fun logEvent(event: AnalyticsEvent, params: Map<String, Any> = emptyMap())
 }
