@@ -100,6 +100,7 @@ data class FavoritesStudyDoneUiState(
     val nextReviewLabel: String,
     val nextReviewAccessibilityValue: UiText,
     val action: FavoritesStudyDoneAction?,
+    val nextReviewAtEpochMs: Long,
 ) {
     val canContinueNow: Boolean get() = action != null
 }
@@ -411,6 +412,7 @@ class FavoritesViewModel(
 
                 else -> null
             },
+            nextReviewAtEpochMs = nextReviewAt,
         )
     }
 
@@ -686,6 +688,15 @@ fun FavoritesScreen(
             viewModel.scrollState.scrollToItem(0)
             viewModel.consumeScrollToTop()
         }
+    }
+
+    val nextReviewAtEpochMs = (viewModel.state as? FavoritesUiState.Content)
+        ?.studyDone?.nextReviewAtEpochMs
+    LaunchedEffect(nextReviewAtEpochMs) {
+        val target = nextReviewAtEpochMs ?: return@LaunchedEffect
+        val remaining = target - Clock.System.now().toEpochMilliseconds()
+        if (remaining > 0) delay(remaining)
+        viewModel.loadFavorites()
     }
 
     FavoritesScreenContent(
@@ -1420,6 +1431,7 @@ fun PreviewFavoritesScreenStudyDone(
                     args = listOf(4),
                 ),
                 action = FavoritesStudyDoneAction.REVIEW_MORE,
+                nextReviewAtEpochMs = 0L,
             ),
         )
         FavoritesScreenContent(state = state)
