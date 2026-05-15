@@ -91,6 +91,7 @@ data class FavoriteSenseItem(
 data class FavoritesStudyUiState(
     val language: Language,
     val dueCount: Int,
+    val delayedDueCardCount: Int = 0,
 ) {
     val estimatedMinutes: Int = ((dueCount + 3) / 4).coerceAtLeast(1)
 }
@@ -100,6 +101,8 @@ data class FavoritesStudyDoneUiState(
     val nextReviewLabel: String,
     val nextReviewAccessibilityValue: UiText,
     val action: FavoritesStudyDoneAction?,
+    val nextReviewAtEpochMs: Long,
+    val delayedDueCardCount: Int = 0,
 ) {
     val canContinueNow: Boolean get() = action != null
 }
@@ -113,6 +116,7 @@ data class FavoriteLanguageReviewUiState(
     val dueCount: Int = 0,
     val activeCardCount: Int = 0,
     val delayedDueLemmaCount: Int = 0,
+    val delayedDueCardCount: Int = 0,
     val pendingFavoriteLemmaCount: Int = 0,
     val canStudyPendingFavoritesNow: Boolean = true,
     val nextReviewAtEpochMs: Long? = null,
@@ -265,6 +269,10 @@ class FavoritesViewModel(
         if (started) {
             viewModelScope.launch {
                 settingsRepository.insert(Setting(Setting.Name.FAVORITES_LANGUAGE, JsonPrimitive(language.code)))
+                Analytics.logEvent(
+                    AnalyticsEvent.SETTING_CHANGED,
+                    mapOf("setting" to "favorites_language", "value" to language.code),
+                )
             }
         }
         queryFlow.value = QueryState(content.query, Uuid.random())
@@ -337,16 +345,23 @@ class FavoritesViewModel(
             val cached = dictionaryRepository.getCachedSense(favorite.senseId)
             buildSenseItem(favorite, cached, existing)
         }
+        val selectedReviewState = selectedLanguage?.let { visibleReviewStateByLanguage[it] }
         val study = selectedLanguage
             ?.let { language ->
-                visibleReviewStateByLanguage[language]?.dueCount
+                selectedReviewState?.dueCount
                     ?.takeIf { dueCount -> dueCount > 0 }
-                    ?.let { dueCount -> FavoritesStudyUiState(language, dueCount) }
+                    ?.let { dueCount ->
+                        FavoritesStudyUiState(
+                            language = language,
+                            dueCount = dueCount,
+                            delayedDueCardCount = selectedReviewState.delayedDueCardCount,
+                        )
+                    }
             }
         val studyDone = studyDoneState(
             study = study,
             selectedLanguage = selectedLanguage,
-            reviewState = selectedLanguage?.let { visibleReviewStateByLanguage[it] },
+            reviewState = selectedReviewState,
             query = trimmedQuery,
         )
 
@@ -369,16 +384,23 @@ class FavoritesViewModel(
         val visibleReviewStateByLanguage = availableLanguages.associateWith { language ->
             reviewStateByLanguage[language] ?: FavoriteLanguageReviewUiState()
         }
+        val selectedReviewState = selectedLanguage?.let { visibleReviewStateByLanguage[it] }
         val updatedStudy = selectedLanguage
             ?.let { language ->
-                visibleReviewStateByLanguage[language]?.dueCount
+                selectedReviewState?.dueCount
                     ?.takeIf { dueCount -> dueCount > 0 }
-                    ?.let { dueCount -> FavoritesStudyUiState(language, dueCount) }
+                    ?.let { dueCount ->
+                        FavoritesStudyUiState(
+                            language = language,
+                            dueCount = dueCount,
+                            delayedDueCardCount = selectedReviewState.delayedDueCardCount,
+                        )
+                    }
             }
         val updatedStudyDone = studyDoneState(
             study = updatedStudy,
             selectedLanguage = selectedLanguage,
-            reviewState = selectedLanguage?.let { visibleReviewStateByLanguage[it] },
+            reviewState = selectedReviewState,
             query = query.trim(),
         )
         return copy(
@@ -411,6 +433,8 @@ class FavoritesViewModel(
 
                 else -> null
             },
+            nextReviewAtEpochMs = nextReviewAt,
+            delayedDueCardCount = reviewState.delayedDueCardCount,
         )
     }
 
@@ -556,7 +580,10 @@ class FavoritesViewModel(
 
             // Remove from repository, then remove from displayed list for immediate feedback
             favoritesRepository.remove(senseId, favorite.language)
-            Analytics.logEvent(AnalyticsEvent.FAVOURITES_REMOVE)
+            Analytics.logEvent(
+                AnalyticsEvent.FAVOURITES_REMOVE,
+                mapOf("lang" to favorite.language.code, "source" to "favorites_list"),
+            )
             onFavoritesChanged(favorite.language)
             val content = state as? FavoritesUiState.Content ?: return@launch
             state = content.copy(senses = content.senses.filter { it.senseId != senseId })
@@ -578,7 +605,10 @@ class FavoritesViewModel(
             if (result == SnackbarResult.ActionPerformed) {
                 // Re-add with the original createdAt to preserve position
                 favoritesRepository.add(senseId, favorite.language, favorite.lemma, favorite.createdAt)
-                Analytics.logEvent(AnalyticsEvent.FAVOURITES_SAVE)
+                Analytics.logEvent(
+                    AnalyticsEvent.FAVOURITES_SAVE,
+                    mapOf("lang" to favorite.language.code, "source" to "favorites_undo"),
+                )
                 onFavoritesChanged(favorite.language)
                 loadFavorites()
             }
@@ -686,6 +716,15 @@ fun FavoritesScreen(
             viewModel.scrollState.scrollToItem(0)
             viewModel.consumeScrollToTop()
         }
+    }
+
+    val nextReviewAtEpochMs = (viewModel.state as? FavoritesUiState.Content)
+        ?.studyDone?.nextReviewAtEpochMs
+    LaunchedEffect(nextReviewAtEpochMs) {
+        val target = nextReviewAtEpochMs ?: return@LaunchedEffect
+        val remaining = target - Clock.System.now().toEpochMilliseconds()
+        if (remaining > 0) delay(remaining)
+        viewModel.loadFavorites()
     }
 
     FavoritesScreenContent(
@@ -937,7 +976,17 @@ fun FavoritesScreenContent(
                                     state.study?.let { study ->
                                         StudyDueCard(
                                             study = study,
-                                            onStartStudy = { onStartStudy(study.language) },
+                                            onStartStudy = {
+                                                Analytics.logEvent(
+                                                    AnalyticsEvent.FAVORITES_STUDY_DUE_CLICK,
+                                                    mapOf(
+                                                        "lang" to study.language.code,
+                                                        "due_count" to study.dueCount.toLong(),
+                                                        "delayed_due_card_count" to study.delayedDueCardCount.toLong(),
+                                                    ),
+                                                )
+                                                onStartStudy(study.language)
+                                            },
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -947,6 +996,20 @@ fun FavoritesScreenContent(
                                             studyDone = studyDone,
                                             onContinueStudyingNow = {
                                                 studyDone.action?.let { action ->
+                                                    Analytics.logEvent(
+                                                        when (action) {
+                                                            FavoritesStudyDoneAction.REVIEW_MORE ->
+                                                                AnalyticsEvent.FAVORITES_STUDY_DONE_REVIEW_MORE_CLICK
+
+                                                            FavoritesStudyDoneAction.STUDY_NEW ->
+                                                                AnalyticsEvent.FAVORITES_STUDY_DONE_STUDY_NEW_CLICK
+                                                        },
+                                                        mapOf(
+                                                            "lang" to studyDone.language.code,
+                                                            "due_count" to state.reviewDueCount.toLong(),
+                                                            "delayed_due_card_count" to studyDone.delayedDueCardCount.toLong(),
+                                                        ),
+                                                    )
                                                     onContinueStudyingNow(studyDone.language, action)
                                                 }
                                             },
@@ -1420,6 +1483,7 @@ fun PreviewFavoritesScreenStudyDone(
                     args = listOf(4),
                 ),
                 action = FavoritesStudyDoneAction.REVIEW_MORE,
+                nextReviewAtEpochMs = 0L,
             ),
         )
         FavoritesScreenContent(state = state)

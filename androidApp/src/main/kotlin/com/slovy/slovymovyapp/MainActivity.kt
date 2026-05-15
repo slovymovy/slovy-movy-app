@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.FirebaseAnalyticsLogger
 import com.slovy.slovymovyapp.androidApp.BuildConfig
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
@@ -14,6 +16,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        Analytics.logger = FirebaseAnalyticsLogger()
 
         setContent {
             val platform = PlatformDbSupport(this)

@@ -45,6 +45,8 @@ import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -541,13 +543,16 @@ class WordDetailViewModel(
     fun toggleFavorite(senseId: String) {
         viewModelScope.launch {
             dictionaryLanguage.let { lang ->
+                val params = mapOf<String, Any>("lang" to lang.code, "source" to "word_detail")
                 val added = if (senseId in favoriteSenses) {
                     favoritesRepository.remove(senseId, lang)
-                    Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_REMOVE)
+                    Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_REMOVE, params)
+                    Analytics.logEvent(AnalyticsEvent.FAVOURITES_REMOVE, params)
                     false
                 } else {
                     favoritesRepository.add(senseId, lang, lemma)
-                    Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_SAVE)
+                    Analytics.logEvent(AnalyticsEvent.WORD_DETAILS_FAVOURITES_SAVE, params)
+                    Analytics.logEvent(AnalyticsEvent.FAVOURITES_SAVE, params)
                     true
                 }
                 onFavoriteChanged?.invoke(added)
@@ -680,7 +685,10 @@ class WordDetailViewModel(
     }
 
     fun playWord() {
-        Analytics.logEvent(AnalyticsEvent.WORD_PLAY_CLICK)
+        Analytics.logEvent(
+            AnalyticsEvent.WORD_PLAY_CLICK,
+            mapOf("lang" to dictionaryLanguage.code, "source" to "word_detail"),
+        )
         if (availableVoices.isEmpty()) return
 
         val hasHighQualityVoice = availableVoices.any { it.quality != VoiceQuality.MEDIUM }
@@ -706,8 +714,15 @@ class WordDetailViewModel(
             isPreparing = true
             ttsManager.setVoice(selectedVoice)
             ttsManager.speak(lemma)
-        } catch (_: Exception) {
-            // Failed to play, ignore
+        } catch (e: Exception) {
+            Analytics.logEvent(
+                AnalyticsEvent.TTS_PLAY_FAILED,
+                mapOf(
+                    "lang" to dictionaryLanguage.code,
+                    "source" to "word_detail",
+                    "error" to (e.message ?: e::class.simpleName ?: "unknown"),
+                ),
+            )
             isPreparing = false
         }
     }
@@ -757,6 +772,20 @@ fun WordDetailScreen(
     DisposableEffect(viewModel) {
         viewModel.attachTtsListener()
         onDispose { viewModel.detachTtsListener() }
+    }
+
+    LaunchedEffect(viewModel) {
+        val loaded = snapshotFlow { viewModel.state }
+            .filterIsInstance<WordDetailUiState.Content>()
+            .first()
+        Analytics.logEvent(
+            AnalyticsEvent.WORD_DETAIL_OPEN,
+            mapOf(
+                "lang" to viewModel.dictionaryLanguage.code,
+                "sense_count" to loaded.entries.sumOf { it.senses.size }.toLong(),
+                "has_target_sense" to (viewModel.targetSenseId != null).toString(),
+            ),
+        )
     }
 
     // Restore scroll position after process death

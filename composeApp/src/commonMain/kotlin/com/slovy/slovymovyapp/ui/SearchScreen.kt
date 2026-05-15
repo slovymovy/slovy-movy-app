@@ -125,6 +125,17 @@ class SearchViewModel(
                 }
                 .collect { results ->
                     val query = queryFlow.value.query
+                    if (query.isNotEmpty()) {
+                        Analytics.logEvent(
+                            AnalyticsEvent.WORD_SEARCH_QUERY,
+                            mapOf(
+                                "lang" to (queryFlow.value.language?.code ?: ""),
+                                "query_length" to query.length.toLong(),
+                                "result_count" to results.size.toLong(),
+                                "has_results" to (results.isNotEmpty()).toString(),
+                            ),
+                        )
+                    }
                     state = state.copy(
                         results = results,
                         showNoResults = results.isEmpty() && query.isNotEmpty()
@@ -232,6 +243,10 @@ class SearchViewModel(
             } else {
                 settingsRepository.deleteById(Setting.Name.SEARCH_LANGUAGE)
             }
+            Analytics.logEvent(
+                AnalyticsEvent.SETTING_CHANGED,
+                mapOf("setting" to "search_language", "value" to (language?.code ?: "any")),
+            )
         }
         // Re-trigger search with new language filter
         val normalized = state.query.trim()

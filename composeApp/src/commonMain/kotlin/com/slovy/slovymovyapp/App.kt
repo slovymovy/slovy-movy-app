@@ -64,6 +64,7 @@ internal data class FavoriteLanguageReviewState(
     val dueCount: Int,
     val activeCardCount: Int,
     val delayedDueLemmaCount: Int,
+    val delayedDueCardCount: Int,
     val pendingFavoriteLemmaCount: Int,
     val canStudyPendingFavoritesNow: Boolean,
     val nextReviewAtEpochMs: Long?,
@@ -154,6 +155,7 @@ internal class FavoritesReviewCoordinator(
             dueCount = dueToday,
             activeCardCount = activeCardCount,
             delayedDueLemmaCount = delayedDueLemmaCount,
+            delayedDueCardCount = delayedDueCardCount,
             pendingFavoriteLemmaCount = pendingFavoriteLemmaCount,
             canStudyPendingFavoritesNow = intakeService.canContinueWithPendingFavoritesNow(language.code),
             nextReviewAtEpochMs = nextReviewAtEpochMs,
@@ -179,6 +181,7 @@ private fun FavoritesReviewState.toFavoriteLanguageReviewUiState(): Map<Language
             dueCount = reviewState.dueCount,
             activeCardCount = reviewState.activeCardCount,
             delayedDueLemmaCount = reviewState.delayedDueLemmaCount,
+            delayedDueCardCount = reviewState.delayedDueCardCount,
             pendingFavoriteLemmaCount = reviewState.pendingFavoriteLemmaCount,
             canStudyPendingFavoritesNow = reviewState.canStudyPendingFavoritesNow,
             nextReviewAtEpochMs = reviewState.nextReviewAtEpochMs,
@@ -853,13 +856,13 @@ fun App(
                 StudySessionScreen(
                     viewModel = viewModel,
                     onCancel = {
-                        logEvent(AnalyticsEvent.STUDY_CANCEL_SESSION)
+                        logEvent(AnalyticsEvent.STUDY_CANCEL_SESSION, viewModel.buildSessionEndParams("cancel"))
                         if (!navController.popBackStack()) {
                             navController.navigate(AppDestination.Favorites)
                         }
                     },
                     onEnd = {
-                        logEvent(AnalyticsEvent.STUDY_END_SESSION)
+                        logEvent(AnalyticsEvent.STUDY_END_SESSION, viewModel.buildSessionEndParams("finished"))
                         if (!navController.popBackStack()) {
                             navController.navigate(AppDestination.Favorites)
                         }

@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
@@ -52,6 +54,7 @@ class StudySessionViewModel(
     private var sessionTotal: Int = 0
     private var availableVoices: List<Text2SpeechVoice> = emptyList()
     private var currentVoiceIndex: Int = 0
+    private val gradeCounts = mutableMapOf<StudyRating, Int>()
 
     init {
         ttsManager.addOnStatusChangeListener(this) { status ->
@@ -93,6 +96,10 @@ class StudySessionViewModel(
 
     fun playAudio(text: String) {
         val active = state as? StudySessionUiState.Active ?: return
+        Analytics.logEvent(
+            AnalyticsEvent.WORD_PLAY_CLICK,
+            mapOf("lang" to langCode, "source" to "study"),
+        )
         state = active.copy(isPreparingAudio = true, isPlayingAudio = false)
         viewModelScope.launch {
             try {
@@ -108,7 +115,15 @@ class StudySessionViewModel(
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Analytics.logEvent(
+                    AnalyticsEvent.TTS_PLAY_FAILED,
+                    mapOf(
+                        "lang" to langCode,
+                        "source" to "study",
+                        "error" to (e.message ?: e::class.simpleName ?: "unknown"),
+                    ),
+                )
                 val latest = state as? StudySessionUiState.Active ?: return@launch
                 state = latest.copy(isPreparingAudio = false, isPlayingAudio = false)
             }
@@ -159,15 +174,26 @@ class StudySessionViewModel(
         val card = currentCard ?: return
         val outcome = currentOutcomes.firstOrNull { it.rating == rating.toDomainRating() } ?: return
 
+        val durationMs = (clock.now() - cardShownAt).inWholeMilliseconds
         state = active.copy(isSubmittingReview = true)
         viewModelScope.launch {
             runCatching {
                 sessionService.submitReview(
                     card = card,
                     outcome = outcome,
-                    durationMs = (clock.now() - cardShownAt).inWholeMilliseconds,
+                    durationMs = durationMs,
                 )
             }.onSuccess {
+                Analytics.logEvent(
+                    AnalyticsEvent.STUDY_CARD_GRADED,
+                    mapOf(
+                        "lang" to langCode,
+                        "rating" to rating.name.lowercase(),
+                        "family" to card.card.family.name.lowercase(),
+                        "duration_ms" to durationMs,
+                    ),
+                )
+                gradeCounts[rating] = (gradeCounts[rating] ?: 0) + 1
                 onReviewSubmitted()
                 reviewedCount += 1
                 currentCard = null
@@ -278,6 +304,17 @@ class StudySessionViewModel(
             total = sessionTotal,
         )
     }
+
+    fun buildSessionEndParams(completion: String): Map<String, Any> = mapOf(
+        "lang" to langCode,
+        "completion" to completion,
+        "cards_reviewed" to reviewedCount.toLong(),
+        "again_count" to (gradeCounts[StudyRating.AGAIN] ?: 0).toLong(),
+        "hard_count" to (gradeCounts[StudyRating.HARD] ?: 0).toLong(),
+        "good_count" to (gradeCounts[StudyRating.GOOD] ?: 0).toLong(),
+        "easy_count" to (gradeCounts[StudyRating.EASY] ?: 0).toLong(),
+        "duration_ms" to (clock.now() - sessionStartedAt).inWholeMilliseconds,
+    )
 
     override fun onCleared() {
         super.onCleared()

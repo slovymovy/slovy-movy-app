@@ -315,6 +315,15 @@ WHERE lang_code = :lang_code
   AND available_after IS NOT NULL
   AND available_after > :now;
 
+countDelayedDueCardsByLang:
+SELECT COUNT(*)
+FROM card
+WHERE lang_code = :lang_code
+  AND due <= :now
+  AND suspended = 0
+  AND available_after IS NOT NULL
+  AND available_after > :now;
+
 selectNextReviewAtByLang:
 SELECT MIN(
   CASE

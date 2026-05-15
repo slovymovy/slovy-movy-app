@@ -12,6 +12,7 @@ data class ReviewQueueStats(
     val activeCardCount: Int,
     val dueToday: Int,
     val delayedDueLemmaCount: Int,
+    val delayedDueCardCount: Int,
     val pendingFavoriteLemmaCount: Int,
     val nextReviewAtEpochMs: Long?,
 )
@@ -48,4 +49,6 @@ data class StatsScreenData(
     val reviewsWeek: Int,
     val wordsTotal: Int,
     val pipeline: List<StatsPipelineStage>,
+    val delayedDueLemmaCount: Int,
+    val delayedDueCardCount: Int,
 )
