@@ -4,6 +4,8 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 actual object AppLogger {
+    actual var remoteLogger: AppLogSink = NoOpAppLogSink
+
     actual fun debug(tag: String, message: String, throwable: Throwable?) {
         log("DEBUG", tag, message, throwable)
     }
@@ -14,10 +16,12 @@ actual object AppLogger {
 
     actual fun warn(tag: String, message: String, throwable: Throwable?) {
         log("WARN", tag, message, throwable)
+        logRemote(AppLogLevel.WARN, tag, message, throwable)
     }
 
     actual fun error(tag: String, message: String, throwable: Throwable?) {
         log("ERROR", tag, message, throwable)
+        logRemote(AppLogLevel.ERROR, tag, message, throwable)
     }
 
     @OptIn(ExperimentalTime::class)
@@ -29,6 +33,15 @@ actual object AppLogger {
         } else {
             System.out.println(line)
             throwable?.printStackTrace()
+        }
+    }
+
+    private fun logRemote(level: AppLogLevel, tag: String, message: String, throwable: Throwable?) {
+        runCatching {
+            remoteLogger.log(level, tag, message, throwable)
+        }.onFailure {
+            System.err.println("WARN/$tag: Remote logging failed")
+            it.printStackTrace(System.err)
         }
     }
 }

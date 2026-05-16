@@ -2,6 +2,7 @@ import SwiftUI
 import ComposeApp
 import FirebaseCore
 import FirebaseAnalytics
+import FirebaseCrashlytics
 
 private class FirebaseAnalyticsLogger: AnalyticsLogger {
     func logEvent(name: String, params: [String: Any]) {
@@ -13,11 +14,36 @@ private class FirebaseAnalyticsLogger: AnalyticsLogger {
     }
 }
 
+private class FirebaseCrashlyticsAppLogSink: AppLogSink {
+    func log(level: AppLogLevel, tag: String, message: String, throwable: KotlinThrowable?) {
+        let crashlytics = Crashlytics.crashlytics()
+        let levelName = level.name
+        crashlytics.log("\(levelName)/\(tag): \(message)")
+
+        guard let throwable else {
+            return
+        }
+
+        let error = NSError(
+            domain: "com.slovy.slovymovyapp.applogger",
+            code: levelName == "ERROR" ? 2 : 1,
+            userInfo: [
+                NSLocalizedDescriptionKey: message,
+                "level": levelName,
+                "tag": tag,
+                "throwable": String(describing: throwable)
+            ]
+        )
+        crashlytics.record(error: error)
+    }
+}
+
 @main
 struct iOSApp: App {
     init() {
         FirebaseApp.configure()
         Analytics.shared.logger = FirebaseAnalyticsLogger()
+        AppLogger.shared.remoteLogger = FirebaseCrashlyticsAppLogSink()
     }
 
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
