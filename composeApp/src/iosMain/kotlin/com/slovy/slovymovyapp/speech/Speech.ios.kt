@@ -68,14 +68,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                 AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation,
                 null
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Audio session deactivation failed
         }
     }
 
     actual fun speak(text: String, language: Language) {
         val voices = AVSpeechSynthesisVoice.speechVoices()
-        val voiceForLanguage = (voices as List<*>)
+        val voiceForLanguage = voices
             .filterIsInstance<AVSpeechSynthesisVoice>()
             .firstOrNull { it.language.startsWith(language.code) }
         if (voiceForLanguage == null) {
