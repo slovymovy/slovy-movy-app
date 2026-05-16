@@ -41,12 +41,28 @@ class LearningDomainTest {
     }
 
     @Test
+    fun card_state_order_is_frozen() {
+        assertEquals(
+            listOf(
+                "NEW",
+                "LEARNING",
+                "REVIEW",
+                "RELEARNING",
+            ),
+            CardState.entries.map { it.name },
+        )
+    }
+
+    @Test
     fun adapters_round_trip_locked_values() {
         val kindAdapter = enumOrdinalAdapter<CardKind>()
+        val stateAdapter = enumOrdinalAdapter<CardState>()
         val ratingAdapter = ratingFsrsAdapter()
 
         assertEquals(3L, kindAdapter.encode(CardKind.TRANSLATION_TO_WORD))
         assertEquals(CardKind.TRANSLATION_TO_WORD, kindAdapter.decode(3L))
+        assertEquals(2L, stateAdapter.encode(CardState.REVIEW))
+        assertEquals(CardState.REVIEW, stateAdapter.decode(2L))
         assertEquals(3L, ratingAdapter.encode(Rating.GOOD))
         assertEquals(Rating.GOOD, ratingAdapter.decode(3L))
     }
@@ -67,6 +83,69 @@ class LearningDomainTest {
         assertTrue(byRating.getValue(Rating.AGAIN).intervalMillis < byRating.getValue(Rating.HARD).intervalMillis)
         assertTrue(byRating.getValue(Rating.HARD).intervalMillis < byRating.getValue(Rating.GOOD).intervalMillis)
         assertTrue(byRating.getValue(Rating.GOOD).intervalMillis < byRating.getValue(Rating.EASY).intervalMillis)
+    }
+
+    @Test
+    fun scheduler_fuzz_is_stable_for_seed_and_spreads_between_seeds() {
+        val config = FsrsDefaults.config()
+        val scheduler = FsrsScheduler(
+            config.requestRetention,
+            config.weights,
+            config.maximumInterval,
+            enableFuzz = true,
+        )
+        val now = Instant.fromEpochMilliseconds(1_700_000_000_000L)
+        val reviewCard = scheduling().copy(
+            state = CardState.REVIEW,
+            stability = 30.0,
+            difficulty = 5.0,
+            dueEpochMs = now.toEpochMilliseconds(),
+            lastReviewEpochMs = (now - 30.days).toEpochMilliseconds(),
+            reps = 5,
+        )
+
+        val first = scheduler.preview(reviewCard, now, fuzzSeed = 1L)
+        val second = scheduler.preview(reviewCard, now, fuzzSeed = 1L)
+        val goodIntervals = (1L..20L)
+            .map { seed -> scheduler.preview(reviewCard, now, fuzzSeed = seed).first { it.rating == Rating.GOOD } }
+            .mapTo(HashSet()) { it.intervalMillis }
+
+        assertEquals(first, second)
+        assertTrue(goodIntervals.size > 1, "Expected seeded fuzz to spread intervals")
+    }
+
+    @Test
+    fun scheduler_fuzz_does_not_shorten_successful_review_intervals() {
+        val config = FsrsDefaults.config()
+        val scheduler = FsrsScheduler(
+            config.requestRetention,
+            config.weights,
+            config.maximumInterval,
+            enableFuzz = true,
+        )
+        val now = Instant.fromEpochMilliseconds(1_700_000_000_000L)
+        val scheduledInterval = 30.days
+        val reviewCard = scheduling().copy(
+            state = CardState.REVIEW,
+            stability = 30.0,
+            difficulty = 5.0,
+            dueEpochMs = now.toEpochMilliseconds(),
+            lastReviewEpochMs = (now - scheduledInterval).toEpochMilliseconds(),
+            reps = 5,
+        )
+
+        (1L..100L).forEach { seed ->
+            val byRating = scheduler.preview(reviewCard, now, fuzzSeed = seed)
+                .associateBy { it.rating }
+            assertTrue(
+                byRating.getValue(Rating.GOOD).intervalMillis > scheduledInterval.inWholeMilliseconds,
+                "Good interval should not be shortened for seed=$seed",
+            )
+            assertTrue(
+                byRating.getValue(Rating.EASY).intervalMillis > scheduledInterval.inWholeMilliseconds,
+                "Easy interval should not be shortened for seed=$seed",
+            )
+        }
     }
 
     @Test
@@ -162,21 +241,11 @@ class LearningDomainTest {
         val config = FsrsDefaults.config()
 
         assertEquals(FsrsDefaults.DEFAULT_INTAKE_FAMILIES, config.defaultIntakeFamilies)
+        assertEquals(FsrsDefaults.ENABLE_FUZZ, config.enableFuzz)
         assertEquals(FsrsDefaults.PRODUCTION_UNLOCK_STABILITY, config.productionUnlockStability)
         assertEquals(FsrsDefaults.CONTEXT_UNLOCK_STABILITY, config.contextUnlockStability)
         assertEquals(FsrsDefaults.PAUSE_INTAKE_RETENTION_MIN_REVIEWS, config.pauseIntakeRetentionMinReviews)
-        assertEquals(
-            FsrsDefaults.RECOGNITION_TO_PRODUCTION_STABILITY_FACTOR,
-            config.recognitionToProductionStabilityFactor,
-        )
-        assertEquals(
-            FsrsDefaults.PRODUCTION_TO_CONTEXT_STABILITY_FACTOR,
-            config.productionToContextStabilityFactor,
-        )
-        assertEquals(
-            FsrsDefaults.CONTEXT_TO_VOICE_STABILITY_FACTOR,
-            config.contextToVoiceStabilityFactor,
-        )
+        assertEquals(FsrsDefaults.CROSS_FAMILY_CREDITS, config.crossFamilyCredits)
         assertEquals(FsrsDefaults.BURY_FAILED_SESSION_CARDS_FOR, config.buryFailedSessionCardsFor)
         assertEquals(FsrsDefaults.SAME_SENSE_COOLDOWN_RATIO, config.sameSenseCooldownRatio)
         assertEquals(FsrsDefaults.SAME_LEMMA_COOLDOWN_RATIO, config.sameLemmaCooldownRatio)
@@ -185,7 +254,36 @@ class LearningDomainTest {
         assertEquals(FsrsDefaults.SIBLING_COOLDOWN_CAP, config.siblingCooldownCap)
         assertEquals(FsrsDefaults.LEMMA_COOLDOWN_FLOOR, config.lemmaCooldownFloor)
         assertEquals(FsrsDefaults.LEMMA_COOLDOWN_CAP, config.lemmaCooldownCap)
+        assertEquals(FsrsDefaults.SAME_SENSE_EXPOSURE_RATIO, config.sameSenseExposureRatio)
+        assertEquals(FsrsDefaults.SAME_SENSE_EXPOSURE_FLOOR, config.sameSenseExposureFloor)
+        assertEquals(FsrsDefaults.SAME_SENSE_EXPOSURE_CAP, config.sameSenseExposureCap)
+        assertEquals(FsrsDefaults.FORWARD_CREDIT_DELAY_RATIO, config.forwardCreditDelayRatio)
+        assertEquals(FsrsDefaults.FORWARD_CREDIT_DELAY_FLOOR, config.forwardCreditDelayFloor)
+        assertEquals(FsrsDefaults.FORWARD_CREDIT_DELAY_CAP, config.forwardCreditDelayCap)
+        assertEquals(FsrsDefaults.BACKWARD_CREDIT_DELAY_RATIO, config.backwardCreditDelayRatio)
+        assertEquals(FsrsDefaults.BACKWARD_CREDIT_DELAY_FLOOR, config.backwardCreditDelayFloor)
+        assertEquals(FsrsDefaults.BACKWARD_CREDIT_DELAY_CAP, config.backwardCreditDelayCap)
         assertEquals(FsrsDefaults.COOLDOWN_JITTER_RATIO, config.cooldownJitterRatio)
+    }
+
+    @Test
+    fun cross_family_credit_defaults_cover_learning_edges() {
+        val configuredEdges = FsrsDefaults.config().crossFamilyCredits
+            .map { it.sourceFamily to it.targetFamily }
+            .toSet()
+        val expectedEdges = setOf(
+            CardFamily.RECOGNIZE_SENSE to CardFamily.PRODUCE_WORD,
+            CardFamily.PRODUCE_WORD to CardFamily.PRODUCE_WORD_IN_CONTEXT,
+            CardFamily.PRODUCE_WORD_IN_CONTEXT to CardFamily.RECOGNIZE_VOICE,
+            CardFamily.PRODUCE_WORD to CardFamily.RECOGNIZE_SENSE,
+            CardFamily.PRODUCE_WORD_IN_CONTEXT to CardFamily.PRODUCE_WORD,
+            CardFamily.PRODUCE_WORD_IN_CONTEXT to CardFamily.RECOGNIZE_SENSE,
+            CardFamily.RECOGNIZE_VOICE to CardFamily.PRODUCE_WORD_IN_CONTEXT,
+            CardFamily.RECOGNIZE_VOICE to CardFamily.PRODUCE_WORD,
+            CardFamily.RECOGNIZE_VOICE to CardFamily.RECOGNIZE_SENSE,
+        )
+
+        assertEquals(expectedEdges, configuredEdges)
     }
 
     @Test

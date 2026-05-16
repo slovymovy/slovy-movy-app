@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.data.learning.session
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.*
+import com.slovy.slovymovyapp.data.learning.fsrs.CrossFamilyCredit
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
@@ -17,7 +18,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToLong
-import kotlin.random.Random
 import kotlin.time.*
 import kotlin.time.Duration.Companion.days
 import kotlin.uuid.Uuid
@@ -45,7 +45,7 @@ class SessionService(
     }.flowOn(Dispatchers.IO)
 
     fun previewRatings(card: SessionCard): List<GradeOutcome> =
-        scheduler.preview(card.card.scheduling, clock.now())
+        scheduler.preview(card.card.scheduling, clock.now(), fuzzSeed = fuzzSeed(card.card))
 
     suspend fun submitReview(
         card: SessionCard,
@@ -90,16 +90,7 @@ class SessionService(
             val nextInterval = (after.dueEpochMs - nowMs).coerceAtLeast(0L)
                 .toDuration(DurationUnit.MILLISECONDS)
             if (outcome.rating.buriesSiblings()) {
-                burySense(
-                    card.card,
-                    nowMs,
-                    siblingCooldown(
-                        nextInterval,
-                        config.sameSenseCooldownRatio,
-                        config.siblingCooldownFloor,
-                        config.siblingCooldownCap,
-                    ),
-                )
+                spaceSameSenseSiblings(card.card, after, nowMs, nextInterval)
                 buryLemma(
                     card.card,
                     nowMs,
@@ -128,8 +119,11 @@ class SessionService(
                     id = card.card.id,
                 )
             }
+            if (outcome.rating.propagatesCredit()) {
+                propagateSameSenseCredit(card.card, after, outcome.rating, nowMs)
+            }
             if (outcome.rating.unlocksNextFamily()) {
-                unlockNextFamilyIfEligible(card, after, nowMs, nextInterval)
+                unlockNextFamilyIfEligible(card, after, outcome.rating, nowMs)
             }
         }
 
@@ -202,10 +196,20 @@ class SessionService(
         val limit = config.selectionCandidateLimit.toLong()
         val recentReviews = learning.selectRecentReviewedCards(langCode, sessionStartedAt, RECENT_LIMIT.toLong())
             .executeAsList()
-        val candidates = learning.selectDueCards(langCode, now, limit).executeAsList()
+        val candidates = learning.selectDueCards(
+            lang_code = langCode,
+            now = now,
+            new_state = CardState.NEW,
+            limit = limit,
+        ).executeAsList()
             .map { it.toCard() }
             .plus(
-                learning.selectNewCards(langCode, now, limit).executeAsList()
+                learning.selectNewCards(
+                    lang_code = langCode,
+                    new_state = CardState.NEW,
+                    now = now,
+                    limit = limit,
+                ).executeAsList()
                     .map { it.toCard() }
             )
 
@@ -250,9 +254,38 @@ class SessionService(
         return penalty
     }
 
-    private fun availableAfter(nowMs: Long, cooldown: Duration): Long? {
-        if (cooldown <= Duration.ZERO) return null
-        return nowMs + jitteredCooldown(cooldown).inWholeMilliseconds
+    private fun fuzzSeed(card: Card): Long {
+        var seed = uuidSeed(card.id)
+        seed = seed * 31 + card.family.ordinal
+        seed = seed * 31 + card.scheduling.reps
+        return seed
+    }
+
+    private fun uuidSeed(id: Uuid): Long {
+        val bytes = id.toByteArray()
+        var high = 0L
+        var low = 0L
+        for (index in 0 until 8) {
+            high = (high shl 8) or (bytes[index].toLong() and 0xff)
+            low = (low shl 8) or (bytes[index + 8].toLong() and 0xff)
+        }
+        return high xor low
+    }
+
+    private fun spaceSameSenseSiblings(
+        source: Card,
+        after: CardScheduling,
+        nowMs: Long,
+        nextInterval: Duration,
+    ) {
+        val exposureCooldown = sameSenseExposureCooldown(after)
+        val intervalCooldown = siblingCooldown(
+            nextInterval,
+            config.sameSenseCooldownRatio,
+            config.siblingCooldownFloor,
+            config.siblingCooldownCap,
+        )
+        burySense(source, nowMs, maxOf(intervalCooldown, exposureCooldown))
     }
 
     private fun burySense(card: Card, nowMs: Long, cooldown: Duration) {
@@ -274,6 +307,7 @@ class SessionService(
             lang_code = card.langCode,
             lemma_id = card.lemmaId,
             sense_id = card.senseId,
+            new_state = CardState.NEW,
         )
     }
 
@@ -310,14 +344,44 @@ class SessionService(
         return scaled.coerceIn(floor, cap)
     }
 
-    private fun jitteredCooldown(cooldown: Duration): Duration {
-        val cooldownMillis = cooldown.inWholeMilliseconds
-        val spread = (cooldownMillis * config.cooldownJitterRatio.coerceAtLeast(0.0)).roundToLong()
-        if (spread <= 0) return cooldown
-
-        val offset = Random.nextLong(-spread, spread + 1)
-        return (cooldownMillis + offset).coerceAtLeast(1L).toDuration(DurationUnit.MILLISECONDS)
+    private fun stabilityCooldown(
+        stability: Double,
+        ratio: Double,
+        floor: Duration,
+        cap: Duration,
+    ): Duration {
+        if (ratio <= 0.0) return Duration.ZERO
+        val scaled = stability.toDuration(DurationUnit.DAYS) * ratio
+        return scaled.coerceIn(floor, cap)
     }
+
+    private fun sameSenseExposureCooldown(after: CardScheduling): Duration =
+        stabilityCooldown(
+            after.stability,
+            config.sameSenseExposureRatio,
+            config.sameSenseExposureFloor,
+            config.sameSenseExposureCap,
+        )
+
+    private fun creditDelay(stability: Double, direction: CreditDirection): Duration =
+        when (direction) {
+            CreditDirection.FORWARD -> stabilityCooldown(
+                stability,
+                config.forwardCreditDelayRatio,
+                config.forwardCreditDelayFloor,
+                config.forwardCreditDelayCap,
+            )
+
+            CreditDirection.BACKWARD -> stabilityCooldown(
+                stability,
+                config.backwardCreditDelayRatio,
+                config.backwardCreditDelayFloor,
+                config.backwardCreditDelayCap,
+            )
+        }
+
+    private fun delayedEpochMs(nowMs: Long, delay: Duration): Long =
+        nowMs + delay.inWholeMilliseconds
 
     private data class BulkBuryParams(
         val minValue: Long,
@@ -390,48 +454,32 @@ class SessionService(
     private fun unlockNextFamilyIfEligible(
         card: SessionCard,
         after: CardScheduling,
+        rating: Rating,
         now: Long,
-        nextInterval: Duration,
     ) {
         val stability = after.stability.toDuration(DurationUnit.DAYS)
-        val unlock = when (card.card.family) {
-            CardFamily.RECOGNIZE_SENSE if stability >= config.productionUnlockStability -> Unlock(
-                family = CardFamily.PRODUCE_WORD,
-                stabilityFactor = config.recognitionToProductionStabilityFactor,
-            )
-
-            CardFamily.PRODUCE_WORD if stability >= config.contextUnlockStability -> Unlock(
-                family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
-                stabilityFactor = config.productionToContextStabilityFactor,
-            )
-
-            CardFamily.PRODUCE_WORD_IN_CONTEXT if stability >= config.contextUnlockStability -> Unlock(
-                family = CardFamily.RECOGNIZE_VOICE,
-                stabilityFactor = config.contextToVoiceStabilityFactor,
-            )
+        val unlockFamily = when (card.card.family) {
+            CardFamily.RECOGNIZE_SENSE if stability >= config.productionUnlockStability -> CardFamily.PRODUCE_WORD
+            CardFamily.PRODUCE_WORD if stability >= config.contextUnlockStability -> CardFamily.PRODUCE_WORD_IN_CONTEXT
+            CardFamily.PRODUCE_WORD_IN_CONTEXT if stability >= config.contextUnlockStability -> CardFamily.RECOGNIZE_VOICE
 
             else -> null
         } ?: return
+        val credit = crossFamilyCredit(card.card.family, unlockFamily, rating) ?: return
+        val inheritedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
 
         val sense = card.wordResult.card?.findSense(card.senseId) ?: return
-        val variants = buildTaskVariants(unlock.family, sense, translationTargetsFor(sense))
+        val variants = buildTaskVariants(unlockFamily, sense, translationTargetsFor(sense))
         if (variants.isEmpty()) return
         insertTaskIfMissing(
             source = card.card,
-            family = unlock.family,
+            family = unlockFamily,
             now = now,
+            due = delayedEpochMs(now, creditDelay(inheritedStability, CreditDirection.FORWARD)),
             state = CardState.LEARNING,
-            stability = (after.stability * unlock.stabilityFactor).coerceAtLeast(MIN_INHERITED_STABILITY),
+            stability = inheritedStability,
             difficulty = after.difficulty,
-            availableAfter = availableAfter(
-                nowMs = now,
-                cooldown = siblingCooldown(
-                    nextInterval,
-                    config.sameSenseCooldownRatio,
-                    config.siblingCooldownFloor,
-                    config.siblingCooldownCap,
-                ),
-            ),
+            availableAfter = delayedEpochMs(now, sameSenseExposureCooldown(after)),
         )
     }
 
@@ -439,6 +487,7 @@ class SessionService(
         source: Card,
         family: CardFamily,
         now: Long,
+        due: Long,
         state: CardState,
         stability: Double,
         difficulty: Double,
@@ -458,7 +507,7 @@ class SessionService(
             state = state,
             stability = stability,
             difficulty = difficulty,
-            due = now,
+            due = due,
             last_review = null,
             reps = 0,
             lapses = 0,
@@ -467,6 +516,46 @@ class SessionService(
             answer_key = source.answerKey,
             suspended = false,
         )
+    }
+
+    private fun propagateSameSenseCredit(
+        source: Card,
+        after: CardScheduling,
+        rating: Rating,
+        now: Long,
+    ) {
+        learning.selectCardsBySense(source.senseId, source.langCode).executeAsList()
+            .map { it.toCard() }
+            .filter { it.id != source.id }
+            .forEach { sibling ->
+                val credit = crossFamilyCredit(source.family, sibling.family, rating) ?: return@forEach
+                val propagatedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
+                // The SQL repeats this guard so concurrent writes cannot lower stability.
+                if (propagatedStability <= sibling.scheduling.stability) return@forEach
+
+                val due = delayedEpochMs(now, creditDelay(propagatedStability, credit.direction))
+                learning.creditSiblingCard(
+                    state = stateAfterPropagatedCredit(sibling, propagatedStability),
+                    stability = propagatedStability,
+                    difficulty = after.difficulty,
+                    due = due,
+                    id = sibling.id,
+                )
+            }
+    }
+
+    private fun stateAfterPropagatedCredit(sibling: Card, stability: Double): CardState {
+        val current = sibling.scheduling.state
+        if (current == CardState.NEW) return CardState.LEARNING
+        if (
+            sibling.scheduling.reps > 0 &&
+            sibling.scheduling.lastReviewEpochMs != null &&
+            stability >= PROPAGATED_REVIEW_STABILITY_DAYS &&
+            (current == CardState.LEARNING || current == CardState.RELEARNING)
+        ) {
+            return CardState.REVIEW
+        }
+        return current
     }
 
     private fun translationTargetsFor(sense: LanguageCardResponseSense): List<Language> =
@@ -479,16 +568,54 @@ class SessionService(
         this != Rating.AGAIN
 
     private fun Rating.unlocksNextFamily(): Boolean =
+        givesCrossFamilyCredit()
+
+    private fun Rating.propagatesCredit(): Boolean =
+        givesCrossFamilyCredit()
+
+    private fun Rating.givesCrossFamilyCredit(): Boolean =
         this == Rating.GOOD || this == Rating.EASY
 
-    private data class Unlock(
-        val family: CardFamily,
-        val stabilityFactor: Double,
+    private fun crossFamilyCredit(
+        sourceFamily: CardFamily,
+        targetFamily: CardFamily,
+        rating: Rating,
+    ): AppliedCredit? {
+        val credit = config.crossFamilyCredits.firstOrNull {
+            it.sourceFamily == sourceFamily && it.targetFamily == targetFamily
+        } ?: return null
+        val factor = credit.factorFor(rating) ?: return null
+        val direction = if (targetFamily.ordinal > sourceFamily.ordinal) {
+            CreditDirection.FORWARD
+        } else {
+            CreditDirection.BACKWARD
+        }
+        return AppliedCredit(factor, direction)
+    }
+
+    private fun CrossFamilyCredit.factorFor(rating: Rating): Double? =
+        when (rating) {
+            Rating.GOOD -> goodFactor
+            Rating.EASY -> easyFactor
+            Rating.AGAIN,
+            Rating.HARD,
+                -> null
+        }?.takeIf { it > 0.0 }
+
+    private data class AppliedCredit(
+        val factor: Double,
+        val direction: CreditDirection,
     )
+
+    private enum class CreditDirection {
+        FORWARD,
+        BACKWARD,
+    }
 
     private companion object {
         const val HARD_EXCLUDE: Double = 1_000_000.0
         const val MIN_INHERITED_STABILITY: Double = 0.001
+        const val PROPAGATED_REVIEW_STABILITY_DAYS: Double = 1.0
         val DAY: Duration = 1.days
         const val RECENT_LIMIT: Int = 20
         val WORD_RECALL_FAMILIES: List<CardFamily> =
