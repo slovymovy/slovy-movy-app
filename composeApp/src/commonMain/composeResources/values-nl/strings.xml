@@ -124,6 +124,13 @@
     <string name="download_subtitle_setting_up">Je bibliotheek wordt voorbereid.\nDit duurt even.</string>
     <string name="download_content_desc_loading_info">Downloadinformatie laden</string>
     <string name="download_content_desc_preparing">Download voorbereiden</string>
+    <string name="download_finalizing_recovering_progress">Favorieten bijwerken (%1$d/%2$d)</string>
+    <plurals name="download_finalizing_recovering_progress_with_failures">
+        <item quantity="one">Favorieten bijwerken (%1$d/%2$d, %3$d mislukt)</item>
+        <item quantity="few">Favorieten bijwerken (%1$d/%2$d, %3$d mislukt)</item>
+        <item quantity="many">Favorieten bijwerken (%1$d/%2$d, %3$d mislukt)</item>
+        <item quantity="other">Favorieten bijwerken (%1$d/%2$d, %3$d mislukt)</item>
+    </plurals>
     <string name="download_preparing">Voorbereiden...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>
     <string name="download_progress_with_percent">Downloaden, %1$d procent voltooid</string>

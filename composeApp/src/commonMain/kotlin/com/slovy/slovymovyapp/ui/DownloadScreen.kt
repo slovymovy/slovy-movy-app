@@ -35,6 +35,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
@@ -51,7 +52,7 @@ class DownloadViewModel(
     private val downloadCoordinator: DownloadCoordinator,
     private val downloadKey: String,
     private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
-    private val finalize: suspend () -> Unit = {},
+    private val finalize: suspend (onRecoveryProgress: (FavoriteRecoveryProgress) -> Unit) -> Unit = {},
     private val onSuccess: suspend () -> Unit,
     private val onCancel: () -> Unit,
     private val onError: (Throwable) -> Unit,
@@ -178,8 +179,8 @@ class DownloadViewModel(
                                 ),
                             )
                             try {
-                                state = DownloadUiState.Finalizing
-                                finalize()
+                                state = DownloadUiState.Finalizing()
+                                finalize(::updateRecoveryProgress)
                                 for (i in 3 downTo 1) {
                                     state = DownloadUiState.Done(countdown = i)
                                     delay(1_000.milliseconds)
@@ -224,6 +225,13 @@ class DownloadViewModel(
                     else -> Unit
                 }
             }
+        }
+    }
+
+    fun updateRecoveryProgress(progress: FavoriteRecoveryProgress) {
+        // Late controller emissions can arrive after finalization has moved to a terminal state.
+        if (state is DownloadUiState.Finalizing) {
+            state = DownloadUiState.Finalizing(progress)
         }
     }
 
@@ -523,6 +531,40 @@ fun DownloadScreenContent(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    val recovery = (state as? DownloadUiState.Finalizing)?.recovery
+                    if (recovery != null && recovery.total > 0) {
+                        Spacer(Modifier.height(AppSpacing.sm))
+                        val recoveryProgressText = if (recovery.failed > 0) {
+                            pluralStringResource(
+                                Res.plurals.download_finalizing_recovering_progress_with_failures,
+                                recovery.failed,
+                                recovery.completed,
+                                recovery.total,
+                                recovery.failed,
+                            )
+                        } else {
+                            stringResource(
+                                Res.string.download_finalizing_recovering_progress,
+                                recovery.completed,
+                                recovery.total,
+                            )
+                        }
+                        Text(
+                            text = recoveryProgressText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                        recovery.currentLemma?.takeIf { it.isNotBlank() }?.let { lemma ->
+                            Spacer(Modifier.height(AppSpacing.xs))
+                            Text(
+                                text = lemma,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
                 }
 
                 is DownloadUiState.Running -> {
@@ -595,7 +637,7 @@ sealed interface DownloadUiState {
     data class ReadyToDownload(val items: List<DownloadItem>) : DownloadUiState
     data object Idle : DownloadUiState
     data class Running(val percent: Int, val total: Long?, val currentFile: String? = null) : DownloadUiState
-    data object Finalizing : DownloadUiState
+    data class Finalizing(val recovery: FavoriteRecoveryProgress? = null) : DownloadUiState
     data class Failed(val error: Throwable) : DownloadUiState
     data object Cancelled : DownloadUiState
     data class Done(val countdown: Int) : DownloadUiState
@@ -655,7 +697,11 @@ private fun DownloadScreenPreviewFinalizing(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(state = DownloadUiState.Finalizing)
+        DownloadScreenContent(
+            state = DownloadUiState.Finalizing(
+                FavoriteRecoveryProgress(currentLemma = "test", completed = 1, total = 3, failed = 0)
+            )
+        )
     }
 }
 
