@@ -11,12 +11,15 @@ import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvider
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.logging.AppLogger
+import com.slovy.slovymovyapp.logging.FirebaseCrashlyticsAppLogSink
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         Analytics.logger = FirebaseAnalyticsLogger()
+        AppLogger.remoteLogger = FirebaseCrashlyticsAppLogSink()
 
         setContent {
             val platform = PlatformDbSupport(this)

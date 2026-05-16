@@ -1,6 +1,23 @@
 package com.slovy.slovymovyapp.logging
 
+enum class AppLogLevel {
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR
+}
+
+interface AppLogSink {
+    fun log(level: AppLogLevel, tag: String, message: String, throwable: Throwable?)
+}
+
+object NoOpAppLogSink : AppLogSink {
+    override fun log(level: AppLogLevel, tag: String, message: String, throwable: Throwable?) = Unit
+}
+
 expect object AppLogger {
+    var remoteLogger: AppLogSink
+
     fun debug(tag: String, message: String, throwable: Throwable?)
     fun info(tag: String, message: String, throwable: Throwable?)
     fun warn(tag: String, message: String, throwable: Throwable?)
