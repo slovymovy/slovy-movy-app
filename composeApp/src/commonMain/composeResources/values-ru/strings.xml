@@ -124,6 +124,7 @@
     <string name="download_subtitle_setting_up">Готовим вашу библиотеку.\nЭто займёт пару минут.</string>
     <string name="download_content_desc_loading_info">Получение данных...</string>
     <string name="download_content_desc_preparing">Подготовка к скачиванию</string>
+    <string name="download_finalizing_recovering_progress">Обновление избранного (%1$d/%2$d)</string>
     <string name="download_preparing">Подготовка...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>
     <string name="download_progress_with_percent">Скачивание: %1$d процентов</string>

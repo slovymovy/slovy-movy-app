@@ -37,6 +37,7 @@ import com.slovy.slovymovyapp.ui.theme.AppTheme
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -273,6 +274,9 @@ fun App(
     val favoriteLemmaRecovery = remember(favoritesRepository, dataManager, dictionaryRepository, wordFetchManager) {
         FavoriteLemmaRecovery(favoritesRepository, dataManager, dictionaryRepository, wordFetchManager)
     }
+    val favoriteRecoveryController = remember(favoriteLemmaRecovery, platform) {
+        FavoriteRecoveryController(favoriteLemmaRecovery, platform)
+    }
     val fsrsConfig = remember { FsrsDefaults.config() }
     val fsrsScheduler = remember(fsrsConfig) {
         FsrsScheduler(
@@ -316,7 +320,7 @@ fun App(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
-    val coroutineScope = rememberCoroutineScope()
+    val appCoroutineScope = rememberCoroutineScope()
     var hasFavoritesToReview by remember { mutableStateOf(false) }
     val favoritesReviewCoordinator = remember { FavoritesReviewCoordinator() }
 
@@ -367,9 +371,7 @@ fun App(
                     favoritesReviewCoordinator.invalidateAllIntakeCache()
                     dictionaryRepository.clearSenseCache()
                     if (recoverFavorites) {
-                        platform.runWithProcessKeepAlive {
-                            favoriteLemmaRecovery.recoverAllInstalledFavorites()
-                        }
+                        favoriteRecoveryController.ensureStarted()
                     }
                     favoritesViewModel.dropCachedFavoriteDetails()
                 },
@@ -503,7 +505,7 @@ fun App(
                 WelcomeScreen(
                     viewModel = viewModel,
                     onGetStarted = {
-                        coroutineScope.launch {
+                        appCoroutineScope.launch {
                             try {
                                 settingsRepository.insert(
                                     Setting(
@@ -536,7 +538,7 @@ fun App(
                 LanguageSetupScreen(
                     viewModel = viewModel,
                     onNext = { learning, native ->
-                        coroutineScope.launch {
+                        appCoroutineScope.launch {
                             settingsRepository.insert(
                                 Setting(
                                     id = Setting.Name.LANGUAGE,
@@ -609,12 +611,22 @@ fun App(
                                     )
                                 }
                             },
-                            finalize = {
+                            finalize = { downloadViewModel ->
                                 favoritesReviewCoordinator.invalidateAllIntakeCache()
                                 dictionaryRepository.clearSenseCache()
-                                platform.runWithProcessKeepAlive {
-                                    withContext(Dispatchers.Default) {
-                                        favoriteLemmaRecovery.recoverAllInstalledFavorites()
+                                val recoveryJob = favoriteRecoveryController.ensureStarted()
+                                coroutineScope {
+                                    val observerJob = launch {
+                                        favoriteRecoveryController.progress.collect { progress ->
+                                            if (progress != null) {
+                                                downloadViewModel.updateRecoveryProgress(progress)
+                                            }
+                                        }
+                                    }
+                                    try {
+                                        recoveryJob.join()
+                                    } finally {
+                                        observerJob.cancel()
                                     }
                                 }
                                 favoritesViewModel.dropCachedFavoriteDetails()
@@ -785,7 +797,7 @@ fun App(
                         navController.navigate(AppDestination.StudySession(language.code))
                     },
                     onContinueStudyingNow = { language, action ->
-                        coroutineScope.launch {
+                        appCoroutineScope.launch {
                             val shouldStartStudy = when (action) {
                                 FavoritesStudyDoneAction.REVIEW_MORE -> {
                                     sessionService.continueDelayedCardsNow(language.code)
@@ -808,10 +820,10 @@ fun App(
                         // nav effects don't refire. remove() and undo's add() already update
                         // card.suspended in-DB, so a stats-only refresh shows correct counts
                         // without paying for intake on the dictionary-DB driver.
-                        coroutineScope.launch { refreshFavoritesDueCountsOnly() }
+                        appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
                     },
                     onRefreshReviewState = {
-                        coroutineScope.launch { refreshFavoritesDueCountsOnly() }
+                        appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
                     },
                 )
             }
@@ -866,7 +878,7 @@ fun App(
                             // A submitted review can push the card past today; refresh the
                             // bottom-nav dot from stats. No intake needed — review changes
                             // hit `card.due_at` directly.
-                            coroutineScope.launch { refreshFavoritesDueCountsOnly() }
+                            appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
                         },
                     )
                 }
@@ -952,7 +964,7 @@ fun App(
                             // Add creates a pending favorite with no SR cards yet — the dot
                             // catches up when the user navigates back and the delayed intake
                             // effect runs intake for this language.
-                            coroutineScope.launch { refreshFavoritesDueCountsOnly() }
+                            appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
                         },
                     ).also { created ->
                         wordDetailViewModels[args] = created

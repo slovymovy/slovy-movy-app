@@ -51,7 +51,7 @@ class DownloadViewModel(
     private val downloadCoordinator: DownloadCoordinator,
     private val downloadKey: String,
     private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
-    private val finalize: suspend () -> Unit = {},
+    private val finalize: suspend (DownloadViewModel) -> Unit = {},
     private val onSuccess: suspend () -> Unit,
     private val onCancel: () -> Unit,
     private val onError: (Throwable) -> Unit,
@@ -178,8 +178,8 @@ class DownloadViewModel(
                                 ),
                             )
                             try {
-                                state = DownloadUiState.Finalizing
-                                finalize()
+                                state = DownloadUiState.Finalizing()
+                                finalize(this@DownloadViewModel)
                                 for (i in 3 downTo 1) {
                                     state = DownloadUiState.Done(countdown = i)
                                     delay(1_000.milliseconds)
@@ -224,6 +224,12 @@ class DownloadViewModel(
                     else -> Unit
                 }
             }
+        }
+    }
+
+    fun updateRecoveryProgress(progress: FavoriteRecoveryProgress) {
+        if (state is DownloadUiState.Finalizing) {
+            state = DownloadUiState.Finalizing(progress)
         }
     }
 
@@ -523,6 +529,29 @@ fun DownloadScreenContent(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    val recovery = (state as? DownloadUiState.Finalizing)?.recovery
+                    if (recovery != null && recovery.total > 0) {
+                        Spacer(Modifier.height(AppSpacing.sm))
+                        Text(
+                            text = stringResource(
+                                Res.string.download_finalizing_recovering_progress,
+                                recovery.completed,
+                                recovery.total,
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                        recovery.currentLemma?.takeIf { it.isNotBlank() }?.let { lemma ->
+                            Spacer(Modifier.height(AppSpacing.xs))
+                            Text(
+                                text = lemma,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
                 }
 
                 is DownloadUiState.Running -> {
@@ -595,7 +624,7 @@ sealed interface DownloadUiState {
     data class ReadyToDownload(val items: List<DownloadItem>) : DownloadUiState
     data object Idle : DownloadUiState
     data class Running(val percent: Int, val total: Long?, val currentFile: String? = null) : DownloadUiState
-    data object Finalizing : DownloadUiState
+    data class Finalizing(val recovery: FavoriteRecoveryProgress? = null) : DownloadUiState
     data class Failed(val error: Throwable) : DownloadUiState
     data object Cancelled : DownloadUiState
     data class Done(val countdown: Int) : DownloadUiState
@@ -655,7 +684,11 @@ private fun DownloadScreenPreviewFinalizing(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(state = DownloadUiState.Finalizing)
+        DownloadScreenContent(
+            state = DownloadUiState.Finalizing(
+                FavoriteRecoveryProgress(currentLemma = "test", completed = 1, total = 3, failed = 0)
+            )
+        )
     }
 }
 

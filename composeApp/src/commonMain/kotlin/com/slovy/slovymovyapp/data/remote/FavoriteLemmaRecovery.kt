@@ -6,8 +6,11 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
+import kotlin.time.Duration.Companion.seconds
 
 class FavoriteLemmaRecovery internal constructor(
     private val favoritesProvider: suspend () -> List<Favorite>,
@@ -34,7 +37,7 @@ class FavoriteLemmaRecovery internal constructor(
         },
         translationTargetsProvider = { language -> dictionaryRepository.defaultTranslationTargets(language) },
         fetchLemma = { language, lemma, translationTargets ->
-            wordFetchManager.getWord(
+            val terminal = wordFetchManager.getWord(
                 language = language,
                 lemma = lemma,
                 translationTargets = translationTargets,
@@ -42,12 +45,20 @@ class FavoriteLemmaRecovery internal constructor(
             ).first { result ->
                 !result.isWordLoading && !result.isTranslationLoading
             }
+            terminal.error?.let { err ->
+                if (err is DictionaryClientException.CancelledException) {
+                    throw CancellationException(err.message)
+                }
+                throw err
+            }
         },
     )
 
-    suspend fun recoverAllInstalledFavorites() {
+    suspend fun recoverAllInstalledFavorites(
+        onProgress: (FavoriteRecoveryProgress) -> Unit = {},
+    ) {
         try {
-            recover(favoritesProvider())
+            recover(favoritesProvider(), onProgress)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -56,7 +67,10 @@ class FavoriteLemmaRecovery internal constructor(
         }
     }
 
-    private suspend fun recover(favorites: List<Favorite>) = coroutineScope {
+    private suspend fun recover(
+        favorites: List<Favorite>,
+        onProgress: (FavoriteRecoveryProgress) -> Unit,
+    ) = coroutineScope {
         val groups = favorites
             .mapNotNull { favorite ->
                 val lemma = favorite.lemma.trim()
@@ -64,22 +78,45 @@ class FavoriteLemmaRecovery internal constructor(
             }
             .groupBy({ it.first }, { it.second })
         val groupsToRecover = groupsByDownloadedLemmaStatus(groups)
+        val total = groupsToRecover.size
+        val progressMutex = Mutex()
+        var completed = 0
+        var failed = 0
+
+        suspend fun emit(currentLemma: String?, deltaFailed: Int = 0) = progressMutex.withLock {
+            if (deltaFailed > 0) failed += deltaFailed
+            onProgress(FavoriteRecoveryProgress(currentLemma, completed, total, failed))
+        }
+
+        suspend fun markDone(deltaFailed: Int) = progressMutex.withLock {
+            completed++
+            if (deltaFailed > 0) failed += deltaFailed
+            onProgress(FavoriteRecoveryProgress(currentLemma = null, completed, total, failed))
+        }
+
+        emit(currentLemma = null)
         val semaphore = Semaphore(MAX_PARALLEL_RECOVERY_GROUPS)
 
         groupsToRecover.map { (key, groupFavorites) ->
             async {
                 semaphore.withPermit {
+                    var failedGroup = false
+                    val lemma = groupFavorites.firstOrNull()?.lemma
                     try {
+                        emit(currentLemma = lemma)
                         recoverLemmaGroup(key.language, groupFavorites)
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
+                        failedGroup = true
                         AppLogger.warn(
                             TAG,
-                            "Unable to recover favorite lemma '${groupFavorites.firstOrNull()?.lemma}' (${key.language.code})",
+                            "Unable to recover favorite lemma '$lemma' (${key.language.code})",
                             e,
                         )
                         // Best-effort recovery: broken or unavailable remote fetches must not block downloads.
+                    } finally {
+                        markDone(deltaFailed = if (failedGroup) 1 else 0)
                     }
                 }
             }
@@ -125,7 +162,42 @@ class FavoriteLemmaRecovery internal constructor(
         val translationTargets = translationTargetsProvider(language)
             .filter { it != language }
             .distinctBy { it.code }
-        fetchLemma(language, lemma, translationTargets)
+        fetchLemmaWithRetry(language, lemma, translationTargets)
+    }
+
+    private suspend fun fetchLemmaWithRetry(
+        language: Language,
+        lemma: String,
+        translationTargets: List<Language>,
+    ) {
+        val delays = listOf(1.seconds, 3.seconds)
+        var attempt = 0
+        while (true) {
+            try {
+                fetchLemma(language, lemma, translationTargets)
+                return
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                val classified = NetworkErrorClassifier.classify(e)
+                val retryable = when (classified) {
+                    is NetworkError.Offline,
+                    is NetworkError.Timeout -> true
+                    is NetworkError.ServerError -> classified.statusCode in 500..599 || classified.statusCode == 0
+                    is NetworkError.InsufficientStorage,
+                    is NetworkError.Unknown -> false
+                }
+                if (!retryable || attempt >= delays.size) throw e
+                val retryDelay = delays[attempt]
+                AppLogger.warn(
+                    TAG,
+                    "Retrying favorite lemma recovery for '$lemma' (${language.code}) after ${retryDelay.inWholeSeconds}s",
+                    e,
+                )
+                delay(retryDelay)
+                attempt++
+            }
+        }
     }
 
     private suspend fun downloadedFavoriteLemmasNeedingRecovery(
@@ -165,6 +237,13 @@ class FavoriteLemmaRecovery internal constructor(
         }
     }
 }
+
+data class FavoriteRecoveryProgress(
+    val currentLemma: String?,
+    val completed: Int,
+    val total: Int,
+    val failed: Int,
+)
 
 private data class FavoriteLemmaGroupKey(
     val language: Language,
