@@ -579,6 +579,301 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun recognition_good_unlocks_production_with_delayed_first_presentation() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "forwarddelay")
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+
+            val recognition = env.nextLoadedCard("en")
+            val reviewed = env.session.submitReview(
+                recognition,
+                env.session.previewRatings(recognition).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val production = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
+                .executeAsList()
+                .single { it.family == CardFamily.PRODUCE_WORD }
+            val expectedDue = start + stabilityDelay(
+                stability = production.stability,
+                ratio = config.forwardCreditDelayRatio,
+                floor = config.forwardCreditDelayFloor,
+                cap = config.forwardCreditDelayCap,
+            )
+            val expectedAvailableAfter = start + stabilityDelay(
+                stability = reviewed.card.scheduling.stability,
+                ratio = config.sameSenseExposureRatio,
+                floor = config.sameSenseExposureFloor,
+                cap = config.sameSenseExposureCap,
+            )
+            assertEquals(expectedDue.toEpochMilliseconds(), production.due)
+            assertEquals(expectedAvailableAfter.toEpochMilliseconds(), production.available_after)
+            assertTrue(production.due > (start + 10.minutes).toEpochMilliseconds())
+        }
+    }
+
+    @Test
+    fun recognition_easy_gives_production_more_credit_and_later_presentation_than_good() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val goodFixture = env.seedSense(lemma = "forwardgood")
+            val easyFixture = env.seedSense(lemma = "forwardeasy")
+            env.addFavorite(goodFixture, createdAt = start.toEpochMilliseconds())
+            env.addFavorite(easyFixture, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+            env.insertTask(
+                fixture = goodFixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+            env.insertTask(
+                fixture = easyFixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+
+            val first = env.nextLoadedCard("en")
+            env.session.submitReview(
+                first,
+                env.session.previewRatings(first).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+            val second = env.nextLoadedCard("en")
+            env.session.submitReview(
+                second,
+                env.session.previewRatings(second).first { it.rating == Rating.EASY },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val goodProduction = env.app.favoritesQueries
+                .selectCardsByFavorite(Uuid.parse(first.senseId), "en")
+                .executeAsList()
+                .single { it.family == CardFamily.PRODUCE_WORD }
+            val easyProduction = env.app.favoritesQueries
+                .selectCardsByFavorite(Uuid.parse(second.senseId), "en")
+                .executeAsList()
+                .single { it.family == CardFamily.PRODUCE_WORD }
+            assertTrue(easyProduction.stability > goodProduction.stability)
+            assertTrue(easyProduction.due > goodProduction.due)
+        }
+    }
+
+    @Test
+    fun forward_credit_bumps_existing_sibling_and_preserves_later_due() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "existingforward")
+            val futureDue = (start + 2.days).toEpochMilliseconds()
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+            val production = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.LEARNING,
+                stability = 0.2,
+                difficulty = 5.0,
+                due = futureDue,
+            )
+
+            val recognition = env.nextLoadedCard("en")
+            val reviewed = env.session.submitReview(
+                recognition,
+                env.session.previewRatings(recognition).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val credit = config.crossFamilyCredits.single {
+                it.sourceFamily == CardFamily.RECOGNIZE_SENSE && it.targetFamily == CardFamily.PRODUCE_WORD
+            }
+            val updatedProduction = env.app.favoritesQueries.selectCardById(production.id).executeAsOne()
+            assertEquals(CardState.LEARNING, updatedProduction.state)
+            assertClose(reviewed.card.scheduling.stability * credit.goodFactor, updatedProduction.stability)
+            assertEquals(futureDue, updatedProduction.due)
+            assertEquals(0L, updatedProduction.reps)
+            assertNull(updatedProduction.last_review)
+        }
+    }
+
+    @Test
+    fun forward_credit_can_graduate_existing_practiced_sibling() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "existingpracticed")
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+            val production = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.LEARNING,
+                stability = 0.2,
+                difficulty = 5.0,
+                due = (start + 2.days).toEpochMilliseconds(),
+                lastReview = (start - 1.days).toEpochMilliseconds(),
+                reps = 1,
+            )
+
+            val recognition = env.nextLoadedCard("en")
+            env.session.submitReview(
+                recognition,
+                env.session.previewRatings(recognition).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val updatedProduction = env.app.favoritesQueries.selectCardById(production.id).executeAsOne()
+            assertEquals(CardState.REVIEW, updatedProduction.state)
+            assertEquals(1L, updatedProduction.reps)
+            assertEquals((start - 1.days).toEpochMilliseconds(), updatedProduction.last_review)
+        }
+    }
+
+    @Test
+    fun forward_credit_does_not_lower_stronger_existing_sibling() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "existingstrong")
+            val futureDue = (start + 2.days).toEpochMilliseconds()
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+            val production = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.REVIEW,
+                stability = 5.0,
+                difficulty = 4.0,
+                due = futureDue,
+            )
+
+            val recognition = env.nextLoadedCard("en")
+            env.session.submitReview(
+                recognition,
+                env.session.previewRatings(recognition).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val updatedProduction = env.app.favoritesQueries.selectCardById(production.id).executeAsOne()
+            assertEquals(CardState.REVIEW, updatedProduction.state)
+            assertEquals(5.0, updatedProduction.stability)
+            assertEquals(4.0, updatedProduction.difficulty)
+            assertEquals(futureDue, updatedProduction.due)
+        }
+    }
+
+    @Test
+    fun production_easy_advances_recognition_without_reviewing_it() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "backwardcredit")
+            env.addFavorite(fixture)
+            val recognition = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.LEARNING,
+                stability = 0.5,
+                difficulty = 0.0,
+                due = (start + 2.days).toEpochMilliseconds(),
+            )
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.LEARNING,
+                stability = 4.0,
+                difficulty = 5.0,
+                due = (start - 2.milliseconds).toEpochMilliseconds(),
+            )
+
+            val production = env.nextLoadedCard("en")
+            assertEquals(CardFamily.PRODUCE_WORD, production.card.family)
+            val reviewed = env.session.submitReview(
+                production,
+                env.session.previewRatings(production).first { it.rating == Rating.EASY },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val updatedRecognition = env.app.favoritesQueries.selectCardById(recognition.id).executeAsOne()
+            assertEquals(CardState.LEARNING, updatedRecognition.state)
+            assertClose(reviewed.card.scheduling.stability, updatedRecognition.stability)
+            assertEquals(0L, updatedRecognition.reps)
+            assertNull(updatedRecognition.last_review)
+            assertEquals(
+                0,
+                env.app.favoritesQueries.selectReviewLogsByCard(recognition.id, 10).executeAsList().size,
+            )
+        }
+    }
+
+    @Test
+    fun hard_review_does_not_propagate_cross_family_credit() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "hardnocredit")
+            env.addFavorite(fixture)
+            val recognition = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = (start - 1.milliseconds).toEpochMilliseconds(),
+            )
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.LEARNING,
+                stability = 4.0,
+                difficulty = 5.0,
+                due = (start - 2.milliseconds).toEpochMilliseconds(),
+            )
+
+            val production = env.nextLoadedCard("en")
+            env.session.submitReview(
+                production,
+                env.session.previewRatings(production).first { it.rating == Rating.HARD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val updatedRecognition = env.app.favoritesQueries.selectCardById(recognition.id).executeAsOne()
+            assertEquals(CardState.NEW, updatedRecognition.state)
+            assertEquals(0.0, updatedRecognition.stability)
+            assertEquals(0L, updatedRecognition.reps)
+        }
+    }
+
+    @Test
     fun same_lemma_new_senses_remain_available_after_successful_review() = runBlocking {
         withEnv(includeTranslation = false) { env ->
             val firstSense = env.seedSense(lemma = "polysemenew")
@@ -701,8 +996,12 @@ class LearningE2ETest : BaseTest() {
 
             env.session.continueDelayedCardsNow("en")
 
-            val cards = env.app.favoritesQueries.selectDueCards("en", start.toEpochMilliseconds(), 10)
-                .executeAsList()
+            val cards = env.app.favoritesQueries.selectDueCards(
+                lang_code = "en",
+                now = start.toEpochMilliseconds(),
+                new_state = CardState.NEW,
+                limit = 10,
+            ).executeAsList()
             assertEquals(setOf(first.senseId, second.senseId), cards.mapTo(HashSet()) { it.sense_id })
             assertNotNull(
                 env.app.favoritesQueries.selectCardsByFavorite(third.senseId, "en")
@@ -743,6 +1042,7 @@ class LearningE2ETest : BaseTest() {
             sameAnswerCooldownRatio = 0.0,
             siblingCooldownFloor = 10.minutes,
             siblingCooldownCap = 10.minutes,
+            sameSenseExposureRatio = 0.0,
             cooldownJitterRatio = 0.5,
         )
         withEnv(includeTranslation = false, config = config) { env ->
@@ -914,7 +1214,12 @@ class LearningE2ETest : BaseTest() {
         val wordFetchManager = WordFetchManager(dictionaryClient)
         val clock = MutableClock(start)
         try {
-            val scheduler = FsrsScheduler(config.requestRetention, config.weights, config.maximumInterval)
+            val scheduler = FsrsScheduler(
+                config.requestRetention,
+                config.weights,
+                config.maximumInterval,
+                enableFuzz = config.enableFuzz,
+            )
             val intake = IntakeService(
                 learning = app.database.favoritesQueries,
                 dictionary = dictionaryRepository,
@@ -1093,11 +1398,21 @@ class LearningE2ETest : BaseTest() {
                         app.favoritesQueries.countCardsByLang(langCode).executeAsOne()
                     } " +
                             "new=${
-                                app.favoritesQueries.selectNewCards(langCode, clock.now().toEpochMilliseconds(), 10)
+                                app.favoritesQueries.selectNewCards(
+                                    lang_code = langCode,
+                                    new_state = CardState.NEW,
+                                    now = clock.now().toEpochMilliseconds(),
+                                    limit = 10,
+                                )
                                     .executeAsList().size
                             } " +
                             "due=${
-                                app.favoritesQueries.selectDueCards(langCode, clock.now().toEpochMilliseconds(), 10)
+                                app.favoritesQueries.selectDueCards(
+                                    lang_code = langCode,
+                                    now = clock.now().toEpochMilliseconds(),
+                                    new_state = CardState.NEW,
+                                    limit = 10,
+                                )
                                     .executeAsList().size
                             }",
                 )
@@ -1118,6 +1433,14 @@ class LearningE2ETest : BaseTest() {
     private fun assertClose(expected: Double, actual: Double) {
         assertTrue(abs(expected - actual) < 0.0001, "expected=$expected actual=$actual")
     }
+
+    private fun stabilityDelay(
+        stability: Double,
+        ratio: Double,
+        floor: Duration,
+        cap: Duration,
+    ): Duration =
+        (stability.toDuration(DurationUnit.DAYS) * ratio).coerceIn(floor, cap)
 
 }
 

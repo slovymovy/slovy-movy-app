@@ -18,21 +18,45 @@ class FSRS(
     private val requestRetention: Double,
     inputParams: List<Double>,
     private val enableFuzz: Boolean = false,
-    private val fuzzFactorProvider: () -> Double = { 0.5 },
+    private val fuzzFactorProvider: (FuzzContext) -> Double = { context -> defaultFuzzFactor(context) },
     private val maximumInterval: Int = 36500,
     private val isReview: Boolean = false,
 ) {
     data class InitState(var difficulty: Double = 0.0, var stability: Double = 0.0)
 
+    data class FuzzContext(
+        val seed: Long?,
+        val rating: Rating,
+        val interval: Int,
+        val scheduledDays: Int,
+    )
+
     private companion object {
         const val STABILITY_MIN = 0.001
         const val DIFFICULTY_MIN = 1.0
         const val DIFFICULTY_MAX = 10.0
+        const val FIFTY_THREE_BITS: Long = 1L shl 53
 
         val AGAIN_DURATION: Duration = 3.minutes
         val FIVE_MINUTES: Duration = 5.minutes
         val TEN_MINUTES: Duration = 10.minutes
         val ONE_DAY: Duration = 1.days
+
+        fun defaultFuzzFactor(context: FuzzContext): Double {
+            val seed = context.seed ?: return 0.5
+            var mixed = seed xor (context.rating.value.toLong() * -7046029254386353131L)
+            mixed = mixed xor (context.interval.toLong() * -4417276706812531889L)
+            mixed = mixed xor (context.scheduledDays.toLong() * -8796714831421723037L)
+            mixed = splitMix64(mixed)
+            return (mixed ushr 11).toDouble() / FIFTY_THREE_BITS.toDouble()
+        }
+
+        private fun splitMix64(value: Long): Long {
+            var z = value + -7046029254386353131L
+            z = (z xor (z ushr 30)) * -4658895280553007687L
+            z = (z xor (z ushr 27)) * -7723592293110705685L
+            return z xor (z ushr 31)
+        }
     }
 
     private val params: List<Double>
@@ -55,7 +79,7 @@ class FSRS(
         factor = 0.9.pow(1.0 / decay) - 1.0
     }
 
-    fun calculate(flashCard: FlashCard): List<Grade> {
+    fun calculate(flashCard: FlashCard, fuzzSeed: Long? = null): List<Grade> {
         val stateAgain: InitState
         val stateHard: InitState
         val stateGood: InitState
@@ -108,8 +132,8 @@ class FSRS(
                     stateEasy = nextState(lastD, lastS, elapsedDays, Rating.Easy)
                 }
 
-                ivlGood = nextInterval(stateGood.stability)
-                ivlEasy = nextInterval(stateEasy.stability)
+                ivlGood = nextInterval(stateGood.stability, Rating.Good, fuzzSeed = fuzzSeed)
+                ivlEasy = nextInterval(stateEasy.stability, Rating.Easy, fuzzSeed = fuzzSeed)
 
                 val ordered = enforceGoodEasyOrder(ivlGood, ivlEasy)
                 ivlGood = ordered.first
@@ -135,9 +159,9 @@ class FSRS(
                 stateGood = nextState(lastD, lastS, elapsedDays, Rating.Good)
                 stateEasy = nextState(lastD, lastS, elapsedDays, Rating.Easy)
 
-                ivlHard = nextInterval(stateHard.stability, lastInterval = interval)
-                ivlGood = nextInterval(stateGood.stability, lastInterval = interval)
-                ivlEasy = nextInterval(stateEasy.stability, lastInterval = interval)
+                ivlHard = nextInterval(stateHard.stability, Rating.Hard, lastInterval = interval, fuzzSeed = fuzzSeed)
+                ivlGood = nextInterval(stateGood.stability, Rating.Good, lastInterval = interval, fuzzSeed = fuzzSeed)
+                ivlEasy = nextInterval(stateEasy.stability, Rating.Easy, lastInterval = interval, fuzzSeed = fuzzSeed)
 
                 val ordered = enforceHardGoodEasyOrder(ivlHard, ivlGood, ivlEasy)
                 ivlHard = ordered.first
@@ -228,7 +252,12 @@ class FSRS(
             else -> "${days}d"
         }
 
-    private fun applyFuzz(interval: Double, scheduledDays: Int = 0): Double {
+    private fun applyFuzz(
+        interval: Double,
+        rating: Rating,
+        scheduledDays: Int = 0,
+        fuzzSeed: Long? = null,
+    ): Double {
         if (!enableFuzz || interval < 2.5) return interval
 
         val ivl = interval.roundToInt()
@@ -241,7 +270,16 @@ class FSRS(
 
         minIvl = min(minIvl, maxIvl)
 
-        return floor(fuzzFactorProvider() * (maxIvl - minIvl + 1) + minIvl)
+        val fuzzFactor = fuzzFactorProvider(
+            FuzzContext(
+                seed = fuzzSeed,
+                rating = rating,
+                interval = ivl,
+                scheduledDays = scheduledDays,
+            )
+        ).coerceIn(0.0, 1.0)
+        return floor(fuzzFactor * (maxIvl - minIvl + 1) + minIvl)
+            .coerceIn(minIvl.toDouble(), maxIvl.toDouble())
     }
 
     private fun forgettingCurve(elapsedDays: Double, stability: Double): Double {
@@ -281,12 +319,14 @@ class FSRS(
 
     private fun nextInterval(
         stability: Double,
+        rating: Rating,
         maxInterval: Int = maximumInterval,
         lastInterval: Int = 0,
+        fuzzSeed: Long? = null,
     ): Int {
         val s = clampStability(stability)
         val rawInterval = s / factor * (requestRetention.pow(1.0 / decay) - 1.0)
-        val fuzzed = applyFuzz(rawInterval, scheduledDays = lastInterval)
+        val fuzzed = applyFuzz(rawInterval, rating = rating, scheduledDays = lastInterval, fuzzSeed = fuzzSeed)
 
         return fuzzed.roundToInt().coerceIn(1, maxInterval)
     }

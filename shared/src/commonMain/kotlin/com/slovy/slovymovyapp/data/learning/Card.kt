@@ -99,9 +99,18 @@ data class CardScheduling(
     val suspended: Boolean,
 )
 
+// Stored by ordinal in the app database. Keep this order stable unless a migration
+// and all state-sensitive SQL queries are updated together.
 enum class CardState {
+    /** Not introduced yet; selected through the new-card intake path. */
     NEW,
+
+    /** Introduced or inferred, but not yet graduated to long-term review. */
     LEARNING,
+
+    /** Graduated card scheduled by normal FSRS review intervals. */
     REVIEW,
+
+    /** A review card that was missed and is temporarily back in short-step practice. */
     RELEARNING,
 }

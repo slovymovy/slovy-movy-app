@@ -234,6 +234,16 @@ private fun MyScreenPreview(
 - `DataDbManager` enforces query-only mode for read-only drivers, checks available disk before downloads, and writes to
   a `.part` temp file before renaming.
 
+### SqlDelight enum columns
+
+- For columns declared as `INTEGER AS SomeEnum`, keep query parameters typed as the enum whenever possible. Compare or
+  assign through the enum-backed column (for example `state = :state` or `state != :new_state`) and pass
+  `CardState.NEW`, `CardState.REVIEW`, etc. from Kotlin.
+- Do not pass enum ordinals by hand from Kotlin service code. If SqlDelight infers a parameter as `Long` because the
+  query compares it to numeric literals, move that state decision into Kotlin and pass the final enum value into SQL.
+- Raw enum ordinals are acceptable only in migrations, adapter implementations, or tightly documented legacy data
+  handling. Persisted enum order should be covered by a small test when the enum is stored by ordinal.
+
 ### Migrations
 
 - Migration files are named `<version>.sqm` (e.g., `1.sqm` to migrate from version 1 to 2)
@@ -354,6 +364,9 @@ if (GitHubClient.isAvailable()) {
 - Avoid default parameter values if possible. Prefer explicit call sites so behaviour is obvious at the call and
   refactors don't silently change semantics for existing callers. Use defaults only when omission has a single,
   obvious meaning that all callers genuinely share.
+- For time arithmetic, use `kotlin.time.Duration` helpers (`1.seconds`, `7.days`, `500.milliseconds`) and
+  `Instant +/- Duration`; avoid raw millisecond constants like `86_400_000L` or manual multipliers. Convert to epoch
+  milliseconds only at API/database boundaries with `toEpochMilliseconds()` or `inWholeMilliseconds`.
 
 ## Testing Guidelines
 

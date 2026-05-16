@@ -16,7 +16,7 @@ class FsrsScheduler(
     retention: Double,
     weights: List<Double>,
     maximumInterval: Duration,
-    enableFuzz: Boolean = false,
+    enableFuzz: Boolean = FsrsDefaults.ENABLE_FUZZ,
 ) {
     private val fsrs = FSRS(
         requestRetention = retention,
@@ -26,8 +26,8 @@ class FsrsScheduler(
     )
 
     @OptIn(ExperimentalTime::class)
-    fun preview(card: CardScheduling, now: Instant): List<GradeOutcome> {
-        return fsrs.calculate(card.toFlashCard(now)).map { grade ->
+    fun preview(card: CardScheduling, now: Instant, fuzzSeed: Long? = null): List<GradeOutcome> {
+        return fsrs.calculate(card.toFlashCard(now), fuzzSeed = fuzzSeed).map { grade ->
             val rating = grade.choice.toAppRating()
             val intervalMillis = grade.durationMillis
             val intervalDays = intervalDays(intervalMillis)
