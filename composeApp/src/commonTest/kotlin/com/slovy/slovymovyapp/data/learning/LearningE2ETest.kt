@@ -755,6 +755,44 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun forward_credit_keeps_sibling_without_direct_review_timestamp_in_learning() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "existinguntimestamped")
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+            val production = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.LEARNING,
+                stability = 0.2,
+                difficulty = 5.0,
+                due = (start + 2.days).toEpochMilliseconds(),
+                reps = 1,
+            )
+
+            val recognition = env.nextLoadedCard("en")
+            env.session.submitReview(
+                recognition,
+                env.session.previewRatings(recognition).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val updatedProduction = env.app.favoritesQueries.selectCardById(production.id).executeAsOne()
+            assertEquals(CardState.LEARNING, updatedProduction.state)
+            assertEquals(1L, updatedProduction.reps)
+            assertNull(updatedProduction.last_review)
+        }
+    }
+
+    @Test
     fun forward_credit_does_not_lower_stronger_existing_sibling() = runBlocking {
         val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
         withEnv(includeTranslation = false, config = config) { env ->

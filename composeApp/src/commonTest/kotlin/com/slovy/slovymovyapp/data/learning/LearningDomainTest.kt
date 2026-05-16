@@ -233,19 +233,23 @@ class LearningDomainTest {
     }
 
     @Test
-    fun cross_family_credit_defaults_cover_unlock_edges() {
+    fun cross_family_credit_defaults_cover_learning_edges() {
         val configuredEdges = FsrsDefaults.config().crossFamilyCredits
             .map { it.sourceFamily to it.targetFamily }
             .toSet()
-        val requiredEdges = listOf(
+        val expectedEdges = setOf(
             CardFamily.RECOGNIZE_SENSE to CardFamily.PRODUCE_WORD,
             CardFamily.PRODUCE_WORD to CardFamily.PRODUCE_WORD_IN_CONTEXT,
             CardFamily.PRODUCE_WORD_IN_CONTEXT to CardFamily.RECOGNIZE_VOICE,
+            CardFamily.PRODUCE_WORD to CardFamily.RECOGNIZE_SENSE,
+            CardFamily.PRODUCE_WORD_IN_CONTEXT to CardFamily.PRODUCE_WORD,
+            CardFamily.PRODUCE_WORD_IN_CONTEXT to CardFamily.RECOGNIZE_SENSE,
+            CardFamily.RECOGNIZE_VOICE to CardFamily.PRODUCE_WORD_IN_CONTEXT,
+            CardFamily.RECOGNIZE_VOICE to CardFamily.PRODUCE_WORD,
+            CardFamily.RECOGNIZE_VOICE to CardFamily.RECOGNIZE_SENSE,
         )
 
-        requiredEdges.forEach { edge ->
-            assertTrue(edge in configuredEdges, "Missing cross-family credit for ${edge.first} -> ${edge.second}")
-        }
+        assertEquals(expectedEdges, configuredEdges)
     }
 
     @Test

@@ -255,10 +255,21 @@ class SessionService(
     }
 
     private fun fuzzSeed(card: Card): Long {
-        var seed = card.id.toString().hashCode().toLong()
+        var seed = uuidSeed(card.id)
         seed = seed * 31 + card.family.ordinal
         seed = seed * 31 + card.scheduling.reps
         return seed
+    }
+
+    private fun uuidSeed(id: Uuid): Long {
+        val bytes = id.toByteArray()
+        var high = 0L
+        var low = 0L
+        for (index in 0 until 8) {
+            high = (high shl 8) or (bytes[index].toLong() and 0xff)
+            low = (low shl 8) or (bytes[index + 8].toLong() and 0xff)
+        }
+        return high xor low
     }
 
     private fun spaceSameSenseSiblings(
@@ -519,6 +530,7 @@ class SessionService(
             .forEach { sibling ->
                 val credit = crossFamilyCredit(source.family, sibling.family, rating) ?: return@forEach
                 val propagatedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
+                // The SQL repeats this guard so concurrent writes cannot lower stability.
                 if (propagatedStability <= sibling.scheduling.stability) return@forEach
 
                 val due = delayedEpochMs(now, creditDelay(propagatedStability, credit.direction))
@@ -537,6 +549,7 @@ class SessionService(
         if (current == CardState.NEW) return CardState.LEARNING
         if (
             sibling.scheduling.reps > 0 &&
+            sibling.scheduling.lastReviewEpochMs != null &&
             stability >= PROPAGATED_REVIEW_STABILITY_DAYS &&
             (current == CardState.LEARNING || current == CardState.RELEARNING)
         ) {
@@ -555,9 +568,12 @@ class SessionService(
         this != Rating.AGAIN
 
     private fun Rating.unlocksNextFamily(): Boolean =
-        this == Rating.GOOD || this == Rating.EASY
+        givesCrossFamilyCredit()
 
     private fun Rating.propagatesCredit(): Boolean =
+        givesCrossFamilyCredit()
+
+    private fun Rating.givesCrossFamilyCredit(): Boolean =
         this == Rating.GOOD || this == Rating.EASY
 
     private fun crossFamilyCredit(
