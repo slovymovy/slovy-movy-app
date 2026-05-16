@@ -63,16 +63,26 @@ Kotlin Multiplatform (KMP) workspace with 3 modules:
 - **Android SDK**: compileSdk=36, minSdk=24, targetSdk=36
 - **Java version**: Use Java 21 (via sdkman: `sdk use java 21.0.9-amzn`). Java 25+ may cause Kotlin compatibility
   issues.
-- **Data version**: `DataDbManager.VERSION = "v11"`; when bumping, upload DBs under the new prefix in the GCS bucket and
-  keep the version in sync.
+- **Data version**: `DataDbManager.VERSION = "v15"`; when bumping, upload DBs under the new prefix in the GCS bucket and
+  keep the version in sync. App startup compares this against `Setting.DATA_VERSION`; mismatch routes to
+  `DataVersionMismatchScreen`, which deletes all downloaded DBs and re-runs `selectInitialDestination`.
+- **Supported languages**: ten total — EN, RU, NL, PL, DE, FR, IT, CS, TR, ES (see
+  `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/Language.kt`). Wiktextract source files are only present
+  for EN/RU/NL/PL (see `LANG_TO_SOURCE_FILE` in `JsonIngestionBuilder`).
 
 ## Code Structure
 
 - **KMP source sets**: commonMain/commonTest for shared code
-- **shared module**: Cross-platform APIs (e.g., Greeting.greet(), Constants.kt)
+- **shared module**: cross-platform domain (`data/`, `ingestion/`, `data/learning/`, `data/learning/fsrs`,
+  `data/learning/stats`, `data/forms`, `data/favorites`, `data/settings`, `util/`, `api/`); also re-exports the
+  vendored FSRS implementation under `external.fsrs`.
+- **composeApp module**: Compose UI + app-specific services (`data/remote`, `data/local`,
+  `data/learning/intake|session`, `data/export`, `analytics`, `logging`, `speech`, `i18n`, `ui/...`).
 - **Compose UI**: composeApp/src/commonMain
 - **Android namespace**: com.slovy.slovymovyapp
 - **Server main**: com.slovy.slovymovyapp.ApplicationKt
+- **buildSrc** ships custom Gradle tasks: `WriteAppVersionTask` / `WriteIosVersionXcconfigTask` (write version
+  metadata from git commit count), `VerifyLocalizationKeysTask`, and `TestServerService` (test-time Ktor server).
 
 ### Compose UI workflow
 
@@ -148,6 +158,57 @@ private fun MyScreenPreview(
       ...
   ) { ... }
   ```
+### Learning / Spaced Repetition
+
+The app drives study via an FSRS-backed pipeline. Domain types live in `shared` and are reused by app services in
+`composeApp`.
+
+- **Domain types** (`shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/learning/`):
+    - `Card` = `id`, `senseId`, `lemmaId`, `langCode`, `family`, `answerKey`, `scheduling`.
+    - `CardFamily` (RECOGNIZE_SENSE, PRODUCE_WORD, PRODUCE_WORD_IN_CONTEXT, RECOGNIZE_VOICE) — only PRODUCE_* /
+      RECOGNIZE_VOICE families set `testsWordRecall = true`.
+    - `CardKind` describes a presentation variant per family (e.g. `SOURCE_DEFINITION_TO_WORD`, `WORD_TO_TRANSLATION`,
+      `CLOZE_TRANSLATION`, `LISTENING_TRANSLATION`). Each carries `requiresTranslation`, `isCloze`, `family`, `priority`
+      and a `minStability` gate for review-time selection.
+    - `CardState`: NEW → LEARNING → REVIEW → RELEARNING. **Stored by ordinal** in the `card` table — keep the order
+      stable; any change requires a migration + an update to every state-sensitive SQL query.
+    - `Rating` is stored using the FSRS numeric value (1..4) via `ratingFsrsAdapter`, not by ordinal. New ratings
+      must extend `fsrsValue` and may not reorder the existing ones.
+- **FSRS plumbing** (`shared/.../data/learning/fsrs/`):
+    - `FsrsScheduler` wraps `external.fsrs.FSRS`, converts between `CardScheduling` and FSRS `FlashCard`, and produces
+      `GradeOutcome` lists for `Again/Hard/Good/Easy`. `apply()` writes back stability/difficulty/due/reps/lapses.
+    - `FsrsDefaults.config()` is the single source of truth for tuning constants (weights, retention target,
+      cross-family credits, cooldown ratios and floors/caps, exposure gates, daily intake budget). When tuning the
+      algorithm, change values here — services pull a `FsrsConfig` instance from `FsrsDefaults` so a single edit
+      propagates.
+    - Avoid raw day/hour millisecond constants; the config defines durations with `kotlin.time.Duration` helpers.
+- **Intake** (`composeApp/.../data/learning/intake/IntakeService.kt`): activates pending favorites by inserting cards
+  per `defaultIntakeFamilies`. Honors a daily new-card budget, two pause conditions
+  (`pauseIntakeIfQueueAbove`, retention floor over the last 7d), and skips when no variant is buildable. Two run
+  modes: `DAILY` (capped by budget) and `CONTINUE_NOW` (capped by `continueNowPendingLemmaLimit`). Logs analytics
+  event `LEARNING_INTAKE_RUN` with per-reason skip counters.
+- **Session selection & review** (`composeApp/.../data/learning/session/`):
+    - `SessionService.nextCard` ranks candidates by `memoryUrgency + overdueBonus - collisionPenalty`. Recent
+      same-sense, same-lemma, same-answer, and same-family reviews are penalized to spread practice; same sense within
+      the last 3 reviews is hard-excluded.
+    - `submitReview` writes the card update and `review_log` row in a single transaction. On Good/Easy/Hard it spaces
+      sibling cards (`burySiblingCardsBy{Sense,Lemma,Answer}`) with jittered cooldowns, propagates same-sense credit
+      across families (`crossFamilyCredits`), and unlocks the next family once the source card's stability crosses
+      `productionUnlockStability` / `contextUnlockStability`.
+    - `buildTaskVariants` enumerates the playable `CardVariant`s for a sense + family + translation targets;
+      `selectVariantsForReview` applies the `minStability` gate and de-prioritises the last-shown variant.
+    - `ExamplePicker` chooses a cloze example, preferring ones the user hasn't seen recently for that sense.
+    - `SessionCard.loadState()` distinguishes LOADING / READY / ERROR with explicit `SessionCardLoadErrorReason`s
+      (sense missing, translation missing, example missing, etc.) so the UI can show retry vs. skip.
+- **Stats** (`shared/.../data/learning/stats/StatsService.kt`): exposes `globalStats`, `reviewQueueStats`,
+  `dueNow`, and the screen-shaped `statsScreenData` (streak, monthly practice log, pipeline distribution by stability:
+  NEW → FRESH → MIDDLE → STRONG → LEARNED). `retrievability(stabilityDays, elapsedDays)` is reused by the session
+  priority function.
+- **Wiring**: `App.kt` builds one `IntakeService`, one `SessionService`, and one `StatsService` per session and
+  passes them through to ViewModels. `FavoritesReviewCoordinator` debounces full intake runs (5-min cache per
+  language) while `refreshDueCountsOnly` re-reads stats without rerunning intake — important on iOS, where intake
+  serializes against the visible screen's dictionary queries.
+
 ### Localization
 
 - Localization uses Compose Multiplatform resources from `composeApp/src/commonMain/composeResources/`.
@@ -207,6 +268,30 @@ private fun MyScreenPreview(
 - The `EmptyState` component has two overloads: one taking `ImageVector` (renders with `Icon` + tint), and one taking
   `iconContent: @Composable () -> Unit` for custom rendering (e.g., `Image()` for illustrations).
 
+### Analytics
+
+- `Analytics` is an `expect object` (per-platform actual). Android wires in `FirebaseAnalyticsLogger`; desktop/iOS
+  default to `NoOpAnalyticsLogger` so tests don't crash without an SDK.
+- All event names live in the `AnalyticsEvent` enum
+  (`composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/analytics/Analytics.kt`). Add new events there so call
+  sites stay symbolic; the logger lowercases the enum name when forwarding.
+- `Analytics.setUserProperty` is used for stable per-user dimensions: `ui_lang`, `learning_lang`, `data_version`.
+
+### Logging
+
+- `AppLogger` is `expect object` with `debug/info/warn/error(tag, message, throwable)`. Avoid `println` outside tools;
+  prefer `AppLogger.warn(TAG, "...", e)` for non-fatal flows (see `FavoriteLemmaRecovery`).
+
+### Data export
+
+- `AppDataExporter` is `expect class` per platform (`androidContext` is only used on Android). Returns
+  `AppDataExportResult` carrying an artifact name and an optional share reference.
+- Shared logic in `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/data/export/` — `AppDataArchiveWriter`
+  emits POSIX tar entries via `TarArchive`. `AppDataSnapshotter` makes consistent SQLite snapshots with
+  `VACUUM INTO`, falling back to `wal_checkpoint(FULL)` + file copy when the driver rejects `VACUUM INTO`.
+- Snapshots cover `app.db`, `local_dictionary.db`, `local_translation.db` (plus `-wal`/`-shm` sidecars). The
+  temp file pattern `*.part` is used for atomic moves.
+
 ### Speech / TTS
 
 - `TextToSpeechManager` has platform actuals (Android, iOS, desktop no-op) and emits word-boundary + status callbacks.
@@ -219,20 +304,39 @@ private fun MyScreenPreview(
 
 ### Schema Locations
 
-- App DB schema: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/`
+- App DB schema (`appdb`): `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/`
+    - Files: `Settings.sq` (key/value JSON store), `Favorites.sq` (`favorites`, `card`, `review_log` tables).
     - Migrations: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/migrations/`
-    - Verification DB: `shared/src/commonMain/sqldelight/appdb/<version>.db` (e.g., `2.db`)
+    - Verification DBs: `1.db` … `5.db` alongside the schema files
 - Dictionary DB schema: `shared/src/commonMain/sqldelight/dictionarydb/com/slovy/slovymovyapp/dictionary/`
+    - Includes `lemma`, `lemma_pos`, `lemma_pos_sense_hint` (routes senses to the correct cluster — adapter wired in
+      `DatabaseProvider`), `lemma_word_family`, `sense`, `form`, `form_tag`, and per-sense detail tables.
 - Translation DB schema: `shared/src/commonMain/sqldelight/translationdb/com/slovy/slovymovyapp/translation/`
-- Repository pattern: `SettingsRepository` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/settings/`
-- Database bootstrap: `DatabaseProvider` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/db/`
+- Repository pattern: `SettingsRepository` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/settings/`,
+  `FavoritesRepository` in `shared/.../data/favorites/`. `Setting.Name` is the canonical list of setting keys
+  (LANGUAGE, DICTIONARY, DATA_VERSION, ENABLED_VOICES, VOICE_SETUP_SHOWN, WELCOME_COMPLETED, plus per-screen language
+  persistence: SEARCH_LANGUAGE, FAVORITES_LANGUAGE, STATS_LANGUAGE).
+- Database bootstrap: `DatabaseProvider` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/db/` —
+  configures every column adapter (UUIDs as `BLOB`, enums via `enumOrdinalAdapter()`, FSRS rating via
+  `ratingFsrsAdapter()`).
 - Platform DB support: expect/actual `PlatformDbSupport` + helpers in
   `composeApp/src/*/kotlin/com/slovy/slovymovyapp/data/remote/`
-- Local writable DBs: `local_dictionary.db` and `local_translation.db` via `LocalDbManager`.
+- Local writable DBs: `local_dictionary.db` and `local_translation.db` via `LocalDbManager` — these survive data
+  version bumps and back up online-fetched words.
 - Downloaded read-only DBs live in the platform database dir and are cached via `ReadOnlyDatabaseCache`; use the cache
   helpers so drivers get closed when deleting files.
-- `DataDbManager` enforces query-only mode for read-only drivers, checks available disk before downloads, and writes to
-  a `.part` temp file before renaming.
+- `DataDbManager` enforces query-only mode for read-only drivers, checks available disk before downloads, writes to
+  a `.part` temp file before renaming, and `cleanupCorruptDownloadedDbs()` runs at startup (probes for
+  `lemma`/`sense_translation` tables and deletes truncated files so routing sees an accurate has-DB picture).
+- `WordFetchManager` reuses in-flight `DictionaryClient.getWord` calls via a `MutableSharedFlow(replay=1)` keyed by
+  `(language, lemma, translationsKey, pushToRepo)`. The shared flow keeps fetches alive past ViewModel cancellation so
+  the next requester gets the same emissions. Completed entries are removed on the next call.
+- `DownloadCoordinator` manages per-key download state (`Idle/Running/Done/Failed/Cancelled`) for setup and
+  settings-triggered downloads.
+- `FavoriteLemmaRecovery` re-fetches favorite lemmas after a data-version download so locally cached translations stay
+  populated; it runs under `platform.runWithProcessKeepAlive` to survive backgrounding.
+- `NetworkErrorClassifier` translates exceptions into `NetworkError` enums (Offline, Timeout, ServerError(status),
+  InsufficientStorage, Unknown). Use it (not raw `e.message`) when surfacing user-visible network errors.
 
 ### SqlDelight enum columns
 
@@ -249,7 +353,7 @@ private fun MyScreenPreview(
 - Migration files are named `<version>.sqm` (e.g., `1.sqm` to migrate from version 1 to 2)
 - Stored in the `migrations/` subdirectory alongside schema files
 - Contain SQL statements to upgrade database schema
-- Verification `.db` files (e.g., `2.db`) represent the expected schema after migrations
+- Verification `.db` files (e.g., `2.db`, …, `5.db` for appdb) represent the expected schema after each migration step
 - Verification tasks: `gradlew :shared:verifyCommonMainAppDatabaseMigration`
     - **Windows Note**: Migration verification is disabled on Windows due to
       [SqlDelight issue #5312](https://github.com/sqldelight/sqldelight/issues/5312)
@@ -294,6 +398,10 @@ Located in `server/src/main/kotlin/com/slovy/slovymovyapp/server/ai/`:
 - **OpenAIProvider**: OpenAI API integration (`OpenAI.kt`)
 - **GeminiProvider**: Google AI Studio integration (`Gemini.kt`)
 - **Enhancers**: `enhancer/` subdirectory contains domain-specific AI enhancement logic
+- **Race with fallback**: `Application.kt` defines `raceWithFallback(...)` — starts Gemini immediately and, if it
+  fails or doesn't return within `AI_FALLBACK_TIMEOUT_MS` (20s), kicks off OpenAI in parallel and returns whichever
+  completes first. Used by both `enhanceWithAI` (base card) and `enhanceWithTranslations` (per target language).
+  Cancels the loser. If both providers are unavailable it throws; if only one is configured it bypasses the race.
 
 Pattern for new providers:
 
@@ -346,9 +454,31 @@ if (GitHubClient.isAvailable()) {
 - Client-side `DictionaryClient` filters server responses to requested translation languages, handles online-only lemmas
   by copying raw data before ingesting processed content, and wraps errors in `DictionaryClientException`.
 - `/internal/update-repo/{lang}/{word}` pretty-prints JSON, ensures `push` exists, merges with existing via
-  `WordDataMerger`, and skips commits when content is identical.
+  `WordDataMerger`, and skips commits when content is identical. Authenticated via `CloudTasksAuthVerifier`
+  (OIDC Bearer token; audience = the deterministic Cloud Run service URL).
 - `WordDataMerger` merges by `sense_id`; existing translations/definitions/examples win, only new language codes/example
   translations (matched by normalized text without `<w>` tags) are appended.
+- `POST /feedback` posts to a `Feedback` discussion category on the `slovymovy/slovy-movy-app` repo;
+  `POST /feedback/{lang}/{word}` creates a labeled feedback issue on `slovymovy/words`. Both require
+  `GitHubClient.isAvailable()`.
+
+### Cloud Tasks / Cloud Run integration
+
+- `CloudRunMetadata` reads service account / numeric project ID / region from the Cloud Run metadata server; the
+  deterministic service URL (`https://$K_SERVICE-$projectNumber.$region.run.app`) is used both for queueing tasks and
+  for verifying their OIDC audience on the way back in.
+- `RepoUpdateTaskClient.queueRepoUpdate(lang, word, json)` enqueues a Cloud Task that POSTs back to
+  `/internal/update-repo/{lang}/{word}` with the LanguageCardResponse JSON, signed with an OIDC token from the
+  service account. Queue name comes from `CLOUD_TASKS_QUEUE` env (default `repo-updates`).
+- A 409 response surfaces as `Conflict` so Cloud Tasks will retry. Other failures are logged but don't fail the
+  originating `/word/...` stream.
+
+### Server test mode
+
+- When `IS_TEST=true`, `Application.module()` mounts `Routing.testDataEndpoints()` from `TestApplication.kt`:
+  `GET /test/db/list` enumerates DB files in `TEST_DB_DIR` (defaulting to `.test-db-files`) and `GET /test/db/file/{name}`
+  serves them. `TestServerDataProvider` in `commonTest` is the client side of this API and replaces
+  `GoogleStorageBucketDataProvider` for tests.
 
 ### Server Test Patterns
 
@@ -367,6 +497,12 @@ if (GitHubClient.isAvailable()) {
 - For time arithmetic, use `kotlin.time.Duration` helpers (`1.seconds`, `7.days`, `500.milliseconds`) and
   `Instant +/- Duration`; avoid raw millisecond constants like `86_400_000L` or manual multipliers. Convert to epoch
   milliseconds only at API/database boundaries with `toEpochMilliseconds()` or `inWholeMilliseconds`.
+- For FSRS / scheduling tuning, edit `FsrsDefaults` constants (and the `FsrsConfig` it produces) rather than
+  hard-coding fresh thresholds at the call site. Services receive `FsrsConfig` so a single source of truth keeps
+  intake, session selection, cooldowns, and stats in sync.
+- Persisted enums: prefer `INTEGER AS Enum` columns with `enumOrdinalAdapter()`; if the enum participates in a
+  numeric protocol (e.g. `Rating.fsrsValue`), use a dedicated adapter (`ratingFsrsAdapter`) and keep the protocol
+  value stable across versions.
 
 ## Testing Guidelines
 
@@ -395,8 +531,8 @@ if (GitHubClient.isAvailable()) {
 - Module accessors: :composeApp, :shared, :server
 - iOS warnings on non-macOS are expected and harmless
 - Downloads are served from the `slovymovy` GCS bucket under the version prefix; `GoogleStorageBucketDataProvider`
-  builds URLs and list calls.
-- App startup checks `Setting.DATA_VERSION`; when versions diverge it routes to a mismatch screen that deletes all
-  downloaded DBs before re-downloading.
+  builds URLs and list calls. In tests the bucket is swapped out for `TestServerDataProvider`, which talks to the
+  in-process server's `/test/db/*` endpoints.
 - Gradle test service `TestServerService` starts the Ktor server for tests with `IS_TEST`, `SERVER_PORT`, and
   `TEST_DB_DIR`; it kills any existing listener on the port and tails logs at `build/test-server.log`.
+- Production server URL (`DictionaryClient.PRODUCTION_SERVER_URL`): `https://backend.openwords.ai`.
