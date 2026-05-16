@@ -1,0 +1,23 @@
+CREATE INDEX IF NOT EXISTS idx_card_due_session
+ON card(lang_code, suspended, due, created_at, available_after, state);
+
+CREATE INDEX IF NOT EXISTS idx_card_new_session
+ON card(lang_code, suspended, state, created_at, due, available_after);
+
+CREATE INDEX IF NOT EXISTS idx_card_active_lemma_due
+ON card(lang_code, suspended, lemma_id, due, available_after, sense_id);
+
+CREATE INDEX IF NOT EXISTS idx_card_answer_siblings
+ON card(lang_code, answer_key, suspended, family);
+
+CREATE INDEX IF NOT EXISTS idx_card_active_created
+ON card(lang_code, suspended, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_review_log_recent
+ON review_log(reviewed_at DESC, card_id);
+
+DROP INDEX IF EXISTS idx_card_due;
+DROP INDEX IF EXISTS idx_card_new;
+DROP INDEX IF EXISTS idx_card_collision;
+DROP INDEX IF EXISTS idx_card_answer;
+DROP INDEX IF EXISTS idx_review_log_reviewed;
