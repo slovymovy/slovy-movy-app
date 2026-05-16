@@ -37,8 +37,8 @@ import com.slovy.slovymovyapp.ui.theme.AppTheme
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -276,6 +276,9 @@ fun App(
     }
     val favoriteRecoveryController = remember(favoriteLemmaRecovery, platform) {
         FavoriteRecoveryController(favoriteLemmaRecovery, platform)
+    }
+    DisposableEffect(favoriteRecoveryController) {
+        onDispose { favoriteRecoveryController.close() }
     }
     val fsrsConfig = remember { FsrsDefaults.config() }
     val fsrsScheduler = remember(fsrsConfig) {
@@ -611,7 +614,7 @@ fun App(
                                     )
                                 }
                             },
-                            finalize = { downloadViewModel ->
+                            finalize = { onRecoveryProgress ->
                                 favoritesReviewCoordinator.invalidateAllIntakeCache()
                                 dictionaryRepository.clearSenseCache()
                                 val recoveryJob = favoriteRecoveryController.ensureStarted()
@@ -619,7 +622,7 @@ fun App(
                                     val observerJob = launch {
                                         favoriteRecoveryController.progress.collect { progress ->
                                             if (progress != null) {
-                                                downloadViewModel.updateRecoveryProgress(progress)
+                                                onRecoveryProgress(progress)
                                             }
                                         }
                                     }

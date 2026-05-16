@@ -125,6 +125,12 @@
     <string name="download_content_desc_loading_info">Ładowanie informacji o pobieraniu</string>
     <string name="download_content_desc_preparing">Przygotowywanie pobierania</string>
     <string name="download_finalizing_recovering_progress">Odświeżanie ulubionych (%1$d/%2$d)</string>
+    <plurals name="download_finalizing_recovering_progress_with_failures">
+        <item quantity="one">Odświeżanie ulubionych (%1$d/%2$d, błędów: %3$d)</item>
+        <item quantity="few">Odświeżanie ulubionych (%1$d/%2$d, błędów: %3$d)</item>
+        <item quantity="many">Odświeżanie ulubionych (%1$d/%2$d, błędów: %3$d)</item>
+        <item quantity="other">Odświeżanie ulubionych (%1$d/%2$d, błędów: %3$d)</item>
+    </plurals>
     <string name="download_preparing">Przygotowywanie...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>
     <string name="download_progress_with_percent">Pobieranie: %1$d%%</string>

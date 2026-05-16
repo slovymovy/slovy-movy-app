@@ -35,6 +35,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
@@ -51,7 +52,7 @@ class DownloadViewModel(
     private val downloadCoordinator: DownloadCoordinator,
     private val downloadKey: String,
     private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
-    private val finalize: suspend (DownloadViewModel) -> Unit = {},
+    private val finalize: suspend (onRecoveryProgress: (FavoriteRecoveryProgress) -> Unit) -> Unit = {},
     private val onSuccess: suspend () -> Unit,
     private val onCancel: () -> Unit,
     private val onError: (Throwable) -> Unit,
@@ -179,7 +180,7 @@ class DownloadViewModel(
                             )
                             try {
                                 state = DownloadUiState.Finalizing()
-                                finalize(this@DownloadViewModel)
+                                finalize(::updateRecoveryProgress)
                                 for (i in 3 downTo 1) {
                                     state = DownloadUiState.Done(countdown = i)
                                     delay(1_000.milliseconds)
@@ -228,6 +229,7 @@ class DownloadViewModel(
     }
 
     fun updateRecoveryProgress(progress: FavoriteRecoveryProgress) {
+        // Late controller emissions can arrive after finalization has moved to a terminal state.
         if (state is DownloadUiState.Finalizing) {
             state = DownloadUiState.Finalizing(progress)
         }
@@ -532,12 +534,23 @@ fun DownloadScreenContent(
                     val recovery = (state as? DownloadUiState.Finalizing)?.recovery
                     if (recovery != null && recovery.total > 0) {
                         Spacer(Modifier.height(AppSpacing.sm))
-                        Text(
-                            text = stringResource(
+                        val recoveryProgressText = if (recovery.failed > 0) {
+                            pluralStringResource(
+                                Res.plurals.download_finalizing_recovering_progress_with_failures,
+                                recovery.failed,
+                                recovery.completed,
+                                recovery.total,
+                                recovery.failed,
+                            )
+                        } else {
+                            stringResource(
                                 Res.string.download_finalizing_recovering_progress,
                                 recovery.completed,
                                 recovery.total,
-                            ),
+                            )
+                        }
+                        Text(
+                            text = recoveryProgressText,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,

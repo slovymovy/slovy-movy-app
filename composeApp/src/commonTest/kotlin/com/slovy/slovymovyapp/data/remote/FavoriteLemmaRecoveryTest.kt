@@ -4,7 +4,9 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -267,6 +269,88 @@ class FavoriteLemmaRecoveryTest : BaseTest() {
         assertEquals(finalProgress.total, finalProgress.completed)
         assertEquals(1, finalProgress.failed)
         assertEquals(null, finalProgress.currentLemma)
+    }
+
+    @Test
+    fun recoverAllInstalledFavorites_keeps_current_lemma_while_parallel_group_is_active() = runBlocking {
+        val progressEvents = mutableListOf<FavoriteRecoveryProgress>()
+        val alphaStarted = CompletableDeferred<Unit>()
+        val betaStarted = CompletableDeferred<Unit>()
+        val allowBetaFinish = CompletableDeferred<Unit>()
+        val betaStillActive = CompletableDeferred<FavoriteRecoveryProgress>()
+        val recovery = FavoriteLemmaRecovery(
+            favoritesProvider = {
+                listOf(
+                    Favorite(sense1, Language.ENGLISH, "alpha"),
+                    Favorite(sense2, Language.ENGLISH, "beta"),
+                )
+            },
+            hasDownloadedDictionary = { language -> language == Language.ENGLISH },
+            downloadedLemmasNeedingRecovery = { _, lemmas -> lemmas },
+            downloadedFavoritesNeedingTranslationRecovery = { _, _, _ -> emptySet() },
+            translationTargetsProvider = { listOf(Language.RUSSIAN) },
+            fetchLemma = { _, lemma, _ ->
+                when (lemma) {
+                    "alpha" -> {
+                        alphaStarted.complete(Unit)
+                        betaStarted.await()
+                    }
+
+                    "beta" -> {
+                        betaStarted.complete(Unit)
+                        allowBetaFinish.await()
+                    }
+                }
+            },
+        )
+
+        val recoveryJob = launch {
+            recovery.recoverAllInstalledFavorites { progress ->
+                progressEvents += progress
+                if (progress.completed == 1 && progress.currentLemma == "beta") {
+                    betaStillActive.complete(progress)
+                }
+            }
+        }
+
+        withTimeout(1.seconds.inWholeMilliseconds) {
+            alphaStarted.await()
+            betaStarted.await()
+        }
+        withTimeout(1.seconds.inWholeMilliseconds) { betaStillActive.await() }
+        allowBetaFinish.complete(Unit)
+        withTimeout(1.seconds.inWholeMilliseconds) { recoveryJob.join() }
+
+        val finalProgress = progressEvents.lastOrNull()
+        assertNotNull(finalProgress, "Recovery should emit a final progress event")
+        assertEquals(finalProgress.total, finalProgress.completed)
+        assertEquals(null, finalProgress.currentLemma)
+    }
+
+    @Test
+    fun recoverAllInstalledFavorites_retries_transient_fetch_failure() = runTest {
+        var attempts = 0
+        val fetches = mutableListOf<FetchCall>()
+        val recovery = FavoriteLemmaRecovery(
+            favoritesProvider = { listOf(Favorite(sense1, Language.ENGLISH, "test")) },
+            hasDownloadedDictionary = { language -> language == Language.ENGLISH },
+            downloadedLemmasNeedingRecovery = { _, lemmas -> lemmas },
+            downloadedFavoritesNeedingTranslationRecovery = { _, _, _ -> emptySet() },
+            translationTargetsProvider = { listOf(Language.RUSSIAN) },
+            fetchLemma = { language, lemma, translationTargets ->
+                attempts++
+                if (attempts == 1) throw RuntimeException("HTTP 500")
+                fetches += FetchCall(language, lemma, translationTargets)
+            },
+        )
+
+        recovery.recoverAllInstalledFavorites()
+
+        assertEquals(2, attempts)
+        assertEquals(
+            listOf(FetchCall(Language.ENGLISH, "test", listOf(Language.RUSSIAN))),
+            fetches,
+        )
     }
 
     @Test

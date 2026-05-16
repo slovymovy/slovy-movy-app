@@ -82,28 +82,29 @@ class FavoriteLemmaRecovery internal constructor(
         val progressMutex = Mutex()
         var completed = 0
         var failed = 0
+        val activeLemmas = linkedMapOf<FavoriteLemmaGroupKey, String>()
 
-        suspend fun emit(currentLemma: String?, deltaFailed: Int = 0) = progressMutex.withLock {
-            if (deltaFailed > 0) failed += deltaFailed
-            onProgress(FavoriteRecoveryProgress(currentLemma, completed, total, failed))
+        suspend fun markStarted(key: FavoriteLemmaGroupKey, lemma: String) = progressMutex.withLock {
+            activeLemmas[key] = lemma
+            onProgress(FavoriteRecoveryProgress(activeLemmas.values.firstOrNull(), completed, total, failed))
         }
 
-        suspend fun markDone(deltaFailed: Int) = progressMutex.withLock {
+        suspend fun markDone(key: FavoriteLemmaGroupKey, deltaFailed: Int) = progressMutex.withLock {
             completed++
             if (deltaFailed > 0) failed += deltaFailed
-            onProgress(FavoriteRecoveryProgress(currentLemma = null, completed, total, failed))
+            activeLemmas.remove(key)
+            onProgress(FavoriteRecoveryProgress(activeLemmas.values.firstOrNull(), completed, total, failed))
         }
 
-        emit(currentLemma = null)
         val semaphore = Semaphore(MAX_PARALLEL_RECOVERY_GROUPS)
 
         groupsToRecover.map { (key, groupFavorites) ->
             async {
                 semaphore.withPermit {
                     var failedGroup = false
-                    val lemma = groupFavorites.firstOrNull()?.lemma
+                    val lemma = groupFavorites.first().lemma.trim()
                     try {
-                        emit(currentLemma = lemma)
+                        markStarted(key, lemma)
                         recoverLemmaGroup(key.language, groupFavorites)
                     } catch (e: CancellationException) {
                         throw e
@@ -116,7 +117,7 @@ class FavoriteLemmaRecovery internal constructor(
                         )
                         // Best-effort recovery: broken or unavailable remote fetches must not block downloads.
                     } finally {
-                        markDone(deltaFailed = if (failedGroup) 1 else 0)
+                        markDone(key, deltaFailed = if (failedGroup) 1 else 0)
                     }
                 }
             }

@@ -101,6 +101,31 @@ class FavoriteRecoveryControllerTest : BaseTest() {
         assertEquals(1, keepAlive.released)
     }
 
+    @Test
+    fun close_cancels_in_flight_job_and_releases_keep_alive() = runBlocking {
+        val started = CompletableDeferred<Unit>()
+        val releaseFetch = CompletableDeferred<Unit>()
+        val keepAlive = CountingKeepAliveFactory()
+        val controller = FavoriteRecoveryController(
+            recovery = recovery(
+                onFetch = {
+                    started.complete(Unit)
+                    releaseFetch.await()
+                },
+            ),
+            acquireKeepAlive = keepAlive::acquire,
+        )
+
+        val controllerJob = controller.ensureStarted()
+        withTimeout(1.seconds.inWholeMilliseconds) { started.await() }
+        controller.close()
+        withTimeout(1.seconds.inWholeMilliseconds) { controllerJob.join() }
+
+        assertTrue(controllerJob.isCancelled, "Closing the controller should cancel in-flight recovery")
+        assertEquals(1, keepAlive.acquired)
+        assertEquals(1, keepAlive.released)
+    }
+
     private fun recovery(
         onFavoritesLoaded: () -> Unit = {},
         onFetch: suspend () -> Unit = {},
