@@ -23,6 +23,7 @@ class FsrsScheduler(
         inputParams = weights,
         enableFuzz = enableFuzz,
         maximumInterval = maximumInterval.inWholeDays.toInt(),
+        isReview = true,
     )
 
     @OptIn(ExperimentalTime::class)

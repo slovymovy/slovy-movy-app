@@ -115,6 +115,40 @@ class LearningDomainTest {
     }
 
     @Test
+    fun scheduler_fuzz_does_not_shorten_successful_review_intervals() {
+        val config = FsrsDefaults.config()
+        val scheduler = FsrsScheduler(
+            config.requestRetention,
+            config.weights,
+            config.maximumInterval,
+            enableFuzz = true,
+        )
+        val now = Instant.fromEpochMilliseconds(1_700_000_000_000L)
+        val scheduledInterval = 30.days
+        val reviewCard = scheduling().copy(
+            state = CardState.REVIEW,
+            stability = 30.0,
+            difficulty = 5.0,
+            dueEpochMs = now.toEpochMilliseconds(),
+            lastReviewEpochMs = (now - scheduledInterval).toEpochMilliseconds(),
+            reps = 5,
+        )
+
+        (1L..100L).forEach { seed ->
+            val byRating = scheduler.preview(reviewCard, now, fuzzSeed = seed)
+                .associateBy { it.rating }
+            assertTrue(
+                byRating.getValue(Rating.GOOD).intervalMillis > scheduledInterval.inWholeMilliseconds,
+                "Good interval should not be shortened for seed=$seed",
+            )
+            assertTrue(
+                byRating.getValue(Rating.EASY).intervalMillis > scheduledInterval.inWholeMilliseconds,
+                "Easy interval should not be shortened for seed=$seed",
+            )
+        }
+    }
+
+    @Test
     fun scheduler_initializes_new_card_state_from_selected_rating_without_rounding() {
         val config = FsrsDefaults.config()
         val scheduler = FsrsScheduler(config.requestRetention, config.weights, config.maximumInterval)
