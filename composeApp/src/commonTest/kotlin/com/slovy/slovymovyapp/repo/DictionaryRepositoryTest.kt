@@ -37,7 +37,7 @@ class DictionaryRepositoryTest : BaseTest() {
     }
 
     private fun deleteLocalDictionary(platform: PlatformDbSupport, localMgr: LocalDbManager) {
-        localMgr.closeAll()
+        runBlocking { localMgr.closeAll() }
         val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
         if (platform.fileExists(localDictPath)) {
             platform.deleteFile(localDictPath)
@@ -311,7 +311,7 @@ class DictionaryRepositoryTest : BaseTest() {
                 "Should have sense definition from local DB"
             )
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) {
                 platform.deleteFile(localDictPath)
             }
@@ -346,18 +346,21 @@ class DictionaryRepositoryTest : BaseTest() {
             assertFalse(mgr.hasTranslation(Language.ENGLISH, Language.RUSSIAN), "RO translation should not exist")
 
             // Get a real sense ID from the RO dictionary
-            val roDb = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
-            val lemmaRow = roDb.dictionaryQueries.selectLemmasByWord("en", "simultaneously")
-                .executeAsList().firstOrNull()
-            assertNotNull(lemmaRow, "Should find 'simultaneously' in RO dictionary")
+            val (lemmaRowId, firstLemmaPosId, senseId) = runBlocking {
+                mgr.withDictionaryReadOnly(Language.ENGLISH) { roDb ->
+                    val lemmaRow = roDb.dictionaryQueries.selectLemmasByWord("en", "simultaneously")
+                        .executeAsList().firstOrNull()
+                    assertNotNull(lemmaRow, "Should find 'simultaneously' in RO dictionary")
 
-            val lemmaPosIds = roDb.dictionaryQueries.selectLemmaPosIdByLemmaId(lemmaRow.id).executeAsList()
-            assertTrue(lemmaPosIds.isNotEmpty(), "Should have lemma_pos entries")
+                    val lemmaPosIds = roDb.dictionaryQueries.selectLemmaPosIdByLemmaId(lemmaRow.id).executeAsList()
+                    assertTrue(lemmaPosIds.isNotEmpty(), "Should have lemma_pos entries")
 
-            val senses = roDb.dictionaryQueries.selectSensesByLemmaPosId(lemmaPosIds.first()).executeAsList()
-            assertTrue(senses.isNotEmpty(), "Should have senses")
+                    val senses = roDb.dictionaryQueries.selectSensesByLemmaPosId(lemmaPosIds.first()).executeAsList()
+                    assertTrue(senses.isNotEmpty(), "Should have senses")
 
-            val senseId = senses.first().sense_id
+                    Triple(lemmaRow.id, lemmaPosIds.first(), senses.first().sense_id)
+                }
+            }
 
             // Insert local definition and translation for this sense
             val localTransDb = localMgr.openLocalTranslation()
@@ -379,8 +382,8 @@ class DictionaryRepositoryTest : BaseTest() {
                 target_lang_word = "ТестЛокал",
                 target_lang_word_normalized = "тестлокал",
                 target_lang_sense_clarification = null,
-                lemma_id = lemmaRow.id,
-                lemma_pos_id = lemmaPosIds.first()
+                lemma_id = lemmaRowId,
+                lemma_pos_id = firstLemmaPosId
             )
 
             val favoritesRepo = favoritesRepository()
@@ -402,7 +405,7 @@ class DictionaryRepositoryTest : BaseTest() {
             )
         } finally {
             runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localTransPath)) {
                 platform.deleteFile(localTransPath)
             }
@@ -483,7 +486,7 @@ class DictionaryRepositoryTest : BaseTest() {
                 "Should load local translations using settings targets even when no target definition exists"
             )
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) {
                 platform.deleteFile(localDictPath)
             }
@@ -566,7 +569,7 @@ class DictionaryRepositoryTest : BaseTest() {
                 "Explicit empty translation-language setting should not fall back to installed or local targets"
             )
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) {
                 platform.deleteFile(localDictPath)
             }
@@ -733,7 +736,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertFalse(found.onlineOnly, "Local lemma should not be marked as online only")
             assertEquals(Language.ENGLISH, found.language, "Should be English language")
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) {
                 platform.deleteFile(localDictPath)
             }
@@ -762,10 +765,14 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
 
             // Get a real lemma from RO dictionary
-            val roDb = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
-            val roLemma = roDb.dictionaryQueries.selectLemmasByWord("en", "simultaneously")
-                .executeAsList().firstOrNull()
-            assertNotNull(roLemma, "Should find 'simultaneously' in RO dictionary")
+            val roLemmaId = runBlocking {
+                mgr.withDictionaryReadOnly(Language.ENGLISH) { roDb ->
+                    val roLemma = roDb.dictionaryQueries.selectLemmasByWord("en", "simultaneously")
+                        .executeAsList().firstOrNull()
+                    assertNotNull(roLemma, "Should find 'simultaneously' in RO dictionary")
+                    roLemma.id
+                }
+            }
 
             // Insert the SAME lemma into local DB (simulating cached/offline data)
             val localDb = localMgr.openLocalDictionary()
@@ -774,8 +781,8 @@ class DictionaryRepositoryTest : BaseTest() {
             val senseId = Uuid.random()
 
             // Use the same lemma ID to simulate the same word cached locally
-            q.insertLemma(roLemma.id, "en", "simultaneously", "simultaneously", 6.0, false)
-            q.insertLemmaPos(lemmaPosId, roLemma.id, DictionaryPos.ADVERB)
+            q.insertLemma(roLemmaId, "en", "simultaneously", "simultaneously", 6.0, false)
+            q.insertLemmaPos(lemmaPosId, roLemmaId, DictionaryPos.ADVERB)
             q.insertSense(
                 sense_id = senseId,
                 lemma_pos_id = lemmaPosId,
@@ -802,7 +809,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertFalse(testResult.onlineOnly, "Result should come from local DB (not online only)")
         } finally {
             runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) {
                 platform.deleteFile(localDictPath)
             }
@@ -950,7 +957,7 @@ class DictionaryRepositoryTest : BaseTest() {
                 "Online-only lemma 'vergieten' must not be redirected by form-fallback to parent 'vergiet'"
             )
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
         }
     }
@@ -1021,7 +1028,7 @@ class DictionaryRepositoryTest : BaseTest() {
                 "Standalone offline lemma in local DB must override the RO form-fallback result"
             )
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             runBlocking { mgr.deleteDictionary(Language.DUTCH) }
             if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
         }
@@ -1079,7 +1086,7 @@ class DictionaryRepositoryTest : BaseTest() {
                 "RelatedWord.lemma for form chip must point to the parent lemma so navigation lands correctly"
             )
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) {
                 platform.deleteFile(localDictPath)
             }
@@ -1134,7 +1141,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertNotNull(resolved, "Accented form 'łody' must be resolved in relatedWords")
             assertEquals("loden", resolved.lemma, "Accented form chip must navigate to parent lemma 'loden'")
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) {
                 platform.deleteFile(localDictPath)
             }
@@ -1161,18 +1168,21 @@ class DictionaryRepositoryTest : BaseTest() {
             val suggestions = runBlocking { repo.getWordSuggestions(Language.ENGLISH, count = 10, offset = 0) }
             assertTrue(suggestions.isNotEmpty(), "Should return at least one suggestion")
 
-            val roDb = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
-            val q = roDb.dictionaryQueries
+            runBlocking {
+                mgr.withDictionaryReadOnly(Language.ENGLISH) { roDb ->
+                    val q = roDb.dictionaryQueries
 
-            suggestions.forEach { lemma ->
-                val lemmaRow = q.selectLemmasByWord("en", lemma).executeAsList().firstOrNull()
-                assertNotNull(lemmaRow, "Expected lemma '$lemma' to exist in dictionary")
-                val posRows = q.selectLemmaPosByLemmaId(lemmaRow.id).executeAsList()
-                assertTrue(posRows.isNotEmpty(), "Expected lemma '$lemma' to have POS entries")
-                assertTrue(
-                    posRows.none { it.pos == DictionaryPos.NAME },
-                    "Lemma '$lemma' should not have NAME POS"
-                )
+                    suggestions.forEach { lemma ->
+                        val lemmaRow = q.selectLemmasByWord("en", lemma).executeAsList().firstOrNull()
+                        assertNotNull(lemmaRow, "Expected lemma '$lemma' to exist in dictionary")
+                        val posRows = q.selectLemmaPosByLemmaId(lemmaRow.id).executeAsList()
+                        assertTrue(posRows.isNotEmpty(), "Expected lemma '$lemma' to have POS entries")
+                        assertTrue(
+                            posRows.none { it.pos == DictionaryPos.NAME },
+                            "Lemma '$lemma' should not have NAME POS"
+                        )
+                    }
+                }
             }
         } finally {
             runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
@@ -1240,7 +1250,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(results.contains(senseMatch.toString()), "Expected matching sense ID to be returned")
             assertFalse(results.contains(senseOther.toString()), "Non-matching sense ID should not be returned")
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localTransPath)) {
                 platform.deleteFile(localTransPath)
             }
@@ -1294,7 +1304,7 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(sense.targetLangDefinitions.isEmpty())
             assertFalse(platform.fileExists(localTransPath), "Read path must not create local translation DB")
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
             if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
         }

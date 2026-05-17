@@ -85,7 +85,7 @@ class DictionaryClientTest : BaseTest() {
             assertTrue(result.isErrorOnly, "Should be error-only result")
             assertFalse(result.hasData, "Should not have data")
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) {
                 platform.deleteFile(localDictPath)
             }
@@ -144,7 +144,7 @@ class DictionaryClientTest : BaseTest() {
             assertTrue(result.hasData, "Should have data")
             assertEquals("testlocal", card.lemma, "Lemma should match")
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) {
                 platform.deleteFile(localDictPath)
             }
@@ -246,7 +246,7 @@ class DictionaryClientTest : BaseTest() {
                 .any { it.translations.containsKey(Language.RUSSIAN) }
             assertTrue(hasRussianTranslation, "Should have Russian translation")
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
             if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
         }
@@ -310,7 +310,7 @@ class DictionaryClientTest : BaseTest() {
             runBlocking {
                 mgr.deleteDictionary(Language.ENGLISH)
             }
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
         }
     }
@@ -366,7 +366,7 @@ class DictionaryClientTest : BaseTest() {
                 "Should have senses after server fetch"
             )
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
         }
     }
@@ -376,11 +376,14 @@ class DictionaryClientTest : BaseTest() {
      * Returns the lemma string, or null if the dictionary is empty.
      */
     private fun findRussianLemma(mgr: com.slovy.slovymovyapp.data.remote.DataDbManager): String? {
-        val db = runBlocking { mgr.openDictionaryReadOnly(Language.RUSSIAN) }
-        val rows = db.dictionaryQueries
-            .selectLemmasNormalizedLike("ru", "", "\uFFFF", 10)
-            .executeAsList()
-        return rows.firstOrNull { !it.online_only }?.lemma
+        return runBlocking {
+            mgr.withDictionaryReadOnly(Language.RUSSIAN) { db ->
+                val rows = db.dictionaryQueries
+                    .selectLemmasNormalizedLike("ru", "", "\uFFFF", 10)
+                    .executeAsList()
+                rows.firstOrNull { !it.online_only }?.lemma
+            }
+        }
     }
 
     @Test
@@ -451,7 +454,7 @@ class DictionaryClientTest : BaseTest() {
             )
         } finally {
             runBlocking { mgr.deleteDictionary(Language.RUSSIAN) }
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
         }
     }
@@ -533,7 +536,7 @@ class DictionaryClientTest : BaseTest() {
             )
         } finally {
             runBlocking { mgr.deleteDictionary(Language.RUSSIAN) }
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
         }
     }
@@ -605,7 +608,7 @@ class DictionaryClientTest : BaseTest() {
                 "Should have senses after server fetch"
             )
         } finally {
-            localMgr.closeAll()
+            runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
             if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
         }

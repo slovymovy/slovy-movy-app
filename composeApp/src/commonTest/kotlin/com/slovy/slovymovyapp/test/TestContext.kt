@@ -85,7 +85,7 @@ class TestDataDbManagerHolder(
 ) {
     fun close() {
         manager.closeAllReadOnlyDatabases()
-        localDbManager.closeAll()
+        kotlinx.coroutines.runBlocking { localDbManager.closeAll() }
         appDbHolder.close()
     }
 }

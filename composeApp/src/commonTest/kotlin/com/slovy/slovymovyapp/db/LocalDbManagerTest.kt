@@ -4,6 +4,7 @@ import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.uuid.Uuid
@@ -43,7 +44,7 @@ class LocalDbManagerTest : BaseTest() {
             assertEquals(1, results.size, "Should find inserted lemma")
             assertEquals("TestWord", results[0].lemma)
         } finally {
-            mgr.closeAll()
+            runBlocking { mgr.closeAll() }
             platform.deleteFile(dictPath)
         }
     }
@@ -83,7 +84,7 @@ class LocalDbManagerTest : BaseTest() {
             assertEquals(1, results.size, "Should find inserted translation")
             assertEquals("ТестовоеСлово", results[0].target_lang_word)
         } finally {
-            mgr.closeAll()
+            runBlocking { mgr.closeAll() }
             platform.deleteFile(transPath)
         }
     }
@@ -104,7 +105,7 @@ class LocalDbManagerTest : BaseTest() {
             val mgr1 = LocalDbManager(platform)
             val db1 = mgr1.openLocalDictionary()
             db1.dictionaryQueries.insertLemma(lemmaId, "en", "Persistent", "persistent", 3.0, false)
-            mgr1.closeAll()
+            runBlocking { mgr1.closeAll() }
 
             // Second open - read data
             val mgr2 = LocalDbManager(platform)
@@ -113,7 +114,7 @@ class LocalDbManagerTest : BaseTest() {
             val results = db2.dictionaryQueries.selectLemmasNormalizedLike("en", start, end, 10).executeAsList()
             assertEquals(1, results.size, "Data should persist after reopen")
             assertEquals("Persistent", results[0].lemma)
-            mgr2.closeAll()
+            runBlocking { mgr2.closeAll() }
         } finally {
             platform.deleteFile(dictPath)
         }
@@ -154,13 +155,13 @@ class LocalDbManagerTest : BaseTest() {
             kotlin.test.assertTrue(platform.fileExists(transPath), "Translation DB should exist")
 
             // Delete all
-            mgr.deleteAll()
+            runBlocking { mgr.deleteAll() }
 
             // Verify they are deleted
             kotlin.test.assertFalse(platform.fileExists(dictPath), "Dictionary DB should be deleted")
             kotlin.test.assertFalse(platform.fileExists(transPath), "Translation DB should be deleted")
         } finally {
-            mgr.closeAll()
+            runBlocking { mgr.closeAll() }
             if (platform.fileExists(dictPath)) platform.deleteFile(dictPath)
             if (platform.fileExists(transPath)) platform.deleteFile(transPath)
         }

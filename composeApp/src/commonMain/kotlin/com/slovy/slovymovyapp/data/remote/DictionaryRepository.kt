@@ -11,6 +11,7 @@ import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.dictionary.*
+import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
 import com.slovy.slovymovyapp.util.stripAccents
@@ -160,6 +161,7 @@ class DictionaryRepository(
     private val senseCache = linkedMapOf<String, SenseWithPos>()
 
     companion object {
+        private const val TAG = "DictionaryRepository"
         private const val SENSE_CACHE_MAX_SIZE = 500
     }
 
@@ -202,28 +204,59 @@ class DictionaryRepository(
         senseCache.clear()
     }
 
-    // Opens dictionary databases in priority order (RO first, then local)
-    private suspend fun openDictionaryDatabases(language: Language): List<DictionaryDatabase> {
-        return buildList {
-            if (dataDbManager.hasDictionary(language)) {
-                add(dataDbManager.openDictionaryReadOnly(language))
-            }
-            if (localDbManager.hasLocalDictionary()) {
-                add(localDbManager.openLocalDictionary())
-            }
+    /**
+     * Runs [block] with the dictionary databases for [language] in priority order (downloaded RO
+     * first, then local). Both the downloaded RO database AND the local writable database are
+     * held under read leases so a concurrent delete on either source cannot tear it down while
+     * [block] is in flight.
+     *
+     * The local DB existence check happens **inside** the local read lock
+     * ([LocalDbManager.withLocalDictionaryIfExists]) — no TOCTOU.
+     */
+    private suspend fun <T> withDictionaryDatabases(
+        language: Language,
+        block: suspend (List<DictionaryDatabase>) -> T,
+    ): T = localDbManager.withLocalDictionaryIfExists { localDb ->
+        dataDbManager.withDictionaryReadOnlyIfExists(language) { downloadedDb ->
+            block(listOfNotNull(downloadedDb, localDb))
         }
     }
 
-    // Opens translation databases in priority order (RO first, then local)
-    private suspend fun openTranslationDatabases(src: Language, tgt: Language): List<TranslationDatabase> {
-        return buildList {
-            if (dataDbManager.hasTranslation(src, tgt)) {
-                add(dataDbManager.openTranslationReadOnly(src, tgt))
-            }
-            if (localDbManager.hasLocalTranslation()) {
-                add(localDbManager.openLocalTranslation())
+    /**
+     * Runs [block] with translation databases for ([src], [tgt]) in priority order. Both the
+     * downloaded RO translation and the local writable translation are leased for the duration.
+     */
+    private suspend fun <T> withTranslationDatabases(
+        src: Language,
+        tgt: Language,
+        block: suspend (List<TranslationDatabase>) -> T,
+    ): T = localDbManager.withLocalTranslationIfExists { localDb ->
+        dataDbManager.withTranslationReadOnlyIfExists(src, tgt) { downloadedDb ->
+            block(listOfNotNull(downloadedDb, localDb))
+        }
+    }
+
+    /**
+     * Recursively acquires translation-database leases for each target language in [targets] and
+     * invokes [block] with a map from each target language to its priority-ordered list of
+     * databases. All leases stay held for the entire [block].
+     */
+    private suspend fun <T> withTranslationDatabasesForTargets(
+        src: Language,
+        targets: List<Language>,
+        block: suspend (Map<Language, List<TranslationDatabase>>) -> T,
+    ): T {
+        suspend fun acquireRemaining(
+            remaining: List<Language>,
+            acquired: Map<Language, List<TranslationDatabase>>,
+        ): T {
+            if (remaining.isEmpty()) return block(acquired)
+            val tgt = remaining.first()
+            return withTranslationDatabases(src, tgt) { dbs ->
+                acquireRemaining(remaining.drop(1), acquired + (tgt to dbs))
             }
         }
+        return acquireRemaining(targets, emptyMap())
     }
 
     // Loads related words from all databases. Offline rows replace online-only rows.
@@ -259,26 +292,34 @@ class DictionaryRepository(
         }
 
         for (db in databases) {
-            val q = db.dictionaryQueries
-            q.selectLemmasByWords(language.code, lookupWords.toList())
-                .executeAsList()
-                .forEach { row ->
-                    putFromLemma(row.lemma, relatedWord(row.lemma, row.zipf_frequency, row.online_only))
-                    foundAsLemmaKeys.add(row.lemma)
-                }
-
-            // Fallback: resolve inflected forms (e.g. "Gebogen" → parent lemma "buigen").
-            // Only applies to forms that are not standalone lemmas; standalone lemmas navigate
-            // to themselves regardless of online/offline status.
-            // Keep the form as the map key so chip text stays unchanged, while
-            // RelatedWord.lemma points navigation at the parent lemma.
-            lookupWords
-                .filter { form -> form !in foundAsLemmaKeys }
-                .forEach { form ->
-                    q.resolveRelatedForm(language, form)?.let { relatedWord ->
-                        putFromFallback(form, relatedWord)
+            try {
+                val q = db.dictionaryQueries
+                q.selectLemmasByWords(language.code, lookupWords.toList())
+                    .executeAsList()
+                    .forEach { row ->
+                        putFromLemma(row.lemma, relatedWord(row.lemma, row.zipf_frequency, row.online_only))
+                        foundAsLemmaKeys.add(row.lemma)
                     }
-                }
+
+                // Fallback: resolve inflected forms (e.g. "Gebogen" → parent lemma "buigen").
+                // Only applies to forms that are not standalone lemmas; standalone lemmas navigate
+                // to themselves regardless of online/offline status.
+                // Keep the form as the map key so chip text stays unchanged, while
+                // RelatedWord.lemma points navigation at the parent lemma.
+                lookupWords
+                    .filter { form -> form !in foundAsLemmaKeys }
+                    .forEach { form ->
+                        q.resolveRelatedForm(language, form)?.let { relatedWord ->
+                            putFromFallback(form, relatedWord)
+                        }
+                    }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                // Related words are decorative — a per-DB failure must not abort the surrounding
+                // card load. Log and continue with whatever the remaining DBs supply.
+                AppLogger.warn(TAG, "loadRelatedWords failed for ${language.code}", e)
+            }
         }
         return result
     }
@@ -359,222 +400,270 @@ class DictionaryRepository(
         // Track lemmas that were added as base lemmas to suppress their forms
         val seenLemmas = HashSet<String>()
 
+        // Set to true when a per-language phase has hit `maxItems` and we want to short-circuit the
+        // remaining work. Replaces the previous non-local `return finalizeSearchResults(...)`
+        // pattern, which we can no longer use because the search body now runs inside non-inline
+        // suspending lease blocks.
+        var done = false
+
         for (lang in languages) {
+            if (done) break
             // search by translation (target language words)
             val targets = translationTargets
                 ?.filter { it != lang && dataDbManager.hasTranslation(lang, it) }
                 ?: defaultTranslationTargets(lang)
 
-            // Build database list: local first, then RO
-            val databases = buildList {
-                if (localDbManager.hasLocalDictionary()) {
-                    add(localDbManager.openLocalDictionary())
+            suspend fun runPerLanguage(downloadedDict: DictionaryDatabase?, localDict: DictionaryDatabase?) {
+                // Build database list: local first, then RO. Preserves the original priority where
+                // local results win over downloaded for the same lemma.
+                val databases = buildList {
+                    if (localDict != null) {
+                        add(localDict)
+                    }
+                    if (downloadedDict != null) {
+                        add(downloadedDict)
+                    }
                 }
-                if (dataDbManager.hasDictionary(lang)) {
-                    add(dataDbManager.openDictionaryReadOnly(lang))
-                }
-            }
 
-            fun addLemma(lemmaId: Uuid, lemma: String, zipfFrequency: Float, onlineOnly: Boolean) {
-                val key = "${lang.code}::$lemma"
-                if (!seenDisplays.contains(key)) {
-                    out.add(
-                        SearchItem(
-                            language = lang,
-                            lemmaId = lemmaId,
-                            lemma = lemma,
-                            display = lemma,
-                            zipfFrequency = zipfFrequency,
-                            pos = emptyList(),
-                            onlineOnly = onlineOnly
+                fun addLemma(lemmaId: Uuid, lemma: String, zipfFrequency: Float, onlineOnly: Boolean) {
+                    val key = "${lang.code}::$lemma"
+                    if (!seenDisplays.contains(key)) {
+                        out.add(
+                            SearchItem(
+                                language = lang,
+                                lemmaId = lemmaId,
+                                lemma = lemma,
+                                display = lemma,
+                                zipfFrequency = zipfFrequency,
+                                pos = emptyList(),
+                                onlineOnly = onlineOnly
+                            )
                         )
-                    )
-                    seenDisplays.add(key)
-                    seenLemmas.add("${lang.code}::${lemma.lowercase()}")
-                }
-            }
-
-            fun addForm(
-                lemmaId: Uuid,
-                lemma: String,
-                form: String,
-                zipfFrequency: Float,
-                onlineOnly: Boolean
-            ) {
-                // Skip forms if the base lemma is already in the results
-                val lemmaKey = "${lang.code}::${lemma.lowercase()}"
-                if (seenLemmas.contains(lemmaKey)) {
-                    return
+                        seenDisplays.add(key)
+                        seenLemmas.add("${lang.code}::${lemma.lowercase()}")
+                    }
                 }
 
-                val display = "\"$form\" form of \"$lemma\""
-                val key = "${lang.code}::$display"
-                if (!seenDisplays.contains(key)) {
-                    out.add(
-                        SearchItem(
-                            language = lang,
-                            lemmaId = lemmaId,
-                            lemma = lemma,
-                            display = display,
-                            zipfFrequency = zipfFrequency,
-                            pos = emptyList(),
-                            onlineOnly = onlineOnly
+                fun addForm(
+                    lemmaId: Uuid,
+                    lemma: String,
+                    form: String,
+                    zipfFrequency: Float,
+                    onlineOnly: Boolean
+                ) {
+                    val lemmaKey = "${lang.code}::${lemma.lowercase()}"
+                    if (seenLemmas.contains(lemmaKey)) {
+                        return
+                    }
+
+                    val display = "\"$form\" form of \"$lemma\""
+                    val key = "${lang.code}::$display"
+                    if (!seenDisplays.contains(key)) {
+                        out.add(
+                            SearchItem(
+                                language = lang,
+                                lemmaId = lemmaId,
+                                lemma = lemma,
+                                display = display,
+                                zipfFrequency = zipfFrequency,
+                                pos = emptyList(),
+                                onlineOnly = onlineOnly
+                            )
                         )
-                    )
-                    seenDisplays.add(key)
-                }
-            }
-
-            fun addTranslation(
-                lemmaId: Uuid,
-                lemma: String,
-                translation: String,
-                zipfFrequency: Float,
-                onlineOnly: Boolean
-            ) {
-                // Skip translation if the base lemma is already in the results
-                val lemmaKey = "${lang.code}::${lemma.lowercase()}"
-                if (seenLemmas.contains(lemmaKey)) {
-                    return
+                        seenDisplays.add(key)
+                    }
                 }
 
-                val display = "\"$translation\" translation of \"$lemma\""
-                val key = "${lang.code}::$display"
-                if (!seenDisplays.contains(key)) {
-                    out.add(
-                        SearchItem(
-                            language = lang,
-                            lemmaId = lemmaId,
-                            lemma = lemma,
-                            display = display,
-                            zipfFrequency = zipfFrequency,
-                            pos = emptyList(),
-                            onlineOnly = onlineOnly
+                fun addTranslation(
+                    lemmaId: Uuid,
+                    lemma: String,
+                    translation: String,
+                    zipfFrequency: Float,
+                    onlineOnly: Boolean
+                ) {
+                    val lemmaKey = "${lang.code}::${lemma.lowercase()}"
+                    if (seenLemmas.contains(lemmaKey)) {
+                        return
+                    }
+
+                    val display = "\"$translation\" translation of \"$lemma\""
+                    val key = "${lang.code}::$display"
+                    if (!seenDisplays.contains(key)) {
+                        out.add(
+                            SearchItem(
+                                language = lang,
+                                lemmaId = lemmaId,
+                                lemma = lemma,
+                                display = display,
+                                zipfFrequency = zipfFrequency,
+                                pos = emptyList(),
+                                onlineOnly = onlineOnly
+                            )
                         )
-                    )
-                    seenDisplays.add(key)
+                        seenDisplays.add(key)
+                    }
                 }
-            }
 
-            // Enriches POS for items that don't have it yet (pos.isEmpty())
-            fun enrichPosForLang(q: DictionaryQueries) {
-                // Only enrich items without POS to avoid overwriting results from previous databases
-                val lemmaIds = out.filter { it.language == lang && it.pos.isEmpty() }
-                    .map { it.lemmaId }.toSet().toList()
-                if (lemmaIds.isNotEmpty()) {
-                    val posResults = q.selectLemmaIdAndPosByLemmaIds(lemmaIds).executeAsList()
-                    val lemmaIdToPosMap = posResults.groupBy({ it.id }, { it.pos.toPartOfSpeech() })
-                    for (i in out.indices) {
-                        if (out[i].language == lang && out[i].pos.isEmpty()) {
-                            val posList = lemmaIdToPosMap[out[i].lemmaId] ?: emptyList()
-                            if (posList.isNotEmpty()) {
-                                out[i] = out[i].copy(pos = posList)
+                fun enrichPosForLang(q: DictionaryQueries) {
+                    val lemmaIds = out.filter { it.language == lang && it.pos.isEmpty() }
+                        .map { it.lemmaId }.toSet().toList()
+                    if (lemmaIds.isNotEmpty()) {
+                        val posResults = q.selectLemmaIdAndPosByLemmaIds(lemmaIds).executeAsList()
+                        val lemmaIdToPosMap = posResults.groupBy({ it.id }, { it.pos.toPartOfSpeech() })
+                        for (i in out.indices) {
+                            if (out[i].language == lang && out[i].pos.isEmpty()) {
+                                val posList = lemmaIdToPosMap[out[i].lemmaId] ?: emptyList()
+                                if (posList.isNotEmpty()) {
+                                    out[i] = out[i].copy(pos = posList)
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            fun shouldEarlyReturn(q: DictionaryQueries): Boolean {
-                if (out.size >= maxItems) {
-                    enrichPosForLang(q)
-                    return true
-                }
-                return false
-            }
-
-            // Search each database (local first, then RO)
-            // 1) Exact lemma matches across all databases
-            for (db in databases) {
-                val q = db.dictionaryQueries
-                val byWord: List<SelectLemmasByWord> =
-                    q.selectLemmasByWord(lang.code, trimmed).executeAsList()
-                val byNorm: List<SelectLemmasByNormalized> =
-                    q.selectLemmasByNormalized(lang.code, trimmed).executeAsList()
-                byWord.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
-                byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
-                if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
-                currentCoroutineContext().ensureActive()
-            }
-
-            // 2) Exact form matches across all databases
-            for (db in databases) {
-                val q = db.dictionaryQueries
-                val formEq: List<SelectLemmasByFormEquals> =
-                    q.selectLemmasByFormEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
-                val formEqNorm: List<SelectLemmasByFormNormalizedEquals> =
-                    q.selectLemmasByFormNormalizedEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
-                formEq.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
-                formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
-                if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
-                currentCoroutineContext().ensureActive()
-            }
-
-            // 3) Prefix lemma matches across all databases
-            for (db in databases) {
-                val q = db.dictionaryQueries
-                val lemmaNormLike: List<SelectLemmasNormalizedLike> =
-                    q.selectLemmasNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong()).executeAsList()
-                lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
-                if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
-                currentCoroutineContext().ensureActive()
-            }
-
-            // 4) Prefix form matches across all databases
-            for (db in databases) {
-                val q = db.dictionaryQueries
-                val formNormLike: List<SelectLemmasFromFormsNormalizedLike> =
-                    q.selectLemmasFromFormsNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong())
-                        .executeAsList()
-                formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
-                if (shouldEarlyReturn(q)) return finalizeSearchResults(out, maxItems)
-
-                // Enrich POS for items found in this database
-                enrichPosForLang(q)
-                currentCoroutineContext().ensureActive()
-            }
-
-            // Translation search: local first, then RO
-            for (tgt in targets) {
-                // Build translation database pairs: (translation DB, dictionary DB for lemma lookup)
-                val transDatabasePairs = buildList {
-                    if (localDbManager.hasLocalTranslation() && localDbManager.hasLocalDictionary()) {
-                        add(localDbManager.openLocalTranslation() to localDbManager.openLocalDictionary())
+                fun shouldEarlyReturn(q: DictionaryQueries): Boolean {
+                    if (out.size >= maxItems) {
+                        enrichPosForLang(q)
+                        return true
                     }
-                    if (dataDbManager.hasTranslation(lang, tgt) && dataDbManager.hasDictionary(lang)) {
-                        add(
-                            dataDbManager.openTranslationReadOnly(lang, tgt) to
-                                    dataDbManager.openDictionaryReadOnly(lang)
-                        )
-                    }
+                    return false
                 }
 
-                for ((tdb, dictDb) in transDatabasePairs) {
-                    val tq = tdb.translationQueries
-                    val dq = dictDb.dictionaryQueries
-                    val trRows =
-                        tq.selectSenseTranslationsByNormalizedPrefix(lang.code, tgt.code, prefixStart, prefixEnd)
+                // Search each database (local first, then RO)
+                // 1) Exact lemma matches across all databases
+                for (db in databases) {
+                    val q = db.dictionaryQueries
+                    val byWord: List<SelectLemmasByWord> =
+                        q.selectLemmasByWord(lang.code, trimmed).executeAsList()
+                    val byNorm: List<SelectLemmasByNormalized> =
+                        q.selectLemmasByNormalized(lang.code, trimmed).executeAsList()
+                    byWord.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
+                    byNorm.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
+                    if (shouldEarlyReturn(q)) {
+                        done = true
+                        return
+                    }
+                    currentCoroutineContext().ensureActive()
+                }
+
+                // 2) Exact form matches across all databases
+                for (db in databases) {
+                    val q = db.dictionaryQueries
+                    val formEq: List<SelectLemmasByFormEquals> =
+                        q.selectLemmasByFormEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
+                    val formEqNorm: List<SelectLemmasByFormNormalizedEquals> =
+                        q.selectLemmasByFormNormalizedEquals(lang.code, trimmed, maxItems.toLong()).executeAsList()
+                    formEq.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
+                    formEqNorm.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
+                    if (shouldEarlyReturn(q)) {
+                        done = true
+                        return
+                    }
+                    currentCoroutineContext().ensureActive()
+                }
+
+                // 3) Prefix lemma matches across all databases
+                for (db in databases) {
+                    val q = db.dictionaryQueries
+                    val lemmaNormLike: List<SelectLemmasNormalizedLike> =
+                        q.selectLemmasNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong()).executeAsList()
+                    lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
+                    if (shouldEarlyReturn(q)) {
+                        done = true
+                        return
+                    }
+                    currentCoroutineContext().ensureActive()
+                }
+
+                // 4) Prefix form matches across all databases
+                for (db in databases) {
+                    val q = db.dictionaryQueries
+                    val formNormLike: List<SelectLemmasFromFormsNormalizedLike> =
+                        q.selectLemmasFromFormsNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong())
                             .executeAsList()
-                    val lemmaRows =
-                        dq.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
-                    val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
-                    for (row in trRowsSorted) {
-                        // Map translation hit back to a base lemma
-                        val lemmaRow = lemmaRows[row.lemma_id]
-                        if (lemmaRow != null) {
-                            addTranslation(
-                                lemmaRow.id,
-                                lemmaRow.lemma,
-                                row.target_lang_word,
-                                lemmaRow.zipf_frequency.toFloat(),
-                                lemmaRow.online_only
-                            )
-                            if (shouldEarlyReturn(dq)) return finalizeSearchResults(out, maxItems)
+                    formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
+                    if (shouldEarlyReturn(q)) {
+                        done = true
+                        return
+                    }
+                    enrichPosForLang(q)
+                    currentCoroutineContext().ensureActive()
+                }
+
+                // Translation search: local first, then RO
+                for (tgt in targets) {
+                    if (done) return
+
+                    // Closure that processes one (translation, dictionary) pair. Returns true when
+                    // we hit maxItems and the outer logic should stop.
+                    fun processPair(tdb: TranslationDatabase, dictDb: DictionaryDatabase): Boolean {
+                        val tq = tdb.translationQueries
+                        val dq = dictDb.dictionaryQueries
+                        val trRows =
+                            tq.selectSenseTranslationsByNormalizedPrefix(lang.code, tgt.code, prefixStart, prefixEnd)
+                                .executeAsList()
+                        val lemmaRows =
+                            dq.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
+                        val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
+                        for (row in trRowsSorted) {
+                            val lemmaRow = lemmaRows[row.lemma_id]
+                            if (lemmaRow != null) {
+                                addTranslation(
+                                    lemmaRow.id,
+                                    lemmaRow.lemma,
+                                    row.target_lang_word,
+                                    lemmaRow.zipf_frequency.toFloat(),
+                                    lemmaRow.online_only
+                                )
+                                if (shouldEarlyReturn(dq)) return true
+                            }
+                        }
+                        enrichPosForLang(dq)
+                        return false
+                    }
+
+                    // Local pair first. Both local DBs are held under their own read leases so a
+                    // concurrent LocalDbManager.deleteAll() cannot tear them down mid-read. The
+                    // existence checks happen inside the leases (no TOCTOU).
+                    var hitMax = false
+                    localDbManager.withLocalTranslationIfExists { localTrans ->
+                        if (localTrans != null) {
+                            localDbManager.withLocalDictionaryIfExists { localDict ->
+                                if (localDict != null) {
+                                    hitMax = processPair(localTrans, localDict)
+                                }
+                            }
                         }
                     }
+                    if (hitMax) {
+                        done = true
+                        return
+                    }
 
-                    // Enrich POS for items found via this translation database
-                    enrichPosForLang(dq)
+                    // Downloaded translation pair. The dictionary lease is already held by the
+                    // outer withDictionaryReadOnlyIfExists; the translation lease is acquired
+                    // here. Existence check happens inside the lease, so a concurrent delete
+                    // can't race with us.
+                    if (downloadedDict != null) {
+                        var hitMax = false
+                        dataDbManager.withTranslationReadOnlyIfExists(lang, tgt) { downloadedTrans ->
+                            if (downloadedTrans != null) {
+                                hitMax = processPair(downloadedTrans, downloadedDict)
+                            }
+                        }
+                        if (hitMax) {
+                            done = true
+                            return
+                        }
+                    }
+                }
+            }
+
+            // Both DBs are held under their respective read leases; existence checks happen
+            // inside the IfExists variants so there is no TOCTOU window.
+            localDbManager.withLocalDictionaryIfExists { localDict ->
+                dataDbManager.withDictionaryReadOnlyIfExists(lang) { downloaded ->
+                    runPerLanguage(downloaded, localDict)
                 }
             }
 
@@ -592,8 +681,38 @@ class DictionaryRepository(
         senseIds: Set<String>? = null
     ): LanguageCard? = withContext(Dispatchers.IO) {
         val resolvedTranslationTargets = translationTargets ?: defaultTranslationTargets(language)
-        // Open dictionary databases in priority order
-        val dictDatabases = openDictionaryDatabases(language)
+        try {
+            withDictionaryDatabases(language) { dictDatabases ->
+                withTranslationDatabasesForTargets(language, resolvedTranslationTargets) { translationDbsMap ->
+                    computeLanguageCard(
+                        language = language,
+                        lemma = lemma,
+                        senseIds = senseIds,
+                        dictDatabases = dictDatabases,
+                        translationDbsMap = translationDbsMap,
+                    )
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            val info = dataDbManager.dictionaryDiagnostics(language)
+            AppLogger.error(
+                TAG,
+                "getLanguageCard failed for lemma='$lemma' lang=${language.code} $info",
+                e,
+            )
+            null
+        }
+    }
+
+    private fun computeLanguageCard(
+        language: Language,
+        lemma: String,
+        senseIds: Set<String>?,
+        dictDatabases: List<DictionaryDatabase>,
+        translationDbsMap: Map<Language, List<TranslationDatabase>>,
+    ): LanguageCard? {
         val senseIdFilter = senseIds?.takeIf { it.isNotEmpty() }
 
         // Lookup lemma, trying databases in order
@@ -618,17 +737,12 @@ class DictionaryRepository(
             }
         }
 
-        if (lemmaId == null || sourceDb == null) return@withContext null
+        if (lemmaId == null || sourceDb == null) return null
 
         val q = sourceDb.dictionaryQueries
 
         // Get all lemma_pos IDs for this lemma
         val lemmaPosIds = q.selectLemmaPosIdByLemmaId(lemmaId).executeAsList()
-
-        // Open translation databases for all target languages
-        val translationDbsMap = resolvedTranslationTargets.associateWith { tgt ->
-            openTranslationDatabases(language, tgt)
-        }
 
         // Data class for sense row data we need to carry forward
         data class SenseRowData(
@@ -695,7 +809,7 @@ class DictionaryRepository(
             posDataList.add(PosData(pos, forms, senseRows, cachedSenses))
         }
 
-        if (posDataList.isEmpty()) return@withContext null
+        if (posDataList.isEmpty()) return null
 
         // Batch load form tags
         val formTagsMap: Map<Uuid, List<String>> = if (allFormIds.isNotEmpty()) {
@@ -877,7 +991,7 @@ class DictionaryRepository(
             )
         }
 
-        if (entries.isEmpty()) return@withContext null
+        if (entries.isEmpty()) return null
 
         // Fetch word family from all databases (union)
         val wordFamily = q.selectWordFamilyByLemmaId(lemmaId).executeAsList().toSet()
@@ -902,13 +1016,13 @@ class DictionaryRepository(
             }
         }
 
-        LanguageCard(
+        return LanguageCard(
             entries = entries,
             lemma = lemma,
             zipfFrequency = zipfFrequency,
             wordFamily = wordFamily.toList(),
             relatedWords = relatedWordsMap,
-            online = onlineOnly
+            online = onlineOnly,
         )
     }
 
@@ -971,32 +1085,33 @@ class DictionaryRepository(
             null -> Unit
         }
 
-        val dictDatabases = openDictionaryDatabases(language)
-        if (dictDatabases.isEmpty()) {
-            return@withContext FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED
-        }
-
-        val normalizedLemma = stripAccents(lemma.trim().lowercase())
-        var foundLemma = false
-        var foundOnlineOnly = false
-
-        for (db in dictDatabases) {
-            val rows = db.dictionaryQueries
-                .selectLemmasByNormalized(language.code, normalizedLemma)
-                .executeAsList()
-            if (rows.isEmpty()) continue
-
-            foundLemma = true
-            if (rows.any { !it.online_only }) {
-                return@withContext FavoriteSenseMissingReason.MEANING_NOT_FOUND
+        withDictionaryDatabases(language) { dictDatabases ->
+            if (dictDatabases.isEmpty()) {
+                return@withDictionaryDatabases FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED
             }
-            foundOnlineOnly = true
-        }
 
-        when {
-            foundOnlineOnly -> FavoriteSenseMissingReason.ONLINE_ONLY
-            !dataDbManager.hasDictionary(language) && !foundLemma -> FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED
-            else -> FavoriteSenseMissingReason.MEANING_NOT_FOUND
+            val normalizedLemma = stripAccents(lemma.trim().lowercase())
+            var foundLemma = false
+            var foundOnlineOnly = false
+
+            for (db in dictDatabases) {
+                val rows = db.dictionaryQueries
+                    .selectLemmasByNormalized(language.code, normalizedLemma)
+                    .executeAsList()
+                if (rows.isEmpty()) continue
+
+                foundLemma = true
+                if (rows.any { !it.online_only }) {
+                    return@withDictionaryDatabases FavoriteSenseMissingReason.MEANING_NOT_FOUND
+                }
+                foundOnlineOnly = true
+            }
+
+            when {
+                foundOnlineOnly -> FavoriteSenseMissingReason.ONLINE_ONLY
+                !dataDbManager.hasDictionary(language) && !foundLemma -> FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED
+                else -> FavoriteSenseMissingReason.MEANING_NOT_FOUND
+            }
         }
     }
 
@@ -1041,64 +1156,62 @@ class DictionaryRepository(
         offset: Int = 2000,
         favorites: List<Favorite>? = null
     ): List<String> = withContext(Dispatchers.IO) {
-        if (!dataDbManager.hasDictionary(language)) {
-            return@withContext emptyList()
-        }
+        dataDbManager.withDictionaryReadOnlyIfExists(language) { db ->
+            if (db == null) return@withDictionaryReadOnlyIfExists emptyList()
+            val q = db.dictionaryQueries
 
-        val db = dataDbManager.openDictionaryReadOnly(language)
-        val q = db.dictionaryQueries
+            // Get favorites to exclude (case-insensitive)
+            val favoriteLemmas = (favorites ?: favoritesRepository.getAll())
+                .filter { it.language == language }
+                .map { it.lemma.lowercase() }
+                .toSet()
 
-        // Get favorites to exclude (case-insensitive)
-        val favoriteLemmas = (favorites ?: favoritesRepository.getAll())
-            .filter { it.language == language }
-            .map { it.lemma.lowercase() }
-            .toSet()
+            val suggestions = mutableListOf<String>()
+            val seenSuggestions = HashSet<String>()
+            val batchSize = 100L
+            val maxAttempts = 10
 
-        val suggestions = mutableListOf<String>()
-        val seenSuggestions = HashSet<String>()
-        val batchSize = 100L
-        val maxAttempts = 10
+            repeat(maxAttempts) {
+                if (suggestions.size >= count) return@repeat
+                val randomOffset = (0..offset).random().toLong()
 
-        repeat(maxAttempts) {
-            if (suggestions.size >= count) return@repeat
-            val offset = (0..offset).random().toLong()
+                val batch = q.selectTopFrequentLemmas(
+                    language.code,
+                    listOf(DictionaryPos.NAME),
+                    batchSize,
+                    randomOffset
+                ).executeAsList()
+                if (batch.isEmpty()) return@repeat
 
-            val batch = q.selectTopFrequentLemmas(
-                language.code,
-                listOf(DictionaryPos.NAME),
-                batchSize,
-                offset
-            ).executeAsList()
-            if (batch.isEmpty()) return@repeat
-
-            // Sample non-favorite rows with gaps, then fill remaining from unused candidates.
-            val candidates = batch.filter { it.lemma.lowercase() !in favoriteLemmas }
-            if (candidates.isNotEmpty()) {
-                val startIndex = (0 until candidates.size).random()
-                var index = startIndex
-                val step = (2..50).random()
-                while (suggestions.size < count && index < candidates.size) {
-                    val lemma = candidates[index].lemma
-                    val key = lemma.lowercase()
-                    if (seenSuggestions.add(key)) {
-                        suggestions.add(lemma)
-                    }
-                    index += step
-                }
-                if (suggestions.size < count) {
-                    for (i in candidates.indices) {
-                        if (suggestions.size >= count) break
-                        val lemma = candidates[i].lemma
+                // Sample non-favorite rows with gaps, then fill remaining from unused candidates.
+                val candidates = batch.filter { it.lemma.lowercase() !in favoriteLemmas }
+                if (candidates.isNotEmpty()) {
+                    val startIndex = (0 until candidates.size).random()
+                    var index = startIndex
+                    val step = (2..50).random()
+                    while (suggestions.size < count && index < candidates.size) {
+                        val lemma = candidates[index].lemma
                         val key = lemma.lowercase()
                         if (seenSuggestions.add(key)) {
                             suggestions.add(lemma)
                         }
+                        index += step
+                    }
+                    if (suggestions.size < count) {
+                        for (i in candidates.indices) {
+                            if (suggestions.size >= count) break
+                            val lemma = candidates[i].lemma
+                            val key = lemma.lowercase()
+                            if (seenSuggestions.add(key)) {
+                                suggestions.add(lemma)
+                            }
+                        }
                     }
                 }
             }
-        }
 
-        suggestions.take(count)
+            suggestions.take(count)
+        }
     }
 
     /**
@@ -1133,28 +1246,39 @@ class DictionaryRepository(
         val matchingSenseIds = mutableSetOf<String>()
         val installedTargets = installedTranslationTargets(sourceLanguage)
 
-        // Search downloaded translation DBs for installed targets
+        // Search downloaded translation DBs for installed targets. Existence is checked inside
+        // the IfExists lease so no TOCTOU.
         for (targetLang in installedTargets) {
             currentCoroutineContext().ensureActive()
-            if (dataDbManager.hasTranslation(sourceLanguage, targetLang)) {
-                val translationQueries = dataDbManager.openTranslationReadOnly(sourceLanguage, targetLang)
-                    .translationQueries
-
-                val results =
-                    searchSensesByTranslations(translationQueries, sourceLanguage, prefixStart, prefixEnd, senseUuids)
-                matchingSenseIds.addAll(results.map { it.toString() })
+            dataDbManager.withTranslationReadOnlyIfExists(sourceLanguage, targetLang) { transDb ->
+                if (transDb != null) {
+                    val results = searchSensesByTranslations(
+                        transDb.translationQueries,
+                        sourceLanguage,
+                        prefixStart,
+                        prefixEnd,
+                        senseUuids,
+                    )
+                    matchingSenseIds.addAll(results.map { it.toString() })
+                }
             }
         }
 
         currentCoroutineContext().ensureActive()
 
-        // Search the local translation DB
-        if (localDbManager.hasLocalTranslation()) {
-            val localTransDb = localDbManager.openLocalTranslation()
-            val translationQueries = localTransDb.translationQueries
-            val results =
-                searchSensesByTranslations(translationQueries, sourceLanguage, prefixStart, prefixEnd, senseUuids)
-            matchingSenseIds.addAll(results.map { it.toString() })
+        // Search the local translation DB under a read lease so a concurrent deleteAll cannot
+        // tear it down mid-read. The existence check happens inside the lease (no TOCTOU).
+        localDbManager.withLocalTranslationIfExists { localTransDb ->
+            if (localTransDb != null) {
+                val results = searchSensesByTranslations(
+                    localTransDb.translationQueries,
+                    sourceLanguage,
+                    prefixStart,
+                    prefixEnd,
+                    senseUuids,
+                )
+                matchingSenseIds.addAll(results.map { it.toString() })
+            }
         }
         matchingSenseIds
     }
@@ -1233,15 +1357,16 @@ class DictionaryRepository(
         var result = out.take(maxItems)
         val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
         if (onlineOnlyIds.isNotEmpty()) {
-            val localLemmaIds = if (localDbManager.hasLocalDictionary()) {
-                val localDb = localDbManager.openLocalDictionary()
-                localDb.dictionaryQueries
-                    .selectLemmasByIds(onlineOnlyIds)
-                    .executeAsList()
-                    .map { it.id }
-                    .toSet()
-            } else {
-                emptySet()
+            val localLemmaIds: Set<Uuid> = localDbManager.withLocalDictionaryIfExists { localDb ->
+                if (localDb == null) {
+                    emptySet()
+                } else {
+                    localDb.dictionaryQueries
+                        .selectLemmasByIds(onlineOnlyIds)
+                        .executeAsList()
+                        .map { it.id }
+                        .toSet()
+                }
             }
 
             result = result.map { item ->

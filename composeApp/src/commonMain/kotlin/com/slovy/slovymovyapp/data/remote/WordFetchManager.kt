@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,6 +25,10 @@ import kotlin.concurrent.Volatile
 class WordFetchManager(
     private val dictionaryClient: DictionaryClient
 ) {
+    companion object {
+        private const val TAG = "WordFetchManager"
+    }
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val activeFetches = mutableMapOf<FetchKey, FetchEntry>()
     private val mutex = Mutex()
@@ -80,16 +85,42 @@ class WordFetchManager(
         val entry = FetchEntry(sharedFlow)
         activeFetches[key] = entry
 
-        // Start collecting from DictionaryClient and forwarding to SharedFlow
+        // Start collecting from DictionaryClient and forwarding to SharedFlow. The try/catch
+        // around the collect is the final safety net: an uncaught exception here would otherwise
+        // escape `scope.launch` and, on Kotlin/Native worker threads, abort the process. Any
+        // exception is logged and surfaced as a terminal error WordResult so subscribers learn
+        // the fetch failed instead of just hanging on a stalled SharedFlow.
         scope.launch {
-            dictionaryClient.getWord(language, normalizedLemma, normalizedTargets, pushToRepo)
-                .onCompletion {
-                    // Mark as complete - will be removed on next getWord call
-                    entry.isComplete = true
-                }
-                .collect { result ->
-                    sharedFlow.emit(result)
-                }
+            try {
+                dictionaryClient.getWord(language, normalizedLemma, normalizedTargets, pushToRepo)
+                    .onCompletion {
+                        // Mark as complete - will be removed on next getWord call
+                        entry.isComplete = true
+                    }
+                    .collect { result ->
+                        sharedFlow.emit(result)
+                    }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                AppLogger.error(
+                    TAG,
+                    "WordFetch failed: lemma='$normalizedLemma' lang=${language.code}",
+                    e,
+                )
+                sharedFlow.emit(
+                    WordResult(
+                        card = null,
+                        isWordLoading = false,
+                        isTranslationLoading = false,
+                        error = DictionaryClientException.NetworkException(
+                            "Unexpected error while fetching '$normalizedLemma'",
+                            e,
+                        ),
+                    )
+                )
+                entry.isComplete = true
+            }
         }
 
         sharedFlow
