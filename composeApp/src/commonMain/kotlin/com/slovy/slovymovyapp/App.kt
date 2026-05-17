@@ -13,6 +13,9 @@ import androidx.compose.ui.text.intl.Locale
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.PerformanceTrace
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
@@ -107,16 +110,19 @@ internal class FavoritesReviewCoordinator(
         statsService: StatsService,
     ): FavoritesReviewState = refreshMutex.withLock {
         if (!enabled) return@withLock FavoritesReviewState(emptyMap())
-        withContext(Dispatchers.Default) {
-            val languages = favoritesRepository.getAllGroupedByLangAndLemma()
-                .map { it.language }
-                .distinct()
-            FavoritesReviewState(
-                reviewByLanguage = languages.associateWith { language ->
+        PerformanceMonitoring.startTrace("favorites_review_due_counts").useWithResult {
+            withContext(Dispatchers.Default) {
+                val languages = favoritesRepository.getAllGroupedByLangAndLemma()
+                    .map { it.language }
+                    .distinct()
+                putMetric("languages", languages.size.toLong())
+                val reviewByLanguage = languages.associateWith { language ->
                     statsService.reviewQueueStats(language.code)
                         .toFavoriteLanguageReviewState(language, intakeService)
-                },
-            )
+                }
+                putReviewStateMetrics(reviewByLanguage)
+                FavoritesReviewState(reviewByLanguage = reviewByLanguage)
+            }
         }
     }
 
@@ -132,22 +138,30 @@ internal class FavoritesReviewCoordinator(
         favoritesRepository: FavoritesRepository,
         intakeService: LearningIntake,
         statsService: StatsService,
-    ): FavoritesReviewState = withContext(Dispatchers.Default) {
-        val languages = favoritesRepository.getAllGroupedByLangAndLemma()
-            .map { it.language }
-            .distinct()
-        languages.forEach { language ->
-            if (shouldRunIntake(language)) {
-                intakeService.runIntake(language.code)
-                markIntakeRun(language)
+    ): FavoritesReviewState = PerformanceMonitoring.startTrace("favorites_review_compute_state").useWithResult {
+        withContext(Dispatchers.Default) {
+            val favorites = favoritesRepository.getAllGroupedByLangAndLemma()
+            val languages = favorites
+                .map { it.language }
+                .distinct()
+            putMetric("favorites", favorites.size.toLong())
+            putMetric("languages", languages.size.toLong())
+            var intakeRuns = 0L
+            languages.forEach { language ->
+                if (shouldRunIntake(language)) {
+                    intakeService.runIntake(language.code)
+                    markIntakeRun(language)
+                    intakeRuns += 1
+                }
             }
-        }
-        FavoritesReviewState(
-            reviewByLanguage = languages.associateWith { language ->
+            putMetric("intake_runs", intakeRuns)
+            val reviewByLanguage = languages.associateWith { language ->
                 statsService.reviewQueueStats(language.code)
                     .toFavoriteLanguageReviewState(language, intakeService)
-            },
-        )
+            }
+            putReviewStateMetrics(reviewByLanguage)
+            FavoritesReviewState(reviewByLanguage = reviewByLanguage)
+        }
     }
 
     private fun ReviewQueueStats.toFavoriteLanguageReviewState(
@@ -190,6 +204,14 @@ private fun FavoritesReviewState.toFavoriteLanguageReviewUiState(): Map<Language
             nextReviewAtEpochMs = reviewState.nextReviewAtEpochMs,
         )
     }
+
+private fun PerformanceTrace.putReviewStateMetrics(reviewByLanguage: Map<Language, FavoriteLanguageReviewState>) {
+    putMetric("due_cards", reviewByLanguage.values.sumOf { it.dueCount }.toLong())
+    putMetric("active_cards", reviewByLanguage.values.sumOf { it.activeCardCount }.toLong())
+    putMetric("delayed_due_lemmas", reviewByLanguage.values.sumOf { it.delayedDueLemmaCount }.toLong())
+    putMetric("delayed_due_cards", reviewByLanguage.values.sumOf { it.delayedDueCardCount }.toLong())
+    putMetric("pending_favorite_lemmas", reviewByLanguage.values.sumOf { it.pendingFavoriteLemmaCount }.toLong())
+}
 
 @Serializable
 private sealed interface AppDestination {

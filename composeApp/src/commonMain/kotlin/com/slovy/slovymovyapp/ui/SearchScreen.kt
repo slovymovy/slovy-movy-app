@@ -39,6 +39,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.settings.Setting
@@ -118,7 +121,18 @@ class SearchViewModel(
                         val results = if (query.isEmpty()) {
                             emptyList()
                         } else {
-                            repository.search(query, queryState.language)
+                            PerformanceMonitoring.startTrace("word_search").useWithResult {
+                                putAttributes(
+                                    mapOf(
+                                        "lang" to (queryState.language?.code ?: "any"),
+                                    ),
+                                )
+                                putMetric("query_length", query.length.toLong())
+                                repository.search(query, queryState.language).also { searchResults ->
+                                    putMetric("result_count", searchResults.size.toLong())
+                                    putAttribute("has_results", searchResults.isNotEmpty().toString())
+                                }
+                            }
                         }
                         emit(results)
                     }.flowOn(Dispatchers.Default) // Run search on background thread

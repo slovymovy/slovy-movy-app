@@ -1,5 +1,8 @@
 package com.slovy.slovymovyapp.data.remote
 
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.*
@@ -91,38 +94,56 @@ class WordFetchManager(
         // exception is logged and surfaced as a terminal error WordResult so subscribers learn
         // the fetch failed instead of just hanging on a stalled SharedFlow.
         scope.launch {
-            try {
-                dictionaryClient.getWord(language, normalizedLemma, normalizedTargets, pushToRepo)
-                    .onCompletion {
-                        // Mark as complete - will be removed on next getWord call
-                        entry.isComplete = true
-                    }
-                    .collect { result ->
-                        sharedFlow.emit(result)
-                    }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Throwable) {
-                AppLogger.error(
-                    TAG,
-                    "WordFetch failed: lemma='$normalizedLemma' lang=${language.code}",
-                    e,
-                )
-                sharedFlow.emit(
-                    WordResult(
-                        card = null,
-                        isWordLoading = false,
-                        isTranslationLoading = false,
-                        error = DictionaryClientException.NetworkException(
-                            "Unexpected error while fetching '$normalizedLemma'",
-                            e,
-                        ),
+            PerformanceMonitoring.startTrace("word_fetch_manager_get_word").useWithResult {
+                putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo))
+                var emissions = 0L
+                try {
+                    dictionaryClient.getWord(language, normalizedLemma, normalizedTargets, pushToRepo)
+                        .onCompletion {
+                            // Mark as complete - will be removed on next getWord call
+                            entry.isComplete = true
+                        }
+                        .collect { result ->
+                            emissions += 1
+                            sharedFlow.emit(result)
+                        }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Throwable) {
+                    markResult("failed")
+                    AppLogger.error(
+                        TAG,
+                        "WordFetch failed: lemma='$normalizedLemma' lang=${language.code}",
+                        e,
                     )
-                )
-                entry.isComplete = true
+                    sharedFlow.emit(
+                        WordResult(
+                            card = null,
+                            isWordLoading = false,
+                            isTranslationLoading = false,
+                            error = DictionaryClientException.NetworkException(
+                                "Unexpected error while fetching '$normalizedLemma'",
+                                e,
+                            ),
+                        )
+                    )
+                    entry.isComplete = true
+                } finally {
+                    putMetric("emissions", emissions)
+                }
             }
         }
 
         sharedFlow
     }
+
+    private fun fetchTraceAttributes(
+        language: Language,
+        translationTargets: List<Language>,
+        pushToRepo: Boolean
+    ): Map<String, Any> = mapOf(
+        "lang" to language.code,
+        "target_count" to translationTargets.size,
+        "push_to_repo" to pushToRepo
+    )
 }

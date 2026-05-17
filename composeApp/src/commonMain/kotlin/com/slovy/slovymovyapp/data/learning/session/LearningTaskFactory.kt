@@ -1,5 +1,8 @@
 package com.slovy.slovymovyapp.data.learning.session
 
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.use
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardKind
@@ -62,12 +65,28 @@ fun selectVariantsForReview(
     translationTargets: List<Language>,
     cardStability: Duration,
     lastVariant: CardVariant?,
-): List<CardVariant> {
+): List<CardVariant> = PerformanceMonitoring.startTrace("learning_select_variants_for_review").use { trace ->
+    trace.putAttributes(
+        mapOf(
+            "family" to family.name.lowercase(),
+            "last_variant_present" to (lastVariant != null),
+        ),
+    )
+    trace.putMetric("translation_targets", translationTargets.distinctBy { it.code }.size.toLong())
+    trace.putMetric("examples", sense.examples.size.toLong())
+    trace.putMetric("stability_ms", cardStability.inWholeMilliseconds)
+
     val all = buildTaskVariants(family, sense, translationTargets)
     val gated = all.filter { it.kind.minStability <= cardStability }
-    val pool = if (gated.isEmpty() && all.isNotEmpty()) all else gated
+    val fallbackToAll = gated.isEmpty() && all.isNotEmpty()
+    val pool = if (fallbackToAll) all else gated
 
-    return pool.sortedWith(
+    trace.putMetric("all_variants", all.size.toLong())
+    trace.putMetric("gated_variants", gated.size.toLong())
+    trace.putMetric("selected_variants", pool.size.toLong())
+    trace.putAttribute("fallback_to_all", fallbackToAll.toString())
+
+    pool.sortedWith(
         compareBy<CardVariant> { variant ->
             if (lastVariant != null &&
                 lastVariant.kind == variant.kind &&

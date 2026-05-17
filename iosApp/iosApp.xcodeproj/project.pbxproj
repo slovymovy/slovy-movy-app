@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FBE7E8A92F953E3200533A88 /* FirebasePerformance in Frameworks */ = {isa = PBXBuildFile; productRef = FBE7E8A82F953E3200533A88 /* FirebasePerformance */; };
 		FBE7E8A32F953E3200533A88 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBE7E8A22F953E3200533A88 /* FirebaseAnalytics */; };
 		FBE7E8A52F953E3200533A88 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = FBE7E8A42F953E3200533A88 /* FirebaseAppCheck */; };
 		FBE7E8A72F953E3200533A88 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBE7E8A62F953E3200533A88 /* FirebaseCrashlytics */; };
@@ -47,6 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBE7E8A92F953E3200533A88 /* FirebasePerformance in Frameworks */,
 				FBE7E8A72F953E3200533A88 /* FirebaseCrashlytics in Frameworks */,
 				FBE7E8A52F953E3200533A88 /* FirebaseAppCheck in Frameworks */,
 				FBE7E8A32F953E3200533A88 /* FirebaseAnalytics in Frameworks */,
@@ -98,6 +100,7 @@
 				FBE7E8A22F953E3200533A88 /* FirebaseAnalytics */,
 				FBE7E8A42F953E3200533A88 /* FirebaseAppCheck */,
 				FBE7E8A62F953E3200533A88 /* FirebaseCrashlytics */,
+				FBE7E8A82F953E3200533A88 /* FirebasePerformance */,
 			);
 			productName = iosApp;
 			productReference = B9DA97B12DC1472C00A4DA20 /* SlovyMovy.app */;
@@ -445,6 +448,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = FBE7E8A12F953E3200533A88 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
+		};
+		FBE7E8A82F953E3200533A88 /* FirebasePerformance */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FBE7E8A12F953E3200533A88 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebasePerformance;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

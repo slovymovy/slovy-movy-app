@@ -1,5 +1,8 @@
 package com.slovy.slovymovyapp.data.learning.stats
 
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.use
 import com.slovy.slovymovyapp.data.learning.CardState
 import com.slovy.slovymovyapp.data.learning.fsrs.DAY
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
@@ -26,7 +29,8 @@ class StatsService(
         viewMonth: StatsYearMonth,
         today: LocalDate,
         timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    ): StatsScreenData {
+    ): StatsScreenData = PerformanceMonitoring.startTrace("stats_screen_data").use { trace ->
+        trace.putAttributes(mapOf("lang" to langCode))
         val todayStartMs = today.atStartOfDayIn(timeZone).toEpochMilliseconds()
         val tomorrowStartMs = today.plus(1, DateTimeUnit.DAY).atStartOfDayIn(timeZone).toEpochMilliseconds()
         val weekStartDate = today.minus(today.dayOfWeek.ordinal, DateTimeUnit.DAY)
@@ -84,7 +88,12 @@ class StatsService(
         val delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, nowMs).executeAsOne().toInt()
         val delayedDueCardCount = learning.countDelayedDueCardsByLang(langCode, nowMs).executeAsOne().toInt()
 
-        return StatsScreenData(
+        trace.putMetric("card_rows", cardRows.size.toLong())
+        trace.putMetric("queued_lemmas", queuedLemmas.size.toLong())
+        trace.putMetric("words_total", wordsTotal.toLong())
+        trace.putMetric("reviews_today", reviewsToday.toLong())
+        trace.putMetric("delayed_due_lemmas", delayedDueLemmaCount.toLong())
+        StatsScreenData(
             streakDays = streakDays,
             practiceLog = practiceLog,
             reviewsToday = reviewsToday,

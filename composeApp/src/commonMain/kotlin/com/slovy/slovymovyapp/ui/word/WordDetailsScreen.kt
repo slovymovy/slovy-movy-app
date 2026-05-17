@@ -34,6 +34,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
@@ -544,17 +547,25 @@ class WordDetailViewModel(
         viewModelScope.launch {
             dictionaryLanguage.let { lang ->
                 val params = mapOf<String, Any>("lang" to lang.code, "source" to "word_detail")
-                val added = if (senseId in favoriteSenses) {
-                    favoritesRepository.remove(senseId, lang)
-                    Analytics.logEvent(AnalyticsEvent.FAVORITES_REMOVE, params)
-                    false
-                } else {
-                    favoritesRepository.add(senseId, lang, lemma)
-                    Analytics.logEvent(AnalyticsEvent.FAVORITES_SAVE, params)
-                    true
+                val isRemoving = senseId in favoriteSenses
+                val traceName = if (isRemoving) "favorite_remove" else "favorite_add"
+                PerformanceMonitoring.startTrace(traceName).useWithResult {
+                    putAttributes(params)
+                    val added = if (isRemoving) {
+                        favoritesRepository.remove(senseId, lang)
+                        putMetric("favorites_removed", 1L)
+                        Analytics.logEvent(AnalyticsEvent.FAVORITES_REMOVE, params)
+                        false
+                    } else {
+                        favoritesRepository.add(senseId, lang, lemma)
+                        putMetric("favorites_added", 1L)
+                        Analytics.logEvent(AnalyticsEvent.FAVORITES_SAVE, params)
+                        true
+                    }
+                    onFavoriteChanged?.invoke(added)
+                    loadFavorites()
+                    putMetric("favorite_senses", favoriteSenses.size.toLong())
                 }
-                onFavoriteChanged?.invoke(added)
-                loadFavorites()
             }
         }
     }
