@@ -94,21 +94,20 @@ class DataDbManager(
     }
 
     suspend fun deleteDictionary(lang: Language) {
-        // Close cached connections before deleting files
-        databaseCache.closeAllForLanguage(lang)
+        // Drain active leases, close drivers, then delete files while new leases stay blocked.
+        databaseCache.closeAllForLanguageGuarded(lang) {
+            val name = dictionaryFileName(lang)
+            platform.deleteFile(platform.getDatabasePath(name))
 
-        // Delete the dictionary
-        val name = dictionaryFileName(lang)
-        platform.deleteFile(platform.getDatabasePath(name))
-
-        // Also delete all translations that use this language as the source
-        val allLanguages = Language.entries
-        allLanguages.forEach { targetLang ->
-            if (targetLang != lang) {
-                val transName = translationFileName(lang, targetLang)
-                val transPath = platform.getDatabasePath(transName)
-                if (platform.fileExists(transPath)) {
-                    platform.deleteFile(transPath)
+            // Also delete all translations that use this language as the source
+            val allLanguages = Language.entries
+            allLanguages.forEach { targetLang ->
+                if (targetLang != lang) {
+                    val transName = translationFileName(lang, targetLang)
+                    val transPath = platform.getDatabasePath(transName)
+                    if (platform.fileExists(transPath)) {
+                        platform.deleteFile(transPath)
+                    }
                 }
             }
         }
@@ -125,11 +124,11 @@ class DataDbManager(
     }
 
     suspend fun deleteTranslation(src: Language, tgt: Language) {
-        // Close cached connection before deleting file
-        databaseCache.closeTranslation(src, tgt)
-
-        val name = translationFileName(src, tgt)
-        platform.deleteFile(platform.getDatabasePath(name))
+        // Drain active leases, close driver, then delete file while new leases stay blocked.
+        databaseCache.closeTranslationGuarded(src, tgt) {
+            val name = translationFileName(src, tgt)
+            platform.deleteFile(platform.getDatabasePath(name))
+        }
     }
 
     /**
@@ -139,38 +138,41 @@ class DataDbManager(
      * routing can correctly send the user back through the download flow.
      */
     suspend fun cleanupCorruptDownloadedDbs() {
-        databaseCache.closeAll()
+        // Drain active leases on every cached DB, close drivers, then run the cleanup with new
+        // leases still blocked so we never race with a reader probing or growing a Pool.
+        databaseCache.closeAllGuarded {
+            val databasesDir = platform.getDatabasePath("")
+            if (!platform.fileExists(databasesDir)) return@closeAllGuarded
 
-        val databasesDir = platform.getDatabasePath("")
-        if (!platform.fileExists(databasesDir)) return
+            val files = platform.listFiles(databasesDir)
+            files.forEach { file ->
+                val fileName = file.name
+                val isDownloadedDb =
+                    fileName.startsWith(DICTIONARY_PREFIX) || fileName.startsWith(TRANSLATION_PREFIX)
+                if (!isDownloadedDb) return@forEach
 
-        val files = platform.listFiles(databasesDir)
-        files.forEach { file ->
-            val fileName = file.name
-            val isDownloadedDb = fileName.startsWith(DICTIONARY_PREFIX) || fileName.startsWith(TRANSLATION_PREFIX)
-            if (!isDownloadedDb) return@forEach
+                if (fileName.endsWith(PART_SUFFIX)) {
+                    platform.deleteFile(file)
+                    return@forEach
+                }
 
-            if (fileName.endsWith(PART_SUFFIX)) {
-                platform.deleteFile(file)
-                return@forEach
-            }
+                val size = platform.getFileSize(file)
+                if (size != null && size < MIN_VALID_DOWNLOADED_DB_BYTES) {
+                    platform.deleteFile(file)
+                    return@forEach
+                }
 
-            val size = platform.getFileSize(file)
-            if (size != null && size < MIN_VALID_DOWNLOADED_DB_BYTES) {
-                platform.deleteFile(file)
-                return@forEach
-            }
-
-            // Size alone won't catch a truncated download that landed past the 16 KB mark but
-            // lost the page holding the schema entry. Open the file and confirm the must-exist
-            // table is present.
-            val schemaOk = if (fileName.startsWith(DICTIONARY_PREFIX)) {
-                probeDownloadedDb(file, isDictionary = true)
-            } else {
-                probeDownloadedDb(file, isDictionary = false)
-            }
-            if (!schemaOk) {
-                platform.deleteFile(file)
+                // Size alone won't catch a truncated download that landed past the 16 KB mark but
+                // lost the page holding the schema entry. Open the file and confirm the must-exist
+                // table is present.
+                val schemaOk = if (fileName.startsWith(DICTIONARY_PREFIX)) {
+                    probeDownloadedDb(file, isDictionary = true)
+                } else {
+                    probeDownloadedDb(file, isDictionary = false)
+                }
+                if (!schemaOk) {
+                    platform.deleteFile(file)
+                }
             }
         }
     }
@@ -221,18 +223,18 @@ class DataDbManager(
      * Used when data version changes.
      */
     suspend fun deleteAllDownloadedData() {
-        // Close all cached connections before deleting files
-        databaseCache.closeAll()
-
-        val databasesDir = platform.getDatabasePath("")
-        val files = platform.listFiles(databasesDir)
-        files.forEach { file ->
-            val fileName = file.name
-            if (fileName.startsWith(DICTIONARY_PREFIX) || fileName.startsWith(TRANSLATION_PREFIX)) {
-                platform.deleteFile(file)
+        // Drain active leases, close every cached driver, then delete files while new leases stay blocked.
+        databaseCache.closeAllGuarded {
+            val databasesDir = platform.getDatabasePath("")
+            val files = platform.listFiles(databasesDir)
+            files.forEach { file ->
+                val fileName = file.name
+                if (fileName.startsWith(DICTIONARY_PREFIX) || fileName.startsWith(TRANSLATION_PREFIX)) {
+                    platform.deleteFile(file)
+                }
             }
+            clearVersion()
         }
-        clearVersion()
     }
 
     /**
@@ -269,14 +271,64 @@ class DataDbManager(
         return platform.fileExists(platform.getDatabasePath(translationFileName(src, tgt)))
     }
 
-    suspend fun openDictionaryReadOnly(lang: Language): DictionaryDatabase {
-        if (!hasDictionary(lang)) throw IllegalArgumentException("Dictionary for language $lang does not exist")
-        return databaseCache.getDictionary(lang)
+    /**
+     * Returns a short string describing the downloaded dictionary file for [lang]: path, whether
+     * it exists, and its size in bytes. Used in error-log diagnostics so Crashlytics reports
+     * include enough context to confirm whether a SQLite failure correlates with file deletion or
+     * truncation under an in-flight reader.
+     */
+    fun dictionaryDiagnostics(lang: Language): String {
+        val path = platform.getDatabasePath(dictionaryFileName(lang))
+        val exists = platform.fileExists(path)
+        val size = if (exists) platform.getFileSize(path) else null
+        return "dictPath=$path exists=$exists size=$size"
     }
 
-    suspend fun openTranslationReadOnly(src: Language, tgt: Language): TranslationDatabase {
-        if (!hasTranslation(src, tgt)) throw IllegalArgumentException("Translation from $src to $tgt does not exist")
-        return databaseCache.getTranslation(src, tgt)
+    /**
+     * Read-mode lease on the downloaded RO dictionary for [lang]. Passes the database to [block],
+     * or `null` if the file does not exist on disk. Any concurrent close (e.g.,
+     * [deleteDictionary], [deleteAllDownloadedData]) waits for [block] to return before deleting
+     * the file — SQLite's Pool inside the driver cannot open new connections to a file that's
+     * about to be unlinked.
+     *
+     * Existence is checked inside the cache's read lock so it cannot race with a concurrent
+     * close. Use this variant whenever a missing DB is a normal "no rows" outcome.
+     */
+    suspend fun <T> withDictionaryReadOnlyIfExists(
+        lang: Language,
+        block: suspend (DictionaryDatabase?) -> T,
+    ): T = databaseCache.withDictionaryIfExists(lang, block)
+
+    /**
+     * Read-mode lease on the downloaded RO translation. See [withDictionaryReadOnlyIfExists].
+     */
+    suspend fun <T> withTranslationReadOnlyIfExists(
+        src: Language,
+        tgt: Language,
+        block: suspend (TranslationDatabase?) -> T,
+    ): T = databaseCache.withTranslationIfExists(src, tgt, block)
+
+    /**
+     * Like [withDictionaryReadOnlyIfExists] but throws [IllegalArgumentException] when the file
+     * is absent. Convenience for callers that have already enumerated installed dictionaries and
+     * want to fail fast on a stale reference.
+     */
+    suspend fun <T> withDictionaryReadOnly(
+        lang: Language,
+        block: suspend (DictionaryDatabase) -> T,
+    ): T = withDictionaryReadOnlyIfExists(lang) { db ->
+        if (db == null) throw IllegalArgumentException("Dictionary for language $lang does not exist")
+        block(db)
+    }
+
+    /** See [withDictionaryReadOnly]. */
+    suspend fun <T> withTranslationReadOnly(
+        src: Language,
+        tgt: Language,
+        block: suspend (TranslationDatabase) -> T,
+    ): T = withTranslationReadOnlyIfExists(src, tgt) { db ->
+        if (db == null) throw IllegalArgumentException("Translation from $src to $tgt does not exist")
+        block(db)
     }
 
     /**
@@ -288,18 +340,20 @@ class DataDbManager(
         normalizedLemmas: Set<String>,
     ): Set<String> = withContext(Dispatchers.IO) {
         if (normalizedLemmas.isEmpty()) return@withContext emptySet()
-        if (!hasDictionary(language)) return@withContext emptySet()
-        val queries = openDictionaryReadOnly(language).dictionaryQueries
-        val rowsByLemma = normalizedLemmas.chunked(999)
-            .flatMap { chunk -> queries.selectLemmasByNormalizedWords(language.code, chunk).executeAsList() }
-            .groupBy { it.lemma_normalized.lowercase() }
+        withDictionaryReadOnlyIfExists(language) { db ->
+            if (db == null) return@withDictionaryReadOnlyIfExists emptySet()
+            val queries = db.dictionaryQueries
+            val rowsByLemma = normalizedLemmas.chunked(999)
+                .flatMap { chunk -> queries.selectLemmasByNormalizedWords(language.code, chunk).executeAsList() }
+                .groupBy { it.lemma_normalized.lowercase() }
 
-        val missingLemmas = normalizedLemmas - rowsByLemma.keys
-        val onlineOnlyLemmas = rowsByLemma
-            .filterValues { rows -> rows.isNotEmpty() && rows.all { it.online_only } }
-            .keys
+            val missingLemmas = normalizedLemmas - rowsByLemma.keys
+            val onlineOnlyLemmas = rowsByLemma
+                .filterValues { rows -> rows.isNotEmpty() && rows.all { it.online_only } }
+                .keys
 
-        missingLemmas + onlineOnlyLemmas
+            missingLemmas + onlineOnlyLemmas
+        }
     }
 
     /**
@@ -329,33 +383,37 @@ class DataDbManager(
             val remaining = senseIdsByNormalizedLemma.keys - needsRecovery
             if (remaining.isEmpty()) break
 
-            if (!hasTranslation(language, target)) {
-                // No translation file at all → every favorite lemma in this language needs the target fetched.
-                needsRecovery += remaining
-                continue
-            }
-
-            val queries = openTranslationReadOnly(language, target).translationQueries
-            val parsedSenseIds: List<Uuid> = remaining.flatMap { lemma ->
-                (senseIdsByNormalizedLemma[lemma] ?: emptySet()).mapNotNull { raw ->
-                    runCatching { Uuid.parse(raw) }.getOrNull()
+            // Existence check happens inside the IfExists lease — no TOCTOU between
+            // hasTranslation() and opening the DB.
+            withTranslationReadOnlyIfExists(language, target) { db ->
+                if (db == null) {
+                    // No translation file → every favorite lemma in this language needs the
+                    // target fetched.
+                    needsRecovery += remaining
+                    return@withTranslationReadOnlyIfExists
                 }
-            }.distinct()
+                val queries = db.translationQueries
+                val parsedSenseIds: List<Uuid> = remaining.flatMap { lemma ->
+                    (senseIdsByNormalizedLemma[lemma] ?: emptySet()).mapNotNull { raw ->
+                        runCatching { Uuid.parse(raw) }.getOrNull()
+                    }
+                }.distinct()
 
-            val present: Set<Uuid> = parsedSenseIds.chunked(999)
-                .flatMap { chunk ->
-                    queries.selectSenseTranslationsBySenseIds(chunk, language.code, target.code).executeAsList()
-                }
-                .map { it.sense_id }
-                .toSet()
+                val present: Set<Uuid> = parsedSenseIds.chunked(999)
+                    .flatMap { chunk ->
+                        queries.selectSenseTranslationsBySenseIds(chunk, language.code, target.code).executeAsList()
+                    }
+                    .map { it.sense_id }
+                    .toSet()
 
-            for (lemma in remaining) {
-                val needed = senseIdsByNormalizedLemma[lemma] ?: continue
-                val anyMissing = needed.any { raw ->
-                    val parsed = runCatching { Uuid.parse(raw) }.getOrNull() ?: return@any true
-                    parsed !in present
+                for (lemma in remaining) {
+                    val needed = senseIdsByNormalizedLemma[lemma] ?: continue
+                    val anyMissing = needed.any { raw ->
+                        val parsed = runCatching { Uuid.parse(raw) }.getOrNull() ?: return@any true
+                        parsed !in present
+                    }
+                    if (anyMissing) needsRecovery += lemma
                 }
-                if (anyMissing) needsRecovery += lemma
             }
         }
         needsRecovery

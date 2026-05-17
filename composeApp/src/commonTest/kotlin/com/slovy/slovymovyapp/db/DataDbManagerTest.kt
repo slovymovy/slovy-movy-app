@@ -54,8 +54,8 @@ class DataDbManagerTest : BaseTest() {
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
             // open read-only — should not throw
-            runBlocking { mgr.openTranslationReadOnly(Language.DUTCH, Language.ENGLISH) }
-            runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
+            runBlocking { mgr.withTranslationReadOnly(Language.DUTCH, Language.ENGLISH) { /* no-op */ } }
+            runBlocking { mgr.withDictionaryReadOnly(Language.ENGLISH) { /* no-op */ } }
         } finally {
             runBlocking {
                 mgr.deleteDictionary(Language.ENGLISH)
@@ -162,16 +162,20 @@ class DataDbManagerTest : BaseTest() {
             assertTrue(platform.fileExists(tr), "Translation file should exist: $tr")
 
             // Open dictionary and search for 'bu' prefix
-            val db = runBlocking { mgr.openDictionaryReadOnly(Language.ENGLISH) }
-            val q = db.dictionaryQueries
+            runBlocking {
+                mgr.withDictionaryReadOnly(Language.ENGLISH) { db ->
+                    val q = db.dictionaryQueries
 
-            val (buStart, buEnd) = prefixRange("bu*")
-            val lemmaLike = q.selectLemmasNormalizedLike("en", buStart, buEnd, 20).executeAsList().map { it.lemma }
-            assertTrue(lemmaLike.isNotEmpty(), "English dictionary should contain lemmas starting with 'bu'")
+                    val (buStart, buEnd) = prefixRange("bu*")
+                    val lemmaLike =
+                        q.selectLemmasNormalizedLike("en", buStart, buEnd, 20).executeAsList().map { it.lemma }
+                    assertTrue(lemmaLike.isNotEmpty(), "English dictionary should contain lemmas starting with 'bu'")
 
-            val formLike =
-                q.selectLemmasFromFormsNormalizedLike("en", buStart, buEnd, 20).executeAsList().map { it.form }
-            assertTrue(formLike.isNotEmpty(), "Form prefix 'bu' should return at least one match")
+                    val formLike =
+                        q.selectLemmasFromFormsNormalizedLike("en", buStart, buEnd, 20).executeAsList().map { it.form }
+                    assertTrue(formLike.isNotEmpty(), "Form prefix 'bu' should return at least one match")
+                }
+            }
         } finally {
             // Clean up to keep environment tidy
             runBlocking {

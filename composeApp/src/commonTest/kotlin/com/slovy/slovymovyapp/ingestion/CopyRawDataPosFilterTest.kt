@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -119,7 +120,7 @@ class CopyRawDataPosFilterTest : BaseTest() {
             assertEquals(0, adjHints.size, "ADJECTIVE sense hint should NOT be copied (filtered)")
         } finally {
             sourceDriver?.close()
-            mgr.closeAll()
+            runBlocking { mgr.closeAll() }
             if (platform.fileExists(sourcePath)) platform.deleteFile(sourcePath)
             if (platform.fileExists(targetPath)) platform.deleteFile(targetPath)
         }
@@ -178,7 +179,7 @@ class CopyRawDataPosFilterTest : BaseTest() {
             assertEquals(2, targetPosEntries.size, "Should have all 2 POS entries when no filter")
         } finally {
             sourceDriver?.close()
-            mgr.closeAll()
+            runBlocking { mgr.closeAll() }
             if (platform.fileExists(sourcePath)) platform.deleteFile(sourcePath)
             if (platform.fileExists(targetPath)) platform.deleteFile(targetPath)
         }

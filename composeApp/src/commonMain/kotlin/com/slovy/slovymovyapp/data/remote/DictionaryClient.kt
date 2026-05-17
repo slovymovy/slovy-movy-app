@@ -262,27 +262,37 @@ class DictionaryClient(
      * Used for translation ingestion - we need to read sense IDs from the dictionary
      * where the word exists with full data.
      */
-    private suspend fun findDictionaryDbWithWord(
+    /**
+     * Locates a dictionary DB that contains [lemma] with full data (not online_only), and runs
+     * [block] while holding a read lease on the chosen DB. Tries the local DB first (recently
+     * ingested words), then the downloaded DB.
+     *
+     * The inner lambda returns `Result.success(...)` to signal "I ran the block, here's the
+     * value" — `null` means "this DB doesn't have the entry, try the next one". `Result` is used
+     * (rather than a custom wrapper) because [T] may itself be nullable, which would make a bare
+     * `T?` ambiguous.
+     */
+    private suspend fun <T> withDictionaryDbContainingWord(
         language: Language,
-        lemma: String
-    ): DictionaryDatabase {
+        lemma: String,
+        block: suspend (DictionaryDatabase) -> T,
+    ): T {
         val lemmaId = JsonIngestionBuilder.generateLemmaId(lemma)
 
-        // Try local first (word may have been just ingested in BASE stage)
-        val localDb = localDbManager.openLocalDictionary()
-        val localLemma = localDb.dictionaryQueries.selectLemmasById(lemmaId).executeAsOneOrNull()
-        if (localLemma != null && !localLemma.online_only) {
-            return localDb
+        // Try local first (existence check happens inside the lease — no TOCTOU).
+        val localOutcome = localDbManager.withLocalDictionaryIfExists { localDb ->
+            if (localDb == null) return@withLocalDictionaryIfExists null
+            val row = localDb.dictionaryQueries.selectLemmasById(lemmaId).executeAsOneOrNull()
+            if (row != null && !row.online_only) Result.success(block(localDb)) else null
         }
+        if (localOutcome != null) return localOutcome.getOrThrow()
 
-        // Try downloaded DB
-        if (dataDbManager.hasDictionary(language)) {
-            val downloadedDb = dataDbManager.openDictionaryReadOnly(language)
-            val downloadedLemma = downloadedDb.dictionaryQueries.selectLemmasById(lemmaId).executeAsOneOrNull()
-            if (downloadedLemma != null && !downloadedLemma.online_only) {
-                return downloadedDb
-            }
+        val downloadedOutcome = dataDbManager.withDictionaryReadOnlyIfExists(language) { downloadedDb ->
+            if (downloadedDb == null) return@withDictionaryReadOnlyIfExists null
+            val row = downloadedDb.dictionaryQueries.selectLemmasById(lemmaId).executeAsOneOrNull()
+            if (row != null && !row.online_only) Result.success(block(downloadedDb)) else null
         }
+        if (downloadedOutcome != null) return downloadedOutcome.getOrThrow()
 
         throw IllegalStateException("Word '$lemma' not found with senses in any dictionary")
     }
@@ -344,67 +354,75 @@ class DictionaryClient(
         frequency: Double,
         localIsOnlineOnly: Boolean
     ) {
-        val localDictDb = localDbManager.openLocalDictionary()
-        val responseJson = json.encodeToString(LanguageCardResponse.serializer(), chunk.payload)
+        // Hold read leases on both local DBs for the entire ingestion. This means: (1) the local
+        // dictionary captured as `localDictDb` and used across multiple call paths is guaranteed
+        // not to be torn down mid-flight; (2) the non-suspending `translationDbProvider` callback
+        // returns the captured leased translation DB instead of opening a fresh, unleased one.
+        localDbManager.withLocalDictionary { localDictDb ->
+            localDbManager.withLocalTranslation { localTransDb ->
+                val responseJson = json.encodeToString(LanguageCardResponse.serializer(), chunk.payload)
 
-        val ingestionBuilder = JsonIngestionBuilder(
-            translationDbProvider = { _, _ -> localDbManager.openLocalTranslation() },
-            frequencyMap = mapOf(lemma to frequency),
-            warningLogger = { message -> AppLogger.warn(TAG, message, null) },
-        )
+                val ingestionBuilder = JsonIngestionBuilder(
+                    translationDbProvider = { _, _ -> localTransDb },
+                    frequencyMap = mapOf(lemma to frequency),
+                    warningLogger = { message -> AppLogger.warn(TAG, message, null) },
+                )
 
-        when (chunk.stage) {
-            WordStreamStage.BASE -> {
-                // Validate that server returned at least some POS entries
-                if (chunk.payload.entries.isEmpty()) {
-                    throw DictionaryClientException.ServerException(
-                        statusCode = 500,
-                        body = "Server returned no POS entries for '$lemma'"
-                    )
-                }
-
-                if (localIsOnlineOnly) {
-                    // Online-only word - copy raw data to local DB first,
-                    // then ingest processed data over it.
-                    // Open downloaded DB before transaction (suspend call).
-                    val downloadedDb = if (dataDbManager.hasDictionary(language)) {
-                        dataDbManager.openDictionaryReadOnly(language)
-                    } else null
-
-                    // Wrap in transaction to avoid partial state if interrupted.
-                    localDictDb.transaction {
-                        if (downloadedDb != null) {
-                            val posFilter = chunk.payload.entries.map { it.pos }.toSet()
-                            copyRawDataIfNeeded(
-                                ingestionBuilder = ingestionBuilder,
-                                language = language,
-                                lemma = lemma,
-                                frequency = frequency,
-                                targetDb = localDictDb,
-                                sourceDb = downloadedDb,
-                                posFilter = posFilter
+                when (chunk.stage) {
+                    WordStreamStage.BASE -> {
+                        // Validate that server returned at least some POS entries
+                        if (chunk.payload.entries.isEmpty()) {
+                            throw DictionaryClientException.ServerException(
+                                statusCode = 500,
+                                body = "Server returned no POS entries for '$lemma'"
                             )
                         }
-                        ingestionBuilder.ingestProcessedOverRaw(
-                            responseJson, lemma, language.code, localDictDb
-                        )
-                    }
-                } else {
-                    // Offline word - find dictionary DB with the processed word,
-                    // add translations only (translations go to local translation DB)
-                    val dictDbForReading = findDictionaryDbWithWord(language, lemma)
-                    ingestionBuilder.ingestTranslationsOnly(
-                        responseJson, lemma, language.code, dictDbForReading
-                    )
-                }
-            }
 
-            WordStreamStage.TRANSLATED -> {
-                // Find dictionary DB with the word (could be local after BASE stage, or downloaded)
-                val dictDbForReading = findDictionaryDbWithWord(language, lemma)
-                ingestionBuilder.ingestTranslationsOnly(
-                    responseJson, lemma, language.code, dictDbForReading
-                )
+                        if (localIsOnlineOnly) {
+                            // Online-only word - copy raw data to local DB first, then ingest
+                            // processed data over it. The downloaded DB lease covers the whole
+                            // transaction so a concurrent delete cannot unlink it mid-write.
+                            // Existence is checked inside the IfExists lease (no TOCTOU).
+                            dataDbManager.withDictionaryReadOnlyIfExists(language) { downloadedDb ->
+                                localDictDb.transaction {
+                                    if (downloadedDb != null) {
+                                        val posFilter = chunk.payload.entries.map { it.pos }.toSet()
+                                        copyRawDataIfNeeded(
+                                            ingestionBuilder = ingestionBuilder,
+                                            language = language,
+                                            lemma = lemma,
+                                            frequency = frequency,
+                                            targetDb = localDictDb,
+                                            sourceDb = downloadedDb,
+                                            posFilter = posFilter
+                                        )
+                                    }
+                                    ingestionBuilder.ingestProcessedOverRaw(
+                                        responseJson, lemma, language.code, localDictDb
+                                    )
+                                }
+                            }
+                        } else {
+                            // Offline word - find dictionary DB with the processed word,
+                            // add translations only (translations go to local translation DB)
+                            withDictionaryDbContainingWord(language, lemma) { dictDbForReading ->
+                                ingestionBuilder.ingestTranslationsOnly(
+                                    responseJson, lemma, language.code, dictDbForReading
+                                )
+                            }
+                        }
+                    }
+
+                    WordStreamStage.TRANSLATED -> {
+                        // Find dictionary DB with the word (could be local after BASE stage, or
+                        // downloaded).
+                        withDictionaryDbContainingWord(language, lemma) { dictDbForReading ->
+                            ingestionBuilder.ingestTranslationsOnly(
+                                responseJson, lemma, language.code, dictDbForReading
+                            )
+                        }
+                    }
+                }
             }
         }
 
