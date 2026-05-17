@@ -14,6 +14,10 @@ kotlin {
     }
 }
 
+val minifiedR8Rules = layout.projectDirectory.file("proguard-rules.pro")
+val minifiedTestR8Rules = layout.projectDirectory.file("proguard-minified-test.pro")
+val testServerPort = 9090
+
 android {
     namespace = "com.slovy.slovymovyapp.androidApp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -21,6 +25,10 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    // Run androidTest against a release-like, minified build type so instrumentation
+    // tests exercise the same R8/resource shrinking path as production.
+    testBuildType = "minifiedTest"
 
     defaultConfig {
         applicationId = "com.slovy.slovymovyapp"
@@ -31,7 +39,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         testInstrumentationRunnerArguments[TestEnvironment.IS_TEST] = "true"
-        testInstrumentationRunnerArguments[TestEnvironment.TEST_SERVER_PORT] = "9090"
+        testInstrumentationRunnerArguments[TestEnvironment.TEST_SERVER_PORT] = testServerPort.toString()
     }
 
     buildTypes {
@@ -41,12 +49,31 @@ android {
             isMinifyEnabled = false
         }
         release {
-            isMinifyEnabled = false // XXX: implement later?
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                minifiedR8Rules.asFile
+            )
+        }
+        create("minifiedTest") {
+            // Mirrors release shrinking/optimization, but uses debug signing and the
+            // debug application ID so connected tests can install it safely in CI.
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release", "debug")
+            signingConfig = signingConfigs.getByName("debug")
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-minified-test"
+            proguardFiles(minifiedTestR8Rules.asFile)
+            testProguardFiles(minifiedTestR8Rules.asFile)
         }
     }
 
     sourceSets {
         getByName("debug") {
+            res.srcDirs("src/debug/res")
+        }
+        getByName("minifiedTest") {
             res.srcDirs("src/debug/res")
         }
     }
@@ -64,6 +91,28 @@ android {
     }
 }
 
+tasks.register("checkReleaseOptimizedBuild") {
+    group = "verification"
+    description = "Runs release unit tests and assembles the minified, resource-shrunk release APK."
+
+    dependsOn("testReleaseUnitTest", "testMinifiedTestUnitTest", "assembleRelease")
+}
+
+tasks.register("connectedMinifiedAndroidTest") {
+    group = "verification"
+    description = "Runs Android instrumentation tests against a signed, minified, resource-shrunk build."
+
+    dependsOn("connectedMinifiedTestAndroidTest")
+}
+
+val testServer = registerTestServer(testServerPort)
+configureTasksToUseTestServer(
+    testServer,
+    "connectedAndroidTest",
+    "connectedMinifiedAndroidTest",
+    "connectedMinifiedTestAndroidTest"
+)
+
 dependencies {
     implementation(projects.composeApp)
     implementation(projects.shared)
@@ -78,5 +127,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.testExt.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.kotlinx.coroutinesCore)
+    androidTestImplementation(libs.kotlinx.ioCore)
     androidTestImplementation(libs.junit)
 }
