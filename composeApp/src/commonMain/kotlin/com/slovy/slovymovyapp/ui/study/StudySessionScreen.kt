@@ -1302,6 +1302,48 @@ private fun StudyExampleText(
     Text(text = annotated, style = style, modifier = modifier)
 }
 
+internal data class StudyClozeDisplayText(
+    val text: String,
+    val answerRanges: List<IntRange>,
+)
+
+internal fun StudyClozeTextUiState.toDisplayText(): StudyClozeDisplayText {
+    val normalizedRanges = answerRanges.mapNotNull { range ->
+        val start = range.first.coerceIn(0, text.length)
+        val endExclusive = (range.last + 1).coerceIn(start, text.length)
+        if (start == endExclusive) null else start until endExclusive
+    }.sortedBy { it.first }
+
+    val output = StringBuilder()
+    val outputRanges = mutableListOf<IntRange>()
+    var cursor = 0
+
+    normalizedRanges.forEach { range ->
+        val start = maxOf(range.first, cursor)
+        val endExclusive = range.last + 1
+        if (start >= endExclusive) return@forEach
+
+        output.append(HtmlTagParser.plainText(text.substring(cursor, start)))
+        val outputStart = output.length
+        val answer = HtmlTagParser.plainText(text.substring(start, endExclusive))
+        if (filled) {
+            output.append(answer)
+        } else {
+            repeat(answer.length.coerceAtLeast(6)) {
+                output.append('\u00A0')
+            }
+        }
+        outputRanges.add(outputStart until output.length)
+        cursor = endExclusive
+    }
+
+    output.append(HtmlTagParser.plainText(text.substring(cursor)))
+    return StudyClozeDisplayText(
+        text = output.toString(),
+        answerRanges = outputRanges,
+    )
+}
+
 @Composable
 private fun StudyClozeText(
     cloze: StudyClozeTextUiState,
@@ -1310,25 +1352,21 @@ private fun StudyClozeText(
 ) {
     val highlightColor = MaterialTheme.colorScheme.primary
     val highlightBackground = MaterialTheme.colorScheme.primaryContainer
-    val blank = " ".repeat(cloze.answer.length.coerceAtLeast(6))
-
-    val prefixPlain = HtmlTagParser.plainText(cloze.prefix)
-    val answerPlain = HtmlTagParser.plainText(cloze.answer)
-    val highlightStart = prefixPlain.length
-    val highlightEnd = highlightStart + answerPlain.length
-
+    val displayText = remember(cloze) { cloze.toDisplayText() }
     val text = buildAnnotatedString {
-        append(prefixPlain)
-        if (cloze.filled) {
-            pushStyle(SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold))
-            append(answerPlain)
+        var cursor = 0
+        displayText.answerRanges.forEach { range ->
+            append(displayText.text.substring(cursor, range.first))
+            if (cloze.filled) {
+                pushStyle(SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold))
+            } else {
+                pushStyle(SpanStyle(color = highlightColor, textDecoration = TextDecoration.Underline))
+            }
+            append(displayText.text.substring(range.first, range.last + 1))
             pop()
-        } else {
-            pushStyle(SpanStyle(color = highlightColor, textDecoration = TextDecoration.Underline))
-            append(blank)
-            pop()
+            cursor = range.last + 1
         }
-        append(HtmlTagParser.plainText(cloze.suffix))
+        append(displayText.text.substring(cursor))
     }
 
     var layoutResult by remember(text) { mutableStateOf<TextLayoutResult?>(null) }
@@ -1342,20 +1380,24 @@ private fun StudyClozeText(
             .drawBehind {
                 if (!cloze.filled) return@drawBehind
                 val layout = layoutResult ?: return@drawBehind
-                val startLine = layout.getLineForOffset(highlightStart)
-                val endLine = layout.getLineForOffset((highlightEnd - 1).coerceAtLeast(highlightStart))
-                for (line in startLine..endLine) {
-                    val lineRangeStart = maxOf(layout.getLineStart(line), highlightStart)
-                    val lineRangeEnd = minOf(layout.getLineEnd(line), highlightEnd)
-                    if (lineRangeStart >= lineRangeEnd) continue
-                    val startBound = layout.getBoundingBox(lineRangeStart)
-                    val endBound = layout.getBoundingBox((lineRangeEnd - 1).coerceAtLeast(lineRangeStart))
-                    drawRoundRect(
-                        color = highlightBackground,
-                        topLeft = Offset(startBound.left, layout.getLineTop(line)),
-                        size = Size(endBound.right - startBound.left, layout.getLineBottom(line) - layout.getLineTop(line)),
-                        cornerRadius = CornerRadius(4.dp.toPx()),
-                    )
+                displayText.answerRanges.forEach { highlightRange ->
+                    val highlightStart = highlightRange.first
+                    val highlightEnd = highlightRange.last + 1
+                    val startLine = layout.getLineForOffset(highlightStart)
+                    val endLine = layout.getLineForOffset((highlightEnd - 1).coerceAtLeast(highlightStart))
+                    for (line in startLine..endLine) {
+                        val lineRangeStart = maxOf(layout.getLineStart(line), highlightStart)
+                        val lineRangeEnd = minOf(layout.getLineEnd(line), highlightEnd)
+                        if (lineRangeStart >= lineRangeEnd) continue
+                        val startBound = layout.getBoundingBox(lineRangeStart)
+                        val endBound = layout.getBoundingBox((lineRangeEnd - 1).coerceAtLeast(lineRangeStart))
+                        drawRoundRect(
+                            color = highlightBackground,
+                            topLeft = Offset(startBound.left, layout.getLineTop(line)),
+                            size = Size(endBound.right - startBound.left, layout.getLineBottom(line) - layout.getLineTop(line)),
+                            cornerRadius = CornerRadius(4.dp.toPx()),
+                        )
+                    }
                 }
             },
         onTextLayout = { layoutResult = it },
@@ -1646,9 +1688,8 @@ private fun clozeCard() = StudyCardUiState.Cloze(
     id = "cloze",
     chipLabel = UiText.Resource(Res.string.study_chip_fill_in),
     prompt = StudyClozeTextUiState(
-        prefix = "Het was zo ",
-        answer = "gezellig",
-        suffix = " bij jullie thuis.",
+        text = "Het was zo gezellig bij jullie thuis.",
+        answerRanges = listOf(11..18),
     ),
     translationHint = "It was so <w>lovely</w> at your place.",
     back = StudyCardBackUiState(
@@ -1656,9 +1697,8 @@ private fun clozeCard() = StudyCardUiState.Cloze(
         secondary = "cosy, sociable",
         definition = "a feeling of warmth and conviviality from being together",
         cloze = StudyClozeTextUiState(
-            prefix = "Het was zo ",
-            answer = "gezellig",
-            suffix = " bij jullie thuis.",
+            text = "Het was zo gezellig bij jullie thuis.",
+            answerRanges = listOf(11..18),
             filled = true,
         ),
     ),

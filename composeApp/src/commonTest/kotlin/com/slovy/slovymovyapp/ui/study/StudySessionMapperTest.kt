@@ -23,6 +23,8 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.uuid.Uuid
 
+private const val PrimarySenseId = "00000000-0000-0000-0000-000000000101"
+
 class StudySessionMapperTest {
 
     @Test
@@ -198,18 +200,90 @@ class StudySessionMapperTest {
             example = ExamplePair(
                 exampleIndex = 0,
                 text = "Het was zo gezellig.",
-                clozeRange = 11..18,
+                clozeRanges = listOf(11..18),
             ),
         )
 
         val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState())
 
-        assertEquals("Het was zo ", mapped.prompt.prefix)
-        assertEquals("gezellig", mapped.prompt.answer)
-        assertEquals(".", mapped.prompt.suffix)
+        assertEquals("Het was zo gezellig.", mapped.prompt.text)
+        assertEquals(listOf(11..18), mapped.prompt.answerRanges)
         assertEquals("It was so cosy.", mapped.translationHint)
         assertNotNull(mapped.back.cloze)
         assertEquals("gezellig", mapped.back.headline)
+    }
+
+    @Test
+    fun mapsSourceClozeCardWithMultipleTaggedRanges() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.CLOZE_SOURCE, targetLang = Language.ENGLISH.code),
+            example = ExamplePair(
+                exampleIndex = 0,
+                text = "Vergeet niet om je paspoort mee te nemen.",
+                clozeRanges = listOf(28..30, 35..39),
+            ),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState())
+
+        assertEquals("Vergeet niet om je paspoort mee te nemen.", mapped.prompt.text)
+        assertEquals(listOf(28..30, 35..39), mapped.prompt.answerRanges)
+        assertNotNull(mapped.back.cloze)
+        assertEquals(listOf(28..30, 35..39), mapped.back.cloze.answerRanges)
+    }
+
+    @Test
+    fun frontSideReplacesEveryAnswerRangeWithBlank() {
+        val state = StudyClozeTextUiState(
+            text = "Vergeet niet om je paspoort mee te nemen.",
+            answerRanges = listOf(28..30, 35..39),
+        )
+
+        val display = state.toDisplayText()
+
+        assertEquals("Vergeet niet om je paspoort \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0 te \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.", display.text)
+        assertEquals(listOf(28..33, 38..43), display.answerRanges)
+    }
+
+    @Test
+    fun backSideHighlightsEveryAnswerRange() {
+        val state = StudyClozeTextUiState(
+            text = "Vergeet niet om je paspoort mee te nemen.",
+            answerRanges = listOf(28..30, 35..39),
+            filled = true,
+        )
+
+        val display = state.toDisplayText()
+
+        assertEquals("Vergeet niet om je paspoort mee te nemen.", display.text)
+        assertEquals(listOf(28..30, 35..39), display.answerRanges)
+    }
+
+    @Test
+    fun backSideStripsNestedTagsFromAnswerRange() {
+        val state = StudyClozeTextUiState(
+            text = "take <w>away</w> today.",
+            answerRanges = listOf(0..15),
+            filled = true,
+        )
+
+        val display = state.toDisplayText()
+
+        assertEquals("take away today.", display.text)
+        assertEquals(listOf(0..8), display.answerRanges)
+    }
+
+    @Test
+    fun frontSideUsesPlainAnswerLengthForNestedTags() {
+        val state = StudyClozeTextUiState(
+            text = "take <w>away</w> today.",
+            answerRanges = listOf(0..15),
+        )
+
+        val display = state.toDisplayText()
+
+        assertEquals("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0 today.", display.text)
+        assertEquals(listOf(0..8), display.answerRanges)
     }
 
     private fun sessionCard(
@@ -218,11 +292,10 @@ class StudySessionMapperTest {
         studiedSenseIds: Set<String> = emptySet(),
         extraSenses: List<LanguageCardResponseSense> = emptyList(),
     ): SessionCard {
-        val senseId = "00000000-0000-0000-0000-000000000101"
         return SessionCard(
             card = Card(
                 id = Uuid.parse("00000000-0000-0000-0000-000000000201"),
-                senseId = Uuid.parse(senseId),
+                senseId = Uuid.parse(PrimarySenseId),
                 lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000301"),
                 langCode = Language.DUTCH.code,
                 family = variant.kind.family,
@@ -241,15 +314,14 @@ class StudySessionMapperTest {
                 ),
             ),
             variant = variant,
-            wordResult = WordResult(card = languageCard(senseId, extraSenses)),
-            senseId = senseId,
+            wordResult = WordResult(card = languageCard(extraSenses)),
+            senseId = PrimarySenseId,
             example = example,
             studiedSenseIds = studiedSenseIds,
         )
     }
 
     private fun languageCard(
-        senseId: String,
         extraSenses: List<LanguageCardResponseSense>,
     ): LanguageCard =
         LanguageCard(
@@ -261,7 +333,7 @@ class StudySessionMapperTest {
                     formsViews = emptyList(),
                     senses = listOf(
                         LanguageCardResponseSense(
-                            senseId = senseId,
+                            senseId = PrimarySenseId,
                             senseDefinition = "a feeling of warmth",
                             learnerLevel = LearnerLevel.A2,
                             frequency = SenseFrequency.HIGH,
