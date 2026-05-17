@@ -37,7 +37,6 @@ kotlin {
 
         withDeviceTestBuilder {
             sourceSetTreeName = "test"
-            @Suppress("UnstableApiUsage")
             androidResources {
                 enable = true
             }
@@ -56,6 +55,7 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
             binaryOption("bundleId", "com.slovy.openwords")
+            export(projects.shared)
         }
     }
 
