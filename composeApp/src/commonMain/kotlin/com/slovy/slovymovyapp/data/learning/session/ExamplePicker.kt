@@ -54,10 +54,11 @@ class ExamplePicker(private val learning: FavoritesQueries) {
         val ranges = mutableListOf<IntRange>()
         HtmlTagParser.parseTextSegments(text).forEach { segment ->
             val start = output.length
-            output += segment.text
-            if (segment.isTagged && segment.text.isNotBlank()) {
-                val leadingWhitespace = segment.text.indexOfFirst { !it.isWhitespace() }
-                val trailingWhitespace = segment.text.indexOfLast { !it.isWhitespace() }
+            val segmentText = HtmlTagParser.plainText(segment.text)
+            output += segmentText
+            if (segment.isTagged && segmentText.isNotBlank()) {
+                val leadingWhitespace = segmentText.indexOfFirst { !it.isWhitespace() }
+                val trailingWhitespace = segmentText.indexOfLast { !it.isWhitespace() }
                 ranges.add((start + leadingWhitespace)..(start + trailingWhitespace))
             }
         }

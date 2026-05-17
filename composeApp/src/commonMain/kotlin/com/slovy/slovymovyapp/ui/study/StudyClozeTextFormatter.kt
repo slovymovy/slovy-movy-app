@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.ui.study
 
+import com.slovy.slovymovyapp.data.util.HtmlTagParser
+
 internal data class StudyClozeDisplayText(
     val text: String,
     val answerRanges: List<IntRange>,
@@ -21,9 +23,9 @@ internal fun StudyClozeTextUiState.toDisplayText(): StudyClozeDisplayText {
         val endExclusive = range.last + 1
         if (start >= endExclusive) return@forEach
 
-        output.append(text.substring(cursor, start))
+        output.append(HtmlTagParser.plainText(text.substring(cursor, start)))
         val outputStart = output.length
-        val answer = text.substring(start, endExclusive)
+        val answer = HtmlTagParser.plainText(text.substring(start, endExclusive))
         if (filled) {
             output.append(answer)
         } else {
@@ -35,7 +37,7 @@ internal fun StudyClozeTextUiState.toDisplayText(): StudyClozeDisplayText {
         cursor = endExclusive
     }
 
-    output.append(text.substring(cursor))
+    output.append(HtmlTagParser.plainText(text.substring(cursor)))
     return StudyClozeDisplayText(
         text = output.toString(),
         answerRanges = outputRanges,

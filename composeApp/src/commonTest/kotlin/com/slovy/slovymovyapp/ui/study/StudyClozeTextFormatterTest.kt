@@ -31,4 +31,31 @@ class StudyClozeTextFormatterTest {
         assertEquals("Vergeet niet om je paspoort mee te nemen.", display.text)
         assertEquals(listOf(28..30, 35..39), display.answerRanges)
     }
+
+    @Test
+    fun backSideStripsNestedTagsFromAnswerRange() {
+        val state = StudyClozeTextUiState(
+            text = "take <w>away</w> today.",
+            answerRanges = listOf(0..15),
+            filled = true,
+        )
+
+        val display = state.toDisplayText()
+
+        assertEquals("take away today.", display.text)
+        assertEquals(listOf(0..8), display.answerRanges)
+    }
+
+    @Test
+    fun frontSideUsesPlainAnswerLengthForNestedTags() {
+        val state = StudyClozeTextUiState(
+            text = "take <w>away</w> today.",
+            answerRanges = listOf(0..15),
+        )
+
+        val display = state.toDisplayText()
+
+        assertEquals("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0 today.", display.text)
+        assertEquals(listOf(0..8), display.answerRanges)
+    }
 }

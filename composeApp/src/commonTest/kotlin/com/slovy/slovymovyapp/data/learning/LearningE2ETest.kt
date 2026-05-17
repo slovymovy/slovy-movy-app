@@ -1209,6 +1209,34 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun cloze_card_strips_nested_tag_markup_from_example_text() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "nestedclozetaggedfixture", includeExamples = false)
+            env.dictionary.dictionaryQueries.insertSenseExample(
+                fixture.senseId,
+                1,
+                "I <w>take <w>away</w></w> luggage.",
+            )
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.intake.runIntake("en")
+            val clozeCard = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                stability = 8.0,
+            )
+            env.insertReviewLog(clozeCard.id, CardKind.CLOZE_TRANSLATION, Language.RUSSIAN.code)
+
+            val card = env.nextLoadedCard("en")
+
+            assertEquals(CardKind.CLOZE_SOURCE, card.variant.kind)
+            val example = assertNotNull(card.example)
+            assertEquals("I take away luggage.", example.text)
+            assertEquals(listOf(2..10), example.clozeRanges)
+        }
+    }
+
+    @Test
     fun translation_cloze_card_uses_target_language_example_translation() = runBlocking {
         withEnv(includeTranslation = true) { env ->
             val fixture = env.seedSense(lemma = "translatedcloze")
