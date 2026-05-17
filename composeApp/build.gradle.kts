@@ -99,7 +99,7 @@ kotlin {
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.sqldelight.runtime)
             implementation(libs.ktor.client.core)
-            implementation(projects.shared)
+            api(projects.shared)
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.nativeDriver)
