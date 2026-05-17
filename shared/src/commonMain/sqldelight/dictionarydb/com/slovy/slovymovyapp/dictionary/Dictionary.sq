@@ -396,3 +396,16 @@ SELECT sense_id, lemma_pos_id FROM lemma_pos_sense_hint WHERE sense_id IN ?;
 
 selectLemmaPosHintsByLemmaPosId:
 SELECT sense_id, lemma_pos_id FROM lemma_pos_sense_hint WHERE lemma_pos_id = ?;
+
+-- Debug-only seed helper: returns up to :limit (sense_id, lemma) pairs for the most frequent
+-- non-online-only lemmas in the language, ordered by descending zipf_frequency. Multiple senses
+-- per lemma are returned, which matches how real favoriting behaves.
+selectFrequentSenseIdsForSeed:
+SELECT s.sense_id, l.lemma
+FROM lemma l
+JOIN lemma_pos lp ON lp.lemma_id = l.id
+JOIN sense s ON s.lemma_pos_id = lp.id
+WHERE l.lang_code = :lang_code
+  AND l.online_only = 0
+ORDER BY l.zipf_frequency DESC, l.lemma ASC, s.sense_id ASC
+LIMIT :max_rows;

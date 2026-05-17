@@ -15,6 +15,7 @@ import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.export.AppDataExporter
+import com.slovy.slovymovyapp.data.favorites.DebugFavoritesSeeder
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
@@ -260,6 +261,9 @@ fun App(
     val favoritesRepository = remember(appDatabase) {
         FavoritesRepository(appDatabase)
     }
+    val debugFavoritesSeeder = remember(appDatabase, dataManager) {
+        DebugFavoritesSeeder(appDatabase, dataManager)
+    }
     val localDbManager = remember(platform) { LocalDbManager(platform) }
     val dictionaryRepository =
         remember(dataManager, localDbManager, favoritesRepository, settingsRepository) {
@@ -370,6 +374,8 @@ fun App(
                 settingsRepository,
                 platform,
                 buildConfig,
+                favoritesRepository,
+                debugFavoritesSeeder,
                 onDictionaryDataChanged = { recoverFavorites ->
                     favoritesReviewCoordinator.invalidateAllIntakeCache()
                     dictionaryRepository.clearSenseCache()

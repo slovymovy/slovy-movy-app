@@ -21,6 +21,8 @@ import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.export.AppDataExporter
+import com.slovy.slovymovyapp.data.favorites.DebugFavoritesSeeder
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
@@ -90,7 +92,10 @@ data class SettingsUiState(
     val feedbackEmail: String = "",
     val feedbackSubmitting: Boolean = false,
     val feedbackError: UiText? = null,
-    val feedbackDiscussionUrl: String? = null
+    val feedbackDiscussionUrl: String? = null,
+
+    // Debug (only rendered when buildConfig.isDebug)
+    val debugFavoritesBusy: Boolean = false,
 )
 
 data class DeleteConfirmationState(
@@ -99,6 +104,12 @@ data class DeleteConfirmationState(
     val warning: UiText? = null,
     val onConfirm: () -> Unit
 )
+
+enum class DebugSeedMode {
+    FAVORITES_ONLY,
+    WITH_NEW_CARDS,
+    WITH_REVIEWED_CARDS,
+}
 
 class SettingsViewModel(
     private val ttsManager: TextToSpeechManager,
@@ -110,6 +121,8 @@ class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val platform: PlatformDbSupport,
     buildConfig: AppBuildConfig,
+    private val favoritesRepository: FavoritesRepository,
+    private val debugFavoritesSeeder: DebugFavoritesSeeder,
     private val onDictionaryDataChanged: suspend (recoverFavorites: Boolean) -> Unit = { _ -> },
 ) : ViewModel() {
 
@@ -823,6 +836,66 @@ class SettingsViewModel(
         ttsManager.stop()
     }
 
+    fun seedDebugFavorites(count: Int, mode: DebugSeedMode) {
+        if (state.debugFavoritesBusy) return
+        val language = state.activeDictionaryLanguage
+        if (language == null) {
+            state = state.copy(errorMessage = UiText.Plain("Pick an active learning language first"))
+            return
+        }
+        state = state.copy(debugFavoritesBusy = true)
+        viewModelScope.launch {
+            try {
+                val result = when (mode) {
+                    DebugSeedMode.FAVORITES_ONLY -> debugFavoritesSeeder.seed(language, count)
+                    DebugSeedMode.WITH_NEW_CARDS -> debugFavoritesSeeder.seedWithCards(language, count)
+                    DebugSeedMode.WITH_REVIEWED_CARDS ->
+                        debugFavoritesSeeder.seedReviewedCards(language, count)
+                }
+                val cardSuffix = when (mode) {
+                    DebugSeedMode.FAVORITES_ONLY -> ""
+                    DebugSeedMode.WITH_NEW_CARDS -> ", ${result.cardsInserted} new cards"
+                    DebugSeedMode.WITH_REVIEWED_CARDS ->
+                        ", ${result.cardsInserted} reviewed cards, ${result.reviewLogsInserted} log rows"
+                }
+                showSnackbar(
+                    UiText.Plain(
+                        "Seeded ${result.favoritesInserted}/${result.requested} favorites" +
+                            "$cardSuffix for ${language.code} " +
+                            "(${result.available} available in dictionary)"
+                    )
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                state = state.copy(
+                    errorMessage = UiText.Plain("Seed failed: ${e.message ?: e::class.simpleName}")
+                )
+            } finally {
+                state = state.copy(debugFavoritesBusy = false)
+            }
+        }
+    }
+
+    fun clearAllDebugFavorites() {
+        if (state.debugFavoritesBusy) return
+        state = state.copy(debugFavoritesBusy = true)
+        viewModelScope.launch {
+            try {
+                favoritesRepository.deleteAll()
+                showSnackbar(UiText.Plain("All favorites + cards deleted"))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                state = state.copy(
+                    errorMessage = UiText.Plain("Delete failed: ${e.message ?: e::class.simpleName}")
+                )
+            } finally {
+                state = state.copy(debugFavoritesBusy = false)
+            }
+        }
+    }
+
     private fun observeDownloads() {
         viewModelScope.launch {
             downloadCoordinator.downloadEntries()
@@ -954,6 +1027,8 @@ fun SettingsScreen(
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
         onFeedbackEmailChange = { viewModel.updateFeedbackEmail(it) },
         onSubmitFeedback = { viewModel.submitFeedback() },
+        onDebugSeedFavorites = { count, mode -> viewModel.seedDebugFavorites(count, mode) },
+        onDebugClearFavorites = { viewModel.clearAllDebugFavorites() },
         wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
@@ -992,6 +1067,8 @@ fun SettingsScreenContent(
     onFeedbackCommentChange: (String) -> Unit = {},
     onFeedbackEmailChange: (String) -> Unit = {},
     onSubmitFeedback: () -> Unit = {},
+    onDebugSeedFavorites: (count: Int, mode: DebugSeedMode) -> Unit = { _, _ -> },
+    onDebugClearFavorites: () -> Unit = {},
     wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -1206,6 +1283,32 @@ fun SettingsScreenContent(
                                     AppDataSection(
                                         isExporting = state.isExportingAppData,
                                         onExport = onExportAppData
+                                    )
+                                }
+                            }
+
+                            // === Debug (only in debug builds) ===
+                            if (state.buildConfig.isDebug) {
+                                item {
+                                    SectionHeader(
+                                        title = "Developer",
+                                        modifier = Modifier.padding(top = AppSpacing.sm)
+                                    )
+                                }
+                                item {
+                                    DebugFavoritesSection(
+                                        busy = state.debugFavoritesBusy,
+                                        activeLanguage = state.activeDictionaryLanguage,
+                                        onSeedFavoritesOnly = {
+                                            onDebugSeedFavorites(it, DebugSeedMode.FAVORITES_ONLY)
+                                        },
+                                        onSeedWithNewCards = {
+                                            onDebugSeedFavorites(it, DebugSeedMode.WITH_NEW_CARDS)
+                                        },
+                                        onSeedWithReviewedCards = {
+                                            onDebugSeedFavorites(it, DebugSeedMode.WITH_REVIEWED_CARDS)
+                                        },
+                                        onClear = onDebugClearFavorites,
                                     )
                                 }
                             }
