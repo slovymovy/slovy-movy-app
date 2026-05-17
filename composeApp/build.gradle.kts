@@ -205,46 +205,17 @@ tasks.withType<KotlinNativeTest> {
 }
 
 
-val testServerService: Provider<TestServerService> = gradle.sharedServices.registerIfAbsent(
-    "testServerService",
-    TestServerService::class.java
-) {
-    val serverProject = project(":server")
-    parameters.classpath.set(
-        serverProject.provider {
-            val config = serverProject.configurations.getByName("runtimeClasspath")
-            val classesDir = serverProject.layout.buildDirectory.dir("classes/kotlin/main").get().asFile.absolutePath
-            val resourcesDir = serverProject.layout.buildDirectory.dir("resources/main").get().asFile.absolutePath
-            (listOf(classesDir, resourcesDir) + config.files.map { it.absolutePath }).distinct()
-        }
-    )
-    parameters.workingDir.set(rootProject.projectDir.absolutePath)
-    parameters.port.set(testServerPort)
-    parameters.dbDir.set(File(rootProject.projectDir, ".test-db-files").absolutePath)
-    maxParallelUsages.set(1)
-}
-
-val startTestServer = tasks.register<StartTestServerTask>("startTestServer") {
-    dependsOn(":server:classes")
-}
+val testServer = registerTestServer(testServerPort)
 
 tasks.withType<Test>().configureEach {
-    dependsOn(":server:classes")
-    dependsOn(startTestServer)
-    usesService(testServerService)
+    usesTestServer(testServer)
 }
 
 tasks.withType<KotlinNativeTest>().configureEach {
-    dependsOn(":server:classes")
-    dependsOn(startTestServer)
-    usesService(testServerService)
+    usesTestServer(testServer)
 }
 
-tasks.matching { it.name == "connectedAndroidTest" || it.name == "connectedAndroidDeviceTest" }.configureEach {
-    dependsOn(":server:classes")
-    dependsOn(startTestServer)
-    usesService(testServerService)
-}
+configureTasksToUseTestServer(testServer, "connectedAndroidTest", "connectedAndroidDeviceTest")
 
 tasks.register<VerifyLocalizationKeysTask>("verifyLocalizationKeys") {
     group = "verification"
