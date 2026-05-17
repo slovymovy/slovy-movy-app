@@ -22,14 +22,15 @@ object NoOpPerformanceTrace : PerformanceTrace {
     override fun stop() = Unit
 }
 
-expect object PerformanceMonitoring {
+object PerformanceMonitoring {
     /**
      * Routes custom trace calls. Defaults to [NoOpPerformanceMonitor] so tests and
-     * unsupported platforms do not need a Firebase SDK.
+     * unsupported platforms do not need a Firebase SDK. Production entry points
+     * (e.g. MainActivity on Android) install the real monitor at startup.
      */
-    var monitor: PerformanceMonitor
+    var monitor: PerformanceMonitor = NoOpPerformanceMonitor
 
-    fun startTrace(name: String): PerformanceTrace
+    fun startTrace(name: String): PerformanceTrace = monitor.startTrace(name)
 }
 
 inline fun <T> PerformanceTrace.use(block: (PerformanceTrace) -> T): T {

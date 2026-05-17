@@ -2,6 +2,9 @@ package com.slovy.slovymovyapp.data.learning.intake
 
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.use
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardState
@@ -48,14 +51,31 @@ class IntakeService(
         }
 
     @OptIn(ExperimentalTime::class)
-    private suspend fun runAndLog(langCode: String, mode: IntakeRunMode): IntakeResult {
-        val result = activatePendingFavorites(langCode, mode)
-        Analytics.logEvent(
-            AnalyticsEvent.LEARNING_INTAKE_RUN,
-            buildIntakeAnalyticsParams(langCode, mode, result),
-        )
-        return result
-    }
+    private suspend fun runAndLog(langCode: String, mode: IntakeRunMode): IntakeResult =
+        PerformanceMonitoring.startTrace("learning_intake_run").use { trace ->
+            trace.putAttributes(
+                mapOf(
+                    "lang" to langCode,
+                    "mode" to when (mode) {
+                        IntakeRunMode.DAILY -> "daily"
+                        IntakeRunMode.CONTINUE_NOW -> "continue_now"
+                    },
+                ),
+            )
+            val result = activatePendingFavorites(langCode, mode)
+            trace.putMetric("cards_created", result.cardsCreated.toLong())
+            trace.putMetric("activated", result.activated.size.toLong())
+            trace.putMetric("skipped", result.skipped.size.toLong())
+            SkipReason.entries.forEach { reason ->
+                val count = result.skipped.count { it == reason }.toLong()
+                if (count > 0L) trace.putMetric("skip_${reason.name.lowercase()}", count)
+            }
+            Analytics.logEvent(
+                AnalyticsEvent.LEARNING_INTAKE_RUN,
+                buildIntakeAnalyticsParams(langCode, mode, result),
+            )
+            result
+        }
 
     @OptIn(ExperimentalTime::class)
     private fun buildIntakeAnalyticsParams(

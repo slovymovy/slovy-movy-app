@@ -3,12 +3,6 @@ package com.slovy.slovymovyapp.analytics
 import com.google.firebase.perf.FirebasePerformance
 import com.google.firebase.perf.metrics.Trace
 
-actual object PerformanceMonitoring {
-    actual var monitor: PerformanceMonitor = NoOpPerformanceMonitor
-
-    actual fun startTrace(name: String): PerformanceTrace = monitor.startTrace(name)
-}
-
 class FirebasePerformanceMonitor : PerformanceMonitor {
     override fun startTrace(name: String): PerformanceTrace {
         val trace = FirebasePerformance.getInstance().newTrace(name)

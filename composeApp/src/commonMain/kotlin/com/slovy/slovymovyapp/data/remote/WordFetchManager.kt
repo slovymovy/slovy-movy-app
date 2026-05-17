@@ -79,9 +79,6 @@ class WordFetchManager(
 
         val existing = activeFetches[key]
         if (existing != null) {
-            PerformanceMonitoring.startTrace("word_fetch_manager_get_word").use { trace ->
-                trace.putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo, reused = true))
-            }
             // Return existing active flow
             return@withLock existing.flow
         }
@@ -98,7 +95,7 @@ class WordFetchManager(
         // the fetch failed instead of just hanging on a stalled SharedFlow.
         scope.launch {
             PerformanceMonitoring.startTrace("word_fetch_manager_get_word").use { trace ->
-                trace.putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo, reused = false))
+                trace.putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo))
                 var emissions = 0L
                 try {
                     dictionaryClient.getWord(language, normalizedLemma, normalizedTargets, pushToRepo)
@@ -145,12 +142,10 @@ class WordFetchManager(
     private fun fetchTraceAttributes(
         language: Language,
         translationTargets: List<Language>,
-        pushToRepo: Boolean,
-        reused: Boolean,
+        pushToRepo: Boolean
     ): Map<String, Any> = mapOf(
         "lang" to language.code,
         "target_count" to translationTargets.size,
-        "push_to_repo" to pushToRepo,
-        "reused" to reused,
+        "push_to_repo" to pushToRepo
     )
 }

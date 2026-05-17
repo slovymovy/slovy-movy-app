@@ -1,5 +1,8 @@
 package com.slovy.slovymovyapp.data.learning.session
 
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.use
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.*
 import com.slovy.slovymovyapp.data.learning.fsrs.CrossFamilyCredit
@@ -52,82 +55,93 @@ class SessionService(
         outcome: GradeOutcome,
         durationMs: Long,
     ): SessionCard = withContext(Dispatchers.IO) {
-        val now = clock.now()
-        val nowMs = now.toEpochMilliseconds()
-        val before = card.card.scheduling
-        val after = scheduler.apply(before, outcome, now)
-        val elapsedDays = scheduler.elapsedDaysForReview(before, now)
-        val scheduledDays = scheduler.scheduledDaysForReview(before)
+        PerformanceMonitoring.startTrace("session_submit_review").use { trace ->
+            trace.putAttributes(
+                mapOf(
+                    "lang" to card.card.langCode,
+                    "family" to card.card.family.name.lowercase(),
+                    "rating" to outcome.rating.name.lowercase(),
+                    "state_before" to card.card.scheduling.state.name.lowercase(),
+                ),
+            )
+            trace.putMetric("duration_ms", durationMs)
+            val now = clock.now()
+            val nowMs = now.toEpochMilliseconds()
+            val before = card.card.scheduling
+            val after = scheduler.apply(before, outcome, now)
+            val elapsedDays = scheduler.elapsedDaysForReview(before, now)
+            val scheduledDays = scheduler.scheduledDaysForReview(before)
 
-        learning.transaction {
-            learning.updateCardAfterReview(
-                state = after.state,
-                stability = after.stability,
-                difficulty = after.difficulty,
-                due = after.dueEpochMs,
-                last_review = after.lastReviewEpochMs,
-                reps = after.reps,
-                lapses = after.lapses,
-                id = card.card.id,
-            )
-            learning.insertReviewLog(
-                id = Uuid.random(),
-                card_id = card.card.id,
-                reviewed_at = nowMs,
-                rating = outcome.rating,
-                variant_kind = card.variant.kind,
-                variant_target_lang = card.variant.targetLang,
-                example_id = card.example?.exampleIndex,
-                state_before = before.state,
-                stability_before = before.stability,
-                difficulty_before = before.difficulty,
-                elapsed_days = elapsedDays,
-                scheduled_days = scheduledDays,
-                stability_after = after.stability,
-                difficulty_after = after.difficulty,
-                duration_ms = durationMs,
-            )
-            val nextInterval = (after.dueEpochMs - nowMs).coerceAtLeast(0L)
-                .toDuration(DurationUnit.MILLISECONDS)
-            if (outcome.rating.buriesSiblings()) {
-                spaceSameSenseSiblings(card.card, after, nowMs, nextInterval)
-                buryLemma(
-                    card.card,
-                    nowMs,
-                    siblingCooldown(
-                        nextInterval,
-                        config.sameLemmaCooldownRatio,
-                        config.lemmaCooldownFloor,
-                        config.lemmaCooldownCap,
-                    ),
+            learning.transaction {
+                learning.updateCardAfterReview(
+                    state = after.state,
+                    stability = after.stability,
+                    difficulty = after.difficulty,
+                    due = after.dueEpochMs,
+                    last_review = after.lastReviewEpochMs,
+                    reps = after.reps,
+                    lapses = after.lapses,
+                    id = card.card.id,
                 )
-                if (card.card.family.testsWordRecall) {
-                    buryAnswer(
+                learning.insertReviewLog(
+                    id = Uuid.random(),
+                    card_id = card.card.id,
+                    reviewed_at = nowMs,
+                    rating = outcome.rating,
+                    variant_kind = card.variant.kind,
+                    variant_target_lang = card.variant.targetLang,
+                    example_id = card.example?.exampleIndex,
+                    state_before = before.state,
+                    stability_before = before.stability,
+                    difficulty_before = before.difficulty,
+                    elapsed_days = elapsedDays,
+                    scheduled_days = scheduledDays,
+                    stability_after = after.stability,
+                    difficulty_after = after.difficulty,
+                    duration_ms = durationMs,
+                )
+                val nextInterval = (after.dueEpochMs - nowMs).coerceAtLeast(0L)
+                    .toDuration(DurationUnit.MILLISECONDS)
+                if (outcome.rating.buriesSiblings()) {
+                    spaceSameSenseSiblings(card.card, after, nowMs, nextInterval)
+                    buryLemma(
                         card.card,
                         nowMs,
                         siblingCooldown(
                             nextInterval,
-                            config.sameAnswerCooldownRatio,
-                            config.siblingCooldownFloor,
-                            config.siblingCooldownCap,
+                            config.sameLemmaCooldownRatio,
+                            config.lemmaCooldownFloor,
+                            config.lemmaCooldownCap,
                         ),
                     )
+                    if (card.card.family.testsWordRecall) {
+                        buryAnswer(
+                            card.card,
+                            nowMs,
+                            siblingCooldown(
+                                nextInterval,
+                                config.sameAnswerCooldownRatio,
+                                config.siblingCooldownFloor,
+                                config.siblingCooldownCap,
+                            ),
+                        )
+                    }
+                } else {
+                    learning.setCardAvailableAfter(
+                        availableAfter = after.dueEpochMs,
+                        id = card.card.id,
+                    )
                 }
-            } else {
-                learning.setCardAvailableAfter(
-                    availableAfter = after.dueEpochMs,
-                    id = card.card.id,
-                )
+                if (outcome.rating.propagatesCredit()) {
+                    propagateSameSenseCredit(card.card, after, outcome.rating, nowMs)
+                }
+                if (outcome.rating.unlocksNextFamily()) {
+                    unlockNextFamilyIfEligible(card, after, outcome.rating, nowMs)
+                }
             }
-            if (outcome.rating.propagatesCredit()) {
-                propagateSameSenseCredit(card.card, after, outcome.rating, nowMs)
-            }
-            if (outcome.rating.unlocksNextFamily()) {
-                unlockNextFamilyIfEligible(card, after, outcome.rating, nowMs)
-            }
-        }
 
-        card.copy(card = card.card.copy(scheduling = after))
+            card.copy(card = card.card.copy(scheduling = after))
+        }
     }
 
     suspend fun putCardForLater(card: SessionCard) = withContext(Dispatchers.IO) {
