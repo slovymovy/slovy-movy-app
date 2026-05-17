@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.use
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.*
@@ -78,9 +79,9 @@ class WordFetchManager(
 
         val existing = activeFetches[key]
         if (existing != null) {
-            val trace = PerformanceMonitoring.startTrace("word_fetch_manager_get_word")
-            trace.putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo, reused = true))
-            trace.stop()
+            PerformanceMonitoring.startTrace("word_fetch_manager_get_word").use { trace ->
+                trace.putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo, reused = true))
+            }
             // Return existing active flow
             return@withLock existing.flow
         }
@@ -96,45 +97,45 @@ class WordFetchManager(
         // exception is logged and surfaced as a terminal error WordResult so subscribers learn
         // the fetch failed instead of just hanging on a stalled SharedFlow.
         scope.launch {
-            val trace = PerformanceMonitoring.startTrace("word_fetch_manager_get_word")
-            trace.putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo, reused = false))
-            var emissions = 0L
-            try {
-                dictionaryClient.getWord(language, normalizedLemma, normalizedTargets, pushToRepo)
-                    .onCompletion {
-                        // Mark as complete - will be removed on next getWord call
-                        entry.isComplete = true
-                    }
-                    .collect { result ->
-                        emissions += 1
-                        sharedFlow.emit(result)
-                    }
-                trace.putAttribute("result", "success")
-            } catch (e: CancellationException) {
-                trace.putAttribute("result", "cancelled")
-                throw e
-            } catch (e: Throwable) {
-                trace.putAttribute("result", "failed")
-                AppLogger.error(
-                    TAG,
-                    "WordFetch failed: lemma='$normalizedLemma' lang=${language.code}",
-                    e,
-                )
-                sharedFlow.emit(
-                    WordResult(
-                        card = null,
-                        isWordLoading = false,
-                        isTranslationLoading = false,
-                        error = DictionaryClientException.NetworkException(
-                            "Unexpected error while fetching '$normalizedLemma'",
-                            e,
-                        ),
+            PerformanceMonitoring.startTrace("word_fetch_manager_get_word").use { trace ->
+                trace.putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo, reused = false))
+                var emissions = 0L
+                try {
+                    dictionaryClient.getWord(language, normalizedLemma, normalizedTargets, pushToRepo)
+                        .onCompletion {
+                            // Mark as complete - will be removed on next getWord call
+                            entry.isComplete = true
+                        }
+                        .collect { result ->
+                            emissions += 1
+                            sharedFlow.emit(result)
+                        }
+                    trace.putAttribute("result", "success")
+                } catch (e: CancellationException) {
+                    trace.putAttribute("result", "cancelled")
+                    throw e
+                } catch (e: Throwable) {
+                    trace.putAttribute("result", "failed")
+                    AppLogger.error(
+                        TAG,
+                        "WordFetch failed: lemma='$normalizedLemma' lang=${language.code}",
+                        e,
                     )
-                )
-                entry.isComplete = true
-            } finally {
-                trace.putMetric("emissions", emissions)
-                trace.stop()
+                    sharedFlow.emit(
+                        WordResult(
+                            card = null,
+                            isWordLoading = false,
+                            isTranslationLoading = false,
+                            error = DictionaryClientException.NetworkException(
+                                "Unexpected error while fetching '$normalizedLemma'",
+                                e,
+                            ),
+                        )
+                    )
+                    entry.isComplete = true
+                } finally {
+                    trace.putMetric("emissions", emissions)
+                }
             }
         }
 

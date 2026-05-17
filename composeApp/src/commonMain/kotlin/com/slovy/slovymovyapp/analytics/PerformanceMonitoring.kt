@@ -32,6 +32,14 @@ expect object PerformanceMonitoring {
     fun startTrace(name: String): PerformanceTrace
 }
 
+inline fun <T> PerformanceTrace.use(block: (PerformanceTrace) -> T): T {
+    try {
+        return block(this)
+    } finally {
+        stop()
+    }
+}
+
 fun PerformanceTrace.putAttributes(attributes: Map<String, Any?>) {
     attributes.forEach { (name, value) ->
         if (value != null) putAttribute(name, value.toString().take(MAX_FIREBASE_ATTRIBUTE_LENGTH))

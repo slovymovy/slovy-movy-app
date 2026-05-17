@@ -10,6 +10,7 @@ import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.use
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
@@ -214,92 +215,92 @@ class StudySessionViewModel(
     private fun start() {
         state = StudySessionUiState.Loading()
         viewModelScope.launch {
-            val trace = PerformanceMonitoring.startTrace("study_session_start")
-            trace.putAttribute("lang", langCode)
-            runCatching {
-                val intakeResult = intakeService.runIntake(langCode)
-                trace.putMetric("cards_created", intakeResult.cardsCreated.toLong())
-                trace.putMetric("activated_favorites", intakeResult.activated.size.toLong())
-                trace.putMetric("skip_reasons", intakeResult.skipped.size.toLong())
-                sessionTotal = statsService.dueNow(langCode)
-                trace.putMetric("due_now", sessionTotal.toLong())
-                trace.putAttribute("result", "success")
-                loadNextCard()
-            }.onFailure { error ->
-                trace.putAttribute("result", "failed")
-                state = StudySessionUiState.Error(
-                    message = error.message?.let(UiText::Plain)
-                        ?: UiText.Resource(Res.string.study_error_prepare_failed),
-                    canRetry = true,
-                )
+            PerformanceMonitoring.startTrace("study_session_start").use { trace ->
+                trace.putAttribute("lang", langCode)
+                runCatching {
+                    val intakeResult = intakeService.runIntake(langCode)
+                    trace.putMetric("cards_created", intakeResult.cardsCreated.toLong())
+                    trace.putMetric("activated_favorites", intakeResult.activated.size.toLong())
+                    trace.putMetric("skip_reasons", intakeResult.skipped.size.toLong())
+                    sessionTotal = statsService.dueNow(langCode)
+                    trace.putMetric("due_now", sessionTotal.toLong())
+                    trace.putAttribute("result", "success")
+                    loadNextCard()
+                }.onFailure { error ->
+                    trace.putAttribute("result", "failed")
+                    state = StudySessionUiState.Error(
+                        message = error.message?.let(UiText::Plain)
+                            ?: UiText.Resource(Res.string.study_error_prepare_failed),
+                        canRetry = true,
+                    )
+                }
             }
-            trace.stop()
         }
     }
 
     private fun loadNextCard() {
         ttsManager.stop()
         viewModelScope.launch {
-            val trace = PerformanceMonitoring.startTrace("study_card_load")
-            trace.putAttributes(
-                mapOf(
-                    "lang" to langCode,
-                    "reviewed_count" to reviewedCount,
-                ),
-            )
-            // Debounce the loading indicator: keep showing the previous card briefly so a
-            // fast-loading next card doesn't cause a visible Loading flash.
-            val showLoadingJob = launch {
-                delay(LOADING_DEBOUNCE_MS.milliseconds)
-                state = StudySessionUiState.Loading(nextCardProgress())
-            }
-            runCatching {
-                sessionService.nextCard(langCode, sessionStartedAt)
-                    .collect { sessionCard ->
-                        when (sessionCard?.loadState()) {
-                            null -> {
-                                showLoadingJob.cancel()
-                                trace.putAttribute("result", if (reviewedCount == 0) "empty" else "complete")
-                                state = if (reviewedCount == 0) {
-                                    StudySessionUiState.Empty
-                                } else {
-                                    StudySessionUiState.Complete(
-                                        reviewedCount = reviewedCount,
-                                        message = randomCompletionMessage(language),
+            PerformanceMonitoring.startTrace("study_card_load").use { trace ->
+                trace.putAttributes(
+                    mapOf(
+                        "lang" to langCode,
+                        "reviewed_count" to reviewedCount,
+                    ),
+                )
+                // Debounce the loading indicator: keep showing the previous card briefly so a
+                // fast-loading next card doesn't cause a visible Loading flash.
+                val showLoadingJob = launch {
+                    delay(LOADING_DEBOUNCE_MS.milliseconds)
+                    state = StudySessionUiState.Loading(nextCardProgress())
+                }
+                runCatching {
+                    sessionService.nextCard(langCode, sessionStartedAt)
+                        .collect { sessionCard ->
+                            when (sessionCard?.loadState()) {
+                                null -> {
+                                    showLoadingJob.cancel()
+                                    trace.putAttribute("result", if (reviewedCount == 0) "empty" else "complete")
+                                    state = if (reviewedCount == 0) {
+                                        StudySessionUiState.Empty
+                                    } else {
+                                        StudySessionUiState.Complete(
+                                            reviewedCount = reviewedCount,
+                                            message = randomCompletionMessage(language),
+                                        )
+                                    }
+                                }
+
+                                SessionCardLoadState.LOADING -> {
+                                    trace.incrementMetric("loading_emissions")
+                                    // Let showLoadingJob switch to Loading after the debounce.
+                                }
+
+                                SessionCardLoadState.READY,
+                                SessionCardLoadState.ERROR,
+                                    -> {
+                                    showLoadingJob.cancel()
+                                    trace.putAttributes(
+                                        mapOf(
+                                            "result" to sessionCard.loadState().name.lowercase(),
+                                            "family" to sessionCard.card.family.name.lowercase(),
+                                            "variant" to sessionCard.variant.kind.name.lowercase(),
+                                        ),
                                     )
+                                    showLoadedCard(sessionCard)
                                 }
                             }
-
-                            SessionCardLoadState.LOADING -> {
-                                trace.incrementMetric("loading_emissions")
-                                // Let showLoadingJob switch to Loading after the debounce.
-                            }
-
-                            SessionCardLoadState.READY,
-                            SessionCardLoadState.ERROR,
-                                -> {
-                                showLoadingJob.cancel()
-                                trace.putAttributes(
-                                    mapOf(
-                                        "result" to sessionCard.loadState().name.lowercase(),
-                                        "family" to sessionCard.card.family.name.lowercase(),
-                                        "variant" to sessionCard.variant.kind.name.lowercase(),
-                                    ),
-                                )
-                                showLoadedCard(sessionCard)
-                            }
                         }
-                    }
-            }.onFailure { error ->
-                showLoadingJob.cancel()
-                trace.putAttribute("result", "failed")
-                state = StudySessionUiState.Error(
-                    message = error.message?.let(UiText::Plain)
-                        ?: UiText.Resource(Res.string.study_error_next_card_failed),
-                    canRetry = true,
-                )
+                }.onFailure { error ->
+                    showLoadingJob.cancel()
+                    trace.putAttribute("result", "failed")
+                    state = StudySessionUiState.Error(
+                        message = error.message?.let(UiText::Plain)
+                            ?: UiText.Resource(Res.string.study_error_next_card_failed),
+                        canRetry = true,
+                    )
+                }
             }
-            trace.stop()
         }
     }
 

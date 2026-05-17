@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.data.remote
 import com.slovy.slovymovyapp.api.WordStreamChunk
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.use
 import com.slovy.slovymovyapp.api.WordStreamStage
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.local.LocalDbManager
@@ -129,106 +130,106 @@ class DictionaryClient(
         translationTargets: List<Language> = emptyList(),
         pushToRepo: Boolean = false
     ): Flow<WordResult> = flow {
-        val trace = PerformanceMonitoring.startTrace("dictionary_client_get_word")
-        trace.putAttributes(
-            mapOf(
-                "lang" to language.code,
-                "target_count" to translationTargets.size,
-            ),
-        )
-        var result = "success"
-        var emissionCount = 0L
-
-        suspend fun emitMeasured(wordResult: WordResult) {
-            emissionCount += 1
-            emit(wordResult)
-        }
-
-        try {
-            // 1. Try local first
-            val localCard = dictionaryRepository.getLanguageCard(language, lemma, translationTargets)
-            if (localCard == null) {
-                result = "raw_data_missing"
-                emitMeasured(
-                    WordResult(
-                        card = localCard,
-                        isTranslationLoading = false,
-                        error = DictionaryClientException.RawDataMissingException(lemma, language)
-                    )
-                )
-                return@flow
-            }
-            val needsRemote = needsRemoteFetch(localCard, translationTargets)
-            val needsTranslations = translationTargets.isNotEmpty() &&
-                    hasMissingTranslations(localCard, translationTargets)
+        PerformanceMonitoring.startTrace("dictionary_client_get_word").use { trace ->
             trace.putAttributes(
                 mapOf(
-                    "remote_fetch" to needsRemote,
-                    "online_only" to localCard.online,
-                    "needs_translations" to needsTranslations,
+                    "lang" to language.code,
+                    "target_count" to translationTargets.size,
                 ),
             )
+            var result = "success"
+            var emissionCount = 0L
 
-            if (!needsRemote) {
-                result = "local_hit"
-                // Complete local data - single emission, no loading
-                emitMeasured(WordResult(card = localCard, isTranslationLoading = false))
-                return@flow
+            suspend fun emitMeasured(wordResult: WordResult) {
+                emissionCount += 1
+                emit(wordResult)
             }
 
-            // 2. Always emit local first with loading indicator (shows POS structure while fetching)
-            emitMeasured(
-                WordResult(
-                    card = localCard,
-                    isWordLoading = localCard.online,
-                    isTranslationLoading = needsTranslations
-                )
-            )
-
-            // 3. Stream from server - emits WordResult after EACH stage
             try {
-                val measuredCollector = object : FlowCollector<WordResult> {
-                    override suspend fun emit(value: WordResult) {
-                        emitMeasured(value)
-                    }
+                // 1. Try local first
+                val localCard = dictionaryRepository.getLanguageCard(language, lemma, translationTargets)
+                if (localCard == null) {
+                    result = "raw_data_missing"
+                    emitMeasured(
+                        WordResult(
+                            card = localCard,
+                            isTranslationLoading = false,
+                            error = DictionaryClientException.RawDataMissingException(lemma, language)
+                        )
+                    )
+                    return@flow
                 }
-                streamFromServer(
-                    measuredCollector,
-                    language,
-                    lemma,
-                    translationTargets,
-                    pushToRepo,
-                    localCard.zipfFrequency.toDouble(),
-                    localCard.online
+                val needsRemote = needsRemoteFetch(localCard, translationTargets)
+                val needsTranslations = translationTargets.isNotEmpty() &&
+                        hasMissingTranslations(localCard, translationTargets)
+                trace.putAttributes(
+                    mapOf(
+                        "remote_fetch" to needsRemote,
+                        "online_only" to localCard.online,
+                        "needs_translations" to needsTranslations,
+                    ),
                 )
-            } catch (e: CancellationException) {
-                result = "cancelled"
-                // Emit error for cancellation, then re-throw to propagate
+
+                if (!needsRemote) {
+                    result = "local_hit"
+                    // Complete local data - single emission, no loading
+                    emitMeasured(WordResult(card = localCard, isTranslationLoading = false))
+                    return@flow
+                }
+
+                // 2. Always emit local first with loading indicator (shows POS structure while fetching)
                 emitMeasured(
                     WordResult(
                         card = localCard,
-                        isWordLoading = false,
-                        isTranslationLoading = false,
-                        error = DictionaryClientException.CancelledException()
+                        isWordLoading = localCard.online,
+                        isTranslationLoading = needsTranslations
                     )
                 )
-                throw e
-            } catch (e: Exception) {
-                result = "remote_error"
-                // Emit error result - preserve loading context so UI knows where error occurred
-                emitMeasured(
-                    WordResult(
-                        card = localCard,
-                        isWordLoading = false,
-                        isTranslationLoading = false,
-                        error = wrapException(e)
+
+                // 3. Stream from server - emits WordResult after EACH stage
+                try {
+                    val measuredCollector = object : FlowCollector<WordResult> {
+                        override suspend fun emit(value: WordResult) {
+                            emitMeasured(value)
+                        }
+                    }
+                    streamFromServer(
+                        measuredCollector,
+                        language,
+                        lemma,
+                        translationTargets,
+                        pushToRepo,
+                        localCard.zipfFrequency.toDouble(),
+                        localCard.online
                     )
-                )
+                } catch (e: CancellationException) {
+                    result = "cancelled"
+                    // Emit error for cancellation, then re-throw to propagate
+                    emitMeasured(
+                        WordResult(
+                            card = localCard,
+                            isWordLoading = false,
+                            isTranslationLoading = false,
+                            error = DictionaryClientException.CancelledException()
+                        )
+                    )
+                    throw e
+                } catch (e: Exception) {
+                    result = "remote_error"
+                    // Emit error result - preserve loading context so UI knows where error occurred
+                    emitMeasured(
+                        WordResult(
+                            card = localCard,
+                            isWordLoading = false,
+                            isTranslationLoading = false,
+                            error = wrapException(e)
+                        )
+                    )
+                }
+            } finally {
+                trace.putMetric("emissions", emissionCount)
+                trace.putAttribute("result", result)
             }
-        } finally {
-            trace.putMetric("emissions", emissionCount)
-            trace.putAttribute("result", result)
-            trace.stop()
         }
     }.flowOn(Dispatchers.IO)
 
@@ -345,60 +346,60 @@ class DictionaryClient(
         frequency: Double,
         localIsOnlineOnly: Boolean
     ) {
-        val trace = PerformanceMonitoring.startTrace("dictionary_client_stream")
-        trace.putAttributes(
-            mapOf(
-                "lang" to language.code,
-                "target_count" to targets.size,
-                "push_to_repo" to push,
-                "online_only" to localIsOnlineOnly,
-            ),
-        )
-        var chunkCount = 0L
-        try {
-            val url = buildUrl(language, lemma, targets, push)
-            val response = httpClient.get(url)
-            trace.putMetric("status_code", response.status.value.toLong())
-            if (!response.status.isSuccess()) {
-                val body = response.bodyAsText()
-                trace.putAttribute("result", "server_error")
-                throw DictionaryClientException.ServerException(response.status.value, body)
-            }
-
-            val channel = response.bodyAsChannel()
-
-            // Read line-by-line, parse each as WordStreamChunk
-            while (!channel.isClosedForRead) {
-                val line = channel.readLine() ?: break
-                if (line.isBlank()) continue
-
-                val chunk = json.decodeFromString(WordStreamChunk.serializer(), line)
-                chunkCount += 1
-                val isBaseStage = chunk.stage == WordStreamStage.BASE
-
-                val haveRequiredTranslations = chunk.payload.entries.any {
-                    it.senses.any { s ->
-                        s.translations.keys.containsAll(targets.map { k -> k.code })
-                    }
+        PerformanceMonitoring.startTrace("dictionary_client_stream").use { trace ->
+            trace.putAttributes(
+                mapOf(
+                    "lang" to language.code,
+                    "target_count" to targets.size,
+                    "push_to_repo" to push,
+                    "online_only" to localIsOnlineOnly,
+                ),
+            )
+            var chunkCount = 0L
+            try {
+                val url = buildUrl(language, lemma, targets, push)
+                val response = httpClient.get(url)
+                trace.putMetric("status_code", response.status.value.toLong())
+                if (!response.status.isSuccess()) {
+                    val body = response.bodyAsText()
+                    trace.putAttribute("result", "server_error")
+                    throw DictionaryClientException.ServerException(response.status.value, body)
                 }
-                // After base, we expect translated if translations were requested
-                val hasMoreChunks = isBaseStage && !haveRequiredTranslations
 
-                processChunk(
-                    collector = collector,
-                    chunk = chunk,
-                    language = language,
-                    lemma = lemma,
-                    translationTargets = targets,
-                    hasMoreChunks = hasMoreChunks,
-                    frequency = frequency,
-                    localIsOnlineOnly = localIsOnlineOnly
-                )
+                val channel = response.bodyAsChannel()
+
+                // Read line-by-line, parse each as WordStreamChunk
+                while (!channel.isClosedForRead) {
+                    val line = channel.readLine() ?: break
+                    if (line.isBlank()) continue
+
+                    val chunk = json.decodeFromString(WordStreamChunk.serializer(), line)
+                    chunkCount += 1
+                    val isBaseStage = chunk.stage == WordStreamStage.BASE
+
+                    val haveRequiredTranslations = chunk.payload.entries.any {
+                        it.senses.any { s ->
+                            s.translations.keys.containsAll(targets.map { k -> k.code })
+                        }
+                    }
+                    // After base, we expect translated if translations were requested
+                    val hasMoreChunks = isBaseStage && !haveRequiredTranslations
+
+                    processChunk(
+                        collector = collector,
+                        chunk = chunk,
+                        language = language,
+                        lemma = lemma,
+                        translationTargets = targets,
+                        hasMoreChunks = hasMoreChunks,
+                        frequency = frequency,
+                        localIsOnlineOnly = localIsOnlineOnly
+                    )
+                }
+                trace.putAttribute("result", "success")
+            } finally {
+                trace.putMetric("chunks", chunkCount)
             }
-            trace.putAttribute("result", "success")
-        } finally {
-            trace.putMetric("chunks", chunkCount)
-            trace.stop()
         }
     }
 
@@ -412,18 +413,17 @@ class DictionaryClient(
         frequency: Double,
         localIsOnlineOnly: Boolean
     ) {
-        val trace = PerformanceMonitoring.startTrace("dictionary_client_process_chunk")
-        trace.putAttributes(
-            mapOf(
-                "lang" to language.code,
-                "stage" to chunk.stage.name.lowercase(),
-                "target_count" to translationTargets.size,
-                "online_only" to localIsOnlineOnly,
-            ),
-        )
-        trace.putMetric("entries", chunk.payload.entries.size.toLong())
-        trace.putMetric("senses", chunk.payload.entries.sumOf { it.senses.size }.toLong())
-        try {
+        PerformanceMonitoring.startTrace("dictionary_client_process_chunk").use { trace ->
+            trace.putAttributes(
+                mapOf(
+                    "lang" to language.code,
+                    "stage" to chunk.stage.name.lowercase(),
+                    "target_count" to translationTargets.size,
+                    "online_only" to localIsOnlineOnly,
+                ),
+            )
+            trace.putMetric("entries", chunk.payload.entries.size.toLong())
+            trace.putMetric("senses", chunk.payload.entries.sumOf { it.senses.size }.toLong())
             // Hold read leases on both local DBs for the entire ingestion. This means: (1) the local
             // dictionary captured as `localDictDb` and used across multiple call paths is guaranteed
             // not to be torn down mid-flight; (2) the non-suspending `translationDbProvider` callback
@@ -516,8 +516,6 @@ class DictionaryClient(
                     )
                 )
             }
-        } finally {
-            trace.stop()
         }
     }
 
