@@ -341,13 +341,10 @@ private fun LanguageCardResponseSense.studyExamples(targetLanguage: Language?): 
 
 private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
     if (text.isBlank()) return null
-    val start = clozeRange.first.coerceIn(0, text.length)
-    val endExclusive = (clozeRange.last + 1).coerceIn(start, text.length)
-    if (start == endExclusive) return null
+    if (clozeRanges.isEmpty()) return null
     return StudyClozeTextUiState(
-        prefix = text.substring(0, start),
-        answer = text.substring(start, endExclusive),
-        suffix = text.substring(endExclusive),
+        text = text,
+        answerRanges = clozeRanges,
     )
 }
 

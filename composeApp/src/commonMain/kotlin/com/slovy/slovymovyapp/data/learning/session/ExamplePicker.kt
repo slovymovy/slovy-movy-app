@@ -34,7 +34,7 @@ class ExamplePicker(private val learning: FavoritesQueries) {
     private fun pickFromCandidates(senseId: Uuid, candidates: List<ExampleCandidate>): ExamplePair? {
         val clozeCandidates = candidates.mapNotNull { candidate ->
             clozeText(candidate.text)?.let { cloze ->
-                ClozeCandidate(candidate.exampleIndex, cloze.text, cloze.range)
+                ClozeCandidate(candidate.exampleIndex, cloze.text, cloze.ranges)
             }
         }
         if (clozeCandidates.isEmpty()) return null
@@ -46,27 +46,27 @@ class ExamplePicker(private val learning: FavoritesQueries) {
                 clozeCandidates.firstOrNull { it.exampleIndex == recentIndex }
             }
             ?: clozeCandidates.first()
-        return ExamplePair(candidate.exampleIndex, candidate.text, candidate.range)
+        return ExamplePair(candidate.exampleIndex, candidate.text, candidate.ranges)
     }
 
     private fun clozeText(text: String): ClozeText? {
         var output = ""
-        var range: IntRange? = null
+        val ranges = mutableListOf<IntRange>()
         HtmlTagParser.parseTextSegments(text).forEach { segment ->
             val start = output.length
             output += segment.text
-            if (range == null && segment.isTagged && segment.text.isNotBlank()) {
+            if (segment.isTagged && segment.text.isNotBlank()) {
                 val leadingWhitespace = segment.text.indexOfFirst { !it.isWhitespace() }
                 val trailingWhitespace = segment.text.indexOfLast { !it.isWhitespace() }
-                range = (start + leadingWhitespace)..(start + trailingWhitespace)
+                ranges.add((start + leadingWhitespace)..(start + trailingWhitespace))
             }
         }
-        return range?.let { ClozeText(text = output, range = it) }
+        return ranges.takeIf { it.isNotEmpty() }?.let { ClozeText(text = output, ranges = it) }
     }
 
     private data class ClozeText(
         val text: String,
-        val range: IntRange,
+        val ranges: List<IntRange>,
     )
 
     private data class ExampleCandidate(
@@ -77,6 +77,6 @@ class ExamplePicker(private val learning: FavoritesQueries) {
     private data class ClozeCandidate(
         val exampleIndex: Long,
         val text: String,
-        val range: IntRange,
+        val ranges: List<IntRange>,
     )
 }

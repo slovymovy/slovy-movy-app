@@ -87,5 +87,5 @@ enum class SessionCardLoadErrorReason {
 data class ExamplePair(
     val exampleIndex: Long,
     val text: String,
-    val clozeRange: IntRange,
+    val clozeRanges: List<IntRange>,
 )

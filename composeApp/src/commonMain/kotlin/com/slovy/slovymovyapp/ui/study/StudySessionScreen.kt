@@ -1310,25 +1310,21 @@ private fun StudyClozeText(
 ) {
     val highlightColor = MaterialTheme.colorScheme.primary
     val highlightBackground = MaterialTheme.colorScheme.primaryContainer
-    val blank = " ".repeat(cloze.answer.length.coerceAtLeast(6))
-
-    val prefixPlain = HtmlTagParser.plainText(cloze.prefix)
-    val answerPlain = HtmlTagParser.plainText(cloze.answer)
-    val highlightStart = prefixPlain.length
-    val highlightEnd = highlightStart + answerPlain.length
-
+    val displayText = remember(cloze) { cloze.toDisplayText() }
     val text = buildAnnotatedString {
-        append(prefixPlain)
-        if (cloze.filled) {
-            pushStyle(SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold))
-            append(answerPlain)
+        var cursor = 0
+        displayText.answerRanges.forEach { range ->
+            append(displayText.text.substring(cursor, range.first))
+            if (cloze.filled) {
+                pushStyle(SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold))
+            } else {
+                pushStyle(SpanStyle(color = highlightColor, textDecoration = TextDecoration.Underline))
+            }
+            append(displayText.text.substring(range.first, range.last + 1))
             pop()
-        } else {
-            pushStyle(SpanStyle(color = highlightColor, textDecoration = TextDecoration.Underline))
-            append(blank)
-            pop()
+            cursor = range.last + 1
         }
-        append(HtmlTagParser.plainText(cloze.suffix))
+        append(displayText.text.substring(cursor))
     }
 
     var layoutResult by remember(text) { mutableStateOf<TextLayoutResult?>(null) }
@@ -1342,20 +1338,24 @@ private fun StudyClozeText(
             .drawBehind {
                 if (!cloze.filled) return@drawBehind
                 val layout = layoutResult ?: return@drawBehind
-                val startLine = layout.getLineForOffset(highlightStart)
-                val endLine = layout.getLineForOffset((highlightEnd - 1).coerceAtLeast(highlightStart))
-                for (line in startLine..endLine) {
-                    val lineRangeStart = maxOf(layout.getLineStart(line), highlightStart)
-                    val lineRangeEnd = minOf(layout.getLineEnd(line), highlightEnd)
-                    if (lineRangeStart >= lineRangeEnd) continue
-                    val startBound = layout.getBoundingBox(lineRangeStart)
-                    val endBound = layout.getBoundingBox((lineRangeEnd - 1).coerceAtLeast(lineRangeStart))
-                    drawRoundRect(
-                        color = highlightBackground,
-                        topLeft = Offset(startBound.left, layout.getLineTop(line)),
-                        size = Size(endBound.right - startBound.left, layout.getLineBottom(line) - layout.getLineTop(line)),
-                        cornerRadius = CornerRadius(4.dp.toPx()),
-                    )
+                displayText.answerRanges.forEach { highlightRange ->
+                    val highlightStart = highlightRange.first
+                    val highlightEnd = highlightRange.last + 1
+                    val startLine = layout.getLineForOffset(highlightStart)
+                    val endLine = layout.getLineForOffset((highlightEnd - 1).coerceAtLeast(highlightStart))
+                    for (line in startLine..endLine) {
+                        val lineRangeStart = maxOf(layout.getLineStart(line), highlightStart)
+                        val lineRangeEnd = minOf(layout.getLineEnd(line), highlightEnd)
+                        if (lineRangeStart >= lineRangeEnd) continue
+                        val startBound = layout.getBoundingBox(lineRangeStart)
+                        val endBound = layout.getBoundingBox((lineRangeEnd - 1).coerceAtLeast(lineRangeStart))
+                        drawRoundRect(
+                            color = highlightBackground,
+                            topLeft = Offset(startBound.left, layout.getLineTop(line)),
+                            size = Size(endBound.right - startBound.left, layout.getLineBottom(line) - layout.getLineTop(line)),
+                            cornerRadius = CornerRadius(4.dp.toPx()),
+                        )
+                    }
                 }
             },
         onTextLayout = { layoutResult = it },
@@ -1646,9 +1646,8 @@ private fun clozeCard() = StudyCardUiState.Cloze(
     id = "cloze",
     chipLabel = UiText.Resource(Res.string.study_chip_fill_in),
     prompt = StudyClozeTextUiState(
-        prefix = "Het was zo ",
-        answer = "gezellig",
-        suffix = " bij jullie thuis.",
+        text = "Het was zo gezellig bij jullie thuis.",
+        answerRanges = listOf(11..18),
     ),
     translationHint = "It was so <w>lovely</w> at your place.",
     back = StudyCardBackUiState(
@@ -1656,9 +1655,8 @@ private fun clozeCard() = StudyCardUiState.Cloze(
         secondary = "cosy, sociable",
         definition = "a feeling of warmth and conviviality from being together",
         cloze = StudyClozeTextUiState(
-            prefix = "Het was zo ",
-            answer = "gezellig",
-            suffix = " bij jullie thuis.",
+            text = "Het was zo gezellig bij jullie thuis.",
+            answerRanges = listOf(11..18),
             filled = true,
         ),
     ),

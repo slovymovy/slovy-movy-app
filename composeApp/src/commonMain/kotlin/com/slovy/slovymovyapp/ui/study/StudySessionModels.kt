@@ -125,9 +125,8 @@ data class StudyExampleUiState(
 )
 
 data class StudyClozeTextUiState(
-    val prefix: String,
-    val answer: String,
-    val suffix: String,
+    val text: String,
+    val answerRanges: List<IntRange>,
     val filled: Boolean = false,
 )
 

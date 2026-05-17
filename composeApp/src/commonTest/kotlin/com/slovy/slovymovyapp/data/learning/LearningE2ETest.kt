@@ -1176,7 +1176,35 @@ class LearningE2ETest : BaseTest() {
             assertEquals(CardKind.CLOZE_SOURCE, card.variant.kind)
             val example = assertNotNull(card.example)
             assertEquals("I ${fixture.lemma} every day.", example.text)
-            assertEquals(2..(fixture.lemma.length + 1), example.clozeRange)
+            assertEquals(listOf(2..(fixture.lemma.length + 1)), example.clozeRanges)
+        }
+    }
+
+    @Test
+    fun cloze_card_keeps_all_tagged_example_occurrences() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "multiclozetaggedfixture", includeExamples = false)
+            env.dictionary.dictionaryQueries.insertSenseExample(
+                fixture.senseId,
+                1,
+                "I <w>take</w> it <w>away</w>.",
+            )
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.intake.runIntake("en")
+            val clozeCard = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                stability = 8.0,
+            )
+            env.insertReviewLog(clozeCard.id, CardKind.CLOZE_TRANSLATION, Language.RUSSIAN.code)
+
+            val card = env.nextLoadedCard("en")
+
+            assertEquals(CardKind.CLOZE_SOURCE, card.variant.kind)
+            val example = assertNotNull(card.example)
+            assertEquals("I take it away.", example.text)
+            assertEquals(listOf(2..5, 10..13), example.clozeRanges)
         }
     }
 
@@ -1198,7 +1226,7 @@ class LearningE2ETest : BaseTest() {
             assertEquals(CardKind.CLOZE_TRANSLATION, card.variant.kind)
             val example = assertNotNull(card.example)
             assertEquals("Я учусь каждый день.", example.text)
-            assertEquals(2..6, example.clozeRange)
+            assertEquals(listOf(2..6), example.clozeRanges)
         }
     }
 
