@@ -3,6 +3,7 @@ import ComposeApp
 import FirebaseCore
 import FirebaseAnalytics
 import FirebaseCrashlytics
+import FirebasePerformance
 
 private class FirebaseAnalyticsLogger: AnalyticsLogger {
     func logEvent(name: String, params: [String: Any]) {
@@ -11,6 +12,40 @@ private class FirebaseAnalyticsLogger: AnalyticsLogger {
 
     func setUserProperty(name: String, value: String?) {
         FirebaseAnalytics.Analytics.setUserProperty(value, forName: name)
+    }
+}
+
+
+private class FirebasePerformanceTrace: PerformanceTrace {
+    private let trace: Trace
+
+    init(trace: Trace) {
+        self.trace = trace
+    }
+
+    func putAttribute(name: String, value: String) {
+        trace.setValue(value, forAttribute: name)
+    }
+
+    func putMetric(name: String, value: Int64) {
+        trace.setValue(value, forMetric: name)
+    }
+
+    func incrementMetric(name: String, by: Int64) {
+        trace.incrementMetric(name, by: by)
+    }
+
+    func stop() {
+        trace.stop()
+    }
+}
+
+private class FirebasePerformanceMonitor: PerformanceMonitor {
+    func startTrace(name: String) -> PerformanceTrace {
+        guard let trace = Performance.startTrace(name: name) else {
+            return NoOpPerformanceTrace.shared
+        }
+        return FirebasePerformanceTrace(trace: trace)
     }
 }
 
@@ -43,6 +78,7 @@ struct iOSApp: App {
     init() {
         FirebaseApp.configure()
         Analytics.shared.logger = FirebaseAnalyticsLogger()
+        PerformanceMonitoring.shared.monitor = FirebasePerformanceMonitor()
         AppLogger.shared.remoteLogger = FirebaseCrashlyticsAppLogSink()
     }
 

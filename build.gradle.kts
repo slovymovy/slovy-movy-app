@@ -13,6 +13,7 @@ plugins {
     alias(libs.plugins.serialization) apply false
     alias(libs.plugins.valkyrie) apply false
     alias(libs.plugins.googleServices) apply false
+    alias(libs.plugins.firebasePerf) apply false
 }
 
 val gitCommitCount = providers.of(GitCommitCountValueSource::class) {}.get()

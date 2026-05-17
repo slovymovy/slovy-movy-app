@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.data.remote
 
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.*
@@ -76,6 +78,9 @@ class WordFetchManager(
 
         val existing = activeFetches[key]
         if (existing != null) {
+            val trace = PerformanceMonitoring.startTrace("word_fetch_manager_get_word")
+            trace.putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo, reused = true))
+            trace.stop()
             // Return existing active flow
             return@withLock existing.flow
         }
@@ -91,6 +96,9 @@ class WordFetchManager(
         // exception is logged and surfaced as a terminal error WordResult so subscribers learn
         // the fetch failed instead of just hanging on a stalled SharedFlow.
         scope.launch {
+            val trace = PerformanceMonitoring.startTrace("word_fetch_manager_get_word")
+            trace.putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo, reused = false))
+            var emissions = 0L
             try {
                 dictionaryClient.getWord(language, normalizedLemma, normalizedTargets, pushToRepo)
                     .onCompletion {
@@ -98,11 +106,15 @@ class WordFetchManager(
                         entry.isComplete = true
                     }
                     .collect { result ->
+                        emissions += 1
                         sharedFlow.emit(result)
                     }
+                trace.putAttribute("result", "success")
             } catch (e: CancellationException) {
+                trace.putAttribute("result", "cancelled")
                 throw e
             } catch (e: Throwable) {
+                trace.putAttribute("result", "failed")
                 AppLogger.error(
                     TAG,
                     "WordFetch failed: lemma='$normalizedLemma' lang=${language.code}",
@@ -120,9 +132,24 @@ class WordFetchManager(
                     )
                 )
                 entry.isComplete = true
+            } finally {
+                trace.putMetric("emissions", emissions)
+                trace.stop()
             }
         }
 
         sharedFlow
     }
+
+    private fun fetchTraceAttributes(
+        language: Language,
+        translationTargets: List<Language>,
+        pushToRepo: Boolean,
+        reused: Boolean,
+    ): Map<String, Any> = mapOf(
+        "lang" to language.code,
+        "target_count" to translationTargets.size,
+        "push_to_repo" to pushToRepo,
+        "reused" to reused,
+    )
 }

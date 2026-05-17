@@ -2,6 +2,8 @@ package com.slovy.slovymovyapp.data.remote
 
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.settings.Setting
@@ -527,23 +529,64 @@ class DataDbManager(
     ): Path = withContext(Dispatchers.Default) {
         val path = platform.getDatabasePath(name)
         val file = Path(path)
-        if (!platform.fileExists(path)) {
+        if (platform.fileExists(path)) return@withContext file
+
+        val trace = PerformanceMonitoring.startTrace("data_db_download")
+        trace.putAttributes(downloadTraceAttributes(name))
+        var result = "success"
+        var bytesDownloaded = 0L
+        try {
             val url = remoteDataProvider.downloadUrlFor(name)
             platform.ensureDatabasesDir()
-            downloadToFile(url, remoteDataProvider.headersForHttp(), path, onProgress, cancelToken ?: CancelToken())
+            downloadToFile(
+                url = url,
+                headers = remoteDataProvider.headersForHttp(),
+                destPath = path,
+                onProgress = { progress ->
+                    bytesDownloaded = max(bytesDownloaded, progress.bytesDownloaded)
+                    onProgress(progress)
+                },
+                cancelToken = cancelToken ?: CancelToken(),
+            )
+            trace.putMetric("bytes", bytesDownloaded)
             // Belt-and-suspenders against partial downloads that slipped past byte-count checks
             // (e.g. server response without Content-Length): verify the file actually carries our
             // schema before we stamp DATA_VERSION and report success.
             val isDictionary = name.startsWith(DICTIONARY_PREFIX)
             if (!probeDownloadedDb(file, isDictionary = isDictionary)) {
                 platform.deleteFile(file)
+                result = "invalid_schema"
                 throw IllegalStateException("Downloaded $name is missing expected schema; deleted")
             }
             platform.markNoBackup(path)
             // After first successful download, save version
             setDownloadedVersion()
+            file
+        } catch (e: DownloadCancelledException) {
+            result = "cancelled"
+            throw e
+        } catch (e: Throwable) {
+            if (result == "success") result = "failed"
+            throw e
+        } finally {
+            trace.putAttribute("result", result)
+            trace.stop()
         }
-        file
+    }
+
+    private fun downloadTraceAttributes(name: String): Map<String, Any> {
+        if (name.startsWith(DICTIONARY_PREFIX)) {
+            return mapOf(
+                "kind" to "dictionary",
+                "source_lang" to name.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION),
+            )
+        }
+        val parts = name.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_", limit = 2)
+        return mapOf(
+            "kind" to "translation",
+            "source_lang" to parts.getOrElse(0) { "unknown" },
+            "target_lang" to parts.getOrElse(1) { "unknown" },
+        )
     }
 
     class DownloadCancelledException : RuntimeException()
