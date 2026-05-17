@@ -41,6 +41,9 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.putAttributes
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
@@ -231,16 +234,47 @@ class FavoritesViewModel(
                 .flatMapLatest { queryState ->
                     val snapshot = state as? FavoritesUiState.Content
                     flow {
-                        emit(
+                        val trimmedQuery = queryState.query.trim()
+                        val newState = if (trimmedQuery.isEmpty()) {
                             computeFavoritesState(
                                 query = queryState.query,
                                 currentContent = snapshot,
-                            ),
-                        )
+                            )
+                        } else {
+                            PerformanceMonitoring.startTrace("favorites_search").useWithResult {
+                                putMetric("query_length", trimmedQuery.length.toLong())
+                                computeFavoritesState(
+                                    query = queryState.query,
+                                    currentContent = snapshot,
+                                ).also { content ->
+                                    putAttributes(
+                                        mapOf(
+                                            "lang" to (content.selectedLanguage?.code ?: "any"),
+                                            "has_results" to content.senses.isNotEmpty(),
+                                        ),
+                                    )
+                                    putMetric("result_count", content.senses.size.toLong())
+                                    putMetric("available_languages", content.availableLanguages.size.toLong())
+                                }
+                            }
+                        }
+                        emit(newState)
                     }
                         .flowOn(Dispatchers.Default)
                 }
                 .collect { newState ->
+                    val query = newState.query.trim()
+                    if (query.isNotEmpty()) {
+                        Analytics.logEvent(
+                            AnalyticsEvent.FAVORITES_SEARCH_QUERY,
+                            mapOf(
+                                "lang" to (newState.selectedLanguage?.code ?: "any"),
+                                "query_length" to query.length.toLong(),
+                                "result_count" to newState.senses.size.toLong(),
+                                "has_results" to newState.senses.isNotEmpty().toString(),
+                            ),
+                        )
+                    }
                     applyNewState(newState)
                     prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
                 }

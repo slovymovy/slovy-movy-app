@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.data.remote
 
+import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
@@ -57,20 +59,34 @@ class FavoriteLemmaRecovery internal constructor(
     suspend fun recoverAllInstalledFavorites(
         onProgress: (FavoriteRecoveryProgress) -> Unit = {},
     ) {
-        try {
-            recover(favoritesProvider(), onProgress)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            AppLogger.warn(TAG, "Unable to load favorites for recovery", e)
-            // Recovery must never block a completed database download.
+        PerformanceMonitoring.startTrace("favorite_lemma_recovery").useWithResult {
+            try {
+                val favorites = favoritesProvider()
+                putMetric("favorites", favorites.size.toLong())
+                putMetric("languages", favorites.map { it.language.code }.distinct().size.toLong())
+                val summary = recover(favorites, onProgress)
+                putMetric("groups_total", summary.total.toLong())
+                putMetric("groups_completed", summary.completed.toLong())
+                putMetric("groups_failed", summary.failed.toLong())
+                markResult(when {
+                    summary.total == 0 -> "nothing_to_recover"
+                    summary.failed > 0 -> "partial_failure"
+                    else -> "success"
+                })
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                markResult("failed")
+                AppLogger.warn(TAG, "Unable to load favorites for recovery", e)
+                // Recovery must never block a completed database download.
+            }
         }
     }
 
     private suspend fun recover(
         favorites: List<Favorite>,
         onProgress: (FavoriteRecoveryProgress) -> Unit,
-    ) = coroutineScope {
+    ): FavoriteRecoverySummary = coroutineScope {
         val groups = favorites
             .mapNotNull { favorite ->
                 val lemma = favorite.lemma.trim()
@@ -122,6 +138,8 @@ class FavoriteLemmaRecovery internal constructor(
                 }
             }
         }.awaitAll()
+
+        FavoriteRecoverySummary(total, completed, failed)
     }
 
     private suspend fun groupsByDownloadedLemmaStatus(
@@ -249,6 +267,12 @@ data class FavoriteRecoveryProgress(
 private data class FavoriteLemmaGroupKey(
     val language: Language,
     val normalizedLemma: String,
+)
+
+private data class FavoriteRecoverySummary(
+    val total: Int,
+    val completed: Int,
+    val failed: Int,
 )
 
 private const val TAG = "FavoriteLemmaRecovery"

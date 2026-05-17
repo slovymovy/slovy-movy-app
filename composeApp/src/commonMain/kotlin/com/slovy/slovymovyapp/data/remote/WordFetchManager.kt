@@ -2,7 +2,7 @@ package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
-import com.slovy.slovymovyapp.analytics.use
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.*
@@ -94,8 +94,8 @@ class WordFetchManager(
         // exception is logged and surfaced as a terminal error WordResult so subscribers learn
         // the fetch failed instead of just hanging on a stalled SharedFlow.
         scope.launch {
-            PerformanceMonitoring.startTrace("word_fetch_manager_get_word").use { trace ->
-                trace.putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo))
+            PerformanceMonitoring.startTrace("word_fetch_manager_get_word").useWithResult {
+                putAttributes(fetchTraceAttributes(language, normalizedTargets, pushToRepo))
                 var emissions = 0L
                 try {
                     dictionaryClient.getWord(language, normalizedLemma, normalizedTargets, pushToRepo)
@@ -107,12 +107,10 @@ class WordFetchManager(
                             emissions += 1
                             sharedFlow.emit(result)
                         }
-                    trace.putAttribute("result", "success")
                 } catch (e: CancellationException) {
-                    trace.putAttribute("result", "cancelled")
                     throw e
                 } catch (e: Throwable) {
-                    trace.putAttribute("result", "failed")
+                    markResult("failed")
                     AppLogger.error(
                         TAG,
                         "WordFetch failed: lemma='$normalizedLemma' lang=${language.code}",
@@ -131,7 +129,7 @@ class WordFetchManager(
                     )
                     entry.isComplete = true
                 } finally {
-                    trace.putMetric("emissions", emissions)
+                    putMetric("emissions", emissions)
                 }
             }
         }

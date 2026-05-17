@@ -4,6 +4,7 @@ import com.slovy.slovymovyapp.api.WordStreamChunk
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.use
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.api.WordStreamStage
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.local.LocalDbManager
@@ -130,14 +131,13 @@ class DictionaryClient(
         translationTargets: List<Language> = emptyList(),
         pushToRepo: Boolean = false
     ): Flow<WordResult> = flow {
-        PerformanceMonitoring.startTrace("dictionary_client_get_word").use { trace ->
-            trace.putAttributes(
+        PerformanceMonitoring.startTrace("dictionary_client_get_word").useWithResult {
+            putAttributes(
                 mapOf(
                     "lang" to language.code,
                     "target_count" to translationTargets.size,
                 ),
             )
-            var result = "success"
             var emissionCount = 0L
 
             suspend fun emitMeasured(wordResult: WordResult) {
@@ -149,7 +149,7 @@ class DictionaryClient(
                 // 1. Try local first
                 val localCard = dictionaryRepository.getLanguageCard(language, lemma, translationTargets)
                 if (localCard == null) {
-                    result = "raw_data_missing"
+                    markResult("raw_data_missing")
                     emitMeasured(
                         WordResult(
                             card = localCard,
@@ -162,7 +162,7 @@ class DictionaryClient(
                 val needsRemote = needsRemoteFetch(localCard, translationTargets)
                 val needsTranslations = translationTargets.isNotEmpty() &&
                         hasMissingTranslations(localCard, translationTargets)
-                trace.putAttributes(
+                putAttributes(
                     mapOf(
                         "remote_fetch" to needsRemote,
                         "online_only" to localCard.online,
@@ -171,7 +171,7 @@ class DictionaryClient(
                 )
 
                 if (!needsRemote) {
-                    result = "local_hit"
+                    markResult("local_hit")
                     // Complete local data - single emission, no loading
                     emitMeasured(WordResult(card = localCard, isTranslationLoading = false))
                     return@flow
@@ -203,7 +203,6 @@ class DictionaryClient(
                         localCard.online
                     )
                 } catch (e: CancellationException) {
-                    result = "cancelled"
                     // Emit error for cancellation, then re-throw to propagate
                     emitMeasured(
                         WordResult(
@@ -215,7 +214,7 @@ class DictionaryClient(
                     )
                     throw e
                 } catch (e: Exception) {
-                    result = "remote_error"
+                    markResult("remote_error")
                     // Emit error result - preserve loading context so UI knows where error occurred
                     emitMeasured(
                         WordResult(
@@ -227,8 +226,7 @@ class DictionaryClient(
                     )
                 }
             } finally {
-                trace.putMetric("emissions", emissionCount)
-                trace.putAttribute("result", result)
+                putMetric("emissions", emissionCount)
             }
         }
     }.flowOn(Dispatchers.IO)
@@ -346,8 +344,8 @@ class DictionaryClient(
         frequency: Double,
         localIsOnlineOnly: Boolean
     ) {
-        PerformanceMonitoring.startTrace("dictionary_client_stream").use { trace ->
-            trace.putAttributes(
+        PerformanceMonitoring.startTrace("dictionary_client_stream").useWithResult {
+            putAttributes(
                 mapOf(
                     "lang" to language.code,
                     "target_count" to targets.size,
@@ -359,10 +357,10 @@ class DictionaryClient(
             try {
                 val url = buildUrl(language, lemma, targets, push)
                 val response = httpClient.get(url)
-                trace.putMetric("status_code", response.status.value.toLong())
+                putMetric("status_code", response.status.value.toLong())
                 if (!response.status.isSuccess()) {
                     val body = response.bodyAsText()
-                    trace.putAttribute("result", "server_error")
+                    markResult("server_error")
                     throw DictionaryClientException.ServerException(response.status.value, body)
                 }
 
@@ -396,9 +394,8 @@ class DictionaryClient(
                         localIsOnlineOnly = localIsOnlineOnly
                     )
                 }
-                trace.putAttribute("result", "success")
             } finally {
-                trace.putMetric("chunks", chunkCount)
+                putMetric("chunks", chunkCount)
             }
         }
     }

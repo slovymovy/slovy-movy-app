@@ -4,7 +4,7 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
-import com.slovy.slovymovyapp.analytics.use
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.settings.Setting
@@ -141,41 +141,63 @@ class DataDbManager(
      * routing can correctly send the user back through the download flow.
      */
     suspend fun cleanupCorruptDownloadedDbs() {
-        // Drain active leases on every cached DB, close drivers, then run the cleanup with new
-        // leases still blocked so we never race with a reader probing or growing a Pool.
-        databaseCache.closeAllGuarded {
-            val databasesDir = platform.getDatabasePath("")
-            if (!platform.fileExists(databasesDir)) return@closeAllGuarded
+        PerformanceMonitoring.startTrace("data_db_cleanup_corrupt_downloaded").useWithResult {
+            var checked = 0L
+            var deletedPart = 0L
+            var deletedSmall = 0L
+            var deletedInvalidSchema = 0L
+            try {
+                // Drain active leases on every cached DB, close drivers, then run the cleanup with new
+                // leases still blocked so we never race with a reader probing or growing a Pool.
+                databaseCache.closeAllGuarded {
+                    val databasesDir = platform.getDatabasePath("")
+                    if (!platform.fileExists(databasesDir)) return@closeAllGuarded
 
-            val files = platform.listFiles(databasesDir)
-            files.forEach { file ->
-                val fileName = file.name
-                val isDownloadedDb =
-                    fileName.startsWith(DICTIONARY_PREFIX) || fileName.startsWith(TRANSLATION_PREFIX)
-                if (!isDownloadedDb) return@forEach
+                    val files = platform.listFiles(databasesDir)
+                    files.forEach { file ->
+                        val fileName = file.name
+                        val isDownloadedDb =
+                            fileName.startsWith(DICTIONARY_PREFIX) || fileName.startsWith(TRANSLATION_PREFIX)
+                        if (!isDownloadedDb) return@forEach
+                        checked += 1
 
-                if (fileName.endsWith(PART_SUFFIX)) {
-                    platform.deleteFile(file)
-                    return@forEach
-                }
+                        if (fileName.endsWith(PART_SUFFIX)) {
+                            platform.deleteFile(file)
+                            deletedPart += 1
+                            return@forEach
+                        }
 
-                val size = platform.getFileSize(file)
-                if (size != null && size < MIN_VALID_DOWNLOADED_DB_BYTES) {
-                    platform.deleteFile(file)
-                    return@forEach
-                }
+                        val size = platform.getFileSize(file)
+                        if (size != null && size < MIN_VALID_DOWNLOADED_DB_BYTES) {
+                            platform.deleteFile(file)
+                            deletedSmall += 1
+                            return@forEach
+                        }
 
-                // Size alone won't catch a truncated download that landed past the 16 KB mark but
-                // lost the page holding the schema entry. Open the file and confirm the must-exist
-                // table is present.
-                val schemaOk = if (fileName.startsWith(DICTIONARY_PREFIX)) {
-                    probeDownloadedDb(file, isDictionary = true)
-                } else {
-                    probeDownloadedDb(file, isDictionary = false)
+                        // Size alone won't catch a truncated download that landed past the 16 KB mark but
+                        // lost the page holding the schema entry. Open the file and confirm the must-exist
+                        // table is present.
+                        val schemaOk = if (fileName.startsWith(DICTIONARY_PREFIX)) {
+                            probeDownloadedDb(file, isDictionary = true)
+                        } else {
+                            probeDownloadedDb(file, isDictionary = false)
+                        }
+                        if (!schemaOk) {
+                            platform.deleteFile(file)
+                            deletedInvalidSchema += 1
+                        }
+                    }
                 }
-                if (!schemaOk) {
-                    platform.deleteFile(file)
+                if (deletedPart + deletedSmall + deletedInvalidSchema > 0L) {
+                    markResult("cleaned")
                 }
+            } finally {
+                val deleted = deletedPart + deletedSmall + deletedInvalidSchema
+                putMetric("downloaded_files_checked", checked)
+                putMetric("deleted_files", deleted)
+                putMetric("part_orphans_deleted", deletedPart)
+                putMetric("too_small_deleted", deletedSmall)
+                putMetric("invalid_schema_deleted", deletedInvalidSchema)
             }
         }
     }
@@ -532,9 +554,8 @@ class DataDbManager(
         val file = Path(path)
         if (platform.fileExists(path)) return@withContext file
 
-        PerformanceMonitoring.startTrace("data_db_download").use { trace ->
-            trace.putAttributes(downloadTraceAttributes(name))
-            var result = "success"
+        PerformanceMonitoring.startTrace("data_db_download").useWithResult {
+            putAttributes(downloadTraceAttributes(name))
             var bytesDownloaded = 0L
             try {
                 val url = remoteDataProvider.downloadUrlFor(name)
@@ -549,14 +570,13 @@ class DataDbManager(
                     },
                     cancelToken = cancelToken ?: CancelToken(),
                 )
-                trace.putMetric("bytes", bytesDownloaded)
                 // Belt-and-suspenders against partial downloads that slipped past byte-count checks
                 // (e.g. server response without Content-Length): verify the file actually carries our
                 // schema before we stamp DATA_VERSION and report success.
                 val isDictionary = name.startsWith(DICTIONARY_PREFIX)
                 if (!probeDownloadedDb(file, isDictionary = isDictionary)) {
                     platform.deleteFile(file)
-                    result = "invalid_schema"
+                    markResult("invalid_schema")
                     throw IllegalStateException("Downloaded $name is missing expected schema; deleted")
                 }
                 platform.markNoBackup(path)
@@ -564,13 +584,10 @@ class DataDbManager(
                 setDownloadedVersion()
                 file
             } catch (e: DownloadCancelledException) {
-                result = "cancelled"
-                throw e
-            } catch (e: Throwable) {
-                if (result == "success") result = "failed"
+                markResult("cancelled")
                 throw e
             } finally {
-                trace.putAttribute("result", result)
+                putMetric("bytes", bytesDownloaded)
             }
         }
     }

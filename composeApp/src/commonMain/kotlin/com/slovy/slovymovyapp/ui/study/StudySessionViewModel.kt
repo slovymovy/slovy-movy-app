@@ -10,7 +10,7 @@ import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
-import com.slovy.slovymovyapp.analytics.use
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
@@ -215,19 +215,20 @@ class StudySessionViewModel(
     private fun start() {
         state = StudySessionUiState.Loading()
         viewModelScope.launch {
-            PerformanceMonitoring.startTrace("study_session_start").use { trace ->
-                trace.putAttribute("lang", langCode)
-                runCatching {
+            PerformanceMonitoring.startTrace("study_session_start").useWithResult {
+                putAttribute("lang", langCode)
+                try {
                     val intakeResult = intakeService.runIntake(langCode)
-                    trace.putMetric("cards_created", intakeResult.cardsCreated.toLong())
-                    trace.putMetric("activated_favorites", intakeResult.activated.size.toLong())
-                    trace.putMetric("skip_reasons", intakeResult.skipped.size.toLong())
+                    putMetric("cards_created", intakeResult.cardsCreated.toLong())
+                    putMetric("activated_favorites", intakeResult.activated.size.toLong())
+                    putMetric("skip_reasons", intakeResult.skipped.size.toLong())
                     sessionTotal = statsService.dueNow(langCode)
-                    trace.putMetric("due_now", sessionTotal.toLong())
-                    trace.putAttribute("result", "success")
+                    putMetric("due_now", sessionTotal.toLong())
                     loadNextCard()
-                }.onFailure { error ->
-                    trace.putAttribute("result", "failed")
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (error: Throwable) {
+                    markResult("failed")
                     state = StudySessionUiState.Error(
                         message = error.message?.let(UiText::Plain)
                             ?: UiText.Resource(Res.string.study_error_prepare_failed),
@@ -241,8 +242,8 @@ class StudySessionViewModel(
     private fun loadNextCard() {
         ttsManager.stop()
         viewModelScope.launch {
-            PerformanceMonitoring.startTrace("study_card_load").use { trace ->
-                trace.putAttributes(
+            PerformanceMonitoring.startTrace("study_card_load").useWithResult {
+                putAttributes(
                     mapOf(
                         "lang" to langCode,
                         "reviewed_count" to reviewedCount,
@@ -254,13 +255,13 @@ class StudySessionViewModel(
                     delay(LOADING_DEBOUNCE_MS.milliseconds)
                     state = StudySessionUiState.Loading(nextCardProgress())
                 }
-                runCatching {
+                try {
                     sessionService.nextCard(langCode, sessionStartedAt)
                         .collect { sessionCard ->
                             when (sessionCard?.loadState()) {
                                 null -> {
                                     showLoadingJob.cancel()
-                                    trace.putAttribute("result", if (reviewedCount == 0) "empty" else "complete")
+                                    markResult(if (reviewedCount == 0) "empty" else "complete")
                                     state = if (reviewedCount == 0) {
                                         StudySessionUiState.Empty
                                     } else {
@@ -272,7 +273,7 @@ class StudySessionViewModel(
                                 }
 
                                 SessionCardLoadState.LOADING -> {
-                                    trace.incrementMetric("loading_emissions")
+                                    incrementMetric("loading_emissions")
                                     // Let showLoadingJob switch to Loading after the debounce.
                                 }
 
@@ -280,9 +281,9 @@ class StudySessionViewModel(
                                 SessionCardLoadState.ERROR,
                                     -> {
                                     showLoadingJob.cancel()
-                                    trace.putAttributes(
+                                    markResult(sessionCard.loadState().name.lowercase())
+                                    putAttributes(
                                         mapOf(
-                                            "result" to sessionCard.loadState().name.lowercase(),
                                             "family" to sessionCard.card.family.name.lowercase(),
                                             "variant" to sessionCard.variant.kind.name.lowercase(),
                                         ),
@@ -291,9 +292,12 @@ class StudySessionViewModel(
                                 }
                             }
                         }
-                }.onFailure { error ->
+                } catch (e: CancellationException) {
                     showLoadingJob.cancel()
-                    trace.putAttribute("result", "failed")
+                    throw e
+                } catch (error: Throwable) {
+                    showLoadingJob.cancel()
+                    markResult("failed")
                     state = StudySessionUiState.Error(
                         message = error.message?.let(UiText::Plain)
                             ?: UiText.Resource(Res.string.study_error_next_card_failed),

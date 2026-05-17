@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.data.learning.session
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.use
+import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.*
 import com.slovy.slovymovyapp.data.learning.fsrs.CrossFamilyCredit
@@ -36,15 +37,34 @@ class SessionService(
     private val translationTargets: suspend (Language) -> List<Language> = { emptyList() },
 ) {
     fun nextCard(langCode: String, sessionStartedAt: Instant): Flow<SessionCard?> = flow {
-        val now = clock.now().toEpochMilliseconds()
-        for (card in nextCandidates(langCode, now, sessionStartedAt.toEpochMilliseconds())) {
-            val sessionCard = loadUntilTerminal(card)
-            if (sessionCard != null) {
-                emit(sessionCard)
-                return@flow
+        PerformanceMonitoring.startTrace("session_next_card").useWithResult(successResult = "empty") {
+            putAttribute("lang", langCode)
+            var attemptedCandidates = 0L
+            var loadingEmissions = 0L
+            try {
+                val now = clock.now().toEpochMilliseconds()
+                val candidates = nextCandidates(langCode, now, sessionStartedAt.toEpochMilliseconds())
+                putMetric("candidates", candidates.size.toLong())
+                for (card in candidates) {
+                    attemptedCandidates += 1
+                    val sessionCard = loadUntilTerminal(card) {
+                        loadingEmissions += 1
+                    }
+                    if (sessionCard != null) {
+                        val loadState = sessionCard.loadState()
+                        markResult(loadState.name.lowercase())
+                        putAttribute("family", sessionCard.card.family.name.lowercase())
+                        putAttribute("variant", sessionCard.variant.kind.name.lowercase())
+                        emit(sessionCard)
+                        return@flow
+                    }
+                }
+                emit(null)
+            } finally {
+                putMetric("attempted_candidates", attemptedCandidates)
+                putMetric("loading_emissions", loadingEmissions)
             }
         }
-        emit(null)
     }.flowOn(Dispatchers.IO)
 
     fun previewRatings(card: SessionCard): List<GradeOutcome> =
@@ -177,11 +197,13 @@ class SessionService(
 
     private suspend fun FlowCollector<SessionCard?>.loadUntilTerminal(
         card: Card,
+        onLoadingEmission: () -> Unit,
     ): SessionCard? {
         val sessionCardFlow = loadSessionCard(card) ?: return null
         return sessionCardFlow
             .onEach { sessionCard ->
                 if (sessionCard?.isFetchLoading() == true) {
+                    onLoadingEmission()
                     emit(sessionCard)
                 }
             }
