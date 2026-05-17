@@ -14,6 +14,8 @@ kotlin {
     }
 }
 
+val releaseR8Rules = layout.projectDirectory.file("proguard-rules.pro")
+
 android {
     namespace = "com.slovy.slovymovyapp.androidApp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -21,6 +23,10 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    // Run androidTest against a release-like, minified build type so instrumentation
+    // tests exercise the same R8/resource shrinking path as production.
+    testBuildType = "minifiedTest"
 
     defaultConfig {
         applicationId = "com.slovy.slovymovyapp"
@@ -41,12 +47,29 @@ android {
             isMinifyEnabled = false
         }
         release {
-            isMinifyEnabled = false // XXX: implement later?
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                releaseR8Rules.asFile
+            )
+        }
+        create("minifiedTest") {
+            // Mirrors release shrinking/optimization, but uses debug signing and the
+            // debug application ID so connected tests can install it safely in CI.
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release", "debug")
+            signingConfig = signingConfigs.getByName("debug")
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-minified-test"
         }
     }
 
     sourceSets {
         getByName("debug") {
+            res.srcDirs("src/debug/res")
+        }
+        getByName("minifiedTest") {
             res.srcDirs("src/debug/res")
         }
     }
@@ -62,6 +85,20 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
+
+tasks.register("checkReleaseOptimizedBuild") {
+    group = "verification"
+    description = "Runs release unit tests and assembles the minified, resource-shrunk release APK."
+
+    dependsOn("testReleaseUnitTest", "testMinifiedTestUnitTest", "assembleRelease")
+}
+
+tasks.register("connectedMinifiedAndroidTest") {
+    group = "verification"
+    description = "Runs Android instrumentation tests against a signed, minified, resource-shrunk build."
+
+    dependsOn("connectedMinifiedTestAndroidTest")
 }
 
 dependencies {
