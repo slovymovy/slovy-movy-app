@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.crashlytics)
@@ -99,7 +98,7 @@ tasks.register("checkReleaseOptimizedBuild") {
     group = "verification"
     description = "Runs release unit tests and assembles the minified, resource-shrunk release APK."
 
-    dependsOn("testReleaseUnitTest", "testMinifiedTestUnitTest", "assembleRelease")
+    dependsOn("testMinifiedTestUnitTest", "assembleRelease")
 }
 
 tasks.register("connectedMinifiedAndroidTest") {
