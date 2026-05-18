@@ -51,7 +51,7 @@ jobs:
           ACCESS_TO_GH_TOKEN: ${{ secrets.ACCESS_TO_GH_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           AISTUDIO_KEY: ${{ secrets.AISTUDIO_KEY }}
-        run: ./gradlew :composeApp:testAndroidHostTest :androidApp:testDebugUnitTest
+        run: ./gradlew :composeApp:testAndroidHostTest :androidApp:testMinifiedTestUnitTest
 
       - name: Upload test results and reports (Linux host)
         if: always()

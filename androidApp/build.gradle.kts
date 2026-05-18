@@ -98,7 +98,7 @@ tasks.register("checkReleaseOptimizedBuild") {
     group = "verification"
     description = "Runs release unit tests and assembles the minified, resource-shrunk release APK."
 
-    dependsOn("testReleaseUnitTest", "testMinifiedTestUnitTest", "assembleRelease")
+    dependsOn("testMinifiedTestUnitTest", "assembleRelease")
 }
 
 tasks.register("connectedMinifiedAndroidTest") {
