@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,7 +19,9 @@ import com.slovy.slovymovyapp.logging.FirebaseCrashlyticsAppLogSink
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            enableEdgeToEdge()
+        }
         super.onCreate(savedInstanceState)
         Analytics.logger = FirebaseAnalyticsLogger()
         PerformanceMonitoring.monitor = FirebasePerformanceMonitor()
