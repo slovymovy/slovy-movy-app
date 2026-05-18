@@ -31,7 +31,7 @@ kotlinx-coroutines = "1.11.0"
 kotlinx-datetime = "0.8.0"
 # Keep aligned with Ktor's transitive kotlinx-io-core version. AGP consistent
 # resolution compares androidTest and app runtime classpaths for minified tests.
-kotlinx-io = "0.8.2"
+kotlinx-io = "0.9.0"
 kotlinx-serialization = "1.11.0"
 ktor = "3.4.3"
 openaiJava = "4.35.0"
