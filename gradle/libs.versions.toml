@@ -1,12 +1,10 @@
 [versions]
-agp = "8.13.2"
+agp = "9.0.1"
 android-compileSdk = "36"
 appVersionBase = "1.2"
 android-minSdk = "24"
 android-targetSdk = "36"
 androidx-activity = "1.13.0"
-androidx-constraintlayout = "2.2.1"
-androidx-core = "1.17.0"
 androidx-espresso = "3.7.0"
 androidx-customview-poolingcontainer = "1.1.0"
 androidx-lifecycle = "2.10.0"
@@ -29,9 +27,7 @@ kotlin = "2.3.21"
 kotlinx-atomicfu = "0.32.1"
 kotlinx-coroutines = "1.11.0"
 kotlinx-datetime = "0.8.0"
-# Keep aligned with Ktor's transitive kotlinx-io-core version. AGP consistent
-# resolution compares androidTest and app runtime classpaths for minified tests.
-kotlinx-io = "0.8.2"
+kotlinx-io = "0.9.0"
 kotlinx-serialization = "1.11.0"
 ktor = "3.4.3"
 openaiJava = "4.35.0"
@@ -116,7 +112,6 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
