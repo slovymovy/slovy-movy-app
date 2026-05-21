@@ -3,7 +3,7 @@
     <string name="common_app_name">OpenWords</string>
 
     <string name="nav_search">Zoeken</string>
-    <string name="nav_favorites">Mijn woorden</string>
+    <string name="nav_favorites">Mijn lijst</string>
     <string name="nav_stats">Stats</string>
     <string name="nav_word_detail">Woord</string>
     <string name="nav_settings">Instellingen</string>
@@ -23,16 +23,16 @@
     </string>
     <string name="welcome_cta_explore_now">Aan de slag</string>
 
-    <string name="search_placeholder">Zoek je woord...</string>
-    <string name="search_open_item">Openen %1$s</string>
+    <string name="search_placeholder">Zoek een woord...</string>
+    <string name="search_open_item">Open %1$s</string>
     <string name="search_content_desc_favorite">Favoriet</string>
     <string name="search_content_desc_not_downloaded">Niet gedownload</string>
-    <string name="search_section_explore">Verkennen</string>
-    <string name="search_pull_to_refresh_hint">Trek omlaag voor nieuwe woorden</string>
-    <string name="search_section_recently_saved">Recent opgeslagen</string>
-    <string name="search_empty_start_typing">Begin te typen om te zoeken</string>
+    <string name="search_section_explore">Ontdekken</string>
+    <string name="search_pull_to_refresh_hint">Sleep omlaag voor nieuwe woorden</string>
+    <string name="search_section_recently_saved">Onlangs opgeslagen</string>
+    <string name="search_empty_start_typing">Begin met typen om te zoeken</string>
     <string name="search_no_dictionary_title">Geen woordenboek gedownload</string>
-    <string name="search_no_dictionary_description">Download een woordenboek om met zoeken te beginnen</string>
+    <string name="search_no_dictionary_description">Download een woordenboek om te beginnen met zoeken</string>
     <string name="search_go_to_settings">Ga naar Instellingen</string>
     <string name="search_no_results_title">Geen resultaten voor "%1$s"</string>
     <string name="search_no_results_description">Probeer een andere spelling of zoekterm</string>
@@ -41,10 +41,10 @@
     <string name="stats_previous_month">Vorige maand</string>
     <string name="stats_next_month">Volgende maand</string>
     <plurals name="stats_day_streak">
-        <item quantity="one">dagenreeks</item>
-        <item quantity="few">dagenreeks</item>
-        <item quantity="many">dagenreeks</item>
-        <item quantity="other">dagenreeks</item>
+        <item quantity="one">dag streak</item>
+        <item quantity="few">dagen streak</item>
+        <item quantity="many">dagen streak</item>
+        <item quantity="other">dagen streak</item>
     </plurals>
     <string name="stats_legend_today">vandaag</string>
     <string name="stats_legend_practiced">geoefend</string>
@@ -77,7 +77,7 @@
     <string name="stats_stage_middle">Herhaling</string>
     <string name="stats_stage_strong">Beheerst</string>
     <string name="stats_stage_learned">Geleerd</string>
-    <string name="stats_caption_learned">Woorden zakken naar beneden in de lijst naarmate je ze bij overhoringen goed blijft onthouden, en schuiven weer omhoog als je ze vergeet. «%1$s» betekent dat ze zijn voltooid — ze doen niet meer mee in de actieve herhaling.</string>
+    <string name="stats_caption_learned">Betekenissen zakken in de lijst naarmate je ze goed blijft onthouden, en komen weer bovenaan te staan als je ze vergeet. %1$s betekent dat de kaart is aangeleerd en uit de actieve herhaling is gehaald.</string>
     <string name="stats_month_january">Januari</string>
     <string name="stats_month_february">Februari</string>
     <string name="stats_month_march">Maart</string>
@@ -101,7 +101,7 @@
     <string name="common_back">Terug</string>
     <string name="common_cancel">Annuleren</string>
     <string name="common_close">Sluiten</string>
-    <string name="common_dismiss">Verbergen</string>
+    <string name="common_dismiss">Sluiten</string>
     <string name="common_error">Fout</string>
     <string name="common_got_it">Begrepen</string>
     <string name="common_later">Later</string>
@@ -109,14 +109,14 @@
     <string name="common_retry">Opnieuw proberen</string>
 
     <string name="download_description_setting_up_library">Je bibliotheek wordt ingesteld</string>
-    <string name="download_action_download_size">Downloaden %1$s</string>
+    <string name="download_action_download_size">Download %1$s</string>
     <string name="download_title_ready">Klaar om te downloaden</string>
     <string name="download_subtitle_ready">Je hebt deze woordenboeken nodig om te starten.</string>
     <string name="download_title_failed">Download mislukt</string>
     <string name="download_subtitle_failed">Er ging iets mis. Probeer het opnieuw.</string>
     <string name="download_title_cancelled">Download geannuleerd</string>
-    <string name="download_subtitle_cancelled">Je kunt opnieuw proberen vanuit Instellingen.</string>
-    <string name="download_title_done">Alles klaar</string>
+    <string name="download_subtitle_cancelled">Je kunt het opnieuw proberen via Instellingen.</string>
+    <string name="download_title_done">Helemaal klaar</string>
     <string name="download_subtitle_done">Je bibliotheek is klaar.</string>
     <string name="download_title_downloading">Downloaden</string>
     <string name="download_subtitle_downloading">Je bibliotheek wordt voorbereid.\nDit kan even duren.</string>
@@ -146,12 +146,12 @@
     </string>
     <string name="favorites_empty_action_start_searching">Begin met zoeken</string>
     <string name="favorites_no_results_title">Geen opgeslagen woorden voor "%1$s"</string>
-    <string name="favorites_no_results_description">Probeer een andere spelling of zoek in het woordenboek</string>
-    <string name="favorites_no_results_action_search_dictionary">Zoek in woordenboek</string>
+    <string name="favorites_no_results_description">Probeer een andere spelling of zoek in het woordenboek.</string>
+    <string name="favorites_no_results_action_search_dictionary">Zoek in het woordenboek</string>
     <string name="favorites_stats">%1$d betekenissen · %2$d woorden</string>
     <string name="favorites_removed_message">Woord verwijderd</string>
     <string name="favorites_removed_undo">Ongedaan maken</string>
-    <string name="favorites_error_dictionary_not_downloaded">Download het %1$s-woordenboek in Instellingen</string>
+    <string name="favorites_error_dictionary_not_downloaded">Download het %1$s-woordenboek via Instellingen</string>
     <string name="favorites_error_meaning_not_found">Betekenis niet gevonden</string>
     <string name="favorites_error_word_needs_download">Woord moet worden gedownload</string>
     <string name="favorites_error_load_meaning_failed">Betekenis laden mislukt</string>
@@ -159,29 +159,29 @@
     <string name="language_setup_title">Selecteer talen</string>
     <string name="language_setup_subtitle">Kies wat je leert en je vertaalvoorkeuren.</string>
     <string name="language_setup_learning_label">Ik leer...</string>
-    <string name="language_setup_select_language">Selecteer taal</string>
+    <string name="language_setup_select_language">Selecteer een taal</string>
     <string name="language_setup_translate_into">Vertalen naar:</string>
-    <string name="language_setup_update_anytime">Altijd te wijzigen in Instellingen</string>
+    <string name="language_setup_update_anytime">Altijd aan te passen via Instellingen</string>
 
     <string name="settings_title">Instellingen</string>
     <string name="settings_section_languages_i_learn">Talen die ik leer</string>
     <string name="settings_no_languages_available">Geen talen beschikbaar</string>
-    <string name="settings_add_language_to_learn">Voeg een leertaal toe</string>
+    <string name="settings_add_language_to_learn">Voeg een taal toe om te leren</string>
     <string name="settings_section_translation_languages">Vertaaltalen</string>
     <string name="settings_section_voice">Stem</string>
     <string name="settings_section_your_data">Jouw gegevens</string>
     <string name="settings_section_about">Over</string>
 
-    <string name="feedback_dialog_title">App-feedback</string>
+    <string name="feedback_dialog_title">Feedback over de app</string>
     <string name="feedback_dialog_placeholder">Deel je gedachten...</string>
 
-    <string name="app_data_version_mismatch_title">Je woordenboeken zijn aan vernieuwing toe</string>
+    <string name="app_data_version_mismatch_title">Je woordenboeken moeten worden bijgewerkt</string>
     <string name="app_data_version_mismatch_body">We hebben de indeling van de woordenboeken verbeterd. Download ze opnieuw voor de nieuwste versie—via wifi duurt dit een paar minuten. Je opgeslagen woorden en voortgang blijven bewaard.</string>
-    <string name="app_data_version_mismatch_action">Vernieuw woordenboeken</string>
+    <string name="app_data_version_mismatch_action">Download opnieuw</string>
 
     <string name="word_details_title">Woorddetails</string>
-    <string name="word_details_action_stop">Stoppen</string>
-    <string name="word_details_action_play_word">Woord afspelen</string>
+    <string name="word_details_action_stop">Stop</string>
+    <string name="word_details_action_play_word">Speel woord af</string>
     <string name="word_details_feedback_title">Een correctie voorstellen</string>
     <string name="word_details_feedback_placeholder">Wat moet er worden gecorrigeerd?</string>
     <string name="word_details_no_entries">Geen items beschikbaar.</string>
@@ -193,7 +193,7 @@
     <string name="word_details_forms">Vormen</string>
     <string name="word_details_loading_meaning">Betekenis laden...</string>
     <string name="word_details_preparing_translation">Vertaling voorbereiden...</string>
-    <string name="word_details_meaning_load_when_expanded">Betekenis wordt geladen bij uitklappen</string>
+    <string name="word_details_meaning_load_when_expanded">Tik om de betekenis te laden</string>
     <string name="word_details_collapse_sense">Betekenis inklappen</string>
     <string name="word_details_expand_sense">Betekenis uitklappen</string>
     <string name="word_details_definition">Definitie</string>
@@ -201,18 +201,18 @@
     <string name="word_details_common_phrases">Veelgebruikte uitdrukkingen</string>
     <string name="word_details_synonyms">Synoniemen</string>
     <string name="word_details_antonyms">Antoniemen</string>
-    <string name="word_details_see_full_word">Volledig woord bekijken</string>
+    <string name="word_details_see_full_word">Bekijk volledige woord</string>
     <string name="word_details_usage_context">Gebruikscontext</string>
 
-    <string name="common_delete">Verwijderen</string>
-    <string name="common_open_system_settings">Systeeminstellingen openen</string>
+    <string name="common_delete">Verwijder</string>
+    <string name="common_open_system_settings">Open systeeminstellingen</string>
     <string name="common_state_selected">Geselecteerd</string>
     <string name="common_state_not_selected">Niet geselecteerd</string>
     <string name="common_state_expanded">Uitgeklapt</string>
     <string name="common_state_collapsed">Ingeklapt</string>
     <string name="common_action_expand">Uitklappen</string>
     <string name="common_action_collapse">Inklappen</string>
-    <string name="common_action_cancel_download">Download annuleren</string>
+    <string name="common_action_cancel_download">Annuleer download</string>
     <string name="common_status_downloading">Downloaden</string>
     <string name="common_status_downloading_percent">Downloaden %1$d%%</string>
     <string name="common_status_downloading_ellipsis">Downloaden...</string>
@@ -226,59 +226,52 @@
     <string name="feedback_dialog_sent_message">Bedankt! We hebben een tracking-issue voor je feedback aangemaakt. Je
         kunt de voortgang op GitHub volgen.
     </string>
-    <string name="feedback_dialog_track_on_github">Volgen op GitHub</string>
+    <string name="feedback_dialog_track_on_github">Volg op GitHub</string>
     <string name="feedback_dialog_comment_label">Opmerking</string>
     <string name="feedback_dialog_email_label">E-mail (optioneel)</string>
     <string name="feedback_dialog_email_supporting">Kan openbaar zichtbaar zijn op GitHub</string>
     <string name="feedback_dialog_sending">Verzenden...</string>
-    <string name="feedback_dialog_send">Verzenden</string>
+    <string name="feedback_dialog_send">Verzend</string>
 
     <string name="voice_setup_title">Verbeter je uitspraak</string>
     <string name="voice_setup_description">De standaardstem kan robotachtig klinken. Zo krijg je een betere:</string>
     <string name="voice_setup_step_android">Open de tekst-naar-spraakinstellingen op je telefoon en download een
         hoogwaardige stem voor %1$s.
     </string>
-    <string name="voice_setup_step_ios">Ga naar iPhone-instellingen - Toegankelijkheid - Gesproken materiaal - Stemmen
-        en download een stem voor %1$s.
-    </string>
+    <string name="voice_setup_step_ios">Ga naar iPhone-instellingen > Toegankelijkheid > Gesproken inhoud > Stemmen en download een stem voor %1$s.</string>
     <string name="voice_setup_step_other">Download een hoogwaardige stem voor %1$s via je systeeminstellingen.</string>
-    <string name="voice_setup_step_two">Ga terug naar Open Words Instellingen - Stemmen en schakel de nieuwe stem in.
-    </string>
+    <string name="voice_setup_step_two">Ga terug naar de Open Words-instellingen > Stemmen en schakel de nieuwe stem in.</string>
 
     <string name="voice_no_voices_enabled">Geen stemmen ingeschakeld</string>
     <string name="voice_unknown_name">Onbekend</string>
     <string name="voice_single_enabled">1 stem ingeschakeld</string>
     <string name="voice_many_enabled">%1$d stemmen ingeschakeld</string>
     <string name="voice_no_voices_available">Geen stemmen beschikbaar</string>
-    <string name="voice_download_more_title">Meer stemmen downloaden</string>
+    <string name="voice_download_more_title">Download meer stemmen</string>
     <string name="voice_download_more_step_android">Open de tekst-naar-spraakinstellingen op je telefoon en download een
         hoogwaardige stem.
     </string>
-    <string name="voice_download_more_step_ios">Ga naar iPhone-instellingen - Toegankelijkheid - Gesproken materiaal -
-        Stemmen en download een hoogwaardige stem.
-    </string>
+    <string name="voice_download_more_step_ios">Ga naar iPhone-instellingen > Toegankelijkheid > Gesproken inhoud > Stemmen en download een hoogwaardige stem.</string>
     <string name="voice_download_more_step_other">Download een hoogwaardige stem via je systeeminstellingen.</string>
-    <string name="voice_download_more_step_two">Ga terug naar Open Words Instellingen - Stem en schakel de nieuwe stem
-        in.
-    </string>
+    <string name="voice_download_more_step_two">Ga terug naar de Open Words-instellingen > Stem en schakel de nieuwe stem in.</string>
     <string name="voice_quality_high">Hoog</string>
     <string name="voice_quality_good">Goed</string>
     <string name="voice_quality_medium">Gemiddeld</string>
     <string name="voice_network_online">Verbonden</string>
-    <string name="voice_test_action">Stem testen</string>
-    <string name="voice_enable_label">%1$s inschakelen</string>
+    <string name="voice_test_action">Test stem</string>
+    <string name="voice_enable_label">Schakel %1$s in</string>
 
     <string name="about_send_feedback_title">Stuur ons feedback</string>
     <string name="about_send_feedback_subtitle">We horen graag van je</string>
-    <string name="about_acknowledgements_title">Dankbetuigingen</string>
+    <string name="about_acknowledgements_title">Met dank aan</string>
     <string name="about_acknowledgements_subtitle">Gegevensbronnen &amp; credits</string>
     <string name="about_version_title">Versie</string>
-    <string name="acknowledgements_title">Dankbetuigingen</string>
-    <string name="acknowledgements_vocab_data_title">Woordgegevens</string>
+    <string name="acknowledgements_title">Met dank aan</string>
+    <string name="acknowledgements_vocab_data_title">Woordenschatgegevens</string>
     <string name="acknowledgements_vocab_data_body">Onze woordgegevens komen uit Wiktionary, het gratis meertalige
         woordenboek dat wereldwijd door vrijwilligers wordt opgebouwd.
     </string>
-    <string name="acknowledgements_dictionary_extracts_title">Woordenboekextracten</string>
+    <string name="acknowledgements_dictionary_extracts_title">Woordenboekextractie</string>
     <string name="acknowledgements_dictionary_extracts_body">We gebruiken voorbewerkte woordenboekgegevens van
         Kaikki.org, geëxtraheerd uit Wiktionary met de open-source tool wiktextract van Tatu Ylonen.
     </string>
@@ -292,22 +285,20 @@
     <string name="acknowledgements_words_sources_body">Alle woordgegevens zijn beschikbaar onder de
         CC-BY-SA-4.0-licentie.
     </string>
-    <string name="acknowledgements_thanks">We zijn de Wiktionary-gemeenschap en Tatu Ylonen dankbaar dat ze deze
-        gegevens vrij beschikbaar hebben gemaakt.
-    </string>
+    <string name="acknowledgements_thanks">Onze dank gaat uit naar de Wiktionary-community en Tatu Ylonen voor het gratis beschikbaar stellen van deze gegevens.</string>
 
     <string name="app_data_backup_title">Maak een back-up van je opgeslagen woorden</string>
     <string name="app_data_backup_description">Exporteert je opgeslagen woorden en app-instellingen naar een archief.
         Handig om een kopie te bewaren of te verhuizen naar een nieuw apparaat.
     </string>
-    <string name="app_data_exporting">Exporteren...</string>
-    <string name="app_data_export_now">Nu exporteren</string>
+    <string name="app_data_exporting">Bezig met exporteren...</string>
+    <string name="app_data_export_now">Exporteer nu</string>
 
     <string name="settings_dictionary_size_with_colon">Woordenboek: %1$s</string>
     <string name="settings_dictionary_size">Woordenboek %1$s</string>
     <string name="settings_translations_title">Vertalingen</string>
     <plurals name="settings_translations_all_downloaded">
-        <item quantity="one">Alle %1$d vertaling gedownload</item>
+        <item quantity="one">%1$d vertaling gedownload</item>
         <item quantity="few">Alle %1$d vertalingen gedownload</item>
         <item quantity="many">Alle %1$d vertalingen gedownload</item>
         <item quantity="other">Alle %1$d vertalingen gedownload</item>
@@ -323,8 +314,8 @@
     <string name="settings_remove_language">Verwijder %1$s</string>
     <string name="settings_delete_translation">Verwijder %1$s-vertaling</string>
     <string name="settings_download_translation">Download %1$s-vertaling</string>
-    <string name="settings_download_language">Downloaden %1$s</string>
-    <string name="settings_edit_translation_languages">Vertaaltalen bewerken</string>
+    <string name="settings_download_language">Download %1$s</string>
+    <string name="settings_edit_translation_languages">Bewerk vertaaltalen</string>
     <string name="settings_no_languages_selected">Geen talen geselecteerd</string>
     <plurals name="settings_languages_selected">
         <item quantity="one">%1$d taal geselecteerd</item>
@@ -348,7 +339,7 @@
     <string name="settings_error_save_translation_languages">Opslaan van vertaaltalen mislukt: %1$s</string>
     <string name="settings_error_delete_with_reason">Verwijderen mislukt: %1$s</string>
     <string name="settings_delete_translation_confirm_title">Verwijder vertaling %1$s -&gt; %2$s?</string>
-    <string name="settings_delete_translation_confirm_message">Je kunt deze altijd opnieuw downloaden.</string>
+    <string name="settings_delete_translation_confirm_message">Je kunt hem altijd opnieuw downloaden.</string>
     <string name="settings_translation_deleted">Vertaling %1$s -&gt; %2$s verwijderd</string>
     <string name="settings_dictionary_download_success">Woordenboek succesvol gedownload</string>
     <string name="settings_translation_download_success">Vertaling succesvol gedownload</string>
@@ -361,7 +352,7 @@
     <string name="settings_error_export_app_data_with_reason">Exporteren van appgegevens mislukt: %1$s</string>
     <string name="settings_error_update_voice_selection_with_reason">Bijwerken van stemselectie mislukt: %1$s</string>
     <string name="settings_feedback_sent">Feedback verzonden</string>
-    <string name="settings_feedback_view">Bekijken</string>
+    <string name="settings_feedback_view">Bekijk</string>
     <string name="settings_feedback_comment_required">Opmerking is verplicht</string>
     <string name="settings_download_cancelled">Download geannuleerd</string>
     <string name="common_search">Zoeken</string>
@@ -374,8 +365,7 @@
         <item quantity="many">%1$s - %2$d betekenissen</item>
         <item quantity="other">%1$s - %2$d betekenissen</item>
     </plurals>
-    <string name="part_of_speech_generating_definitions_examples">Definities en voorbeelden worden gegenereerd...
-    </string>
+    <string name="part_of_speech_generating_definitions_examples">Definities en voorbeelden genereren...</string>
     <string name="sense_frequency_high">Hoog</string>
     <string name="sense_frequency_middle">Gemiddeld</string>
     <string name="sense_frequency_low">Laag</string>
@@ -543,7 +533,7 @@
     <string name="scheme_label_passive_adjectival_participle">passief deelw. (bnw.)</string>
     <string name="scheme_label_contemporary_adverbial_participle">gelijktijdig bijw. deelw.</string>
     <string name="scheme_label_verbal_noun">verbaal substantief</string>
-    <string name="study_action_close">Studiesessie sluiten</string>
+    <string name="study_action_close">Sluit studiesessie</string>
     <string name="study_action_retry">Opnieuw proberen</string>
     <string name="study_loading">Je herhaling wordt voorbereid…</string>
     <string name="study_empty_title">Nu niets te herhalen</string>
@@ -572,22 +562,22 @@
         <item quantity="other">Je leert %1$d betekenissen van dit woord.</item>
     </plurals>
     <plurals name="study_swipe_other_meanings_hint">
-        <item quantity="one">Swipe naar links voor nog %1$d betekenis.</item>
-        <item quantity="few">Swipe naar links voor nog %1$d betekenissen.</item>
-        <item quantity="many">Swipe naar links voor nog %1$d betekenissen.</item>
-        <item quantity="other">Swipe naar links voor nog %1$d betekenissen.</item>
+        <item quantity="one">Veeg naar links voor nog een betekenis.</item>
+        <item quantity="few">Veeg naar links voor nog %1$d betekenissen.</item>
+        <item quantity="many">Veeg naar links voor nog %1$d betekenissen.</item>
+        <item quantity="other">Veeg naar links voor nog %1$d betekenissen.</item>
     </plurals>
-    <string name="study_swipe_back_to_rate">Swipe terug naar de eerste kaart om te beoordelen.</string>
+    <string name="study_swipe_back_to_rate">Veeg terug naar de eerste kaart om deze te beoordelen.</string>
     <string name="study_chip_source_only">alleen %1$s</string>
     <string name="study_chip_fill_in">Invullen</string>
     <string name="study_chip_listen">Luisteren</string>
-    <string name="study_prompt_recall_word">Herinner het woord</string>
+    <string name="study_prompt_recall_word">Bedenk het woord</string>
     <string name="study_prompt_translate_to">Vertaal naar %1$s</string>
-    <string name="study_chip_recall">Herinner %1$s</string>
-    <string name="guess_by_context">Raad context</string>
-    <string name="study_play_word_audio">Woord afspelen</string>
-    <string name="study_play_prompt_audio">Opdracht afspelen</string>
-    <string name="study_stop_audio">Audio stoppen</string>
+    <string name="study_chip_recall">Wat betekent %1$s?</string>
+    <string name="guess_by_context">Raad op basis van de context</string>
+    <string name="study_play_word_audio">Speel woord af</string>
+    <string name="study_play_prompt_audio">Speel opdracht af</string>
+    <string name="study_stop_audio">Stop audio</string>
     <string name="study_listen_prompt">Tik om af te spelen. Welk woord hoor je?</string>
     <plurals name="study_hint_starts_with">
         <item quantity="one">Hint: begint met %1$s, %2$d letter</item>
@@ -607,11 +597,11 @@
         <item quantity="other">%1$d kaarten</item>
     </plurals>
     <string name="favorites_study_due_subtitle">Ongeveer %1$d min</string>
-    <string name="favorites_study_due_action">Herhaling starten</string>
+    <string name="favorites_study_due_action">Start herhaling</string>
     <string name="favorites_study_done_title">HELEMAAL BIJ</string>
     <string name="favorites_study_done_until_next_review">tot de volgende herhaling</string>
     <string name="favorites_study_done_review_more">Nog even herhalen</string>
-    <string name="favorites_study_done_study_new">Nieuwe woorden leren</string>
+    <string name="favorites_study_done_study_new">Leer nieuwe woorden</string>
     <string name="favorites_study_done_region">Herhaling voltooid</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d uur</item>
