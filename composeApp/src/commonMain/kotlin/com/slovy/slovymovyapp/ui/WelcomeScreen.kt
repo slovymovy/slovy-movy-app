@@ -16,11 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -151,54 +147,12 @@ fun WelcomeScreenContent(
 }
 
 @Composable
-private fun OnboardingHeader(
-    title: String,
-    subtitle: String
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontFamily = FontFamily.Default,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.sp
-            ),
-            color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(
-            text = subtitle,
-            modifier = Modifier.widthIn(max = 300.dp),
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontFamily = MaterialTheme.serifFontFamily,
-                fontStyle = FontStyle.Italic,
-                lineHeight = 22.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
 private fun SellingPointRow(
     icon: ImageVector,
     title: String,
     description: String,
     showDivider: Boolean
 ) {
-    val normalizedDescription = description
-        .lineSequence()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .joinToString(" ")
-
     Column(modifier = Modifier.fillMaxWidth()) {
         if (showDivider) {
             HorizontalDivider(
@@ -228,7 +182,7 @@ private fun SellingPointRow(
                 )
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(AppSpacing.md))
 
             Column(
                 modifier = Modifier
@@ -244,10 +198,10 @@ private fun SellingPointRow(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(modifier = Modifier.height(3.dp))
+                Spacer(modifier = Modifier.height(AppSpacing.xs))
 
                 Text(
-                    text = normalizedDescription,
+                    text = description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 20.sp
