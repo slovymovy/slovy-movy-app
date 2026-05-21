@@ -205,10 +205,8 @@ class StatsViewModel(
 fun StatsScreen(
     viewModel: StatsViewModel,
     learningLanguages: List<Language>,
-    wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
-    onNavigateToWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
 ) {
@@ -243,10 +241,8 @@ fun StatsScreen(
         onSelectedLanguageChange = { viewModel.setSelectedLanguage(it) },
         onLanguageDropdownExpandedChange = { viewModel.setLanguageDropdownExpanded(it) },
         onStepMonth = { viewModel.stepMonth(it) },
-        wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
-        onNavigateToWordDetail = onNavigateToWordDetail,
         onNavigateToSettings = onNavigateToSettings,
         hasFavoritesToReview = hasFavoritesToReview,
     )
@@ -260,10 +256,8 @@ fun StatsScreenContent(
     onSelectedLanguageChange: (Language) -> Unit = {},
     onLanguageDropdownExpandedChange: (Boolean) -> Unit = {},
     onStepMonth: (Int) -> Unit = {},
-    wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
-    onNavigateToWordDetail: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
 ) {
@@ -275,8 +269,6 @@ fun StatsScreenContent(
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToFavorites = onNavigateToFavorites,
                 onNavigateToStats = {},
-                onNavigateToWordDetail = onNavigateToWordDetail,
-                wordDetailLabel = wordDetailLabel,
                 onNavigateToSettings = onNavigateToSettings,
                 hasFavoritesToReview = hasFavoritesToReview,
             )

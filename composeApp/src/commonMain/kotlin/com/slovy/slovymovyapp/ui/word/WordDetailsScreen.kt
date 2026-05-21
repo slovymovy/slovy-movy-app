@@ -42,7 +42,6 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.AppNavigationBar
-import com.slovy.slovymovyapp.ui.AppScreen
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
@@ -985,13 +984,11 @@ fun WordDetailScreenContent(
         },
         bottomBar = {
             AppNavigationBar(
-                currentScreen = AppScreen.WORD_DETAIL,
+                currentScreen = null,
                 onNavigateToSearch = onNavigateToSearch,
                 onNavigateToFavorites = onNavigateToFavorites,
                 onNavigateToStats = onNavigateToStats,
-                onNavigateToWordDetail = {},
                 onNavigateToSettings = onNavigateToSettings,
-                wordDetailLabel = titleText,
                 hasFavoritesToReview = hasFavoritesToReview,
             )
         },

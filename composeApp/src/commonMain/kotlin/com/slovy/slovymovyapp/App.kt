@@ -759,12 +759,6 @@ fun App(
                         )
                         navController.navigate(destination)
                     },
-                    wordDetailLabel = wordDetailViewModels.keys.lastOrNull()?.lemma,
-                    onNavigateToWordDetail = {
-                        wordDetailViewModels.keys.lastOrNull()?.let { destination ->
-                            navController.navigate(destination)
-                        }
-                    },
                     onNavigateToFavorites = {
                         if (!navController.popBackStack(AppDestination.Favorites, inclusive = false))
                             navController.navigate(AppDestination.Favorites)
@@ -802,12 +796,6 @@ fun App(
                             translationLanguageCodes = translationCodes
                         )
                         navController.navigate(destination)
-                    },
-                    wordDetailLabel = wordDetailViewModels.keys.lastOrNull()?.lemma,
-                    onNavigateToLastWordDetail = {
-                        wordDetailViewModels.keys.lastOrNull()?.let { destination ->
-                            navController.navigate(destination)
-                        }
                     },
                     onNavigateToSettings = {
                         if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
@@ -862,7 +850,6 @@ fun App(
                 StatsScreen(
                     viewModel = viewModel,
                     learningLanguages = learningLanguagesForStats,
-                    wordDetailLabel = wordDetailViewModels.keys.lastOrNull()?.lemma,
                     onNavigateToSearch = {
                         if (!navController.popBackStack(AppDestination.Search, inclusive = false))
                             navController.navigate(AppDestination.Search)
@@ -870,11 +857,6 @@ fun App(
                     onNavigateToFavorites = {
                         if (!navController.popBackStack(AppDestination.Favorites, inclusive = false))
                             navController.navigate(AppDestination.Favorites)
-                    },
-                    onNavigateToWordDetail = {
-                        wordDetailViewModels.keys.lastOrNull()?.let { destination ->
-                            navController.navigate(destination)
-                        }
                     },
                     onNavigateToSettings = {
                         if (!navController.popBackStack(AppDestination.Settings, inclusive = false))
@@ -937,12 +919,6 @@ fun App(
                     onNavigateToStats = {
                         if (!navController.popBackStack(AppDestination.Stats, inclusive = false))
                             navController.navigate(AppDestination.Stats)
-                    },
-                    wordDetailLabel = wordDetailViewModels.keys.lastOrNull()?.lemma,
-                    onNavigateToWordDetail = {
-                        wordDetailViewModels.keys.lastOrNull()?.let { destination ->
-                            navController.navigate(destination)
-                        }
                     },
                     hasFavoritesToReview = hasFavoritesToReview,
                 )
