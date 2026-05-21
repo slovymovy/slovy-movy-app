@@ -8,7 +8,7 @@
     <string name="nav_word_detail">Woord</string>
     <string name="nav_settings">Instellingen</string>
 
-    <string name="welcome_tagline">Niet alleen woorden opzoeken, maar ze ook echt leren. Gratis.</string>
+    <string name="welcome_tagline">De app die van opgezochte woorden geleerde woorden maakt. Gratis.</string>
     <string name="welcome_selling_point_translations_title">Zoek elk woord op</string>
     <string name="welcome_selling_point_translations_description">Voorbeelden, vormen, zinnen en synoniemen — alles
         handig op één plek.
@@ -17,7 +17,7 @@
     <string name="welcome_selling_point_collection_description">Bewaar de woorden die je wilt onthouden. Je lijst blijft
         gewoon op je eigen toestel staan.
     </string>
-    <string name="welcome_selling_point_practice_title">Houd je kennis vast</string>
+    <string name="welcome_selling_point_practice_title">Oefen tot woorden echt blijven hangen</string>
     <string name="welcome_selling_point_practice_description">Slim herhalen en verschillende oefeningen helpen je om
         woorden echt te onthouden.
     </string>
