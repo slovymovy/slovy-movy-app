@@ -589,10 +589,11 @@
         <item quantity="many">Подсказка: начинается на %1$s, %2$d букв</item>
         <item quantity="other">Подсказка: начинается на %1$s, %2$d букв</item>
     </plurals>
-    <string name="study_rating_again">Снова</string>
-    <string name="study_rating_hard">Трудно</string>
-    <string name="study_rating_good">Хорошо</string>
-    <string name="study_rating_easy">Легко</string>
+    <string name="study_rating_prompt">Получилось вспомнить?</string>
+    <string name="study_rating_again">Не помню</string>
+    <string name="study_rating_hard">Почти</string>
+    <string name="study_rating_good">Помню</string>
+    <string name="study_rating_easy">Слишком легко</string>
     <string name="favorites_study_due_title">ЗАКРЕПИТЬ МАТЕРИАЛ</string>
     <plurals name="favorites_study_due_count">
         <item quantity="one">%1$d карточка</item>

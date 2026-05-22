@@ -592,10 +592,11 @@
         <item quantity="many">Podpowiedź: zaczyna się na %1$s, %2$d liter</item>
         <item quantity="other">Podpowiedź: zaczyna się na %1$s, %2$d litery</item>
     </plurals>
-    <string name="study_rating_again">Jeszcze raz</string>
-    <string name="study_rating_hard">Trudne</string>
-    <string name="study_rating_good">Dobrze</string>
-    <string name="study_rating_easy">Łatwe</string>
+    <string name="study_rating_prompt">Udało Ci się przypomnieć?</string>
+    <string name="study_rating_again">Nie pamiętam</string>
+    <string name="study_rating_hard">Prawie</string>
+    <string name="study_rating_good">Pamiętam</string>
+    <string name="study_rating_easy">Za łatwe</string>
     <string name="favorites_study_due_title">DO POWTÓRKI</string>
     <plurals name="favorites_study_due_count">
         <item quantity="one">%1$d karta</item>

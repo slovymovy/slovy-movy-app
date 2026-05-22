@@ -591,10 +591,11 @@
         <item quantity="other">Hint: starts with %1$s, %2$d letters</item>
     </plurals>
     <string name="study_listen_prompt">Tap to play. What word do you hear?</string>
-    <string name="study_rating_again">Again</string>
-    <string name="study_rating_hard">Hard</string>
-    <string name="study_rating_good">Good</string>
-    <string name="study_rating_easy">Easy</string>
+    <string name="study_rating_prompt">How well did you remember this?</string>
+    <string name="study_rating_again">Forgot</string>
+    <string name="study_rating_hard">Almost</string>
+    <string name="study_rating_good">Got it</string>
+    <string name="study_rating_easy">Too easy</string>
     <string name="favorites_study_due_title">DUE FOR REVIEW</string>
     <plurals name="favorites_study_due_count">
         <item quantity="one">%1$d card</item>
