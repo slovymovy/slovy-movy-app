@@ -236,12 +236,8 @@
 
     <string name="voice_setup_title">Качество озвучки</string>
     <string name="voice_setup_description">Стандартный голос может звучать механически. Вот как это исправить:</string>
-    <string name="voice_setup_step_android">Откройте настройки синтеза речи на телефоне и скачайте качественный голос
-        для %1$s.
-    </string>
-    <string name="voice_setup_step_ios">Перейдите в Настройки > Универсальный доступ > Устный контент > Голоса. Скачайте
-        улучшенный голос для %1$s.
-    </string>
+    <string name="voice_setup_step_android">Откройте настройки синтеза речи на телефоне и скачайте качественный голос для %1$s.</string>
+    <string name="voice_setup_step_ios">Перейдите в Настройки > Универсальный доступ > Устный контент > Голоса. Скачайте улучшенный голос для %1$s.</string>
     <string name="voice_setup_step_other">Скачайте качественный голос для %1$s в системных настройках.</string>
     <string name="voice_setup_step_two">Вернитесь в OpenWords (Настройки > Озвучка) и выберите новый голос.</string>
 
@@ -251,12 +247,8 @@
     <string name="voice_many_enabled">%1$d голосов включено</string>
     <string name="voice_no_voices_available">Нет доступных голосов</string>
     <string name="voice_download_more_title">Добавить новые голоса</string>
-    <string name="voice_download_more_step_android">Откройте настройки синтеза речи на телефоне и загрузите качественный
-        голос.
-    </string>
-    <string name="voice_download_more_step_ios">Настройки > Универсальный доступ > Устный контент > Голоса. Скачайте
-        один из улучшенных голосов.
-    </string>
+    <string name="voice_download_more_step_android">Откройте настройки синтеза речи на телефоне и загрузите качественный голос.</string>
+    <string name="voice_download_more_step_ios">Настройки > Универсальный доступ > Устный контент > Голоса. Скачайте один из улучшенных голосов.</string>
     <string name="voice_download_more_step_other">Загрузите качественный голос в системных настройках.</string>
     <string name="voice_download_more_step_two">Вернитесь в OpenWords (Настройки > Озвучка) и включите его.</string>
     <string name="voice_quality_high">Высокое</string>
@@ -266,10 +258,13 @@
     <string name="voice_test_action">Проверить</string>
     <string name="voice_enable_label">Включить %1$s</string>
 
-    <string name="about_send_feedback_title">Написать нам</string>
-    <string name="about_send_feedback_subtitle">Будем рады узнать ваше мнение</string>
+    <string name="about_send_feedback_title">Предложить функцию</string>
+    <string name="about_send_feedback_subtitle">Поделитесь идеями по улучшению OpenWords</string>
     <string name="about_acknowledgements_title">Благодарности</string>
     <string name="about_acknowledgements_subtitle">Источники данных и авторы</string>
+    <string name="about_review_google_play_title">Оценить в Google Play</string>
+    <string name="about_review_app_store_title">Оценить в App Store</string>
+    <string name="about_review_subtitle">OpenWords помогает в учёбе? Поддержите нас оценкой!</string>
     <string name="about_version_title">Версия</string>
     <string name="acknowledgements_title">Благодарности</string>
     <string name="acknowledgements_vocab_data_title">Словарные данные</string>
@@ -293,9 +288,7 @@
     </string>
 
     <string name="app_data_backup_title">Резервная копия</string>
-    <string name="app_data_backup_description">Создаёт архив с вашими словами и настройками. Пригодится, чтобы сохранить
-        данные или перенести их на новое устройство.
-    </string>
+    <string name="app_data_backup_description">Создаёт архив с вашими словами и настройками. Пригодится, чтобы сохранить данные или перенести их на новое устройство.</string>
     <string name="app_data_exporting">Экспорт...</string>
     <string name="app_data_export_now">Экспортировать сейчас</string>
 

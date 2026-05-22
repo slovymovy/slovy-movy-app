@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.VolunteerActivism
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -29,6 +30,24 @@ fun AboutSection(
     onSendFeedback: () -> Unit = {},
     onAcknowledgements: () -> Unit = {}
 ) {
+    val uriHandler = LocalUriHandler.current
+    AboutSectionContent(
+        buildConfig = buildConfig,
+        reviewTarget = storeReviewTarget(),
+        onReview = { uriHandler.openUri(it.reviewUrl()) },
+        onSendFeedback = onSendFeedback,
+        onAcknowledgements = onAcknowledgements
+    )
+}
+
+@Composable
+private fun AboutSectionContent(
+    buildConfig: AppBuildConfig,
+    reviewTarget: StoreReviewTarget?,
+    onReview: (StoreReviewTarget) -> Unit,
+    onSendFeedback: () -> Unit,
+    onAcknowledgements: () -> Unit
+) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -38,6 +57,22 @@ fun AboutSection(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
+            if (reviewTarget != null) {
+                AboutItem(
+                    icon = Icons.Outlined.StarBorder,
+                    title = when (reviewTarget) {
+                        StoreReviewTarget.GOOGLE_PLAY -> stringResource(Res.string.about_review_google_play_title)
+                        StoreReviewTarget.APP_STORE -> stringResource(Res.string.about_review_app_store_title)
+                    },
+                    subtitle = stringResource(Res.string.about_review_subtitle),
+                    onClick = { onReview(reviewTarget) }
+                )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = AppSpacing.lg),
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                )
+            }
             AboutItem(
                 icon = Icons.Outlined.Feedback,
                 title = stringResource(Res.string.about_send_feedback_title),
@@ -219,6 +254,38 @@ fun AboutItem(
 
 @Preview
 @Composable
+private fun AboutSectionPreviewWithReview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        AboutSectionContent(
+            buildConfig = previewBuildConfig,
+            reviewTarget = StoreReviewTarget.GOOGLE_PLAY,
+            onReview = {},
+            onSendFeedback = {},
+            onAcknowledgements = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AboutSectionPreviewWithoutReview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        AboutSectionContent(
+            buildConfig = previewBuildConfig,
+            reviewTarget = null,
+            onReview = {},
+            onSendFeedback = {},
+            onAcknowledgements = {}
+        )
+    }
+}
+
+@Preview
+@Composable
 private fun AcknowledgementsBottomSheetPreview(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
@@ -226,3 +293,10 @@ private fun AcknowledgementsBottomSheetPreview(
         AcknowledgementsBottomSheetContent()
     }
 }
+
+private val previewBuildConfig = AppBuildConfig(
+    versionName = "1.2.345",
+    versionCode = 345,
+    isDebug = false,
+    applicationId = "com.slovy.slovymovyapp"
+)

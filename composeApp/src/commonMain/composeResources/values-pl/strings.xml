@@ -235,14 +235,9 @@
 
     <string name="voice_setup_title">Lepsza wymowa</string>
     <string name="voice_setup_description">Domyślny głos może brzmieć mechanicznie. Oto jak to zmienić:</string>
-    <string name="voice_setup_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos
-        dla języka %1$s.
-    </string>
-    <string name="voice_setup_step_ios">Przejdź do: Ustawienia > Dostępność > Czytaj zawartość > Głosy i pobierz głos
-        dla języka %1$s.
-    </string>
-    <string name="voice_setup_step_other">Pobierz wysokiej jakości głos dla języka %1$s w ustawieniach systemowych.
-    </string>
+    <string name="voice_setup_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos dla języka %1$s.</string>
+    <string name="voice_setup_step_ios">Przejdź do: Ustawienia > Dostępność > Czytaj zawartość > Głosy i pobierz głos dla języka %1$s.</string>
+    <string name="voice_setup_step_other">Pobierz wysokiej jakości głos dla języka %1$s w ustawieniach systemowych.</string>
     <string name="voice_setup_step_two">Wróć do: Ustawienia Open Words > Głosy i włącz nowy głos.</string>
 
     <string name="voice_no_voices_enabled">Brak włączonych głosów</string>
@@ -251,12 +246,8 @@
     <string name="voice_many_enabled">%1$d aktywnych głosów</string>
     <string name="voice_no_voices_available">Brak dostępnych głosów</string>
     <string name="voice_download_more_title">Pobierz więcej głosów</string>
-    <string name="voice_download_more_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej
-        jakości głos.
-    </string>
-    <string name="voice_download_more_step_ios">Przejdź do: Ustawienia > Dostępność > Czytaj zawartość > Głosy i pobierz
-        wysokiej jakości głos.
-    </string>
+    <string name="voice_download_more_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos.</string>
+    <string name="voice_download_more_step_ios">Przejdź do: Ustawienia > Dostępność > Czytaj zawartość > Głosy i pobierz wysokiej jakości głos.</string>
     <string name="voice_download_more_step_other">Pobierz wysokiej jakości głos w ustawieniach systemowych.</string>
     <string name="voice_download_more_step_two">Wróć do: Ustawienia Open Words > Głos i włącz nowy głos.</string>
     <string name="voice_quality_high">Wysoka</string>
@@ -266,10 +257,13 @@
     <string name="voice_test_action">Przetestuj</string>
     <string name="voice_enable_label">Włącz %1$s</string>
 
-    <string name="about_send_feedback_title">Wyślij opinię</string>
-    <string name="about_send_feedback_subtitle">Chętnie poznamy Twoją opinię</string>
+    <string name="about_send_feedback_title">Zaproponuj funkcję</string>
+    <string name="about_send_feedback_subtitle">Podziel się pomysłami na ulepszenie OpenWords</string>
     <string name="about_acknowledgements_title">Podziękowania</string>
     <string name="about_acknowledgements_subtitle">Źródła danych i autorzy</string>
+    <string name="about_review_google_play_title">Oceń nas w Google Play</string>
+    <string name="about_review_app_store_title">Oceń nas w App Store</string>
+    <string name="about_review_subtitle">Czy OpenWords jest pomocne? Wesprzyj nas oceną!</string>
     <string name="about_version_title">Wersja</string>
     <string name="acknowledgements_title">Podziękowania</string>
     <string name="acknowledgements_vocab_data_title">Dane słownikowe</string>
@@ -294,9 +288,7 @@
     </string>
 
     <string name="app_data_backup_title">Kopia zapasowa Twoich słów</string>
-    <string name="app_data_backup_description">Eksportuj zapisane słowa i ustawienia do archiwum. Przydatne, aby
-        zachować kopię lub przenieść dane na nowe urządzenie.
-    </string>
+    <string name="app_data_backup_description">Eksportuj zapisane słowa i ustawienia do archiwum. Przydatne, aby zachować kopię lub przenieść dane na nowe urządzenie.</string>
     <string name="app_data_exporting">Eksportowanie...</string>
     <string name="app_data_export_now">Eksportuj teraz</string>
 
