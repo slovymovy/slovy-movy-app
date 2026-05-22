@@ -333,9 +333,7 @@
     <string name="settings_languages_more">+%1$d more</string>
     <string name="settings_toggle_translation_for_language">Toggle %1$s translation</string>
     <string name="settings_remove_language_confirm_title">Remove %1$s?</string>
-    <string name="settings_remove_language_confirm_message">The dictionary and all its translations will be deleted. You
-        can re-download anytime.
-    </string>
+    <string name="settings_remove_language_confirm_message">The dictionary and all its translations will be deleted. You can download them again anytime.</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">This will also remove %1$d translation.</item>
         <item quantity="few">This will also remove %1$d translations.</item>

@@ -332,9 +332,7 @@
     <string name="settings_languages_more">+%1$d więcej</string>
     <string name="settings_toggle_translation_for_language">Przełącz tłumaczenie %1$s</string>
     <string name="settings_remove_language_confirm_title">Usunąć %1$s?</string>
-    <string name="settings_remove_language_confirm_message">Słownik i wszystkie jego tłumaczenia zostaną usunięte.
-        Możesz je pobrać ponownie w dowolnym momencie.
-    </string>
+    <string name="settings_remove_language_confirm_message">Słownik i wszystkie jego tłumaczenia zostaną usunięte. Możesz je pobrać ponownie w dowolnym momencie.</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">To usunie również %1$d tłumaczenie.</item>
         <item quantity="few">To usunie również %1$d tłumaczenia.</item>

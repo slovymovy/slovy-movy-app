@@ -331,9 +331,7 @@
     <string name="settings_languages_more">+%1$d еще</string>
     <string name="settings_toggle_translation_for_language">Переключить перевод %1$s</string>
     <string name="settings_remove_language_confirm_title">Удалить %1$s?</string>
-    <string name="settings_remove_language_confirm_message">Словарь и все его переводы будут удалены. Вы сможете скачать
-        их снова в любое время.
-    </string>
+    <string name="settings_remove_language_confirm_message">Словарь и все его переводы будут удалены. Вы сможете скачать их снова в любое время.</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">Это также удалит %1$d перевод.</item>
         <item quantity="few">Это также удалит %1$d перевода.</item>
