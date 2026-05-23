@@ -208,7 +208,7 @@ selectDueCardsExcludingFamily:
 SELECT id, sense_id, lemma_id, lang_code, family, state,
        stability, difficulty, due, last_review, reps, lapses, created_at,
        available_after, answer_key, suspended
-FROM card INDEXED BY idx_card_due_session
+FROM card
 WHERE lang_code = :lang_code
   AND due <= :now
   AND state != :new_state
@@ -235,7 +235,7 @@ selectNewCardsExcludingFamily:
 SELECT id, sense_id, lemma_id, lang_code, family, state,
        stability, difficulty, due, last_review, reps, lapses, created_at,
        available_after, answer_key, suspended
-FROM card INDEXED BY idx_card_new_session
+FROM card
 WHERE lang_code = :lang_code
   AND state = :new_state
   AND due <= :now
@@ -431,9 +431,10 @@ WHERE id = :id
   AND (available_after IS NULL OR available_after < :availableAfter);
 
 setCardsAvailableAfterByLemma:
-UPDATE card
+UPDATE card INDEXED BY idx_card_active_lemma_due
 SET available_after = :availableAfter
 WHERE lang_code = :lang_code
+  AND suspended IN (0, 1)
   AND lemma_id = :lemma_id
   AND (available_after IS NULL OR available_after < :availableAfter);
 

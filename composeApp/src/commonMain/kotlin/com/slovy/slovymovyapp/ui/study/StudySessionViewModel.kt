@@ -32,6 +32,8 @@ import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
@@ -71,7 +73,9 @@ class StudySessionViewModel(
     private val gradeCounts = mutableMapOf<StudyRating, Int>()
     private var autoplayEnabled: Boolean = false
     private var pendingRemovalFavorite: Favorite? = null
+    private var isPreparingRemoval: Boolean = false
     private var postponeListeningCardsForSession: Boolean = false
+    private val snackbarMutex = Mutex()
 
     init {
         ttsManager.addOnStatusChangeListener(this) { status ->
@@ -175,6 +179,7 @@ class StudySessionViewModel(
     }
 
     fun suspendCurrentWord(suspendedMessage: String) {
+        if (isPreparingRemoval) return
         val active = state as? StudySessionUiState.Active ?: return
         val card = currentCard ?: return
         state = active.copy(isOverflowMenuOpen = false)
@@ -184,11 +189,16 @@ class StudySessionViewModel(
             currentCard = null
             currentOutcomes = emptyList()
             loadNextCard()
-            snackbarHostState.showSnackbar(suspendedMessage)
+            showStudySnackbar(
+                message = suspendedMessage,
+                actionLabel = null,
+                duration = SnackbarDuration.Short,
+            )
         }
     }
 
     fun postponeListeningCards(postponedMessage: String) {
+        if (isPreparingRemoval) return
         val active = state as? StudySessionUiState.Active ?: return
         if (active.card !is StudyCardUiState.Listening) return
         postponeListeningCardsForSession = true
@@ -198,34 +208,53 @@ class StudySessionViewModel(
         state = active.copy(isPreparingAudio = false, isPlayingAudio = false)
         loadNextCard()
         viewModelScope.launch {
-            snackbarHostState.showSnackbar(postponedMessage)
+            showStudySnackbar(
+                message = postponedMessage,
+                actionLabel = null,
+                duration = SnackbarDuration.Short,
+            )
         }
     }
 
     fun requestRemoveFromLibrary() {
         val active = state as? StudySessionUiState.Active ?: return
+        if (isPreparingRemoval) return
         val card = currentCard ?: return
         val lang = Language.fromCodeOrNull(card.card.langCode) ?: return
+        isPreparingRemoval = true
+        state = active.copy(isOverflowMenuOpen = false, isSubmittingReview = true)
         viewModelScope.launch {
-            val favorite = favoritesRepository.getOne(card.card.senseId.toString(), lang)
-            val latest = state as? StudySessionUiState.Active ?: return@launch
-            if (favorite == null) {
-                state = latest.copy(isOverflowMenuOpen = false)
-                loadNextCard()
-                return@launch
+            try {
+                val favorite = favoritesRepository.getOne(card.card.senseId.toString(), lang)
+                val latest = state as? StudySessionUiState.Active
+                isPreparingRemoval = false
+                if (latest == null) return@launch
+                if (favorite == null) {
+                    state = latest.copy(isOverflowMenuOpen = false, isSubmittingReview = false)
+                    loadNextCard()
+                    return@launch
+                }
+                pendingRemovalFavorite = favorite
+                state = latest.copy(
+                    isOverflowMenuOpen = false,
+                    isSubmittingReview = false,
+                    removeConfirmation = StudyRemoveConfirmationUiState(favorite.lemma),
+                )
+            } catch (e: CancellationException) {
+                isPreparingRemoval = false
+                throw e
+            } catch (_: Exception) {
+                isPreparingRemoval = false
+                val latest = state as? StudySessionUiState.Active ?: return@launch
+                state = latest.copy(isOverflowMenuOpen = false, isSubmittingReview = false)
             }
-            pendingRemovalFavorite = favorite
-            state = latest.copy(
-                isOverflowMenuOpen = false,
-                removeConfirmation = StudyRemoveConfirmationUiState(favorite.lemma),
-            )
         }
     }
 
     fun dismissRemoveConfirmation() {
         pendingRemovalFavorite = null
         val active = state as? StudySessionUiState.Active ?: return
-        state = active.copy(removeConfirmation = null)
+        state = active.copy(removeConfirmation = null, isSubmittingReview = false)
     }
 
     fun confirmRemoveFromLibrary(
@@ -250,7 +279,7 @@ class StudySessionViewModel(
             currentOutcomes = emptyList()
             loadNextCard()
 
-            val result = snackbarHostState.showSnackbar(
+            val result = showStudySnackbar(
                 message = removedMessage,
                 actionLabel = undoLabel,
                 duration = SnackbarDuration.Short,
@@ -267,6 +296,10 @@ class StudySessionViewModel(
                     mapOf("lang" to favorite.language.code, "source" to "study_undo"),
                 )
                 onFavoriteChanged(favorite.language)
+                skippedCount = (skippedCount - 1).coerceAtLeast(0)
+                currentCard = null
+                currentOutcomes = emptyList()
+                loadNextCard()
             }
         }
     }
@@ -309,6 +342,7 @@ class StudySessionViewModel(
     }
 
     fun rate(rating: StudyRating) {
+        if (isPreparingRemoval) return
         val active = state as? StudySessionUiState.Active ?: return
         if (active.side != StudyCardSide.BACK || active.isSubmittingReview) return
 
@@ -510,6 +544,18 @@ class StudySessionViewModel(
         return StudySessionProgressUiState(
             current = current,
             total = sessionTotal,
+        )
+    }
+
+    private suspend fun showStudySnackbar(
+        message: String,
+        actionLabel: String?,
+        duration: SnackbarDuration,
+    ): SnackbarResult = snackbarMutex.withLock {
+        snackbarHostState.showSnackbar(
+            message = message,
+            actionLabel = actionLabel,
+            duration = duration,
         )
     }
 
