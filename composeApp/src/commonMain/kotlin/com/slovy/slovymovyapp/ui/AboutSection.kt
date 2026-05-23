@@ -34,7 +34,8 @@ fun AboutSection(
     AboutSectionContent(
         buildConfig = buildConfig,
         reviewTarget = storeReviewTarget(),
-        onReview = { uriHandler.openUri(it.reviewUrl()) },
+        reviewUrl = storeReviewUrl(),
+        onReview = { uriHandler.openUri(it) },
         onSendFeedback = onSendFeedback,
         onAcknowledgements = onAcknowledgements
     )
@@ -44,7 +45,8 @@ fun AboutSection(
 private fun AboutSectionContent(
     buildConfig: AppBuildConfig,
     reviewTarget: StoreReviewTarget?,
-    onReview: (StoreReviewTarget) -> Unit,
+    reviewUrl: String?,
+    onReview: (String) -> Unit,
     onSendFeedback: () -> Unit,
     onAcknowledgements: () -> Unit
 ) {
@@ -57,7 +59,7 @@ private fun AboutSectionContent(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            if (reviewTarget != null) {
+            if (reviewTarget != null && reviewUrl != null) {
                 AboutItem(
                     icon = Icons.Outlined.StarBorder,
                     title = when (reviewTarget) {
@@ -65,7 +67,7 @@ private fun AboutSectionContent(
                         StoreReviewTarget.APP_STORE -> stringResource(Res.string.about_review_app_store_title)
                     },
                     subtitle = stringResource(Res.string.about_review_subtitle),
-                    onClick = { onReview(reviewTarget) }
+                    onClick = { onReview(reviewUrl) }
                 )
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = AppSpacing.lg),
@@ -261,6 +263,7 @@ private fun AboutSectionPreviewWithReview(
         AboutSectionContent(
             buildConfig = previewBuildConfig,
             reviewTarget = StoreReviewTarget.GOOGLE_PLAY,
+            reviewUrl = "https://example.com",
             onReview = {},
             onSendFeedback = {},
             onAcknowledgements = {}
@@ -277,6 +280,7 @@ private fun AboutSectionPreviewWithoutReview(
         AboutSectionContent(
             buildConfig = previewBuildConfig,
             reviewTarget = null,
+            reviewUrl = null,
             onReview = {},
             onSendFeedback = {},
             onAcknowledgements = {}
