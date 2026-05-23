@@ -44,6 +44,9 @@ import org.jetbrains.compose.resources.getPluralString
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 
 data class LanguageUiState(
     val voices: List<Text2SpeechVoice> = emptyList(),
@@ -91,7 +94,10 @@ data class SettingsUiState(
     val feedbackEmail: String = "",
     val feedbackSubmitting: Boolean = false,
     val feedbackError: UiText? = null,
-    val feedbackDiscussionUrl: String? = null
+    val feedbackDiscussionUrl: String? = null,
+
+    // Developer
+    val developerModeEnabled: Boolean = false
 )
 
 data class DeleteConfirmationState(
@@ -129,8 +135,13 @@ class SettingsViewModel(
     private var loadLearningLanguagesJob: Job? = null
     private var loadLanguagesJob: Job? = null
 
+    private var versionTapCount = 0
+    private var lastVersionTapAtMs = 0L
+
     companion object {
         private const val TAG = "SettingsViewModel"
+        private const val VERSION_TAPS_FOR_DEVELOPER_MODE = 7
+        private val VERSION_TAP_WINDOW_MS = 2.seconds.inWholeMilliseconds
     }
 
     init {
@@ -138,6 +149,14 @@ class SettingsViewModel(
         loadLanguages()
         setupTTSListeners()
         observeDownloads()
+        loadDeveloperMode()
+    }
+
+    private fun loadDeveloperMode() {
+        viewModelScope.launch {
+            val enabled = settingsRepository.getDeveloperMode(default = state.buildConfig.isDebug)
+            state = state.copy(developerModeEnabled = enabled)
+        }
     }
 
     private fun setupTTSListeners() {
@@ -787,6 +806,31 @@ class SettingsViewModel(
         return url
     }
 
+    @OptIn(ExperimentalTime::class)
+    fun onVersionClick() {
+        val now = Clock.System.now().toEpochMilliseconds()
+        versionTapCount = if (now - lastVersionTapAtMs > VERSION_TAP_WINDOW_MS) 1 else versionTapCount + 1
+        lastVersionTapAtMs = now
+        if (versionTapCount >= VERSION_TAPS_FOR_DEVELOPER_MODE) {
+            versionTapCount = 0
+            lastVersionTapAtMs = 0
+            toggleDeveloperMode()
+        }
+    }
+
+    private fun toggleDeveloperMode() {
+        viewModelScope.launch {
+            val current = settingsRepository.getDeveloperMode(default = state.buildConfig.isDebug)
+            val next = !current
+            settingsRepository.setDeveloperMode(next)
+            state = state.copy(developerModeEnabled = next)
+            showSnackbar(
+                if (next) UiText.Resource(Res.string.settings_developer_mode_enabled)
+                else UiText.Resource(Res.string.settings_developer_mode_disabled)
+            )
+        }
+    }
+
     fun openAcknowledgements() {
         state = state.copy(acknowledgementsVisible = true)
     }
@@ -984,6 +1028,7 @@ fun SettingsScreen(
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
+    onNavigateToDeveloper: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
 ) {
     LifecycleResumeEffect(Unit) {
@@ -1026,9 +1071,11 @@ fun SettingsScreen(
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
         onFeedbackEmailChange = { viewModel.updateFeedbackEmail(it) },
         onSubmitFeedback = { viewModel.submitFeedback() },
+        onVersionClick = { viewModel.onVersionClick() },
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
+        onNavigateToDeveloper = onNavigateToDeveloper,
         hasFavoritesToReview = hasFavoritesToReview,
     )
 }
@@ -1062,9 +1109,11 @@ fun SettingsScreenContent(
     onFeedbackCommentChange: (String) -> Unit = {},
     onFeedbackEmailChange: (String) -> Unit = {},
     onSubmitFeedback: () -> Unit = {},
+    onVersionClick: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
+    onNavigateToDeveloper: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
 ) {
     val dismissActionLabel = stringResource(Res.string.common_dismiss)
@@ -1289,8 +1338,21 @@ fun SettingsScreenContent(
                                     AboutSection(
                                         buildConfig = buildConfig,
                                         onSendFeedback = onSendFeedback,
-                                        onAcknowledgements = onAcknowledgements
+                                        onAcknowledgements = onAcknowledgements,
+                                        onVersionClick = onVersionClick
                                     )
+                                }
+                            }
+
+                            if (state.developerModeEnabled) {
+                                item {
+                                    SectionHeader(
+                                        title = stringResource(Res.string.settings_section_developer),
+                                        modifier = Modifier.padding(top = AppSpacing.sm)
+                                    )
+                                }
+                                item {
+                                    DeveloperOptionsCard(onClick = onNavigateToDeveloper)
                                 }
                             }
                         }

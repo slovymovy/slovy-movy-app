@@ -17,6 +17,7 @@ import com.slovy.slovymovyapp.data.remote.WordFetchManager
 import com.slovy.slovymovyapp.data.remote.WordResult
 import com.slovy.slovymovyapp.db.FavoritesQueries
 import com.slovy.slovymovyapp.db.SelectRecentReviewedCards
+import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.*
@@ -45,7 +46,7 @@ class SessionService(
                 val now = clock.now().toEpochMilliseconds()
                 val candidates = nextCandidates(langCode, now, sessionStartedAt.toEpochMilliseconds())
                 putMetric("candidates", candidates.size.toLong())
-                for (card in candidates) {
+                for ((card, priorityScore) in candidates) {
                     attemptedCandidates += 1
                     val sessionCard = loadUntilTerminal(card) {
                         loadingEmissions += 1
@@ -55,9 +56,21 @@ class SessionService(
                         markResult(loadState.name.lowercase())
                         putAttribute("family", sessionCard.card.family.name.lowercase())
                         putAttribute("variant", sessionCard.variant.kind.name.lowercase())
+                        logSelectedCard(
+                            sessionCard = sessionCard,
+                            priorityScore = priorityScore,
+                            candidateRank = attemptedCandidates,
+                            candidateCount = candidates.size,
+                            loadState = loadState,
+                            nowMs = now,
+                        )
                         emit(sessionCard)
                         return@flow
                     }
+                }
+                AppLogger.debug(TAG, null) {
+                    "Card selection empty lang=$langCode candidates=${candidates.size} " +
+                        "attempted=$attemptedCandidates loadingEmissions=$loadingEmissions"
                 }
                 emit(null)
             } finally {
@@ -91,6 +104,12 @@ class SessionService(
             val after = scheduler.apply(before, outcome, now)
             val elapsedDays = scheduler.elapsedDaysForReview(before, now)
             val scheduledDays = scheduler.scheduledDaysForReview(before)
+            AppLogger.debug(TAG, null) {
+                "Review submitted card=${card.card.id} lang=${card.card.langCode} family=${card.card.family} " +
+                    "rating=${outcome.rating} state=${before.state}->${after.state} " +
+                    "stability=${formatDouble(before.stability)}->${formatDouble(after.stability)} " +
+                    "dueIn=${formatDelay(after.dueEpochMs, nowMs)}"
+            }
 
             learning.transaction {
                 learning.updateCardAfterReview(
@@ -151,6 +170,10 @@ class SessionService(
                         availableAfter = after.dueEpochMs,
                         id = card.card.id,
                     )
+                    AppLogger.debug(TAG, null) {
+                        "Bury skipped for siblings: rating=${outcome.rating}; delayed source card=${card.card.id} " +
+                            "availableAfterIn=${formatDelay(after.dueEpochMs, nowMs)}"
+                    }
                 }
                 if (outcome.rating.propagatesCredit()) {
                     propagateSameSenseCredit(card.card, after, outcome.rating, nowMs)
@@ -169,11 +192,18 @@ class SessionService(
     }
 
     suspend fun continueDelayedCardsNow(langCode: String) = withContext(Dispatchers.IO) {
+        val now = clock.now().toEpochMilliseconds()
+        val before = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne()
         learning.clearAvailableAfterForDelayedLemmas(
             lang_code = langCode,
-            now = clock.now().toEpochMilliseconds(),
+            now = now,
             lemma_limit = config.continueNowLemmaLimit.toLong(),
         )
+        val after = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne()
+        AppLogger.debug(TAG, null) {
+            "Continue delayed cards now lang=$langCode lemmaLimit=${config.continueNowLemmaLimit} " +
+                "delayedDueCards=$before->$after unblocked=${(before - after).coerceAtLeast(0)}"
+        }
     }
 
     private suspend fun loadSessionCard(card: Card): Flow<SessionCard?>? {
@@ -216,19 +246,28 @@ class SessionService(
     @OptIn(ExperimentalTime::class)
     private fun setCardAvailableAfter(card: Card) {
         val delay = config.buryFailedSessionCardsFor
-        if (delay <= Duration.ZERO) return
+        if (delay <= Duration.ZERO) {
+            AppLogger.debug(TAG, null) {
+                "Delay failed/session card skipped: card=${card.id} lang=${card.langCode} family=${card.family} delay=$delay"
+            }
+            return
+        }
         val availableAfter = clock.now().toEpochMilliseconds() + delay.inWholeMilliseconds
         learning.setCardAvailableAfter(
             availableAfter = availableAfter,
             id = card.id,
         )
+        AppLogger.debug(TAG, null) {
+            "Delay failed/session card card=${card.id} lang=${card.langCode} family=${card.family} " +
+                "availableAfterIn=$delay"
+        }
     }
 
     private fun nextCandidates(
         langCode: String,
         now: Long,
         sessionStartedAt: Long,
-    ): List<Card> {
+    ): List<Pair<Card, Double>> {
         val limit = config.selectionCandidateLimit.toLong()
         val recentReviews = learning.selectRecentReviewedCards(langCode, sessionStartedAt, RECENT_LIMIT.toLong())
             .executeAsList()
@@ -253,7 +292,6 @@ class SessionService(
             .map { it to priority(it, now, recentReviews) }
             .filter { (_, score) -> score > -HARD_EXCLUDE / 2 }
             .sortedByDescending { (_, score) -> score }
-            .map { (card, _) -> card }
     }
 
     private fun priority(card: Card, now: Long, recentReviews: List<SelectRecentReviewedCards>): Double {
@@ -290,6 +328,28 @@ class SessionService(
         return penalty
     }
 
+    private fun logSelectedCard(
+        sessionCard: SessionCard,
+        priorityScore: Double,
+        candidateRank: Long,
+        candidateCount: Int,
+        loadState: SessionCardLoadState,
+        nowMs: Long,
+    ) {
+        val card = sessionCard.card
+        val scheduling = card.scheduling
+        AppLogger.debug(TAG, null) {
+            "Card selected lang=${card.langCode} rank=$candidateRank/$candidateCount " +
+                "priority=${formatDouble(priorityScore)} card=${card.id} sense=${card.senseId} lemma=${card.lemmaId} " +
+                "family=${card.family} state=${scheduling.state} variant=${sessionCard.variant.kind} " +
+                "targetLang=${sessionCard.variant.targetLang ?: "none"} loadState=$loadState " +
+                "dueIn=${formatDelay(scheduling.dueEpochMs, nowMs)} " +
+                "availableAfterIn=${formatNullableDelay(scheduling.availableAfterEpochMs, nowMs)} " +
+                "stability=${formatDouble(scheduling.stability)} difficulty=${formatDouble(scheduling.difficulty)} " +
+                "reps=${scheduling.reps} lapses=${scheduling.lapses}"
+        }
+    }
+
     private fun fuzzSeed(card: Card): Long {
         var seed = uuidSeed(card.id)
         seed = seed * 31 + card.family.ordinal
@@ -321,11 +381,21 @@ class SessionService(
             config.siblingCooldownFloor,
             config.siblingCooldownCap,
         )
+        AppLogger.debug(TAG, null) {
+            "Same-sense bury cooldowns source=${source.id} family=${source.family} " +
+                "nextInterval=$nextInterval intervalCooldown=$intervalCooldown exposureCooldown=$exposureCooldown " +
+                "chosen=${maxOf(intervalCooldown, exposureCooldown)}"
+        }
         burySense(source, nowMs, maxOf(intervalCooldown, exposureCooldown))
     }
 
     private fun burySense(card: Card, nowMs: Long, cooldown: Duration) {
-        val params = bulkBuryParams(nowMs, cooldown) ?: return
+        val params = bulkBuryParams(nowMs, cooldown)
+        if (params == null) {
+            logBurySkipped("sense", card, cooldown)
+            return
+        }
+        logBuryScheduled("sense", card, nowMs, cooldown, params, "sense=${card.senseId}")
         learning.burySiblingCardsBySense(
             window_start = params.windowStart,
             window_width = params.windowWidth,
@@ -336,19 +406,35 @@ class SessionService(
     }
 
     private fun buryLemma(card: Card, nowMs: Long, cooldown: Duration) {
-        val params = bulkBuryParams(nowMs, cooldown) ?: return
+        val params = bulkBuryParams(nowMs, cooldown)
+        if (params == null) {
+            logBurySkipped("lemma", card, cooldown)
+            return
+        }
+        logBuryScheduled(
+            "lemma",
+            card,
+            nowMs,
+            cooldown,
+            params,
+            "lemma=${card.lemmaId} excludeSense=${card.senseId} includesNew=true",
+        )
         learning.burySiblingCardsByLemma(
             window_start = params.windowStart,
             window_width = params.windowWidth,
             lang_code = card.langCode,
             lemma_id = card.lemmaId,
             sense_id = card.senseId,
-            new_state = CardState.NEW,
         )
     }
 
     private fun buryAnswer(card: Card, nowMs: Long, cooldown: Duration) {
-        val params = bulkBuryParams(nowMs, cooldown) ?: return
+        val params = bulkBuryParams(nowMs, cooldown)
+        if (params == null) {
+            logBurySkipped("answer", card, cooldown)
+            return
+        }
+        logBuryScheduled("answer", card, nowMs, cooldown, params, "answerKey=${card.answerKey}")
         learning.burySiblingCardsByAnswer(
             window_start = params.windowStart,
             window_width = params.windowWidth,
@@ -418,6 +504,27 @@ class SessionService(
 
     private fun delayedEpochMs(nowMs: Long, delay: Duration): Long =
         nowMs + delay.inWholeMilliseconds
+
+    private fun logBurySkipped(type: String, card: Card, cooldown: Duration) {
+        AppLogger.debug(TAG, null) {
+            "Bury skipped type=$type source=${card.id} lang=${card.langCode} family=${card.family} cooldown=$cooldown"
+        }
+    }
+
+    private fun logBuryScheduled(
+        type: String,
+        card: Card,
+        nowMs: Long,
+        cooldown: Duration,
+        params: BulkBuryParams,
+        target: String,
+    ) {
+        AppLogger.debug(TAG, null) {
+            "Bury scheduled type=$type source=${card.id} lang=${card.langCode} family=${card.family} " +
+                "$target cooldown=$cooldown windowStartIn=${formatDelay(params.windowStart, nowMs)} " +
+                "windowWidth=${params.windowWidth.toDuration(DurationUnit.MILLISECONDS)}"
+        }
+    }
 
     private data class BulkBuryParams(
         val windowStart: Long,
@@ -501,21 +608,46 @@ class SessionService(
 
             else -> null
         } ?: return
-        val credit = crossFamilyCredit(card.card.family, unlockFamily, rating) ?: return
+        val credit = crossFamilyCredit(card.card.family, unlockFamily, rating)
+        if (credit == null) {
+            AppLogger.debug(TAG, null) {
+                "Unlock skipped: no cross-family credit source=${card.card.id} " +
+                    "from=${card.card.family} to=$unlockFamily rating=$rating"
+            }
+            return
+        }
         val inheritedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
 
-        val sense = card.wordResult.card?.findSense(card.senseId) ?: return
+        val sense = card.wordResult.card?.findSense(card.senseId)
+        if (sense == null) {
+            AppLogger.debug(TAG, null) {
+                "Unlock skipped: sense missing source=${card.card.id} sense=${card.senseId} to=$unlockFamily"
+            }
+            return
+        }
         val variants = buildTaskVariants(unlockFamily, sense, translationTargetsFor(sense))
-        if (variants.isEmpty()) return
+        if (variants.isEmpty()) {
+            AppLogger.debug(TAG, null) {
+                "Unlock skipped: no playable variants source=${card.card.id} sense=${card.senseId} to=$unlockFamily"
+            }
+            return
+        }
+        val due = delayedEpochMs(now, creditDelay(inheritedStability, CreditDirection.FORWARD))
+        val availableAfter = delayedEpochMs(now, sameSenseExposureCooldown(after))
+        AppLogger.debug(TAG, null) {
+            "Unlock eligible source=${card.card.id} sense=${card.senseId} from=${card.card.family} to=$unlockFamily " +
+                "rating=$rating inheritedStability=${formatDouble(inheritedStability)} " +
+                "dueIn=${formatDelay(due, now)} availableAfterIn=${formatDelay(availableAfter, now)}"
+        }
         insertTaskIfMissing(
             source = card.card,
             family = unlockFamily,
             now = now,
-            due = delayedEpochMs(now, creditDelay(inheritedStability, CreditDirection.FORWARD)),
+            due = due,
             state = CardState.LEARNING,
             stability = inheritedStability,
             difficulty = after.difficulty,
-            availableAfter = delayedEpochMs(now, sameSenseExposureCooldown(after)),
+            availableAfter = availableAfter,
         )
     }
 
@@ -531,7 +663,13 @@ class SessionService(
     ) {
         val existing = learning.selectCardBySenseAndFamily(source.senseId, source.langCode, family)
             .executeAsOneOrNull()
-        if (existing != null) return
+        if (existing != null) {
+            AppLogger.debug(TAG, null) {
+                "Unlock card insert skipped: existing card=${existing.id} source=${source.id} " +
+                    "sense=${source.senseId} family=$family"
+            }
+            return
+        }
 
         val cardId = Uuid.random()
         learning.insertCard(
@@ -552,6 +690,11 @@ class SessionService(
             answer_key = source.answerKey,
             suspended = false,
         )
+        AppLogger.debug(TAG, null) {
+            "Unlock card inserted card=$cardId source=${source.id} lang=${source.langCode} " +
+                "sense=${source.senseId} family=$family state=$state stability=${formatDouble(stability)} " +
+                "dueIn=${formatDelay(due, now)} availableAfterIn=${formatNullableDelay(availableAfter, now)}"
+        }
     }
 
     private fun propagateSameSenseCredit(
@@ -567,16 +710,30 @@ class SessionService(
                 val credit = crossFamilyCredit(source.family, sibling.family, rating) ?: return@forEach
                 val propagatedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
                 // The SQL repeats this guard so concurrent writes cannot lower stability.
-                if (propagatedStability <= sibling.scheduling.stability) return@forEach
+                if (propagatedStability <= sibling.scheduling.stability) {
+                    AppLogger.debug(TAG, null) {
+                        "Credit skipped: source=${source.id} sibling=${sibling.id} from=${source.family} " +
+                            "to=${sibling.family} rating=$rating stability=${formatDouble(sibling.scheduling.stability)} " +
+                            "candidate=${formatDouble(propagatedStability)}"
+                    }
+                    return@forEach
+                }
 
                 val due = delayedEpochMs(now, creditDelay(propagatedStability, credit.direction))
+                val state = stateAfterPropagatedCredit(sibling, propagatedStability)
                 learning.creditSiblingCard(
-                    state = stateAfterPropagatedCredit(sibling, propagatedStability),
+                    state = state,
                     stability = propagatedStability,
                     difficulty = after.difficulty,
                     due = due,
                     id = sibling.id,
                 )
+                AppLogger.debug(TAG, null) {
+                    "Credit applied source=${source.id} sibling=${sibling.id} from=${source.family} to=${sibling.family} " +
+                        "direction=${credit.direction} factor=${formatDouble(credit.factor)} rating=$rating " +
+                        "state=${sibling.scheduling.state}->$state stability=${formatDouble(sibling.scheduling.stability)}" +
+                        "->${formatDouble(propagatedStability)} dueIn=${formatDelay(due, now)}"
+                }
             }
     }
 
@@ -648,7 +805,17 @@ class SessionService(
         BACKWARD,
     }
 
+    private fun formatDelay(epochMs: Long, nowMs: Long): String =
+        (epochMs - nowMs).toDuration(DurationUnit.MILLISECONDS).toString()
+
+    private fun formatNullableDelay(epochMs: Long?, nowMs: Long): String =
+        epochMs?.let { formatDelay(it, nowMs) } ?: "none"
+
+    private fun formatDouble(value: Double): String =
+        ((value * 1000.0).roundToLong() / 1000.0).toString()
+
     private companion object {
+        const val TAG: String = "SessionService"
         const val HARD_EXCLUDE: Double = 1_000_000.0
         const val MIN_INHERITED_STABILITY: Double = 0.001
         const val PROPAGATED_REVIEW_STABILITY_DAYS: Double = 1.0
