@@ -278,6 +278,8 @@
     <string name="developer_stats_title">Statystyki</string>
     <string name="developer_terminal_title">Terminal</string>
     <string name="developer_terminal_clear">Wyczyść</string>
+    <string name="developer_terminal_open">Otwórz terminal programisty</string>
+    <string name="developer_terminal_close">Zamknij terminal programisty</string>
     <string name="developer_terminal_ready">terminal gotowy</string>
     <string name="developer_terminal_running">Uruchomione: %1$s</string>
     <string name="developer_stats_metric_header">Metryka</string>

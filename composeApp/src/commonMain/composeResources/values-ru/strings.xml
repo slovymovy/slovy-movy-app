@@ -279,6 +279,8 @@
     <string name="developer_stats_title">Статистика</string>
     <string name="developer_terminal_title">Терминал</string>
     <string name="developer_terminal_clear">Очистить</string>
+    <string name="developer_terminal_open">Открыть терминал разработчика</string>
+    <string name="developer_terminal_close">Закрыть терминал разработчика</string>
     <string name="developer_terminal_ready">терминал готов</string>
     <string name="developer_terminal_running">Выполняется: %1$s</string>
     <string name="developer_stats_metric_header">Метрика</string>

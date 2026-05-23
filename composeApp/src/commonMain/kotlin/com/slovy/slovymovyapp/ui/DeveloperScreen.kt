@@ -64,7 +64,6 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.intake.IntakeResult
 import com.slovy.slovymovyapp.data.learning.intake.IntakeRunMode
 import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
-import com.slovy.slovymovyapp.logging.AppLogEntry
 import com.slovy.slovymovyapp.logging.AppLogLevel
 import com.slovy.slovymovyapp.logging.AppLogSink
 import com.slovy.slovymovyapp.logging.AppLogger
@@ -264,19 +263,14 @@ class DeveloperViewModel(
 
     private fun syncTerminalLogs() {
         val recentLogs = AppLogger.recentDeveloperLogs()
-        val signature = recentLogs.signature()
+        val signature = recentLogs.developerLogSignature()
         if (signature != terminalLogSignature) {
             terminalLogSignature = signature
             state = state.copy(
-                terminalLines = recentLogs.map(::formatLogEntry),
+                terminalLines = recentLogs.map { it.toDeveloperTerminalLine() },
                 terminalRevision = state.terminalRevision + 1,
             )
         }
-    }
-
-    private fun List<AppLogEntry>.signature(): String {
-        val last = lastOrNull() ?: return "0"
-        return "${size}:${last.createdAtEpochMs}:${last.level}:${last.tag}:${last.message}:${last.throwableLabel}"
     }
 
     private fun startTerminalLogPolling() {
@@ -287,14 +281,6 @@ class DeveloperViewModel(
             }
         }
     }
-
-    private fun formatLogEntry(entry: AppLogEntry): String {
-        val cause = entry.throwableLabel?.let { " ($it)" }.orEmpty()
-        return "${formatTerminalTime(entry.createdAtEpochMs)} ${entry.level.name}/${entry.tag}: ${entry.message}$cause"
-    }
-
-    private fun formatTerminalTime(epochMs: Long): String =
-        formatRelativeTime(epochMs, Clock.System.now().toEpochMilliseconds())
 
     private suspend fun runIntakeFor(mode: IntakeRunMode, langCode: String): IntakeResult =
         when (mode) {
@@ -397,12 +383,12 @@ class DeveloperViewModel(
                     row.state.name,
                     formatDouble(row.stability),
                     formatDouble(row.difficulty),
-                    formatRelativeTime(row.due, nowEpochMs),
-                    formatRelativeTime(row.lastReview, nowEpochMs),
+                    formatDeveloperRelativeTime(row.due, nowEpochMs),
+                    formatDeveloperRelativeTime(row.lastReview, nowEpochMs),
                     row.reps.toString(),
                     row.lapses.toString(),
-                    formatRelativeTime(row.createdAt, nowEpochMs),
-                    formatRelativeTime(row.availableAfter, nowEpochMs),
+                    formatDeveloperRelativeTime(row.createdAt, nowEpochMs),
+                    formatDeveloperRelativeTime(row.availableAfter, nowEpochMs),
                     row.answerKey,
                     row.suspended.toString(),
                     row.senseId.toString(),
@@ -412,27 +398,6 @@ class DeveloperViewModel(
 
     private fun formatDouble(value: Double): String =
         ((value * 100.0).toLong() / 100.0).toString()
-
-    private fun formatRelativeTime(epochMs: Long?, nowEpochMs: Long): String {
-        if (epochMs == null) return "-"
-        val deltaMs = epochMs - nowEpochMs
-        if (kotlin.math.abs(deltaMs) < 1_000L) return "now"
-        val sign = if (deltaMs < 0L) "-" else "+"
-        val duration = kotlin.math.abs(deltaMs).milliseconds
-        val days = duration.inWholeDays
-        if (days > 0L) {
-            val hours = (duration - days.days).inWholeHours
-            return if (hours > 0L) "${sign}${days}d ${hours}h" else "${sign}${days}d"
-        }
-        val hours = duration.inWholeHours
-        if (hours > 0L) {
-            val minutes = (duration - hours.hours).inWholeMinutes
-            return if (minutes > 0L) "${sign}${hours}h ${minutes}m" else "${sign}${hours}h"
-        }
-        val minutes = duration.inWholeMinutes
-        if (minutes > 0L) return "${sign}${minutes}m"
-        return "${sign}${duration.inWholeSeconds}s"
-    }
 
     companion object {
         private const val TAG = "DeveloperViewModel"
