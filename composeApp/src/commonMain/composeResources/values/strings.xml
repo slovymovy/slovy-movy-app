@@ -135,9 +135,8 @@
     <string name="favorites_loading">Loading...</string>
     <string name="favorites_search_placeholder">Type a word...</string>
     <string name="favorites_empty_title">Your learning list starts here.</string>
-    <string name="favorites_empty_description">Search for any word and tap the heart icon to save it here for later
-        study.
-    </string>
+    <string name="favorites_empty_description_before_heart_icon">Search for any word and tap the&#32;</string>
+    <string name="favorites_empty_description_after_heart_icon">&#32;to save it here for later study.</string>
     <string name="favorites_empty_action_start_searching">Start searching</string>
     <string name="favorites_no_results_title">No saved words matching "%1$s"</string>
     <string name="favorites_no_results_description">Try a different spelling or search the dictionary instead</string>

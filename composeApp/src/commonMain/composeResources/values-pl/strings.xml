@@ -134,8 +134,8 @@
     <string name="favorites_loading">Ładowanie...</string>
     <string name="favorites_search_placeholder">Wyszukaj słowo...</string>
     <string name="favorites_empty_title">Twoja lista słówek zaczyna się tutaj.</string>
-    <string name="favorites_empty_description">Wyszukaj dowolne słowo i kliknij serduszko, aby zapisać je do nauki.
-    </string>
+    <string name="favorites_empty_description_before_heart_icon">Wyszukaj dowolne słowo i kliknij&#32;</string>
+    <string name="favorites_empty_description_after_heart_icon">, aby zapisać je do nauki.</string>
     <string name="favorites_empty_action_start_searching">Zacznij szukać</string>
     <string name="favorites_no_results_title">Brak wyników dla „%1$s"</string>
     <string name="favorites_no_results_description">Sprawdź pisownię lub wyszukaj w całym słowniku.</string>

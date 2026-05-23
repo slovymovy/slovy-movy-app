@@ -8,14 +8,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,8 +36,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -170,6 +180,7 @@ class FavoritesViewModel(
         private set
 
     val scrollState = LazyListState()
+    val emptyStateScrollState = ScrollState(0)
     val snackbarHostState = SnackbarHostState()
 
     private var pendingScrollToTop: Boolean = false
@@ -752,6 +763,13 @@ fun FavoritesScreen(
         }
     }
 
+    val isEmptyState = (viewModel.state as? FavoritesUiState.Content)?.hasAnyFavorites == false
+    LaunchedEffect(isEmptyState) {
+        if (isEmptyState) {
+            viewModel.emptyStateScrollState.scrollTo(0)
+        }
+    }
+
     val nextReviewAtEpochMs = (viewModel.state as? FavoritesUiState.Content)
         ?.studyDone?.nextReviewAtEpochMs
     LaunchedEffect(nextReviewAtEpochMs) {
@@ -764,6 +782,7 @@ fun FavoritesScreen(
     FavoritesScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
+        emptyStateScrollState = viewModel.emptyStateScrollState,
         snackbarHostState = viewModel.snackbarHostState,
         onNavigateToSearch = onNavigateToSearch,
         onSearchInDictionary = onSearchInDictionary,
@@ -786,6 +805,7 @@ fun FavoritesScreen(
 fun FavoritesScreenContent(
     state: FavoritesUiState,
     scrollState: LazyListState = LazyListState(),
+    emptyStateScrollState: ScrollState? = null,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onNavigateToSearch: () -> Unit = {},
     onSearchInDictionary: (String) -> Unit = {},
@@ -802,6 +822,7 @@ fun FavoritesScreenContent(
     onContinueStudyingNow: (Language, FavoritesStudyDoneAction) -> Unit = { _, _ -> },
 ) {
     val focusManager = LocalFocusManager.current
+    val resolvedEmptyStateScrollState = emptyStateScrollState ?: remember { ScrollState(0) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -949,26 +970,10 @@ fun FavoritesScreenContent(
                     ) {
                         when {
                             !state.hasAnyFavorites -> {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
+                                ScrollableEmptyStateContainer(
+                                    scrollState = resolvedEmptyStateScrollState,
                                 ) {
-                                    EmptyState(
-                                        iconContent = {
-                                            Image(
-                                                imageVector = SlovyIcons.NoFavsImage,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(180.dp)
-                                            )
-                                        },
-                                        title = stringResource(Res.string.favorites_empty_title),
-                                        description = stringResource(Res.string.favorites_empty_description),
-                                        action = {
-                                            FilledTonalButton(onClick = onNavigateToSearch) {
-                                                Text(stringResource(Res.string.favorites_empty_action_start_searching))
-                                            }
-                                        }
-                                    )
+                                    FavoritesEmptyState(onNavigateToSearch = onNavigateToSearch)
                                 }
                             }
 
@@ -988,9 +993,24 @@ fun FavoritesScreenContent(
                                         title = stringResource(Res.string.favorites_no_results_title, state.query),
                                         description = stringResource(Res.string.favorites_no_results_description),
                                         action = {
-                                            FilledTonalButton(
-                                                onClick = { onSearchInDictionary(state.query) }
+                                            Button(
+                                                onClick = { onSearchInDictionary(state.query) },
+                                                shape = CircleShape,
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                                                ),
+                                                contentPadding = PaddingValues(horizontal = 28.dp),
+                                                modifier = Modifier
+                                                    .height(56.dp)
+                                                    .widthIn(min = 220.dp)
                                             ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Search,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(10.dp))
                                                 Text(stringResource(Res.string.favorites_no_results_action_search_dictionary))
                                             }
                                         }
@@ -1090,6 +1110,127 @@ fun FavoritesScreenContent(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ScrollableEmptyStateContainer(
+    scrollState: ScrollState,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = maxHeight)
+                .verticalScroll(scrollState),
+            contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.18f),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun FavoritesEmptyState(
+    onNavigateToSearch: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val heartIconId = "favorite-heart"
+    val descriptionBeforeHeart = stringResource(Res.string.favorites_empty_description_before_heart_icon)
+    val descriptionAfterHeart = stringResource(Res.string.favorites_empty_description_after_heart_icon)
+    val favoriteLabel = stringResource(Res.string.search_content_desc_favorite)
+    val descriptionText = buildAnnotatedString {
+        append(descriptionBeforeHeart)
+        appendInlineContent(heartIconId, favoriteLabel)
+        append(descriptionAfterHeart)
+    }
+    val inlineContent = mapOf(
+        heartIconId to InlineTextContent(
+            placeholder = Placeholder(
+                width = 18.sp,
+                height = 18.sp,
+                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+            ),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Favorite,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.9f),
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    )
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            imageVector = SlovyIcons.NoFavsImage,
+            contentDescription = null,
+            modifier = Modifier.size(204.dp)
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = stringResource(Res.string.favorites_empty_title),
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontFamily = MaterialTheme.serifFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                lineHeight = 34.sp,
+            ),
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(max = 340.dp)
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        Text(
+            text = descriptionText,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontFamily = MaterialTheme.serifFontFamily,
+                fontStyle = FontStyle.Italic,
+                lineHeight = 24.sp,
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            inlineContent = inlineContent,
+            modifier = Modifier.widthIn(max = 320.dp)
+        )
+
+        Spacer(modifier = Modifier.height(36.dp))
+
+        Button(
+            onClick = onNavigateToSearch,
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
+            contentPadding = PaddingValues(horizontal = 28.dp),
+            modifier = Modifier
+                .height(56.dp)
+                .widthIn(min = 220.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = stringResource(Res.string.favorites_empty_action_start_searching),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+            )
         }
     }
 }

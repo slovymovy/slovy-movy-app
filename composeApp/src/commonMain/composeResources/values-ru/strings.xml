@@ -135,9 +135,8 @@
     <string name="favorites_loading">Загрузка...</string>
     <string name="favorites_search_placeholder">Найти слово...</string>
     <string name="favorites_empty_title">Ваш список слов начинается здесь.</string>
-    <string name="favorites_empty_description">Найдите нужное слово и нажмите на сердечко, чтобы сохранить его для
-        изучения.
-    </string>
+    <string name="favorites_empty_description_before_heart_icon">Найдите нужное слово и нажмите на&#32;</string>
+    <string name="favorites_empty_description_after_heart_icon">, чтобы сохранить его для изучения.</string>
     <string name="favorites_empty_action_start_searching">Начать поиск</string>
     <string name="favorites_no_results_title">В списке нет "%1$s"</string>
     <string name="favorites_no_results_description">Проверьте написание или поищите это слово во всём словаре.</string>

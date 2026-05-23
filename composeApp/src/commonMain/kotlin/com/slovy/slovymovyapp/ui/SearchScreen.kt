@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -9,11 +10,13 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
@@ -27,6 +30,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -107,6 +111,7 @@ class SearchViewModel(
         private set
 
     private val queryFlow = MutableStateFlow(Search("", state.selectedLanguage, Uuid.random()))
+    val noDictionaryScrollState = ScrollState(0)
     private var suggestionsInitialized = false
     private var savedSearchLanguage: Language? = null
 
@@ -324,8 +329,16 @@ fun SearchScreen(
         }
     }
 
+    val isNoDictionaryState = viewModel.state.availableLanguages.isEmpty()
+    LaunchedEffect(isNoDictionaryState) {
+        if (isNoDictionaryState) {
+            viewModel.noDictionaryScrollState.scrollTo(0)
+        }
+    }
+
     SearchScreenContent(
         state = viewModel.state,
+        noDictionaryScrollState = viewModel.noDictionaryScrollState,
         onQueryChange = { viewModel.updateQuery(it) },
         onResultSelected = { item ->
             focusManager.clearFocus()
@@ -357,6 +370,7 @@ fun SearchScreen(
 @Composable
 fun SearchScreenContent(
     state: SearchUiState,
+    noDictionaryScrollState: ScrollState? = null,
     onQueryChange: (String) -> Unit = {},
     onResultSelected: (DictionaryRepository.SearchItem) -> Unit = {},
     onSuggestionSelected: (String) -> Unit = {},
@@ -369,6 +383,7 @@ fun SearchScreenContent(
     hasFavoritesToReview: Boolean = false,
 ) {
     val focusManager = LocalFocusManager.current
+    val resolvedNoDictionaryScrollState = noDictionaryScrollState ?: remember { ScrollState(0) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -480,7 +495,10 @@ fun SearchScreenContent(
                     // Result area
                     when {
                         state.availableLanguages.isEmpty() -> {
-                            NoDictionaryState(onNavigateToSettings = onNavigateToSettings)
+                            NoDictionaryState(
+                                scrollState = resolvedNoDictionaryScrollState,
+                                onNavigateToSettings = onNavigateToSettings
+                            )
                         }
 
                         state.query.isBlank() -> {
@@ -716,29 +734,98 @@ private fun SuggestionCard(lemma: String, onClick: () -> Unit) {
 
 @Composable
 private fun NoDictionaryState(
+    scrollState: ScrollState,
     onNavigateToSettings: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f)
+    ScrollableNoDictionaryContainer(
+        scrollState = scrollState,
     ) {
-        EmptyState(
-            iconContent = {
-                Image(
-                    imageVector = SlovyIcons.NoDictionaryIcon,
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Image(
+                imageVector = SlovyIcons.NoDictionaryIcon,
+                contentDescription = null,
+                modifier = Modifier.size(204.dp)
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = stringResource(Res.string.search_no_dictionary_title),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontFamily = MaterialTheme.serifFontFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    lineHeight = 34.sp,
+                ),
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.widthIn(max = 340.dp)
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text(
+                text = stringResource(Res.string.search_no_dictionary_description),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontFamily = MaterialTheme.serifFontFamily,
+                    fontStyle = FontStyle.Italic,
+                    lineHeight = 24.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.widthIn(max = 320.dp)
+            )
+
+            Spacer(modifier = Modifier.height(36.dp))
+
+            Button(
+                onClick = onNavigateToSettings,
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+                contentPadding = PaddingValues(horizontal = 28.dp),
+                modifier = Modifier
+                    .height(56.dp)
+                    .widthIn(min = 220.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
                     contentDescription = null,
-                    modifier = Modifier.size(180.dp)
+                    modifier = Modifier.size(20.dp)
                 )
-            },
-            title = stringResource(Res.string.search_no_dictionary_title),
-            description = stringResource(Res.string.search_no_dictionary_description),
-            action = {
-                FilledTonalButton(onClick = onNavigateToSettings) {
-                    Text(stringResource(Res.string.search_go_to_settings))
-                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = stringResource(Res.string.search_go_to_settings),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun ScrollableNoDictionaryContainer(
+    scrollState: ScrollState,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = maxHeight)
+                .verticalScroll(scrollState),
+            contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.18f),
+            content = content
         )
     }
 }

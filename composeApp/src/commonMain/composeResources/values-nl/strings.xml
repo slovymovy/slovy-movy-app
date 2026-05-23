@@ -135,8 +135,8 @@
     <string name="favorites_loading">Laden...</string>
     <string name="favorites_search_placeholder">Typ een woord...</string>
     <string name="favorites_empty_title">Je eigen woordenlijst begint hier.</string>
-    <string name="favorites_empty_description">Zoek een woord en tik op het hartje om het op te slaan voor later.
-    </string>
+    <string name="favorites_empty_description_before_heart_icon">Zoek een woord en tik op&#32;</string>
+    <string name="favorites_empty_description_after_heart_icon">&#32;om het op te slaan voor later.</string>
     <string name="favorites_empty_action_start_searching">Begin met zoeken</string>
     <string name="favorites_no_results_title">Geen opgeslagen woorden voor "%1$s"</string>
     <string name="favorites_no_results_description">Probeer een andere spelling of zoek in het woordenboek.</string>
