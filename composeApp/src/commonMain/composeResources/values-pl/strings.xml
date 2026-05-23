@@ -277,6 +277,7 @@
     <string name="developer_remove_all_learning_cards">Usuń wszystkie karty nauki</string>
     <string name="developer_stats_title">Statystyki</string>
     <string name="developer_terminal_title">Terminal</string>
+    <string name="developer_terminal_clear">Wyczyść</string>
     <string name="developer_terminal_ready">terminal gotowy</string>
     <string name="developer_terminal_running">Uruchomione: %1$s</string>
     <string name="developer_stats_metric_header">Metryka</string>

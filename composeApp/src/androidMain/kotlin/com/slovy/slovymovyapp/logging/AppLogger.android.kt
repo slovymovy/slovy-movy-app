@@ -9,10 +9,15 @@ actual object AppLogger {
     actual var remoteLogger: AppLogSink = NoOpAppLogSink
     actual var developerLogger: AppLogSink = NoOpAppLogSink
 
-    private val recentDeveloperLogs = mutableListOf<AppLogEntry>()
+    private val developerLogBuffer = DeveloperLogBuffer()
 
     @Synchronized
-    actual fun recentDeveloperLogs(): List<AppLogEntry> = recentDeveloperLogs.toList()
+    actual fun recentDeveloperLogs(): List<AppLogEntry> = developerLogBuffer.snapshot()
+
+    @Synchronized
+    actual fun clearDeveloperLogs() {
+        developerLogBuffer.clear()
+    }
 
     actual fun debug(tag: String, message: String, throwable: Throwable?) {
         if (throwable == null) Log.d(tag, message) else Log.d(tag, message, throwable)
@@ -39,16 +44,15 @@ actual object AppLogger {
     @OptIn(ExperimentalTime::class)
     @Synchronized
     private fun appendDeveloperLog(level: AppLogLevel, tag: String, message: String, throwable: Throwable?) {
-        recentDeveloperLogs += AppLogEntry(
-            createdAtEpochMs = Clock.System.now().toEpochMilliseconds(),
-            level = level,
-            tag = tag,
-            message = message,
-            throwableLabel = throwable?.toLogLabel(),
+        developerLogBuffer.append(
+            AppLogEntry(
+                createdAtEpochMs = Clock.System.now().toEpochMilliseconds(),
+                level = level,
+                tag = tag,
+                message = message,
+                throwableLabel = throwable?.toLogLabel(),
+            ),
         )
-        while (recentDeveloperLogs.size > MAX_RECENT_DEVELOPER_LOGS) {
-            recentDeveloperLogs.removeAt(0)
-        }
     }
 
     private fun logDeveloper(level: AppLogLevel, tag: String, message: String, throwable: Throwable?) {
@@ -71,7 +75,6 @@ actual object AppLogger {
     private fun Throwable.toLogLabel(): String =
         "${this::class.simpleName ?: "Error"}: ${message ?: "no message"}"
 
-    private const val MAX_RECENT_DEVELOPER_LOGS = 120
 }
 
 class FirebaseCrashlyticsAppLogSink : AppLogSink {

@@ -8,9 +8,13 @@ actual object AppLogger {
     actual var remoteLogger: AppLogSink = NoOpAppLogSink
     actual var developerLogger: AppLogSink = NoOpAppLogSink
 
-    private val recentDeveloperLogs = mutableListOf<AppLogEntry>()
+    private val developerLogBuffer = DeveloperLogBuffer()
 
-    actual fun recentDeveloperLogs(): List<AppLogEntry> = recentDeveloperLogs.toList()
+    actual fun recentDeveloperLogs(): List<AppLogEntry> = developerLogBuffer.snapshot()
+
+    actual fun clearDeveloperLogs() {
+        developerLogBuffer.clear()
+    }
 
     actual fun debug(tag: String, message: String, throwable: Throwable?) {
         log("DEBUG", tag, message, throwable)
@@ -58,20 +62,18 @@ actual object AppLogger {
 
     @OptIn(ExperimentalTime::class)
     private fun appendDeveloperLog(level: AppLogLevel, tag: String, message: String, throwable: Throwable?) {
-        recentDeveloperLogs += AppLogEntry(
-            createdAtEpochMs = Clock.System.now().toEpochMilliseconds(),
-            level = level,
-            tag = tag,
-            message = message,
-            throwableLabel = throwable?.toLogLabel(),
+        developerLogBuffer.append(
+            AppLogEntry(
+                createdAtEpochMs = Clock.System.now().toEpochMilliseconds(),
+                level = level,
+                tag = tag,
+                message = message,
+                throwableLabel = throwable?.toLogLabel(),
+            ),
         )
-        while (recentDeveloperLogs.size > MAX_RECENT_DEVELOPER_LOGS) {
-            recentDeveloperLogs.removeAt(0)
-        }
     }
 
     private fun Throwable.toLogLabel(): String =
         "${this::class.simpleName ?: "Error"}: ${message ?: "no message"}"
 
-    private const val MAX_RECENT_DEVELOPER_LOGS = 120
 }

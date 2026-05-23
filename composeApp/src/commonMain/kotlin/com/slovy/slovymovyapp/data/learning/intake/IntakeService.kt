@@ -14,6 +14,7 @@ import com.slovy.slovymovyapp.data.learning.session.buildTaskVariants
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.db.FavoritesQueries
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
+import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -63,6 +64,12 @@ class IntakeService(
                 ),
             )
             val result = activatePendingFavorites(langCode, mode)
+            AppLogger.debug(
+                TAG,
+                "Intake completed lang=$langCode mode=${mode.logName()} cardsCreated=${result.cardsCreated} " +
+                    "activated=${result.activated.size} skipped=${skipSummary(result.skipped)}",
+                null,
+            )
             trace.putMetric("cards_created", result.cardsCreated.toLong())
             trace.putMetric("activated", result.activated.size.toLong())
             trace.putMetric("skipped", result.skipped.size.toLong())
@@ -114,7 +121,10 @@ class IntakeService(
         mode: IntakeRunMode,
     ): IntakeResult {
         val language = Language.fromCodeOrNull(langCode)
-            ?: return IntakeResult(emptyList(), emptyList(), 0)
+        if (language == null) {
+            AppLogger.debug(TAG, "Intake skipped: unknown language lang=$langCode mode=${mode.logName()}", null)
+            return IntakeResult(emptyList(), emptyList(), 0)
+        }
         val translationTargets = dictionary.defaultTranslationTargets(language)
             .filter { it != language }
             .distinctBy { it.code }
@@ -138,6 +148,13 @@ class IntakeService(
             .selectPendingActivationLemmas(langCode, pendingLemmaLimit.toLong())
             .executeAsList()
             .partition { it.is_extension }
+        AppLogger.debug(
+            TAG,
+            "Intake selected pending lemmas lang=$langCode mode=${mode.logName()} " +
+                "translationTargets=${translationTargets.joinToString { it.code }} " +
+                "pendingLemmaLimit=$pendingLemmaLimit extensions=${extensions.size} newcomers=${newcomers.size}",
+            null,
+        )
 
         val activated = mutableListOf<Uuid>()
         val skipped = mutableListOf<SkipReason>()
@@ -150,24 +167,57 @@ class IntakeService(
             invalidatedSenses += outcome.activatedSenses.map { it.toString() }
             activated += outcome.activatedSenses
             cardsCreated += outcome.cardsCreated
+            AppLogger.debug(
+                TAG,
+                "Intake lemma processed lang=$langCode mode=${mode.logName()} lemma=$lemma " +
+                    "cardsCreated=${outcome.cardsCreated} activatedSenses=${outcome.activatedSenses.size} " +
+                    "skipped=${skipSummary(outcome.skipped)}",
+                null,
+            )
         }
 
         for (row in extensions) apply(row.lemma)
 
         if (newcomers.isNotEmpty()) {
             when (val gate = newcomerGate(langCode, mode, nowInstant, startOfToday)) {
-                is NewcomerGate.Blocked -> skipped += gate.reason
+                is NewcomerGate.Blocked -> {
+                    skipped += gate.reason
+                    AppLogger.debug(
+                        TAG,
+                        "Intake newcomers blocked lang=$langCode mode=${mode.logName()} reason=${gate.reason}",
+                        null,
+                    )
+                }
+
                 is NewcomerGate.Open -> {
+                    AppLogger.debug(
+                        TAG,
+                        "Intake newcomers open lang=$langCode mode=${mode.logName()} dailyBudget=${gate.dailyBudget ?: "none"}",
+                        null,
+                    )
                     var remainingDailyBudget = gate.dailyBudget
                     var activatedLemmaCount = 0
                     for (row in newcomers) {
                         if (mode == IntakeRunMode.CONTINUE_NOW &&
                             activatedLemmaCount >= config.continueNowPendingLemmaLimit
-                        ) break
+                        ) {
+                            AppLogger.debug(
+                                TAG,
+                                "Intake continue-now lemma limit reached lang=$langCode limit=${config.continueNowPendingLemmaLimit}",
+                                null,
+                            )
+                            break
+                        }
                         val upperBoundCards = row.pending_count.toInt() * familiesPerSense
                         val budget = remainingDailyBudget
                         if (budget != null && upperBoundCards > budget) {
                             skipped += SkipReason.BUDGET_EXHAUSTED
+                            AppLogger.debug(
+                                TAG,
+                                "Intake lemma skipped by budget lang=$langCode lemma=${row.lemma} " +
+                                    "upperBoundCards=$upperBoundCards remainingBudget=$budget",
+                                null,
+                            )
                             continue
                         }
                         val before = cardsCreated
@@ -186,6 +236,11 @@ class IntakeService(
 
         if (invalidatedSenses.isNotEmpty()) {
             dictionary.invalidateSenses(invalidatedSenses)
+            AppLogger.debug(
+                TAG,
+                "Intake invalidated dictionary senses lang=$langCode count=${invalidatedSenses.size}",
+                null,
+            )
         }
         return IntakeResult(activated, skipped, cardsCreated)
     }
@@ -215,7 +270,10 @@ class IntakeService(
         now: Long,
     ): LemmaActivationOutcome {
         val group = learning.selectPendingActivationByLemma(langCode, lemma).executeAsList()
-        if (group.isEmpty()) return LemmaActivationOutcome.EMPTY
+        if (group.isEmpty()) {
+            AppLogger.debug(TAG, "Intake lemma skipped: no pending favorites lang=$langCode lemma=$lemma", null)
+            return LemmaActivationOutcome.EMPTY
+        }
 
         val skipped = mutableListOf<SkipReason>()
         val languageCard = dictionary.getLanguageCard(
@@ -226,6 +284,11 @@ class IntakeService(
         )
         if (languageCard == null) {
             skipped += SkipReason.CARD_DATA_UNAVAILABLE
+            AppLogger.debug(
+                TAG,
+                "Intake lemma skipped: card data unavailable lang=$langCode lemma=$lemma pendingSenses=${group.size}",
+                null,
+            )
             return LemmaActivationOutcome(0, emptyList(), skipped)
         }
         val sensesById = languageCard.entries
@@ -237,6 +300,11 @@ class IntakeService(
             val sense = sensesById[favorite.sense_id]
             if (sense == null) {
                 skipped += SkipReason.CARD_DATA_UNAVAILABLE
+                AppLogger.debug(
+                    TAG,
+                    "Intake sense skipped: sense missing in card data lang=$langCode lemma=$lemma sense=${favorite.sense_id}",
+                    null,
+                )
                 continue
             }
             val tasksToCreate = config.defaultIntakeFamilies.mapNotNull { family ->
@@ -245,18 +313,43 @@ class IntakeService(
             }
             if (tasksToCreate.isEmpty()) {
                 skipped += SkipReason.NO_TASKS_VARIANT_AVAILABLE
+                AppLogger.debug(
+                    TAG,
+                    "Intake sense skipped: no playable variants lang=$langCode lemma=$lemma sense=${favorite.sense_id}",
+                    null,
+                )
                 continue
             }
+            AppLogger.debug(
+                TAG,
+                "Intake sense planned lang=$langCode lemma=$lemma sense=${favorite.sense_id} " +
+                    "families=${tasksToCreate.joinToString { it.name }}",
+                null,
+            )
             groupPlan += IntakePlanItem(Uuid.parse(favorite.sense_id), tasksToCreate)
         }
 
-        if (groupPlan.isEmpty()) return LemmaActivationOutcome(0, emptyList(), skipped)
+        if (groupPlan.isEmpty()) {
+            AppLogger.debug(
+                TAG,
+                "Intake lemma skipped: no activatable senses lang=$langCode lemma=$lemma skipped=${skipSummary(skipped)}",
+                null,
+            )
+            return LemmaActivationOutcome(0, emptyList(), skipped)
+        }
         val groupTotal = groupPlan.sumOf { it.families.size }
 
         val lemmaId = JsonIngestionBuilder.generateLemmaId(lemma)
         val answerKey = lemma.lowercase()
         learning.transaction {
             groupPlan.forEach { item ->
+                AppLogger.debug(
+                    TAG,
+                    "Intake activating favorite lang=$langCode lemma=$lemma sense=${item.senseId} " +
+                        "newCards=${item.families.size} families=${item.families.joinToString { it.name }} " +
+                        "state=${CardState.NEW} due=now availableAfter=none",
+                    null,
+                )
                 item.families.forEach { family ->
                     learning.insertCard(
                         id = Uuid.random(),
@@ -278,6 +371,11 @@ class IntakeService(
                     )
                 }
                 learning.markFavoriteActivated(now, item.senseId.toString(), langCode)
+                AppLogger.debug(
+                    TAG,
+                    "Intake favorite activated lang=$langCode lemma=$lemma sense=${item.senseId} activatedAt=now",
+                    null,
+                )
             }
         }
         return LemmaActivationOutcome(
@@ -345,3 +443,22 @@ enum class IntakeRunMode {
     DAILY,
     CONTINUE_NOW,
 }
+
+private fun IntakeRunMode.logName(): String =
+    when (this) {
+        IntakeRunMode.DAILY -> "daily"
+        IntakeRunMode.CONTINUE_NOW -> "continue_now"
+    }
+
+private fun skipSummary(skipped: List<SkipReason>): String =
+    if (skipped.isEmpty()) {
+        "none"
+    } else {
+        skipped.groupingBy { it }
+            .eachCount()
+            .entries
+            .sortedBy { it.key.name }
+            .joinToString { (reason, count) -> "${reason.name}=$count" }
+    }
+
+private const val TAG: String = "IntakeService"

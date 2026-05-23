@@ -2,6 +2,8 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,7 +39,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -126,6 +131,7 @@ data class DeveloperUiState(
     val isBusy: Boolean = false,
     val currentActionLabel: String? = null,
     val terminalLines: List<String> = emptyList(),
+    val terminalRevision: Long = 0,
     val scheduleStats: DeveloperScheduleStats = DeveloperScheduleStats(),
     val isStatsLoading: Boolean = false,
     val statsErrorLabel: String? = null,
@@ -170,6 +176,7 @@ class DeveloperViewModel(
         private set
 
     val scrollState = LazyListState()
+    val terminalScrollState = ScrollState(0)
     val tableHorizontalScrollState = ScrollState(0)
     val snackbarHostState = SnackbarHostState()
 
@@ -180,7 +187,6 @@ class DeveloperViewModel(
         AppLogger.developerLogger = developerLogSink
         syncTerminalLogs()
         startTerminalLogPolling()
-        AppLogger.info(TAG, "Developer terminal attached (${AppLogger.recentDeveloperLogs().size} buffered logs)", null)
         refreshDeveloperData()
     }
 
@@ -217,6 +223,12 @@ class DeveloperViewModel(
         }
     }
 
+    fun clearTerminalLogs() {
+        AppLogger.clearDeveloperLogs()
+        terminalLogSignature = ""
+        syncTerminalLogs()
+    }
+
     private fun runAction(actionName: String, work: suspend () -> String) {
         if (state.isBusy) return
         AppLogger.info(TAG, "Action started: $actionName", null)
@@ -248,13 +260,23 @@ class DeveloperViewModel(
     private fun describe(e: Throwable): String =
         "${e::class.simpleName ?: "Error"}: ${e.message ?: "no message"}"
 
+    private var terminalLogSignature: String = ""
+
     private fun syncTerminalLogs() {
-        val recentLines = AppLogger.recentDeveloperLogs()
-            .takeLast(MAX_TERMINAL_LINES)
-            .map(::formatLogEntry)
-        if (recentLines != state.terminalLines) {
-            state = state.copy(terminalLines = recentLines)
+        val recentLogs = AppLogger.recentDeveloperLogs()
+        val signature = recentLogs.signature()
+        if (signature != terminalLogSignature) {
+            terminalLogSignature = signature
+            state = state.copy(
+                terminalLines = recentLogs.map(::formatLogEntry),
+                terminalRevision = state.terminalRevision + 1,
+            )
         }
+    }
+
+    private fun List<AppLogEntry>.signature(): String {
+        val last = lastOrNull() ?: return "0"
+        return "${size}:${last.createdAtEpochMs}:${last.level}:${last.tag}:${last.message}:${last.throwableLabel}"
     }
 
     private fun startTerminalLogPolling() {
@@ -414,7 +436,6 @@ class DeveloperViewModel(
 
     companion object {
         private const val TAG = "DeveloperViewModel"
-        private const val MAX_TERMINAL_LINES = 80
     }
 
     override fun onCleared() {
@@ -478,12 +499,14 @@ fun DeveloperScreen(
         timeShiftOptions = viewModel.timeShiftOptions,
         intakeModes = viewModel.intakeModes,
         scrollState = viewModel.scrollState,
+        terminalScrollState = viewModel.terminalScrollState,
         tableHorizontalScrollState = viewModel.tableHorizontalScrollState,
         snackbarHostState = viewModel.snackbarHostState,
         onShiftTimeBack = viewModel::shiftTimeBack,
         onRunIntake = viewModel::runIntake,
         onRemoveSuspendedCards = viewModel::removeSuspendedLearningCards,
         onRemoveAllLearningCards = viewModel::removeAllLearningCards,
+        onClearTerminalLogs = viewModel::clearTerminalLogs,
         onBack = onBack,
     )
 }
@@ -496,12 +519,14 @@ fun DeveloperScreenContent(
     timeShiftOptions: List<TimeShiftOption> = TimeShiftOptions,
     intakeModes: List<IntakeRunMode> = IntakeRunMode.entries,
     scrollState: LazyListState = LazyListState(),
+    terminalScrollState: ScrollState = ScrollState(0),
     tableHorizontalScrollState: ScrollState = ScrollState(0),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onShiftTimeBack: (TimeShiftOption) -> Unit = {},
     onRunIntake: (IntakeRunMode) -> Unit = {},
     onRemoveSuspendedCards: () -> Unit = {},
     onRemoveAllLearningCards: () -> Unit = {},
+    onClearTerminalLogs: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     val backLabel = stringResource(Res.string.common_back)
@@ -547,6 +572,9 @@ fun DeveloperScreenContent(
                         isBusy = state.isBusy,
                         currentActionLabel = state.currentActionLabel,
                         terminalLines = state.terminalLines,
+                        terminalRevision = state.terminalRevision,
+                        scrollState = terminalScrollState,
+                        onClear = onClearTerminalLogs,
                     )
                 }
 
@@ -706,7 +734,14 @@ private fun DeveloperTerminalCard(
     isBusy: Boolean,
     currentActionLabel: String?,
     terminalLines: List<String>,
+    terminalRevision: Long,
+    scrollState: ScrollState,
+    onClear: () -> Unit,
 ) {
+    LaunchedEffect(terminalRevision) {
+        scrollState.scrollTo(scrollState.maxValue)
+    }
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -721,11 +756,21 @@ private fun DeveloperTerminalCard(
                 .padding(AppSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
         ) {
-            Text(
-                text = stringResource(Res.string.developer_terminal_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+            ) {
+                Text(
+                    text = stringResource(Res.string.developer_terminal_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = onClear) {
+                    Text(stringResource(Res.string.developer_terminal_clear))
+                }
+            }
             if (isBusy) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -744,18 +789,26 @@ private fun DeveloperTerminalCard(
                 }
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
-                val visibleLines = if (terminalLines.isEmpty()) {
-                    listOf(stringResource(Res.string.developer_terminal_ready))
-                } else {
-                    terminalLines.takeLast(12)
-                }
-                visibleLines.forEach { line ->
-                    Text(
-                        text = line,
-                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
+            SelectionContainer {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 280.dp)
+                        .verticalScroll(scrollState),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.xs),
+                ) {
+                    val visibleLines = if (terminalLines.isEmpty()) {
+                        listOf(stringResource(Res.string.developer_terminal_ready))
+                    } else {
+                        terminalLines
+                    }
+                    visibleLines.forEach { line ->
+                        Text(
+                            text = line,
+                            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
             }
         }
