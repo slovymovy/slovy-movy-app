@@ -14,13 +14,36 @@ class FavoritesRepository(private val db: AppDatabase) {
 
     @OptIn(ExperimentalTime::class)
     suspend fun add(senseId: String, language: Language, lemma: String) = withContext(Dispatchers.IO) {
-        addFavorite(senseId, language, lemma, Clock.System.now().toEpochMilliseconds())
+        addFavorite(
+            senseId = senseId,
+            language = language,
+            lemma = lemma,
+            createdAt = Clock.System.now().toEpochMilliseconds(),
+            restoreImmediately = false,
+        )
     }
 
     @OptIn(ExperimentalTime::class)
     suspend fun add(senseId: String, language: Language, lemma: String, createdAt: Long) =
         withContext(Dispatchers.IO) {
-            addFavorite(senseId, language, lemma, createdAt)
+            addFavorite(
+                senseId = senseId,
+                language = language,
+                lemma = lemma,
+                createdAt = createdAt,
+                restoreImmediately = false,
+            )
+        }
+
+    suspend fun restoreForUndo(senseId: String, language: Language, lemma: String, createdAt: Long) =
+        withContext(Dispatchers.IO) {
+            addFavorite(
+                senseId = senseId,
+                language = language,
+                lemma = lemma,
+                createdAt = createdAt,
+                restoreImmediately = true,
+            )
         }
 
     suspend fun remove(senseId: String, language: Language) = withContext(Dispatchers.IO) {
@@ -129,7 +152,13 @@ class FavoritesRepository(private val db: AppDatabase) {
     }
 
     @OptIn(ExperimentalTime::class)
-    private fun addFavorite(senseId: String, language: Language, lemma: String, createdAt: Long) {
+    private fun addFavorite(
+        senseId: String,
+        language: Language,
+        lemma: String,
+        createdAt: Long,
+        restoreImmediately: Boolean,
+    ) {
         val senseUuid = Uuid.parse(senseId)
         val restoredAt = Clock.System.now().toEpochMilliseconds()
         db.favoritesQueries.transaction {
@@ -150,10 +179,17 @@ class FavoritesRepository(private val db: AppDatabase) {
                 activated_at = if (hasLearningCards) restoredAt else null,
             )
             if (hasLearningCards) {
-                db.favoritesQueries.unsuspendCardsByFavorite(
-                    sense_id = senseUuid,
-                    lang_code = language.code,
-                )
+                if (restoreImmediately) {
+                    db.favoritesQueries.unsuspendCardsByFavoriteClearingAvailableAfter(
+                        sense_id = senseUuid,
+                        lang_code = language.code,
+                    )
+                } else {
+                    db.favoritesQueries.unsuspendCardsByFavorite(
+                        sense_id = senseUuid,
+                        lang_code = language.code,
+                    )
+                }
             }
         }
     }

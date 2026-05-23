@@ -113,7 +113,7 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
-    fun removing_favorite_suspends_learning_cards_and_readding_restores_them() = runBlocking {
+    fun removing_favorite_suspends_learning_cards_and_readding_preserves_delay() = runBlocking {
         withEnv(includeTranslation = false) { env ->
             val fixture = env.seedSense(lemma = "restoresuspendcards")
             env.addFavorite(fixture)
@@ -144,6 +144,64 @@ class LearningE2ETest : BaseTest() {
             assertEquals(1, restoredCards.size)
             assertTrue(restoredCards.none { it.suspended })
             assertEquals(availableAfter, restoredCards.first().available_after)
+            assertNull(env.session.nextCard("en", start).first())
+        }
+    }
+
+    @Test
+    fun undoing_removed_favorite_restores_cards_immediately() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            val fixture = env.seedSense(lemma = "undoremovedfavorite")
+            env.addFavorite(fixture)
+            env.intake.runIntake("en")
+            val card = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
+                .executeAsOne()
+            env.app.favoritesQueries.setCardAvailableAfter(
+                availableAfter = (start + 10.minutes).toEpochMilliseconds(),
+                id = card.id,
+            )
+
+            env.favorites.remove(fixture.senseId.toString(), Language.ENGLISH)
+            env.favorites.restoreForUndo(
+                senseId = fixture.senseId.toString(),
+                language = Language.ENGLISH,
+                lemma = fixture.lemma,
+                createdAt = start.toEpochMilliseconds(),
+            )
+
+            val restoredCards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+            assertEquals(1, restoredCards.size)
+            assertTrue(restoredCards.none { it.suspended })
+            assertNull(restoredCards.first().available_after)
+            env.nextLoadedCard("en")
+        }
+    }
+
+    @Test
+    fun suspending_word_applies_delay_to_removed_meanings() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            val fixture = env.seedSense(lemma = "delayremovedmeaning")
+            env.addFavorite(fixture)
+            env.intake.runIntake("en")
+            val card = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsOne()
+
+            env.favorites.remove(fixture.senseId.toString(), Language.ENGLISH)
+            val availableAfter = (start + 30.days).toEpochMilliseconds()
+            env.app.favoritesQueries.setCardsAvailableAfterByLemma(
+                availableAfter = availableAfter,
+                lang_code = "en",
+                lemma_id = card.lemma_id,
+            )
+
+            val suspendedCard = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsOne()
+            assertTrue(suspendedCard.suspended)
+            assertEquals(availableAfter, suspendedCard.available_after)
+
+            env.favorites.add(fixture.senseId.toString(), Language.ENGLISH, fixture.lemma)
+
+            val restoredCard = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsOne()
+            assertFalse(restoredCard.suspended)
+            assertEquals(availableAfter, restoredCard.available_after)
             assertNull(env.session.nextCard("en", start).first())
         }
     }

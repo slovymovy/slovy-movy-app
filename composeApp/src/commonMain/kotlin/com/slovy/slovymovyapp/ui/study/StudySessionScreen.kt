@@ -294,7 +294,7 @@ fun StudySessionScreenContent(
         )
 
         is StudySessionUiState.Complete -> StudySessionCompleteContent(
-            reviewedCount = state.reviewedCount,
+            completedCount = state.completedCount,
             message = state.message,
             scrollState = completeScrollState,
             onClose = onEnd,
@@ -363,7 +363,7 @@ private fun StudySessionLoadingContent(
 
 @Composable
 private fun StudySessionCompleteContent(
-    reviewedCount: Int,
+    completedCount: Int,
     message: String,
     scrollState: ScrollState,
     onClose: () -> Unit,
@@ -418,7 +418,11 @@ private fun StudySessionCompleteContent(
                     )
                     Spacer(Modifier.height(AppSpacing.md))
                     Text(
-                        text = pluralStringResource(Res.plurals.study_complete_description, reviewedCount, reviewedCount),
+                        text = pluralStringResource(
+                            Res.plurals.study_complete_description,
+                            completedCount,
+                            completedCount,
+                        ),
                         style = MaterialTheme.typography.titleMedium,
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontStyle = FontStyle.Italic,
@@ -2483,7 +2487,7 @@ private fun StudySessionCompletePreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
-            state = StudySessionUiState.Complete(reviewedCount = 12, message = "Goed gedaan!"),
+            state = StudySessionUiState.Complete(completedCount = 12, message = "Goed gedaan!"),
             onCancel = {},
             onEnd = {},
         )

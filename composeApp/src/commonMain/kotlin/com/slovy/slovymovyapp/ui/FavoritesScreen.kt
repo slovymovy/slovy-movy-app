@@ -649,7 +649,12 @@ class FavoritesViewModel(
 
             if (result == SnackbarResult.ActionPerformed) {
                 // Re-add with the original createdAt to preserve position
-                favoritesRepository.add(senseId, favorite.language, favorite.lemma, favorite.createdAt)
+                favoritesRepository.restoreForUndo(
+                    senseId = senseId,
+                    language = favorite.language,
+                    lemma = favorite.lemma,
+                    createdAt = favorite.createdAt,
+                )
                 Analytics.logEvent(
                     AnalyticsEvent.FAVORITES_SAVE,
                     mapOf("lang" to favorite.language.code, "source" to "favorites_undo"),

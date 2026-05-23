@@ -206,16 +206,19 @@ class StudySessionViewModel(
         val active = state as? StudySessionUiState.Active ?: return
         val card = currentCard ?: return
         val lang = Language.fromCodeOrNull(card.card.langCode) ?: return
-        state = active.copy(isOverflowMenuOpen = false)
         viewModelScope.launch {
             val favorite = favoritesRepository.getOne(card.card.senseId.toString(), lang)
             val latest = state as? StudySessionUiState.Active ?: return@launch
             if (favorite == null) {
+                state = latest.copy(isOverflowMenuOpen = false)
                 loadNextCard()
                 return@launch
             }
             pendingRemovalFavorite = favorite
-            state = latest.copy(removeConfirmation = StudyRemoveConfirmationUiState(favorite.lemma))
+            state = latest.copy(
+                isOverflowMenuOpen = false,
+                removeConfirmation = StudyRemoveConfirmationUiState(favorite.lemma),
+            )
         }
     }
 
@@ -253,7 +256,12 @@ class StudySessionViewModel(
                 duration = SnackbarDuration.Short,
             )
             if (result == SnackbarResult.ActionPerformed) {
-                favoritesRepository.add(favorite.senseId, favorite.language, favorite.lemma, favorite.createdAt)
+                favoritesRepository.restoreForUndo(
+                    senseId = favorite.senseId,
+                    language = favorite.language,
+                    lemma = favorite.lemma,
+                    createdAt = favorite.createdAt,
+                )
                 Analytics.logEvent(
                     AnalyticsEvent.FAVORITES_SAVE,
                     mapOf("lang" to favorite.language.code, "source" to "study_undo"),
@@ -397,7 +405,7 @@ class StudySessionViewModel(
                                         StudySessionUiState.Empty
                                     } else {
                                         StudySessionUiState.Complete(
-                                            reviewedCount = completedCount,
+                                            completedCount = completedCount,
                                             message = randomCompletionMessage(language),
                                         )
                                     }
@@ -498,7 +506,7 @@ class StudySessionViewModel(
             statsService.dueNow(langCode)
         }
         val projectedTotal = reviewedCount + dueNow
-        sessionTotal = maxOf(projectedTotal, current)
+        sessionTotal = maxOf(sessionTotal, projectedTotal, current)
         return StudySessionProgressUiState(
             current = current,
             total = sessionTotal,

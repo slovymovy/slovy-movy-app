@@ -31,7 +31,7 @@ sealed interface StudySessionUiState {
     ) : StudySessionUiState
 
     data class Complete(
-        val reviewedCount: Int,
+        val completedCount: Int,
         val message: String,
     ) : StudySessionUiState
 }
