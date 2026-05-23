@@ -1014,14 +1014,20 @@ fun App(
                 DataVersionMismatchScreen(
                     onRedownload = {
                         coroutineScope.launch {
-                            dataManager.deleteAllDownloadedData()
-                            localDbManager.deleteAll()
-                            dictionaryRepository.clearSenseCache()
-                            favoritesReviewCoordinator.invalidateAllIntakeCache()
-                            favoritesViewModel.dropCachedFavoriteDetails()
-                            val target = selectInitialDestination()
-                            navController.navigate(target) {
-                                popUpTo<AppDestination.DataVersionMismatch> { inclusive = true }
+                            try {
+                                dataManager.deleteAllDownloadedData()
+                                localDbManager.deleteAll()
+                                dictionaryRepository.clearSenseCache()
+                                favoritesReviewCoordinator.invalidateAllIntakeCache()
+                                favoritesViewModel.dropCachedFavoriteDetails()
+                                val target = selectInitialDestination()
+                                navController.navigate(target) {
+                                    popUpTo<AppDestination.DataVersionMismatch> { inclusive = true }
+                                }
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Throwable) {
+                                navController.navigate(AppDestination.Error(e.message ?: "Failed to refresh dictionaries"))
                             }
                         }
                     }
