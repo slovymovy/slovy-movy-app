@@ -23,11 +23,8 @@ class FirstLetterHintTest {
     }
 
     @Test
-    fun oneLetter_hasNoHiddenLetterDots() {
-        val hint = "I".firstLetterHint()!!
-        assertEquals('I', hint.letter)
-        assertEquals(1, hint.letterCount)
-        assertEquals(0, hint.dotCount)
+    fun oneLetter_returnsNull() {
+        assertNull("I".firstLetterHint())
     }
 
     @Test

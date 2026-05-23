@@ -1,11 +1,25 @@
 package com.slovy.slovymovyapp.ui
 
 import com.slovy.slovymovyapp.logging.AppLogEntry
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+
+private val developerDateTimeFormat = LocalDateTime.Format {
+    date(LocalDate.Formats.ISO)
+    char(' ')
+    time(LocalTime.Formats.ISO)
+}
 
 internal fun List<AppLogEntry>.developerLogSignature(): String {
     val last = lastOrNull() ?: return "0"
@@ -40,4 +54,10 @@ internal fun formatDeveloperRelativeTime(epochMs: Long?, nowEpochMs: Long): Stri
     val minutes = duration.inWholeMinutes
     if (minutes > 0L) return "${sign}${minutes}m"
     return "${sign}${duration.inWholeSeconds}s"
+}
+
+internal fun buildDeveloperDiagnosticInfo(id: String, createdAtEpochMs: Long): String {
+    val localDateTime = Instant.fromEpochMilliseconds(createdAtEpochMs)
+        .toLocalDateTime(currentSystemDefault())
+    return "ID: $id\nAdded: ${localDateTime.format(developerDateTimeFormat)}"
 }

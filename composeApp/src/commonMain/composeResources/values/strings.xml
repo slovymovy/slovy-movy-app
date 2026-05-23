@@ -618,6 +618,9 @@
     <string name="study_play_word_audio">Play word audio</string>
     <string name="study_play_prompt_audio">Play prompt audio</string>
     <string name="study_stop_audio">Stop audio</string>
+    <string name="study_hint_show">Hint</string>
+    <string name="study_hint_show_description">Show first letter hint</string>
+    <string name="study_hint_show_translation_description">Show translation hint</string>
     <plurals name="study_hint_starts_with">
         <item quantity="one">Hint: starts with %1$s, %2$d letter</item>
         <item quantity="few">Hint: starts with %1$s, %2$d letters</item>
