@@ -327,8 +327,8 @@ class SessionService(
     private fun burySense(card: Card, nowMs: Long, cooldown: Duration) {
         val params = bulkBuryParams(nowMs, cooldown) ?: return
         learning.burySiblingCardsBySense(
-            min_value = params.minValue,
-            jitter_range = params.jitterRange,
+            window_start = params.windowStart,
+            window_width = params.windowWidth,
             sense_id = card.senseId,
             lang_code = card.langCode,
             id = card.id,
@@ -338,8 +338,8 @@ class SessionService(
     private fun buryLemma(card: Card, nowMs: Long, cooldown: Duration) {
         val params = bulkBuryParams(nowMs, cooldown) ?: return
         learning.burySiblingCardsByLemma(
-            min_value = params.minValue,
-            jitter_range = params.jitterRange,
+            window_start = params.windowStart,
+            window_width = params.windowWidth,
             lang_code = card.langCode,
             lemma_id = card.lemmaId,
             sense_id = card.senseId,
@@ -350,8 +350,8 @@ class SessionService(
     private fun buryAnswer(card: Card, nowMs: Long, cooldown: Duration) {
         val params = bulkBuryParams(nowMs, cooldown) ?: return
         learning.burySiblingCardsByAnswer(
-            min_value = params.minValue,
-            jitter_range = params.jitterRange,
+            window_start = params.windowStart,
+            window_width = params.windowWidth,
             lang_code = card.langCode,
             answer_key = card.answerKey,
             allowed_families = WORD_RECALL_FAMILIES,
@@ -362,10 +362,10 @@ class SessionService(
     private fun bulkBuryParams(nowMs: Long, cooldown: Duration): BulkBuryParams? {
         if (cooldown <= Duration.ZERO) return null
         val cooldownMillis = cooldown.inWholeMilliseconds
-        val spread = (cooldownMillis * config.cooldownJitterRatio.coerceAtLeast(0.0)).roundToLong()
+        val halfWidth = (cooldownMillis * config.cooldownJitterRatio.coerceAtLeast(0.0)).roundToLong()
         return BulkBuryParams(
-            minValue = nowMs + cooldownMillis - spread,
-            jitterRange = (2 * spread + 1).coerceAtLeast(1L),
+            windowStart = nowMs + cooldownMillis - halfWidth,
+            windowWidth = (2 * halfWidth + 1).coerceAtLeast(1L),
         )
     }
 
@@ -420,8 +420,8 @@ class SessionService(
         nowMs + delay.inWholeMilliseconds
 
     private data class BulkBuryParams(
-        val minValue: Long,
-        val jitterRange: Long,
+        val windowStart: Long,
+        val windowWidth: Long,
     )
 
     private fun sortedVariants(card: Card, sense: LanguageCardResponseSense?): List<CardVariant> {

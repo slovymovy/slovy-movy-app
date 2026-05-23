@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.Uuid
 
@@ -111,6 +112,19 @@ class FavoritesRepository(private val db: AppDatabase) {
         db.favoritesQueries.transaction {
             db.favoritesQueries.suspendAllCards()
             db.favoritesQueries.deleteAll()
+        }
+    }
+
+    // Simulates `shift` of elapsed wall-clock time by moving every stored learning timestamp
+    // backwards by that amount. Tuning/debug only — has no callers in production paths.
+    suspend fun shiftLearningTimestampsBack(shift: Duration) = withContext(Dispatchers.IO) {
+        require(shift.isPositive()) { "shift must be positive" }
+        val shiftMs = shift.inWholeMilliseconds
+        db.favoritesQueries.transaction {
+            db.favoritesQueries.shiftFavoritesCreatedAtBack(shiftMs)
+            db.favoritesQueries.shiftFavoritesActivatedAtBack(shiftMs)
+            db.favoritesQueries.shiftCardTimestampsBack(shiftMs)
+            db.favoritesQueries.shiftReviewLogReviewedAtBack(shiftMs)
         }
     }
 

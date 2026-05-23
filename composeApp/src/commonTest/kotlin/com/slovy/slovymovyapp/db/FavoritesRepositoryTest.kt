@@ -4,13 +4,21 @@ import app.cash.sqldelight.db.SqlDriver
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.learning.CardFamily
+import com.slovy.slovymovyapp.data.learning.CardKind
+import com.slovy.slovymovyapp.data.learning.CardState
+import com.slovy.slovymovyapp.data.learning.Rating
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
 import kotlin.uuid.Uuid
 
 open class FavoritesRepositoryTest : BaseTest() {
@@ -163,6 +171,154 @@ open class FavoritesRepositoryTest : BaseTest() {
             assertEquals("bonjour", results[2].lemma)
             assertEquals(Language.RUSSIAN, results[3].language)
             assertEquals("monde", results[3].lemma)
+        }
+    }
+
+    @Test
+    fun shiftLearningTimestampsBack_shifts_all_columns_by_exact_amount() = runBlocking {
+        val app = openApp()
+        try {
+            val repo = FavoritesRepository(app.database)
+            val q = app.database.favoritesQueries
+
+            val senseId = sense1
+            val lemmaId = Uuid.random()
+            val cardId = Uuid.random()
+            val reviewLogId = Uuid.random()
+            val lang = Language.ENGLISH.code
+
+            val favCreatedAt = 1_700_000_000_000L
+            val favActivatedAt = 1_700_000_010_000L
+            val cardCreatedAt = 1_700_000_020_000L
+            val cardDue = 1_700_500_000_000L
+            val cardLastReview = 1_700_000_030_000L
+            val cardAvailableAfter = 1_700_000_040_000L
+            val reviewedAt = 1_700_000_050_000L
+
+            q.insertFavorite(
+                sense_id = senseId,
+                lang_code = lang,
+                lemma = "hello",
+                created_at = favCreatedAt,
+                activated_at = favActivatedAt,
+            )
+            q.insertCard(
+                id = cardId,
+                sense_id = Uuid.parse(senseId),
+                lemma_id = lemmaId,
+                lang_code = lang,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.REVIEW,
+                stability = 5.0,
+                difficulty = 4.0,
+                due = cardDue,
+                last_review = cardLastReview,
+                reps = 3,
+                lapses = 1,
+                created_at = cardCreatedAt,
+                available_after = cardAvailableAfter,
+                answer_key = "hello",
+                suspended = false,
+            )
+            q.insertReviewLog(
+                id = reviewLogId,
+                card_id = cardId,
+                reviewed_at = reviewedAt,
+                rating = Rating.GOOD,
+                variant_kind = CardKind.SOURCE_DEFINITION_TO_WORD,
+                variant_target_lang = null,
+                example_id = null,
+                state_before = CardState.LEARNING,
+                stability_before = 1.0,
+                difficulty_before = 4.0,
+                elapsed_days = 0,
+                scheduled_days = 1,
+                stability_after = 5.0,
+                difficulty_after = 4.0,
+                duration_ms = 1_200,
+            )
+
+            val shift = 2.days
+            val shiftMs = shift.inWholeMilliseconds
+            repo.shiftLearningTimestampsBack(shift)
+
+            val fav = q.selectFavoriteWithActivation(senseId, lang).executeAsOne()
+            assertEquals(favCreatedAt - shiftMs, fav.created_at, "favorites.created_at not shifted")
+            assertEquals(favActivatedAt - shiftMs, fav.activated_at, "favorites.activated_at not shifted")
+
+            val card = q.selectCardById(cardId).executeAsOne()
+            assertEquals(cardCreatedAt - shiftMs, card.created_at, "card.created_at not shifted")
+            assertEquals(cardDue - shiftMs, card.due, "card.due not shifted")
+            assertEquals(cardLastReview - shiftMs, card.last_review, "card.last_review not shifted")
+            assertEquals(cardAvailableAfter - shiftMs, card.available_after, "card.available_after not shifted")
+
+            val log = q.selectReviewLogsByCard(card_id = cardId, limit = 1).executeAsOne()
+            assertEquals(reviewedAt - shiftMs, log.reviewed_at, "review_log.reviewed_at not shifted")
+        } finally {
+            app.close()
+        }
+    }
+
+    @Test
+    fun shiftLearningTimestampsBack_preserves_nulls_in_nullable_columns() = runBlocking {
+        val app = openApp()
+        try {
+            val repo = FavoritesRepository(app.database)
+            val q = app.database.favoritesQueries
+
+            val senseId = sense1
+            val cardId = Uuid.random()
+            val lang = Language.ENGLISH.code
+
+            // Favorite with NULL activated_at (pending intake), card with NULL last_review + available_after.
+            q.insertFavorite(
+                sense_id = senseId,
+                lang_code = lang,
+                lemma = "hello",
+                created_at = 1_700_000_000_000L,
+                activated_at = null,
+            )
+            q.insertCard(
+                id = cardId,
+                sense_id = Uuid.parse(senseId),
+                lemma_id = Uuid.random(),
+                lang_code = lang,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = 1_700_000_000_000L,
+                last_review = null,
+                reps = 0,
+                lapses = 0,
+                created_at = 1_700_000_000_000L,
+                available_after = null,
+                answer_key = "hello",
+                suspended = false,
+            )
+
+            repo.shiftLearningTimestampsBack(1.days)
+
+            val fav = q.selectFavoriteWithActivation(senseId, lang).executeAsOne()
+            assertNull(fav.activated_at, "favorites.activated_at must stay NULL")
+
+            val card = q.selectCardById(cardId).executeAsOne()
+            assertNull(card.last_review, "card.last_review must stay NULL")
+            assertNull(card.available_after, "card.available_after must stay NULL")
+        } finally {
+            app.close()
+        }
+    }
+
+    @Test
+    fun shiftLearningTimestampsBack_rejects_non_positive_duration() = runBlocking {
+        withRepository { repo ->
+            assertFailsWith<IllegalArgumentException>("zero shift should be rejected") {
+                repo.shiftLearningTimestampsBack(Duration.ZERO)
+            }
+            assertFailsWith<IllegalArgumentException>("negative shift should be rejected") {
+                repo.shiftLearningTimestampsBack(-(1.days))
+            }
         }
     }
 

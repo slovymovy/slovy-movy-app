@@ -252,13 +252,13 @@ WHERE sense_id = :sense_id
   AND lang_code = :lang_code
 ORDER BY family ASC;
 
--- Per-row jittered available_after target = :min_value + uniform[0, :jitter_range).
+-- Per-row jittered available_after target = :window_start + uniform[0, :window_width).
 -- max() ensures we only push cards later, never pull them forward.
 burySiblingCardsBySense:
 UPDATE card INDEXED BY idx_card_unique_task
 SET available_after = max(
     coalesce(available_after, 0),
-    :min_value + ((random() % :jitter_range) + :jitter_range) % :jitter_range
+    :window_start + ((random() % :window_width) + :window_width) % :window_width
 )
 WHERE sense_id = :sense_id
   AND lang_code = :lang_code
@@ -269,7 +269,7 @@ burySiblingCardsByLemma:
 UPDATE card INDEXED BY idx_card_active_lemma_due
 SET available_after = max(
     coalesce(available_after, 0),
-    :min_value + ((random() % :jitter_range) + :jitter_range) % :jitter_range
+    :window_start + ((random() % :window_width) + :window_width) % :window_width
 )
 WHERE lang_code = :lang_code
   AND lemma_id = :lemma_id
@@ -282,7 +282,7 @@ burySiblingCardsByAnswer:
 UPDATE card INDEXED BY idx_card_answer_siblings
 SET available_after = max(
     coalesce(available_after, 0),
-    :min_value + ((random() % :jitter_range) + :jitter_range) % :jitter_range
+    :window_start + ((random() % :window_width) + :window_width) % :window_width
 )
 WHERE lang_code = :lang_code
   AND answer_key = :answer_key
@@ -568,3 +568,22 @@ DELETE FROM review_log;
 
 deleteAllCards:
 DELETE FROM card;
+
+-- Time-machine helper: shift every learning timestamp backwards by :shift_ms,
+-- simulating that :shift_ms of wall-clock time has elapsed. For algorithm tuning only.
+shiftFavoritesCreatedAtBack:
+UPDATE favorites SET created_at = created_at - :shift_ms;
+
+shiftFavoritesActivatedAtBack:
+UPDATE favorites SET activated_at = activated_at - :shift_ms
+WHERE activated_at IS NOT NULL;
+
+shiftCardTimestampsBack:
+UPDATE card
+SET created_at      = created_at - :shift_ms,
+    due             = due - :shift_ms,
+    last_review     = CASE WHEN last_review     IS NULL THEN NULL ELSE last_review     - :shift_ms END,
+    available_after = CASE WHEN available_after IS NULL THEN NULL ELSE available_after - :shift_ms END;
+
+shiftReviewLogReviewedAtBack:
+UPDATE review_log SET reviewed_at = reviewed_at - :shift_ms;
