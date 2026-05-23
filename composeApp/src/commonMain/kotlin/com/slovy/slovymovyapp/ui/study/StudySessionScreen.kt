@@ -139,6 +139,7 @@ import slovymovyapp.composeapp.generated.resources.study_stop_audio
 import slovymovyapp.composeapp.generated.resources.study_swipe_back_to_rate
 import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
 import slovymovyapp.composeapp.generated.resources.study_progress_count
+import slovymovyapp.composeapp.generated.resources.study_suspend_message
 import slovymovyapp.composeapp.generated.resources.study_rating_again
 import slovymovyapp.composeapp.generated.resources.study_rating_easy
 import slovymovyapp.composeapp.generated.resources.study_rating_good
@@ -170,7 +171,7 @@ fun StudySessionScreen(
         onOpenOverflowMenu = viewModel::openOverflowMenu,
         onDismissOverflowMenu = viewModel::dismissOverflowMenu,
         onToggleAutoplay = viewModel::toggleAutoplay,
-        onPlaceholderAction = viewModel::selectPlaceholderAction,
+        onSuspendWord = viewModel::suspendCurrentWord,
         onRequestRemoveFromLibrary = viewModel::requestRemoveFromLibrary,
         onDismissRemoveConfirmation = viewModel::dismissRemoveConfirmation,
         onConfirmRemoveFromLibrary = viewModel::confirmRemoveFromLibrary,
@@ -193,7 +194,7 @@ fun StudySessionScreenContent(
     onOpenOverflowMenu: () -> Unit = {},
     onDismissOverflowMenu: () -> Unit = {},
     onToggleAutoplay: () -> Unit = {},
-    onPlaceholderAction: () -> Unit = {},
+    onSuspendWord: (String) -> Unit = {},
     onRequestRemoveFromLibrary: () -> Unit = {},
     onDismissRemoveConfirmation: () -> Unit = {},
     onConfirmRemoveFromLibrary: (String, String) -> Unit = { _, _ -> },
@@ -278,7 +279,7 @@ fun StudySessionScreenContent(
             onOpenOverflowMenu = onOpenOverflowMenu,
             onDismissOverflowMenu = onDismissOverflowMenu,
             onToggleAutoplay = onToggleAutoplay,
-            onPlaceholderAction = onPlaceholderAction,
+            onSuspendWord = onSuspendWord,
             onRequestRemoveFromLibrary = onRequestRemoveFromLibrary,
             onDismissRemoveConfirmation = onDismissRemoveConfirmation,
             onConfirmRemoveFromLibrary = onConfirmRemoveFromLibrary,
@@ -511,7 +512,7 @@ private fun StudySessionActiveContent(
     onOpenOverflowMenu: () -> Unit,
     onDismissOverflowMenu: () -> Unit,
     onToggleAutoplay: () -> Unit,
-    onPlaceholderAction: () -> Unit,
+    onSuspendWord: (String) -> Unit,
     onRequestRemoveFromLibrary: () -> Unit,
     onDismissRemoveConfirmation: () -> Unit,
     onConfirmRemoveFromLibrary: (String, String) -> Unit,
@@ -522,6 +523,10 @@ private fun StudySessionActiveContent(
     val viewedSenseId = state.viewedSenseId ?: originalSenseId
     val isOnOriginalSense = !state.card.hasMultiSense ||
         viewedSenseId == originalSenseId
+    val suspendedMessage = stringResource(
+        Res.string.study_suspend_message,
+        state.card.studyWord(),
+    )
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
@@ -586,7 +591,7 @@ private fun StudySessionActiveContent(
             StudySessionOverflowSheet(
                 autoplayEnabled = state.isAutoplayEnabled,
                 onToggleAutoplay = onToggleAutoplay,
-                onPlaceholderAction = onPlaceholderAction,
+                onSuspendWord = { onSuspendWord(suspendedMessage) },
                 onRequestRemoveFromLibrary = onRequestRemoveFromLibrary,
                 onDismiss = onDismissOverflowMenu,
             )
@@ -600,6 +605,14 @@ private fun StudySessionActiveContent(
         }
     }
 }
+
+private fun StudyCardUiState.studyWord(): String =
+    when (this) {
+        is StudyCardUiState.Recognition -> promptWord
+        is StudyCardUiState.Production -> back.headline
+        is StudyCardUiState.Cloze -> back.headline
+        is StudyCardUiState.Listening -> back.headline
+    }
 
 @Composable
 private fun StudySessionSnackbarHost(
@@ -753,7 +766,7 @@ private fun StudySessionProgressLabel(
 private fun StudySessionOverflowSheet(
     autoplayEnabled: Boolean,
     onToggleAutoplay: () -> Unit,
-    onPlaceholderAction: () -> Unit,
+    onSuspendWord: () -> Unit,
     onRequestRemoveFromLibrary: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -810,7 +823,7 @@ private fun StudySessionOverflowSheet(
                     },
                     label = stringResource(Res.string.study_actions_suspend),
                     supporting = stringResource(Res.string.study_actions_suspend_description),
-                    onClick = onPlaceholderAction,
+                    onClick = onSuspendWord,
                 )
                 StudyOverflowMenuItem(
                     icon = {

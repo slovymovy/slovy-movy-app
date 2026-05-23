@@ -393,6 +393,14 @@ WHERE id = :id
   AND suspended = 0
   AND (available_after IS NULL OR available_after < :availableAfter);
 
+setCardsAvailableAfterByLemma:
+UPDATE card INDEXED BY idx_card_active_lemma_due
+SET available_after = :availableAfter
+WHERE lang_code = :lang_code
+  AND lemma_id = :lemma_id
+  AND suspended = 0
+  AND (available_after IS NULL OR available_after < :availableAfter);
+
 -- Propagated credit is not a direct review. Cards with no direct reps stay in
 -- LEARNING even when propagated stability is review-grade.
 creditSiblingCard:

@@ -528,8 +528,9 @@
     <string name="study_actions_autoplay">Автовоспроизведение</string>
     <string name="study_actions_autoplay_description">Произношение включается автоматически</string>
     <string name="study_actions_autoplay_on">Автовоспроизведение включено</string>
-    <string name="study_actions_suspend">Отложить это слово</string>
-    <string name="study_actions_suspend_description">Приостановить повторение на 30 дней</string>
+    <string name="study_actions_suspend">Повторять позже</string>
+    <string name="study_actions_suspend_description">Отложить повторение на 30 дней</string>
+    <string name="study_suspend_message">Слово «%1$s» отложено на 30 дней</string>
     <string name="study_actions_remove">Удалить из «Моих слов»</string>
     <string name="study_remove_title">Удалить «%1$s» из «Моих слов»?</string>
     <string name="study_remove_message">Это значение больше не появится в тренировках. Другие значения слова «%1$s» останутся в «Моих словах». Вы сможете вернуть его в любой момент без потери прогресса.</string>

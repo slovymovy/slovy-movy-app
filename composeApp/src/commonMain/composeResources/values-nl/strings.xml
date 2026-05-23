@@ -528,8 +528,9 @@
     <string name="study_actions_autoplay">Audio automatisch afspelen</string>
     <string name="study_actions_autoplay_description">Speel uitspraak automatisch af</string>
     <string name="study_actions_autoplay_on">Audio automatisch afspelen aan</string>
-    <string name="study_actions_suspend">Dit woord pauzeren</string>
-    <string name="study_actions_suspend_description">Herhaling 30 dagen pauzeren</string>
+    <string name="study_actions_suspend">Woord pauzeren</string>
+    <string name="study_actions_suspend_description">Herhalingen 30 dagen pauzeren</string>
+    <string name="study_suspend_message">"%1$s" is 30 dagen gepauzeerd</string>
     <string name="study_actions_remove">Uit Mijn lijst verwijderen</string>
     <string name="study_remove_title">"%1$s" verwijderen uit Mijn woorden?</string>
     <string name="study_remove_message">Alleen deze specifieke betekenis komt niet meer voorbij tijdens het oefenen. Andere betekenissen van "%1$s" blijven gewoon in Mijn woorden staan. Je kunt de betekenis later weer toevoegen met behoud van je voortgang.</string>

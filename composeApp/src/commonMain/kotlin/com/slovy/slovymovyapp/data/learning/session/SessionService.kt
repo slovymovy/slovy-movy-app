@@ -168,6 +168,15 @@ class SessionService(
         setCardAvailableAfter(card.card)
     }
 
+    suspend fun suspendWord(card: SessionCard, duration: Duration) = withContext(Dispatchers.IO) {
+        val availableAfter = clock.now().toEpochMilliseconds() + duration.inWholeMilliseconds
+        learning.setCardsAvailableAfterByLemma(
+            availableAfter = availableAfter,
+            lang_code = card.card.langCode,
+            lemma_id = card.card.lemmaId,
+        )
+    }
+
     suspend fun continueDelayedCardsNow(langCode: String) = withContext(Dispatchers.IO) {
         learning.clearAvailableAfterForDelayedLemmas(
             lang_code = langCode,

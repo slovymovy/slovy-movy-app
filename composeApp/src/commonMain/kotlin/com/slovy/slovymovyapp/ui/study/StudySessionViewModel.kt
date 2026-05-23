@@ -33,6 +33,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -172,8 +173,19 @@ class StudySessionViewModel(
         }
     }
 
-    fun selectPlaceholderAction() {
-        dismissOverflowMenu()
+    fun suspendCurrentWord(suspendedMessage: String) {
+        val active = state as? StudySessionUiState.Active ?: return
+        val card = currentCard ?: return
+        state = active.copy(isOverflowMenuOpen = false)
+        viewModelScope.launch {
+            sessionService.suspendWord(card, WORD_SUSPEND_DURATION)
+            skippedCount += 1
+            sessionTotal = (sessionTotal - 1).coerceAtLeast(reviewedCount + skippedCount + 1)
+            currentCard = null
+            currentOutcomes = emptyList()
+            loadNextCard()
+            snackbarHostState.showSnackbar(suspendedMessage)
+        }
     }
 
     fun requestRemoveFromLibrary() {
@@ -477,5 +489,6 @@ class StudySessionViewModel(
 
     companion object {
         private const val LOADING_DEBOUNCE_MS = 150L
+        private val WORD_SUSPEND_DURATION = 30.days
     }
 }
