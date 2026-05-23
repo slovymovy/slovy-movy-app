@@ -341,7 +341,7 @@ private data class LemmaActivationOutcome(
     }
 }
 
-private enum class IntakeRunMode {
+enum class IntakeRunMode {
     DAILY,
     CONTINUE_NOW,
 }

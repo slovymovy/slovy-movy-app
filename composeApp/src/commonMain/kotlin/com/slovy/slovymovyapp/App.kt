@@ -31,6 +31,7 @@ import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.*
@@ -258,6 +259,9 @@ private sealed interface AppDestination {
     data object Settings : AppDestination
 
     @Serializable
+    data object Developer : AppDestination
+
+    @Serializable
     data class Error(val message: String) : AppDestination
 
     @Serializable
@@ -380,6 +384,13 @@ fun App(
     }
 
     val buildConfig = remember { appBuildConfig }
+    LaunchedEffect(buildConfig) {
+        AppLogger.info(
+            tag = "App",
+            message = "App started ${buildConfig.applicationId} ${buildConfig.versionName} (${buildConfig.versionCode}), debug=${buildConfig.isDebug}",
+            throwable = null,
+        )
+    }
     val settingsViewModel =
         remember {
             SettingsViewModel(
@@ -920,7 +931,28 @@ fun App(
                         if (!navController.popBackStack(AppDestination.Stats, inclusive = false))
                             navController.navigate(AppDestination.Stats)
                     },
+                    onNavigateToDeveloper = {
+                        navController.navigate(AppDestination.Developer)
+                    },
                     hasFavoritesToReview = hasFavoritesToReview,
+                )
+            }
+            composable<AppDestination.Developer> { backStackEntry ->
+                val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
+                    DeveloperViewModel(
+                        favoritesRepository = favoritesRepository,
+                        intake = intakeService,
+                        learningLanguagesProvider = {
+                            dataManager.listDownloadedDatabases()
+                                .filterIsInstance<DatabaseFileInfo.Dictionary>()
+                                .map { it.language }
+                        },
+                    )
+                }
+                DeveloperScreen(
+                    viewModel = viewModel,
+                    isDebugBuild = buildConfig.isDebug,
+                    onBack = { navController.popBackStack() },
                 )
             }
             composable<AppDestination.WordDetail> { backStackEntry ->

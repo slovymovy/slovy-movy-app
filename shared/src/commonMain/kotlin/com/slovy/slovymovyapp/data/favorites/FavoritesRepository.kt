@@ -1,6 +1,8 @@
 package com.slovy.slovymovyapp.data.favorites
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.learning.CardFamily
+import com.slovy.slovymovyapp.data.learning.CardState
 import com.slovy.slovymovyapp.db.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -9,6 +11,38 @@ import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.Uuid
+
+data class CardScheduleDebugStats(
+    val futureScheduledCards: Long,
+    val futureScheduledLemmas: Long,
+    val availableAfterSuppressedCards: Long,
+    val availableAfterSuppressedLemmas: Long,
+)
+
+data class CardTableDebugRow(
+    val lemma: String?,
+    val id: Uuid,
+    val senseId: Uuid,
+    val lemmaId: Uuid,
+    val langCode: String,
+    val family: CardFamily,
+    val state: CardState,
+    val stability: Double,
+    val difficulty: Double,
+    val due: Long,
+    val lastReview: Long?,
+    val reps: Long,
+    val lapses: Long,
+    val createdAt: Long,
+    val availableAfter: Long?,
+    val answerKey: String,
+    val suspended: Boolean,
+)
+
+data class CardFamilyDebugCount(
+    val family: CardFamily,
+    val cardCount: Long,
+)
 
 class FavoritesRepository(private val db: AppDatabase) {
 
@@ -106,6 +140,80 @@ class FavoritesRepository(private val db: AppDatabase) {
         db.favoritesQueries.selectDistinctLemmasByLang(lang_code = language.code)
             .executeAsList()
             .toSet()
+    }
+
+    suspend fun getCardScheduleDebugStats(language: Language, nowEpochMs: Long): CardScheduleDebugStats =
+        withContext(Dispatchers.IO) {
+            CardScheduleDebugStats(
+                futureScheduledCards = db.favoritesQueries.countFutureScheduledCardsByLang(
+                    lang_code = language.code,
+                    now = nowEpochMs,
+                ).executeAsOne(),
+                futureScheduledLemmas = db.favoritesQueries.countFutureScheduledLemmasByLang(
+                    lang_code = language.code,
+                    now = nowEpochMs,
+                ).executeAsOne(),
+                availableAfterSuppressedCards = db.favoritesQueries.countDelayedDueCardsByLang(
+                    lang_code = language.code,
+                    now = nowEpochMs,
+                ).executeAsOne(),
+                availableAfterSuppressedLemmas = db.favoritesQueries.countDelayedDueLemmasByLang(
+                    lang_code = language.code,
+                    now = nowEpochMs,
+                ).executeAsOne(),
+            )
+        }
+
+    suspend fun getCardTableDebugRows(): List<CardTableDebugRow> = withContext(Dispatchers.IO) {
+        db.favoritesQueries.selectDeveloperCardTable().executeAsList().map { row ->
+            CardTableDebugRow(
+                lemma = row.lemma,
+                id = row.id,
+                senseId = row.sense_id,
+                lemmaId = row.lemma_id,
+                langCode = row.lang_code,
+                family = row.family,
+                state = row.state,
+                stability = row.stability,
+                difficulty = row.difficulty,
+                due = row.due,
+                lastReview = row.last_review,
+                reps = row.reps,
+                lapses = row.lapses,
+                createdAt = row.created_at,
+                availableAfter = row.available_after,
+                answerKey = row.answer_key,
+                suspended = row.suspended,
+            )
+        }
+    }
+
+    suspend fun getCardFamilyDebugCounts(): List<CardFamilyDebugCount> = withContext(Dispatchers.IO) {
+        db.favoritesQueries.countCardsByFamily().executeAsList().map { row ->
+            CardFamilyDebugCount(
+                family = row.family,
+                cardCount = row.card_count,
+            )
+        }
+    }
+
+    suspend fun removeSuspendedLearningCards(): Long = withContext(Dispatchers.IO) {
+        val cardCount = db.favoritesQueries.countSuspendedCards().executeAsOne()
+        db.favoritesQueries.transaction {
+            db.favoritesQueries.deleteReviewLogsForSuspendedCards()
+            db.favoritesQueries.deleteSuspendedCards()
+        }
+        cardCount
+    }
+
+    suspend fun removeAllLearningCards(): Long = withContext(Dispatchers.IO) {
+        val cardCount = db.favoritesQueries.countAllCards().executeAsOne()
+        db.favoritesQueries.transaction {
+            db.favoritesQueries.deleteAllLearning()
+            db.favoritesQueries.deleteAllCards()
+            db.favoritesQueries.resetFavoriteActivations()
+        }
+        cardCount
     }
 
     suspend fun deleteAll() = withContext(Dispatchers.IO) {

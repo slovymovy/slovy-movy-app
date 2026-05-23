@@ -28,7 +28,8 @@ import slovymovyapp.composeapp.generated.resources.*
 fun AboutSection(
     buildConfig: AppBuildConfig,
     onSendFeedback: () -> Unit = {},
-    onAcknowledgements: () -> Unit = {}
+    onAcknowledgements: () -> Unit = {},
+    onVersionClick: () -> Unit = {}
 ) {
     val uriHandler = LocalUriHandler.current
     AboutSectionContent(
@@ -37,7 +38,8 @@ fun AboutSection(
         reviewUrl = storeReviewUrl(),
         onReview = { uriHandler.openUri(it) },
         onSendFeedback = onSendFeedback,
-        onAcknowledgements = onAcknowledgements
+        onAcknowledgements = onAcknowledgements,
+        onVersionClick = onVersionClick
     )
 }
 
@@ -48,7 +50,8 @@ private fun AboutSectionContent(
     reviewUrl: String?,
     onReview: (String) -> Unit,
     onSendFeedback: () -> Unit,
-    onAcknowledgements: () -> Unit
+    onAcknowledgements: () -> Unit,
+    onVersionClick: () -> Unit = {}
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -100,7 +103,8 @@ private fun AboutSectionContent(
             AboutItem(
                 icon = Icons.Outlined.Info,
                 title = stringResource(Res.string.about_version_title),
-                subtitle = buildConfig.versionName
+                subtitle = buildConfig.versionName,
+                onClick = onVersionClick
             )
         }
     }
