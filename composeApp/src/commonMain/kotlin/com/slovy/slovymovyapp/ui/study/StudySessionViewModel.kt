@@ -159,6 +159,7 @@ class StudySessionViewModel(
 
     fun openOverflowMenu() {
         val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview) return
         state = active.copy(isOverflowMenuOpen = true, removeConfirmation = null)
     }
 
@@ -169,6 +170,7 @@ class StudySessionViewModel(
 
     fun toggleAutoplay() {
         val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview) return
         autoplayEnabled = !autoplayEnabled
         state = active.copy(
             isAutoplayEnabled = autoplayEnabled,
@@ -181,6 +183,7 @@ class StudySessionViewModel(
     fun suspendCurrentWord(suspendedMessage: String) {
         if (isPreparingRemoval) return
         val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview) return
         val card = currentCard ?: return
         currentCard = null
         currentOutcomes = emptyList()
@@ -200,6 +203,7 @@ class StudySessionViewModel(
     fun postponeListeningCards(postponedMessage: String) {
         if (isPreparingRemoval) return
         val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview) return
         if (active.card !is StudyCardUiState.Listening) return
         currentCard ?: return
         postponeListeningCardsForSession = true
@@ -219,7 +223,7 @@ class StudySessionViewModel(
 
     fun requestRemoveFromLibrary() {
         val active = state as? StudySessionUiState.Active ?: return
-        if (isPreparingRemoval) return
+        if (active.isSubmittingReview || isPreparingRemoval) return
         val card = currentCard ?: return
         val lang = Language.fromCodeOrNull(card.card.langCode) ?: return
         isPreparingRemoval = true
@@ -273,7 +277,20 @@ class StudySessionViewModel(
             )
         }
         viewModelScope.launch {
-            favoritesRepository.remove(favorite.senseId, favorite.language)
+            try {
+                favoritesRepository.remove(favorite.senseId, favorite.language)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                val latest = state as? StudySessionUiState.Active ?: active ?: return@launch
+                state = latest.copy(
+                    removeConfirmation = null,
+                    isOverflowMenuOpen = false,
+                    isSubmittingReview = false,
+                )
+                return@launch
+            }
+
             Analytics.logEvent(
                 AnalyticsEvent.FAVORITES_REMOVE,
                 mapOf("lang" to favorite.language.code, "source" to "study"),
@@ -289,23 +306,32 @@ class StudySessionViewModel(
                 actionLabel = undoLabel,
                 duration = SnackbarDuration.Short,
             )
-            if (result == SnackbarResult.ActionPerformed) {
+            if (result != SnackbarResult.ActionPerformed) return@launch
+
+            try {
                 favoritesRepository.restoreForUndo(
                     senseId = favorite.senseId,
                     language = favorite.language,
                     lemma = favorite.lemma,
                     createdAt = favorite.createdAt,
                 )
-                Analytics.logEvent(
-                    AnalyticsEvent.FAVORITES_SAVE,
-                    mapOf("lang" to favorite.language.code, "source" to "study_undo"),
-                )
-                onFavoriteChanged(favorite.language)
-                skippedCount = (skippedCount - 1).coerceAtLeast(0)
-                currentCard = null
-                currentOutcomes = emptyList()
-                loadNextCard()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                val latest = state as? StudySessionUiState.Active ?: return@launch
+                state = latest.copy(isSubmittingReview = false)
+                return@launch
             }
+
+            Analytics.logEvent(
+                AnalyticsEvent.FAVORITES_SAVE,
+                mapOf("lang" to favorite.language.code, "source" to "study_undo"),
+            )
+            onFavoriteChanged(favorite.language)
+            skippedCount = (skippedCount - 1).coerceAtLeast(0)
+            currentCard = null
+            currentOutcomes = emptyList()
+            loadNextCard()
         }
     }
 
