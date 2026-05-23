@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.logging
 
 import platform.Foundation.NSLog
+import platform.Foundation.NSRecursiveLock
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -9,11 +10,17 @@ actual object AppLogger {
     actual var developerLogger: AppLogSink = NoOpAppLogSink
 
     private val developerLogBuffer = DeveloperLogBuffer()
+    private val developerLogLock = NSRecursiveLock()
 
-    actual fun recentDeveloperLogs(): List<AppLogEntry> = developerLogBuffer.snapshot()
+    actual fun recentDeveloperLogs(): List<AppLogEntry> =
+        withDeveloperLogLock {
+            developerLogBuffer.snapshot()
+        }
 
     actual fun clearDeveloperLogs() {
-        developerLogBuffer.clear()
+        withDeveloperLogLock {
+            developerLogBuffer.clear()
+        }
     }
 
     actual fun debug(tag: String, message: String, throwable: Throwable?) {
@@ -62,18 +69,28 @@ actual object AppLogger {
 
     @OptIn(ExperimentalTime::class)
     private fun appendDeveloperLog(level: AppLogLevel, tag: String, message: String, throwable: Throwable?) {
-        developerLogBuffer.append(
-            AppLogEntry(
-                createdAtEpochMs = Clock.System.now().toEpochMilliseconds(),
-                level = level,
-                tag = tag,
-                message = message,
-                throwableLabel = throwable?.toLogLabel(),
-            ),
+        val entry = AppLogEntry(
+            createdAtEpochMs = Clock.System.now().toEpochMilliseconds(),
+            level = level,
+            tag = tag,
+            message = message,
+            throwableLabel = throwable?.toLogLabel(),
         )
+        withDeveloperLogLock {
+            developerLogBuffer.append(entry)
+        }
     }
 
     private fun Throwable.toLogLabel(): String =
         "${this::class.simpleName ?: "Error"}: ${message ?: "no message"}"
+
+    private inline fun <T> withDeveloperLogLock(block: () -> T): T {
+        developerLogLock.lock()
+        return try {
+            block()
+        } finally {
+            developerLogLock.unlock()
+        }
+    }
 
 }
