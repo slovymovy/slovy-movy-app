@@ -5,7 +5,6 @@
     <string name="nav_search">Zoeken</string>
     <string name="nav_favorites">Mijn lijst</string>
     <string name="nav_stats">Stats</string>
-    <string name="nav_word_detail">Woord</string>
     <string name="nav_settings">Instellingen</string>
 
     <string name="welcome_tagline">De app die van opgezochte woorden geleerde woorden maakt. Gratis.</string>
