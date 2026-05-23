@@ -343,9 +343,11 @@ class StudySessionViewModel(
             )
             onFavoriteChanged(favorite.language)
             skippedCount = (skippedCount - 1).coerceAtLeast(0)
-            currentCard = null
-            currentOutcomes = emptyList()
-            loadNextCard()
+            if (state !is StudySessionUiState.Active || currentCard == null) {
+                currentCard = null
+                currentOutcomes = emptyList()
+                loadNextCard()
+            }
         }
     }
 
@@ -585,7 +587,11 @@ class StudySessionViewModel(
             statsService.dueNow(langCode)
         }
         val projectedTotal = reviewedCount + dueNow
-        sessionTotal = maxOf(sessionTotal, projectedTotal, current)
+        sessionTotal = if (postponeListeningCardsForSession) {
+            maxOf(projectedTotal, current)
+        } else {
+            maxOf(sessionTotal, projectedTotal, current)
+        }
         return StudySessionProgressUiState(
             current = current,
             total = sessionTotal,
