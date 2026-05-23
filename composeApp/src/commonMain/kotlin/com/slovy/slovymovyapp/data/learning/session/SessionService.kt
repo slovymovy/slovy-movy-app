@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import kotlin.math.roundToLong
 import kotlin.time.*
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalTime::class)
@@ -269,7 +270,8 @@ class SessionService(
         sessionStartedAt: Long,
     ): List<Pair<Card, Double>> {
         val limit = config.selectionCandidateLimit.toLong()
-        val recentReviews = learning.selectRecentReviewedCards(langCode, sessionStartedAt, RECENT_LIMIT.toLong())
+        val recentSince = maxOf(sessionStartedAt, now - 1.hours.inWholeMilliseconds)
+        val recentReviews = learning.selectRecentReviewedCards(langCode, recentSince, RECENT_LIMIT.toLong())
             .executeAsList()
         val candidates = learning.selectDueCards(
             lang_code = langCode,
@@ -299,7 +301,7 @@ class SessionService(
         val memoryUrgency = when (scheduling.state) {
             CardState.LEARNING,
             CardState.RELEARNING,
-                -> 1000.0
+                -> 100.0
 
             CardState.REVIEW -> {
                 val elapsedDays = scheduling.lastReviewEpochMs
@@ -308,9 +310,10 @@ class SessionService(
                 (config.requestRetention - retrievability(scheduling.stability, elapsedDays)).coerceAtLeast(0.0) * 100.0
             }
 
-            CardState.NEW -> 10.0
+            CardState.NEW -> 30.0
         }
-        val overdueBonus = ((now - scheduling.dueEpochMs).coerceAtLeast(0L).toDouble() / DAY.inWholeMilliseconds) * 2.0
+        val overdueBonus = (((now - scheduling.dueEpochMs).coerceAtLeast(0L).toDouble() / DAY.inWholeMilliseconds) * 2.0)
+            .coerceAtMost(50.0)
         return memoryUrgency + overdueBonus - collisionPenalty(card, recentReviews)
     }
 
@@ -318,13 +321,15 @@ class SessionService(
         if (recentReviews.take(3).any { it.sense_id == card.senseId }) return HARD_EXCLUDE
 
         var penalty = 0.0
-        if (recentReviews.take(5).any { it.lemma_id == card.lemmaId }) penalty += 80.0
+        if (recentReviews.take(10).any { it.sense_id == card.senseId }) penalty += 20.0
+        if (recentReviews.take(5).any { it.lemma_id == card.lemmaId }) penalty += 8.0
+        if (recentReviews.take(10).any { it.lemma_id == card.lemmaId }) penalty += 2.0
         if (card.family.testsWordRecall && recentReviews.take(5).any {
                 it.family.testsWordRecall && it.answer_key == card.answerKey
             }) {
-            penalty += 120.0
+            penalty += 12.0
         }
-        if (recentReviews.take(2).any { it.family == card.family }) penalty += 15.0
+        if (recentReviews.take(5).any { it.family == card.family }) penalty += 1.5
         return penalty
     }
 
