@@ -579,10 +579,11 @@
         <item quantity="many">Hint: begint met %1$s, %2$d letters</item>
         <item quantity="other">Hint: begint met %1$s, %2$d letters</item>
     </plurals>
-    <string name="study_rating_again">Opnieuw</string>
-    <string name="study_rating_hard">Moeilijk</string>
-    <string name="study_rating_good">Goed</string>
-    <string name="study_rating_easy">Makkelijk</string>
+    <string name="study_rating_prompt">Is het gelukt om het te onthouden?</string>
+    <string name="study_rating_again">Niet onthouden</string>
+    <string name="study_rating_hard">Bijna</string>
+    <string name="study_rating_good">Onthouden</string>
+    <string name="study_rating_easy">Te makkelijk</string>
     <string name="favorites_study_due_title">TE HERHALEN</string>
     <plurals name="favorites_study_due_count">
         <item quantity="one">%1$d kaart</item>

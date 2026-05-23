@@ -117,6 +117,7 @@ import slovymovyapp.composeapp.generated.resources.study_rating_again
 import slovymovyapp.composeapp.generated.resources.study_rating_easy
 import slovymovyapp.composeapp.generated.resources.study_rating_good
 import slovymovyapp.composeapp.generated.resources.study_rating_hard
+import slovymovyapp.composeapp.generated.resources.study_rating_prompt
 import slovymovyapp.composeapp.generated.resources.study_tap_to_check
 import slovymovyapp.composeapp.generated.resources.study_tap_to_flip
 
@@ -478,8 +479,8 @@ private fun StudySessionActiveContent(
                     .fillMaxWidth()
                     .weight(1f),
             )
-            Spacer(Modifier.height(AppSpacing.lg))
-            Box(Modifier.fillMaxWidth().height(56.dp), contentAlignment = Alignment.Center) {
+            Spacer(Modifier.height(AppSpacing.md))
+            Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
                 if (state.side == StudyCardSide.BACK) {
                     if (isOnOriginalSense) {
                         StudyRatingRow(
@@ -1506,17 +1507,40 @@ private fun StudyRatingRow(
     onRate: (StudyRating) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    Column(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ratings.forEach { option ->
-            StudyRatingButton(
-                option = option,
-                enabled = enabled && option.enabled,
-                onRate = onRate,
-                modifier = Modifier.weight(1f),
-            )
+        Text(
+            text = stringResource(Res.string.study_rating_prompt).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 12.sp,
+                letterSpacing = 0.3.sp,
+            ),
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = 9.sp,
+                maxFontSize = 12.sp,
+                stepSize = 1.sp,
+            ),
+        )
+        Spacer(Modifier.height(AppSpacing.sm))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+        ) {
+            ratings.forEach { option ->
+                StudyRatingButton(
+                    option = option,
+                    enabled = enabled && option.enabled,
+                    onRate = onRate,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }
@@ -1550,11 +1574,13 @@ private fun StudyRatingButton(
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-            )
-            Text(
-                text = option.intervalLabel,
-                style = MaterialTheme.typography.labelSmall,
-                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = 9.sp,
+                    maxFontSize = MaterialTheme.typography.labelMedium.fontSize,
+                    stepSize = 1.sp,
+                ),
             )
         }
     }
