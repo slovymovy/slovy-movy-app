@@ -74,9 +74,6 @@ import com.slovy.slovymovyapp.ui.word.SenseCardData
 import com.slovy.slovymovyapp.ui.word.SenseUiState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.datetime.*
-import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
-import kotlinx.datetime.format.char
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.pluralStringResource
@@ -85,7 +82,6 @@ import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 data class FavoriteSenseItem(
@@ -1262,7 +1258,7 @@ private fun FavoriteSenseCard(
             pos = item.pos,
             loading = item.loading,
             error = item.error?.resolve(),
-            diagnosticInfoOnError = buildDiagnosticInfo(item.senseId, item.createdAt)
+            diagnosticInfoOnError = buildDeveloperDiagnosticInfo(item.senseId, item.createdAt)
         ),
         state = senseState,
         onToggle = onToggle,
@@ -1489,16 +1485,6 @@ private fun StudyDueCard(
             )
         }
     }
-}
-
-private val dateFormat = LocalDateTime.Format { date(LocalDate.Formats.ISO); char(' '); time(LocalTime.Formats.ISO) }
-
-private fun buildDiagnosticInfo(senseId: String, createdAt: Long): String {
-    val instant = Instant.fromEpochMilliseconds(createdAt)
-    val timeZone = currentSystemDefault()
-    val localDateTime: LocalDateTime = instant.toLocalDateTime(timeZone)
-    val dateStr = localDateTime.format(dateFormat)
-    return "ID: $senseId\nAdded: $dateStr"
 }
 
 // Preview helpers
