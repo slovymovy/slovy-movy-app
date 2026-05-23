@@ -49,6 +49,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -98,6 +99,7 @@ import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.icons.ImageOtterSessionComplete
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -305,7 +307,7 @@ private fun StudySessionLoadingContent(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { StudySessionSnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -364,7 +366,7 @@ private fun StudySessionCompleteContent(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { StudySessionSnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -471,7 +473,7 @@ private fun StudySessionMessageScaffold(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { StudySessionSnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -525,7 +527,7 @@ private fun StudySessionActiveContent(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             containerColor = MaterialTheme.colorScheme.background,
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            snackbarHost = { StudySessionSnackbarHost(hostState = snackbarHostState) },
         ) { innerPadding ->
             Column(
                 modifier = Modifier
@@ -595,6 +597,80 @@ private fun StudySessionActiveContent(
                 onDismiss = onDismissRemoveConfirmation,
                 onConfirm = onConfirmRemoveFromLibrary,
             )
+        }
+    }
+}
+
+@Composable
+private fun StudySessionSnackbarHost(
+    hostState: SnackbarHostState,
+    modifier: Modifier = Modifier,
+) {
+    SnackbarHost(
+        hostState = hostState,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(12.dp),
+    ) { data ->
+        StudySessionSnackbar(data = data)
+    }
+}
+
+@Composable
+private fun StudySessionSnackbar(
+    data: SnackbarData,
+    modifier: Modifier = Modifier,
+) {
+    val isDarkTheme = LocalIsDarkTheme.current
+    val snackbarBackground = if (isDarkTheme) Color(0xFFF2EEE6) else Color(0xFF1F1A14)
+    val snackbarContent = if (isDarkTheme) Color(0xFF2D2620) else Color(0xFFF2EBE0)
+    val snackbarAction = if (isDarkTheme) Color(0xFFB87333) else Color(0xFFE8B57A)
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 8.dp,
+                shape = MaterialTheme.shapes.medium,
+                clip = false,
+                ambientColor = Color.Black.copy(alpha = 0.18f),
+                spotColor = Color.Black.copy(alpha = 0.28f),
+            ),
+        shape = MaterialTheme.shapes.medium,
+        color = snackbarBackground,
+        contentColor = snackbarContent,
+        tonalElevation = 0.dp,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = AppSpacing.lg, vertical = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = data.visuals.message,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                color = snackbarContent,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            data.visuals.actionLabel?.let { actionLabel ->
+                TextButton(
+                    onClick = data::performAction,
+                    shape = MaterialTheme.shapes.small,
+                    contentPadding = PaddingValues(horizontal = AppSpacing.xs, vertical = 2.dp),
+                ) {
+                    Text(
+                        text = actionLabel.uppercase(),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = snackbarAction,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
         }
     }
 }
@@ -771,7 +847,7 @@ private fun StudyRemoveConfirmationDialog(
         },
         text = {
             Text(
-                text = stringResource(Res.string.study_remove_message),
+                text = stringResource(Res.string.study_remove_message, confirmation.lemma),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

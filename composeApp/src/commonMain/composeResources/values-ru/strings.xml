@@ -530,12 +530,12 @@
     <string name="study_actions_autoplay_on">Автовоспроизведение включено</string>
     <string name="study_actions_suspend">Отложить это слово</string>
     <string name="study_actions_suspend_description">Приостановить повторение на 30 дней</string>
-    <string name="study_actions_remove">Удалить из библиотеки</string>
-    <string name="study_remove_title">Удалить «%1$s» из библиотеки?</string>
-    <string name="study_remove_message">Это слово исчезнет из библиотеки и перестанет появляться в учебных сессиях. Вы сможете добавить его обратно позже, сохранив прогресс.</string>
+    <string name="study_actions_remove">Удалить из «Моих слов»</string>
+    <string name="study_remove_title">Удалить «%1$s» из «Моих слов»?</string>
+    <string name="study_remove_message">Это значение больше не появится в тренировках. Другие значения слова «%1$s» останутся в «Моих словах». Вы сможете вернуть его в любой момент без потери прогресса.</string>
     <string name="study_remove_cancel">Отмена</string>
     <string name="study_remove_confirm">Удалить</string>
-    <string name="study_remove_removed_message">Удалено: %1$s</string>
+    <string name="study_remove_removed_message">Удалено одно значение слова «%1$s»</string>
     <string name="study_remove_undo">Отменить</string>
     <string name="study_loading">Готовим повторение…</string>
     <string name="study_empty_title">Сейчас нечего повторять</string>
