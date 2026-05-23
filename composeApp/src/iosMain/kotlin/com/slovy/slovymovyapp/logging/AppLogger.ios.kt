@@ -11,6 +11,15 @@ actual object AppLogger {
 
     private val developerLogBuffer = DeveloperLogBuffer()
     private val developerLogLock = NSRecursiveLock()
+    private var debugLoggingEnabledValue = false
+
+    actual var debugLoggingEnabled: Boolean
+        get() = withDeveloperLogLock { debugLoggingEnabledValue }
+        set(value) {
+            withDeveloperLogLock {
+                debugLoggingEnabledValue = value
+            }
+        }
 
     actual fun recentDeveloperLogs(): List<AppLogEntry> =
         withDeveloperLogLock {
@@ -23,9 +32,11 @@ actual object AppLogger {
         }
     }
 
-    actual fun debug(tag: String, message: String, throwable: Throwable?) {
-        log("DEBUG", tag, message, throwable)
-        logDeveloper(AppLogLevel.DEBUG, tag, message, throwable)
+    actual fun debug(tag: String, throwable: Throwable?, message: () -> String) {
+        if (!debugLoggingEnabled) return
+        val resolvedMessage = message()
+        log("DEBUG", tag, resolvedMessage, throwable)
+        logDeveloper(AppLogLevel.DEBUG, tag, resolvedMessage, throwable)
     }
 
     actual fun info(tag: String, message: String, throwable: Throwable?) {

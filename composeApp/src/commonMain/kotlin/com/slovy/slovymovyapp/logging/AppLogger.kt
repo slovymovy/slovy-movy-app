@@ -66,11 +66,12 @@ internal class DeveloperLogBuffer(
 expect object AppLogger {
     var remoteLogger: AppLogSink
     var developerLogger: AppLogSink
+    var debugLoggingEnabled: Boolean
 
     fun recentDeveloperLogs(): List<AppLogEntry>
     fun clearDeveloperLogs()
 
-    fun debug(tag: String, message: String, throwable: Throwable?)
+    fun debug(tag: String, throwable: Throwable?, message: () -> String)
     fun info(tag: String, message: String, throwable: Throwable?)
     fun warn(tag: String, message: String, throwable: Throwable?)
     fun error(tag: String, message: String, throwable: Throwable?)

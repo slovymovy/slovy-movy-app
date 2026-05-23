@@ -2,12 +2,12 @@ package com.slovy.slovymovyapp.logging
 
 import android.util.Log
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 actual object AppLogger {
     actual var remoteLogger: AppLogSink = NoOpAppLogSink
     actual var developerLogger: AppLogSink = NoOpAppLogSink
+    @Volatile
+    actual var debugLoggingEnabled: Boolean = false
 
     private val developerLogBuffer = DeveloperLogBuffer()
 
@@ -19,9 +19,11 @@ actual object AppLogger {
         developerLogBuffer.clear()
     }
 
-    actual fun debug(tag: String, message: String, throwable: Throwable?) {
-        if (throwable == null) Log.d(tag, message) else Log.d(tag, message, throwable)
-        logDeveloper(AppLogLevel.DEBUG, tag, message, throwable)
+    actual fun debug(tag: String, throwable: Throwable?, message: () -> String) {
+        if (!debugLoggingEnabled) return
+        val resolvedMessage = message()
+        if (throwable == null) Log.d(tag, resolvedMessage) else Log.d(tag, resolvedMessage, throwable)
+        logDeveloper(AppLogLevel.DEBUG, tag, resolvedMessage, throwable)
     }
 
     actual fun info(tag: String, message: String, throwable: Throwable?) {
@@ -41,12 +43,11 @@ actual object AppLogger {
         logRemote(AppLogLevel.ERROR, tag, message, throwable)
     }
 
-    @OptIn(ExperimentalTime::class)
     @Synchronized
     private fun appendDeveloperLog(level: AppLogLevel, tag: String, message: String, throwable: Throwable?) {
         developerLogBuffer.append(
             AppLogEntry(
-                createdAtEpochMs = Clock.System.now().toEpochMilliseconds(),
+                createdAtEpochMs = System.currentTimeMillis(),
                 level = level,
                 tag = tag,
                 message = message,

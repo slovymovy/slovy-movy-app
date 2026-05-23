@@ -432,6 +432,9 @@ fun App(
     val learningLanguagesForStats = settingsState.learningLanguages
         .map { it.language }
         .ifEmpty { dictionaryLanguage?.let { listOf(it) }.orEmpty() }
+    LaunchedEffect(buildConfig.isDebug, settingsState.developerModeEnabled) {
+        AppLogger.debugLoggingEnabled = buildConfig.isDebug || settingsState.developerModeEnabled
+    }
     LaunchedEffect(settingsState.translationLanguages, settingsState.settingsLoaded) {
         if (settingsState.settingsLoaded) {
             nativeLanguages = settingsState.translationLanguages.sortedBy { it.ordinal }
