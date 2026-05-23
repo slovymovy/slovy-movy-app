@@ -84,6 +84,7 @@ sealed interface StudyCardUiState {
         override val chipLabel: UiText,
         val prompt: StudyClozeTextUiState,
         val translationHint: String? = null,
+        val translationHintRevealed: Boolean = false,
         override val senses: List<StudyCardSenseUiState> = emptyList(),
         override val activeSenseId: String? = null,
         override val back: StudyCardBackUiState,

@@ -172,15 +172,32 @@ class StudySessionViewModel(
         state = active.copy(
             card = production.copy(firstLetterHintRevealed = true),
         )
+        logHintRevealed(production.id, production.back.headline, hintKind = "first_letter")
+    }
+
+    fun revealTranslationHint() {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.side != StudyCardSide.FRONT) return
+        val cloze = active.card as? StudyCardUiState.Cloze ?: return
+        if (cloze.translationHint == null || cloze.translationHintRevealed) return
+
+        state = active.copy(
+            card = cloze.copy(translationHintRevealed = true),
+        )
+        logHintRevealed(cloze.id, cloze.back.headline, hintKind = "translation")
+    }
+
+    private fun logHintRevealed(cardId: String, lemma: String, hintKind: String) {
         val sessionCard = currentCard
         Analytics.logEvent(
             AnalyticsEvent.STUDY_HINT_REVEALED,
             mapOf(
                 "lang" to langCode,
-                "card_id" to production.id,
-                "lemma" to production.back.headline,
+                "card_id" to cardId,
+                "lemma" to lemma,
                 "family" to (sessionCard?.card?.family?.name?.lowercase() ?: "unknown"),
                 "variant" to (sessionCard?.variant?.kind?.name?.lowercase() ?: "unknown"),
+                "hint" to hintKind,
             ),
         )
     }
