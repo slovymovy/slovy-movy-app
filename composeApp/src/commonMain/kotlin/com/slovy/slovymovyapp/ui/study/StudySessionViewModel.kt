@@ -185,11 +185,25 @@ class StudySessionViewModel(
         val active = state as? StudySessionUiState.Active ?: return
         if (active.isSubmittingReview) return
         val card = currentCard ?: return
+        val outcomes = currentOutcomes
         currentCard = null
         currentOutcomes = emptyList()
         state = active.copy(isOverflowMenuOpen = false, isSubmittingReview = true)
         viewModelScope.launch {
-            sessionService.suspendWord(card, WORD_SUSPEND_DURATION)
+            try {
+                sessionService.suspendWord(card, WORD_SUSPEND_DURATION)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                currentCard = card
+                currentOutcomes = outcomes
+                val latest = state as? StudySessionUiState.Active ?: active
+                state = latest.copy(
+                    isOverflowMenuOpen = false,
+                    isSubmittingReview = false,
+                )
+                return@launch
+            }
             skippedCount += 1
             loadNextCard()
             showStudySnackbar(
