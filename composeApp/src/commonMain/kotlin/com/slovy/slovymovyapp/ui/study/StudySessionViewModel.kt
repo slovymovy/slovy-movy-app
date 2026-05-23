@@ -163,6 +163,28 @@ class StudySessionViewModel(
         }
     }
 
+    fun revealFirstLetterHint() {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.side != StudyCardSide.FRONT) return
+        val production = active.card as? StudyCardUiState.Production ?: return
+        if (production.firstLetterHint == null || production.firstLetterHintRevealed) return
+
+        state = active.copy(
+            card = production.copy(firstLetterHintRevealed = true),
+        )
+        val sessionCard = currentCard
+        Analytics.logEvent(
+            AnalyticsEvent.STUDY_HINT_REVEALED,
+            mapOf(
+                "lang" to langCode,
+                "card_id" to production.id,
+                "lemma" to production.back.headline,
+                "family" to (sessionCard?.card?.family?.name?.lowercase() ?: "unknown"),
+                "variant" to (sessionCard?.variant?.kind?.name?.lowercase() ?: "unknown"),
+            ),
+        )
+    }
+
     fun setViewedSense(senseId: String) {
         val active = state as? StudySessionUiState.Active ?: return
         if (active.card.senses.none { it.id == senseId }) return

@@ -620,6 +620,8 @@
     <string name="study_play_word_audio">Odtwórz słowo</string>
     <string name="study_play_prompt_audio">Odtwórz zadanie</string>
     <string name="study_stop_audio">Zatrzymaj audio</string>
+    <string name="study_hint_show">Podpowiedź</string>
+    <string name="study_hint_show_description">Pokaż podpowiedź z pierwszą literą</string>
     <string name="study_listen_prompt">Dotknij, aby odtworzyć. Jakie słowo słyszysz?</string>
     <plurals name="study_hint_starts_with">
         <item quantity="one">Podpowiedź: zaczyna się na %1$s, %2$d litera</item>
