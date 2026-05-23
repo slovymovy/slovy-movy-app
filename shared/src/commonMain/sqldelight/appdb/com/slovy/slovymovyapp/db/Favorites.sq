@@ -132,12 +132,20 @@ deleteAll:
 DELETE FROM favorites;
 
 selectPendingActivationLemmas:
-SELECT lemma, COUNT(*) AS pending_count
-FROM favorites
-WHERE lang_code = ? AND activated_at IS NULL
-GROUP BY lemma
-ORDER BY MIN(created_at) ASC
-LIMIT ?;
+SELECT
+  f.lemma,
+  COUNT(*) AS pending_count,
+  EXISTS (
+    SELECT 1 FROM favorites f2
+    WHERE f2.lang_code = f.lang_code
+      AND f2.lemma = f.lemma
+      AND f2.activated_at IS NOT NULL
+  ) AS is_extension
+FROM favorites f
+WHERE f.lang_code = :lang_code AND f.activated_at IS NULL
+GROUP BY f.lemma
+ORDER BY is_extension DESC, MIN(f.created_at) ASC
+LIMIT :limit;
 
 selectPendingActivationByLemma:
 SELECT sense_id, lang_code, lemma, created_at, activated_at
