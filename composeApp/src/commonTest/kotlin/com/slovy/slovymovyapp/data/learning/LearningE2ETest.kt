@@ -131,7 +131,7 @@ class LearningE2ETest : BaseTest() {
             val suspendedCards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
             assertEquals(1, suspendedCards.size)
             assertTrue(suspendedCards.all { it.suspended })
-            assertTrue(suspendedCards.all { it.available_after == null })
+            assertEquals(availableAfter, suspendedCards.first().available_after)
             assertNull(env.session.nextCard("en", start).first())
 
             env.favorites.add(fixture.senseId.toString(), Language.ENGLISH, fixture.lemma)
@@ -143,7 +143,37 @@ class LearningE2ETest : BaseTest() {
             val restoredCards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
             assertEquals(1, restoredCards.size)
             assertTrue(restoredCards.none { it.suspended })
-            assertTrue(env.nextLoadedCard("en").isReady())
+            assertEquals(availableAfter, restoredCards.first().available_after)
+            assertNull(env.session.nextCard("en", start).first())
+        }
+    }
+
+    @Test
+    fun next_card_excluding_family_applies_filter_before_candidate_limit() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            repeat(60) { index ->
+                val fixture = env.seedSense(lemma = "voicecandidate$index")
+                env.insertTask(
+                    fixture = fixture,
+                    family = CardFamily.RECOGNIZE_VOICE,
+                    due = (start - 10.minutes).toEpochMilliseconds(),
+                )
+            }
+            val recognition = env.seedSense(lemma = "recognitioncandidate")
+            env.addFavorite(recognition)
+            val recognitionCard = env.insertTask(
+                fixture = recognition,
+                family = CardFamily.RECOGNIZE_SENSE,
+                due = (start - 1.minutes).toEpochMilliseconds(),
+            )
+
+            val next = env.session.nextCardExcludingFamily(
+                langCode = "en",
+                sessionStartedAt = start,
+                excludedFamily = CardFamily.RECOGNIZE_VOICE,
+            ).first { it == null || it.loadState() != SessionCardLoadState.LOADING }
+
+            assertEquals(recognitionCard.id, assertNotNull(next).card.id)
         }
     }
 

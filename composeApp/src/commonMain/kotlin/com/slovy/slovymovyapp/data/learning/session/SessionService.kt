@@ -40,13 +40,24 @@ class SessionService(
         nextCard(
             langCode = langCode,
             sessionStartedAt = sessionStartedAt,
-            excludedFamilies = emptySet(),
+            excludedFamily = null,
         )
 
-    fun nextCard(
+    fun nextCardExcludingFamily(
         langCode: String,
         sessionStartedAt: Instant,
-        excludedFamilies: Set<CardFamily>,
+        excludedFamily: CardFamily,
+    ): Flow<SessionCard?> =
+        nextCard(
+            langCode = langCode,
+            sessionStartedAt = sessionStartedAt,
+            excludedFamily = excludedFamily,
+        )
+
+    private fun nextCard(
+        langCode: String,
+        sessionStartedAt: Instant,
+        excludedFamily: CardFamily?,
     ): Flow<SessionCard?> = flow {
         PerformanceMonitoring.startTrace("session_next_card").useWithResult(successResult = "empty") {
             putAttribute("lang", langCode)
@@ -58,7 +69,7 @@ class SessionService(
                     langCode = langCode,
                     now = now,
                     sessionStartedAt = sessionStartedAt.toEpochMilliseconds(),
-                    excludedFamilies = excludedFamilies,
+                    excludedFamily = excludedFamily,
                 )
                 putMetric("candidates", candidates.size.toLong())
                 for (card in candidates) {
@@ -253,10 +264,9 @@ class SessionService(
         langCode: String,
         now: Long,
         sessionStartedAt: Long,
-        excludedFamilies: Set<CardFamily>,
+        excludedFamily: CardFamily?,
     ): List<Card> {
         val limit = config.selectionCandidateLimit.toLong()
-        val excludedFamily = excludedFamilies.singleOrNull()
         val recentReviews = learning.selectRecentReviewedCards(langCode, sessionStartedAt, RECENT_LIMIT.toLong())
             .executeAsList()
         val dueCards = if (excludedFamily == null) {
@@ -297,7 +307,6 @@ class SessionService(
             )
 
         return candidates
-            .filterNot { it.family in excludedFamilies }
             .map { it to priority(it, now, recentReviews) }
             .filter { (_, score) -> score > -HARD_EXCLUDE / 2 }
             .sortedByDescending { (_, score) -> score }

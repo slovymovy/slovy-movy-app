@@ -181,7 +181,6 @@ class StudySessionViewModel(
         viewModelScope.launch {
             sessionService.suspendWord(card, WORD_SUSPEND_DURATION)
             skippedCount += 1
-            sessionTotal = (sessionTotal - 1).coerceAtLeast(reviewedCount + skippedCount + 1)
             currentCard = null
             currentOutcomes = emptyList()
             loadNextCard()
@@ -193,6 +192,7 @@ class StudySessionViewModel(
         val active = state as? StudySessionUiState.Active ?: return
         if (active.card !is StudyCardUiState.Listening) return
         postponeListeningCardsForSession = true
+        skippedCount += 1
         currentCard = null
         currentOutcomes = emptyList()
         state = active.copy(isPreparingAudio = false, isPlayingAudio = false)
@@ -243,7 +243,6 @@ class StudySessionViewModel(
             )
             onFavoriteChanged(favorite.language)
             skippedCount += 1
-            sessionTotal = (sessionTotal - 1).coerceAtLeast(reviewedCount + skippedCount + 1)
             currentCard = null
             currentOutcomes = emptyList()
             loadNextCard()
@@ -387,21 +386,18 @@ class StudySessionViewModel(
                     state = StudySessionUiState.Loading(nextCardProgress())
                 }
                 try {
-                    sessionService.nextCard(
-                        langCode = langCode,
-                        sessionStartedAt = sessionStartedAt,
-                        excludedFamilies = excludedCardFamiliesForSession(),
-                    )
+                    nextSessionCard()
                         .collect { sessionCard ->
                             when (sessionCard?.loadState()) {
                                 null -> {
                                     showLoadingJob.cancel()
-                                    markResult(if (reviewedCount == 0) "empty" else "complete")
-                                    state = if (reviewedCount == 0) {
+                                    val completedCount = reviewedCount + skippedCount
+                                    markResult(if (completedCount == 0) "empty" else "complete")
+                                    state = if (completedCount == 0) {
                                         StudySessionUiState.Empty
                                     } else {
                                         StudySessionUiState.Complete(
-                                            reviewedCount = reviewedCount,
+                                            reviewedCount = completedCount,
                                             message = randomCompletionMessage(language),
                                         )
                                     }
@@ -477,11 +473,20 @@ class StudySessionViewModel(
                 -> null
         }
 
-    private fun excludedCardFamiliesForSession(): Set<CardFamily> =
+    private fun nextSessionCard() =
+        excludedCardFamilyForSession()?.let { excludedFamily ->
+            sessionService.nextCardExcludingFamily(
+                langCode = langCode,
+                sessionStartedAt = sessionStartedAt,
+                excludedFamily = excludedFamily,
+            )
+        } ?: sessionService.nextCard(langCode, sessionStartedAt)
+
+    private fun excludedCardFamilyForSession(): CardFamily? =
         if (postponeListeningCardsForSession) {
-            setOf(CardFamily.RECOGNIZE_VOICE)
+            CardFamily.RECOGNIZE_VOICE
         } else {
-            emptySet()
+            null
         }
 
     private suspend fun nextCardProgress(): StudySessionProgressUiState {
@@ -492,12 +497,8 @@ class StudySessionViewModel(
         } else {
             statsService.dueNow(langCode)
         }
-        val projectedTotal = completedCount + dueNow
-        sessionTotal = if (postponeListeningCardsForSession) {
-            maxOf(projectedTotal, current)
-        } else {
-            maxOf(sessionTotal, projectedTotal, current)
-        }
+        val projectedTotal = reviewedCount + dueNow
+        sessionTotal = maxOf(projectedTotal, current)
         return StudySessionProgressUiState(
             current = current,
             total = sessionTotal,
