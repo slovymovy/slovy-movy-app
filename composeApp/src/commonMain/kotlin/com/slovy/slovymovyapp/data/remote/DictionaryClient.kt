@@ -203,6 +203,8 @@ class DictionaryClient(
                         localCard.online
                     )
                 } catch (e: CancellationException) {
+                    markResult("remote_cancelled")
+                    AppLogger.warn(TAG, "getWord cancelled for $language/$lemma", e)
                     // Emit error for cancellation, then re-throw to propagate
                     emitMeasured(
                         WordResult(
@@ -215,6 +217,7 @@ class DictionaryClient(
                     throw e
                 } catch (e: Exception) {
                     markResult("remote_error")
+                    AppLogger.error(TAG, "getWord remote fetch failed for $language/$lemma", e)
                     // Emit error result - preserve loading context so UI knows where error occurred
                     emitMeasured(
                         WordResult(
@@ -568,9 +571,14 @@ class DictionaryClient(
             val body = response.bodyAsText()
             return json.decodeFromString(FeedbackResponse.serializer(), body)
         } catch (e: CancellationException) {
+            AppLogger.warn(TAG, "sendFeedback cancelled for $language/$lemma", e)
             throw e
         } catch (e: Exception) {
-            if (e is DictionaryClientException) throw e
+            if (e is DictionaryClientException) {
+                AppLogger.error(TAG, "sendFeedback failed for $language/$lemma", e)
+                throw e
+            }
+            AppLogger.error(TAG, "sendFeedback failed for $language/$lemma", e)
             throw DictionaryClientException.NetworkException(
                 NetworkErrorClassifier.userMessage(e),
                 e
@@ -604,9 +612,14 @@ class DictionaryClient(
             val body = response.bodyAsText()
             return json.decodeFromString(GeneralFeedbackResponse.serializer(), body)
         } catch (e: CancellationException) {
+            AppLogger.warn(TAG, "sendGeneralFeedback cancelled", e)
             throw e
         } catch (e: Exception) {
-            if (e is DictionaryClientException) throw e
+            if (e is DictionaryClientException) {
+                AppLogger.error(TAG, "sendGeneralFeedback failed", e)
+                throw e
+            }
+            AppLogger.error(TAG, "sendGeneralFeedback failed", e)
             throw DictionaryClientException.NetworkException(
                 NetworkErrorClassifier.userMessage(e),
                 e
