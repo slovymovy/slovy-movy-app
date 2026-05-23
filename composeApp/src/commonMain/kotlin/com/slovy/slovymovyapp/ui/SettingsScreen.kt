@@ -26,6 +26,7 @@ import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
@@ -127,6 +128,10 @@ class SettingsViewModel(
     private var translationSaveJob: Job? = null
     private var loadLearningLanguagesJob: Job? = null
     private var loadLanguagesJob: Job? = null
+
+    companion object {
+        private const val TAG = "SettingsViewModel"
+    }
 
     init {
         loadLearningLanguages()
@@ -336,6 +341,9 @@ class SettingsViewModel(
                 settingsRepository.insert(Setting(Setting.Name.LANGUAGE, jsonArray))
                 onDictionaryDataChanged(false)
                 loadLearningLanguages()
+                if (language !in previous) {
+                    downloadMissingTranslationsForInstalledLearningLanguages(current)
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -473,13 +481,49 @@ class SettingsViewModel(
         ) {
             onDictionaryDataChanged(true)
             reloadSettings()
+            downloadMissingTranslationsForLearningLanguage(language)
         }
     }
 
     fun downloadTranslation(sourceLanguage: Language, targetLanguage: Language) {
-        val downloadKey = "trans_${sourceLanguage.code}_${targetLanguage.code}"
-        if (downloadCoordinator.isRunning(downloadKey)) return
+        logTranslationDownloadClick(sourceLanguage, targetLanguage)
+        startTranslationDownload(sourceLanguage, targetLanguage)
+    }
 
+    private suspend fun downloadMissingTranslationsForLearningLanguage(language: Language) {
+        val translationLanguages = loadTranslationLanguagesForAutoDownload() ?: return
+        downloadMissingTranslationsForLearningLanguage(language, translationLanguages)
+    }
+
+    private suspend fun downloadMissingTranslationsForInstalledLearningLanguages(
+        translationLanguages: Collection<Language>
+    ) {
+        if (translationLanguages.isEmpty()) return
+
+        val translationList = translationLanguages.toList()
+        val installedLearningLanguages = dataDbManager.listDownloadedDatabases()
+            .filterIsInstance<DatabaseFileInfo.Dictionary>()
+            .map { it.language }
+            .sortedBy { it.ordinal }
+
+        installedLearningLanguages.forEach { language ->
+            downloadMissingTranslationsForLearningLanguage(language, translationList)
+        }
+    }
+
+    private suspend fun downloadMissingTranslationsForLearningLanguage(
+        language: Language,
+        translationLanguages: List<Language>
+    ) {
+        if (translationLanguages.isEmpty()) return
+        loadDownloadableTranslationTargets(language, translationLanguages)
+            .filter { !dataDbManager.hasTranslation(language, it) }
+            .forEach { target ->
+                startTranslationDownload(language, target)
+            }
+    }
+
+    private fun logTranslationDownloadClick(sourceLanguage: Language, targetLanguage: Language) {
         Analytics.logEvent(
             AnalyticsEvent.SETTINGS_DOWNLOAD_TRANSLATION_CLICK,
             mapOf(
@@ -488,6 +532,36 @@ class SettingsViewModel(
                 "tgt_lang" to targetLanguage.code,
             ),
         )
+    }
+
+    private suspend fun loadTranslationLanguagesForAutoDownload(): List<Language>? {
+        val translationLanguages = try {
+            loadTranslationLanguages()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to load translation languages for automatic download", e)
+            return null
+        }
+        return translationLanguages.takeIf { it.isNotEmpty() }?.toList()
+    }
+
+    private suspend fun loadDownloadableTranslationTargets(
+        sourceLanguage: Language,
+        translationLanguages: List<Language>
+    ): List<Language> = try {
+        dataDbManager.downloadableTranslationTargets(sourceLanguage, translationLanguages)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        AppLogger.warn(TAG, "Unable to load downloadable translations for ${sourceLanguage.code}", e)
+        emptyList()
+    }
+
+    private fun startTranslationDownload(sourceLanguage: Language, targetLanguage: Language) {
+        val downloadKey = "trans_${sourceLanguage.code}_${targetLanguage.code}"
+        if (downloadCoordinator.isRunning(downloadKey)) return
+
         val keepAlive = platform.acquireProcessKeepAlive()
         val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
             dataDbManager.ensureTranslation(
