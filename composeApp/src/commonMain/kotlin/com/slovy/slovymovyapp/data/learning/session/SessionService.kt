@@ -256,23 +256,44 @@ class SessionService(
         excludedFamilies: Set<CardFamily>,
     ): List<Card> {
         val limit = config.selectionCandidateLimit.toLong()
+        val excludedFamily = excludedFamilies.singleOrNull()
         val recentReviews = learning.selectRecentReviewedCards(langCode, sessionStartedAt, RECENT_LIMIT.toLong())
             .executeAsList()
-        val candidates = learning.selectDueCards(
-            lang_code = langCode,
-            now = now,
-            new_state = CardState.NEW,
-            limit = limit,
-        ).executeAsList()
-            .map { it.toCard() }
+        val dueCards = if (excludedFamily == null) {
+            learning.selectDueCards(
+                lang_code = langCode,
+                now = now,
+                new_state = CardState.NEW,
+                limit = limit,
+            ).executeAsList().map { it.toCard() }
+        } else {
+            learning.selectDueCardsExcludingFamily(
+                lang_code = langCode,
+                now = now,
+                new_state = CardState.NEW,
+                excluded_family = excludedFamily,
+                limit = limit,
+            ).executeAsList().map { it.toCard() }
+        }
+        val newCards = if (excludedFamily == null) {
+            learning.selectNewCards(
+                lang_code = langCode,
+                new_state = CardState.NEW,
+                now = now,
+                limit = limit,
+            ).executeAsList().map { it.toCard() }
+        } else {
+            learning.selectNewCardsExcludingFamily(
+                lang_code = langCode,
+                new_state = CardState.NEW,
+                now = now,
+                excluded_family = excludedFamily,
+                limit = limit,
+            ).executeAsList().map { it.toCard() }
+        }
+        val candidates = dueCards
             .plus(
-                learning.selectNewCards(
-                    lang_code = langCode,
-                    new_state = CardState.NEW,
-                    now = now,
-                    limit = limit,
-                ).executeAsList()
-                    .map { it.toCard() }
+                newCards
             )
 
         return candidates

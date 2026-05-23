@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.data.learning.stats
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.use
+import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardState
 import com.slovy.slovymovyapp.data.learning.fsrs.DAY
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
@@ -170,6 +171,16 @@ class StatsService(
     suspend fun dueNow(langCode: String): Int = withContext(Dispatchers.IO) {
         val now = clock.now().toEpochMilliseconds()
         learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt()
+    }
+
+    @OptIn(ExperimentalTime::class)
+    suspend fun dueNowExcludingFamily(langCode: String, excludedFamily: CardFamily): Int = withContext(Dispatchers.IO) {
+        val now = clock.now().toEpochMilliseconds()
+        learning.countDueCardsByLangDistinctByLemmaExcludingFamily(
+            lang_code = langCode,
+            now = now,
+            excluded_family = excludedFamily,
+        ).executeAsOne().toInt()
     }
 
     @OptIn(ExperimentalTime::class)

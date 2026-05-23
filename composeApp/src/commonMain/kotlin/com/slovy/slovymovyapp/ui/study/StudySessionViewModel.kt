@@ -487,8 +487,17 @@ class StudySessionViewModel(
     private suspend fun nextCardProgress(): StudySessionProgressUiState {
         val completedCount = reviewedCount + skippedCount
         val current = completedCount + 1
-        val projectedTotal = completedCount + statsService.dueNow(langCode)
-        sessionTotal = maxOf(sessionTotal, projectedTotal, current)
+        val dueNow = if (postponeListeningCardsForSession) {
+            statsService.dueNowExcludingFamily(langCode, CardFamily.RECOGNIZE_VOICE)
+        } else {
+            statsService.dueNow(langCode)
+        }
+        val projectedTotal = completedCount + dueNow
+        sessionTotal = if (postponeListeningCardsForSession) {
+            maxOf(projectedTotal, current)
+        } else {
+            maxOf(sessionTotal, projectedTotal, current)
+        }
         return StudySessionProgressUiState(
             current = current,
             total = sessionTotal,

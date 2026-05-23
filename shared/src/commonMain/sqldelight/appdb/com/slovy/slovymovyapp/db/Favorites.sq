@@ -204,6 +204,20 @@ WHERE lang_code = :lang_code
 ORDER BY due ASC, created_at ASC
 LIMIT :limit;
 
+selectDueCardsExcludingFamily:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card INDEXED BY idx_card_due_session
+WHERE lang_code = :lang_code
+  AND due <= :now
+  AND state != :new_state
+  AND family != :excluded_family
+  AND suspended = 0
+  AND (available_after IS NULL OR available_after <= :now)
+ORDER BY due ASC, created_at ASC
+LIMIT :limit;
+
 selectNewCards:
 SELECT id, sense_id, lemma_id, lang_code, family, state,
        stability, difficulty, due, last_review, reps, lapses, created_at,
@@ -212,6 +226,20 @@ FROM card INDEXED BY idx_card_new_session
 WHERE lang_code = :lang_code
   AND state = :new_state
   AND due <= :now
+  AND suspended = 0
+  AND (available_after IS NULL OR available_after <= :now)
+ORDER BY created_at ASC
+LIMIT :limit;
+
+selectNewCardsExcludingFamily:
+SELECT id, sense_id, lemma_id, lang_code, family, state,
+       stability, difficulty, due, last_review, reps, lapses, created_at,
+       available_after, answer_key, suspended
+FROM card INDEXED BY idx_card_new_session
+WHERE lang_code = :lang_code
+  AND state = :new_state
+  AND due <= :now
+  AND family != :excluded_family
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now)
 ORDER BY created_at ASC
@@ -316,6 +344,15 @@ SELECT COUNT(DISTINCT lemma_id)
 FROM card INDEXED BY idx_card_active_lemma_due
 WHERE lang_code = :lang_code
   AND due <= :now
+  AND suspended = 0
+  AND (available_after IS NULL OR available_after <= :now);
+
+countDueCardsByLangDistinctByLemmaExcludingFamily:
+SELECT COUNT(DISTINCT lemma_id)
+FROM card INDEXED BY idx_card_active_lemma_due
+WHERE lang_code = :lang_code
+  AND due <= :now
+  AND family != :excluded_family
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now);
 
