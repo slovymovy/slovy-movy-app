@@ -486,25 +486,13 @@ class SettingsViewModel(
     }
 
     fun downloadTranslation(sourceLanguage: Language, targetLanguage: Language) {
-        startTranslationDownload(
-            sourceLanguage = sourceLanguage,
-            targetLanguage = targetLanguage,
-            logUserClick = true
-        )
+        logTranslationDownloadClick(sourceLanguage, targetLanguage)
+        startTranslationDownload(sourceLanguage, targetLanguage)
     }
 
     private suspend fun downloadMissingTranslationsForLearningLanguage(language: Language) {
-        val translationLanguages = try {
-            loadTranslationLanguages()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            AppLogger.warn(TAG, "Unable to load translation languages for automatic download", e)
-            return
-        }
-        if (translationLanguages.isEmpty()) return
-
-        downloadMissingTranslationsForLearningLanguage(language, translationLanguages.toList())
+        val translationLanguages = loadTranslationLanguagesForAutoDownload() ?: return
+        downloadMissingTranslationsForLearningLanguage(language, translationLanguages)
     }
 
     private suspend fun downloadMissingTranslationsForInstalledLearningLanguages(
@@ -528,45 +516,52 @@ class SettingsViewModel(
         translationLanguages: List<Language>
     ) {
         if (translationLanguages.isEmpty()) return
-
-        val downloadableTargets = try {
-            dataDbManager.downloadableTranslationTargets(language, translationLanguages)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            AppLogger.warn(TAG, "Unable to load downloadable translations for ${language.code}", e)
-            emptyList()
-        }
-
-        downloadableTargets
+        loadDownloadableTranslationTargets(language, translationLanguages)
             .filter { !dataDbManager.hasTranslation(language, it) }
             .forEach { target ->
-                startTranslationDownload(
-                    sourceLanguage = language,
-                    targetLanguage = target,
-                    logUserClick = false
-                )
+                startTranslationDownload(language, target)
             }
     }
 
-    private fun startTranslationDownload(
+    private fun logTranslationDownloadClick(sourceLanguage: Language, targetLanguage: Language) {
+        Analytics.logEvent(
+            AnalyticsEvent.SETTINGS_DOWNLOAD_TRANSLATION_CLICK,
+            mapOf(
+                "kind" to "translation",
+                "src_lang" to sourceLanguage.code,
+                "tgt_lang" to targetLanguage.code,
+            ),
+        )
+    }
+
+    private suspend fun loadTranslationLanguagesForAutoDownload(): List<Language>? {
+        val translationLanguages = try {
+            loadTranslationLanguages()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to load translation languages for automatic download", e)
+            return null
+        }
+        return translationLanguages.takeIf { it.isNotEmpty() }?.toList()
+    }
+
+    private suspend fun loadDownloadableTranslationTargets(
         sourceLanguage: Language,
-        targetLanguage: Language,
-        logUserClick: Boolean
-    ) {
+        translationLanguages: List<Language>
+    ): List<Language> = try {
+        dataDbManager.downloadableTranslationTargets(sourceLanguage, translationLanguages)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        AppLogger.warn(TAG, "Unable to load downloadable translations for ${sourceLanguage.code}", e)
+        emptyList()
+    }
+
+    private fun startTranslationDownload(sourceLanguage: Language, targetLanguage: Language) {
         val downloadKey = "trans_${sourceLanguage.code}_${targetLanguage.code}"
         if (downloadCoordinator.isRunning(downloadKey)) return
 
-        if (logUserClick) {
-            Analytics.logEvent(
-                AnalyticsEvent.SETTINGS_DOWNLOAD_TRANSLATION_CLICK,
-                mapOf(
-                    "kind" to "translation",
-                    "src_lang" to sourceLanguage.code,
-                    "tgt_lang" to targetLanguage.code,
-                ),
-            )
-        }
         val keepAlive = platform.acquireProcessKeepAlive()
         val downloadFlow = downloadCoordinator.startDownload(downloadKey) { onProgress, cancelToken ->
             dataDbManager.ensureTranslation(
