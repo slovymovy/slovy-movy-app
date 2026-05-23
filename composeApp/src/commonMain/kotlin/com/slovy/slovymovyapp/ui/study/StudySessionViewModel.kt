@@ -182,12 +182,12 @@ class StudySessionViewModel(
         if (isPreparingRemoval) return
         val active = state as? StudySessionUiState.Active ?: return
         val card = currentCard ?: return
-        state = active.copy(isOverflowMenuOpen = false)
+        currentCard = null
+        currentOutcomes = emptyList()
+        state = active.copy(isOverflowMenuOpen = false, isSubmittingReview = true)
         viewModelScope.launch {
             sessionService.suspendWord(card, WORD_SUSPEND_DURATION)
             skippedCount += 1
-            currentCard = null
-            currentOutcomes = emptyList()
             loadNextCard()
             showStudySnackbar(
                 message = suspendedMessage,
@@ -201,6 +201,7 @@ class StudySessionViewModel(
         if (isPreparingRemoval) return
         val active = state as? StudySessionUiState.Active ?: return
         if (active.card !is StudyCardUiState.Listening) return
+        currentCard ?: return
         postponeListeningCardsForSession = true
         skippedCount += 1
         currentCard = null
@@ -265,7 +266,11 @@ class StudySessionViewModel(
         pendingRemovalFavorite = null
         val active = state as? StudySessionUiState.Active
         if (active != null) {
-            state = active.copy(removeConfirmation = null, isOverflowMenuOpen = false)
+            state = active.copy(
+                removeConfirmation = null,
+                isOverflowMenuOpen = false,
+                isSubmittingReview = true,
+            )
         }
         viewModelScope.launch {
             favoritesRepository.remove(favorite.senseId, favorite.language)
