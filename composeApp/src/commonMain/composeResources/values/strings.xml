@@ -9,17 +9,11 @@
 
     <string name="welcome_tagline">The app that turns looked-up words into learned words. Free.</string>
     <string name="welcome_selling_point_translations_title">Look up any word</string>
-    <string name="welcome_selling_point_translations_description">Examples, forms, phrases, synonyms — everything about
-        it in one place.
-    </string>
+    <string name="welcome_selling_point_translations_description">Examples, forms, phrases, synonyms — everything about it in one place.</string>
     <string name="welcome_selling_point_collection_title">Build your personal word list</string>
-    <string name="welcome_selling_point_collection_description">Save words as you go. Your collection stays on your
-        device.
-    </string>
+    <string name="welcome_selling_point_collection_description">Save words as you go. Your collection stays on your device.</string>
     <string name="welcome_selling_point_practice_title">Practice until words stick</string>
-    <string name="welcome_selling_point_practice_description">Spaced repetition and multiple modes help you actually
-        remember what you learn.
-    </string>
+    <string name="welcome_selling_point_practice_description">Spaced repetition and multiple modes help you actually remember what you learn.</string>
     <string name="welcome_cta_explore_now">Get Started</string>
 
     <string name="search_placeholder">Search your word...</string>
@@ -159,8 +153,9 @@
     <string name="language_setup_title">Select Languages</string>
     <string name="language_setup_subtitle">Choose what you're learning and your translation preferences.</string>
     <string name="language_setup_learning_label">I'm learning...</string>
-    <string name="language_setup_select_language">Select language</string>
     <string name="language_setup_translate_into">Translate into:</string>
+    <string name="language_setup_choose_learning_first">Choose a learning language first</string>
+    <string name="language_setup_step_completed">Step %1$d completed</string>
     <string name="language_setup_update_anytime">Update anytime in Settings</string>
 
     <string name="settings_title">Settings</string>

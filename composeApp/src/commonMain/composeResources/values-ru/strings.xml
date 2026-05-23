@@ -9,17 +9,11 @@
 
     <string name="welcome_tagline">Приложение, чтобы не просто искать слова, а учить их. Бесплатно.</string>
     <string name="welcome_selling_point_translations_title">Ищите любые слова</string>
-    <string name="welcome_selling_point_translations_description">Примеры, формы, фразы и синонимы — всё в одном
-        месте.
-    </string>
+    <string name="welcome_selling_point_translations_description">Примеры, формы, фразы и синонимы — всё в одном месте.</string>
     <string name="welcome_selling_point_collection_title">Свой список слов</string>
-    <string name="welcome_selling_point_collection_description">Сохраняйте то, что хотите запомнить. Ваша подборка
-        остается только на устройстве.
-    </string>
+    <string name="welcome_selling_point_collection_description">Сохраняйте то, что хотите запомнить. Ваша подборка остается только на устройстве.</string>
     <string name="welcome_selling_point_practice_title">Закрепляйте результат</string>
-    <string name="welcome_selling_point_practice_description">Интервальные повторения и разные режимы помогут
-        по-настоящему запомнить новые слова.
-    </string>
+    <string name="welcome_selling_point_practice_description">Интервальные повторения и разные режимы помогут по-настоящему запомнить новые слова.</string>
     <string name="welcome_cta_explore_now">Начать</string>
 
     <string name="search_placeholder">Найти слово...</string>
@@ -159,8 +153,9 @@
     <string name="language_setup_title">Выбор языков</string>
     <string name="language_setup_subtitle">Укажите язык, который вы учите, и на каком показывать перевод.</string>
     <string name="language_setup_learning_label">Я учу...</string>
-    <string name="language_setup_select_language">Выберите язык</string>
     <string name="language_setup_translate_into">Переводить на:</string>
+    <string name="language_setup_choose_learning_first">Сначала выберите язык изучения</string>
+    <string name="language_setup_step_completed">Шаг %1$d выполнен</string>
     <string name="language_setup_update_anytime">Это всегда можно изменить в настройках</string>
 
     <string name="settings_title">Настройки</string>

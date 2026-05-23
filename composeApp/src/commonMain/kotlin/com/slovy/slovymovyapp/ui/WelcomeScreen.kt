@@ -1,8 +1,10 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -12,12 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -82,51 +81,33 @@ fun WelcomeScreenContent(
             ) {
                 Spacer(modifier = Modifier.height(AppSpacing.xxxl))
 
-                Text(
-                    text = stringResource(Res.string.common_app_name),
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontFamily = FontFamily.Default,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(AppSpacing.sm))
-
-                Text(
-                    text = stringResource(Res.string.welcome_tagline),
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontFamily = MaterialTheme.serifFontFamily,
-                        fontStyle = FontStyle.Italic
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
+                OnboardingHeader(
+                    title = stringResource(Res.string.common_app_name),
+                    subtitle = stringResource(Res.string.welcome_tagline)
                 )
 
                 Spacer(modifier = Modifier.height(AppSpacing.xxl))
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
-                ) {
-                    SellingPointCard(
-                        icon = Icons.Outlined.Search,
-                        title = stringResource(Res.string.welcome_selling_point_translations_title),
-                        description = stringResource(Res.string.welcome_selling_point_translations_description)
-                    )
+                SellingPointRow(
+                    icon = Icons.Outlined.Search,
+                    title = stringResource(Res.string.welcome_selling_point_translations_title),
+                    description = stringResource(Res.string.welcome_selling_point_translations_description),
+                    showDivider = false
+                )
 
-                    SellingPointCard(
-                        icon = Icons.Outlined.FavoriteBorder,
-                        title = stringResource(Res.string.welcome_selling_point_collection_title),
-                        description = stringResource(Res.string.welcome_selling_point_collection_description)
-                    )
+                SellingPointRow(
+                    icon = Icons.Outlined.FavoriteBorder,
+                    title = stringResource(Res.string.welcome_selling_point_collection_title),
+                    description = stringResource(Res.string.welcome_selling_point_collection_description),
+                    showDivider = true
+                )
 
-                    SellingPointCard(
-                        icon = Icons.Outlined.Psychology,
-                        title = stringResource(Res.string.welcome_selling_point_practice_title),
-                        description = stringResource(Res.string.welcome_selling_point_practice_description)
-                    )
-                }
+                SellingPointRow(
+                    icon = Icons.Outlined.Psychology,
+                    title = stringResource(Res.string.welcome_selling_point_practice_title),
+                    description = stringResource(Res.string.welcome_selling_point_practice_description),
+                    showDivider = true
+                )
 
                 Spacer(modifier = Modifier.height(AppSpacing.lg))
             }
@@ -166,41 +147,53 @@ fun WelcomeScreenContent(
 }
 
 @Composable
-private fun SellingPointCard(
+private fun SellingPointRow(
     icon: ImageVector,
     title: String,
-    description: String
+    description: String,
+    showDivider: Boolean
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp
-        )
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (showDivider) {
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+        }
+
         Row(
-            modifier = Modifier.padding(AppSpacing.lg),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = AppSpacing.xs, vertical = AppSpacing.md),
             verticalAlignment = Alignment.Top
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                    .clip(CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
 
             Spacer(modifier = Modifier.width(AppSpacing.md))
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(top = AppSpacing.xs)
             ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 20.sp
                     ),
                     color = MaterialTheme.colorScheme.onSurface
                 )

@@ -9,17 +9,11 @@
 
     <string name="welcome_tagline">De app die van opgezochte woorden geleerde woorden maakt. Gratis.</string>
     <string name="welcome_selling_point_translations_title">Zoek elk woord op</string>
-    <string name="welcome_selling_point_translations_description">Voorbeelden, vormen, zinnen en synoniemen — alles
-        handig op één plek.
-    </string>
+    <string name="welcome_selling_point_translations_description">Voorbeelden, vormen, zinnen en synoniemen — alles handig op één plek.</string>
     <string name="welcome_selling_point_collection_title">Je eigen woordenlijst</string>
-    <string name="welcome_selling_point_collection_description">Bewaar de woorden die je wilt onthouden. Je lijst blijft
-        gewoon op je eigen toestel staan.
-    </string>
-    <string name="welcome_selling_point_practice_title">Oefen tot woorden echt blijven hangen</string>
-    <string name="welcome_selling_point_practice_description">Slim herhalen en verschillende oefeningen helpen je om
-        woorden echt te onthouden.
-    </string>
+    <string name="welcome_selling_point_collection_description">Bewaar de woorden die je wilt onthouden. Je lijst blijft gewoon op je eigen toestel staan.</string>
+    <string name="welcome_selling_point_practice_title">Houd je kennis vast</string>
+    <string name="welcome_selling_point_practice_description">Slim herhalen en verschillende oefeningen helpen je om woorden echt te onthouden.</string>
     <string name="welcome_cta_explore_now">Aan de slag</string>
 
     <string name="search_placeholder">Zoek een woord...</string>
@@ -158,8 +152,9 @@
     <string name="language_setup_title">Selecteer talen</string>
     <string name="language_setup_subtitle">Kies wat je leert en je vertaalvoorkeuren.</string>
     <string name="language_setup_learning_label">Ik leer...</string>
-    <string name="language_setup_select_language">Selecteer een taal</string>
     <string name="language_setup_translate_into">Vertalen naar:</string>
+    <string name="language_setup_choose_learning_first">Kies eerst een leertaal</string>
+    <string name="language_setup_step_completed">Stap %1$d voltooid</string>
     <string name="language_setup_update_anytime">Altijd aan te passen via Instellingen</string>
 
     <string name="settings_title">Instellingen</string>

@@ -7,20 +7,13 @@
     <string name="nav_stats">Statystyki</string>
     <string name="nav_settings">Ustawienia</string>
 
-    <string name="welcome_tagline">Aplikacja, by nie tylko sprawdzać słowa, ale faktycznie się ich uczyć. Za darmo.
-    </string>
+    <string name="welcome_tagline">Aplikacja, by nie tylko sprawdzać słowa, ale faktycznie się ich uczyć. Za darmo.</string>
     <string name="welcome_selling_point_translations_title">Wyszukuj dowolne słowa</string>
-    <string name="welcome_selling_point_translations_description">Przykłady, odmiany, zwroty i synonimy — wszystko w
-        jednym miejscu.
-    </string>
+    <string name="welcome_selling_point_translations_description">Przykłady, odmiany, zwroty i synonimy — wszystko w jednym miejscu.</string>
     <string name="welcome_selling_point_collection_title">Twoja własna lista słówek</string>
-    <string name="welcome_selling_point_collection_description">Zapisuj to, co chcesz zapamiętać. Twoja kolekcja zostaje
-        tylko na Twoim urządzeniu.
-    </string>
+    <string name="welcome_selling_point_collection_description">Zapisuj to, co chcesz zapamiętać. Twoja kolekcja zostaje tylko na Twoim urządzeniu.</string>
     <string name="welcome_selling_point_practice_title">Utrwalaj wiedzę</string>
-    <string name="welcome_selling_point_practice_description">Metoda powtórek i różne tryby pomogą Ci na dobre
-        zapamiętać nowe słowa.
-    </string>
+    <string name="welcome_selling_point_practice_description">Metoda powtórek i różne tryby pomogą Ci na dobre zapamiętać nowe słowa.</string>
     <string name="welcome_cta_explore_now">Zacznij teraz</string>
 
     <string name="search_placeholder">Wyszukaj słowo...</string>
@@ -158,8 +151,9 @@
     <string name="language_setup_title">Wybierz języki</string>
     <string name="language_setup_subtitle">Wybierz język, którego się uczysz, i preferencje tłumaczeń.</string>
     <string name="language_setup_learning_label">Uczę się...</string>
-    <string name="language_setup_select_language">Wybierz język</string>
     <string name="language_setup_translate_into">Tłumacz na:</string>
+    <string name="language_setup_choose_learning_first">Najpierw wybierz język nauki</string>
+    <string name="language_setup_step_completed">Krok %1$d ukończony</string>
     <string name="language_setup_update_anytime">Możesz to zmienić w Ustawieniach</string>
 
     <string name="settings_title">Ustawienia</string>
