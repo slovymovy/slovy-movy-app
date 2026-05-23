@@ -228,14 +228,9 @@
     <string name="feedback_dialog_send">Send</string>
 
     <string name="voice_setup_title">Get better pronunciation</string>
-    <string name="voice_setup_description">The default voice may sound robotic. Here is how to get a better one:
-    </string>
-    <string name="voice_setup_step_android">Open your phone text-to-speech settings and download a high-quality voice
-        for %1$s.
-    </string>
-    <string name="voice_setup_step_ios">Go to iPhone Settings - Accessibility - Read &amp; Speak - Voices and download a
-        voice for %1$s.
-    </string>
+    <string name="voice_setup_description">The default voice may sound robotic. Here is how to get a better one:</string>
+    <string name="voice_setup_step_android">Open your phone text-to-speech settings and download a high-quality voice for %1$s.</string>
+    <string name="voice_setup_step_ios">Go to iPhone Settings - Accessibility - Read &amp; Speak - Voices and download a voice for %1$s.</string>
     <string name="voice_setup_step_other">Download a high-quality voice for %1$s from your system settings.</string>
     <string name="voice_setup_step_two">Come back to Open Words Settings - Voices and enable the new voice.</string>
 
@@ -245,15 +240,10 @@
     <string name="voice_many_enabled">%1$d voices enabled</string>
     <string name="voice_no_voices_available">No voices available</string>
     <string name="voice_download_more_title">Download more voices</string>
-    <string name="voice_download_more_step_android">Open your phone text-to-speech settings and download a high-quality
-        voice.
-    </string>
-    <string name="voice_download_more_step_ios">Go to iPhone Settings - Accessibility - Read &amp; Speak - Voices and
-        download a high-quality voice.
-    </string>
+    <string name="voice_download_more_step_android">Open your phone text-to-speech settings and download a high-quality voice.</string>
+    <string name="voice_download_more_step_ios">Go to iPhone Settings - Accessibility - Read &amp; Speak - Voices and download a high-quality voice.</string>
     <string name="voice_download_more_step_other">Download a high-quality voice from your system settings.</string>
-    <string name="voice_download_more_step_two">Come back to Open Words Settings - Voice and enable the new voice.
-    </string>
+    <string name="voice_download_more_step_two">Come back to Open Words Settings - Voice and enable the new voice.</string>
     <string name="voice_quality_high">High</string>
     <string name="voice_quality_good">Good</string>
     <string name="voice_quality_medium">Medium</string>
@@ -261,10 +251,13 @@
     <string name="voice_test_action">Test Voice</string>
     <string name="voice_enable_label">Enable %1$s</string>
 
-    <string name="about_send_feedback_title">Send us feedback</string>
-    <string name="about_send_feedback_subtitle">We would love to hear from you</string>
+    <string name="about_send_feedback_title">Request a feature</string>
+    <string name="about_send_feedback_subtitle">Share your ideas on how to improve OpenWords</string>
     <string name="about_acknowledgements_title">Acknowledgements</string>
     <string name="about_acknowledgements_subtitle">Data sources &amp; credits</string>
+    <string name="about_review_google_play_title">Review us on Google Play</string>
+    <string name="about_review_app_store_title">Review us on the App Store</string>
+    <string name="about_review_subtitle">Find OpenWords helpful? Support us with a rating!</string>
     <string name="about_version_title">Version</string>
     <string name="acknowledgements_title">Acknowledgements</string>
     <string name="acknowledgements_vocab_data_title">Vocabulary data</string>
@@ -288,9 +281,7 @@
     </string>
 
     <string name="app_data_backup_title">Back up your saved words</string>
-    <string name="app_data_backup_description">Exports your saved words and app settings to an archive. Useful for
-        keeping a copy or moving to a new device.
-    </string>
+    <string name="app_data_backup_description">Exports your saved words and app settings to an archive. Useful for keeping a copy or moving to a new device.</string>
     <string name="app_data_exporting">Exporting...</string>
     <string name="app_data_export_now">Export now</string>
 

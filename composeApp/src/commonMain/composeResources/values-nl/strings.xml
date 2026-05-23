@@ -229,9 +229,7 @@
 
     <string name="voice_setup_title">Verbeter je uitspraak</string>
     <string name="voice_setup_description">De standaardstem kan robotachtig klinken. Zo krijg je een betere:</string>
-    <string name="voice_setup_step_android">Open de tekst-naar-spraakinstellingen op je telefoon en download een
-        hoogwaardige stem voor %1$s.
-    </string>
+    <string name="voice_setup_step_android">Open de tekst-naar-spraakinstellingen op je telefoon en download een hoogwaardige stem voor %1$s.</string>
     <string name="voice_setup_step_ios">Ga naar iPhone-instellingen > Toegankelijkheid > Gesproken inhoud > Stemmen en download een stem voor %1$s.</string>
     <string name="voice_setup_step_other">Download een hoogwaardige stem voor %1$s via je systeeminstellingen.</string>
     <string name="voice_setup_step_two">Ga terug naar de Open Words-instellingen > Stemmen en schakel de nieuwe stem in.</string>
@@ -242,9 +240,7 @@
     <string name="voice_many_enabled">%1$d stemmen ingeschakeld</string>
     <string name="voice_no_voices_available">Geen stemmen beschikbaar</string>
     <string name="voice_download_more_title">Download meer stemmen</string>
-    <string name="voice_download_more_step_android">Open de tekst-naar-spraakinstellingen op je telefoon en download een
-        hoogwaardige stem.
-    </string>
+    <string name="voice_download_more_step_android">Open de tekst-naar-spraakinstellingen op je telefoon en download een hoogwaardige stem.</string>
     <string name="voice_download_more_step_ios">Ga naar iPhone-instellingen > Toegankelijkheid > Gesproken inhoud > Stemmen en download een hoogwaardige stem.</string>
     <string name="voice_download_more_step_other">Download een hoogwaardige stem via je systeeminstellingen.</string>
     <string name="voice_download_more_step_two">Ga terug naar de Open Words-instellingen > Stem en schakel de nieuwe stem in.</string>
@@ -255,10 +251,13 @@
     <string name="voice_test_action">Test stem</string>
     <string name="voice_enable_label">Schakel %1$s in</string>
 
-    <string name="about_send_feedback_title">Stuur ons feedback</string>
-    <string name="about_send_feedback_subtitle">We horen graag van je</string>
+    <string name="about_send_feedback_title">Functie aanvragen</string>
+    <string name="about_send_feedback_subtitle">Deel je ideeën om OpenWords te verbeteren</string>
     <string name="about_acknowledgements_title">Met dank aan</string>
     <string name="about_acknowledgements_subtitle">Gegevensbronnen &amp; credits</string>
+    <string name="about_review_google_play_title">Beoordeel ons op Google Play</string>
+    <string name="about_review_app_store_title">Beoordeel ons in de App Store</string>
+    <string name="about_review_subtitle">Vind je OpenWords nuttig? Steun ons met een beoordeling!</string>
     <string name="about_version_title">Versie</string>
     <string name="acknowledgements_title">Met dank aan</string>
     <string name="acknowledgements_vocab_data_title">Woordenschatgegevens</string>
@@ -282,9 +281,7 @@
     <string name="acknowledgements_thanks">Onze dank gaat uit naar de Wiktionary-community en Tatu Ylonen voor het gratis beschikbaar stellen van deze gegevens.</string>
 
     <string name="app_data_backup_title">Maak een back-up van je opgeslagen woorden</string>
-    <string name="app_data_backup_description">Exporteert je opgeslagen woorden en app-instellingen naar een archief.
-        Handig om een kopie te bewaren of te verhuizen naar een nieuw apparaat.
-    </string>
+    <string name="app_data_backup_description">Exporteert je opgeslagen woorden en app-instellingen naar een archief. Handig om een kopie te bewaren of te verhuizen naar een nieuw apparaat.</string>
     <string name="app_data_exporting">Bezig met exporteren...</string>
     <string name="app_data_export_now">Exporteer nu</string>
 
