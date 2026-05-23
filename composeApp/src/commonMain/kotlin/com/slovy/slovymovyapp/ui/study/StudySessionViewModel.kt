@@ -586,7 +586,7 @@ class StudySessionViewModel(
         } else {
             statsService.dueNow(langCode)
         }
-        val projectedTotal = reviewedCount + dueNow
+        val projectedTotal = completedCount + dueNow
         sessionTotal = if (postponeListeningCardsForSession) {
             maxOf(projectedTotal, current)
         } else {
