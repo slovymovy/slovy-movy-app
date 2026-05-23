@@ -621,6 +621,7 @@
     <string name="study_stop_audio">Stop audio</string>
     <string name="study_hint_show">Hint</string>
     <string name="study_hint_show_description">Toon eerste-letterhint</string>
+    <string name="study_hint_show_translation_description">Toon vertaalhint</string>
     <string name="study_listen_prompt">Tik om af te spelen. Welk woord hoor je?</string>
     <plurals name="study_hint_starts_with">
         <item quantity="one">Hint: begint met %1$s, %2$d letter</item>

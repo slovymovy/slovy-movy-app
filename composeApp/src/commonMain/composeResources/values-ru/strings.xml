@@ -620,6 +620,7 @@
     <string name="study_stop_audio">Остановить аудио</string>
     <string name="study_hint_show">Подсказка</string>
     <string name="study_hint_show_description">Показать подсказку с первой буквой</string>
+    <string name="study_hint_show_translation_description">Показать подсказку с переводом</string>
     <string name="study_listen_prompt">Нажмите для воспроизведения. Какое слово вы слышите?</string>
     <plurals name="study_hint_starts_with">
         <item quantity="one">Подсказка: начинается на %1$s, %2$d буква</item>

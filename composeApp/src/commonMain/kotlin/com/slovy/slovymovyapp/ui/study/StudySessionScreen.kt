@@ -114,6 +114,7 @@ import slovymovyapp.composeapp.generated.resources.study_play_word_audio
 import slovymovyapp.composeapp.generated.resources.study_hint_starts_with
 import slovymovyapp.composeapp.generated.resources.study_hint_show
 import slovymovyapp.composeapp.generated.resources.study_hint_show_description
+import slovymovyapp.composeapp.generated.resources.study_hint_show_translation_description
 import slovymovyapp.composeapp.generated.resources.study_swipe_other_meanings_hint
 import slovymovyapp.composeapp.generated.resources.study_stop_audio
 import slovymovyapp.composeapp.generated.resources.study_swipe_back_to_rate
@@ -975,7 +976,7 @@ private fun ClozeFront(
                     )
                 } else {
                     HintRevealPill(
-                        contentDescription = stringResource(Res.string.study_hint_show_description),
+                        contentDescription = stringResource(Res.string.study_hint_show_translation_description),
                         onReveal = onRevealTranslationHint,
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                     )
