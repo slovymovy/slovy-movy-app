@@ -581,6 +581,8 @@
     <string name="study_play_prompt_audio">Воспроизвести задание</string>
     <string name="study_stop_audio">Остановить аудио</string>
     <string name="study_listen_prompt">Нажмите для воспроизведения. Какое слово вы слышите?</string>
+    <string name="study_cant_listen_now">Не могу сейчас слушать</string>
+    <string name="study_listening_postponed_message">Карточки на аудирование отложены до следующего повторения</string>
     <plurals name="study_hint_starts_with">
         <item quantity="one">Подсказка: начинается на %1$s, %2$d буква</item>
         <item quantity="few">Подсказка: начинается на %1$s, %2$d буквы</item>

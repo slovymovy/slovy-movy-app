@@ -36,14 +36,30 @@ class SessionService(
     private val clock: Clock,
     private val translationTargets: suspend (Language) -> List<Language> = { emptyList() },
 ) {
-    fun nextCard(langCode: String, sessionStartedAt: Instant): Flow<SessionCard?> = flow {
+    fun nextCard(langCode: String, sessionStartedAt: Instant): Flow<SessionCard?> =
+        nextCard(
+            langCode = langCode,
+            sessionStartedAt = sessionStartedAt,
+            excludedFamilies = emptySet(),
+        )
+
+    fun nextCard(
+        langCode: String,
+        sessionStartedAt: Instant,
+        excludedFamilies: Set<CardFamily>,
+    ): Flow<SessionCard?> = flow {
         PerformanceMonitoring.startTrace("session_next_card").useWithResult(successResult = "empty") {
             putAttribute("lang", langCode)
             var attemptedCandidates = 0L
             var loadingEmissions = 0L
             try {
                 val now = clock.now().toEpochMilliseconds()
-                val candidates = nextCandidates(langCode, now, sessionStartedAt.toEpochMilliseconds())
+                val candidates = nextCandidates(
+                    langCode = langCode,
+                    now = now,
+                    sessionStartedAt = sessionStartedAt.toEpochMilliseconds(),
+                    excludedFamilies = excludedFamilies,
+                )
                 putMetric("candidates", candidates.size.toLong())
                 for (card in candidates) {
                     attemptedCandidates += 1
@@ -237,6 +253,7 @@ class SessionService(
         langCode: String,
         now: Long,
         sessionStartedAt: Long,
+        excludedFamilies: Set<CardFamily>,
     ): List<Card> {
         val limit = config.selectionCandidateLimit.toLong()
         val recentReviews = learning.selectRecentReviewedCards(langCode, sessionStartedAt, RECENT_LIMIT.toLong())
@@ -259,6 +276,7 @@ class SessionService(
             )
 
         return candidates
+            .filterNot { it.family in excludedFamilies }
             .map { it to priority(it, now, recentReviews) }
             .filter { (_, score) -> score > -HARD_EXCLUDE / 2 }
             .sortedByDescending { (_, score) -> score }
@@ -521,7 +539,6 @@ class SessionService(
             family = unlockFamily,
             now = now,
             due = delayedEpochMs(now, creditDelay(inheritedStability, CreditDirection.FORWARD)),
-            state = CardState.LEARNING,
             stability = inheritedStability,
             difficulty = after.difficulty,
             availableAfter = delayedEpochMs(now, sameSenseExposureCooldown(after)),
@@ -533,7 +550,6 @@ class SessionService(
         family: CardFamily,
         now: Long,
         due: Long,
-        state: CardState,
         stability: Double,
         difficulty: Double,
         availableAfter: Long?,
@@ -549,7 +565,7 @@ class SessionService(
             lemma_id = source.lemmaId,
             lang_code = source.langCode,
             family = family,
-            state = state,
+            state = CardState.LEARNING,
             stability = stability,
             difficulty = difficulty,
             due = due,

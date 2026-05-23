@@ -17,6 +17,7 @@ import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
@@ -70,6 +71,7 @@ class StudySessionViewModel(
     private val gradeCounts = mutableMapOf<StudyRating, Int>()
     private var autoplayEnabled: Boolean = false
     private var pendingRemovalFavorite: Favorite? = null
+    private var postponeListeningCardsForSession: Boolean = false
 
     init {
         ttsManager.addOnStatusChangeListener(this) { status ->
@@ -166,7 +168,6 @@ class StudySessionViewModel(
         autoplayEnabled = !autoplayEnabled
         state = active.copy(
             isAutoplayEnabled = autoplayEnabled,
-            isOverflowMenuOpen = false,
         )
         if (autoplayEnabled) {
             autoplayAudioText(active.card)?.let { playAudio(text = it, logClick = false) }
@@ -185,6 +186,19 @@ class StudySessionViewModel(
             currentOutcomes = emptyList()
             loadNextCard()
             snackbarHostState.showSnackbar(suspendedMessage)
+        }
+    }
+
+    fun postponeListeningCards(postponedMessage: String) {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.card !is StudyCardUiState.Listening) return
+        postponeListeningCardsForSession = true
+        currentCard = null
+        currentOutcomes = emptyList()
+        state = active.copy(isPreparingAudio = false, isPlayingAudio = false)
+        loadNextCard()
+        viewModelScope.launch {
+            snackbarHostState.showSnackbar(postponedMessage)
         }
     }
 
@@ -237,7 +251,7 @@ class StudySessionViewModel(
             val result = snackbarHostState.showSnackbar(
                 message = removedMessage,
                 actionLabel = undoLabel,
-                duration = SnackbarDuration.Long,
+                duration = SnackbarDuration.Short,
             )
             if (result == SnackbarResult.ActionPerformed) {
                 favoritesRepository.add(favorite.senseId, favorite.language, favorite.lemma, favorite.createdAt)
@@ -373,7 +387,11 @@ class StudySessionViewModel(
                     state = StudySessionUiState.Loading(nextCardProgress())
                 }
                 try {
-                    sessionService.nextCard(langCode, sessionStartedAt)
+                    sessionService.nextCard(
+                        langCode = langCode,
+                        sessionStartedAt = sessionStartedAt,
+                        excludedFamilies = excludedCardFamiliesForSession(),
+                    )
                         .collect { sessionCard ->
                             when (sessionCard?.loadState()) {
                                 null -> {
@@ -457,6 +475,13 @@ class StudySessionViewModel(
             is StudyCardUiState.Production,
             is StudyCardUiState.Cloze,
                 -> null
+        }
+
+    private fun excludedCardFamiliesForSession(): Set<CardFamily> =
+        if (postponeListeningCardsForSession) {
+            setOf(CardFamily.RECOGNIZE_VOICE)
+        } else {
+            emptySet()
         }
 
     private suspend fun nextCardProgress(): StudySessionProgressUiState {

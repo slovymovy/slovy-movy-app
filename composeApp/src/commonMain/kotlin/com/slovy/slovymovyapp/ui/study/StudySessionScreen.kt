@@ -94,6 +94,7 @@ import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.ui.SpeakerOffVector
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.icons.ImageOtterSessionComplete
@@ -128,7 +129,9 @@ import slovymovyapp.composeapp.generated.resources.study_empty_title
 import slovymovyapp.composeapp.generated.resources.study_error_title
 import slovymovyapp.composeapp.generated.resources.study_chip_fill_in
 import slovymovyapp.composeapp.generated.resources.study_chip_listen
+import slovymovyapp.composeapp.generated.resources.study_cant_listen_now
 import slovymovyapp.composeapp.generated.resources.study_listen_prompt
+import slovymovyapp.composeapp.generated.resources.study_listening_postponed_message
 import slovymovyapp.composeapp.generated.resources.study_loading
 import slovymovyapp.composeapp.generated.resources.study_multi_sense_front_hint
 import slovymovyapp.composeapp.generated.resources.study_play_prompt_audio
@@ -166,6 +169,7 @@ fun StudySessionScreen(
         onRate = viewModel::rate,
         onPlayAudio = viewModel::playAudio,
         onStopAudio = viewModel::stopAudio,
+        onPostponeListeningCards = viewModel::postponeListeningCards,
         onRetry = viewModel::retry,
         onViewedSenseChange = viewModel::setViewedSense,
         onOpenOverflowMenu = viewModel::openOverflowMenu,
@@ -189,6 +193,7 @@ fun StudySessionScreenContent(
     onRate: (StudyRating) -> Unit = {},
     onPlayAudio: (String) -> Unit = {},
     onStopAudio: () -> Unit = {},
+    onPostponeListeningCards: (String) -> Unit = {},
     onRetry: () -> Unit = {},
     onViewedSenseChange: (String) -> Unit = {},
     onOpenOverflowMenu: () -> Unit = {},
@@ -275,6 +280,7 @@ fun StudySessionScreenContent(
             onRate = onRate,
             onPlayAudio = onPlayAudio,
             onStopAudio = onStopAudio,
+            onPostponeListeningCards = onPostponeListeningCards,
             onViewedSenseChange = onViewedSenseChange,
             onOpenOverflowMenu = onOpenOverflowMenu,
             onDismissOverflowMenu = onDismissOverflowMenu,
@@ -508,6 +514,7 @@ private fun StudySessionActiveContent(
     onRate: (StudyRating) -> Unit,
     onPlayAudio: (String) -> Unit,
     onStopAudio: () -> Unit,
+    onPostponeListeningCards: (String) -> Unit,
     onViewedSenseChange: (String) -> Unit,
     onOpenOverflowMenu: () -> Unit,
     onDismissOverflowMenu: () -> Unit,
@@ -527,6 +534,7 @@ private fun StudySessionActiveContent(
         Res.string.study_suspend_message,
         state.card.studyWord(),
     )
+    val listeningPostponedMessage = stringResource(Res.string.study_listening_postponed_message)
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
@@ -556,6 +564,7 @@ private fun StudySessionActiveContent(
                     isPreparingAudio = state.isPreparingAudio,
                     onPlayAudio = onPlayAudio,
                     onStopAudio = onStopAudio,
+                    onPostponeListeningCards = { onPostponeListeningCards(listeningPostponedMessage) },
                     onReveal = onReveal,
                     viewedSenseId = viewedSenseId,
                     onViewedSenseChange = onViewedSenseChange,
@@ -657,7 +666,8 @@ private fun StudySessionSnackbar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AppSpacing.lg, vertical = 14.dp),
+                .heightIn(min = 48.dp)
+                .padding(horizontal = AppSpacing.lg, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -674,7 +684,8 @@ private fun StudySessionSnackbar(
                 TextButton(
                     onClick = data::performAction,
                     shape = MaterialTheme.shapes.small,
-                    contentPadding = PaddingValues(horizontal = AppSpacing.xs, vertical = 2.dp),
+                    modifier = Modifier.height(32.dp),
+                    contentPadding = PaddingValues(horizontal = AppSpacing.xs, vertical = 0.dp),
                 ) {
                     Text(
                         text = actionLabel.uppercase(),
@@ -983,6 +994,7 @@ private fun StudyCardSurface(
     isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
     onStopAudio: () -> Unit,
+    onPostponeListeningCards: () -> Unit,
     onReveal: () -> Unit,
     viewedSenseId: String?,
     onViewedSenseChange: (String) -> Unit,
@@ -1025,6 +1037,7 @@ private fun StudyCardSurface(
                         isPreparingAudio = isPreparingAudio,
                         onPlayAudio = onPlayAudio,
                         onStopAudio = onStopAudio,
+                        onPostponeListeningCards = onPostponeListeningCards,
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 360.dp),
@@ -1197,6 +1210,7 @@ private fun StudyCardFront(
     isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
     onStopAudio: () -> Unit,
+    onPostponeListeningCards: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (card) {
@@ -1225,6 +1239,7 @@ private fun StudyCardFront(
             isPreparingAudio = isPreparingAudio,
             onPlayAudio = onPlayAudio,
             onStopAudio = onStopAudio,
+            onPostponeListeningCards = onPostponeListeningCards,
             modifier = modifier,
         )
     }
@@ -1363,6 +1378,7 @@ private fun ListeningFront(
     isPreparingAudio: Boolean,
     onPlayAudio: (String) -> Unit,
     onStopAudio: () -> Unit,
+    onPostponeListeningCards: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -1371,7 +1387,7 @@ private fun ListeningFront(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.xl),
         ) {
             Surface(
                 modifier = Modifier
@@ -1404,20 +1420,57 @@ private fun ListeningFront(
                     }
                 }
             }
-            Text(
-                text = stringResource(Res.string.study_listen_prompt),
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontFamily = MaterialTheme.serifFontFamily,
-                    fontSize = 13.5.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontStyle = FontStyle.Normal,
-                    lineHeight = 19.sp,
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-            ListeningMultiSenseByline(card = card)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.study_listen_prompt),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontSize = 13.5.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontStyle = FontStyle.Normal,
+                        lineHeight = 19.sp,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+                ListeningMultiSenseByline(card = card)
+            }
+            CantListenNowButton(onClick = onPostponeListeningCards)
         }
+    }
+}
+
+@Composable
+private fun CantListenNowButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier,
+        shape = CircleShape,
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.18f)),
+        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp),
+    ) {
+        Icon(
+            imageVector = SpeakerOffVector,
+            contentDescription = null,
+            modifier = Modifier.size(15.dp),
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = stringResource(Res.string.study_cant_listen_now),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 0.1.sp,
+        )
     }
 }
 

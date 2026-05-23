@@ -37,6 +37,31 @@ internal val SpeakerVector: ImageVector = ImageVector.Builder(
     )
 }.build()
 
+internal val SpeakerOffVector: ImageVector = ImageVector.Builder(
+    name = "SpeakerOff",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f
+).apply {
+    addPath(
+        pathData = parsePathNodes("M11 5L6 9H2v6h4l5 4V5z"),
+        fill = null,
+        stroke = strokeRound,
+        strokeLineWidth = 2f,
+        strokeLineCap = StrokeCap.Round,
+        strokeLineJoin = StrokeJoin.Round
+    )
+    addPath(
+        pathData = parsePathNodes("M22 9l-6 6M16 9l6 6"),
+        fill = null,
+        stroke = strokeRound,
+        strokeLineWidth = 2f,
+        strokeLineCap = StrokeCap.Round,
+        strokeLineJoin = StrokeJoin.Round
+    )
+}.build()
+
 internal val StatsFilledVector: ImageVector = ImageVector.Builder(
     name = "StatsFilled",
     defaultWidth = 24.dp,
