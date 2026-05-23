@@ -20,6 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.AppBuildConfig
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
@@ -67,7 +69,14 @@ private fun AboutSectionContent(
                         StoreReviewTarget.APP_STORE -> stringResource(Res.string.about_review_app_store_title)
                     },
                     subtitle = stringResource(Res.string.about_review_subtitle),
-                    onClick = { onReview(reviewUrl) }
+                    onClick = {
+                        val platform = when (reviewTarget) {
+                            StoreReviewTarget.GOOGLE_PLAY -> "android"
+                            StoreReviewTarget.APP_STORE -> "ios"
+                        }
+                        Analytics.logEvent(AnalyticsEvent.REVIEW_APP_CLICK, mapOf("platform" to platform))
+                        onReview(reviewUrl)
+                    }
                 )
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = AppSpacing.lg),
