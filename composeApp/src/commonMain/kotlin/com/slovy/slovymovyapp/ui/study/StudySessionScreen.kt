@@ -34,18 +34,29 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material.icons.Icons
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.StopCircle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -95,8 +106,21 @@ import slovymovyapp.composeapp.generated.resources.guess_by_context
 import slovymovyapp.composeapp.generated.resources.study_action_close
 import slovymovyapp.composeapp.generated.resources.study_action_done_for_now
 import slovymovyapp.composeapp.generated.resources.study_action_retry
+import slovymovyapp.composeapp.generated.resources.study_actions_autoplay
+import slovymovyapp.composeapp.generated.resources.study_actions_autoplay_description
+import slovymovyapp.composeapp.generated.resources.study_actions_autoplay_on
+import slovymovyapp.composeapp.generated.resources.study_actions_menu
+import slovymovyapp.composeapp.generated.resources.study_actions_remove
+import slovymovyapp.composeapp.generated.resources.study_actions_suspend
+import slovymovyapp.composeapp.generated.resources.study_actions_suspend_description
 import slovymovyapp.composeapp.generated.resources.study_complete_description
 import slovymovyapp.composeapp.generated.resources.study_complete_supporting
+import slovymovyapp.composeapp.generated.resources.study_remove_cancel
+import slovymovyapp.composeapp.generated.resources.study_remove_confirm
+import slovymovyapp.composeapp.generated.resources.study_remove_message
+import slovymovyapp.composeapp.generated.resources.study_remove_removed_message
+import slovymovyapp.composeapp.generated.resources.study_remove_title
+import slovymovyapp.composeapp.generated.resources.study_remove_undo
 import slovymovyapp.composeapp.generated.resources.study_empty_description
 import slovymovyapp.composeapp.generated.resources.study_empty_title
 import slovymovyapp.composeapp.generated.resources.study_error_title
@@ -132,6 +156,7 @@ fun StudySessionScreen(
     StudySessionScreenContent(
         state = viewModel.state,
         completeScrollState = viewModel.completeScrollState,
+        snackbarHostState = viewModel.snackbarHostState,
         onCancel = onCancel,
         onEnd = onEnd,
         onReveal = viewModel::reveal,
@@ -140,6 +165,13 @@ fun StudySessionScreen(
         onStopAudio = viewModel::stopAudio,
         onRetry = viewModel::retry,
         onViewedSenseChange = viewModel::setViewedSense,
+        onOpenOverflowMenu = viewModel::openOverflowMenu,
+        onDismissOverflowMenu = viewModel::dismissOverflowMenu,
+        onToggleAutoplay = viewModel::toggleAutoplay,
+        onPlaceholderAction = viewModel::selectPlaceholderAction,
+        onRequestRemoveFromLibrary = viewModel::requestRemoveFromLibrary,
+        onDismissRemoveConfirmation = viewModel::dismissRemoveConfirmation,
+        onConfirmRemoveFromLibrary = viewModel::confirmRemoveFromLibrary,
     )
 }
 
@@ -147,6 +179,7 @@ fun StudySessionScreen(
 fun StudySessionScreenContent(
     state: StudySessionUiState,
     completeScrollState: ScrollState = ScrollState(0),
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
     onCancel: () -> Unit,
     onEnd: () -> Unit,
     onReveal: () -> Unit = {},
@@ -155,6 +188,13 @@ fun StudySessionScreenContent(
     onStopAudio: () -> Unit = {},
     onRetry: () -> Unit = {},
     onViewedSenseChange: (String) -> Unit = {},
+    onOpenOverflowMenu: () -> Unit = {},
+    onDismissOverflowMenu: () -> Unit = {},
+    onToggleAutoplay: () -> Unit = {},
+    onPlaceholderAction: () -> Unit = {},
+    onRequestRemoveFromLibrary: () -> Unit = {},
+    onDismissRemoveConfirmation: () -> Unit = {},
+    onConfirmRemoveFromLibrary: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     when (state) {
@@ -164,6 +204,7 @@ fun StudySessionScreenContent(
                 StudySessionMessageScaffold(
                     modifier = modifier,
                     onClose = onCancel,
+                    snackbarHostState = snackbarHostState,
                 ) {
                     StudyLoadingIndicator()
                 }
@@ -171,6 +212,7 @@ fun StudySessionScreenContent(
                 StudySessionLoadingContent(
                     progress = progress,
                     onClose = onCancel,
+                    snackbarHostState = snackbarHostState,
                     modifier = modifier,
                 )
             }
@@ -179,6 +221,7 @@ fun StudySessionScreenContent(
         StudySessionUiState.Empty -> StudySessionMessageScaffold(
             modifier = modifier,
             onClose = onCancel,
+            snackbarHostState = snackbarHostState,
         ) {
             Text(
                 text = stringResource(Res.string.study_empty_title),
@@ -198,6 +241,7 @@ fun StudySessionScreenContent(
         is StudySessionUiState.Error -> StudySessionMessageScaffold(
             modifier = modifier,
             onClose = onCancel,
+            snackbarHostState = snackbarHostState,
         ) {
             Text(
                 text = stringResource(Res.string.study_error_title),
@@ -229,6 +273,14 @@ fun StudySessionScreenContent(
             onPlayAudio = onPlayAudio,
             onStopAudio = onStopAudio,
             onViewedSenseChange = onViewedSenseChange,
+            onOpenOverflowMenu = onOpenOverflowMenu,
+            onDismissOverflowMenu = onDismissOverflowMenu,
+            onToggleAutoplay = onToggleAutoplay,
+            onPlaceholderAction = onPlaceholderAction,
+            onRequestRemoveFromLibrary = onRequestRemoveFromLibrary,
+            onDismissRemoveConfirmation = onDismissRemoveConfirmation,
+            onConfirmRemoveFromLibrary = onConfirmRemoveFromLibrary,
+            snackbarHostState = snackbarHostState,
             modifier = modifier,
         )
 
@@ -237,6 +289,7 @@ fun StudySessionScreenContent(
             message = state.message,
             scrollState = completeScrollState,
             onClose = onEnd,
+            snackbarHostState = snackbarHostState,
             modifier = modifier,
         )
     }
@@ -246,11 +299,13 @@ fun StudySessionScreenContent(
 private fun StudySessionLoadingContent(
     progress: StudySessionProgressUiState,
     onClose: () -> Unit,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -261,6 +316,8 @@ private fun StudySessionLoadingContent(
             StudySessionTopBar(
                 progress = progress,
                 onClose = onClose,
+                isAutoplayEnabled = false,
+                onOpenActions = null,
             )
             Spacer(Modifier.height(AppSpacing.md))
             StudyProgressBar(progress = progress)
@@ -301,11 +358,13 @@ private fun StudySessionCompleteContent(
     message: String,
     scrollState: ScrollState,
     onClose: () -> Unit,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -316,6 +375,8 @@ private fun StudySessionCompleteContent(
             StudySessionTopBar(
                 progress = null,
                 onClose = onClose,
+                isAutoplayEnabled = false,
+                onOpenActions = null,
             )
             Box(
                 modifier = Modifier
@@ -403,12 +464,14 @@ private fun StudyLoadingIndicator() {
 @Composable
 private fun StudySessionMessageScaffold(
     onClose: () -> Unit,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -419,6 +482,8 @@ private fun StudySessionMessageScaffold(
             StudySessionTopBar(
                 progress = null,
                 onClose = onClose,
+                isAutoplayEnabled = false,
+                onOpenActions = null,
             )
             Column(
                 modifier = Modifier
@@ -441,6 +506,14 @@ private fun StudySessionActiveContent(
     onPlayAudio: (String) -> Unit,
     onStopAudio: () -> Unit,
     onViewedSenseChange: (String) -> Unit,
+    onOpenOverflowMenu: () -> Unit,
+    onDismissOverflowMenu: () -> Unit,
+    onToggleAutoplay: () -> Unit,
+    onPlaceholderAction: () -> Unit,
+    onRequestRemoveFromLibrary: () -> Unit,
+    onDismissRemoveConfirmation: () -> Unit,
+    onConfirmRemoveFromLibrary: (String, String) -> Unit,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
     val originalSenseId = state.card.activeSenseId
@@ -448,59 +521,80 @@ private fun StudySessionActiveContent(
     val isOnOriginalSense = !state.card.hasMultiSense ||
         viewedSenseId == originalSenseId
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
-        ) {
-            StudySessionTopBar(
-                progress = state.progress,
-                onClose = onClose,
-            )
-            Spacer(Modifier.height(AppSpacing.md))
-            StudyProgressBar(progress = state.progress)
-            Spacer(Modifier.height(AppSpacing.md))
-            StudyCardSurface(
-                card = state.card,
-                side = state.side,
-                isPlayingAudio = state.isPlayingAudio,
-                isPreparingAudio = state.isPreparingAudio,
-                onPlayAudio = onPlayAudio,
-                onStopAudio = onStopAudio,
-                onReveal = onReveal,
-                viewedSenseId = viewedSenseId,
-                onViewedSenseChange = onViewedSenseChange,
+    Box(modifier = modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = MaterialTheme.colorScheme.background,
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        ) { innerPadding ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-            )
-            Spacer(Modifier.height(AppSpacing.md))
-            Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
-                if (state.side == StudyCardSide.BACK) {
-                    if (isOnOriginalSense) {
-                        StudyRatingRow(
-                            ratings = state.ratingOptions,
-                            enabled = !state.isSubmittingReview,
-                            onRate = onRate,
-                            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(Res.string.study_swipe_back_to_rate),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontStyle = FontStyle.Italic,
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                        )
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
+            ) {
+                StudySessionTopBar(
+                    progress = state.progress,
+                    onClose = onClose,
+                    isAutoplayEnabled = state.isAutoplayEnabled,
+                    onOpenActions = onOpenOverflowMenu,
+                )
+                Spacer(Modifier.height(AppSpacing.md))
+                StudyProgressBar(progress = state.progress)
+                Spacer(Modifier.height(AppSpacing.md))
+                StudyCardSurface(
+                    card = state.card,
+                    side = state.side,
+                    isPlayingAudio = state.isPlayingAudio,
+                    isPreparingAudio = state.isPreparingAudio,
+                    onPlayAudio = onPlayAudio,
+                    onStopAudio = onStopAudio,
+                    onReveal = onReveal,
+                    viewedSenseId = viewedSenseId,
+                    onViewedSenseChange = onViewedSenseChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                )
+                Spacer(Modifier.height(AppSpacing.md))
+                Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
+                    if (state.side == StudyCardSide.BACK) {
+                        if (isOnOriginalSense) {
+                            StudyRatingRow(
+                                ratings = state.ratingOptions,
+                                enabled = !state.isSubmittingReview,
+                                onRate = onRate,
+                                modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(Res.string.study_swipe_back_to_rate),
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontStyle = FontStyle.Italic,
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     }
                 }
             }
+        }
+        if (state.isOverflowMenuOpen) {
+            StudySessionOverflowSheet(
+                autoplayEnabled = state.isAutoplayEnabled,
+                onToggleAutoplay = onToggleAutoplay,
+                onPlaceholderAction = onPlaceholderAction,
+                onRequestRemoveFromLibrary = onRequestRemoveFromLibrary,
+                onDismiss = onDismissOverflowMenu,
+            )
+        }
+        state.removeConfirmation?.let { confirmation ->
+            StudyRemoveConfirmationDialog(
+                confirmation = confirmation,
+                onDismiss = onDismissRemoveConfirmation,
+                onConfirm = onConfirmRemoveFromLibrary,
+            )
         }
     }
 }
@@ -509,6 +603,8 @@ private fun StudySessionActiveContent(
 private fun StudySessionTopBar(
     progress: StudySessionProgressUiState?,
     onClose: () -> Unit,
+    isAutoplayEnabled: Boolean,
+    onOpenActions: (() -> Unit)?,
 ) {
     Row(
         modifier = Modifier
@@ -523,22 +619,246 @@ private fun StudySessionTopBar(
             )
         }
         if (progress != null) {
-            Text(
-                text = stringResource(
-                    Res.string.study_progress_count,
-                    progress.safeCurrent,
-                    progress.safeTotal,
-                ),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
+            StudySessionProgressLabel(
+                progress = progress,
+                isAutoplayEnabled = isAutoplayEnabled,
                 modifier = Modifier.weight(1f),
             )
         } else {
             Spacer(Modifier.weight(1f))
         }
-        Spacer(Modifier.size(48.dp))
+        if (onOpenActions != null) {
+            IconButton(onClick = onOpenActions) {
+                Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = stringResource(Res.string.study_actions_menu),
+                )
+            }
+        } else {
+            Spacer(Modifier.size(48.dp))
+        }
     }
+}
+
+@Composable
+private fun StudySessionProgressLabel(
+    progress: StudySessionProgressUiState,
+    isAutoplayEnabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (isAutoplayEnabled) {
+            Icon(
+                imageVector = SpeakerVector,
+                contentDescription = stringResource(Res.string.study_actions_autoplay_on),
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.width(6.dp))
+        }
+        Text(
+            text = stringResource(
+                Res.string.study_progress_count,
+                progress.safeCurrent,
+                progress.safeTotal,
+            ),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun StudySessionOverflowSheet(
+    autoplayEnabled: Boolean,
+    onToggleAutoplay: () -> Unit,
+    onPlaceholderAction: () -> Unit,
+    onRequestRemoveFromLibrary: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.4f))
+            .clickable(onClick = onDismiss),
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 0.dp,
+            shadowElevation = 8.dp,
+        ) {
+            Column(
+                modifier = Modifier.padding(top = AppSpacing.sm, bottom = AppSpacing.lg),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(32.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)),
+                )
+                Spacer(Modifier.height(AppSpacing.sm))
+                StudyOverflowMenuItem(
+                    icon = {
+                        Icon(
+                            imageVector = SpeakerVector,
+                            contentDescription = null,
+                        )
+                    },
+                    label = stringResource(Res.string.study_actions_autoplay),
+                    supporting = stringResource(Res.string.study_actions_autoplay_description),
+                    trailing = {
+                        Switch(
+                            checked = autoplayEnabled,
+                            onCheckedChange = { onToggleAutoplay() },
+                        )
+                    },
+                    onClick = onToggleAutoplay,
+                )
+                StudyOverflowMenuItem(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.PauseCircle,
+                            contentDescription = null,
+                        )
+                    },
+                    label = stringResource(Res.string.study_actions_suspend),
+                    supporting = stringResource(Res.string.study_actions_suspend_description),
+                    onClick = onPlaceholderAction,
+                )
+                StudyOverflowMenuItem(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = null,
+                        )
+                    },
+                    label = stringResource(Res.string.study_actions_remove),
+                    destructive = true,
+                    onClick = onRequestRemoveFromLibrary,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StudyRemoveConfirmationDialog(
+    confirmation: StudyRemoveConfirmationUiState,
+    onDismiss: () -> Unit,
+    onConfirm: (String, String) -> Unit,
+) {
+    val removedMessage = stringResource(Res.string.study_remove_removed_message, confirmation.lemma)
+    val undoLabel = stringResource(Res.string.study_remove_undo)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(Res.string.study_remove_title, confirmation.lemma),
+                style = MaterialTheme.typography.headlineSmall,
+                fontFamily = MaterialTheme.serifFontFamily,
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(Res.string.study_remove_message),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(removedMessage, undoLabel) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                ),
+            ) {
+                Text(stringResource(Res.string.study_remove_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.study_remove_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun StudyOverflowMenuItem(
+    icon: @Composable () -> Unit,
+    label: String,
+    onClick: () -> Unit,
+    supporting: String? = null,
+    trailing: (@Composable () -> Unit)? = null,
+    destructive: Boolean = false,
+) {
+    val contentColor = if (destructive) {
+        MaterialTheme.colorScheme.error
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+    val supportingColor = if (destructive) {
+        MaterialTheme.colorScheme.error.copy(alpha = 0.72f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(24.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            CompositionLocalProviderForIconTint(contentColor) {
+                icon()
+            }
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = contentColor,
+            )
+            supporting?.let { text ->
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = supportingColor,
+                )
+            }
+        }
+        trailing?.invoke()
+    }
+}
+
+@Composable
+private fun CompositionLocalProviderForIconTint(
+    tint: Color,
+    content: @Composable () -> Unit,
+) {
+    CompositionLocalProvider(LocalContentColor provides tint, content = content)
 }
 
 @Composable

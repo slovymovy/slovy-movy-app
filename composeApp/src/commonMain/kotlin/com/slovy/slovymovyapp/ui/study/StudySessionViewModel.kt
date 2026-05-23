@@ -1,6 +1,9 @@
 package com.slovy.slovymovyapp.ui.study
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,6 +15,8 @@ import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.favorites.Favorite
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
@@ -35,6 +40,7 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 class StudySessionViewModel(
     private val langCode: String,
+    private val favoritesRepository: FavoritesRepository,
     private val intakeService: IntakeService,
     private val sessionService: SessionService,
     private val statsService: StatsService,
@@ -42,11 +48,13 @@ class StudySessionViewModel(
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
     private val onReviewSubmitted: () -> Unit,
+    private val onFavoriteChanged: (Language) -> Unit,
 ) : ViewModel() {
 
     var state by mutableStateOf<StudySessionUiState>(StudySessionUiState.Loading())
         private set
     val completeScrollState = ScrollState(0)
+    val snackbarHostState = SnackbarHostState()
 
     private val language: Language? = Language.fromCodeOrNull(langCode)
     private val sessionStartedAt: Instant = clock.now()
@@ -54,10 +62,13 @@ class StudySessionViewModel(
     private var currentCard: SessionCard? = null
     private var currentOutcomes: List<GradeOutcome> = emptyList()
     private var reviewedCount: Int = 0
+    private var skippedCount: Int = 0
     private var sessionTotal: Int = 0
     private var availableVoices: List<Text2SpeechVoice> = emptyList()
     private var currentVoiceIndex: Int = 0
     private val gradeCounts = mutableMapOf<StudyRating, Int>()
+    private var autoplayEnabled: Boolean = false
+    private var pendingRemovalFavorite: Favorite? = null
 
     init {
         ttsManager.addOnStatusChangeListener(this) { status ->
@@ -98,11 +109,17 @@ class StudySessionViewModel(
     }
 
     fun playAudio(text: String) {
+        playAudio(text = text, logClick = true)
+    }
+
+    private fun playAudio(text: String, logClick: Boolean) {
         val active = state as? StudySessionUiState.Active ?: return
-        Analytics.logEvent(
-            AnalyticsEvent.WORD_PLAY_CLICK,
-            mapOf("lang" to langCode, "source" to "study"),
-        )
+        if (logClick) {
+            Analytics.logEvent(
+                AnalyticsEvent.WORD_PLAY_CLICK,
+                mapOf("lang" to langCode, "source" to "study"),
+            )
+        }
         state = active.copy(isPreparingAudio = true, isPlayingAudio = false)
         viewModelScope.launch {
             try {
@@ -129,6 +146,94 @@ class StudySessionViewModel(
                 )
                 val latest = state as? StudySessionUiState.Active ?: return@launch
                 state = latest.copy(isPreparingAudio = false, isPlayingAudio = false)
+            }
+        }
+    }
+
+    fun openOverflowMenu() {
+        val active = state as? StudySessionUiState.Active ?: return
+        state = active.copy(isOverflowMenuOpen = true, removeConfirmation = null)
+    }
+
+    fun dismissOverflowMenu() {
+        val active = state as? StudySessionUiState.Active ?: return
+        state = active.copy(isOverflowMenuOpen = false)
+    }
+
+    fun toggleAutoplay() {
+        val active = state as? StudySessionUiState.Active ?: return
+        autoplayEnabled = !autoplayEnabled
+        state = active.copy(
+            isAutoplayEnabled = autoplayEnabled,
+            isOverflowMenuOpen = false,
+        )
+        if (autoplayEnabled) {
+            autoplayAudioText(active.card)?.let { playAudio(text = it, logClick = false) }
+        }
+    }
+
+    fun selectPlaceholderAction() {
+        dismissOverflowMenu()
+    }
+
+    fun requestRemoveFromLibrary() {
+        val active = state as? StudySessionUiState.Active ?: return
+        val card = currentCard ?: return
+        val lang = Language.fromCodeOrNull(card.card.langCode) ?: return
+        state = active.copy(isOverflowMenuOpen = false)
+        viewModelScope.launch {
+            val favorite = favoritesRepository.getOne(card.card.senseId.toString(), lang)
+            val latest = state as? StudySessionUiState.Active ?: return@launch
+            if (favorite == null) {
+                loadNextCard()
+                return@launch
+            }
+            pendingRemovalFavorite = favorite
+            state = latest.copy(removeConfirmation = StudyRemoveConfirmationUiState(favorite.lemma))
+        }
+    }
+
+    fun dismissRemoveConfirmation() {
+        pendingRemovalFavorite = null
+        val active = state as? StudySessionUiState.Active ?: return
+        state = active.copy(removeConfirmation = null)
+    }
+
+    fun confirmRemoveFromLibrary(
+        removedMessage: String,
+        undoLabel: String,
+    ) {
+        val favorite = pendingRemovalFavorite ?: return
+        pendingRemovalFavorite = null
+        val active = state as? StudySessionUiState.Active
+        if (active != null) {
+            state = active.copy(removeConfirmation = null, isOverflowMenuOpen = false)
+        }
+        viewModelScope.launch {
+            favoritesRepository.remove(favorite.senseId, favorite.language)
+            Analytics.logEvent(
+                AnalyticsEvent.FAVORITES_REMOVE,
+                mapOf("lang" to favorite.language.code, "source" to "study"),
+            )
+            onFavoriteChanged(favorite.language)
+            skippedCount += 1
+            sessionTotal = (sessionTotal - 1).coerceAtLeast(reviewedCount + skippedCount + 1)
+            currentCard = null
+            currentOutcomes = emptyList()
+            loadNextCard()
+
+            val result = snackbarHostState.showSnackbar(
+                message = removedMessage,
+                actionLabel = undoLabel,
+                duration = SnackbarDuration.Long,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                favoritesRepository.add(favorite.senseId, favorite.language, favorite.lemma, favorite.createdAt)
+                Analytics.logEvent(
+                    AnalyticsEvent.FAVORITES_SAVE,
+                    mapOf("lang" to favorite.language.code, "source" to "study_undo"),
+                )
+                onFavoriteChanged(favorite.language)
             }
         }
     }
@@ -326,12 +431,26 @@ class StudySessionViewModel(
             side = StudyCardSide.FRONT,
             ratingOptions = emptyList(),
             viewedSenseId = uiCard.activeSenseId,
+            isAutoplayEnabled = autoplayEnabled,
         )
+        if (autoplayEnabled) {
+            autoplayAudioText(uiCard)?.let { playAudio(text = it, logClick = false) }
+        }
     }
 
+    private fun autoplayAudioText(card: StudyCardUiState): String? =
+        when (card) {
+            is StudyCardUiState.Recognition -> card.promptAudioText
+            is StudyCardUiState.Listening -> card.promptAudioText
+            is StudyCardUiState.Production,
+            is StudyCardUiState.Cloze,
+                -> null
+        }
+
     private suspend fun nextCardProgress(): StudySessionProgressUiState {
-        val current = reviewedCount + 1
-        val projectedTotal = reviewedCount + statsService.dueNow(langCode)
+        val completedCount = reviewedCount + skippedCount
+        val current = completedCount + 1
+        val projectedTotal = completedCount + statsService.dueNow(langCode)
         sessionTotal = maxOf(sessionTotal, projectedTotal, current)
         return StudySessionProgressUiState(
             current = current,
