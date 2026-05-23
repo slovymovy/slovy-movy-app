@@ -1,0 +1,4 @@
+.aistudio_key*
+.openai_api_key
+.github_key
+/.claude/settings.local.json
