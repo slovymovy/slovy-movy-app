@@ -121,123 +121,66 @@ class IntakeService(
         val nowInstant = clock.now()
         val now = nowInstant.toEpochMilliseconds()
 
-        val pauseReason = pendingFavoritePauseReason(langCode, nowInstant)
-        if (pauseReason != null) {
-            return IntakeResult(emptyList(), listOf(pauseReason), 0)
-        }
-
         val timeZone = TimeZone.currentSystemDefault()
         val startOfToday = nowInstant.toLocalDateTime(timeZone).date
             .atStartOfDayIn(timeZone)
             .toEpochMilliseconds()
-        var remainingDailyTaskFamilies: Int? = null
-        if (mode == IntakeRunMode.DAILY) {
-            val addedToday = learning.countNewCardsCreatedSince(langCode, startOfToday).executeAsOne()
-            remainingDailyTaskFamilies = config.dailyNewTaskFamilyBudget - addedToday.toInt()
-            if (remainingDailyTaskFamilies <= 0) {
-                return IntakeResult(emptyList(), listOf(SkipReason.BUDGET_EXHAUSTED), 0)
-            }
-        }
 
         val familiesPerSense = config.defaultIntakeFamilies.size
         val pendingLemmaLimit = when (mode) {
-            IntakeRunMode.DAILY -> requireNotNull(remainingDailyTaskFamilies) * 10
+            IntakeRunMode.DAILY -> maxOf(
+                config.dailyNewTaskFamilyBudget,
+                config.continueNowPendingLemmaLimit,
+            ) * 10
             IntakeRunMode.CONTINUE_NOW -> config.continueNowPendingLemmaLimit * 10
         }
-        val pendingLemmas = learning
+        val (extensions, newcomers) = learning
             .selectPendingActivationLemmas(langCode, pendingLemmaLimit.toLong())
             .executeAsList()
+            .partition { it.is_extension }
+
         val activated = mutableListOf<Uuid>()
         val skipped = mutableListOf<SkipReason>()
         val invalidatedSenses = mutableSetOf<String>()
         var cardsCreated = 0
-        var activatedLemmaCount = 0
 
-        for (row in pendingLemmas) {
-            if (mode == IntakeRunMode.CONTINUE_NOW && activatedLemmaCount >= config.continueNowPendingLemmaLimit) {
-                break
-            }
+        suspend fun apply(lemma: String) {
+            val outcome = activateLemma(lemma, langCode, language, translationTargets, now)
+            skipped += outcome.skipped
+            invalidatedSenses += outcome.activatedSenses.map { it.toString() }
+            activated += outcome.activatedSenses
+            cardsCreated += outcome.cardsCreated
+        }
 
-            val upperBoundCards = row.pending_count.toInt() * familiesPerSense
-            if (remainingDailyTaskFamilies != null && upperBoundCards > remainingDailyTaskFamilies) {
-                skipped += SkipReason.BUDGET_EXHAUSTED
-                continue
-            }
+        for (row in extensions) apply(row.lemma)
 
-            val group = learning.selectPendingActivationByLemma(langCode, row.lemma).executeAsList()
-            if (group.isEmpty()) continue
-
-            val languageCard = dictionary.getLanguageCard(
-                language = language,
-                lemma = row.lemma,
-                translationTargets = translationTargets,
-                senseIds = group.mapTo(mutableSetOf()) { it.sense_id },
-            )
-            if (languageCard == null) {
-                skipped += SkipReason.CARD_DATA_UNAVAILABLE
-                continue
-            }
-            val sensesById = languageCard.entries
-                .flatMap { it.senses }
-                .associateBy { it.senseId }
-
-            val groupPlan = mutableListOf<IntakePlanItem>()
-            for (favorite in group) {
-                val sense = sensesById[favorite.sense_id]
-                if (sense == null) {
-                    skipped += SkipReason.CARD_DATA_UNAVAILABLE
-                    continue
-                }
-                val tasksToCreate = config.defaultIntakeFamilies.mapNotNull { family ->
-                    val variants = buildTaskVariants(family, sense, translationTargets)
-                    if (variants.isEmpty()) null else family
-                }
-                if (tasksToCreate.isEmpty()) {
-                    skipped += SkipReason.NO_TASKS_VARIANT_AVAILABLE
-                    continue
-                }
-                groupPlan += IntakePlanItem(Uuid.parse(favorite.sense_id), tasksToCreate)
-            }
-
-            if (groupPlan.isEmpty()) continue
-            val groupTotal = groupPlan.sumOf { it.families.size }
-
-            val lemmaId = JsonIngestionBuilder.generateLemmaId(row.lemma)
-            val answerKey = row.lemma.lowercase()
-            learning.transaction {
-                groupPlan.forEach { item ->
-                    item.families.forEach { family ->
-                        learning.insertCard(
-                            id = Uuid.random(),
-                            sense_id = item.senseId,
-                            lemma_id = lemmaId,
-                            lang_code = langCode,
-                            family = family,
-                            state = CardState.NEW,
-                            stability = 0.0,
-                            difficulty = 0.0,
-                            due = now,
-                            last_review = null,
-                            reps = 0,
-                            lapses = 0,
-                            created_at = now,
-                            available_after = null,
-                            answer_key = answerKey,
-                            suspended = false,
-                        )
+        if (newcomers.isNotEmpty()) {
+            when (val gate = newcomerGate(langCode, mode, nowInstant, startOfToday)) {
+                is NewcomerGate.Blocked -> skipped += gate.reason
+                is NewcomerGate.Open -> {
+                    var remainingDailyBudget = gate.dailyBudget
+                    var activatedLemmaCount = 0
+                    for (row in newcomers) {
+                        if (mode == IntakeRunMode.CONTINUE_NOW &&
+                            activatedLemmaCount >= config.continueNowPendingLemmaLimit
+                        ) break
+                        val upperBoundCards = row.pending_count.toInt() * familiesPerSense
+                        val budget = remainingDailyBudget
+                        if (budget != null && upperBoundCards > budget) {
+                            skipped += SkipReason.BUDGET_EXHAUSTED
+                            continue
+                        }
+                        val before = cardsCreated
+                        apply(row.lemma)
+                        val created = cardsCreated - before
+                        if (created == 0) continue
+                        if (budget != null) {
+                            remainingDailyBudget = budget - created
+                        } else {
+                            activatedLemmaCount += 1
+                        }
                     }
-                    learning.markFavoriteActivated(now, item.senseId.toString(), langCode)
                 }
-            }
-            groupPlan.forEach { item ->
-                invalidatedSenses += item.senseId.toString()
-                activated += item.senseId
-            }
-            cardsCreated += groupTotal
-            if (remainingDailyTaskFamilies != null) {
-                remainingDailyTaskFamilies -= groupTotal
-            } else {
-                activatedLemmaCount += 1
             }
         }
 
@@ -245,6 +188,103 @@ class IntakeService(
             dictionary.invalidateSenses(invalidatedSenses)
         }
         return IntakeResult(activated, skipped, cardsCreated)
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun newcomerGate(
+        langCode: String,
+        mode: IntakeRunMode,
+        nowInstant: Instant,
+        startOfToday: Long,
+    ): NewcomerGate {
+        val pauseReason = pendingFavoritePauseReason(langCode, nowInstant)
+        if (pauseReason != null) return NewcomerGate.Blocked(pauseReason)
+        if (mode != IntakeRunMode.DAILY) return NewcomerGate.Open(dailyBudget = null)
+        val addedToday = learning.countNewCardsCreatedSince(langCode, startOfToday).executeAsOne()
+        val remaining = config.dailyNewTaskFamilyBudget - addedToday.toInt()
+        return if (remaining <= 0) NewcomerGate.Blocked(SkipReason.BUDGET_EXHAUSTED)
+        else NewcomerGate.Open(dailyBudget = remaining)
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private suspend fun activateLemma(
+        lemma: String,
+        langCode: String,
+        language: Language,
+        translationTargets: List<Language>,
+        now: Long,
+    ): LemmaActivationOutcome {
+        val group = learning.selectPendingActivationByLemma(langCode, lemma).executeAsList()
+        if (group.isEmpty()) return LemmaActivationOutcome.EMPTY
+
+        val skipped = mutableListOf<SkipReason>()
+        val languageCard = dictionary.getLanguageCard(
+            language = language,
+            lemma = lemma,
+            translationTargets = translationTargets,
+            senseIds = group.mapTo(mutableSetOf()) { it.sense_id },
+        )
+        if (languageCard == null) {
+            skipped += SkipReason.CARD_DATA_UNAVAILABLE
+            return LemmaActivationOutcome(0, emptyList(), skipped)
+        }
+        val sensesById = languageCard.entries
+            .flatMap { it.senses }
+            .associateBy { it.senseId }
+
+        val groupPlan = mutableListOf<IntakePlanItem>()
+        for (favorite in group) {
+            val sense = sensesById[favorite.sense_id]
+            if (sense == null) {
+                skipped += SkipReason.CARD_DATA_UNAVAILABLE
+                continue
+            }
+            val tasksToCreate = config.defaultIntakeFamilies.mapNotNull { family ->
+                val variants = buildTaskVariants(family, sense, translationTargets)
+                if (variants.isEmpty()) null else family
+            }
+            if (tasksToCreate.isEmpty()) {
+                skipped += SkipReason.NO_TASKS_VARIANT_AVAILABLE
+                continue
+            }
+            groupPlan += IntakePlanItem(Uuid.parse(favorite.sense_id), tasksToCreate)
+        }
+
+        if (groupPlan.isEmpty()) return LemmaActivationOutcome(0, emptyList(), skipped)
+        val groupTotal = groupPlan.sumOf { it.families.size }
+
+        val lemmaId = JsonIngestionBuilder.generateLemmaId(lemma)
+        val answerKey = lemma.lowercase()
+        learning.transaction {
+            groupPlan.forEach { item ->
+                item.families.forEach { family ->
+                    learning.insertCard(
+                        id = Uuid.random(),
+                        sense_id = item.senseId,
+                        lemma_id = lemmaId,
+                        lang_code = langCode,
+                        family = family,
+                        state = CardState.NEW,
+                        stability = 0.0,
+                        difficulty = 0.0,
+                        due = now,
+                        last_review = null,
+                        reps = 0,
+                        lapses = 0,
+                        created_at = now,
+                        available_after = null,
+                        answer_key = answerKey,
+                        suspended = false,
+                    )
+                }
+                learning.markFavoriteActivated(now, item.senseId.toString(), langCode)
+            }
+        }
+        return LemmaActivationOutcome(
+            cardsCreated = groupTotal,
+            activatedSenses = groupPlan.map { it.senseId },
+            skipped = skipped,
+        )
     }
 
     @OptIn(ExperimentalTime::class)
@@ -285,6 +325,21 @@ private data class IntakePlanItem(
     val senseId: Uuid,
     val families: List<CardFamily>,
 )
+
+private sealed interface NewcomerGate {
+    data class Open(val dailyBudget: Int?) : NewcomerGate
+    data class Blocked(val reason: SkipReason) : NewcomerGate
+}
+
+private data class LemmaActivationOutcome(
+    val cardsCreated: Int,
+    val activatedSenses: List<Uuid>,
+    val skipped: List<SkipReason>,
+) {
+    companion object {
+        val EMPTY = LemmaActivationOutcome(0, emptyList(), emptyList())
+    }
+}
 
 private enum class IntakeRunMode {
     DAILY,

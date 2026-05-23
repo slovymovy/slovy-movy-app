@@ -389,6 +389,179 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun intake_schedules_new_sense_of_active_lemma_when_daily_budget_exhausted() = runBlocking {
+        val config = FsrsDefaults.config().copy(dailyNewTaskFamilyBudget = 0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val first = env.seedSense(lemma = "budgetextension")
+            val second = env.seedAdditionalSense(first)
+            env.addFavorite(first, createdAt = start.toEpochMilliseconds())
+            env.insertTask(fixture = first, family = CardFamily.RECOGNIZE_SENSE)
+            env.app.favoritesQueries.markFavoriteActivated(
+                activated_at = start.toEpochMilliseconds(),
+                sense_id = first.senseId.toString(),
+                lang_code = "en",
+            )
+            env.addFavorite(second, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.cardsCreated)
+            assertEquals(listOf(second.senseId), result.activated)
+            assertTrue(result.skipped.isEmpty(), "unexpected skips: ${result.skipped}")
+            assertEquals(
+                1,
+                env.app.favoritesQueries.selectCardsByFavorite(second.senseId, "en").executeAsList().size,
+            )
+            assertNotNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(second.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
+    fun intake_schedules_new_sense_of_active_lemma_when_queue_paused() = runBlocking {
+        val config = FsrsDefaults.config().copy(pauseIntakeIfQueueAbove = 0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val first = env.seedSense(lemma = "queueextension")
+            val second = env.seedAdditionalSense(first)
+            val newcomer = env.seedSense(lemma = "queuenewcomer")
+            env.addFavorite(first, createdAt = start.toEpochMilliseconds())
+            env.insertTask(fixture = first, family = CardFamily.RECOGNIZE_SENSE)
+            env.app.favoritesQueries.markFavoriteActivated(
+                activated_at = start.toEpochMilliseconds(),
+                sense_id = first.senseId.toString(),
+                lang_code = "en",
+            )
+            env.addFavorite(second, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+            env.addFavorite(newcomer, createdAt = (start + 2.milliseconds).toEpochMilliseconds())
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.cardsCreated)
+            assertEquals(listOf(second.senseId), result.activated)
+            assertEquals(listOf(SkipReason.QUEUE_TOO_FULL), result.skipped)
+            assertNotNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(second.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+            assertNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(newcomer.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
+    fun intake_schedules_new_sense_of_active_lemma_when_retention_paused() = runBlocking {
+        val config = FsrsDefaults.config().copy(pauseIntakeRetentionMinReviews = 1L)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val first = env.seedSense(lemma = "retentionextension")
+            val second = env.seedAdditionalSense(first)
+            env.addFavorite(first, createdAt = start.toEpochMilliseconds())
+            val card = env.insertTask(fixture = first, family = CardFamily.RECOGNIZE_SENSE)
+            env.app.favoritesQueries.markFavoriteActivated(
+                activated_at = start.toEpochMilliseconds(),
+                sense_id = first.senseId.toString(),
+                lang_code = "en",
+            )
+            env.insertReviewLog(
+                cardId = card.id,
+                variantKind = CardKind.WORD_TO_SOURCE_DEFINITION,
+                rating = Rating.AGAIN,
+            )
+            env.addFavorite(second, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.cardsCreated)
+            assertEquals(listOf(second.senseId), result.activated)
+            assertTrue(result.skipped.isEmpty(), "unexpected skips: ${result.skipped}")
+            assertNotNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(second.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
+    fun intake_treats_lemma_as_newcomer_after_all_active_favorites_removed() = runBlocking {
+        val config = FsrsDefaults.config().copy(pauseIntakeIfQueueAbove = 0)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val first = env.seedSense(lemma = "removedextension")
+            val second = env.seedAdditionalSense(first)
+            val pressure = env.seedSense(lemma = "removedpressure")
+            env.addFavorite(first, createdAt = start.toEpochMilliseconds())
+            env.insertTask(fixture = first, family = CardFamily.RECOGNIZE_SENSE)
+            env.app.favoritesQueries.markFavoriteActivated(
+                activated_at = start.toEpochMilliseconds(),
+                sense_id = first.senseId.toString(),
+                lang_code = "en",
+            )
+            env.addFavorite(pressure, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+            env.insertTask(fixture = pressure, family = CardFamily.RECOGNIZE_SENSE)
+            env.app.favoritesQueries.markFavoriteActivated(
+                activated_at = start.toEpochMilliseconds(),
+                sense_id = pressure.senseId.toString(),
+                lang_code = "en",
+            )
+
+            env.favorites.remove(first.senseId.toString(), Language.ENGLISH)
+            env.addFavorite(second, createdAt = (start + 2.milliseconds).toEpochMilliseconds())
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(0, result.cardsCreated)
+            assertEquals(listOf(SkipReason.QUEUE_TOO_FULL), result.skipped)
+            assertNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(second.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
+    fun continue_now_extension_bypasses_pending_lemma_limit() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            val activeFirst = env.seedSense(lemma = "continueextensionactive")
+            val activeSecond = env.seedAdditionalSense(activeFirst)
+            env.addFavorite(activeFirst, createdAt = start.toEpochMilliseconds())
+            env.insertTask(fixture = activeFirst, family = CardFamily.RECOGNIZE_SENSE)
+            env.app.favoritesQueries.markFavoriteActivated(
+                activated_at = start.toEpochMilliseconds(),
+                sense_id = activeFirst.senseId.toString(),
+                lang_code = "en",
+            )
+            env.addFavorite(activeSecond, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+            val newcomers = (1..6).map { index ->
+                env.seedSense(lemma = "continueextensionnew$index").also { fixture ->
+                    env.addFavorite(
+                        fixture = fixture,
+                        createdAt = (start + (10 + index).milliseconds).toEpochMilliseconds(),
+                    )
+                }
+            }
+
+            val result = env.intake.continueWithPendingFavoritesNow("en")
+
+            assertEquals(6, result.cardsCreated)
+            assertTrue(result.activated.contains(activeSecond.senseId))
+            assertEquals(5, result.activated.count { it != activeSecond.senseId })
+            assertEquals(
+                5,
+                newcomers.count {
+                    env.app.favoritesQueries.selectFavoriteWithActivation(it.senseId.toString(), "en")
+                        .executeAsOne().activated_at != null
+                },
+            )
+            assertNotNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(activeSecond.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
     fun intake_creates_recognition_task_before_translation_exists() = runBlocking {
         withEnv(includeTranslation = true) { env ->
             val fixture = env.seedSense(lemma = "configured")
