@@ -907,11 +907,9 @@ class SettingsViewModel(
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
-    wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
-    onNavigateToWordDetail: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
 ) {
     LifecycleResumeEffect(Unit) {
@@ -954,11 +952,9 @@ fun SettingsScreen(
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
         onFeedbackEmailChange = { viewModel.updateFeedbackEmail(it) },
         onSubmitFeedback = { viewModel.submitFeedback() },
-        wordDetailLabel = wordDetailLabel,
         onNavigateToSearch = onNavigateToSearch,
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
-        onNavigateToWordDetail = onNavigateToWordDetail,
         hasFavoritesToReview = hasFavoritesToReview,
     )
 }
@@ -992,11 +988,9 @@ fun SettingsScreenContent(
     onFeedbackCommentChange: (String) -> Unit = {},
     onFeedbackEmailChange: (String) -> Unit = {},
     onSubmitFeedback: () -> Unit = {},
-    wordDetailLabel: String? = null,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
-    onNavigateToWordDetail: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
 ) {
     val dismissActionLabel = stringResource(Res.string.common_dismiss)
@@ -1033,8 +1027,6 @@ fun SettingsScreenContent(
                     onNavigateToSearch = onNavigateToSearch,
                     onNavigateToFavorites = onNavigateToFavorites,
                     onNavigateToStats = onNavigateToStats,
-                    onNavigateToWordDetail = onNavigateToWordDetail,
-                    wordDetailLabel = wordDetailLabel,
                     onNavigateToSettings = {},
                     hasFavoritesToReview = hasFavoritesToReview,
                 )

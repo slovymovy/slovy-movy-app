@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
@@ -32,25 +30,21 @@ enum class AppScreen {
     SEARCH,
     FAVORITES,
     STATS,
-    WORD_DETAIL,
     SETTINGS
 }
 
 @Composable
 fun AppNavigationBar(
-    currentScreen: AppScreen,
+    currentScreen: AppScreen?,
     onNavigateToSearch: () -> Unit,
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
-    onNavigateToWordDetail: () -> Unit,
-    wordDetailLabel: String? = null,
     onNavigateToSettings: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
 ) {
     val searchLabel = stringResource(Res.string.nav_search)
     val favoritesLabel = stringResource(Res.string.nav_favorites)
     val statsLabel = stringResource(Res.string.nav_stats)
-    val wordDetailLabelText = stringResource(Res.string.nav_word_detail)
     val settingsLabel = stringResource(Res.string.nav_settings)
     val showFavoritesDueDot = hasFavoritesToReview && currentScreen != AppScreen.FAVORITES
 
@@ -89,30 +83,6 @@ fun AppNavigationBar(
             },
             selected = currentScreen == AppScreen.SEARCH,
             onClick = onNavigateToSearch,
-            colors = itemColors
-        )
-        NavigationBarItem(
-            icon = {
-                Icon(
-                    imageVector = if (currentScreen == AppScreen.WORD_DETAIL) {
-                        Icons.Filled.Book
-                    } else {
-                        Icons.Outlined.Book
-                    },
-                    contentDescription = wordDetailLabelText
-                )
-            },
-            label = {
-                Text(
-                    wordDetailLabel ?: wordDetailLabelText,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.labelSmall
-                )
-            },
-            selected = currentScreen == AppScreen.WORD_DETAIL,
-            enabled = wordDetailLabel != null,
-            onClick = onNavigateToWordDetail,
             colors = itemColors
         )
         NavigationBarItem(
@@ -234,8 +204,6 @@ fun PreviewAppNavigationBar(
             onNavigateToSearch = {},
             onNavigateToFavorites = {},
             onNavigateToStats = {},
-            onNavigateToWordDetail = {},
-            wordDetailLabel = "example",
             hasFavoritesToReview = true,
         )
     }
@@ -252,8 +220,6 @@ fun PreviewAppNavigationBarFavoritesSelected(
             onNavigateToSearch = {},
             onNavigateToFavorites = {},
             onNavigateToStats = {},
-            onNavigateToWordDetail = {},
-            wordDetailLabel = "example",
             hasFavoritesToReview = true,
         )
     }

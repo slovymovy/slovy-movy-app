@@ -5,7 +5,6 @@
     <string name="nav_search">Szukaj</string>
     <string name="nav_favorites">Moje słowa</string>
     <string name="nav_stats">Statystyki</string>
-    <string name="nav_word_detail">Słowo</string>
     <string name="nav_settings">Ustawienia</string>
 
     <string name="welcome_tagline">Aplikacja, by nie tylko sprawdzać słowa, ale faktycznie się ich uczyć. Za darmo.</string>
