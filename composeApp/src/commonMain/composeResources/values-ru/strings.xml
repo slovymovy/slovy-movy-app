@@ -295,6 +295,9 @@
     <string name="developer_tables_loading">Загрузка таблицы карт...</string>
     <string name="developer_tables_empty">Нет строк карт.</string>
     <string name="developer_tables_error">Таблица карт недоступна: %1$s</string>
+    <string name="developer_tables_page_status">Строки %1$d-%2$d из %3$d</string>
+    <string name="developer_tables_previous_page">Назад</string>
+    <string name="developer_tables_next_page">Далее</string>
     <string name="developer_card_table_col_lemma">lemma</string>
     <string name="developer_card_table_col_sense_id">sense_id</string>
     <string name="developer_card_table_col_lang_code">lang_code</string>

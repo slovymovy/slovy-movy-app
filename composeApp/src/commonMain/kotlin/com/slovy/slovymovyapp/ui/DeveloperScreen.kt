@@ -60,6 +60,7 @@ import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.CardFamilyDebugCount
 import com.slovy.slovymovyapp.data.favorites.CardScheduleDebugStats
+import com.slovy.slovymovyapp.data.favorites.CardTableDebugRow
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.intake.IntakeResult
 import com.slovy.slovymovyapp.data.learning.intake.IntakeRunMode
@@ -70,8 +71,10 @@ import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.logging.NoOpAppLogSink
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -95,6 +98,8 @@ private val TimeShiftOptions: List<TimeShiftOption> = listOf(
     TimeShiftOption("+1d", 1.days),
     TimeShiftOption("+10d", 10.days),
 )
+
+private const val CardTablePageSize = 50
 
 private val CardTableColumnWidths = listOf(
     120.dp, // lemma
@@ -135,6 +140,7 @@ data class DeveloperUiState(
     val isStatsLoading: Boolean = false,
     val statsErrorLabel: String? = null,
     val cardTableRows: List<DeveloperCardTableRow> = emptyList(),
+    val cardTablePage: DeveloperCardTablePageInfo = DeveloperCardTablePageInfo(),
     val isTableLoading: Boolean = false,
     val tableErrorLabel: String? = null,
 )
@@ -151,9 +157,32 @@ data class DeveloperCardTableRow(
     val cells: List<String>,
 )
 
+data class DeveloperCardTablePageInfo(
+    val pageIndex: Int = 0,
+    val pageSize: Int = CardTablePageSize,
+    val totalRows: Long = 0,
+) {
+    val firstVisibleRow: Long
+        get() = if (totalRows == 0L) 0L else pageIndex.toLong() * pageSize.toLong() + 1L
+
+    val lastVisibleRow: Long
+        get() = minOf(totalRows, (pageIndex.toLong() + 1L) * pageSize.toLong())
+
+    val canGoPrevious: Boolean
+        get() = pageIndex > 0
+
+    val canGoNext: Boolean
+        get() = lastVisibleRow < totalRows
+}
+
 data class DeveloperFamilyCount(
     val family: String,
     val cardCount: Long,
+)
+
+private data class DeveloperCardTablePageResult(
+    val rows: List<DeveloperCardTableRow>,
+    val pageInfo: DeveloperCardTablePageInfo,
 )
 
 class DeveloperViewModel(
@@ -181,6 +210,7 @@ class DeveloperViewModel(
 
     val timeShiftOptions: List<TimeShiftOption> = TimeShiftOptions
     val intakeModes: List<IntakeRunMode> = IntakeRunMode.entries
+    private var tableLoadJob: Job? = null
 
     init {
         AppLogger.developerLogger = developerLogSink
@@ -226,6 +256,18 @@ class DeveloperViewModel(
         AppLogger.clearDeveloperLogs()
         terminalLogSignature = ""
         syncTerminalLogs()
+    }
+
+    fun previousCardTablePage() {
+        if (state.cardTablePage.canGoPrevious) {
+            refreshCardTableRows(state.cardTablePage.pageIndex - 1)
+        }
+    }
+
+    fun nextCardTablePage() {
+        if (state.cardTablePage.canGoNext) {
+            refreshCardTableRows(state.cardTablePage.pageIndex + 1)
+        }
     }
 
     private fun runAction(actionName: String, work: suspend () -> String) {
@@ -329,17 +371,28 @@ class DeveloperViewModel(
         }
     }
 
-    private fun refreshCardTableRows() {
-        state = state.copy(isTableLoading = true, tableErrorLabel = null)
-        viewModelScope.launch {
+    private fun refreshCardTableRows(pageIndex: Int = state.cardTablePage.pageIndex) {
+        tableLoadJob?.cancel()
+        val requestedPageIndex = pageIndex.coerceAtLeast(0)
+        state = state.copy(
+            cardTablePage = state.cardTablePage.copy(pageIndex = requestedPageIndex),
+            isTableLoading = true,
+            tableErrorLabel = null,
+        )
+        tableLoadJob = viewModelScope.launch {
             try {
                 val now = Clock.System.now().toEpochMilliseconds()
-                val rows = withContext(Dispatchers.IO) { loadCardTableRows(now) }
+                val page = withContext(Dispatchers.IO) {
+                    loadCardTablePage(now, requestedPageIndex)
+                }
                 state = state.copy(
-                    cardTableRows = rows,
+                    cardTableRows = page.rows,
+                    cardTablePage = page.pageInfo,
                     isTableLoading = false,
                     tableErrorLabel = null,
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Card table load failed", e)
                 state = state.copy(
@@ -373,28 +426,59 @@ class DeveloperViewModel(
             cardCount = cardCount,
         )
 
-    private suspend fun loadCardTableRows(nowEpochMs: Long): List<DeveloperCardTableRow> =
-        favoritesRepository.getCardTableDebugRows().map { row ->
-            DeveloperCardTableRow(
-                cells = listOf(
-                    row.lemma ?: "-",
-                    row.langCode,
-                    row.family.name,
-                    row.state.name,
-                    formatDouble(row.stability),
-                    formatDouble(row.difficulty),
-                    formatDeveloperRelativeTime(row.due, nowEpochMs),
-                    formatDeveloperRelativeTime(row.lastReview, nowEpochMs),
-                    row.reps.toString(),
-                    row.lapses.toString(),
-                    formatDeveloperRelativeTime(row.createdAt, nowEpochMs),
-                    formatDeveloperRelativeTime(row.availableAfter, nowEpochMs),
-                    row.answerKey,
-                    row.suspended.toString(),
-                    row.senseId.toString(),
-                ),
-            )
+    private suspend fun loadCardTablePage(
+        nowEpochMs: Long,
+        requestedPageIndex: Int,
+    ): DeveloperCardTablePageResult {
+        val totalRows = favoritesRepository.countCardTableDebugRows()
+        val pageIndex = requestedPageIndex.coerceAtMost(lastCardTablePageIndex(totalRows))
+        val rows = if (totalRows == 0L) {
+            emptyList()
+        } else {
+            favoritesRepository.getCardTableDebugRows(
+                pageSize = CardTablePageSize.toLong(),
+                pageOffset = pageIndex.toLong() * CardTablePageSize.toLong(),
+            ).map { row -> row.toDeveloperCardTableRow(nowEpochMs) }
         }
+        return DeveloperCardTablePageResult(
+            rows = rows,
+            pageInfo = DeveloperCardTablePageInfo(
+                pageIndex = pageIndex,
+                pageSize = CardTablePageSize,
+                totalRows = totalRows,
+            ),
+        )
+    }
+
+    private fun lastCardTablePageIndex(totalRows: Long): Int =
+        if (totalRows <= 0L) {
+            0
+        } else {
+            ((totalRows - 1L) / CardTablePageSize.toLong())
+                .coerceAtMost(Int.MAX_VALUE.toLong())
+                .toInt()
+        }
+
+    private fun CardTableDebugRow.toDeveloperCardTableRow(nowEpochMs: Long): DeveloperCardTableRow =
+        DeveloperCardTableRow(
+            cells = listOf(
+                lemma ?: "-",
+                langCode,
+                family.name,
+                state.name,
+                formatDouble(stability),
+                formatDouble(difficulty),
+                formatDeveloperRelativeTime(due, nowEpochMs),
+                formatDeveloperRelativeTime(lastReview, nowEpochMs),
+                reps.toString(),
+                lapses.toString(),
+                formatDeveloperRelativeTime(createdAt, nowEpochMs),
+                formatDeveloperRelativeTime(availableAfter, nowEpochMs),
+                answerKey,
+                suspended.toString(),
+                senseId.toString(),
+            ),
+        )
 
     private fun formatDouble(value: Double): String =
         ((value * 100.0).toLong() / 100.0).toString()
@@ -472,6 +556,8 @@ fun DeveloperScreen(
         onRemoveSuspendedCards = viewModel::removeSuspendedLearningCards,
         onRemoveAllLearningCards = viewModel::removeAllLearningCards,
         onClearTerminalLogs = viewModel::clearTerminalLogs,
+        onPreviousCardTablePage = viewModel::previousCardTablePage,
+        onNextCardTablePage = viewModel::nextCardTablePage,
         onBack = onBack,
     )
 }
@@ -492,6 +578,8 @@ fun DeveloperScreenContent(
     onRemoveSuspendedCards: () -> Unit = {},
     onRemoveAllLearningCards: () -> Unit = {},
     onClearTerminalLogs: () -> Unit = {},
+    onPreviousCardTablePage: () -> Unit = {},
+    onNextCardTablePage: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     val backLabel = stringResource(Res.string.common_back)
@@ -604,9 +692,12 @@ fun DeveloperScreenContent(
                 item {
                     CardTableCard(
                         rows = state.cardTableRows,
+                        pageInfo = state.cardTablePage,
                         isLoading = state.isTableLoading,
                         errorLabel = state.tableErrorLabel,
                         horizontalScrollState = tableHorizontalScrollState,
+                        onPreviousPage = onPreviousCardTablePage,
+                        onNextPage = onNextCardTablePage,
                     )
                 }
             }
@@ -1070,9 +1161,12 @@ private fun SchedulingStatsTableRow(
 @Composable
 private fun CardTableCard(
     rows: List<DeveloperCardTableRow>,
+    pageInfo: DeveloperCardTablePageInfo,
     isLoading: Boolean,
     errorLabel: String?,
     horizontalScrollState: ScrollState,
+    onPreviousPage: () -> Unit,
+    onNextPage: () -> Unit,
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -1088,6 +1182,12 @@ private fun CardTableCard(
                 .padding(AppSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
         ) {
+            CardTablePager(
+                pageInfo = pageInfo,
+                isLoading = isLoading,
+                onPreviousPage = onPreviousPage,
+                onNextPage = onNextPage,
+            )
             when {
                 isLoading -> LoadingStatusRow(text = stringResource(Res.string.developer_tables_loading))
                 rows.isEmpty() -> Text(
@@ -1126,6 +1226,44 @@ private fun CardTableCard(
                     color = MaterialTheme.colorScheme.error,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun CardTablePager(
+    pageInfo: DeveloperCardTablePageInfo,
+    isLoading: Boolean,
+    onPreviousPage: () -> Unit,
+    onNextPage: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+    ) {
+        Text(
+            text = stringResource(
+                Res.string.developer_tables_page_status,
+                pageInfo.firstVisibleRow,
+                pageInfo.lastVisibleRow,
+                pageInfo.totalRows,
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        TextButton(
+            onClick = onPreviousPage,
+            enabled = pageInfo.canGoPrevious && !isLoading,
+        ) {
+            Text(stringResource(Res.string.developer_tables_previous_page))
+        }
+        TextButton(
+            onClick = onNextPage,
+            enabled = pageInfo.canGoNext && !isLoading,
+        ) {
+            Text(stringResource(Res.string.developer_tables_next_page))
         }
     }
 }
@@ -1323,9 +1461,16 @@ private fun CardTableCardPreviewWithRows(
                     ),
                 ),
             ),
+            pageInfo = DeveloperCardTablePageInfo(
+                pageIndex = 0,
+                pageSize = CardTablePageSize,
+                totalRows = 2,
+            ),
             isLoading = false,
             errorLabel = null,
             horizontalScrollState = ScrollState(0),
+            onPreviousPage = {},
+            onNextPage = {},
         )
     }
 }

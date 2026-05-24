@@ -295,6 +295,9 @@
     <string name="developer_tables_loading">Kaarttabel laden...</string>
     <string name="developer_tables_empty">Geen kaartregels.</string>
     <string name="developer_tables_error">Kaarttabel niet beschikbaar: %1$s</string>
+    <string name="developer_tables_page_status">Rijen %1$d-%2$d van %3$d</string>
+    <string name="developer_tables_previous_page">Vorige</string>
+    <string name="developer_tables_next_page">Volgende</string>
     <string name="developer_card_table_col_lemma">lemma</string>
     <string name="developer_card_table_col_sense_id">sense_id</string>
     <string name="developer_card_table_col_lang_code">lang_code</string>

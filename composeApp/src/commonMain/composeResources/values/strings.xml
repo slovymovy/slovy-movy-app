@@ -295,6 +295,9 @@
     <string name="developer_tables_loading">Loading card table...</string>
     <string name="developer_tables_empty">No card rows.</string>
     <string name="developer_tables_error">Card table unavailable: %1$s</string>
+    <string name="developer_tables_page_status">Rows %1$d-%2$d of %3$d</string>
+    <string name="developer_tables_previous_page">Previous</string>
+    <string name="developer_tables_next_page">Next</string>
     <string name="developer_card_table_col_lemma">lemma</string>
     <string name="developer_card_table_col_sense_id">sense_id</string>
     <string name="developer_card_table_col_lang_code">lang_code</string>

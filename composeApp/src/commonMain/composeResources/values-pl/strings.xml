@@ -294,6 +294,9 @@
     <string name="developer_tables_loading">Ładowanie tabeli kart...</string>
     <string name="developer_tables_empty">Brak wierszy kart.</string>
     <string name="developer_tables_error">Tabela kart niedostępna: %1$s</string>
+    <string name="developer_tables_page_status">Wiersze %1$d-%2$d z %3$d</string>
+    <string name="developer_tables_previous_page">Poprzednia</string>
+    <string name="developer_tables_next_page">Następna</string>
     <string name="developer_card_table_col_lemma">lemma</string>
     <string name="developer_card_table_col_sense_id">sense_id</string>
     <string name="developer_card_table_col_lang_code">lang_code</string>
