@@ -176,6 +176,8 @@ class SettingsViewModel(
     @Suppress("DEPRECATION")
     suspend fun migrateLegacyDefaultVoiceSelectionsAfterAppStart() {
         try {
+            if (settingsRepository.isLegacyVoiceMigrationDone()) return
+
             val languages = ttsManager.getAvailableLanguages()
             val downloadedLanguages = dataDbManager.listDownloadedDatabases()
                 .filterIsInstance<DatabaseFileInfo.Dictionary>()
@@ -198,6 +200,8 @@ class SettingsViewModel(
                         AppLogger.warn(TAG, "Unable to migrate legacy default voices for ${language.language.code}", e)
                     }
                 }
+
+            settingsRepository.setLegacyVoiceMigrationDone()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
