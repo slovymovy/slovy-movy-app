@@ -20,6 +20,7 @@ data class Setting(
         VOICE_SETUP_SHOWN,
         SEARCH_LANGUAGE,
         FAVORITES_LANGUAGE,
-        STATS_LANGUAGE
+        STATS_LANGUAGE,
+        DEVELOPER_MODE
     }
 }

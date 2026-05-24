@@ -302,7 +302,6 @@ SET available_after = max(
 WHERE lang_code = :lang_code
   AND lemma_id = :lemma_id
   AND sense_id != :sense_id
-  AND state != :new_state
   AND suspended = 0;
 
 -- :allowed_families should be CardFamily entries with testsWordRecall = true.
@@ -338,6 +337,20 @@ WHERE lang_code = :lang_code
   AND due <= :now
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now);
+
+countFutureScheduledCardsByLang:
+SELECT COUNT(*)
+FROM card INDEXED BY idx_card_due_session
+WHERE lang_code = :lang_code
+  AND due > :now
+  AND suspended = 0;
+
+countFutureScheduledLemmasByLang:
+SELECT COUNT(DISTINCT lemma_id)
+FROM card INDEXED BY idx_card_active_lemma_due
+WHERE lang_code = :lang_code
+  AND due > :now
+  AND suspended = 0;
 
 countDueCardsByLangDistinctByLemma:
 SELECT COUNT(DISTINCT lemma_id)
@@ -397,6 +410,13 @@ SELECT COUNT(*)
 FROM card INDEXED BY idx_card_active_created
 WHERE lang_code = :lang_code
   AND suspended = 0;
+
+countCardsByFamily:
+SELECT family, COUNT(*) AS card_count
+FROM card
+WHERE suspended = 0
+GROUP BY family
+ORDER BY family ASC;
 
 countMatureCardsByLang:
 SELECT COUNT(*)
@@ -605,6 +625,37 @@ FROM card
 WHERE lang_code = :lang_code
   AND suspended = 0;
 
+selectDeveloperCardTable:
+SELECT
+  f.lemma AS lemma,
+  c.id AS id,
+  c.sense_id AS sense_id,
+  c.lemma_id AS lemma_id,
+  c.lang_code AS lang_code,
+  c.family AS family,
+  c.state AS state,
+  c.stability AS stability,
+  c.difficulty AS difficulty,
+  c.due AS due,
+  c.last_review AS last_review,
+  c.reps AS reps,
+  c.lapses AS lapses,
+  c.created_at AS created_at,
+  c.available_after AS available_after,
+  c.answer_key AS answer_key,
+  c.suspended AS suspended
+FROM card c
+LEFT JOIN favorites f
+  ON f.lang_code = c.lang_code
+  AND f.sense_id = lower(
+    substr(hex(c.sense_id), 1, 8) || '-' ||
+    substr(hex(c.sense_id), 9, 4) || '-' ||
+    substr(hex(c.sense_id), 13, 4) || '-' ||
+    substr(hex(c.sense_id), 17, 4) || '-' ||
+    substr(hex(c.sense_id), 21, 12)
+  )
+ORDER BY max(c.due, coalesce(c.available_after, c.due)) ASC, c.created_at ASC;
+
 countSuccessfulReviewsSince:
 SELECT COUNT(*)
 FROM review_log r INDEXED BY idx_review_log_recent
@@ -613,11 +664,33 @@ WHERE c.lang_code = :lang_code
   AND r.reviewed_at >= :since
   AND r.rating != 1;
 
+countSuspendedCards:
+SELECT COUNT(*)
+FROM card
+WHERE suspended = 1;
+
+countAllCards:
+SELECT COUNT(*)
+FROM card;
+
+deleteReviewLogsForSuspendedCards:
+DELETE FROM review_log
+WHERE card_id IN (
+  SELECT id FROM card WHERE suspended = 1
+);
+
+deleteSuspendedCards:
+DELETE FROM card
+WHERE suspended = 1;
+
 deleteAllLearning:
 DELETE FROM review_log;
 
 deleteAllCards:
 DELETE FROM card;
+
+resetFavoriteActivations:
+UPDATE favorites SET activated_at = NULL;
 
 -- Time-machine helper: shift every learning timestamp backwards by :shift_ms,
 -- simulating that :shift_ms of wall-clock time has elapsed. For algorithm tuning only.

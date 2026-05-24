@@ -20,6 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.AppBuildConfig
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
@@ -28,7 +30,8 @@ import slovymovyapp.composeapp.generated.resources.*
 fun AboutSection(
     buildConfig: AppBuildConfig,
     onSendFeedback: () -> Unit = {},
-    onAcknowledgements: () -> Unit = {}
+    onAcknowledgements: () -> Unit = {},
+    onVersionClick: () -> Unit = {}
 ) {
     val uriHandler = LocalUriHandler.current
     AboutSectionContent(
@@ -37,7 +40,8 @@ fun AboutSection(
         reviewUrl = storeReviewUrl(),
         onReview = { uriHandler.openUri(it) },
         onSendFeedback = onSendFeedback,
-        onAcknowledgements = onAcknowledgements
+        onAcknowledgements = onAcknowledgements,
+        onVersionClick = onVersionClick
     )
 }
 
@@ -48,7 +52,8 @@ private fun AboutSectionContent(
     reviewUrl: String?,
     onReview: (String) -> Unit,
     onSendFeedback: () -> Unit,
-    onAcknowledgements: () -> Unit
+    onAcknowledgements: () -> Unit,
+    onVersionClick: () -> Unit = {}
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -67,7 +72,14 @@ private fun AboutSectionContent(
                         StoreReviewTarget.APP_STORE -> stringResource(Res.string.about_review_app_store_title)
                     },
                     subtitle = stringResource(Res.string.about_review_subtitle),
-                    onClick = { onReview(reviewUrl) }
+                    onClick = {
+                        val platform = when (reviewTarget) {
+                            StoreReviewTarget.GOOGLE_PLAY -> "android"
+                            StoreReviewTarget.APP_STORE -> "ios"
+                        }
+                        Analytics.logEvent(AnalyticsEvent.REVIEW_APP_CLICK, mapOf("platform" to platform))
+                        onReview(reviewUrl)
+                    }
                 )
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = AppSpacing.lg),
@@ -100,7 +112,8 @@ private fun AboutSectionContent(
             AboutItem(
                 icon = Icons.Outlined.Info,
                 title = stringResource(Res.string.about_version_title),
-                subtitle = buildConfig.versionName
+                subtitle = buildConfig.versionName,
+                onClick = onVersionClick
             )
         }
     }

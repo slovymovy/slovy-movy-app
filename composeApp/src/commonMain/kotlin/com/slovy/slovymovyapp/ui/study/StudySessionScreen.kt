@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.StopCircle
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
@@ -75,9 +76,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -137,6 +141,9 @@ import slovymovyapp.composeapp.generated.resources.study_multi_sense_front_hint
 import slovymovyapp.composeapp.generated.resources.study_play_prompt_audio
 import slovymovyapp.composeapp.generated.resources.study_play_word_audio
 import slovymovyapp.composeapp.generated.resources.study_hint_starts_with
+import slovymovyapp.composeapp.generated.resources.study_hint_show
+import slovymovyapp.composeapp.generated.resources.study_hint_show_description
+import slovymovyapp.composeapp.generated.resources.study_hint_show_translation_description
 import slovymovyapp.composeapp.generated.resources.study_swipe_other_meanings_hint
 import slovymovyapp.composeapp.generated.resources.study_stop_audio
 import slovymovyapp.composeapp.generated.resources.study_swipe_back_to_rate
@@ -166,6 +173,8 @@ fun StudySessionScreen(
         onCancel = onCancel,
         onEnd = onEnd,
         onReveal = viewModel::reveal,
+        onRevealFirstLetterHint = viewModel::revealFirstLetterHint,
+        onRevealTranslationHint = viewModel::revealTranslationHint,
         onRate = viewModel::rate,
         onPlayAudio = viewModel::playAudio,
         onStopAudio = viewModel::stopAudio,
@@ -190,6 +199,8 @@ fun StudySessionScreenContent(
     onCancel: () -> Unit,
     onEnd: () -> Unit,
     onReveal: () -> Unit = {},
+    onRevealFirstLetterHint: () -> Unit = {},
+    onRevealTranslationHint: () -> Unit = {},
     onRate: (StudyRating) -> Unit = {},
     onPlayAudio: (String) -> Unit = {},
     onStopAudio: () -> Unit = {},
@@ -277,6 +288,8 @@ fun StudySessionScreenContent(
             state = state,
             onClose = onCancel,
             onReveal = onReveal,
+            onRevealFirstLetterHint = onRevealFirstLetterHint,
+            onRevealTranslationHint = onRevealTranslationHint,
             onRate = onRate,
             onPlayAudio = onPlayAudio,
             onStopAudio = onStopAudio,
@@ -515,6 +528,8 @@ private fun StudySessionActiveContent(
     state: StudySessionUiState.Active,
     onClose: () -> Unit,
     onReveal: () -> Unit,
+    onRevealFirstLetterHint: () -> Unit,
+    onRevealTranslationHint: () -> Unit,
     onRate: (StudyRating) -> Unit,
     onPlayAudio: (String) -> Unit,
     onStopAudio: () -> Unit,
@@ -570,6 +585,8 @@ private fun StudySessionActiveContent(
                     onStopAudio = onStopAudio,
                     onPostponeListeningCards = { onPostponeListeningCards(listeningPostponedMessage) },
                     onReveal = onReveal,
+                    onRevealFirstLetterHint = onRevealFirstLetterHint,
+                    onRevealTranslationHint = onRevealTranslationHint,
                     viewedSenseId = viewedSenseId,
                     onViewedSenseChange = onViewedSenseChange,
                     modifier = Modifier
@@ -1000,6 +1017,8 @@ private fun StudyCardSurface(
     onStopAudio: () -> Unit,
     onPostponeListeningCards: () -> Unit,
     onReveal: () -> Unit,
+    onRevealFirstLetterHint: () -> Unit,
+    onRevealTranslationHint: () -> Unit,
     viewedSenseId: String?,
     onViewedSenseChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -1042,6 +1061,8 @@ private fun StudyCardSurface(
                         onPlayAudio = onPlayAudio,
                         onStopAudio = onStopAudio,
                         onPostponeListeningCards = onPostponeListeningCards,
+                        onRevealFirstLetterHint = onRevealFirstLetterHint,
+                        onRevealTranslationHint = onRevealTranslationHint,
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 360.dp),
@@ -1215,6 +1236,8 @@ private fun StudyCardFront(
     onPlayAudio: (String) -> Unit,
     onStopAudio: () -> Unit,
     onPostponeListeningCards: () -> Unit,
+    onRevealFirstLetterHint: () -> Unit,
+    onRevealTranslationHint: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (card) {
@@ -1229,11 +1252,13 @@ private fun StudyCardFront(
 
         is StudyCardUiState.Production -> ProductionFront(
             card = card,
+            onRevealFirstLetterHint = onRevealFirstLetterHint,
             modifier = modifier,
         )
 
         is StudyCardUiState.Cloze -> ClozeFront(
             card = card,
+            onRevealTranslationHint = onRevealTranslationHint,
             modifier = modifier,
         )
 
@@ -1309,6 +1334,7 @@ private fun RecognitionFront(
 @Composable
 private fun ProductionFront(
     card: StudyCardUiState.Production,
+    onRevealFirstLetterHint: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -1336,7 +1362,11 @@ private fun ProductionFront(
         )
         card.firstLetterHint?.let { hint ->
             Spacer(Modifier.height(AppSpacing.xl))
-            FirstLetterHintView(hint = hint)
+            FirstLetterHintView(
+                hint = hint,
+                revealed = card.firstLetterHintRevealed,
+                onReveal = onRevealFirstLetterHint,
+            )
         }
     }
 }
@@ -1344,6 +1374,7 @@ private fun ProductionFront(
 @Composable
 private fun ClozeFront(
     card: StudyCardUiState.Cloze,
+    onRevealTranslationHint: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -1367,9 +1398,17 @@ private fun ClozeFront(
                 ),
             )
             card.translationHint?.let { hint ->
-                StudyExampleBlock(
-                    example = StudyExampleUiState(text = hint),
-                )
+                if (card.translationHintRevealed) {
+                    StudyExampleBlock(
+                        example = StudyExampleUiState(text = hint),
+                    )
+                } else {
+                    HintRevealPill(
+                        contentDescription = stringResource(Res.string.study_hint_show_translation_description),
+                        onReveal = onRevealTranslationHint,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    )
+                }
             }
         }
     }
@@ -1924,8 +1963,70 @@ private fun StudyTaggedText(
 }
 
 @Composable
+private fun HintRevealPill(
+    contentDescription: String,
+    onReveal: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
+    val dashWidth = 6.dp
+    val dashGap = 4.dp
+    val description = contentDescription
+    Box(
+        modifier = modifier
+            .height(48.dp)
+            .drawBehind {
+                val strokeWidth = 1.dp.toPx()
+                drawRoundRect(
+                    color = borderColor,
+                    topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f),
+                    size = Size(
+                        width = size.width - strokeWidth,
+                        height = size.height - strokeWidth,
+                    ),
+                    cornerRadius = CornerRadius(size.height / 2f, size.height / 2f),
+                    style = Stroke(
+                        width = strokeWidth,
+                        pathEffect = PathEffect.dashPathEffect(
+                            floatArrayOf(dashWidth.toPx(), dashGap.toPx()),
+                        ),
+                    ),
+                )
+            }
+            .clip(CircleShape)
+            .semantics(mergeDescendants = true) {
+                this.contentDescription = description
+            }
+            .clickable(role = Role.Button, onClickLabel = description) { onReveal() }
+            .padding(horizontal = 14.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.VpnKey,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(Res.string.study_hint_show),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 0.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
 private fun FirstLetterHintView(
     hint: FirstLetterHint,
+    revealed: Boolean,
+    onReveal: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val hintContentDescription = pluralStringResource(
@@ -1934,14 +2035,30 @@ private fun FirstLetterHintView(
         hint.letter.toString(),
         hint.letterCount,
     )
+    val shellModifier = modifier.height(48.dp)
+    if (!revealed) {
+        HintRevealPill(
+            contentDescription = stringResource(Res.string.study_hint_show_description),
+            onReveal = onReveal,
+            modifier = shellModifier,
+        )
+        return
+    }
+
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        modifier = modifier.clearAndSetSemantics { contentDescription = hintContentDescription },
+        modifier = shellModifier
+            .clip(CircleShape)
+            .clearAndSetSemantics {
+                contentDescription = hintContentDescription
+            },
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
@@ -1955,7 +2072,7 @@ private fun FirstLetterHintView(
             )
             if (hint.dotCount > 0) {
                 Text(
-                    text = "·".repeat(hint.dotCount.coerceAtMost(15)),
+                    text = "·".repeat(hint.dotCount),
                     fontSize = 16.sp,
                     fontFamily = MaterialTheme.serifFontFamily,
                     letterSpacing = 8.sp,
@@ -2384,6 +2501,24 @@ private fun StudySessionProductionFrontPreview(
 
 @Preview
 @Composable
+private fun StudySessionProductionFrontHintRevealedPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                productionCard().copy(firstLetterHintRevealed = true),
+                StudyCardSide.FRONT,
+                current = 5,
+            ),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
 private fun StudySessionProductionBackPreview(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
 ) {
@@ -2404,6 +2539,24 @@ private fun StudySessionClozeFrontPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(clozeCard(), StudyCardSide.FRONT, current = 6),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionClozeFrontHintRevealedPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                clozeCard().copy(translationHintRevealed = true),
+                StudyCardSide.FRONT,
+                current = 6,
+            ),
             onCancel = {},
             onEnd = {},
         )

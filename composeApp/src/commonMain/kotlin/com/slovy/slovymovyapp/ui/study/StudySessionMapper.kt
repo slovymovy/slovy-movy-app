@@ -351,6 +351,7 @@ private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
 internal fun String.firstLetterHint(): FirstLetterHint? {
     val first = firstOrNull { it.isLetter() } ?: return null
     val letterCount = count { it.isLetter() }
+    if (letterCount <= 1) return null
     val dotCount = letterCount - 1
     return FirstLetterHint(letter = first, letterCount = letterCount, dotCount = dotCount)
 }

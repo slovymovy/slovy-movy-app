@@ -1173,11 +1173,17 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
-    fun same_lemma_new_senses_remain_available_after_successful_review() = runBlocking {
-        withEnv(includeTranslation = false) { env ->
+    fun same_lemma_new_senses_wait_for_lightweight_cooldown_after_successful_review() = runBlocking {
+        val config = FsrsDefaults.config().copy(
+            lemmaCooldownFloor = 2.minutes,
+            lemmaCooldownCap = 2.minutes,
+            cooldownJitterRatio = 0.0,
+        )
+        withEnv(includeTranslation = false, config = config) { env ->
             val firstSense = env.seedSense(lemma = "polysemenew")
             val secondSense = env.seedAdditionalSense(firstSense)
             val thirdSense = env.seedAdditionalSense(firstSense)
+            val senses = listOf(firstSense, secondSense, thirdSense)
             env.addFavorite(firstSense, createdAt = start.toEpochMilliseconds())
             env.addFavorite(secondSense, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
             env.addFavorite(thirdSense, createdAt = (start + 2.milliseconds).toEpochMilliseconds())
@@ -1197,6 +1203,17 @@ class LearningE2ETest : BaseTest() {
                 durationMs = 1.seconds.inWholeMilliseconds,
             )
 
+            val delayedCards = senses
+                .filter { it.senseId.toString() != firstCard.senseId }
+                .map { env.app.favoritesQueries.selectCardsByFavorite(it.senseId, "en").executeAsOne() }
+            assertEquals(2, delayedCards.size)
+            delayedCards.forEach { delayedCard ->
+                assertEquals(CardState.NEW, delayedCard.state)
+                assertEquals((start + 2.minutes).toEpochMilliseconds(), delayedCard.available_after)
+            }
+            assertNull(env.session.nextCard("en", start).first())
+
+            env.clock.advance(2.minutes)
             val nextCard = assertNotNull(
                 env.session.nextCard("en", start)
                     .first { it == null || it.loadState() != SessionCardLoadState.LOADING }

@@ -6,6 +6,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
 class SettingsRepository(private val db: AppDatabase) {
@@ -44,5 +46,12 @@ class SettingsRepository(private val db: AppDatabase) {
 
     suspend fun deleteById(id: Setting.Name) = withContext(Dispatchers.IO) {
         db.settingsQueries.deleteById(id)
+    }
+
+    suspend fun getDeveloperMode(default: Boolean): Boolean =
+        getById(Setting.Name.DEVELOPER_MODE)?.value?.jsonPrimitive?.booleanOrNull ?: default
+
+    suspend fun setDeveloperMode(enabled: Boolean) {
+        insert(Setting(Setting.Name.DEVELOPER_MODE, JsonPrimitive(enabled)))
     }
 }
