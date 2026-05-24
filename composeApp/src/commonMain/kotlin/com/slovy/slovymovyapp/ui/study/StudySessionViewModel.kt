@@ -88,9 +88,7 @@ class StudySessionViewModel(
         val ttsLanguage = ttsManager.getAvailableLanguages()
             .firstOrNull { it.language == lang } ?: return
         val allVoices = ttsManager.getVoicesForLanguage(ttsLanguage)
-        if (!voiceFilterHelper.hasEnabledVoices(ttsLanguage)) {
-            voiceFilterHelper.initializeDefaultVoices(ttsLanguage, allVoices)
-        }
+        voiceFilterHelper.initializeDefaultVoices(ttsLanguage, allVoices)
         availableVoices = voiceFilterHelper.filterVoicesByEnabled(allVoices, ttsLanguage)
         if (availableVoices.isNotEmpty()) {
             currentVoiceIndex = availableVoices.indices.random()

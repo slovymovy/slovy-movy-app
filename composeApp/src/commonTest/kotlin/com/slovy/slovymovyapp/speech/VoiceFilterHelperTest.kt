@@ -20,22 +20,28 @@ open class VoiceFilterHelperTest : BaseTest() {
             id = "voice1",
             name = "Voice 1",
             language = Language.ENGLISH,
+            localeTag = "en-US",
             quality = VoiceQuality.BEST,
-            networkConnectionRequired = false // local voice
+            networkConnectionRequired = false,
+            enabledByDefault = true
         ),
         Text2SpeechVoice(
             id = "voice2",
             name = "Voice 2",
             language = Language.ENGLISH,
+            localeTag = "en-US",
             quality = VoiceQuality.GOOD,
-            networkConnectionRequired = true // network voice
+            networkConnectionRequired = true,
+            enabledByDefault = false
         ),
         Text2SpeechVoice(
             id = "voice3",
             name = "Voice 3",
             language = Language.ENGLISH,
+            localeTag = "en-GB",
             quality = VoiceQuality.MEDIUM,
-            networkConnectionRequired = false // local voice
+            networkConnectionRequired = false,
+            enabledByDefault = true
         )
     )
 
@@ -147,18 +153,162 @@ open class VoiceFilterHelperTest : BaseTest() {
     }
 
     @Test
-    fun initializeDefaultVoices_selects_local_voices_only() = runBlocking {
+    fun isVoiceEnabled_returns_false_when_voice_list_is_empty() = runBlocking {
+        val repo = settingsRepository()
+        val helper = VoiceFilterHelper(repo)
+
+        helper.setEnabledVoices(testLanguage, emptySet())
+
+        assertFalse(helper.isVoiceEnabled("voice1", testLanguage))
+    }
+
+    @Test
+    fun initializeDefaultVoices_selects_default_enabled_voices_only() = runBlocking {
         val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
 
         val result = helper.initializeDefaultVoices(testLanguage, testVoices)
 
-        // Should only include voice1 and voice3 (networkConnectionRequired = false, i.e., local voices)
         assertEquals(setOf("voice1", "voice3"), result)
 
-        // Verify it was saved
         val saved = helper.getEnabledVoices(testLanguage)
         assertEquals(setOf("voice1", "voice3"), saved)
+    }
+
+    @Test
+    fun initializeDefaultVoices_excludes_default_disabled_local_voices() = runBlocking {
+        val repo = settingsRepository()
+        val helper = VoiceFilterHelper(repo)
+        val voices = testVoices + Text2SpeechVoice(
+            id = "novelty",
+            name = "Bubbles",
+            language = Language.ENGLISH,
+            localeTag = "en-US",
+            quality = VoiceQuality.BEST,
+            networkConnectionRequired = false,
+            enabledByDefault = false
+        )
+
+        val result = helper.initializeDefaultVoices(testLanguage, voices)
+
+        assertEquals(setOf("voice1", "voice3"), result)
+    }
+
+    @Test
+    fun initializeDefaultVoices_selects_all_default_enabled_voices() = runBlocking {
+        val repo = settingsRepository()
+        val helper = VoiceFilterHelper(repo)
+        val voices = (1..6).map { index ->
+            Text2SpeechVoice(
+                id = "voice$index",
+                name = "Voice $index",
+                language = Language.ENGLISH,
+                localeTag = "en-US",
+                quality = if (index <= 4) VoiceQuality.BEST else VoiceQuality.GOOD,
+                networkConnectionRequired = false,
+                enabledByDefault = true
+            )
+        }
+
+        val result = helper.initializeDefaultVoices(testLanguage, voices)
+
+        assertEquals(setOf("voice1", "voice2", "voice3", "voice4", "voice5", "voice6"), result)
+    }
+
+    @Test
+    fun initializeDefaultVoices_repairs_broad_legacy_default_selection() = runBlocking {
+        val repo = settingsRepository()
+        val helper = VoiceFilterHelper(repo)
+        val voices = (1..10).map { index ->
+            Text2SpeechVoice(
+                id = "voice$index",
+                name = "Voice $index",
+                language = Language.ENGLISH,
+                localeTag = "en-US",
+                quality = if (index <= 4) VoiceQuality.BEST else VoiceQuality.GOOD,
+                networkConnectionRequired = false,
+                enabledByDefault = index <= 4
+            )
+        }
+        helper.setEnabledVoices(testLanguage, voices.map { it.id }.toSet())
+
+        val result = helper.initializeDefaultVoices(testLanguage, voices)
+
+        assertEquals(setOf("voice1", "voice2", "voice3", "voice4"), result)
+    }
+
+    @Test
+    fun initializeDefaultVoices_preserves_broad_selection_with_manual_extra_voice() = runBlocking {
+        val repo = settingsRepository()
+        val helper = VoiceFilterHelper(repo)
+        val legacyVoices = (1..10).map { index ->
+            Text2SpeechVoice(
+                id = "voice$index",
+                name = "Voice $index",
+                language = Language.ENGLISH,
+                localeTag = "en-US",
+                quality = if (index <= 4) VoiceQuality.BEST else VoiceQuality.GOOD,
+                networkConnectionRequired = false,
+                enabledByDefault = index <= 4
+            )
+        }
+        val manualExtraVoice = Text2SpeechVoice(
+            id = "manualExtra",
+            name = "Manual Extra",
+            language = Language.ENGLISH,
+            localeTag = "en-US",
+            quality = VoiceQuality.BEST,
+            networkConnectionRequired = true,
+            enabledByDefault = false
+        )
+        val savedSelection = legacyVoices.map { it.id }.toSet() + manualExtraVoice.id
+        helper.setEnabledVoices(testLanguage, savedSelection)
+
+        val result = helper.initializeDefaultVoices(testLanguage, legacyVoices + manualExtraVoice)
+
+        assertEquals(savedSelection, result)
+    }
+
+    @Test
+    fun initializeDefaultVoices_preserves_manual_selection() = runBlocking {
+        val repo = settingsRepository()
+        val helper = VoiceFilterHelper(repo)
+        helper.setEnabledVoices(testLanguage, setOf("voice3"))
+
+        val result = helper.initializeDefaultVoices(testLanguage, testVoices)
+
+        assertEquals(setOf("voice3"), result)
+    }
+
+    @Test
+    fun initializeDefaultVoices_preserves_manual_selection_with_disabled_voice() = runBlocking {
+        val repo = settingsRepository()
+        val helper = VoiceFilterHelper(repo)
+        val voices = testVoices + Text2SpeechVoice(
+            id = "novelty",
+            name = "Bubbles",
+            language = Language.ENGLISH,
+            localeTag = "en-US",
+            quality = VoiceQuality.BEST,
+            networkConnectionRequired = false,
+            enabledByDefault = false
+        )
+        helper.setEnabledVoices(testLanguage, setOf("novelty"))
+
+        val result = helper.initializeDefaultVoices(testLanguage, voices)
+
+        assertEquals(setOf("novelty"), result)
+    }
+
+    @Test
+    fun initializeDefaultVoices_preserves_empty_manual_selection() = runBlocking {
+        val repo = settingsRepository()
+        val helper = VoiceFilterHelper(repo)
+        helper.setEnabledVoices(testLanguage, emptySet())
+
+        val result = helper.initializeDefaultVoices(testLanguage, testVoices)
+
+        assertTrue(result.isEmpty())
     }
 
     @Test
@@ -184,6 +334,18 @@ open class VoiceFilterHelperTest : BaseTest() {
         assertTrue(result.any { it.id == "voice1" })
         assertTrue(result.any { it.id == "voice3" })
         assertFalse(result.any { it.id == "voice2" })
+    }
+
+    @Test
+    fun filterVoicesByEnabled_returns_empty_when_voice_list_is_empty() = runBlocking {
+        val repo = settingsRepository()
+        val helper = VoiceFilterHelper(repo)
+
+        helper.setEnabledVoices(testLanguage, emptySet())
+
+        val result = helper.filterVoicesByEnabled(testVoices, testLanguage)
+
+        assertTrue(result.isEmpty())
     }
 
     @Test

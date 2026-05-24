@@ -5,11 +5,11 @@ import com.slovy.slovymovyapp.data.Language
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.ObjCSignatureOverride
-import kotlinx.cinterop.useContents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import platform.AVFAudio.*
+import platform.Foundation.NSSelectorFromString
 import platform.Foundation.NSRange
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
@@ -21,7 +21,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     private val delegate = TTSDelegate()
     private var currentVoice: AVSpeechSynthesisVoice? = null
 
-    private var onWordBoundary: ((IntRange) -> Unit)? = null
     private val statusListeners = mutableMapOf<Any, (TTSStatus) -> Unit>()
 
     // Generation counter to track speech requests and ignore stale callbacks
@@ -37,8 +36,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                     deactivateAudioSession()
                     statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
                 }
-            },
-            onWordBoundary = { range -> onWordBoundary?.invoke(range) }
+            }
         )
     }
 
@@ -54,7 +52,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                 null
             )
             audioSession.setActive(true, null)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Audio session configuration/activation failed
         }
     }
@@ -75,9 +73,11 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual fun speak(text: String, language: Language) {
         val voices = AVSpeechSynthesisVoice.speechVoices()
-        val voiceForLanguage = voices
+        val voicesForLanguage = voices
             .filterIsInstance<AVSpeechSynthesisVoice>()
-            .firstOrNull { it.language.startsWith(language.code) }
+            .filter { it.language.startsWith(language.code) }
+        val voiceForLanguage = voicesForLanguage.firstOrNull { it.isEnabledByDefault() }
+            ?: voicesForLanguage.firstOrNull()
         if (voiceForLanguage == null) {
             statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
             return
@@ -147,12 +147,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                         id = voice.identifier,
                         name = voice.name,
                         language = language.language,
+                        localeTag = voice.language,
                         quality = when (voice.quality) {
                             AVSpeechSynthesisVoiceQualityPremium -> VoiceQuality.BEST
                             AVSpeechSynthesisVoiceQualityEnhanced -> VoiceQuality.GOOD
                             else -> VoiceQuality.MEDIUM
                         },
-                        networkConnectionRequired = false // TODO
+                        networkConnectionRequired = false,
+                        enabledByDefault = voice.isEnabledByDefault()
                     )
                 }
         }
@@ -180,10 +182,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
     }
 
-    actual fun setOnWordBoundaryListener(listener: (wordRange: IntRange) -> Unit) {
-        onWordBoundary = listener
-    }
-
     actual fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {
         statusListeners[key] = listener
     }
@@ -193,12 +191,61 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     }
 }
 
+private fun AVSpeechSynthesisVoice.isEnabledByDefault(): Boolean {
+    val canReadVoiceTraits = hasVoiceTraits()
+    val blockedByTrait = hasVoiceTrait(AVSpeechSynthesisVoiceTraitIsNoveltyVoice) ||
+            hasVoiceTrait(AVSpeechSynthesisVoiceTraitIsPersonalVoice)
+    val blockedByFallbackName = !canReadVoiceTraits && hasKnownNoveltyName()
+
+    return !blockedByTrait &&
+            !blockedByFallbackName &&
+            isSystemDefaultVoiceForLocale()
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private fun AVSpeechSynthesisVoice.hasVoiceTraits(): Boolean {
+    return respondsToSelector(NSSelectorFromString("voiceTraits"))
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private fun AVSpeechSynthesisVoice.hasVoiceTrait(trait: ULong): Boolean {
+    if (!hasVoiceTraits()) return false
+    return (voiceTraits and trait) != 0uL
+}
+
+private fun AVSpeechSynthesisVoice.hasKnownNoveltyName(): Boolean {
+    val searchableName = "${identifier.lowercase()} ${name.lowercase()}"
+    return KNOWN_NOVELTY_VOICE_NAMES.any { it in searchableName }
+}
+
+private fun AVSpeechSynthesisVoice.isSystemDefaultVoiceForLocale(): Boolean {
+    return AVSpeechSynthesisVoice.voiceWithLanguage(language)?.identifier == identifier
+}
+
+private val KNOWN_NOVELTY_VOICE_NAMES = setOf(
+    "bad news",
+    "bahh",
+    "bells",
+    "boing",
+    "bubbles",
+    "cellos",
+    "deranged",
+    "fred",
+    "good news",
+    "hysterical",
+    "junior",
+    "organ",
+    "princess",
+    "trinoids",
+    "whisper",
+    "zarvox"
+)
+
 @OptIn(ExperimentalForeignApi::class)
 private class TTSDelegate : NSObject(), AVSpeechSynthesizerDelegateProtocol {
 
     private var onStart: (() -> Unit)? = null
     private var onSpeechEnded: ((Long) -> Unit)? = null
-    private var onWordBoundary: ((IntRange) -> Unit)? = null
 
     private var started: Boolean = false
 
@@ -208,12 +255,10 @@ private class TTSDelegate : NSObject(), AVSpeechSynthesizerDelegateProtocol {
 
     fun setCallbacks(
         onStart: () -> Unit,
-        onSpeechEnded: (Long) -> Unit,
-        onWordBoundary: (IntRange) -> Unit
+        onSpeechEnded: (Long) -> Unit
     ) {
         this.onStart = onStart
         this.onSpeechEnded = onSpeechEnded
-        this.onWordBoundary = onWordBoundary
     }
 
     fun registerUtterance(utterance: AVSpeechUtterance, generation: Long) {
@@ -268,10 +313,6 @@ private class TTSDelegate : NSObject(), AVSpeechSynthesizerDelegateProtocol {
         if (!started) {
             started = true
             onStart?.invoke()
-        }
-        willSpeakRangeOfSpeechString.useContents {
-            val range = location.toInt() until (location + length).toInt()
-            onWordBoundary?.invoke(range)
         }
     }
 }

@@ -624,9 +624,15 @@ class SettingsViewModel(
                 )
 
                 filteredLanguages.forEach { language ->
-                    val enabledIds = voiceFilterHelper.getEnabledVoices(language)
-                    if (enabledIds.isNotEmpty()) {
-                        updateLanguageState(language) { it.copy(enabledVoiceIds = enabledIds) }
+                    try {
+                        val voices = ttsManager.getVoicesForLanguage(language)
+                        voiceFilterHelper.initializeDefaultVoices(language, voices)
+                        val enabledIds = voiceFilterHelper.getEnabledVoices(language)
+                        updateLanguageState(language) { it.copy(voices = voices, enabledVoiceIds = enabledIds) }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (_: Exception) {
+                        // The expanded row still shows a localized load error if this language is opened.
                     }
                 }
             } catch (e: CancellationException) {
@@ -655,9 +661,7 @@ class SettingsViewModel(
             try {
                 val voices = ttsManager.getVoicesForLanguage(language)
 
-                if (!voiceFilterHelper.hasEnabledVoices(language)) {
-                    voiceFilterHelper.initializeDefaultVoices(language, voices)
-                }
+                voiceFilterHelper.initializeDefaultVoices(language, voices)
 
                 val enabledIds = voiceFilterHelper.getEnabledVoices(language)
                 updateLanguageState(language) {
@@ -1533,22 +1537,28 @@ private fun SettingsScreenPreviewWithExpandedVoice(
                                 id = "en-us-x-sfg#female_1-local",
                                 name = "Female 1",
                                 language = Language.ENGLISH,
+                                localeTag = "en-US",
                                 quality = VoiceQuality.BEST,
-                                networkConnectionRequired = false
+                                networkConnectionRequired = false,
+                                enabledByDefault = true
                             ),
                             Text2SpeechVoice(
                                 id = "en-us-x-sfg#male_1-local",
                                 name = "Male 1",
                                 language = Language.ENGLISH,
+                                localeTag = "en-US",
                                 quality = VoiceQuality.GOOD,
-                                networkConnectionRequired = false
+                                networkConnectionRequired = false,
+                                enabledByDefault = true
                             ),
                             Text2SpeechVoice(
                                 id = "en-us-x-tpf-network",
                                 name = "Network Voice",
                                 language = Language.ENGLISH,
+                                localeTag = "en-US",
                                 quality = VoiceQuality.MEDIUM,
-                                networkConnectionRequired = true
+                                networkConnectionRequired = true,
+                                enabledByDefault = false
                             )
                         )
                     )

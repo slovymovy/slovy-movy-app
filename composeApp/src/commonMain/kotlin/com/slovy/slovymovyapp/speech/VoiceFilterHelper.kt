@@ -16,6 +16,8 @@ import kotlinx.serialization.json.contentOrNull
  */
 class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
 
+    private val broadLegacyDefaultThreshold = 8
+
     suspend fun hasEnabledVoices(language: Text2SpeechLanguage): Boolean = withContext(Dispatchers.IO) {
         val repo = settingsRepo ?: return@withContext false
         val setting = repo.getById(Setting.Name.ENABLED_VOICES) ?: return@withContext false
@@ -52,22 +54,29 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
     }
 
     suspend fun isVoiceEnabled(voiceId: String, language: Text2SpeechLanguage): Boolean {
+        if (!hasEnabledVoices(language)) return true
+
         val enabledVoices = getEnabledVoices(language)
-        // If no voices are configured, all are considered enabled
-        return enabledVoices.isEmpty() || voiceId in enabledVoices
+        return voiceId in enabledVoices
     }
 
     suspend fun initializeDefaultVoices(
         language: Text2SpeechLanguage,
         allVoices: List<Text2SpeechVoice>
     ): Set<String> = withContext(Dispatchers.IO) {
-        // Select voices that don't require network (local voices)
-        val localVoices = allVoices.filter { !it.networkConnectionRequired }.map { it.id }.toSet()
-        // Save default selection
-        if (localVoices.isNotEmpty()) {
-            setEnabledVoices(language, localVoices)
+        val defaultVoices = selectDefaultVoiceIds(allVoices)
+        if (defaultVoices.isEmpty()) return@withContext emptySet()
+
+        val hasConfiguredSelection = hasEnabledVoices(language)
+        val currentVoices = getEnabledVoices(language)
+        if (!hasConfiguredSelection ||
+            isBroadLegacyDefault(currentVoices, allVoices)
+        ) {
+            setEnabledVoices(language, defaultVoices)
+            return@withContext defaultVoices
         }
-        localVoices
+
+        currentVoices
     }
 
     suspend fun isVoiceSetupShown(language: Language): Boolean = withContext(Dispatchers.IO) {
@@ -93,13 +102,31 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         voices: List<Text2SpeechVoice>,
         language: Text2SpeechLanguage
     ): List<Text2SpeechVoice> {
+        if (!hasEnabledVoices(language)) return voices
+
         val enabledVoiceIds = getEnabledVoices(language)
-        return if (enabledVoiceIds.isEmpty()) {
-            // No filter set, return all voices
-            voices
-        } else {
-            // Filter to only enabled voices
-            voices.filter { it.id in enabledVoiceIds }
-        }
+        return voices.filter { it.id in enabledVoiceIds }
+    }
+
+    private fun selectDefaultVoiceIds(voices: List<Text2SpeechVoice>): Set<String> {
+        val eligibleVoices = voices.filter { it.enabledByDefault }
+        val fallbackVoices = voices.filter { !it.networkConnectionRequired }
+        val sourceVoices = eligibleVoices.ifEmpty { fallbackVoices }
+
+        return sourceVoices.map { it.id }.toSet()
+    }
+
+    private fun isBroadLegacyDefault(
+        currentVoiceIds: Set<String>,
+        allVoices: List<Text2SpeechVoice>
+    ): Boolean {
+        val legacyDefaultIds = allVoices
+            .filter { !it.networkConnectionRequired }
+            .map { it.id }
+            .toSet()
+
+        return legacyDefaultIds.size >= broadLegacyDefaultThreshold &&
+                currentVoiceIds.size >= broadLegacyDefaultThreshold &&
+                currentVoiceIds == legacyDefaultIds
     }
 }

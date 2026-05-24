@@ -69,7 +69,7 @@ fun VoiceSetupBottomSheetContent(
 
     val step1Instruction = when {
         isAndroid -> stringResource(Res.string.voice_setup_step_android, language.selfName)
-        isIos -> stringResource(Res.string.voice_setup_step_ios, language.selfName)
+        isIos -> stringResource(Res.string.voice_setup_step_ios)
         else -> stringResource(Res.string.voice_setup_step_other, language.selfName)
     }
 

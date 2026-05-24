@@ -502,10 +502,8 @@ class WordDetailViewModel(
                 if (targetLanguage != null) {
                     val allVoices = ttsManager.getVoicesForLanguage(targetLanguage)
 
-                    // Initialize default voices if needed
-                    if (!voiceFilterHelper.hasEnabledVoices(targetLanguage)) {
-                        voiceFilterHelper.initializeDefaultVoices(targetLanguage, allVoices)
-                    }
+                    // Initialize or repair the default voice selection if needed.
+                    voiceFilterHelper.initializeDefaultVoices(targetLanguage, allVoices)
 
                     // Filter to enabled voices only
                     availableVoices = voiceFilterHelper.filterVoicesByEnabled(allVoices, targetLanguage)

@@ -30,9 +30,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     actual fun openSettings() {
     }
 
-    actual fun setOnWordBoundaryListener(listener: (wordRange: IntRange) -> Unit) {
-    }
-
     actual fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {
         statusListeners[key] = listener
     }
