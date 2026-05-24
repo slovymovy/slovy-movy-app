@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.ui
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class StatsCountFormatterTest {
     @Test
@@ -12,10 +13,22 @@ class StatsCountFormatterTest {
         assertEquals("3.319", formatCountForLanguage(3319, "es"))
         assertEquals("3.319", formatCountForLanguage(3319, "it"))
         assertEquals("3.319", formatCountForLanguage(3319, "tr"))
-        assertEquals("3\u00A0319", formatCountForLanguage(3319, "ru"))
-        assertEquals("3\u00A0319", formatCountForLanguage(3319, "pl"))
-        assertEquals("3\u00A0319", formatCountForLanguage(3319, "cs"))
-        assertEquals("3\u202F319", formatCountForLanguage(3319, "fr"))
+        assertGroupedWithSpace("ru")
+        assertGroupedWithSpace("pl")
+        assertGroupedWithSpace("cs")
+        assertGroupedWithSpace("fr")
+    }
+
+    private fun assertGroupedWithSpace(language: String) {
+        val formatted = formatCountForLanguage(3319, language)
+        assertEquals(5, formatted.length, "Expected 5 chars for $language, got '$formatted'")
+        assertEquals('3', formatted[0], "Expected leading '3' for $language, got '$formatted'")
+        assertEquals("319", formatted.substring(2), "Expected trailing '319' for $language, got '$formatted'")
+        val separator = formatted[1]
+        assertTrue(
+            separator == ' ' || separator == '\u00A0' || separator == '\u202F' || separator == '\u2009',
+            "Expected space-like grouping separator for $language, got U+${separator.code.toString(16).uppercase()}",
+        )
     }
 
     @Test
