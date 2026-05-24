@@ -119,6 +119,15 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         return voices.filter { it.id in enabledVoiceIds }
     }
 
+    suspend fun loadEnabledVoices(
+        ttsManager: TextToSpeechManager,
+        language: Text2SpeechLanguage,
+    ): List<Text2SpeechVoice> {
+        val allVoices = ttsManager.getVoicesForLanguage(language)
+        initializeDefaultVoices(language, allVoices)
+        return filterVoicesByEnabled(allVoices, language)
+    }
+
     private fun selectDefaultVoiceIds(voices: List<Text2SpeechVoice>): Set<String> {
         val eligibleVoices = voices.filter { it.enabledByDefault }
         val fallbackVoices = voices.filter { !it.networkConnectionRequired }

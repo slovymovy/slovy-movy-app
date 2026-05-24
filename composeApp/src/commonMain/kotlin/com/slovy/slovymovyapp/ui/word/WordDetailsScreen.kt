@@ -501,18 +501,10 @@ class WordDetailViewModel(
                 val languages = ttsManager.getAvailableLanguages()
                 val targetLanguage = languages.firstOrNull { it.language == dictionaryLanguage }
                 if (targetLanguage != null) {
-                    val allVoices = ttsManager.getVoicesForLanguage(targetLanguage)
-
-                    // Initialize or repair the default voice selection if needed.
-                    voiceFilterHelper.initializeDefaultVoices(targetLanguage, allVoices)
-
-                    // Filter to enabled voices only
-                    availableVoices = voiceFilterHelper.filterVoicesByEnabled(allVoices, targetLanguage)
-                    // Start from a random voice index
+                    availableVoices = voiceFilterHelper.loadEnabledVoices(ttsManager, targetLanguage)
                     if (availableVoices.isNotEmpty()) {
                         currentVoiceIndex = availableVoices.indices.random()
                     }
-
                 }
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to load word detail voices for ${dictionaryLanguage.code}", e)

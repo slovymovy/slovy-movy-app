@@ -57,7 +57,6 @@ class StudySessionViewModel(
     private var reviewedCount: Int = 0
     private var sessionTotal: Int = 0
     private var availableVoices: List<Text2SpeechVoice> = emptyList()
-    private var audioMutedByVoiceFilter: Boolean = false
     private var currentVoiceIndex: Int = 0
     private val gradeCounts = mutableMapOf<StudyRating, Int>()
 
@@ -82,31 +81,15 @@ class StudySessionViewModel(
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to load study voices for $langCode", e)
                 availableVoices = emptyList()
-                audioMutedByVoiceFilter = false
             }
         }
     }
 
     private suspend fun loadVoicesSync() {
-        val lang = language ?: run {
-            audioMutedByVoiceFilter = false
-            return
-        }
+        val lang = language ?: return
         val ttsLanguage = ttsManager.getAvailableLanguages()
-            .firstOrNull { it.language == lang } ?: run {
-                audioMutedByVoiceFilter = false
-                return
-            }
-        val allVoices = ttsManager.getVoicesForLanguage(ttsLanguage)
-        voiceFilterHelper.initializeDefaultVoices(ttsLanguage, allVoices)
-        val hasConfiguredSelection = voiceFilterHelper.hasEnabledVoices(ttsLanguage)
-        val enabledVoiceIds = voiceFilterHelper.getEnabledVoices(ttsLanguage)
-        audioMutedByVoiceFilter = hasConfiguredSelection && enabledVoiceIds.isEmpty()
-        availableVoices = if (hasConfiguredSelection) {
-            allVoices.filter { it.id in enabledVoiceIds }
-        } else {
-            allVoices
-        }
+            .firstOrNull { it.language == lang } ?: return
+        availableVoices = voiceFilterHelper.loadEnabledVoices(ttsManager, ttsLanguage)
         if (availableVoices.isNotEmpty()) {
             currentVoiceIndex = availableVoices.indices.random()
         }
@@ -122,17 +105,13 @@ class StudySessionViewModel(
         viewModelScope.launch {
             try {
                 if (availableVoices.isEmpty()) loadVoicesSync()
-                if (audioMutedByVoiceFilter) {
-                    val latest = state as? StudySessionUiState.Active ?: return@launch
-                    state = latest.copy(isPreparingAudio = false, isPlayingAudio = false)
-                } else if (availableVoices.isNotEmpty()) {
+                if (availableVoices.isNotEmpty()) {
                     currentVoiceIndex = (currentVoiceIndex + 1) % availableVoices.size
                     ttsManager.setVoice(availableVoices[currentVoiceIndex])
                     ttsManager.speak(text)
-                } else if (language != null) {
-                    ttsManager.speak(text, language)
                 } else {
-                    ttsManager.speak(text)
+                    val latest = state as? StudySessionUiState.Active ?: return@launch
+                    state = latest.copy(isPreparingAudio = false, isPlayingAudio = false)
                 }
             } catch (e: CancellationException) {
                 throw e
