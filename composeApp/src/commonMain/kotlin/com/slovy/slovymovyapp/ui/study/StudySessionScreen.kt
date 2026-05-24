@@ -1878,6 +1878,32 @@ private fun clozeCard() = StudyCardUiState.Cloze(
     ),
 )
 
+private fun translationClozeCard() = StudyCardUiState.Cloze(
+    id = "cloze-translation",
+    chipLabel = UiText.Plain("Recall NL"),
+    prompt = StudyClozeTextUiState(
+        text = "It was so lovely at your place.",
+        answerRanges = listOf(10..15),
+        filled = true,
+    ),
+    translationHint = StudyClozeTextUiState(
+        text = "Het was zo gezellig bij jullie thuis.",
+        answerRanges = listOf(11..18),
+    ),
+    back = StudyCardBackUiState(
+        headline = "gezellig",
+        isLemmaHeadline = true,
+        secondary = "cosy, sociable",
+        definition = "a feeling of warmth and conviviality from being together",
+        examples = listOf(
+            StudyExampleUiState(
+                text = "Het was zo gezellig bij jullie thuis.",
+                translation = "It was so lovely at your place.",
+            ),
+        ),
+    ),
+)
+
 private fun listeningCard() = StudyCardUiState.Listening(
     id = "listening",
     chipLabel = UiText.Resource(Res.string.study_chip_listen),
@@ -2136,6 +2162,38 @@ private fun StudySessionClozeBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(clozeCard(), StudyCardSide.BACK, current = 6),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTranslationClozeFrontPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(translationClozeCard(), StudyCardSide.FRONT, current = 6),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTranslationClozeFrontHintRevealedPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                translationClozeCard().copy(translationHintRevealed = true),
+                StudyCardSide.FRONT,
+                current = 6,
+            ),
             onCancel = {},
             onEnd = {},
         )
