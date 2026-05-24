@@ -971,9 +971,7 @@ private fun ClozeFront(
             )
             card.translationHint?.let { hint ->
                 if (card.translationHintRevealed) {
-                    StudyExampleBlock(
-                        example = StudyExampleUiState(text = hint),
-                    )
+                    StudyTranslationHintBlock(cloze = hint)
                 } else {
                     HintRevealPill(
                         contentDescription = stringResource(Res.string.study_hint_show_translation_description),
@@ -1276,6 +1274,36 @@ private fun StudySpeakerButton(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun StudyTranslationHintBlock(
+    cloze: StudyClozeTextUiState,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+    ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(1.5.dp))
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+        )
+        StudyClozeText(
+            cloze = cloze,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontFamily = MaterialTheme.serifFontFamily,
+                fontStyle = FontStyle.Normal,
+                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f,
+            ),
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 
@@ -1834,7 +1862,10 @@ private fun clozeCard() = StudyCardUiState.Cloze(
         text = "Het was zo gezellig bij jullie thuis.",
         answerRanges = listOf(11..18),
     ),
-    translationHint = "It was so <w>lovely</w> at your place.",
+    translationHint = StudyClozeTextUiState(
+        text = "It was so lovely at your place.",
+        answerRanges = listOf(10..15),
+    ),
     back = StudyCardBackUiState(
         headline = "gezellig",
         secondary = "cosy, sociable",
@@ -1843,6 +1874,32 @@ private fun clozeCard() = StudyCardUiState.Cloze(
             text = "Het was zo gezellig bij jullie thuis.",
             answerRanges = listOf(11..18),
             filled = true,
+        ),
+    ),
+)
+
+private fun translationClozeCard() = StudyCardUiState.Cloze(
+    id = "cloze-translation",
+    chipLabel = UiText.Plain("Recall NL"),
+    prompt = StudyClozeTextUiState(
+        text = "It was so lovely at your place.",
+        answerRanges = listOf(10..15),
+        filled = true,
+    ),
+    translationHint = StudyClozeTextUiState(
+        text = "Het was zo gezellig bij jullie thuis.",
+        answerRanges = listOf(11..18),
+    ),
+    back = StudyCardBackUiState(
+        headline = "gezellig",
+        isLemmaHeadline = true,
+        secondary = "cosy, sociable",
+        definition = "a feeling of warmth and conviviality from being together",
+        examples = listOf(
+            StudyExampleUiState(
+                text = "Het was zo gezellig bij jullie thuis.",
+                translation = "It was so lovely at your place.",
+            ),
         ),
     ),
 )
@@ -2105,6 +2162,38 @@ private fun StudySessionClozeBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(clozeCard(), StudyCardSide.BACK, current = 6),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTranslationClozeFrontPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(translationClozeCard(), StudyCardSide.FRONT, current = 6),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTranslationClozeFrontHintRevealedPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                translationClozeCard().copy(translationHintRevealed = true),
+                StudyCardSide.FRONT,
+                current = 6,
+            ),
             onCancel = {},
             onEnd = {},
         )

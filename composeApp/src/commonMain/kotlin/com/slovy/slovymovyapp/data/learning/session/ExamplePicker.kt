@@ -2,7 +2,7 @@ package com.slovy.slovymovyapp.data.learning.session
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.LanguageCardExample
-import com.slovy.slovymovyapp.data.util.HtmlTagParser
+import com.slovy.slovymovyapp.data.util.parseClozeFromTaggedText
 import com.slovy.slovymovyapp.db.FavoritesQueries
 import kotlin.uuid.Uuid
 
@@ -33,9 +33,11 @@ class ExamplePicker(private val learning: FavoritesQueries) {
 
     private fun pickFromCandidates(senseId: Uuid, candidates: List<ExampleCandidate>): ExamplePair? {
         val clozeCandidates = candidates.mapNotNull { candidate ->
-            clozeText(candidate.text)?.let { cloze ->
-                ClozeCandidate(candidate.exampleIndex, cloze.text, cloze.ranges)
-            }
+            parseClozeFromTaggedText(candidate.text)
+                ?.takeIf { it.answerRanges.isNotEmpty() }
+                ?.let { cloze ->
+                    ClozeCandidate(candidate.exampleIndex, cloze.plainText, cloze.answerRanges)
+                }
         }
         if (clozeCandidates.isEmpty()) return null
         val recentDesc = learning.selectRecentReviewedExampleIdsBySense(senseId, clozeCandidates.size.toLong())
@@ -48,27 +50,6 @@ class ExamplePicker(private val learning: FavoritesQueries) {
             ?: clozeCandidates.first()
         return ExamplePair(candidate.exampleIndex, candidate.text, candidate.ranges)
     }
-
-    private fun clozeText(text: String): ClozeText? {
-        var output = ""
-        val ranges = mutableListOf<IntRange>()
-        HtmlTagParser.parseTextSegments(text).forEach { segment ->
-            val start = output.length
-            val segmentText = HtmlTagParser.plainText(segment.text)
-            output += segmentText
-            if (segment.isTagged && segmentText.isNotBlank()) {
-                val leadingWhitespace = segmentText.indexOfFirst { !it.isWhitespace() }
-                val trailingWhitespace = segmentText.indexOfLast { !it.isWhitespace() }
-                ranges.add((start + leadingWhitespace)..(start + trailingWhitespace))
-            }
-        }
-        return ranges.takeIf { it.isNotEmpty() }?.let { ClozeText(text = output, ranges = it) }
-    }
-
-    private data class ClozeText(
-        val text: String,
-        val ranges: List<IntRange>,
-    )
 
     private data class ExampleCandidate(
         val exampleIndex: Long,

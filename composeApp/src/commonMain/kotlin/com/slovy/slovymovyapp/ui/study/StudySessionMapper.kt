@@ -9,6 +9,7 @@ import com.slovy.slovymovyapp.data.learning.session.SessionCard
 import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
+import com.slovy.slovymovyapp.data.util.parseClozeFromTaggedText
 import com.slovy.slovymovyapp.i18n.UiText
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.math.roundToLong
@@ -154,8 +155,8 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                 translationHint = sense.examples
                     .firstOrNull { HtmlTagParser.plainText(it.text) == example.text }
                     ?.targetLangTranslations
-                    ?.values
-                    ?.firstOrNull(),
+                    ?.get(target)
+                    ?.let { toTranslationHintCloze(it) },
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,
@@ -165,14 +166,13 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
         CardKind.CLOZE_TRANSLATION -> {
             val target = targetLanguage ?: return null
             val cloze = example?.toClozeText() ?: return null
-            val backExamples = sense.examples[example.exampleIndex.toInt()].let {
-                listOf(
-                    StudyExampleUiState(
-                        text = it.text,
-                        translation = it.targetLangTranslations[target],
-                    )
+            val sourceExample = sense.examples[example.exampleIndex.toInt()]
+            val backExamples = listOf(
+                StudyExampleUiState(
+                    text = sourceExample.text,
+                    translation = sourceExample.targetLangTranslations[target],
                 )
-            }
+            )
             val activeBack = sourceClozeBack(
                 lemma = lemma,
                 sense = sense,
@@ -192,7 +192,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     listOf(sourceLanguage.studyCode()),
                 ),
                 prompt = cloze.copy(filled = true),
-                translationHint = null,
+                translationHint = toTranslationHintCloze(sourceExample.text),
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,
@@ -346,6 +346,11 @@ private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
         text = text,
         answerRanges = clozeRanges,
     )
+}
+
+private fun toTranslationHintCloze(text: String): StudyClozeTextUiState? {
+    val parsed = parseClozeFromTaggedText(text) ?: return null
+    return StudyClozeTextUiState(text = parsed.plainText, answerRanges = parsed.answerRanges)
 }
 
 internal fun String.firstLetterHint(): FirstLetterHint? {
