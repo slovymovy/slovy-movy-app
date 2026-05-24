@@ -173,6 +173,42 @@ class SettingsViewModel(
         loadLanguages()
     }
 
+    @Suppress("DEPRECATION")
+    suspend fun migrateLegacyDefaultVoiceSelectionsAfterAppStart() {
+        try {
+            if (settingsRepository.isLegacyVoiceMigrationDone()) return
+
+            val languages = ttsManager.getAvailableLanguages()
+            val downloadedLanguages = dataDbManager.listDownloadedDatabases()
+                .filterIsInstance<DatabaseFileInfo.Dictionary>()
+                .map { it.language }
+                .toSet()
+
+            languages
+                .filter { it.language in downloadedLanguages }
+                .forEach { language ->
+                    try {
+                        val voices = ttsManager.getVoicesForLanguage(language)
+                        val migrated = voiceFilterHelper.migrateLegacyDefaultVoiceSelection(language, voices)
+                        if (migrated) {
+                            val enabledIds = voiceFilterHelper.getEnabledVoices(language)
+                            updateLanguageState(language) { it.copy(enabledVoiceIds = enabledIds) }
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        AppLogger.warn(TAG, "Unable to migrate legacy default voices for ${language.language.code}", e)
+                    }
+                }
+
+            settingsRepository.setLegacyVoiceMigrationDone()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to run legacy voice default migration", e)
+        }
+    }
+
     private fun loadLearningLanguages() {
         loadLearningLanguagesJob?.cancel()
         loadLearningLanguagesJob = viewModelScope.launch {
@@ -624,9 +660,16 @@ class SettingsViewModel(
                 )
 
                 filteredLanguages.forEach { language ->
-                    val enabledIds = voiceFilterHelper.getEnabledVoices(language)
-                    if (enabledIds.isNotEmpty()) {
-                        updateLanguageState(language) { it.copy(enabledVoiceIds = enabledIds) }
+                    try {
+                        val voices = ttsManager.getVoicesForLanguage(language)
+                        voiceFilterHelper.initializeDefaultVoices(language, voices)
+                        val enabledIds = voiceFilterHelper.getEnabledVoices(language)
+                        updateLanguageState(language) { it.copy(voices = voices, enabledVoiceIds = enabledIds) }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        AppLogger.warn(TAG, "Unable to load voices for ${language.language.code}", e)
+                        // The expanded row still shows a localized load error if this language is opened.
                     }
                 }
             } catch (e: CancellationException) {
@@ -655,15 +698,14 @@ class SettingsViewModel(
             try {
                 val voices = ttsManager.getVoicesForLanguage(language)
 
-                if (!voiceFilterHelper.hasEnabledVoices(language)) {
-                    voiceFilterHelper.initializeDefaultVoices(language, voices)
-                }
+                voiceFilterHelper.initializeDefaultVoices(language, voices)
 
                 val enabledIds = voiceFilterHelper.getEnabledVoices(language)
                 updateLanguageState(language) {
                     it.copy(voices = voices, enabledVoiceIds = enabledIds, isLoadingVoices = false)
                 }
             } catch (e: Exception) {
+                AppLogger.warn(TAG, "Unable to load voices for ${language.language.code}", e)
                 updateLanguageState(language) { it.copy(isLoadingVoices = false) }
                 state = state.copy(
                     errorMessage = UiText.Resource(
@@ -698,6 +740,7 @@ class SettingsViewModel(
             ttsManager.setVoice(voice)
             ttsManager.speak(text)
         } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to test voice ${voice.id} for ${voice.language.code}", e)
             state = state.copy(
                 testingVoice = null,
                 errorMessage = UiText.Resource(
@@ -1533,22 +1576,28 @@ private fun SettingsScreenPreviewWithExpandedVoice(
                                 id = "en-us-x-sfg#female_1-local",
                                 name = "Female 1",
                                 language = Language.ENGLISH,
+                                localeTag = "en-US",
                                 quality = VoiceQuality.BEST,
-                                networkConnectionRequired = false
+                                networkConnectionRequired = false,
+                                enabledByDefault = true
                             ),
                             Text2SpeechVoice(
                                 id = "en-us-x-sfg#male_1-local",
                                 name = "Male 1",
                                 language = Language.ENGLISH,
+                                localeTag = "en-US",
                                 quality = VoiceQuality.GOOD,
-                                networkConnectionRequired = false
+                                networkConnectionRequired = false,
+                                enabledByDefault = true
                             ),
                             Text2SpeechVoice(
                                 id = "en-us-x-tpf-network",
                                 name = "Network Voice",
                                 language = Language.ENGLISH,
+                                localeTag = "en-US",
                                 quality = VoiceQuality.MEDIUM,
-                                networkConnectionRequired = true
+                                networkConnectionRequired = true,
+                                enabledByDefault = false
                             )
                         )
                     )

@@ -407,6 +407,9 @@ fun App(
                 },
             )
         }
+    LaunchedEffect(settingsViewModel) {
+        settingsViewModel.migrateLegacyDefaultVoiceSelectionsAfterAppStart()
+    }
     DisposableEffect(Unit) {
         onDispose { downloadCoordinator.close() }
     }

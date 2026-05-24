@@ -54,4 +54,11 @@ class SettingsRepository(private val db: AppDatabase) {
     suspend fun setDeveloperMode(enabled: Boolean) {
         insert(Setting(Setting.Name.DEVELOPER_MODE, JsonPrimitive(enabled)))
     }
+
+    suspend fun isLegacyVoiceMigrationDone(): Boolean =
+        getById(Setting.Name.LEGACY_VOICE_MIGRATION_DONE)?.value?.jsonPrimitive?.booleanOrNull ?: false
+
+    suspend fun setLegacyVoiceMigrationDone() {
+        insert(Setting(Setting.Name.LEGACY_VOICE_MIGRATION_DONE, JsonPrimitive(true)))
+    }
 }

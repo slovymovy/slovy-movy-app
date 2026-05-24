@@ -20,7 +20,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     private val context: Context = androidContext as Context
     private lateinit var tts: TextToSpeech
 
-    private var onWordBoundary: ((IntRange) -> Unit)? = null
     private val statusListeners = mutableMapOf<Any, (TTSStatus) -> Unit>()
 
     init {
@@ -55,14 +54,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                 statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
             }
 
-            override fun onRangeStart(
-                utteranceId: String?,
-                start: Int,
-                end: Int,
-                frame: Int
-            ) {
-                onWordBoundary?.invoke(start until end)
-            }
         })
     }
 
@@ -121,12 +112,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                     id = voice.name,
                     name = if (voice.name.contains("#")) voice.name.split("#").lastOrNull() else null,
                     language = language.language,
+                    localeTag = voice.locale.toLanguageTag(),
                     quality = when {
                         voice.quality >= QUALITY_VERY_HIGH -> VoiceQuality.BEST
                         voice.quality >= QUALITY_HIGH -> VoiceQuality.GOOD
                         else -> VoiceQuality.MEDIUM
                     },
-                    networkConnectionRequired = voice.isNetworkConnectionRequired
+                    networkConnectionRequired = voice.isNetworkConnectionRequired,
+                    enabledByDefault = !voice.isNetworkConnectionRequired
                 )
             }
         }
@@ -159,10 +152,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
     actual fun stop() {
         tts.stop()
         statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
-    }
-
-    actual fun setOnWordBoundaryListener(listener: (wordRange: IntRange) -> Unit) {
-        onWordBoundary = listener
     }
 
     actual fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {

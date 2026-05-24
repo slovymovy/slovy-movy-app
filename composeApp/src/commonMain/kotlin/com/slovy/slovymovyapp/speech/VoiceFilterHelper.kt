@@ -52,22 +52,42 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
     }
 
     suspend fun isVoiceEnabled(voiceId: String, language: Text2SpeechLanguage): Boolean {
+        if (!hasEnabledVoices(language)) return true
+
         val enabledVoices = getEnabledVoices(language)
-        // If no voices are configured, all are considered enabled
-        return enabledVoices.isEmpty() || voiceId in enabledVoices
+        return voiceId in enabledVoices
     }
 
     suspend fun initializeDefaultVoices(
         language: Text2SpeechLanguage,
         allVoices: List<Text2SpeechVoice>
     ): Set<String> = withContext(Dispatchers.IO) {
-        // Select voices that don't require network (local voices)
-        val localVoices = allVoices.filter { !it.networkConnectionRequired }.map { it.id }.toSet()
-        // Save default selection
-        if (localVoices.isNotEmpty()) {
-            setEnabledVoices(language, localVoices)
+        val defaultVoices = selectDefaultVoiceIds(allVoices)
+        if (defaultVoices.isEmpty()) return@withContext emptySet()
+
+        if (!hasEnabledVoices(language)) {
+            setEnabledVoices(language, defaultVoices)
+            return@withContext defaultVoices
         }
-        localVoices
+
+        getEnabledVoices(language)
+    }
+
+    @Deprecated("Temporary migration for old local-voice defaults. Remove after legacy settings are no longer expected.")
+    suspend fun migrateLegacyDefaultVoiceSelection(
+        language: Text2SpeechLanguage,
+        allVoices: List<Text2SpeechVoice>
+    ): Boolean = withContext(Dispatchers.IO) {
+        if (!hasEnabledVoices(language)) return@withContext false
+
+        val currentVoices = getEnabledVoices(language)
+        val legacyDefaultVoices = selectLegacyDefaultVoiceIds(allVoices)
+        val defaultVoices = selectDefaultVoiceIds(allVoices)
+        if (legacyDefaultVoices.isEmpty() || defaultVoices.isEmpty()) return@withContext false
+        if (currentVoices != legacyDefaultVoices || currentVoices == defaultVoices) return@withContext false
+
+        setEnabledVoices(language, defaultVoices)
+        true
     }
 
     suspend fun isVoiceSetupShown(language: Language): Boolean = withContext(Dispatchers.IO) {
@@ -93,13 +113,33 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         voices: List<Text2SpeechVoice>,
         language: Text2SpeechLanguage
     ): List<Text2SpeechVoice> {
+        if (!hasEnabledVoices(language)) return voices
+
         val enabledVoiceIds = getEnabledVoices(language)
-        return if (enabledVoiceIds.isEmpty()) {
-            // No filter set, return all voices
-            voices
-        } else {
-            // Filter to only enabled voices
-            voices.filter { it.id in enabledVoiceIds }
-        }
+        return voices.filter { it.id in enabledVoiceIds }
+    }
+
+    suspend fun loadEnabledVoices(
+        ttsManager: TextToSpeechManager,
+        language: Text2SpeechLanguage,
+    ): List<Text2SpeechVoice> {
+        val allVoices = ttsManager.getVoicesForLanguage(language)
+        initializeDefaultVoices(language, allVoices)
+        return filterVoicesByEnabled(allVoices, language)
+    }
+
+    private fun selectDefaultVoiceIds(voices: List<Text2SpeechVoice>): Set<String> {
+        val eligibleVoices = voices.filter { it.enabledByDefault }
+        val fallbackVoices = voices.filter { !it.networkConnectionRequired }
+        val sourceVoices = eligibleVoices.ifEmpty { fallbackVoices }
+
+        return sourceVoices.map { it.id }.toSet()
+    }
+
+    private fun selectLegacyDefaultVoiceIds(voices: List<Text2SpeechVoice>): Set<String> {
+        return voices
+            .filter { !it.networkConnectionRequired }
+            .map { it.id }
+            .toSet()
     }
 }
