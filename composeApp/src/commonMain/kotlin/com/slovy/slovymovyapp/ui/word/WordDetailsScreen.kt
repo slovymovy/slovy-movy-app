@@ -7,6 +7,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -1123,63 +1124,57 @@ private fun WordDetailContent(
                 if (size.height > 0) onHeroMeasured(size.height.toFloat())
             }
         ) {
-            val fontScale = LocalDensity.current.fontScale
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                val maxWidth = constraints.maxWidth
-                var lemmaFontSize by remember(card.lemma, maxWidth, fontScale) { mutableStateOf(42.sp) }
-                Row(
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = card.lemma,
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.Medium,
+                        lineHeight = 44.sp,
+                        letterSpacing = (-0.3).sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    autoSize = TextAutoSize.StepBased(
+                        minFontSize = 22.sp,
+                        maxFontSize = 42.sp,
+                        stepSize = 1.sp,
+                    ),
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                IconButton(
+                    onClick = { if (isPlaying) onStopWord() else onPlayWord() },
+                    enabled = canPlay && !isPreparing,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(bottom = 4.dp)
+                        .size(36.dp)
                 ) {
-                    Text(
-                        text = card.lemma,
-                        style = MaterialTheme.typography.displaySmall.copy(
-                            fontSize = lemmaFontSize,
-                            fontWeight = FontWeight.Medium,
-                            lineHeight = (lemmaFontSize.value * 1.05f).sp,
-                            letterSpacing = (-0.3).sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
-                        onTextLayout = { result ->
-                            if (result.hasVisualOverflow && lemmaFontSize > 22.sp) {
-                                lemmaFontSize = (lemmaFontSize.value * 0.9f).sp
-                            }
-                        }
-                    )
-                    IconButton(
-                        onClick = { if (isPlaying) onStopWord() else onPlayWord() },
-                        enabled = canPlay && !isPreparing,
-                        modifier = Modifier
-                            .padding(bottom = 4.dp)
-                            .size(36.dp)
-                    ) {
-                        when {
-                            isPreparing -> CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                    when {
+                        isPreparing -> CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
 
-                            else -> Icon(
-                                imageVector = if (isPlaying) Icons.Filled.StopCircle else SpeakerVector,
-                                contentDescription = if (isPlaying) {
-                                    stringResource(Res.string.word_details_action_stop)
-                                } else {
-                                    stringResource(Res.string.word_details_action_play_word)
-                                },
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    .copy(alpha = if (canPlay) 1f else 0.38f)
-                            )
-                        }
+                        else -> Icon(
+                            imageVector = if (isPlaying) Icons.Filled.StopCircle else SpeakerVector,
+                            contentDescription = if (isPlaying) {
+                                stringResource(Res.string.word_details_action_stop)
+                            } else {
+                                stringResource(Res.string.word_details_action_play_word)
+                            },
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                .copy(alpha = if (canPlay) 1f else 0.38f)
+                        )
                     }
                 }
-            } // end BoxWithConstraints
+            }
 
             ChapterRule()
         } // end hero measurement Column
