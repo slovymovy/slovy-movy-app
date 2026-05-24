@@ -343,10 +343,13 @@ class StudySessionViewModel(
             )
             onFavoriteChanged(favorite.language)
             skippedCount = (skippedCount - 1).coerceAtLeast(0)
-            if (state !is StudySessionUiState.Active || currentCard == null) {
+            val activeAfterUndo = state as? StudySessionUiState.Active
+            if (activeAfterUndo == null || currentCard == null) {
                 currentCard = null
                 currentOutcomes = emptyList()
                 loadNextCard()
+            } else {
+                state = activeAfterUndo.copy(progress = nextCardProgress())
             }
         }
     }
