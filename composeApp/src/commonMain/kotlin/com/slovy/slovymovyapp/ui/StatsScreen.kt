@@ -37,6 +37,7 @@ import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.learning.stats.StatsYearMonth
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.i18n.NumberFormatter
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
@@ -1165,26 +1166,8 @@ private fun formatCount(value: Int, isLoading: Boolean, language: String): Strin
     return formatCountForLanguage(value, language)
 }
 
-internal fun formatCountForLanguage(value: Int, language: String): String {
-    val raw = value.toString()
-    if (raw.length <= 3) return raw
-    val separator = when (language.lowercase()) {
-        "cs", "pl", "ru" -> "\u00A0"
-        "fr" -> "\u202F"
-        "de", "es", "it", "nl", "tr" -> "."
-        else -> ","
-    }
-    val firstGroupLength = raw.length % 3
-    return buildString {
-        if (firstGroupLength > 0) {
-            append(raw.take(firstGroupLength))
-        }
-        for (index in firstGroupLength until raw.length step 3) {
-            if (isNotEmpty()) append(separator)
-            append(raw.substring(index, index + 3))
-        }
-    }
-}
+internal fun formatCountForLanguage(value: Int, language: String): String =
+    NumberFormatter.formatInteger(value, language)
 
 internal fun statsPipelineLabelFontSizeSp(labels: List<String>): Float {
     val maxLength = labels.maxOfOrNull { it.length } ?: 0
