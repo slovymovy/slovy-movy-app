@@ -18,6 +18,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -836,9 +837,17 @@ private fun LibraryMetric(
 @Composable
 private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean) {
     val maxCount = pipeline.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
-    val countColumnWidth = if (pipeline.any { formatCount(it.count, isLoading = false).length > 3 }) 52.dp else 36.dp
+    val countLanguage = Locale.current.language
+    val countColumnWidth = if (pipeline.any { formatCountForLanguage(it.count, countLanguage).length > 3 }) {
+        52.dp
+    } else {
+        36.dp
+    }
+    val rows = pipeline.map { stage -> stage to stageLabel(stage.id).uppercase() }
+    val labelFontSize = statsPipelineLabelFontSizeSp(rows.map { it.second })
+    val labelLetterSpacing = if (labelFontSize < 11f) 0.sp else 0.4.sp
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        pipeline.forEach { stage ->
+        rows.forEach { (stage, label) ->
             val pct = if (isLoading) {
                 loadingPipelineWidth(stage.id)
             } else {
@@ -864,13 +873,15 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Text(
-                    text = stageLabel(stage.id).uppercase(),
+                    text = label,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
-                        letterSpacing = 0.4.sp,
+                        fontSize = labelFontSize.sp,
+                        letterSpacing = labelLetterSpacing,
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    softWrap = false,
                     modifier = Modifier.width(72.dp),
                 )
                 Box(
@@ -889,7 +900,7 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
                     )
                 }
                 CountText(
-                    text = formatCount(stage.count, isLoading),
+                    text = formatCount(stage.count, isLoading, countLanguage),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontWeight = FontWeight.Medium,
@@ -1143,11 +1154,46 @@ private fun previewPracticeLog(today: LocalDate): Set<StatsPracticeDay> {
     return log
 }
 
+@Composable
 private fun formatCount(value: Int, isLoading: Boolean): String {
     if (isLoading) return "--"
+    return formatCountForLanguage(value, Locale.current.language)
+}
+
+private fun formatCount(value: Int, isLoading: Boolean, language: String): String {
+    if (isLoading) return "--"
+    return formatCountForLanguage(value, language)
+}
+
+internal fun formatCountForLanguage(value: Int, language: String): String {
     val raw = value.toString()
     if (raw.length <= 3) return raw
-    return raw.reversed().chunked(3).joinToString(",").reversed()
+    val separator = when (language.lowercase()) {
+        "cs", "pl", "ru" -> "\u00A0"
+        "fr" -> "\u202F"
+        "de", "es", "it", "nl", "tr" -> "."
+        else -> ","
+    }
+    val firstGroupLength = raw.length % 3
+    return buildString {
+        if (firstGroupLength > 0) {
+            append(raw.take(firstGroupLength))
+        }
+        for (index in firstGroupLength until raw.length step 3) {
+            if (isNotEmpty()) append(separator)
+            append(raw.substring(index, index + 3))
+        }
+    }
+}
+
+internal fun statsPipelineLabelFontSizeSp(labels: List<String>): Float {
+    val maxLength = labels.maxOfOrNull { it.length } ?: 0
+    val hasCyrillic = labels.any { label -> label.any { it in '\u0400'..'\u04FF' } }
+    return when {
+        hasCyrillic && maxLength >= 9 -> 9.8f
+        maxLength >= 10 -> 10.2f
+        else -> 11f
+    }
 }
 
 private const val STATS_REVEAL_ANIMATION_MS = 260
