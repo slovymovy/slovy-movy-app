@@ -40,6 +40,7 @@ import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.SpeakerVector
@@ -513,7 +514,8 @@ class WordDetailViewModel(
                     }
 
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                AppLogger.warn(TAG, "Unable to load word detail voices for ${dictionaryLanguage.code}", e)
                 // Failed to load voices, button will be disabled
                 availableVoices = emptyList()
             }
@@ -721,6 +723,7 @@ class WordDetailViewModel(
             ttsManager.setVoice(selectedVoice)
             ttsManager.speak(lemma)
         } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to play word detail audio for ${dictionaryLanguage.code}", e)
             Analytics.logEvent(
                 AnalyticsEvent.TTS_PLAY_FAILED,
                 mapOf(
@@ -748,6 +751,10 @@ class WordDetailViewModel(
         ttsManager.removeOnStatusChangeListener(this)
         ttsManager.stop()
         viewModelScope.cancel()
+    }
+
+    private companion object {
+        const val TAG = "WordDetailViewModel"
     }
 }
 

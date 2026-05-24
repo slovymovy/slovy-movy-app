@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.speech
 
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.ObjCSignatureOverride
@@ -52,8 +53,8 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                 null
             )
             audioSession.setActive(true, null)
-        } catch (_: Exception) {
-            // Audio session configuration/activation failed
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to activate iOS audio session for speech playback", e)
         }
     }
 
@@ -66,8 +67,8 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                 AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation,
                 null
             )
-        } catch (_: Exception) {
-            // Audio session deactivation failed
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to deactivate iOS audio session after speech playback", e)
         }
     }
 
@@ -79,6 +80,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         val voiceForLanguage = voicesForLanguage.firstOrNull { it.isEnabledByDefault() }
             ?: voicesForLanguage.firstOrNull()
         if (voiceForLanguage == null) {
+            AppLogger.warn(TAG, "No iOS TTS voice available for ${language.code}", null)
             statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
             return
         }
@@ -90,7 +92,10 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         // Stop any current speech first - maintains consistent behavior regardless of text/voice state
         synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
         if (text.isEmpty()) return
-        val voice = currentVoice ?: return
+        val voice = currentVoice ?: run {
+            AppLogger.warn(TAG, "Cannot play iOS speech without a selected voice", null)
+            return
+        }
         // Increment generation for the new utterance
         speechGeneration++
         activateAudioSession()
@@ -161,6 +166,9 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual fun setVoice(voice: Text2SpeechVoice) {
         val selectedVoice = AVSpeechSynthesisVoice.voiceWithIdentifier(voice.id)
+        if (selectedVoice == null) {
+            AppLogger.warn(TAG, "Unable to select iOS TTS voice ${voice.id}", null)
+        }
         currentVoice = selectedVoice
     }
 
@@ -188,6 +196,10 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
 
     actual fun removeOnStatusChangeListener(key: Any) {
         statusListeners.remove(key)
+    }
+
+    private companion object {
+        const val TAG = "TextToSpeechManager"
     }
 }
 

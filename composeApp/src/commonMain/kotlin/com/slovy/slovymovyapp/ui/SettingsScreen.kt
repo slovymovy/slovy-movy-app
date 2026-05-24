@@ -173,6 +173,38 @@ class SettingsViewModel(
         loadLanguages()
     }
 
+    @Suppress("DEPRECATION")
+    suspend fun migrateLegacyDefaultVoiceSelectionsAfterAppStart() {
+        try {
+            val languages = ttsManager.getAvailableLanguages()
+            val downloadedLanguages = dataDbManager.listDownloadedDatabases()
+                .filterIsInstance<DatabaseFileInfo.Dictionary>()
+                .map { it.language }
+                .toSet()
+
+            languages
+                .filter { it.language in downloadedLanguages }
+                .forEach { language ->
+                    try {
+                        val voices = ttsManager.getVoicesForLanguage(language)
+                        val migrated = voiceFilterHelper.migrateLegacyDefaultVoiceSelection(language, voices)
+                        if (migrated) {
+                            val enabledIds = voiceFilterHelper.getEnabledVoices(language)
+                            updateLanguageState(language) { it.copy(enabledVoiceIds = enabledIds) }
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        AppLogger.warn(TAG, "Unable to migrate legacy default voices for ${language.language.code}", e)
+                    }
+                }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to run legacy voice default migration", e)
+        }
+    }
+
     private fun loadLearningLanguages() {
         loadLearningLanguagesJob?.cancel()
         loadLearningLanguagesJob = viewModelScope.launch {
@@ -631,7 +663,8 @@ class SettingsViewModel(
                         updateLanguageState(language) { it.copy(voices = voices, enabledVoiceIds = enabledIds) }
                     } catch (e: CancellationException) {
                         throw e
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        AppLogger.warn(TAG, "Unable to load voices for ${language.language.code}", e)
                         // The expanded row still shows a localized load error if this language is opened.
                     }
                 }
@@ -668,6 +701,7 @@ class SettingsViewModel(
                     it.copy(voices = voices, enabledVoiceIds = enabledIds, isLoadingVoices = false)
                 }
             } catch (e: Exception) {
+                AppLogger.warn(TAG, "Unable to load voices for ${language.language.code}", e)
                 updateLanguageState(language) { it.copy(isLoadingVoices = false) }
                 state = state.copy(
                     errorMessage = UiText.Resource(
@@ -702,6 +736,7 @@ class SettingsViewModel(
             ttsManager.setVoice(voice)
             ttsManager.speak(text)
         } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to test voice ${voice.id} for ${voice.language.code}", e)
             state = state.copy(
                 testingVoice = null,
                 errorMessage = UiText.Resource(

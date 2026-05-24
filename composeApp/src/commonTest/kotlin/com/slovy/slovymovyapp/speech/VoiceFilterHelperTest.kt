@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.runBlocking
 import kotlin.test.*
 
+@Suppress("DEPRECATION")
 open class VoiceFilterHelperTest : BaseTest() {
 
     private val testLanguage = Text2SpeechLanguage(
@@ -216,7 +217,30 @@ open class VoiceFilterHelperTest : BaseTest() {
     }
 
     @Test
-    fun initializeDefaultVoices_repairs_broad_legacy_default_selection() = runBlocking {
+    fun initializeDefaultVoices_preserves_configured_legacy_default_selection() = runBlocking {
+        val repo = settingsRepository()
+        val helper = VoiceFilterHelper(repo)
+        val voices = (1..10).map { index ->
+            Text2SpeechVoice(
+                id = "voice$index",
+                name = "Voice $index",
+                language = Language.ENGLISH,
+                localeTag = "en-US",
+                quality = if (index <= 4) VoiceQuality.BEST else VoiceQuality.GOOD,
+                networkConnectionRequired = false,
+                enabledByDefault = index <= 4
+            )
+        }
+        val savedSelection = voices.map { it.id }.toSet()
+        helper.setEnabledVoices(testLanguage, savedSelection)
+
+        val result = helper.initializeDefaultVoices(testLanguage, voices)
+
+        assertEquals(savedSelection, result)
+    }
+
+    @Test
+    fun migrateLegacyDefaultVoiceSelection_repairs_selection_created_by_old_default_selector() = runBlocking {
         val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
         val voices = (1..10).map { index ->
@@ -232,13 +256,15 @@ open class VoiceFilterHelperTest : BaseTest() {
         }
         helper.setEnabledVoices(testLanguage, voices.map { it.id }.toSet())
 
-        val result = helper.initializeDefaultVoices(testLanguage, voices)
+        val migrated = helper.migrateLegacyDefaultVoiceSelection(testLanguage, voices)
 
+        assertTrue(migrated)
+        val result = helper.getEnabledVoices(testLanguage)
         assertEquals(setOf("voice1", "voice2", "voice3", "voice4"), result)
     }
 
     @Test
-    fun initializeDefaultVoices_preserves_broad_selection_with_manual_extra_voice() = runBlocking {
+    fun migrateLegacyDefaultVoiceSelection_preserves_selection_with_manual_extra_voice() = runBlocking {
         val repo = settingsRepository()
         val helper = VoiceFilterHelper(repo)
         val legacyVoices = (1..10).map { index ->
@@ -264,8 +290,10 @@ open class VoiceFilterHelperTest : BaseTest() {
         val savedSelection = legacyVoices.map { it.id }.toSet() + manualExtraVoice.id
         helper.setEnabledVoices(testLanguage, savedSelection)
 
-        val result = helper.initializeDefaultVoices(testLanguage, legacyVoices + manualExtraVoice)
+        val migrated = helper.migrateLegacyDefaultVoiceSelection(testLanguage, legacyVoices + manualExtraVoice)
+        val result = helper.getEnabledVoices(testLanguage)
 
+        assertFalse(migrated)
         assertEquals(savedSelection, result)
     }
 
