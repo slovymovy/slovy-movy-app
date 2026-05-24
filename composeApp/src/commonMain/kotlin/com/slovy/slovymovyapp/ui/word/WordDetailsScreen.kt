@@ -4,11 +4,16 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.ThemedPreview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.StopCircle
@@ -19,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
@@ -1131,21 +1137,8 @@ private fun WordDetailContent(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = card.lemma,
-                    style = MaterialTheme.typography.displaySmall.copy(
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 44.sp,
-                        letterSpacing = (-0.3).sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    autoSize = TextAutoSize.StepBased(
-                        minFontSize = 22.sp,
-                        maxFontSize = 42.sp,
-                        stepSize = 1.sp,
-                    ),
+                LemmaHeadlineText(
+                    lemma = card.lemma,
                     modifier = Modifier.weight(1f, fill = false),
                 )
                 IconButton(
@@ -1268,6 +1261,27 @@ private fun WordDetailContent(
 }
 
 @Composable
+private fun LemmaHeadlineText(lemma: String, modifier: Modifier = Modifier) {
+    Text(
+        text = lemma,
+        style = MaterialTheme.typography.displaySmall.copy(
+            fontWeight = FontWeight.Medium,
+            lineHeight = 44.sp,
+            letterSpacing = (-0.3).sp
+        ),
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = 22.sp,
+            maxFontSize = 42.sp,
+            stepSize = 1.sp,
+        ),
+        modifier = modifier,
+    )
+}
+
+@Composable
 private fun ChapterRule() {
     val color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
     Row(
@@ -1290,5 +1304,51 @@ private fun ChapterRule() {
             modifier = Modifier.weight(1f),
             color = color.copy(alpha = 0.45f * 0.35f)
         )
+    }
+}
+
+@Preview
+@Composable
+private fun LemmaHeadlineAutoSizePreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    val samples = listOf(
+        "kat",
+        "ondergaan",
+        "Geschwindigkeitsbegrenzung",
+        "необыкновенный",
+        "antidisestablishmentarianism",
+    )
+    ThemedPreview(darkTheme = isDark) {
+        Surface {
+            Column(
+                modifier = Modifier
+                    .width(360.dp)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                samples.forEach { lemma ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 12.dp),
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        LemmaHeadlineText(
+                            lemma = lemma,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        Box(
+                            modifier = Modifier
+                                .padding(bottom = 4.dp)
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        )
+                    }
+                }
+            }
+        }
     }
 }

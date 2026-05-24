@@ -872,22 +872,7 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.4.sp,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    softWrap = false,
-                    autoSize = TextAutoSize.StepBased(
-                        minFontSize = 9.sp,
-                        maxFontSize = 11.sp,
-                        stepSize = 0.2.sp,
-                    ),
-                    modifier = Modifier.width(72.dp),
-                )
+                PipelineStageLabel(label)
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -919,6 +904,26 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
             }
         }
     }
+}
+
+@Composable
+private fun PipelineStageLabel(label: String) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.4.sp,
+        ),
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        softWrap = false,
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = 9.sp,
+            maxFontSize = 11.sp,
+            stepSize = 0.2.sp,
+        ),
+        modifier = Modifier.width(72.dp),
+    )
 }
 
 @Composable
@@ -1216,5 +1221,44 @@ private fun StatsScreenLoadingPreview(
                 clock = Clock.System,
             ),
         )
+    }
+}
+
+@Preview
+@Composable
+private fun PipelineStageLabelAutoSizePreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    val samples = listOf(
+        "QUEUE",
+        "LEARNED",
+        "RECALLING",
+        "EXTRALONGT",
+        "В ОЧЕРЕДИ",
+        "ПОВТОРЕНИЕ",
+        "ЗАКРЕПЛЕНО",
+        "WIEDERHOLUNG",
+    )
+    ThemedPreview(darkTheme = isDark) {
+        Surface {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                samples.forEach { label ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        PipelineStageLabel(label)
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 10.dp)
+                                .weight(1f)
+                                .height(10.dp)
+                                .clip(RoundedCornerShape(5.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        )
+                    }
+                }
+            }
+        }
     }
 }
