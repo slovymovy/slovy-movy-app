@@ -208,9 +208,29 @@ class StudySessionMapperTest {
 
         assertEquals("Het was zo gezellig.", mapped.prompt.text)
         assertEquals(listOf(11..18), mapped.prompt.answerRanges)
-        assertEquals("It was so cosy.", mapped.translationHint)
+        val hint = assertNotNull(mapped.translationHint)
+        assertEquals("It was so cosy.", hint.text)
+        assertEquals(emptyList(), hint.answerRanges)
         assertNotNull(mapped.back.cloze)
         assertEquals("gezellig", mapped.back.headline)
+    }
+
+    @Test
+    fun translationClozeCardExposesSourceExampleAsClozeHint() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.CLOZE_TRANSLATION, targetLang = Language.ENGLISH.code),
+            example = ExamplePair(
+                exampleIndex = 0,
+                text = "It was so cosy.",
+                clozeRanges = listOf(10..13),
+            ),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState())
+
+        val hint = assertNotNull(mapped.translationHint)
+        assertEquals("Het was zo gezellig.", hint.text)
+        assertEquals(listOf(11..18), hint.answerRanges)
     }
 
     @Test

@@ -154,8 +154,8 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                 translationHint = sense.examples
                     .firstOrNull { HtmlTagParser.plainText(it.text) == example.text }
                     ?.targetLangTranslations
-                    ?.values
-                    ?.firstOrNull(),
+                    ?.get(target)
+                    ?.toTranslationHintCloze(),
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,
@@ -165,14 +165,13 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
         CardKind.CLOZE_TRANSLATION -> {
             val target = targetLanguage ?: return null
             val cloze = example?.toClozeText() ?: return null
-            val backExamples = sense.examples[example.exampleIndex.toInt()].let {
-                listOf(
-                    StudyExampleUiState(
-                        text = it.text,
-                        translation = it.targetLangTranslations[target],
-                    )
+            val sourceExample = sense.examples[example.exampleIndex.toInt()]
+            val backExamples = listOf(
+                StudyExampleUiState(
+                    text = sourceExample.text,
+                    translation = sourceExample.targetLangTranslations[target],
                 )
-            }
+            )
             val activeBack = sourceClozeBack(
                 lemma = lemma,
                 sense = sense,
@@ -192,7 +191,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     listOf(sourceLanguage.studyCode()),
                 ),
                 prompt = cloze.copy(filled = true),
-                translationHint = null,
+                translationHint = sourceExample.text.toTranslationHintCloze(),
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,
@@ -346,6 +345,25 @@ private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
         text = text,
         answerRanges = clozeRanges,
     )
+}
+
+private fun String.toTranslationHintCloze(): StudyClozeTextUiState? {
+    if (isBlank()) return null
+    val output = StringBuilder()
+    val ranges = mutableListOf<IntRange>()
+    HtmlTagParser.parseTextSegments(this).forEach { segment ->
+        val start = output.length
+        val segmentText = HtmlTagParser.plainText(segment.text)
+        output.append(segmentText)
+        if (segment.isTagged && segmentText.isNotBlank()) {
+            val leading = segmentText.indexOfFirst { !it.isWhitespace() }
+            val trailing = segmentText.indexOfLast { !it.isWhitespace() }
+            ranges.add((start + leading)..(start + trailing))
+        }
+    }
+    val plain = output.toString()
+    if (plain.isBlank()) return null
+    return StudyClozeTextUiState(text = plain, answerRanges = ranges)
 }
 
 internal fun String.firstLetterHint(): FirstLetterHint? {
