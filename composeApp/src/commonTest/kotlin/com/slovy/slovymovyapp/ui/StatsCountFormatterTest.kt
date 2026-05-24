@@ -31,13 +31,4 @@ class StatsCountFormatterTest {
     fun doesNotGroupSmallCounts() {
         assertEquals("999", formatCountForLanguage(999, "nl"))
     }
-
-    @Test
-    fun adjustsPipelineLabelFontSizeForLocalizedLabels() {
-        assertEquals(11f, statsPipelineLabelFontSizeSp(listOf("QUEUE", "FRESH", "SOLID")))
-        assertEquals(11f, statsPipelineLabelFontSizeSp(listOf("RECALLING", "LEARNED")))
-        assertEquals(10.2f, statsPipelineLabelFontSizeSp(listOf("EXTRALONGT", "LEARNED")))
-        assertEquals(9.8f, statsPipelineLabelFontSizeSp(listOf("В ОЧЕРЕДИ", "НОВЫЕ")))
-        assertEquals(9.8f, statsPipelineLabelFontSizeSp(listOf("ПОВТОРЕНИЕ", "ЗАКРЕПЛЕНО")))
-    }
 }

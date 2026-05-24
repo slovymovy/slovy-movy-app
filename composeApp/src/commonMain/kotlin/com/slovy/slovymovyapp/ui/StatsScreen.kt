@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -845,8 +846,6 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
         36.dp
     }
     val rows = pipeline.map { stage -> stage to stageLabel(stage.id).uppercase() }
-    val labelFontSize = statsPipelineLabelFontSizeSp(rows.map { it.second })
-    val labelLetterSpacing = if (labelFontSize < 11f) 0.sp else 0.4.sp
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         rows.forEach { (stage, label) ->
             val pct = if (isLoading) {
@@ -877,12 +876,16 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
                     text = label,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = labelFontSize.sp,
-                        letterSpacing = labelLetterSpacing,
+                        letterSpacing = 0.4.sp,
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     softWrap = false,
+                    autoSize = TextAutoSize.StepBased(
+                        minFontSize = 9.sp,
+                        maxFontSize = 11.sp,
+                        stepSize = 0.2.sp,
+                    ),
                     modifier = Modifier.width(72.dp),
                 )
                 Box(
@@ -1168,16 +1171,6 @@ private fun formatCount(value: Int, isLoading: Boolean, language: String): Strin
 
 internal fun formatCountForLanguage(value: Int, language: String): String =
     NumberFormatter.formatInteger(value, language)
-
-internal fun statsPipelineLabelFontSizeSp(labels: List<String>): Float {
-    val maxLength = labels.maxOfOrNull { it.length } ?: 0
-    val hasCyrillic = labels.any { label -> label.any { it in '\u0400'..'\u04FF' } }
-    return when {
-        hasCyrillic && maxLength >= 9 -> 9.8f
-        maxLength >= 10 -> 10.2f
-        else -> 11f
-    }
-}
 
 private const val STATS_REVEAL_ANIMATION_MS = 260
 
