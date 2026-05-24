@@ -9,6 +9,7 @@ import com.slovy.slovymovyapp.data.learning.session.SessionCard
 import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
+import com.slovy.slovymovyapp.data.util.parseClozeFromTaggedText
 import com.slovy.slovymovyapp.i18n.UiText
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.math.roundToLong
@@ -155,7 +156,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     .firstOrNull { HtmlTagParser.plainText(it.text) == example.text }
                     ?.targetLangTranslations
                     ?.get(target)
-                    ?.toTranslationHintCloze(),
+                    ?.let { toTranslationHintCloze(it) },
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,
@@ -191,7 +192,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     listOf(sourceLanguage.studyCode()),
                 ),
                 prompt = cloze.copy(filled = true),
-                translationHint = sourceExample.text.toTranslationHintCloze(),
+                translationHint = toTranslationHintCloze(sourceExample.text),
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,
@@ -347,23 +348,9 @@ private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
     )
 }
 
-private fun String.toTranslationHintCloze(): StudyClozeTextUiState? {
-    if (isBlank()) return null
-    val output = StringBuilder()
-    val ranges = mutableListOf<IntRange>()
-    HtmlTagParser.parseTextSegments(this).forEach { segment ->
-        val start = output.length
-        val segmentText = HtmlTagParser.plainText(segment.text)
-        output.append(segmentText)
-        if (segment.isTagged && segmentText.isNotBlank()) {
-            val leading = segmentText.indexOfFirst { !it.isWhitespace() }
-            val trailing = segmentText.indexOfLast { !it.isWhitespace() }
-            ranges.add((start + leading)..(start + trailing))
-        }
-    }
-    val plain = output.toString()
-    if (plain.isBlank()) return null
-    return StudyClozeTextUiState(text = plain, answerRanges = ranges)
+private fun toTranslationHintCloze(text: String): StudyClozeTextUiState? {
+    val parsed = parseClozeFromTaggedText(text) ?: return null
+    return StudyClozeTextUiState(text = parsed.plainText, answerRanges = parsed.answerRanges)
 }
 
 internal fun String.firstLetterHint(): FirstLetterHint? {
