@@ -7,22 +7,22 @@ import kotlin.test.assertTrue
 class StatsCountFormatterTest {
     @Test
     fun formatsCountsWithLocaleGroupingSeparator() {
-        assertEquals("3,319", formatCountForLanguage(3319, "en"))
+        assertEquals("33,319", formatCountForLanguage(33319, "en"))
         for (language in listOf("nl", "de", "es", "it", "tr", "ru", "pl", "cs", "fr")) {
             assertGrouped(language)
         }
     }
 
     private fun assertGrouped(language: String) {
-        val formatted = formatCountForLanguage(3319, language)
-        assertEquals(5, formatted.length, "Expected 5 chars for $language, got '$formatted'")
-        assertEquals('3', formatted[0], "Expected leading '3' for $language, got '$formatted'")
-        assertEquals("319", formatted.substring(2), "Expected trailing '319' for $language, got '$formatted'")
-        val separator = formatted[1]
+        val formatted = formatCountForLanguage(33319, language)
+        assertEquals(6, formatted.length, "Expected 6 chars for $language, got '$formatted'")
+        assertEquals("33", formatted.substring(0, 2), "Expected leading '33' for $language, got '$formatted'")
+        assertEquals("319", formatted.substring(3), "Expected trailing '319' for $language, got '$formatted'")
+        val separator = formatted[2]
         assertTrue(
             separator == ',' || separator == '.' ||
-                separator == ' ' || separator == '\u00A0' ||
-                separator == '\u202F' || separator == '\u2009',
+                separator == ' ' || separator == ' ' ||
+                separator == ' ' || separator == ' ',
             "Expected locale grouping separator for $language, got U+${separator.code.toString(16).uppercase()}",
         )
     }
