@@ -604,7 +604,7 @@ LEFT JOIN favorites f
     substr(hex(c.sense_id), 17, 4) || '-' ||
     substr(hex(c.sense_id), 21, 12)
   )
-ORDER BY max(c.due, coalesce(c.available_after, c.due)) ASC, c.created_at ASC
+ORDER BY max(c.due, coalesce(c.available_after, c.due)) ASC, c.created_at ASC, c.id ASC
 LIMIT :page_size OFFSET :page_offset;
 
 countDeveloperCardTableRows:
