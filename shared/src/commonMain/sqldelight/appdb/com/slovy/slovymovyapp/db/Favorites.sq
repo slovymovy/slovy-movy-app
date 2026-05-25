@@ -199,6 +199,7 @@ FROM card INDEXED BY idx_card_due_session
 WHERE lang_code = :lang_code
   AND due <= :now
   AND state != :new_state
+  AND family IN :allowed_families
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now)
 ORDER BY due ASC, created_at ASC
@@ -212,6 +213,7 @@ FROM card INDEXED BY idx_card_new_session
 WHERE lang_code = :lang_code
   AND state = :new_state
   AND due <= :now
+  AND family IN :allowed_families
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now)
 ORDER BY created_at ASC
@@ -329,6 +331,7 @@ SELECT COUNT(DISTINCT lemma_id)
 FROM card INDEXED BY idx_card_active_lemma_due
 WHERE lang_code = :lang_code
   AND due <= :now
+  AND family IN :allowed_families
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now);
 
@@ -413,6 +416,29 @@ WHERE id = :id
   AND suspended = 0
   AND (available_after IS NULL OR available_after < :availableAfter);
 
+-- Snapshot of every card touched by `setCardsAvailableAfterByLemma` so a paused word
+-- can be undone via `restoreCardScheduling` per row. Includes suspended cards for the
+-- same reason as the update below (see test `suspending_word_applies_delay_to_removed_meanings`).
+selectCardScheduleByLemma:
+SELECT id, suspended, available_after
+FROM card INDEXED BY idx_card_active_lemma_due
+WHERE lang_code = :lang_code
+  AND suspended IN (0, 1)
+  AND lemma_id = :lemma_id;
+
+-- `suspended IN (0, 1)` is intentional: pausing a word should delay every card for the
+-- lemma, including ones suspended by a removed meaning (see test
+-- `suspending_word_applies_delay_to_removed_meanings`). It also acts as an explicit
+-- skip-scan hint so the planner can use idx_card_active_lemma_due past the `suspended`
+-- column to filter by `lemma_id`.
+setCardsAvailableAfterByLemma:
+UPDATE card INDEXED BY idx_card_active_lemma_due
+SET available_after = :availableAfter
+WHERE lang_code = :lang_code
+  AND suspended IN (0, 1)
+  AND lemma_id = :lemma_id
+  AND (available_after IS NULL OR available_after < :availableAfter);
+
 -- Propagated credit is not a direct review. Cards with no direct reps stay in
 -- LEARNING even when propagated stability is review-grade.
 creditSiblingCard:
@@ -451,17 +477,24 @@ WHERE lang_code = :lang_code
 
 suspendCardsByFavorite:
 UPDATE card INDEXED BY idx_card_unique_task
-SET suspended = 1,
-    available_after = NULL
+SET suspended = 1
 WHERE sense_id = :sense_id
   AND lang_code = :lang_code;
 
 unsuspendCardsByFavorite:
 UPDATE card INDEXED BY idx_card_unique_task
-SET suspended = 0,
-    available_after = NULL
+SET suspended = 0
 WHERE sense_id = :sense_id
   AND lang_code = :lang_code;
+
+-- Per-card restore used by undo to replay the exact `(suspended, available_after)`
+-- captured in a snapshot taken before `remove()` ran. Non-destructive: nothing else
+-- on the card row changes.
+restoreCardScheduling:
+UPDATE card
+SET suspended = :suspended,
+    available_after = :available_after
+WHERE id = :id;
 
 suspendAllCards:
 UPDATE card

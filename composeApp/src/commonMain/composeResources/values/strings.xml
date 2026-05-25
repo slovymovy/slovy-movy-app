@@ -579,6 +579,21 @@
     <string name="scheme_label_verbal_noun">verbal noun</string>
     <string name="study_action_close">Close study session</string>
     <string name="study_action_retry">Retry</string>
+    <string name="study_actions_menu">Study session actions</string>
+    <string name="study_actions_autoplay">Autoplay audio</string>
+    <string name="study_actions_autoplay_description">Play pronunciation automatically</string>
+    <string name="study_actions_autoplay_on">Autoplay audio on</string>
+    <string name="study_actions_suspend">Pause this word</string>
+    <string name="study_actions_suspend_description">Pause reviews for 30 days</string>
+    <string name="study_suspend_message">"%1$s" paused for 30 days</string>
+    <string name="study_suspend_undo">Undo</string>
+    <string name="study_actions_remove">Remove from My words</string>
+    <string name="study_remove_title">Remove "%1$s" from My words?</string>
+    <string name="study_remove_message">This specific meaning will stop appearing in your study sessions. Other meanings of "%1$s" will stay in My words. You can always add it back later without losing your progress.</string>
+    <string name="study_remove_cancel">Cancel</string>
+    <string name="study_remove_confirm">Remove</string>
+    <string name="study_remove_removed_message">Removed one meaning of "%1$s"</string>
+    <string name="study_remove_undo">Undo</string>
     <string name="study_loading">Preparing your review…</string>
     <string name="study_empty_title">Nothing due right now</string>
     <string name="study_empty_description">Saved words will appear here when they are ready for review.</string>
@@ -631,6 +646,8 @@
         <item quantity="other">Hint: starts with %1$s, %2$d letters</item>
     </plurals>
     <string name="study_listen_prompt">Tap to play. What word do you hear?</string>
+    <string name="study_cant_listen_now">Can&apos;t listen right now</string>
+    <string name="study_listening_postponed_message">Listening cards paused until your next review</string>
     <string name="study_rating_prompt">How well did you remember this?</string>
     <string name="study_rating_again">Forgot</string>
     <string name="study_rating_hard">Almost</string>

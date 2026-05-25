@@ -1,6 +1,9 @@
 package com.slovy.slovymovyapp.ui.study
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,6 +15,9 @@ import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.favorites.Favorite
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
@@ -27,8 +33,11 @@ import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -36,6 +45,7 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 class StudySessionViewModel(
     private val langCode: String,
+    private val favoritesRepository: FavoritesRepository,
     private val intakeService: IntakeService,
     private val sessionService: SessionService,
     private val statsService: StatsService,
@@ -43,11 +53,13 @@ class StudySessionViewModel(
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
     private val onReviewSubmitted: () -> Unit,
+    private val onFavoriteChanged: (Language) -> Unit,
 ) : ViewModel() {
 
     var state by mutableStateOf<StudySessionUiState>(StudySessionUiState.Loading())
         private set
     val completeScrollState = ScrollState(0)
+    val snackbarHostState = SnackbarHostState()
 
     private val language: Language? = Language.fromCodeOrNull(langCode)
     private val sessionStartedAt: Instant = clock.now()
@@ -55,10 +67,16 @@ class StudySessionViewModel(
     private var currentCard: SessionCard? = null
     private var currentOutcomes: List<GradeOutcome> = emptyList()
     private var reviewedCount: Int = 0
+    private var skippedCount: Int = 0
     private var sessionTotal: Int = 0
     private var availableVoices: List<Text2SpeechVoice> = emptyList()
     private var currentVoiceIndex: Int = 0
     private val gradeCounts = mutableMapOf<StudyRating, Int>()
+    private var autoplayEnabled: Boolean = false
+    private var pendingRemovalFavorite: Favorite? = null
+    private var isPreparingRemoval: Boolean = false
+    private var postponeListeningCardsForSession: Boolean = false
+    private val snackbarMutex = Mutex()
 
     init {
         ttsManager.addOnStatusChangeListener(this) { status ->
@@ -96,11 +114,17 @@ class StudySessionViewModel(
     }
 
     fun playAudio(text: String) {
+        playAudio(text = text, logClick = true)
+    }
+
+    private fun playAudio(text: String, logClick: Boolean) {
         val active = state as? StudySessionUiState.Active ?: return
-        Analytics.logEvent(
-            AnalyticsEvent.WORD_PLAY_CLICK,
-            mapOf("lang" to langCode, "source" to "study"),
-        )
+        if (logClick) {
+            Analytics.logEvent(
+                AnalyticsEvent.WORD_PLAY_CLICK,
+                mapOf("lang" to langCode, "source" to "study"),
+            )
+        }
         state = active.copy(isPreparingAudio = true, isPlayingAudio = false)
         viewModelScope.launch {
             try {
@@ -127,6 +151,216 @@ class StudySessionViewModel(
                 )
                 val latest = state as? StudySessionUiState.Active ?: return@launch
                 state = latest.copy(isPreparingAudio = false, isPlayingAudio = false)
+            }
+        }
+    }
+
+    fun openOverflowMenu() {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview) return
+        state = active.copy(isOverflowMenuOpen = true, removeConfirmation = null)
+    }
+
+    fun dismissOverflowMenu() {
+        val active = state as? StudySessionUiState.Active ?: return
+        state = active.copy(isOverflowMenuOpen = false)
+    }
+
+    fun toggleAutoplay() {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview) return
+        autoplayEnabled = !autoplayEnabled
+        state = active.copy(
+            isAutoplayEnabled = autoplayEnabled,
+        )
+        if (autoplayEnabled) {
+            autoplayFrontAudioText(active.card)?.let { playAudio(text = it, logClick = false) }
+        }
+    }
+
+    fun suspendCurrentWord(suspendedMessage: String, undoLabel: String) {
+        if (isPreparingRemoval) return
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview) return
+        val card = currentCard ?: return
+        val outcomes = currentOutcomes
+        currentCard = null
+        currentOutcomes = emptyList()
+        state = active.copy(isOverflowMenuOpen = false, isSubmittingReview = true)
+        viewModelScope.launch {
+            val snapshot = try {
+                sessionService.suspendWord(card, WORD_SUSPEND_DURATION)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                currentCard = card
+                currentOutcomes = outcomes
+                val latest = state as? StudySessionUiState.Active ?: active
+                state = latest.copy(
+                    isOverflowMenuOpen = false,
+                    isSubmittingReview = false,
+                )
+                return@launch
+            }
+            skippedCount += 1
+            loadNextCard()
+            val result = showStudySnackbar(
+                message = suspendedMessage,
+                actionLabel = if (snapshot.isNotEmpty()) undoLabel else null,
+                duration = SnackbarDuration.Short,
+            )
+            if (result != SnackbarResult.ActionPerformed || snapshot.isEmpty()) return@launch
+
+            try {
+                sessionService.restorePausedWord(snapshot)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                return@launch
+            }
+            skippedCount = (skippedCount - 1).coerceAtLeast(0)
+            val activeAfterUndo = state as? StudySessionUiState.Active
+            if (activeAfterUndo == null || currentCard == null) {
+                currentCard = null
+                currentOutcomes = emptyList()
+                loadNextCard()
+            } else {
+                state = activeAfterUndo.copy(progress = nextCardProgress())
+            }
+        }
+    }
+
+    fun postponeListeningCards(postponedMessage: String) {
+        if (isPreparingRemoval) return
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview) return
+        if (active.card !is StudyCardUiState.Listening) return
+        currentCard ?: return
+        postponeListeningCardsForSession = true
+        skippedCount += 1
+        currentCard = null
+        currentOutcomes = emptyList()
+        state = active.copy(isPreparingAudio = false, isPlayingAudio = false)
+        loadNextCard()
+        viewModelScope.launch {
+            showStudySnackbar(
+                message = postponedMessage,
+                actionLabel = null,
+                duration = SnackbarDuration.Short,
+            )
+        }
+    }
+
+    fun requestRemoveFromLibrary() {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview || isPreparingRemoval) return
+        val card = currentCard ?: return
+        val lang = Language.fromCodeOrNull(card.card.langCode) ?: return
+        isPreparingRemoval = true
+        state = active.copy(isOverflowMenuOpen = false, isSubmittingReview = true)
+        viewModelScope.launch {
+            try {
+                val favorite = favoritesRepository.getOne(card.card.senseId.toString(), lang)
+                val latest = state as? StudySessionUiState.Active
+                isPreparingRemoval = false
+                if (latest == null) return@launch
+                if (favorite == null) {
+                    state = latest.copy(isOverflowMenuOpen = false, isSubmittingReview = false)
+                    loadNextCard()
+                    return@launch
+                }
+                pendingRemovalFavorite = favorite
+                state = latest.copy(
+                    isOverflowMenuOpen = false,
+                    isSubmittingReview = false,
+                    removeConfirmation = StudyRemoveConfirmationUiState(favorite.lemma),
+                )
+            } catch (e: CancellationException) {
+                isPreparingRemoval = false
+                throw e
+            } catch (_: Exception) {
+                isPreparingRemoval = false
+                val latest = state as? StudySessionUiState.Active ?: return@launch
+                state = latest.copy(isOverflowMenuOpen = false, isSubmittingReview = false)
+            }
+        }
+    }
+
+    fun dismissRemoveConfirmation() {
+        pendingRemovalFavorite = null
+        val active = state as? StudySessionUiState.Active ?: return
+        state = active.copy(removeConfirmation = null, isSubmittingReview = false)
+    }
+
+    fun confirmRemoveFromLibrary(
+        removedMessage: String,
+        undoLabel: String,
+    ) {
+        val favorite = pendingRemovalFavorite ?: return
+        pendingRemovalFavorite = null
+        val active = state as? StudySessionUiState.Active
+        if (active != null) {
+            state = active.copy(
+                removeConfirmation = null,
+                isOverflowMenuOpen = false,
+                isSubmittingReview = true,
+            )
+        }
+        viewModelScope.launch {
+            val snapshot = try {
+                favoritesRepository.remove(favorite.senseId, favorite.language)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                val latest = state as? StudySessionUiState.Active ?: active ?: return@launch
+                state = latest.copy(
+                    removeConfirmation = null,
+                    isOverflowMenuOpen = false,
+                    isSubmittingReview = false,
+                )
+                return@launch
+            }
+
+            Analytics.logEvent(
+                AnalyticsEvent.FAVORITES_REMOVE,
+                mapOf("lang" to favorite.language.code, "source" to "study"),
+            )
+            onFavoriteChanged(favorite.language)
+            skippedCount += 1
+            currentCard = null
+            currentOutcomes = emptyList()
+            loadNextCard()
+
+            val result = showStudySnackbar(
+                message = removedMessage,
+                actionLabel = if (snapshot != null) undoLabel else null,
+                duration = SnackbarDuration.Short,
+            )
+            if (result != SnackbarResult.ActionPerformed || snapshot == null) return@launch
+
+            try {
+                favoritesRepository.restoreForUndo(snapshot)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                val latest = state as? StudySessionUiState.Active ?: return@launch
+                state = latest.copy(isSubmittingReview = false)
+                return@launch
+            }
+
+            Analytics.logEvent(
+                AnalyticsEvent.FAVORITES_SAVE,
+                mapOf("lang" to favorite.language.code, "source" to "study_undo"),
+            )
+            onFavoriteChanged(favorite.language)
+            skippedCount = (skippedCount - 1).coerceAtLeast(0)
+            val activeAfterUndo = state as? StudySessionUiState.Active
+            if (activeAfterUndo == null || currentCard == null) {
+                currentCard = null
+                currentOutcomes = emptyList()
+                loadNextCard()
+            } else {
+                state = activeAfterUndo.copy(progress = nextCardProgress())
             }
         }
     }
@@ -158,6 +392,9 @@ class StudySessionViewModel(
                 side = StudyCardSide.BACK,
                 ratingOptions = currentOutcomes.toStudyRatings(),
             )
+            if (autoplayEnabled) {
+                autoplayBackAudioText(active.card)?.let { playAudio(text = it, logClick = false) }
+            }
         }
     }
 
@@ -208,6 +445,7 @@ class StudySessionViewModel(
     }
 
     fun rate(rating: StudyRating) {
+        if (isPreparingRemoval) return
         val active = state as? StudySessionUiState.Active ?: return
         if (active.side != StudyCardSide.BACK || active.isSubmittingReview) return
 
@@ -259,7 +497,7 @@ class StudySessionViewModel(
                     putMetric("cards_created", intakeResult.cardsCreated.toLong())
                     putMetric("activated_favorites", intakeResult.activated.size.toLong())
                     putMetric("skip_reasons", intakeResult.skipped.size.toLong())
-                    sessionTotal = statsService.dueNow(langCode)
+                    sessionTotal = statsService.dueNow(langCode, excludedCardFamiliesForSession())
                     putMetric("due_now", sessionTotal.toLong())
                     loadNextCard()
                 } catch (e: CancellationException) {
@@ -293,17 +531,18 @@ class StudySessionViewModel(
                     state = StudySessionUiState.Loading(nextCardProgress())
                 }
                 try {
-                    sessionService.nextCard(langCode, sessionStartedAt)
+                    nextSessionCard()
                         .collect { sessionCard ->
                             when (sessionCard?.loadState()) {
                                 null -> {
                                     showLoadingJob.cancel()
-                                    markResult(if (reviewedCount == 0) "empty" else "complete")
-                                    state = if (reviewedCount == 0) {
+                                    val completedCount = reviewedCount + skippedCount
+                                    markResult(if (completedCount == 0) "empty" else "complete")
+                                    state = if (completedCount == 0) {
                                         StudySessionUiState.Empty
                                     } else {
                                         StudySessionUiState.Complete(
-                                            reviewedCount = reviewedCount,
+                                            completedCount = completedCount,
                                             message = randomCompletionMessage(language),
                                         )
                                     }
@@ -363,16 +602,66 @@ class StudySessionViewModel(
             side = StudyCardSide.FRONT,
             ratingOptions = emptyList(),
             viewedSenseId = uiCard.activeSenseId,
+            isAutoplayEnabled = autoplayEnabled,
         )
+        if (autoplayEnabled) {
+            autoplayFrontAudioText(uiCard)?.let { playAudio(text = it, logClick = false) }
+        }
     }
 
+    private fun autoplayFrontAudioText(card: StudyCardUiState): String? =
+        when (card) {
+            is StudyCardUiState.Recognition -> card.promptAudioText
+            is StudyCardUiState.Listening -> card.promptAudioText
+            is StudyCardUiState.Production,
+            is StudyCardUiState.Cloze,
+                -> null
+        }
+
+    // For cards whose front side has no audio (Production / Cloze) play the back audio
+    // when the user reveals it, so autoplay always lets the user hear the word.
+    private fun autoplayBackAudioText(card: StudyCardUiState): String? =
+        if (autoplayFrontAudioText(card) != null) null else card.back.audioText
+
+    private fun nextSessionCard() =
+        sessionService.nextCard(
+            langCode = langCode,
+            sessionStartedAt = sessionStartedAt,
+            excludedFamilies = excludedCardFamiliesForSession(),
+        )
+
+    private fun excludedCardFamiliesForSession(): Set<CardFamily> =
+        if (postponeListeningCardsForSession) {
+            setOf(CardFamily.RECOGNIZE_VOICE)
+        } else {
+            emptySet()
+        }
+
     private suspend fun nextCardProgress(): StudySessionProgressUiState {
-        val current = reviewedCount + 1
-        val projectedTotal = reviewedCount + statsService.dueNow(langCode)
-        sessionTotal = maxOf(sessionTotal, projectedTotal, current)
+        val completedCount = reviewedCount + skippedCount
+        val current = completedCount + 1
+        val dueNow = statsService.dueNow(langCode, excludedCardFamiliesForSession())
+        val projectedTotal = completedCount + dueNow
+        sessionTotal = if (postponeListeningCardsForSession) {
+            maxOf(projectedTotal, current)
+        } else {
+            maxOf(sessionTotal, projectedTotal, current)
+        }
         return StudySessionProgressUiState(
             current = current,
             total = sessionTotal,
+        )
+    }
+
+    private suspend fun showStudySnackbar(
+        message: String,
+        actionLabel: String?,
+        duration: SnackbarDuration,
+    ): SnackbarResult = snackbarMutex.withLock {
+        snackbarHostState.showSnackbar(
+            message = message,
+            actionLabel = actionLabel,
+            duration = duration,
         )
     }
 
@@ -396,5 +685,6 @@ class StudySessionViewModel(
     companion object {
         private const val TAG = "StudySessionViewModel"
         private const val LOADING_DEBOUNCE_MS = 150L
+        private val WORD_SUSPEND_DURATION = 30.days
     }
 }

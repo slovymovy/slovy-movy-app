@@ -25,10 +25,13 @@ sealed interface StudySessionUiState {
         val isPlayingAudio: Boolean = false,
         val isPreparingAudio: Boolean = false,
         val viewedSenseId: String? = null,
+        val isAutoplayEnabled: Boolean = false,
+        val isOverflowMenuOpen: Boolean = false,
+        val removeConfirmation: StudyRemoveConfirmationUiState? = null,
     ) : StudySessionUiState
 
     data class Complete(
-        val reviewedCount: Int,
+        val completedCount: Int,
         val message: String,
     ) : StudySessionUiState
 }
@@ -45,6 +48,10 @@ enum class StudyCardSide {
     FRONT,
     BACK,
 }
+
+data class StudyRemoveConfirmationUiState(
+    val lemma: String,
+)
 
 sealed interface StudyCardUiState {
     val id: String

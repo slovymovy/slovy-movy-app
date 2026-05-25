@@ -48,27 +48,85 @@ class FavoritesRepository(private val db: AppDatabase) {
 
     @OptIn(ExperimentalTime::class)
     suspend fun add(senseId: String, language: Language, lemma: String) = withContext(Dispatchers.IO) {
-        addFavorite(senseId, language, lemma, Clock.System.now().toEpochMilliseconds())
+        addFavorite(
+            senseId = senseId,
+            language = language,
+            lemma = lemma,
+            createdAt = Clock.System.now().toEpochMilliseconds(),
+        )
     }
 
     @OptIn(ExperimentalTime::class)
     suspend fun add(senseId: String, language: Language, lemma: String, createdAt: Long) =
         withContext(Dispatchers.IO) {
-            addFavorite(senseId, language, lemma, createdAt)
+            addFavorite(
+                senseId = senseId,
+                language = language,
+                lemma = lemma,
+                createdAt = createdAt,
+            )
         }
 
-    suspend fun remove(senseId: String, language: Language) = withContext(Dispatchers.IO) {
+    @OptIn(ExperimentalTime::class)
+    suspend fun restoreForUndo(snapshot: RemovedFavoriteSnapshot) = withContext(Dispatchers.IO) {
+        val senseUuid = Uuid.parse(snapshot.senseId)
+        val restoredAt = Clock.System.now().toEpochMilliseconds()
         db.favoritesQueries.transaction {
-            db.favoritesQueries.suspendCardsByFavorite(
-                sense_id = Uuid.parse(senseId),
-                lang_code = language.code,
+            val existing = db.favoritesQueries.selectFavoriteWithActivation(
+                sense_id = snapshot.senseId,
+                lang_code = snapshot.language.code,
+            ).executeAsOneOrNull()
+            if (existing != null) return@transaction
+            val hasLearningCards = db.favoritesQueries.countCardsByFavorite(
+                sense_id = senseUuid,
+                lang_code = snapshot.language.code,
+            ).executeAsOne() > 0
+            db.favoritesQueries.insertFavorite(
+                sense_id = snapshot.senseId,
+                lang_code = snapshot.language.code,
+                lemma = snapshot.lemma,
+                created_at = snapshot.createdAt,
+                activated_at = if (hasLearningCards) restoredAt else null,
             )
-            db.favoritesQueries.deleteFavorite(
-                sense_id = senseId,
-                lang_code = language.code
-            )
+            db.favoritesQueries.applyCardScheduleSnapshots(snapshot.cards)
         }
     }
+
+    suspend fun remove(senseId: String, language: Language): RemovedFavoriteSnapshot? =
+        withContext(Dispatchers.IO) {
+            val senseUuid = Uuid.parse(senseId)
+            db.favoritesQueries.transactionWithResult {
+                val favorite = db.favoritesQueries.selectFavoriteWithActivation(
+                    sense_id = senseId,
+                    lang_code = language.code,
+                ).executeAsOneOrNull() ?: return@transactionWithResult null
+                val cards = db.favoritesQueries.selectCardsByFavorite(
+                    sense_id = senseUuid,
+                    lang_code = language.code,
+                ).executeAsList().map {
+                    CardScheduleSnapshot(
+                        id = it.id,
+                        suspended = it.suspended,
+                        availableAfter = it.available_after,
+                    )
+                }
+                db.favoritesQueries.suspendCardsByFavorite(
+                    sense_id = senseUuid,
+                    lang_code = language.code,
+                )
+                db.favoritesQueries.deleteFavorite(
+                    sense_id = senseId,
+                    lang_code = language.code,
+                )
+                RemovedFavoriteSnapshot(
+                    senseId = senseId,
+                    language = language,
+                    lemma = favorite.lemma,
+                    createdAt = favorite.created_at,
+                    cards = cards,
+                )
+            }
+        }
 
     suspend fun getAll(): List<Favorite> = withContext(Dispatchers.IO) {
         db.favoritesQueries.selectAll().executeAsList().map { row ->
@@ -247,7 +305,12 @@ class FavoritesRepository(private val db: AppDatabase) {
     }
 
     @OptIn(ExperimentalTime::class)
-    private fun addFavorite(senseId: String, language: Language, lemma: String, createdAt: Long) {
+    private fun addFavorite(
+        senseId: String,
+        language: Language,
+        lemma: String,
+        createdAt: Long,
+    ) {
         val senseUuid = Uuid.parse(senseId)
         val restoredAt = Clock.System.now().toEpochMilliseconds()
         db.favoritesQueries.transaction {

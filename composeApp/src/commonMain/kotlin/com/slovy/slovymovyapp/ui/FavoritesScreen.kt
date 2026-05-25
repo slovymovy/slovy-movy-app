@@ -620,7 +620,7 @@ class FavoritesViewModel(
             val favorite = favoritesRepository.getOne(senseId, item.targetLang) ?: return@launch
 
             // Remove from repository, then remove from displayed list for immediate feedback
-            favoritesRepository.remove(senseId, favorite.language)
+            val removedSnapshot = favoritesRepository.remove(senseId, favorite.language)
             Analytics.logEvent(
                 AnalyticsEvent.FAVORITES_REMOVE,
                 mapOf("lang" to favorite.language.code, "source" to "favorites_list"),
@@ -631,21 +631,21 @@ class FavoritesViewModel(
 
             // Recompute languages and filtered senses from repository (handles query
             // filtering, language switches, and all edge cases correctly)
-            val snapshot = state as? FavoritesUiState.Content
-            val newState = withContext(Dispatchers.Default) { computeFavoritesState(content.query, snapshot) }
+            val uiSnapshot = state as? FavoritesUiState.Content
+            val newState = withContext(Dispatchers.Default) { computeFavoritesState(content.query, uiSnapshot) }
             applyNewState(newState)
             prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
 
             // Show snackbar with an undo option
             val result = snackbarHostState.showSnackbar(
                 message = removedMessage,
-                actionLabel = undoLabel,
+                actionLabel = if (removedSnapshot != null) undoLabel else null,
                 duration = SnackbarDuration.Short
             )
 
-            if (result == SnackbarResult.ActionPerformed) {
-                // Re-add with the original createdAt to preserve position
-                favoritesRepository.add(senseId, favorite.language, favorite.lemma, favorite.createdAt)
+            if (result == SnackbarResult.ActionPerformed && removedSnapshot != null) {
+                // Replay the per-card snapshot to restore scheduling exactly as it was
+                favoritesRepository.restoreForUndo(removedSnapshot)
                 Analytics.logEvent(
                     AnalyticsEvent.FAVORITES_SAVE,
                     mapOf("lang" to favorite.language.code, "source" to "favorites_undo"),

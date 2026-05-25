@@ -5,6 +5,8 @@ import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.use
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.favorites.CardScheduleSnapshot
+import com.slovy.slovymovyapp.data.favorites.applyCardScheduleSnapshots
 import com.slovy.slovymovyapp.data.learning.*
 import com.slovy.slovymovyapp.data.learning.fsrs.CrossFamilyCredit
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
@@ -38,14 +40,23 @@ class SessionService(
     private val clock: Clock,
     private val translationTargets: suspend (Language) -> List<Language> = { emptyList() },
 ) {
-    fun nextCard(langCode: String, sessionStartedAt: Instant): Flow<SessionCard?> = flow {
+    fun nextCard(
+        langCode: String,
+        sessionStartedAt: Instant,
+        excludedFamilies: Set<CardFamily>,
+    ): Flow<SessionCard?> = flow {
         PerformanceMonitoring.startTrace("session_next_card").useWithResult(successResult = "empty") {
             putAttribute("lang", langCode)
             var attemptedCandidates = 0L
             var loadingEmissions = 0L
             try {
                 val now = clock.now().toEpochMilliseconds()
-                val candidates = nextCandidates(langCode, now, sessionStartedAt.toEpochMilliseconds())
+                val candidates = nextCandidates(
+                    langCode = langCode,
+                    now = now,
+                    sessionStartedAt = sessionStartedAt.toEpochMilliseconds(),
+                    excludedFamilies = excludedFamilies,
+                )
                 putMetric("candidates", candidates.size.toLong())
                 for ((card, priorityScore) in candidates) {
                     attemptedCandidates += 1
@@ -192,6 +203,35 @@ class SessionService(
         setCardAvailableAfter(card.card)
     }
 
+    suspend fun suspendWord(card: SessionCard, duration: Duration): List<CardScheduleSnapshot> =
+        withContext(Dispatchers.IO) {
+            val availableAfter = clock.now().toEpochMilliseconds() + duration.inWholeMilliseconds
+            learning.transactionWithResult {
+                val cards = learning.selectCardScheduleByLemma(
+                    lang_code = card.card.langCode,
+                    lemma_id = card.card.lemmaId,
+                ).executeAsList().map {
+                    CardScheduleSnapshot(
+                        id = it.id,
+                        suspended = it.suspended,
+                        availableAfter = it.available_after,
+                    )
+                }
+                learning.setCardsAvailableAfterByLemma(
+                    availableAfter = availableAfter,
+                    lang_code = card.card.langCode,
+                    lemma_id = card.card.lemmaId,
+                )
+                cards
+            }
+        }
+
+    suspend fun restorePausedWord(snapshot: List<CardScheduleSnapshot>) = withContext(Dispatchers.IO) {
+        learning.transaction {
+            learning.applyCardScheduleSnapshots(snapshot)
+        }
+    }
+
     suspend fun continueDelayedCardsNow(langCode: String) = withContext(Dispatchers.IO) {
         val now = clock.now().toEpochMilliseconds()
         val before = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne()
@@ -268,27 +308,28 @@ class SessionService(
         langCode: String,
         now: Long,
         sessionStartedAt: Long,
+        excludedFamilies: Set<CardFamily>,
     ): List<Pair<Card, Double>> {
         val limit = config.selectionCandidateLimit.toLong()
         val recentSince = maxOf(sessionStartedAt, now - 1.hours.inWholeMilliseconds)
         val recentReviews = learning.selectRecentReviewedCards(langCode, recentSince, RECENT_LIMIT.toLong())
             .executeAsList()
-        val candidates = learning.selectDueCards(
+        val allowedFamilies = CardFamily.entries - excludedFamilies
+        val dueCards = learning.selectDueCards(
             lang_code = langCode,
             now = now,
             new_state = CardState.NEW,
+            allowed_families = allowedFamilies,
             limit = limit,
-        ).executeAsList()
-            .map { it.toCard() }
-            .plus(
-                learning.selectNewCards(
-                    lang_code = langCode,
-                    new_state = CardState.NEW,
-                    now = now,
-                    limit = limit,
-                ).executeAsList()
-                    .map { it.toCard() }
-            )
+        ).executeAsList().map { it.toCard() }
+        val newCards = learning.selectNewCards(
+            lang_code = langCode,
+            new_state = CardState.NEW,
+            now = now,
+            allowed_families = allowedFamilies,
+            limit = limit,
+        ).executeAsList().map { it.toCard() }
+        val candidates = dueCards + newCards
 
         return candidates
             .map { it to priority(it, now, recentReviews) }

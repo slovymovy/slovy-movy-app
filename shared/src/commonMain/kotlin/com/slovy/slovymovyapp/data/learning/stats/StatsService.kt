@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.data.learning.stats
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.use
+import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardState
 import com.slovy.slovymovyapp.data.learning.fsrs.DAY
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
@@ -159,7 +160,11 @@ class StatsService(
         val successfulReviews = learning.countSuccessfulReviewsSince(langCode, since).executeAsOne()
         return GlobalStats(
             totalCards = learning.countCardsByLang(langCode).executeAsOne().toInt(),
-            dueToday = learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt(),
+            dueToday = learning.countDueCardsByLangDistinctByLemma(
+                lang_code = langCode,
+                now = now,
+                allowed_families = CardFamily.entries,
+            ).executeAsOne().toInt(),
             reviewedLast7d = totalReviews.toInt(),
             rollingRetention7d = if (totalReviews == 0L) null else successfulReviews.toDouble() / totalReviews,
             matureCount = learning.countMatureCardsByLang(langCode, MATURITY_STABILITY_DAYS).executeAsOne().toInt(),
@@ -167,9 +172,13 @@ class StatsService(
     }
 
     @OptIn(ExperimentalTime::class)
-    suspend fun dueNow(langCode: String): Int = withContext(Dispatchers.IO) {
+    suspend fun dueNow(langCode: String, excludedFamilies: Set<CardFamily>): Int = withContext(Dispatchers.IO) {
         val now = clock.now().toEpochMilliseconds()
-        learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt()
+        learning.countDueCardsByLangDistinctByLemma(
+            lang_code = langCode,
+            now = now,
+            allowed_families = CardFamily.entries - excludedFamilies,
+        ).executeAsOne().toInt()
     }
 
     @OptIn(ExperimentalTime::class)
@@ -177,7 +186,11 @@ class StatsService(
         val now = clock.now().toEpochMilliseconds()
         return ReviewQueueStats(
             activeCardCount = learning.countCardsByLang(langCode).executeAsOne().toInt(),
-            dueToday = learning.countDueCardsByLangDistinctByLemma(langCode, now).executeAsOne().toInt(),
+            dueToday = learning.countDueCardsByLangDistinctByLemma(
+                lang_code = langCode,
+                now = now,
+                allowed_families = CardFamily.entries,
+            ).executeAsOne().toInt(),
             delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, now).executeAsOne().toInt(),
             delayedDueCardCount = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne().toInt(),
             pendingFavoriteLemmaCount = learning.countPendingFavoriteLemmasByLang(langCode).executeAsOne().toInt(),

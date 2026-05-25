@@ -892,6 +892,7 @@ fun App(
                     ) {
                         StudySessionViewModel(
                             langCode = args.langCode,
+                            favoritesRepository = favoritesRepository,
                             intakeService = intakeService,
                             sessionService = sessionService,
                             statsService = statsService,
@@ -905,6 +906,10 @@ fun App(
                                 // A submitted review can push the card past today; refresh the
                                 // bottom-nav dot from stats. No intake needed — review changes
                                 // hit `card.due_at` directly.
+                                appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
+                            },
+                            onFavoriteChanged = { language ->
+                                favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(language)
                                 appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
                             },
                         )
