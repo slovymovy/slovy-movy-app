@@ -224,7 +224,8 @@ private fun DeveloperTerminalSheet(
                 .fillMaxWidth()
                 .fillMaxHeight(1f)
                 .padding(horizontal = AppSpacing.lg)
-                .padding(bottom = AppSpacing.lg),
+                .padding(bottom = AppSpacing.lg)
+                .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
         ) {
             Row(

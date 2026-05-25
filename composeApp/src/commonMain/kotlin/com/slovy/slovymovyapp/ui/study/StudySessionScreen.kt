@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -820,7 +823,9 @@ private fun StudySessionOverflowSheet(
             shadowElevation = 8.dp,
         ) {
             Column(
-                modifier = Modifier.padding(top = AppSpacing.sm, bottom = AppSpacing.lg),
+                modifier = Modifier
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .padding(top = AppSpacing.sm, bottom = AppSpacing.lg),
             ) {
                 Box(
                     modifier = Modifier
@@ -2718,6 +2723,23 @@ private fun StudySessionMultiSenseListeningBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(multiSenseListeningCard(), StudyCardSide.BACK, current = 2),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionOverflowMenuOpenPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(recognitionCard(), StudyCardSide.FRONT).copy(
+                isOverflowMenuOpen = true,
+                isAutoplayEnabled = true,
+            ),
             onCancel = {},
             onEnd = {},
         )

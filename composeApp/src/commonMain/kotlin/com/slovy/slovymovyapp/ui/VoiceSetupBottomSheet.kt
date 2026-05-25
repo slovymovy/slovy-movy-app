@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -77,7 +78,8 @@ fun VoiceSetupBottomSheetContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppSpacing.xl)
-            .padding(bottom = AppSpacing.xl),
+            .padding(bottom = AppSpacing.xl)
+            .navigationBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
         Row(
