@@ -586,6 +586,7 @@
     <string name="study_actions_suspend">Pause this word</string>
     <string name="study_actions_suspend_description">Pause reviews for 30 days</string>
     <string name="study_suspend_message">"%1$s" paused for 30 days</string>
+    <string name="study_suspend_undo">Undo</string>
     <string name="study_actions_remove">Remove from My words</string>
     <string name="study_remove_title">Remove "%1$s" from My words?</string>
     <string name="study_remove_message">This specific meaning will stop appearing in your study sessions. Other meanings of "%1$s" will stay in My words. You can always add it back later without losing your progress.</string>

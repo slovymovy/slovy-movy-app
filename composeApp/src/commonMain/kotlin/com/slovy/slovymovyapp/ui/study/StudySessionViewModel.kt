@@ -178,7 +178,7 @@ class StudySessionViewModel(
         }
     }
 
-    fun suspendCurrentWord(suspendedMessage: String) {
+    fun suspendCurrentWord(suspendedMessage: String, undoLabel: String) {
         if (isPreparingRemoval) return
         val active = state as? StudySessionUiState.Active ?: return
         if (active.isSubmittingReview) return
@@ -188,7 +188,7 @@ class StudySessionViewModel(
         currentOutcomes = emptyList()
         state = active.copy(isOverflowMenuOpen = false, isSubmittingReview = true)
         viewModelScope.launch {
-            try {
+            val snapshot = try {
                 sessionService.suspendWord(card, WORD_SUSPEND_DURATION)
             } catch (e: CancellationException) {
                 throw e
@@ -204,11 +204,29 @@ class StudySessionViewModel(
             }
             skippedCount += 1
             loadNextCard()
-            showStudySnackbar(
+            val result = showStudySnackbar(
                 message = suspendedMessage,
-                actionLabel = null,
+                actionLabel = if (snapshot.cards.isNotEmpty()) undoLabel else null,
                 duration = SnackbarDuration.Short,
             )
+            if (result != SnackbarResult.ActionPerformed || snapshot.cards.isEmpty()) return@launch
+
+            try {
+                sessionService.restorePausedWord(snapshot)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                return@launch
+            }
+            skippedCount = (skippedCount - 1).coerceAtLeast(0)
+            val activeAfterUndo = state as? StudySessionUiState.Active
+            if (activeAfterUndo == null || currentCard == null) {
+                currentCard = null
+                currentOutcomes = emptyList()
+                loadNextCard()
+            } else {
+                state = activeAfterUndo.copy(progress = nextCardProgress())
+            }
         }
     }
 
@@ -289,7 +307,7 @@ class StudySessionViewModel(
             )
         }
         viewModelScope.launch {
-            try {
+            val snapshot = try {
                 favoritesRepository.remove(favorite.senseId, favorite.language)
             } catch (e: CancellationException) {
                 throw e
@@ -315,18 +333,13 @@ class StudySessionViewModel(
 
             val result = showStudySnackbar(
                 message = removedMessage,
-                actionLabel = undoLabel,
+                actionLabel = if (snapshot != null) undoLabel else null,
                 duration = SnackbarDuration.Short,
             )
-            if (result != SnackbarResult.ActionPerformed) return@launch
+            if (result != SnackbarResult.ActionPerformed || snapshot == null) return@launch
 
             try {
-                favoritesRepository.restoreForUndo(
-                    senseId = favorite.senseId,
-                    language = favorite.language,
-                    lemma = favorite.lemma,
-                    createdAt = favorite.createdAt,
-                )
+                favoritesRepository.restoreForUndo(snapshot)
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {

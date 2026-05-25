@@ -150,6 +150,7 @@ import slovymovyapp.composeapp.generated.resources.study_swipe_back_to_rate
 import slovymovyapp.composeapp.generated.resources.study_prompt_translate_to
 import slovymovyapp.composeapp.generated.resources.study_progress_count
 import slovymovyapp.composeapp.generated.resources.study_suspend_message
+import slovymovyapp.composeapp.generated.resources.study_suspend_undo
 import slovymovyapp.composeapp.generated.resources.study_rating_again
 import slovymovyapp.composeapp.generated.resources.study_rating_easy
 import slovymovyapp.composeapp.generated.resources.study_rating_good
@@ -210,7 +211,7 @@ fun StudySessionScreenContent(
     onOpenOverflowMenu: () -> Unit = {},
     onDismissOverflowMenu: () -> Unit = {},
     onToggleAutoplay: () -> Unit = {},
-    onSuspendWord: (String) -> Unit = {},
+    onSuspendWord: (String, String) -> Unit = { _, _ -> },
     onRequestRemoveFromLibrary: () -> Unit = {},
     onDismissRemoveConfirmation: () -> Unit = {},
     onConfirmRemoveFromLibrary: (String, String) -> Unit = { _, _ -> },
@@ -538,7 +539,7 @@ private fun StudySessionActiveContent(
     onOpenOverflowMenu: () -> Unit,
     onDismissOverflowMenu: () -> Unit,
     onToggleAutoplay: () -> Unit,
-    onSuspendWord: (String) -> Unit,
+    onSuspendWord: (String, String) -> Unit,
     onRequestRemoveFromLibrary: () -> Unit,
     onDismissRemoveConfirmation: () -> Unit,
     onConfirmRemoveFromLibrary: (String, String) -> Unit,
@@ -553,6 +554,7 @@ private fun StudySessionActiveContent(
         Res.string.study_suspend_message,
         state.card.studyWord(),
     )
+    val suspendedUndoLabel = stringResource(Res.string.study_suspend_undo)
     val listeningPostponedMessage = stringResource(Res.string.study_listening_postponed_message)
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -621,7 +623,7 @@ private fun StudySessionActiveContent(
             StudySessionOverflowSheet(
                 autoplayEnabled = state.isAutoplayEnabled,
                 onToggleAutoplay = onToggleAutoplay,
-                onSuspendWord = { onSuspendWord(suspendedMessage) },
+                onSuspendWord = { onSuspendWord(suspendedMessage, suspendedUndoLabel) },
                 onRequestRemoveFromLibrary = onRequestRemoveFromLibrary,
                 onDismiss = onDismissOverflowMenu,
             )

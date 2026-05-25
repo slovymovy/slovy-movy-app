@@ -416,6 +416,21 @@ WHERE id = :id
   AND suspended = 0
   AND (available_after IS NULL OR available_after < :availableAfter);
 
+-- Snapshot of every card touched by `setCardsAvailableAfterByLemma` so a paused word
+-- can be undone via `restoreCardScheduling` per row. Includes suspended cards for the
+-- same reason as the update below (see test `suspending_word_applies_delay_to_removed_meanings`).
+selectCardScheduleByLemma:
+SELECT id, suspended, available_after
+FROM card INDEXED BY idx_card_active_lemma_due
+WHERE lang_code = :lang_code
+  AND suspended IN (0, 1)
+  AND lemma_id = :lemma_id;
+
+-- `suspended IN (0, 1)` is intentional: pausing a word should delay every card for the
+-- lemma, including ones suspended by a removed meaning (see test
+-- `suspending_word_applies_delay_to_removed_meanings`). It also acts as an explicit
+-- skip-scan hint so the planner can use idx_card_active_lemma_due past the `suspended`
+-- column to filter by `lemma_id`.
 setCardsAvailableAfterByLemma:
 UPDATE card INDEXED BY idx_card_active_lemma_due
 SET available_after = :availableAfter
@@ -472,12 +487,14 @@ SET suspended = 0
 WHERE sense_id = :sense_id
   AND lang_code = :lang_code;
 
-unsuspendCardsByFavoriteClearingAvailableAfter:
-UPDATE card INDEXED BY idx_card_unique_task
-SET suspended = 0,
-    available_after = NULL
-WHERE sense_id = :sense_id
-  AND lang_code = :lang_code;
+-- Per-card restore used by undo to replay the exact `(suspended, available_after)`
+-- captured in a snapshot taken before `remove()` ran. Non-destructive: nothing else
+-- on the card row changes.
+restoreCardScheduling:
+UPDATE card
+SET suspended = :suspended,
+    available_after = :available_after
+WHERE id = :id;
 
 suspendAllCards:
 UPDATE card

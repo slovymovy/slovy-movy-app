@@ -5,6 +5,7 @@ import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.use
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.favorites.CardScheduleSnapshot
 import com.slovy.slovymovyapp.data.learning.*
 import com.slovy.slovymovyapp.data.learning.fsrs.CrossFamilyCredit
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
@@ -27,6 +28,8 @@ import kotlin.time.*
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.uuid.Uuid
+
+data class PausedWordSnapshot(val cards: List<CardScheduleSnapshot>)
 
 @OptIn(ExperimentalTime::class)
 class SessionService(
@@ -201,13 +204,39 @@ class SessionService(
         setCardAvailableAfter(card.card)
     }
 
-    suspend fun suspendWord(card: SessionCard, duration: Duration) = withContext(Dispatchers.IO) {
-        val availableAfter = clock.now().toEpochMilliseconds() + duration.inWholeMilliseconds
-        learning.setCardsAvailableAfterByLemma(
-            availableAfter = availableAfter,
-            lang_code = card.card.langCode,
-            lemma_id = card.card.lemmaId,
-        )
+    suspend fun suspendWord(card: SessionCard, duration: Duration): PausedWordSnapshot =
+        withContext(Dispatchers.IO) {
+            val availableAfter = clock.now().toEpochMilliseconds() + duration.inWholeMilliseconds
+            learning.transactionWithResult {
+                val cards = learning.selectCardScheduleByLemma(
+                    lang_code = card.card.langCode,
+                    lemma_id = card.card.lemmaId,
+                ).executeAsList().map {
+                    CardScheduleSnapshot(
+                        id = it.id,
+                        suspended = it.suspended,
+                        availableAfter = it.available_after,
+                    )
+                }
+                learning.setCardsAvailableAfterByLemma(
+                    availableAfter = availableAfter,
+                    lang_code = card.card.langCode,
+                    lemma_id = card.card.lemmaId,
+                )
+                PausedWordSnapshot(cards = cards)
+            }
+        }
+
+    suspend fun restorePausedWord(snapshot: PausedWordSnapshot) = withContext(Dispatchers.IO) {
+        learning.transaction {
+            for (card in snapshot.cards) {
+                learning.restoreCardScheduling(
+                    suspended = card.suspended,
+                    available_after = card.availableAfter,
+                    id = card.id,
+                )
+            }
+        }
     }
 
     suspend fun continueDelayedCardsNow(langCode: String) = withContext(Dispatchers.IO) {

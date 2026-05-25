@@ -149,31 +149,28 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
-    fun undoing_removed_favorite_restores_cards_immediately() = runBlocking {
+    fun undoing_removed_favorite_replays_snapshot_preserving_scheduling() = runBlocking {
         withEnv(includeTranslation = false) { env ->
             val fixture = env.seedSense(lemma = "undoremovedfavorite")
             env.addFavorite(fixture)
             env.intake.runIntake("en")
             val card = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
                 .executeAsOne()
+            val availableAfter = (start + 10.minutes).toEpochMilliseconds()
             env.app.favoritesQueries.setCardAvailableAfter(
-                availableAfter = (start + 10.minutes).toEpochMilliseconds(),
+                availableAfter = availableAfter,
                 id = card.id,
             )
 
-            env.favorites.remove(fixture.senseId.toString(), Language.ENGLISH)
-            env.favorites.restoreForUndo(
-                senseId = fixture.senseId.toString(),
-                language = Language.ENGLISH,
-                lemma = fixture.lemma,
-                createdAt = start.toEpochMilliseconds(),
+            val snapshot = assertNotNull(
+                env.favorites.remove(fixture.senseId.toString(), Language.ENGLISH),
             )
+            env.favorites.restoreForUndo(snapshot)
 
             val restoredCards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
             assertEquals(1, restoredCards.size)
             assertTrue(restoredCards.none { it.suspended })
-            assertNull(restoredCards.first().available_after)
-            env.nextLoadedCard("en")
+            assertEquals(availableAfter, restoredCards.first().available_after)
         }
     }
 
