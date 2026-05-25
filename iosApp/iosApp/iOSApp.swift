@@ -7,11 +7,10 @@ import FirebaseCrashlytics
 import FirebasePerformance
 
 private class SlovyAppCheckProviderFactory: NSObject, AppCheckProviderFactory {
+    // Firebase Console is configured with App Attest as the iOS provider.
+    // Requires the com.apple.developer.devicecheck.appattest-environment entitlement on the target.
     func createProvider(with app: FirebaseApp) -> AppCheckProvider? {
-        if #available(iOS 14.0, *) {
-            return AppAttestProvider(app: app)
-        }
-        return DeviceCheckProvider(app: app)
+        return AppAttestProvider(app: app)
     }
 }
 
