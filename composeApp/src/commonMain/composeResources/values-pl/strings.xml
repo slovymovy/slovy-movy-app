@@ -229,7 +229,7 @@
     <string name="voice_setup_title">Lepsza wymowa</string>
     <string name="voice_setup_description">Domyślny głos może brzmieć mechanicznie. Oto jak to zmienić:</string>
     <string name="voice_setup_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos dla języka %1$s.</string>
-    <string name="voice_setup_step_ios">Przejdź do: Ustawienia > Dostępność > Czytaj zawartość > Głosy i pobierz głos dla języka %1$s.</string>
+    <string name="voice_setup_step_ios">Przejdź do: Ustawienia > Dostępność > Wzrok > Czytaj i mów > Głosy, wybierz język i pobierz potrzebne głosy.</string>
     <string name="voice_setup_step_other">Pobierz wysokiej jakości głos dla języka %1$s w ustawieniach systemowych.</string>
     <string name="voice_setup_step_two">Wróć do: Ustawienia Open Words > Głosy i włącz nowy głos.</string>
 
@@ -240,7 +240,7 @@
     <string name="voice_no_voices_available">Brak dostępnych głosów</string>
     <string name="voice_download_more_title">Pobierz więcej głosów</string>
     <string name="voice_download_more_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos.</string>
-    <string name="voice_download_more_step_ios">Przejdź do: Ustawienia > Dostępność > Czytaj zawartość > Głosy i pobierz wysokiej jakości głos.</string>
+    <string name="voice_download_more_step_ios">Przejdź do: Ustawienia > Dostępność > Wzrok > Czytaj i mów > Głosy, wybierz język i pobierz potrzebne głosy.</string>
     <string name="voice_download_more_step_other">Pobierz wysokiej jakości głos w ustawieniach systemowych.</string>
     <string name="voice_download_more_step_two">Wróć do: Ustawienia Open Words > Głos i włącz nowy głos.</string>
     <string name="voice_quality_high">Wysoka</string>
@@ -294,6 +294,9 @@
     <string name="developer_tables_loading">Ładowanie tabeli kart...</string>
     <string name="developer_tables_empty">Brak wierszy kart.</string>
     <string name="developer_tables_error">Tabela kart niedostępna: %1$s</string>
+    <string name="developer_tables_page_status">Wiersze %1$d-%2$d z %3$d</string>
+    <string name="developer_tables_previous_page">Poprzednia</string>
+    <string name="developer_tables_next_page">Następna</string>
     <string name="developer_card_table_col_lemma">lemma</string>
     <string name="developer_card_table_col_sense_id">sense_id</string>
     <string name="developer_card_table_col_lang_code">lang_code</string>

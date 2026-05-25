@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,6 +38,7 @@ import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.learning.stats.StatsYearMonth
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.i18n.NumberFormatter
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
@@ -836,9 +839,15 @@ private fun LibraryMetric(
 @Composable
 private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean) {
     val maxCount = pipeline.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
-    val countColumnWidth = if (pipeline.any { formatCount(it.count, isLoading = false).length > 3 }) 52.dp else 36.dp
+    val countLanguage = Locale.current.language
+    val countColumnWidth = if (pipeline.any { formatCountForLanguage(it.count, countLanguage).length > 3 }) {
+        52.dp
+    } else {
+        36.dp
+    }
+    val rows = pipeline.map { stage -> stage to stageLabel(stage.id).uppercase() }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        pipeline.forEach { stage ->
+        rows.forEach { (stage, label) ->
             val pct = if (isLoading) {
                 loadingPipelineWidth(stage.id)
             } else {
@@ -863,16 +872,7 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text(
-                    text = stageLabel(stage.id).uppercase(),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
-                        letterSpacing = 0.4.sp,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.width(72.dp),
-                )
+                PipelineStageLabel(label)
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -889,7 +889,7 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
                     )
                 }
                 CountText(
-                    text = formatCount(stage.count, isLoading),
+                    text = formatCount(stage.count, isLoading, countLanguage),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontWeight = FontWeight.Medium,
@@ -904,6 +904,26 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
             }
         }
     }
+}
+
+@Composable
+private fun PipelineStageLabel(label: String) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.4.sp,
+        ),
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        softWrap = false,
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = 9.sp,
+            maxFontSize = 11.sp,
+            stepSize = 0.2.sp,
+        ),
+        modifier = Modifier.width(72.dp),
+    )
 }
 
 @Composable
@@ -1143,12 +1163,19 @@ private fun previewPracticeLog(today: LocalDate): Set<StatsPracticeDay> {
     return log
 }
 
+@Composable
 private fun formatCount(value: Int, isLoading: Boolean): String {
     if (isLoading) return "--"
-    val raw = value.toString()
-    if (raw.length <= 3) return raw
-    return raw.reversed().chunked(3).joinToString(",").reversed()
+    return formatCountForLanguage(value, Locale.current.language)
 }
+
+private fun formatCount(value: Int, isLoading: Boolean, language: String): String {
+    if (isLoading) return "--"
+    return formatCountForLanguage(value, language)
+}
+
+internal fun formatCountForLanguage(value: Int, language: String): String =
+    NumberFormatter.formatInteger(value, language)
 
 private const val STATS_REVEAL_ANIMATION_MS = 260
 
@@ -1194,5 +1221,44 @@ private fun StatsScreenLoadingPreview(
                 clock = Clock.System,
             ),
         )
+    }
+}
+
+@Preview
+@Composable
+private fun PipelineStageLabelAutoSizePreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    val samples = listOf(
+        "QUEUE",
+        "LEARNED",
+        "RECALLING",
+        "EXTRALONGT",
+        "В ОЧЕРЕДИ",
+        "ПОВТОРЕНИЕ",
+        "ЗАКРЕПЛЕНО",
+        "WIEDERHOLUNG",
+    )
+    ThemedPreview(darkTheme = isDark) {
+        Surface {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                samples.forEach { label ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        PipelineStageLabel(label)
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 10.dp)
+                                .weight(1f)
+                                .height(10.dp)
+                                .clip(RoundedCornerShape(5.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        )
+                    }
+                }
+            }
+        }
     }
 }

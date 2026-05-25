@@ -230,7 +230,7 @@
     <string name="voice_setup_title">Качество озвучки</string>
     <string name="voice_setup_description">Стандартный голос может звучать механически. Вот как это исправить:</string>
     <string name="voice_setup_step_android">Откройте настройки синтеза речи на телефоне и скачайте качественный голос для %1$s.</string>
-    <string name="voice_setup_step_ios">Перейдите в Настройки > Универсальный доступ > Устный контент > Голоса. Скачайте улучшенный голос для %1$s.</string>
+    <string name="voice_setup_step_ios">Перейдите в Настройки > Универсальный доступ > Зрение > Чтение вслух > Голоса, выберите язык и скачайте нужные голоса.</string>
     <string name="voice_setup_step_other">Скачайте качественный голос для %1$s в системных настройках.</string>
     <string name="voice_setup_step_two">Вернитесь в OpenWords (Настройки > Озвучка) и выберите новый голос.</string>
 
@@ -241,7 +241,7 @@
     <string name="voice_no_voices_available">Нет доступных голосов</string>
     <string name="voice_download_more_title">Добавить новые голоса</string>
     <string name="voice_download_more_step_android">Откройте настройки синтеза речи на телефоне и загрузите качественный голос.</string>
-    <string name="voice_download_more_step_ios">Настройки > Универсальный доступ > Устный контент > Голоса. Скачайте один из улучшенных голосов.</string>
+    <string name="voice_download_more_step_ios">Настройки > Универсальный доступ > Зрение > Чтение вслух > Голоса. Выберите язык и скачайте нужные голоса.</string>
     <string name="voice_download_more_step_other">Загрузите качественный голос в системных настройках.</string>
     <string name="voice_download_more_step_two">Вернитесь в OpenWords (Настройки > Озвучка) и включите его.</string>
     <string name="voice_quality_high">Высокое</string>
@@ -295,6 +295,9 @@
     <string name="developer_tables_loading">Загрузка таблицы карт...</string>
     <string name="developer_tables_empty">Нет строк карт.</string>
     <string name="developer_tables_error">Таблица карт недоступна: %1$s</string>
+    <string name="developer_tables_page_status">Строки %1$d-%2$d из %3$d</string>
+    <string name="developer_tables_previous_page">Назад</string>
+    <string name="developer_tables_next_page">Далее</string>
     <string name="developer_card_table_col_lemma">lemma</string>
     <string name="developer_card_table_col_sense_id">sense_id</string>
     <string name="developer_card_table_col_lang_code">lang_code</string>

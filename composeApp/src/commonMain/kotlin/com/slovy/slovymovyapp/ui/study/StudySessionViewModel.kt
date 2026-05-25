@@ -25,6 +25,7 @@ import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.learning.session.SessionService
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.TTSStatus
 import com.slovy.slovymovyapp.speech.Text2SpeechVoice
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
@@ -95,7 +96,8 @@ class StudySessionViewModel(
                 loadVoicesSync()
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                AppLogger.warn(TAG, "Unable to load study voices for $langCode", e)
                 availableVoices = emptyList()
             }
         }
@@ -105,11 +107,7 @@ class StudySessionViewModel(
         val lang = language ?: return
         val ttsLanguage = ttsManager.getAvailableLanguages()
             .firstOrNull { it.language == lang } ?: return
-        val allVoices = ttsManager.getVoicesForLanguage(ttsLanguage)
-        if (!voiceFilterHelper.hasEnabledVoices(ttsLanguage)) {
-            voiceFilterHelper.initializeDefaultVoices(ttsLanguage, allVoices)
-        }
-        availableVoices = voiceFilterHelper.filterVoicesByEnabled(allVoices, ttsLanguage)
+        availableVoices = voiceFilterHelper.loadEnabledVoices(ttsManager, ttsLanguage)
         if (availableVoices.isNotEmpty()) {
             currentVoiceIndex = availableVoices.indices.random()
         }
@@ -135,14 +133,14 @@ class StudySessionViewModel(
                     currentVoiceIndex = (currentVoiceIndex + 1) % availableVoices.size
                     ttsManager.setVoice(availableVoices[currentVoiceIndex])
                     ttsManager.speak(text)
-                } else if (language != null) {
-                    ttsManager.speak(text, language)
                 } else {
-                    ttsManager.speak(text)
+                    val latest = state as? StudySessionUiState.Active ?: return@launch
+                    state = latest.copy(isPreparingAudio = false, isPlayingAudio = false)
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                AppLogger.warn(TAG, "Unable to play study audio for $langCode", e)
                 Analytics.logEvent(
                     AnalyticsEvent.TTS_PLAY_FAILED,
                     mapOf(
@@ -670,6 +668,7 @@ class StudySessionViewModel(
     }
 
     companion object {
+        private const val TAG = "StudySessionViewModel"
         private const val LOADING_DEBOUNCE_MS = 150L
         private val WORD_SUSPEND_DURATION = 30.days
     }

@@ -187,29 +187,39 @@ class FavoritesRepository(private val db: AppDatabase) {
             )
         }
 
-    suspend fun getCardTableDebugRows(): List<CardTableDebugRow> = withContext(Dispatchers.IO) {
-        db.favoritesQueries.selectDeveloperCardTable().executeAsList().map { row ->
-            CardTableDebugRow(
-                lemma = row.lemma,
-                id = row.id,
-                senseId = row.sense_id,
-                lemmaId = row.lemma_id,
-                langCode = row.lang_code,
-                family = row.family,
-                state = row.state,
-                stability = row.stability,
-                difficulty = row.difficulty,
-                due = row.due,
-                lastReview = row.last_review,
-                reps = row.reps,
-                lapses = row.lapses,
-                createdAt = row.created_at,
-                availableAfter = row.available_after,
-                answerKey = row.answer_key,
-                suspended = row.suspended,
-            )
-        }
+    suspend fun countCardTableDebugRows(): Long = withContext(Dispatchers.IO) {
+        db.favoritesQueries.countDeveloperCardTableRows().executeAsOne()
     }
+
+    suspend fun getCardTableDebugRows(pageSize: Long, pageOffset: Long): List<CardTableDebugRow> =
+        withContext(Dispatchers.IO) {
+            require(pageSize > 0) { "pageSize must be positive" }
+            require(pageOffset >= 0) { "pageOffset must be non-negative" }
+            db.favoritesQueries.selectDeveloperCardTable(
+                page_size = pageSize,
+                page_offset = pageOffset,
+            ).executeAsList().map { row ->
+                CardTableDebugRow(
+                    lemma = row.lemma,
+                    id = row.id,
+                    senseId = row.sense_id,
+                    lemmaId = row.lemma_id,
+                    langCode = row.lang_code,
+                    family = row.family,
+                    state = row.state,
+                    stability = row.stability,
+                    difficulty = row.difficulty,
+                    due = row.due,
+                    lastReview = row.last_review,
+                    reps = row.reps,
+                    lapses = row.lapses,
+                    createdAt = row.created_at,
+                    availableAfter = row.available_after,
+                    answerKey = row.answer_key,
+                    suspended = row.suspended,
+                )
+            }
+        }
 
     suspend fun getCardFamilyDebugCounts(): List<CardFamilyDebugCount> = withContext(Dispatchers.IO) {
         db.favoritesQueries.countCardsByFamily().executeAsList().map { row ->

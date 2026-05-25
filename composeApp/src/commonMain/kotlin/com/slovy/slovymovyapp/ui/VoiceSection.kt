@@ -14,10 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -305,12 +302,14 @@ fun VoiceItem(
                 )
             }
 
-            val languagePair = remember(voice.id) {
-                val pattern1 = Regex("^([a-zA-Z]{2}-[a-zA-Z]{2})")
-                val pattern2 = Regex("com\\.apple\\.voice\\.[a-zA-Z]+\\.([a-zA-Z]{2}-[a-zA-Z]{2})\\.")
+            val languagePair = remember(voice.localeTag, voice.id) {
+                voice.localeTag?.uppercase() ?: run {
+                    val pattern1 = Regex("^([a-zA-Z]{2}-[a-zA-Z]{2})")
+                    val pattern2 = Regex("com\\.apple\\.voice\\.[a-zA-Z]+\\.([a-zA-Z]{2}-[a-zA-Z]{2})\\.")
 
-                (pattern1.find(voice.id)?.groupValues?.get(1)
-                    ?: pattern2.find(voice.id)?.groupValues?.get(1))?.uppercase()
+                    (pattern1.find(voice.id)?.groupValues?.get(1)
+                        ?: pattern2.find(voice.id)?.groupValues?.get(1))?.uppercase()
+                }
             }
 
             if (languagePair != null) {

@@ -11,7 +11,6 @@ expect class TextToSpeechManager(androidContext: Any? = null) {
     fun setVoice(voice: Text2SpeechVoice)
     fun openSettings()
 
-    fun setOnWordBoundaryListener(listener: (wordRange: IntRange) -> Unit)
     fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit)
     fun removeOnStatusChangeListener(key: Any)
 }
@@ -26,8 +25,10 @@ data class Text2SpeechVoice(
     val id: String,
     val name: String?,
     val language: Language,
+    val localeTag: String?,
     val quality: VoiceQuality,
-    val networkConnectionRequired: Boolean
+    val networkConnectionRequired: Boolean,
+    val enabledByDefault: Boolean
 )
 
 enum class VoiceQuality {
