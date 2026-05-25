@@ -206,10 +206,10 @@ class StudySessionViewModel(
             loadNextCard()
             val result = showStudySnackbar(
                 message = suspendedMessage,
-                actionLabel = if (snapshot.cards.isNotEmpty()) undoLabel else null,
+                actionLabel = if (snapshot.isNotEmpty()) undoLabel else null,
                 duration = SnackbarDuration.Short,
             )
-            if (result != SnackbarResult.ActionPerformed || snapshot.cards.isEmpty()) return@launch
+            if (result != SnackbarResult.ActionPerformed || snapshot.isEmpty()) return@launch
 
             try {
                 sessionService.restorePausedWord(snapshot)

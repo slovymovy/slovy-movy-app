@@ -44,20 +44,6 @@ data class CardFamilyDebugCount(
     val cardCount: Long,
 )
 
-data class CardScheduleSnapshot(
-    val id: Uuid,
-    val suspended: Boolean,
-    val availableAfter: Long?,
-)
-
-data class RemovedFavoriteSnapshot(
-    val senseId: String,
-    val language: Language,
-    val lemma: String,
-    val createdAt: Long,
-    val cards: List<CardScheduleSnapshot>,
-)
-
 class FavoritesRepository(private val db: AppDatabase) {
 
     @OptIn(ExperimentalTime::class)
@@ -102,13 +88,7 @@ class FavoritesRepository(private val db: AppDatabase) {
                 created_at = snapshot.createdAt,
                 activated_at = if (hasLearningCards) restoredAt else null,
             )
-            for (card in snapshot.cards) {
-                db.favoritesQueries.restoreCardScheduling(
-                    suspended = card.suspended,
-                    available_after = card.availableAfter,
-                    id = card.id,
-                )
-            }
+            db.favoritesQueries.applyCardScheduleSnapshots(snapshot.cards)
         }
     }
 
