@@ -38,28 +38,10 @@ class SessionService(
     private val clock: Clock,
     private val translationTargets: suspend (Language) -> List<Language> = { emptyList() },
 ) {
-    fun nextCard(langCode: String, sessionStartedAt: Instant): Flow<SessionCard?> =
-        nextCard(
-            langCode = langCode,
-            sessionStartedAt = sessionStartedAt,
-            excludedFamily = null,
-        )
-
-    fun nextCardExcludingFamily(
+    fun nextCard(
         langCode: String,
         sessionStartedAt: Instant,
-        excludedFamily: CardFamily,
-    ): Flow<SessionCard?> =
-        nextCard(
-            langCode = langCode,
-            sessionStartedAt = sessionStartedAt,
-            excludedFamily = excludedFamily,
-        )
-
-    private fun nextCard(
-        langCode: String,
-        sessionStartedAt: Instant,
-        excludedFamily: CardFamily?,
+        excludedFamilies: Set<CardFamily>,
     ): Flow<SessionCard?> = flow {
         PerformanceMonitoring.startTrace("session_next_card").useWithResult(successResult = "empty") {
             putAttribute("lang", langCode)
@@ -71,7 +53,7 @@ class SessionService(
                     langCode = langCode,
                     now = now,
                     sessionStartedAt = sessionStartedAt.toEpochMilliseconds(),
-                    excludedFamily = excludedFamily,
+                    excludedFamilies = excludedFamilies,
                 )
                 putMetric("candidates", candidates.size.toLong())
                 for ((card, priorityScore) in candidates) {
@@ -304,48 +286,28 @@ class SessionService(
         langCode: String,
         now: Long,
         sessionStartedAt: Long,
-        excludedFamily: CardFamily?,
+        excludedFamilies: Set<CardFamily>,
     ): List<Pair<Card, Double>> {
         val limit = config.selectionCandidateLimit.toLong()
         val recentSince = maxOf(sessionStartedAt, now - 1.hours.inWholeMilliseconds)
         val recentReviews = learning.selectRecentReviewedCards(langCode, recentSince, RECENT_LIMIT.toLong())
             .executeAsList()
-        val dueCards = if (excludedFamily == null) {
-            learning.selectDueCards(
-                lang_code = langCode,
-                now = now,
-                new_state = CardState.NEW,
-                limit = limit,
-            ).executeAsList().map { it.toCard() }
-        } else {
-            learning.selectDueCardsExcludingFamily(
-                lang_code = langCode,
-                now = now,
-                new_state = CardState.NEW,
-                excluded_family = excludedFamily,
-                limit = limit,
-            ).executeAsList().map { it.toCard() }
-        }
-        val newCards = if (excludedFamily == null) {
-            learning.selectNewCards(
-                lang_code = langCode,
-                new_state = CardState.NEW,
-                now = now,
-                limit = limit,
-            ).executeAsList().map { it.toCard() }
-        } else {
-            learning.selectNewCardsExcludingFamily(
-                lang_code = langCode,
-                new_state = CardState.NEW,
-                now = now,
-                excluded_family = excludedFamily,
-                limit = limit,
-            ).executeAsList().map { it.toCard() }
-        }
-        val candidates = dueCards
-            .plus(
-                newCards
-            )
+        val allowedFamilies = CardFamily.entries - excludedFamilies
+        val dueCards = learning.selectDueCards(
+            lang_code = langCode,
+            now = now,
+            new_state = CardState.NEW,
+            allowed_families = allowedFamilies,
+            limit = limit,
+        ).executeAsList().map { it.toCard() }
+        val newCards = learning.selectNewCards(
+            lang_code = langCode,
+            new_state = CardState.NEW,
+            now = now,
+            allowed_families = allowedFamilies,
+            limit = limit,
+        ).executeAsList().map { it.toCard() }
+        val candidates = dueCards + newCards
 
         return candidates
             .map { it to priority(it, now, recentReviews) }

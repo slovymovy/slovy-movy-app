@@ -481,7 +481,7 @@ class StudySessionViewModel(
                     putMetric("cards_created", intakeResult.cardsCreated.toLong())
                     putMetric("activated_favorites", intakeResult.activated.size.toLong())
                     putMetric("skip_reasons", intakeResult.skipped.size.toLong())
-                    sessionTotal = statsService.dueNow(langCode)
+                    sessionTotal = statsService.dueNow(langCode, excludedCardFamiliesForSession())
                     putMetric("due_now", sessionTotal.toLong())
                     loadNextCard()
                 } catch (e: CancellationException) {
@@ -603,29 +603,23 @@ class StudySessionViewModel(
         }
 
     private fun nextSessionCard() =
-        excludedCardFamilyForSession()?.let { excludedFamily ->
-            sessionService.nextCardExcludingFamily(
-                langCode = langCode,
-                sessionStartedAt = sessionStartedAt,
-                excludedFamily = excludedFamily,
-            )
-        } ?: sessionService.nextCard(langCode, sessionStartedAt)
+        sessionService.nextCard(
+            langCode = langCode,
+            sessionStartedAt = sessionStartedAt,
+            excludedFamilies = excludedCardFamiliesForSession(),
+        )
 
-    private fun excludedCardFamilyForSession(): CardFamily? =
+    private fun excludedCardFamiliesForSession(): Set<CardFamily> =
         if (postponeListeningCardsForSession) {
-            CardFamily.RECOGNIZE_VOICE
+            setOf(CardFamily.RECOGNIZE_VOICE)
         } else {
-            null
+            emptySet()
         }
 
     private suspend fun nextCardProgress(): StudySessionProgressUiState {
         val completedCount = reviewedCount + skippedCount
         val current = completedCount + 1
-        val dueNow = if (postponeListeningCardsForSession) {
-            statsService.dueNowExcludingFamily(langCode, CardFamily.RECOGNIZE_VOICE)
-        } else {
-            statsService.dueNow(langCode)
-        }
+        val dueNow = statsService.dueNow(langCode, excludedCardFamiliesForSession())
         val projectedTotal = completedCount + dueNow
         sessionTotal = if (postponeListeningCardsForSession) {
             maxOf(projectedTotal, current)

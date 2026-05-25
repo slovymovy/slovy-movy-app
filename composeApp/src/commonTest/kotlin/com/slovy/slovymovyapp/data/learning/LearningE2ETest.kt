@@ -132,7 +132,7 @@ class LearningE2ETest : BaseTest() {
             assertEquals(1, suspendedCards.size)
             assertTrue(suspendedCards.all { it.suspended })
             assertEquals(availableAfter, suspendedCards.first().available_after)
-            assertNull(env.session.nextCard("en", start).first())
+            assertNull(env.session.nextCard("en", start, emptySet()).first())
 
             env.favorites.add(fixture.senseId.toString(), Language.ENGLISH, fixture.lemma)
 
@@ -144,7 +144,7 @@ class LearningE2ETest : BaseTest() {
             assertEquals(1, restoredCards.size)
             assertTrue(restoredCards.none { it.suspended })
             assertEquals(availableAfter, restoredCards.first().available_after)
-            assertNull(env.session.nextCard("en", start).first())
+            assertNull(env.session.nextCard("en", start, emptySet()).first())
         }
     }
 
@@ -202,7 +202,7 @@ class LearningE2ETest : BaseTest() {
             val restoredCard = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsOne()
             assertFalse(restoredCard.suspended)
             assertEquals(availableAfter, restoredCard.available_after)
-            assertNull(env.session.nextCard("en", start).first())
+            assertNull(env.session.nextCard("en", start, emptySet()).first())
         }
     }
 
@@ -225,10 +225,10 @@ class LearningE2ETest : BaseTest() {
                 due = (start - 1.minutes).toEpochMilliseconds(),
             )
 
-            val next = env.session.nextCardExcludingFamily(
+            val next = env.session.nextCard(
                 langCode = "en",
                 sessionStartedAt = start,
-                excludedFamily = CardFamily.RECOGNIZE_VOICE,
+                excludedFamilies = setOf(CardFamily.RECOGNIZE_VOICE),
             ).first { it == null || it.loadState() != SessionCardLoadState.LOADING }
 
             assertEquals(recognitionCard.id, assertNotNull(next).card.id)
@@ -796,12 +796,12 @@ class LearningE2ETest : BaseTest() {
 
             val reviewed = env.app.favoritesQueries.selectCardById(card.card.id).executeAsOne()
             assertEquals(reviewed.due, reviewed.available_after)
-            assertNull(env.session.nextCard("en", start).first())
+            assertNull(env.session.nextCard("en", start, emptySet()).first())
 
             env.clock.advance(again.intervalMillis.toDuration(DurationUnit.MILLISECONDS))
 
             val repeated = assertNotNull(
-                env.session.nextCard("en", env.clock.now())
+                env.session.nextCard("en", env.clock.now(), emptySet())
                     .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
             )
             assertEquals(card.card.id, repeated.card.id)
@@ -1211,11 +1211,11 @@ class LearningE2ETest : BaseTest() {
                 assertEquals(CardState.NEW, delayedCard.state)
                 assertEquals((start + 2.minutes).toEpochMilliseconds(), delayedCard.available_after)
             }
-            assertNull(env.session.nextCard("en", start).first())
+            assertNull(env.session.nextCard("en", start, emptySet()).first())
 
             env.clock.advance(2.minutes)
             val nextCard = assertNotNull(
-                env.session.nextCard("en", start)
+                env.session.nextCard("en", start, emptySet())
                     .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
             )
             assertTrue(nextCard.senseId in expectedSenseIds - firstCard.senseId)
@@ -1247,7 +1247,7 @@ class LearningE2ETest : BaseTest() {
             )
 
             val firstCard = assertNotNull(
-                env.session.nextCard("en", start)
+                env.session.nextCard("en", start, emptySet())
                     .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
             )
             val expectedSenseIds = setOf(firstSense.senseId.toString(), secondSense.senseId.toString())
@@ -1264,11 +1264,11 @@ class LearningE2ETest : BaseTest() {
             val delayedCard = env.app.favoritesQueries.selectCardsByFavorite(delayedSense.senseId, "en")
                 .executeAsOne()
             assertEquals((start + 3.minutes).toEpochMilliseconds(), delayedCard.available_after)
-            assertNull(env.session.nextCard("en", start).first())
+            assertNull(env.session.nextCard("en", start, emptySet()).first())
 
             env.clock.advance(3.minutes)
             val secondCard = assertNotNull(
-                env.session.nextCard("en", start)
+                env.session.nextCard("en", start, emptySet())
                     .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
             )
             assertEquals(setOf(delayedSenseId), setOf(secondCard.senseId))
@@ -1316,6 +1316,7 @@ class LearningE2ETest : BaseTest() {
                 lang_code = "en",
                 now = start.toEpochMilliseconds(),
                 new_state = CardState.NEW,
+                allowed_families = CardFamily.entries,
                 limit = 10,
             ).executeAsList()
             assertEquals(setOf(first.senseId, second.senseId), cards.mapTo(HashSet()) { it.sense_id })
@@ -1341,7 +1342,7 @@ class LearningE2ETest : BaseTest() {
                 availableAfter = (start + 10.minutes).toEpochMilliseconds(),
             )
 
-            assertNull(env.session.nextCard("en", start).first())
+            assertNull(env.session.nextCard("en", start, emptySet()).first())
 
             env.session.continueDelayedCardsNow("en")
 
@@ -1544,7 +1545,7 @@ class LearningE2ETest : BaseTest() {
             env.intake.runIntake("en")
             env.app.favoritesQueries.deleteFavorite(fixture.senseId.toString(), "en")
 
-            assertNull(env.session.nextCard("en", start).first())
+            assertNull(env.session.nextCard("en", start, emptySet()).first())
         }
     }
 
@@ -1761,7 +1762,7 @@ class LearningE2ETest : BaseTest() {
     }
 
     private suspend fun Env.nextLoadedCard(langCode: String) =
-        session.nextCard(langCode, start)
+        session.nextCard(langCode, start, emptySet())
             .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
             .let { card ->
                 assertNotNull(
@@ -1774,6 +1775,7 @@ class LearningE2ETest : BaseTest() {
                                     lang_code = langCode,
                                     new_state = CardState.NEW,
                                     now = clock.now().toEpochMilliseconds(),
+                                    allowed_families = CardFamily.entries,
                                     limit = 10,
                                 )
                                     .executeAsList().size
@@ -1783,6 +1785,7 @@ class LearningE2ETest : BaseTest() {
                                     lang_code = langCode,
                                     now = clock.now().toEpochMilliseconds(),
                                     new_state = CardState.NEW,
+                                    allowed_families = CardFamily.entries,
                                     limit = 10,
                                 )
                                     .executeAsList().size
