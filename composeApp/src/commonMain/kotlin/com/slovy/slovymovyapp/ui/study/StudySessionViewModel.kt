@@ -174,7 +174,7 @@ class StudySessionViewModel(
             isAutoplayEnabled = autoplayEnabled,
         )
         if (autoplayEnabled) {
-            autoplayAudioText(active.card)?.let { playAudio(text = it, logClick = false) }
+            autoplayFrontAudioText(active.card)?.let { playAudio(text = it, logClick = false) }
         }
     }
 
@@ -392,6 +392,9 @@ class StudySessionViewModel(
                 side = StudyCardSide.BACK,
                 ratingOptions = currentOutcomes.toStudyRatings(),
             )
+            if (autoplayEnabled) {
+                autoplayBackAudioText(active.card)?.let { playAudio(text = it, logClick = false) }
+            }
         }
     }
 
@@ -602,11 +605,11 @@ class StudySessionViewModel(
             isAutoplayEnabled = autoplayEnabled,
         )
         if (autoplayEnabled) {
-            autoplayAudioText(uiCard)?.let { playAudio(text = it, logClick = false) }
+            autoplayFrontAudioText(uiCard)?.let { playAudio(text = it, logClick = false) }
         }
     }
 
-    private fun autoplayAudioText(card: StudyCardUiState): String? =
+    private fun autoplayFrontAudioText(card: StudyCardUiState): String? =
         when (card) {
             is StudyCardUiState.Recognition -> card.promptAudioText
             is StudyCardUiState.Listening -> card.promptAudioText
@@ -614,6 +617,11 @@ class StudySessionViewModel(
             is StudyCardUiState.Cloze,
                 -> null
         }
+
+    // For cards whose front side has no audio (Production / Cloze) play the back audio
+    // when the user reveals it, so autoplay always lets the user hear the word.
+    private fun autoplayBackAudioText(card: StudyCardUiState): String? =
+        if (autoplayFrontAudioText(card) != null) null else card.back.audioText
 
     private fun nextSessionCard() =
         sessionService.nextCard(
