@@ -2,8 +2,17 @@ import SwiftUI
 import ComposeApp
 import FirebaseCore
 import FirebaseAnalytics
+import FirebaseAppCheck
 import FirebaseCrashlytics
 import FirebasePerformance
+
+private class SlovyAppCheckProviderFactory: NSObject, AppCheckProviderFactory {
+    // Firebase Console is configured with App Attest as the iOS provider.
+    // Requires the com.apple.developer.devicecheck.appattest-environment entitlement on the target.
+    func createProvider(with app: FirebaseApp) -> AppCheckProvider? {
+        return AppAttestProvider(app: app)
+    }
+}
 
 private class FirebaseAnalyticsLogger: AnalyticsLogger {
     func logEvent(name: String, params: [String: Any]) {
@@ -76,6 +85,11 @@ private class FirebaseCrashlyticsAppLogSink: AppLogSink {
 @main
 struct iOSApp: App {
     init() {
+        #if DEBUG
+        AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
+        #else
+        AppCheck.setAppCheckProviderFactory(SlovyAppCheckProviderFactory())
+        #endif
         FirebaseApp.configure()
         Analytics.shared.logger = FirebaseAnalyticsLogger()
         PerformanceMonitoring.shared.monitor = FirebasePerformanceMonitor()

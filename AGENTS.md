@@ -277,6 +277,54 @@ The app drives study via an FSRS-backed pipeline. Domain types live in `shared` 
   sites stay symbolic; the logger lowercases the enum name when forwarding.
 - `Analytics.setUserProperty` is used for stable per-user dimensions: `ui_lang`, `learning_lang`, `data_version`.
 
+### App Check
+
+Firebase App Check filters non-genuine traffic (bots, scrapers, emulator spam) out of Analytics/Crashlytics/Performance.
+
+- **Android wiring**: `FirebaseAppCheckInstaller.install(isDebug)` in
+  `composeApp/src/androidMain/kotlin/com/slovy/slovymovyapp/analytics/` installs `PlayIntegrityAppCheckProviderFactory`
+  for release and `DebugAppCheckProviderFactory` for debug. Called from `MainActivity.onCreate` **before** the other
+  Firebase wrappers (`Analytics.logger = ...`, etc.) so the first analytics calls already carry a token.
+- **iOS wiring**: `iOSApp.init()` sets `SlovyAppCheckProviderFactory` (returns `AppAttestProvider` for
+  release — matching the Firebase Console provider config) and `AppCheckDebugProviderFactory` for debug
+  builds, **before** `FirebaseApp.configure()`. The `FirebaseAppCheck` SPM product is added under
+  `iosApp.xcodeproj`. iOS deployment target is 14.0, so App Attest is always available at the OS level.
+- **iOS App Attest entitlement (required for release)**: `AppAttestProvider` constructs successfully but
+  fails to mint tokens at runtime unless the target carries the
+  `com.apple.developer.devicecheck.appattest-environment` entitlement. To wire it up:
+    1. Apple Developer portal → Identifiers → your app ID → enable **App Attest** capability.
+    2. Xcode → iosApp target → **Signing & Capabilities** → `+ Capability` → **App Attest**. This creates
+       (or updates) `iosApp/iosApp/iosApp.entitlements` with key
+       `com.apple.developer.devicecheck.appattest-environment` (use `production` for release,
+       `development` for ad-hoc / TestFlight as needed).
+    3. Make sure `CODE_SIGN_ENTITLEMENTS` points at the entitlements file for both Debug and Release in
+       `iosApp.xcodeproj`.
+    4. Regenerate provisioning profiles to include App Attest.
+    5. Firebase Console → App Check → iOS app → confirm the **App Attest** provider is selected (no key
+       upload needed for App Attest — Firebase validates with Apple directly).
+  Without these steps, release iOS clients will be rejected once enforcement is enabled.
+- **Why a wrapper on Android**: the Firebase App Check classes live in `composeApp/androidMain`; `MainActivity` is in
+  the `androidApp` module and can't see them transitively (`implementation` doesn't leak). All Firebase-touching code
+  is wrapped inside composeApp following the same pattern as `FirebaseAnalyticsLogger`, `FirebasePerformanceMonitor`,
+  `FirebaseCrashlyticsAppLogSink`.
+- **Library coordinates** (`gradle/libs.versions.toml`, versions from `firebase-bom`):
+  `firebase-appcheck-playintegrity` (always shipped) + `firebase-appcheck-debug` (always shipped, only instantiated
+  when `BuildConfig.DEBUG`). R8 strips the unused provider class in release.
+- **Debug tokens**: first debug launch on a device logs a UUID via `DebugAppCheckProvider` (Android Logcat) or the
+  Firebase iOS SDK (Xcode console). Each device's UUID must be allowlisted in Firebase Console → App Check → app →
+  ⋮ → Manage debug tokens, or that debug build fails attestation once enforcement is on. Wiping app data rotates the
+  UUID.
+- **SHA-256 fingerprints**: the Firebase Android app needs both the **debug** SHA (from
+  `./gradlew :androidApp:signingReport`, variant `debug`) and the **Play App Signing** SHA (Play Console → Test and
+  release → Setup → App integrity → App signing key certificate). Without these registered under Project Settings →
+  General → Android app → SHA certificate fingerprints, Play Integrity attestation cannot succeed.
+- **Rollout sequence**: enforcement is server-side in Firebase Console. Pre-App-Check releases have no SDK and
+  therefore no token — enforcing too early drops legitimate users on old versions. Sit in unenforced (monitor) mode
+  until App Check → Metrics shows the verified count tracking your active user count (typically 1–2 weeks for Play /
+  App Store updates to propagate), then flip enforcement per product (start with Analytics).
+- **Bot traffic, not enforcement, is the goal**: the "Unverified" delta in monitor-mode metrics is what will be
+  blocked. If that delta is roughly your bot traffic estimate, enforcement is safe.
+
 ### Logging
 
 - `AppLogger` is `expect object` with `debug/info/warn/error(tag, message, throwable)`. Avoid `println` outside tools;

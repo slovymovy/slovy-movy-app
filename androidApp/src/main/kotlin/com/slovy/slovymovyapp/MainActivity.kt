@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.FirebaseAnalyticsLogger
+import com.slovy.slovymovyapp.analytics.FirebaseAppCheckInstaller
 import com.slovy.slovymovyapp.analytics.FirebasePerformanceMonitor
 import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.androidApp.BuildConfig
@@ -23,6 +24,7 @@ class MainActivity : ComponentActivity() {
             enableEdgeToEdge()
         }
         super.onCreate(savedInstanceState)
+        FirebaseAppCheckInstaller.install(isDebug = BuildConfig.DEBUG)
         Analytics.logger = FirebaseAnalyticsLogger()
         PerformanceMonitoring.monitor = FirebasePerformanceMonitor()
         AppLogger.remoteLogger = FirebaseCrashlyticsAppLogSink()

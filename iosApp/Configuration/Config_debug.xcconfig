@@ -1,5 +1,6 @@
 PRODUCT_NAME=SlovyMovy
 PRODUCT_BUNDLE_IDENTIFIER=com.slovy.openwords.debug
+CODE_SIGN_ENTITLEMENTS=iosApp/iosApp.debug.entitlements
 
 #include? "Version.xcconfig"
 
