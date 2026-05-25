@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FBE7E8A92F953E3200533A88 /* FirebasePerformance in Frameworks */ = {isa = PBXBuildFile; productRef = FBE7E8A82F953E3200533A88 /* FirebasePerformance */; };
 		FBE7E8A32F953E3200533A88 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBE7E8A22F953E3200533A88 /* FirebaseAnalytics */; };
 		FBE7E8A52F953E3200533A88 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = FBE7E8A42F953E3200533A88 /* FirebaseAppCheck */; };
 		FBE7E8A72F953E3200533A88 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBE7E8A62F953E3200533A88 /* FirebaseCrashlytics */; };
+		FBE7E8A92F953E3200533A88 /* FirebasePerformance in Frameworks */ = {isa = PBXBuildFile; productRef = FBE7E8A82F953E3200533A88 /* FirebasePerformance */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
