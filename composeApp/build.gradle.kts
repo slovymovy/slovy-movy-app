@@ -80,6 +80,8 @@ kotlin {
             implementation(libs.firebase.analytics)
             implementation(libs.firebase.crashlytics)
             implementation(libs.firebase.perf)
+            implementation(libs.firebase.appcheck.playintegrity)
+            implementation(libs.firebase.appcheck.debug)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
