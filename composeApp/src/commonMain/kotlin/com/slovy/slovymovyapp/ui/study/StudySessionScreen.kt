@@ -951,6 +951,17 @@ private fun StudyOverflowMenuItem(
     val itemModifier = Modifier
         .fillMaxWidth()
         .heightIn(min = 56.dp)
+        .let { base ->
+            if (toggleValue != null) {
+                base.toggleable(
+                    value = toggleValue,
+                    role = role,
+                    onValueChange = { onClick() },
+                )
+            } else {
+                base.clickable(role = role, onClick = onClick)
+            }
+        }
         .padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm)
 
     Row(
@@ -961,17 +972,6 @@ private fun StudyOverflowMenuItem(
         Row(
             modifier = Modifier
                 .weight(1f)
-                .let { base ->
-                    if (toggleValue != null) {
-                        base.toggleable(
-                            value = toggleValue,
-                            role = role,
-                            onValueChange = { onClick() },
-                        )
-                    } else {
-                        base.clickable(role = role, onClick = onClick)
-                    }
-                }
                 .padding(vertical = AppSpacing.xs),
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
             verticalAlignment = Alignment.CenterVertically,
