@@ -401,13 +401,22 @@ class StudySessionViewModel(
     fun revealFirstLetterHint() {
         val active = state as? StudySessionUiState.Active ?: return
         if (active.side != StudyCardSide.FRONT) return
-        val production = active.card as? StudyCardUiState.Production ?: return
-        if (production.firstLetterHint == null || production.firstLetterHintRevealed) return
+        val updatedCard = when (val card = active.card) {
+            is StudyCardUiState.Production -> {
+                if (card.firstLetterHint == null || card.firstLetterHintRevealed) return
+                card.copy(firstLetterHintRevealed = true)
+            }
 
-        state = active.copy(
-            card = production.copy(firstLetterHintRevealed = true),
-        )
-        logHintRevealed(production.id, production.back.headline, hintKind = "first_letter")
+            is StudyCardUiState.Cloze -> {
+                if (card.firstLetterHint == null || card.firstLetterHintRevealed) return
+                card.copy(firstLetterHintRevealed = true)
+            }
+
+            else -> return
+        }
+
+        state = active.copy(card = updatedCard)
+        logHintRevealed(updatedCard.id, updatedCard.back.headline, hintKind = "first_letter")
     }
 
     fun revealTranslationHint() {
