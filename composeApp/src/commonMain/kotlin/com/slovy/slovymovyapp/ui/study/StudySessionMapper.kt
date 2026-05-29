@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
-fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
+fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String> = emptySet()): StudyCardUiState? {
     if (loadState() != SessionCardLoadState.READY) return null
 
     val cardData = wordResult.card ?: return null
@@ -29,6 +29,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
         ?: return null
     val targetLanguage = variant.targetLang?.let(Language::fromCodeOrNull)
     val lemma = cardData.lemma
+    val favoriteLemmaKeys = favoriteLemmas.mapTo(HashSet()) { it.normalizeLemmaKey() }
 
     val studiedSenses = cardData.entries
         .flatMap { it.senses }
@@ -40,6 +41,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
             val senses = studiedSenses.toSourceSenseUiStates(
                 lemma = lemma,
                 targetLanguage = null,
+                favoriteLemmaKeys = favoriteLemmaKeys,
             )
             StudyCardUiState.Recognition(
                 id = card.id.toString(),
@@ -56,6 +58,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     lemma = lemma,
                     sense = sense,
                     targetLanguage = null,
+                    favoriteLemmaKeys = favoriteLemmaKeys,
                 ),
             )
         }
@@ -64,7 +67,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
             val target = targetLanguage ?: return null
             val answer = sense.translationCue(target) ?: return null
             val definition = sense.translationDef(target) ?: return null
-            val senses = studiedSenses.toBilingualSenseUiStates(target)
+            val senses = studiedSenses.toBilingualSenseUiStates(target, favoriteLemmaKeys)
             StudyCardUiState.Recognition(
                 id = card.id.toString(),
                 chipLabel = UiText.Plain("${sourceLanguage.studyCode()} -> ${target.studyCode()}"),
@@ -77,6 +80,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     headline = answer,
                     definition = definition,
                     examples = sense.studyExamples(target),
+                    synonyms = sense.toStudySynonyms(favoriteLemmaKeys),
                     audioText = null,
                 ),
             )
@@ -86,6 +90,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
             val senses = studiedSenses.toSourceSenseUiStates(
                 lemma = lemma,
                 targetLanguage = null,
+                favoriteLemmaKeys = favoriteLemmaKeys,
             )
             StudyCardUiState.Production(
                 id = card.id.toString(),
@@ -103,6 +108,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     lemma = lemma,
                     sense = sense,
                     targetLanguage = null,
+                    favoriteLemmaKeys = favoriteLemmaKeys,
                 ),
             )
         }
@@ -113,6 +119,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
             val senses = studiedSenses.toSourceSenseUiStates(
                 lemma = lemma,
                 targetLanguage = target,
+                favoriteLemmaKeys = favoriteLemmaKeys,
             )
             StudyCardUiState.Production(
                 id = card.id.toString(),
@@ -129,6 +136,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     lemma = lemma,
                     sense = sense,
                     targetLanguage = target,
+                    favoriteLemmaKeys = favoriteLemmaKeys,
                 ),
             )
         }
@@ -141,10 +149,12 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                 sense = sense,
                 targetLanguage = target,
                 cloze = cloze.copy(filled = true),
+                favoriteLemmaKeys = favoriteLemmaKeys,
             )
             val senses = studiedSenses.toSourceSenseUiStates(
                 lemma = lemma,
                 targetLanguage = target,
+                favoriteLemmaKeys = favoriteLemmaKeys,
             ).map { senseUi ->
                 if (senseUi.id == sense.senseId) senseUi.copy(back = activeBack) else senseUi
             }
@@ -178,10 +188,12 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                 sense = sense,
                 targetLanguage = target,
                 examples = backExamples,
+                favoriteLemmaKeys = favoriteLemmaKeys,
             )
             val senses = studiedSenses.toSourceSenseUiStates(
                 lemma = lemma,
                 targetLanguage = target,
+                favoriteLemmaKeys = favoriteLemmaKeys,
             ).map { senseUi ->
                 if (senseUi.id == sense.senseId) senseUi.copy(back = activeBack) else senseUi
             }
@@ -204,6 +216,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
             val senses = studiedSenses.toSourceSenseUiStates(
                 lemma = lemma,
                 targetLanguage = target,
+                favoriteLemmaKeys = favoriteLemmaKeys,
             )
             StudyCardUiState.Listening(
                 id = card.id.toString(),
@@ -215,6 +228,7 @@ fun SessionCard.toStudyCardUiState(): StudyCardUiState? {
                     lemma = lemma,
                     sense = sense,
                     targetLanguage = target,
+                    favoriteLemmaKeys = favoriteLemmaKeys,
                 ),
             )
         }
@@ -249,6 +263,7 @@ private fun sourceBack(
     lemma: String,
     sense: LanguageCardResponseSense,
     targetLanguage: Language?,
+    favoriteLemmaKeys: Set<String>,
     cloze: StudyClozeTextUiState? = null,
 ): StudyCardBackUiState =
     StudyCardBackUiState(
@@ -258,13 +273,15 @@ private fun sourceBack(
         definition = sense.senseDefinition,
         cloze = cloze,
         audioText = lemma,
-        examples = sense.studyExamples(targetLanguage)
+        examples = sense.studyExamples(targetLanguage),
+        synonyms = sense.toStudySynonyms(favoriteLemmaKeys),
     )
 
 private fun sourceClozeBack(
     lemma: String,
     sense: LanguageCardResponseSense,
     targetLanguage: Language?,
+    favoriteLemmaKeys: Set<String>,
     cloze: StudyClozeTextUiState? = null,
     examples: List<StudyExampleUiState> = emptyList(),
 ): StudyCardBackUiState =
@@ -274,6 +291,7 @@ private fun sourceClozeBack(
         secondary = targetLanguage?.let { sense.translationWords(it) },
         definition = sense.senseDefinition,
         examples = examples,
+        synonyms = sense.toStudySynonyms(favoriteLemmaKeys),
         cloze = cloze,
         audioText = lemma,
     )
@@ -295,6 +313,7 @@ private fun LanguageCardResponseSense.translationWords(language: Language): Stri
 
 private fun List<LanguageCardResponseSense>.toBilingualSenseUiStates(
     targetLanguage: Language,
+    favoriteLemmaKeys: Set<String>,
 ): List<StudyCardSenseUiState> =
     mapNotNull { sense ->
         val answer = sense.translationCue(targetLanguage) ?: return@mapNotNull null
@@ -308,6 +327,7 @@ private fun List<LanguageCardResponseSense>.toBilingualSenseUiStates(
                 headline = answer,
                 definition = definition,
                 examples = sense.studyExamples(targetLanguage),
+                synonyms = sense.toStudySynonyms(favoriteLemmaKeys),
                 audioText = null,
             ),
         )
@@ -316,6 +336,7 @@ private fun List<LanguageCardResponseSense>.toBilingualSenseUiStates(
 private fun List<LanguageCardResponseSense>.toSourceSenseUiStates(
     lemma: String,
     targetLanguage: Language?,
+    favoriteLemmaKeys: Set<String>,
 ): List<StudyCardSenseUiState> =
     mapIndexed { index, sense ->
         StudyCardSenseUiState(
@@ -325,9 +346,24 @@ private fun List<LanguageCardResponseSense>.toSourceSenseUiStates(
                 lemma = lemma,
                 sense = sense,
                 targetLanguage = targetLanguage,
+                favoriteLemmaKeys = favoriteLemmaKeys,
             ),
         )
     }
+
+private fun LanguageCardResponseSense.toStudySynonyms(favoriteLemmaKeys: Set<String>): List<StudySynonymUiState> =
+    synonyms
+        .filter { it.isNotBlank() }
+        .distinctBy { it.normalizeLemmaKey() }
+        .map { synonym ->
+            StudySynonymUiState(
+                word = synonym,
+                known = synonym.normalizeLemmaKey() in favoriteLemmaKeys,
+            )
+        }
+        .sortedByDescending { it.known }
+
+private fun String.normalizeLemmaKey(): String = trim().lowercase()
 
 private fun LanguageCardResponseSense.studyExamples(targetLanguage: Language?): List<StudyExampleUiState> {
     val example = examples.randomOrNull() ?: return emptyList()

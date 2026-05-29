@@ -134,6 +134,27 @@ class StudySessionMapperTest {
     }
 
     @Test
+    fun mapsSynonymsWithLibraryAwareness() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.WORD_TO_TRANSLATION, targetLang = Language.ENGLISH.code),
+            synonyms = listOf("knus", "aangenaam", "prettig"),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Recognition>(
+            sessionCard.toStudyCardUiState(favoriteLemmas = setOf("Knus", "prettig")),
+        )
+
+        assertEquals(
+            listOf(
+                StudySynonymUiState("knus", known = true),
+                StudySynonymUiState("prettig", known = true),
+                StudySynonymUiState("aangenaam", known = false),
+            ),
+            mapped.back.synonyms,
+        )
+    }
+
+    @Test
     fun listeningCardPopulatesStudiedSenses() {
         val studiedSenseId = "00000000-0000-0000-0000-000000000101"
         val otherSenseId = "00000000-0000-0000-0000-000000000102"
@@ -311,6 +332,7 @@ class StudySessionMapperTest {
         example: ExamplePair? = null,
         studiedSenseIds: Set<String> = emptySet(),
         extraSenses: List<LanguageCardResponseSense> = emptyList(),
+        synonyms: List<String> = emptyList(),
     ): SessionCard {
         return SessionCard(
             card = Card(
@@ -334,7 +356,7 @@ class StudySessionMapperTest {
                 ),
             ),
             variant = variant,
-            wordResult = WordResult(card = languageCard(extraSenses)),
+            wordResult = WordResult(card = languageCard(extraSenses, synonyms)),
             senseId = PrimarySenseId,
             example = example,
             studiedSenseIds = studiedSenseIds,
@@ -343,6 +365,7 @@ class StudySessionMapperTest {
 
     private fun languageCard(
         extraSenses: List<LanguageCardResponseSense>,
+        synonyms: List<String>,
     ): LanguageCard =
         LanguageCard(
             lemma = "gezellig",
@@ -365,6 +388,7 @@ class StudySessionMapperTest {
                                 ),
                             ),
                             targetLangDefinitions = mapOf(Language.ENGLISH to "a feeling of warmth"),
+                            synonyms = synonyms,
                             translations = mapOf(
                                 Language.ENGLISH to listOf(
                                     LanguageCardTranslation(targetLangWord = "cosy"),

@@ -76,6 +76,7 @@ class StudySessionViewModel(
     private var pendingRemovalFavorite: Favorite? = null
     private var isPreparingRemoval: Boolean = false
     private var postponeListeningCardsForSession: Boolean = false
+    private var favoriteLemmaCache: Set<String>? = null
     private val snackbarMutex = Mutex()
 
     init {
@@ -325,7 +326,7 @@ class StudySessionViewModel(
                 AnalyticsEvent.FAVORITES_REMOVE,
                 mapOf("lang" to favorite.language.code, "source" to "study"),
             )
-            onFavoriteChanged(favorite.language)
+            notifyFavoriteChanged(favorite.language)
             skippedCount += 1
             currentCard = null
             currentOutcomes = emptyList()
@@ -352,7 +353,7 @@ class StudySessionViewModel(
                 AnalyticsEvent.FAVORITES_SAVE,
                 mapOf("lang" to favorite.language.code, "source" to "study_undo"),
             )
-            onFavoriteChanged(favorite.language)
+            notifyFavoriteChanged(favorite.language)
             skippedCount = (skippedCount - 1).coerceAtLeast(0)
             val activeAfterUndo = state as? StudySessionUiState.Active
             if (activeAfterUndo == null || currentCard == null) {
@@ -586,7 +587,7 @@ class StudySessionViewModel(
 
     private suspend fun showLoadedCard(sessionCard: SessionCard) {
         currentCard = sessionCard
-        val uiCard = sessionCard.toStudyCardUiState()
+        val uiCard = sessionCard.toStudyCardUiState(loadFavoriteLemmas())
         if (uiCard == null) {
             state = StudySessionUiState.Error(
                 message = UiText.Resource(Res.string.study_error_card_data_missing),
@@ -607,6 +608,24 @@ class StudySessionViewModel(
         if (autoplayEnabled) {
             autoplayFrontAudioText(uiCard)?.let { playAudio(text = it, logClick = false) }
         }
+    }
+
+    private suspend fun loadFavoriteLemmas(): Set<String> {
+        val lang = language ?: return emptySet()
+        favoriteLemmaCache?.let { return it }
+        return try {
+            favoritesRepository.getDistinctLemmasByLang(lang).also { favoriteLemmaCache = it }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to load favorite lemmas for study synonyms lang=$langCode", e)
+            emptySet()
+        }
+    }
+
+    private fun notifyFavoriteChanged(lang: Language) {
+        if (lang == language) favoriteLemmaCache = null
+        onFavoriteChanged(lang)
     }
 
     private fun autoplayFrontAudioText(card: StudyCardUiState): String? =

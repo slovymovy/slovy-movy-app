@@ -31,13 +31,16 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material.icons.Icons
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.Refresh
@@ -85,11 +88,14 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -161,6 +167,7 @@ import slovymovyapp.composeapp.generated.resources.study_rating_hard
 import slovymovyapp.composeapp.generated.resources.study_rating_prompt
 import slovymovyapp.composeapp.generated.resources.study_tap_to_check
 import slovymovyapp.composeapp.generated.resources.study_tap_to_flip
+import slovymovyapp.composeapp.generated.resources.word_details_synonyms
 
 private val MultiSenseFrontHintTopSpacing = 20.dp
 
@@ -1657,6 +1664,89 @@ private fun StudyCardBackContent(
         back.examples.forEach { example ->
             StudyExampleBlock(example = example)
         }
+
+        StudySynonymsRow(synonyms = back.synonyms)
+    }
+}
+
+@Composable
+private fun StudySynonymsRow(
+    synonyms: List<StudySynonymUiState>,
+    modifier: Modifier = Modifier,
+) {
+    if (synonyms.isEmpty()) return
+
+    val knownColor = MaterialTheme.colorScheme.onSurface
+    val unknownColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val commaColor = unknownColor.copy(alpha = 0.7f)
+    val heartColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+    val inlineContent = remember(synonyms, heartColor) {
+        synonyms.mapIndexedNotNull { index, synonym ->
+            if (!synonym.known) return@mapIndexedNotNull null
+            val id = "known_synonym_$index"
+            id to InlineTextContent(
+                placeholder = Placeholder(
+                    width = 11.sp,
+                    height = 8.sp,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline,
+                ),
+            ) {
+                Box(
+                    modifier = Modifier.width(11.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Favorite,
+                        contentDescription = null,
+                        modifier = Modifier.size(width = 9.dp, height = 8.dp),
+                        tint = heartColor,
+                    )
+                }
+            }
+        }.toMap()
+    }
+    val text = remember(synonyms, knownColor, unknownColor, commaColor) {
+        buildAnnotatedString {
+            synonyms.forEachIndexed { index, synonym ->
+                if (index > 0) {
+                    withStyle(SpanStyle(color = commaColor)) {
+                        append(", ")
+                    }
+                }
+                if (synonym.known) {
+                    appendInlineContent(id = "known_synonym_$index", alternateText = "\u200B")
+                }
+                withStyle(SpanStyle(color = if (synonym.known) knownColor else unknownColor)) {
+                    append(synonym.word)
+                }
+            }
+        }
+    }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(
+            text = stringResource(Res.string.word_details_synonyms).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.8.sp,
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+        )
+        Text(
+            text = text,
+            inlineContent = inlineContent,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontFamily = MaterialTheme.serifFontFamily,
+                fontStyle = FontStyle.Italic,
+                fontSize = 14.5.sp,
+                lineHeight = 21.75.sp,
+                color = unknownColor,
+            ),
+        )
     }
 }
 
@@ -2238,6 +2328,11 @@ private fun recognitionCard() = StudyCardUiState.Recognition(
                 text = "Het was zo <w>gezellig</w> bij jullie thuis.",
                 translation = "It was so lovely at your place.",
             ),
+        ),
+        synonyms = listOf(
+            StudySynonymUiState("knus", known = true),
+            StudySynonymUiState("aangenaam"),
+            StudySynonymUiState("prettig", known = true),
         ),
         audioText = null,
     ),
