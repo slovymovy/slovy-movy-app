@@ -156,6 +156,16 @@
     <string name="language_setup_choose_learning_first">Kies eerst een leertaal</string>
     <string name="language_setup_step_completed">Stap %1$d voltooid</string>
     <string name="language_setup_update_anytime">Altijd aan te passen via Instellingen</string>
+    <string name="language_setup_no_translation_title">Geen vertaling nodig</string>
+    <string name="language_setup_no_translation_subtitle">Houd alles in de taal die je leert</string>
+    <string name="language_setup_no_translation_accessibility">Geen vertaling nodig. Houd alles in de taal die je leert. Als je dit selecteert, worden gekozen vertaaltalen gewist.</string>
+    <string name="language_setup_request_language_before">Taal niet gevonden?</string>
+    <string name="language_setup_request_language_link">Laat het ons weten</string>
+    <string name="language_setup_request_language_after">, dan voegen we deze toe.</string>
+    <string name="language_setup_request_language_title">Taal aanvragen</string>
+    <string name="language_setup_request_language_placeholder">Welke taal wil je toevoegen?</string>
+    <string name="language_setup_request_language_sent_title">Verzoek verzonden</string>
+    <string name="language_setup_request_language_sent_message">Bedankt! We hebben je taalverzoek ontvangen. Je kunt de voortgang op GitHub volgen.</string>
 
     <string name="settings_title">Instellingen</string>
     <string name="settings_section_languages_i_learn">Talen die ik leer</string>
@@ -217,9 +227,7 @@
     <string name="common_status_online_only">Alleen online</string>
 
     <string name="feedback_dialog_sent_title">Feedback verzonden</string>
-    <string name="feedback_dialog_sent_message">Bedankt! We hebben een tracking-issue voor je feedback aangemaakt. Je
-        kunt de voortgang op GitHub volgen.
-    </string>
+    <string name="feedback_dialog_sent_message">Bedankt! We hebben je feedback ontvangen. Je kunt de voortgang op GitHub volgen.</string>
     <string name="feedback_dialog_track_on_github">Volg op GitHub</string>
     <string name="feedback_dialog_comment_label">Opmerking</string>
     <string name="feedback_dialog_email_label">E-mail (optioneel)</string>

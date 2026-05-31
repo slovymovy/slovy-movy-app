@@ -156,6 +156,16 @@
     <string name="language_setup_choose_learning_first">Сначала выберите язык изучения</string>
     <string name="language_setup_step_completed">Шаг %1$d выполнен</string>
     <string name="language_setup_update_anytime">Это всегда можно изменить в настройках</string>
+    <string name="language_setup_no_translation_title">Перевод не нужен</string>
+    <string name="language_setup_no_translation_subtitle">Оставить всё на изучаемом языке</string>
+    <string name="language_setup_no_translation_accessibility">Перевод не нужен. Всё останется на изучаемом языке. При выборе этого пункта выбранные языки перевода будут очищены.</string>
+    <string name="language_setup_request_language_before">Не нашли свой язык?</string>
+    <string name="language_setup_request_language_link">Напишите нам</string>
+    <string name="language_setup_request_language_after">, и мы его добавим.</string>
+    <string name="language_setup_request_language_title">Запросить язык</string>
+    <string name="language_setup_request_language_placeholder">Какой язык вы хотите добавить?</string>
+    <string name="language_setup_request_language_sent_title">Запрос отправлен</string>
+    <string name="language_setup_request_language_sent_message">Спасибо! Мы получили ваш запрос на добавление языка. За прогрессом можно следить на GitHub.</string>
 
     <string name="settings_title">Настройки</string>
     <string name="settings_section_languages_i_learn">Я учу</string>
@@ -217,9 +227,7 @@
     <string name="common_status_online_only">Только онлайн</string>
 
     <string name="feedback_dialog_sent_title">Отзыв отправлен!</string>
-    <string name="feedback_dialog_sent_message">Спасибо! Мы создали задачу на GitHub на основе вашего отзыва. Там можно
-        будет следить за прогрессом.
-    </string>
+    <string name="feedback_dialog_sent_message">Спасибо! Мы получили ваш отзыв. За прогрессом можно следить на GitHub.</string>
     <string name="feedback_dialog_track_on_github">Следить на GitHub</string>
     <string name="feedback_dialog_comment_label">Ваш комментарий</string>
     <string name="feedback_dialog_email_label">Email (необязательно)</string>

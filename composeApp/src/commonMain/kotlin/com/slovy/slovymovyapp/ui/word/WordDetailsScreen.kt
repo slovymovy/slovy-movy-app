@@ -1076,6 +1076,7 @@ fun WordDetailScreenContent(
         com.slovy.slovymovyapp.ui.FeedbackDialog(
             title = stringResource(Res.string.word_details_feedback_title),
             commentPlaceholder = stringResource(Res.string.word_details_feedback_placeholder),
+            commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
             comment = state.feedbackComment,
             email = state.feedbackEmail,
             isSending = state.feedbackSubmitting,

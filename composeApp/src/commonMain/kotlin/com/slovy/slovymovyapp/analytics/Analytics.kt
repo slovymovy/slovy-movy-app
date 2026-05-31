@@ -40,7 +40,8 @@ enum class AnalyticsEvent {
     DATA_VERSION_MISMATCH,
     TTS_PLAY_FAILED,
     SETTING_CHANGED,
-    REVIEW_APP_CLICK
+    REVIEW_APP_CLICK,
+    LANGUAGE_REQUEST_OPEN
 }
 
 expect object Analytics {
