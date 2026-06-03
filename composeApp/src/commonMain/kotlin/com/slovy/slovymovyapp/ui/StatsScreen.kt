@@ -7,13 +7,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -22,8 +22,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -65,9 +67,12 @@ data class StatsUiState(
     val viewMonth: StatsYearMonth,
     val isLoading: Boolean,
     val streakDays: Int,
+    val activeDaysTotal: Int,
     val practiceLog: Set<StatsPracticeDay>,
     val reviewsToday: Int,
     val reviewsWeek: Int,
+    val minutesToday: Int,
+    val minutesWeek: Int,
     val wordsTotal: Int,
     val pipeline: List<StatsPipelineStage>,
     val delayedDueLemmaCount: Int = 0,
@@ -149,7 +154,6 @@ class StatsViewModel(
         val todayMonth = StatsYearMonth(state.today.year, state.today.month.ordinal)
         if (next.year > todayMonth.year || (next.year == todayMonth.year && next.monthZeroBased > todayMonth.monthZeroBased)) return
         state = state.copy(viewMonth = next)
-        scheduleReload()
     }
 
     fun refresh() {
@@ -160,13 +164,12 @@ class StatsViewModel(
         if (!savedStatsLanguageLoaded) return
         val today = currentLocalDate(clock)
         val langCode = state.selectedLanguage.code
-        val viewMonth = state.viewMonth
         val requestId = ++reloadRequestId
         state = state.copy(today = today, isLoading = true)
         viewModelScope.launch {
             runCatching {
                 withContext(Dispatchers.Default) {
-                    statsService.statsScreenData(langCode, viewMonth, today)
+                    statsService.statsScreenData(langCode, today)
                 }
             }.onSuccess { data ->
                 if (!isCurrentReload(requestId)) return@launch
@@ -174,9 +177,12 @@ class StatsViewModel(
                     today = today,
                     isLoading = false,
                     streakDays = data.streakDays,
+                    activeDaysTotal = data.activeDaysTotal,
                     practiceLog = data.practiceLog,
                     reviewsToday = data.reviewsToday,
                     reviewsWeek = data.reviewsWeek,
+                    minutesToday = data.minutesToday,
+                    minutesWeek = data.minutesWeek,
                     wordsTotal = data.wordsTotal,
                     pipeline = data.pipeline,
                     delayedDueLemmaCount = data.delayedDueLemmaCount,
@@ -228,8 +234,11 @@ fun StatsScreen(
             mapOf(
                 "lang" to loaded.selectedLanguage.code,
                 "streak_days" to loaded.streakDays.toLong(),
+                "active_days_total" to loaded.activeDaysTotal.toLong(),
                 "reviews_today" to loaded.reviewsToday.toLong(),
                 "reviews_week" to loaded.reviewsWeek.toLong(),
+                "minutes_today" to loaded.minutesToday.toLong(),
+                "minutes_week" to loaded.minutesWeek.toLong(),
                 "words_total" to loaded.wordsTotal.toLong(),
                 "senses_total" to loaded.sensesTotal.toLong(),
                 "delayed_due_lemma_count" to loaded.delayedDueLemmaCount.toLong(),
@@ -297,23 +306,8 @@ fun StatsScreenContent(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 StreakCard(state = state, onStepMonth = onStepMonth)
-                SectionHeader(text = stringResource(Res.string.stats_reviews_section))
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatCell(
-                        value = state.reviewsToday,
-                        unit = pluralStringResource(Res.plurals.stats_cards_unit, state.reviewsToday),
-                        label = stringResource(Res.string.stats_today_label),
-                        isLoading = state.isLoading,
-                        modifier = Modifier.weight(1f),
-                    )
-                    StatCell(
-                        value = state.reviewsWeek,
-                        unit = pluralStringResource(Res.plurals.stats_cards_unit, state.reviewsWeek),
-                        label = stringResource(Res.string.stats_this_week_label),
-                        isLoading = state.isLoading,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+                SectionHeader(text = stringResource(Res.string.stats_effort_section))
+                EffortCard(state = state)
                 SectionHeader(text = stringResource(Res.string.stats_library_section))
                 LibraryCard(state = state)
             }
@@ -435,13 +429,10 @@ private fun StreakCard(
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row(
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
                     CountText(
                         text = formatCount(state.streakDays, state.isLoading),
                         style = MaterialTheme.typography.displaySmall.copy(
@@ -458,19 +449,39 @@ private fun StreakCard(
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontFamily = MaterialTheme.serifFontFamily,
                             fontStyle = FontStyle.Italic,
-                            fontSize = 13.sp,
+                            fontSize = 12.5.sp,
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 2.dp),
                     )
                 }
-                MonthStepper(
-                    viewMonth = state.viewMonth,
-                    today = state.today,
-                    onStepMonth = onStepMonth,
-                )
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(1.dp),
+                ) {
+                    CountText(
+                        text = formatCount(state.activeDaysTotal, state.isLoading),
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = MaterialTheme.serifFontFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 27.sp,
+                            lineHeight = 25.sp,
+                            letterSpacing = (-0.5).sp,
+                        ),
+                        color = loadingAwareContentColor(state.isLoading),
+                    )
+                    Text(
+                        text = stringResource(Res.string.stats_active_days_all_time),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontFamily = MaterialTheme.serifFontFamily,
+                            fontStyle = FontStyle.Italic,
+                            fontSize = 12.5.sp,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.End,
+                    )
+                }
             }
-            CalendarGrid(state = state)
+            CalendarGrid(state = state, onStepMonth = onStepMonth)
         }
     }
 }
@@ -482,10 +493,24 @@ private fun MonthStepper(
     onStepMonth: (Int) -> Unit,
 ) {
     val atCurrentMonth = viewMonth.year == today.year && viewMonth.monthZeroBased == today.month.ordinal
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    val monthLabelStyle = MaterialTheme.typography.bodySmall.copy(
+        fontWeight = FontWeight.Medium,
+        fontSize = 13.5.sp,
+        letterSpacing = 0.1.sp,
+    )
+    val monthLabels = statsMonthLabels(viewMonth.year)
+    val monthLabelWidth = rememberMonthLabelWidth(
+        labels = monthLabels,
+        style = monthLabelStyle,
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+    ) {
         IconButton(
             onClick = { onStepMonth(-1) },
-            modifier = Modifier.size(26.dp),
+            modifier = Modifier.size(28.dp),
         ) {
             Text(
                 text = "‹",
@@ -494,36 +519,66 @@ private fun MonthStepper(
             )
         }
         Text(
-            text = "${statsMonthName(viewMonth.monthZeroBased)} ${viewMonth.year}",
-            style = MaterialTheme.typography.bodySmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 12.5.sp,
-                letterSpacing = 0.1.sp,
-            ),
+            text = monthLabels[viewMonth.monthZeroBased],
+            style = monthLabelStyle,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
-            modifier = Modifier.width(94.dp),
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.width(monthLabelWidth),
         )
-        IconButton(
-            onClick = { onStepMonth(1) },
-            enabled = !atCurrentMonth,
-            modifier = Modifier.size(26.dp),
-        ) {
-            Text(
-                text = "›",
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (atCurrentMonth) {
-                    MaterialTheme.colorScheme.outlineVariant
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-            )
+        if (atCurrentMonth) {
+            Spacer(Modifier.size(28.dp))
+        } else {
+            IconButton(
+                onClick = { onStepMonth(1) },
+                modifier = Modifier.size(28.dp),
+            ) {
+                Text(
+                    text = "›",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun CalendarGrid(state: StatsUiState) {
+private fun statsMonthLabels(year: Int): List<String> = listOf(
+    "${stringResource(Res.string.stats_month_january)} $year",
+    "${stringResource(Res.string.stats_month_february)} $year",
+    "${stringResource(Res.string.stats_month_march)} $year",
+    "${stringResource(Res.string.stats_month_april)} $year",
+    "${stringResource(Res.string.stats_month_may)} $year",
+    "${stringResource(Res.string.stats_month_june)} $year",
+    "${stringResource(Res.string.stats_month_july)} $year",
+    "${stringResource(Res.string.stats_month_august)} $year",
+    "${stringResource(Res.string.stats_month_september)} $year",
+    "${stringResource(Res.string.stats_month_october)} $year",
+    "${stringResource(Res.string.stats_month_november)} $year",
+    "${stringResource(Res.string.stats_month_december)} $year",
+)
+
+@Composable
+private fun rememberMonthLabelWidth(labels: List<String>, style: TextStyle): Dp {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    return remember(labels, style, density.density, density.fontScale, textMeasurer) {
+        measuredLabelWidth(
+            labels = labels,
+            style = style,
+            textMeasurer = textMeasurer,
+            density = density,
+        ).plus(4.dp).coerceIn(94.dp, 180.dp)
+    }
+}
+
+@Composable
+private fun CalendarGrid(
+    state: StatsUiState,
+    onStepMonth: (Int) -> Unit,
+) {
     val cells = calendarCells(state.viewMonth)
     val weekdays = listOf(
         stringResource(Res.string.stats_weekday_initial_monday),
@@ -544,6 +599,11 @@ private fun CalendarGrid(state: StatsUiState) {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+            MonthStepper(
+                viewMonth = state.viewMonth,
+                today = state.today,
+                onStepMonth = onStepMonth,
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 weekdays.forEach { day ->
                     Text(
@@ -720,58 +780,268 @@ private fun SectionHeader(text: String) {
 }
 
 @Composable
-private fun StatCell(
-    value: Int,
-    unit: String,
-    label: String,
-    isLoading: Boolean,
-    modifier: Modifier = Modifier,
-) {
+private fun EffortCard(state: StatsUiState) {
+    val todayCardsUnit = pluralStringResource(Res.plurals.stats_cards_unit, state.reviewsToday)
+    val weekCardsUnit = pluralStringResource(Res.plurals.stats_cards_unit, state.reviewsWeek)
+    val representativeCards = 1_000
+    val representativeMinutes = 5 * 60 + 53
+    val rowLayout = rememberEffortRowLayout(
+        cardsCounts = listOf(
+            formatCount(state.reviewsToday, state.isLoading),
+            formatCount(state.reviewsWeek, state.isLoading),
+            formatCount(representativeCards, isLoading = false),
+        ),
+        cardsUnits = listOf(
+            todayCardsUnit,
+            weekCardsUnit,
+            pluralStringResource(Res.plurals.stats_cards_unit, representativeCards),
+        ),
+        durations = listOf(
+            durationPlainText(state.minutesToday, state.isLoading),
+            durationPlainText(state.minutesWeek, state.isLoading),
+            durationPlainText(representativeMinutes, isLoading = false),
+        ),
+    )
     StatsCard(
-        modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         padding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                CountText(
-                    text = formatCount(value, isLoading),
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontFamily = MaterialTheme.serifFontFamily,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 32.sp,
-                        lineHeight = 32.sp,
-                        letterSpacing = (-0.5).sp,
-                    ),
-                    color = loadingAwareContentColor(isLoading),
-                )
-                Text(
-                    text = unit,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontFamily = MaterialTheme.serifFontFamily,
-                        fontStyle = FontStyle.Italic,
-                        fontSize = 13.sp,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 2.dp),
-                )
-            }
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontFamily = MaterialTheme.serifFontFamily,
-                    fontStyle = FontStyle.Italic,
-                    fontSize = 12.5.sp,
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(13.dp),
+        ) {
+            EffortRow(
+                label = stringResource(Res.string.stats_today_label),
+                cards = state.reviewsToday,
+                cardsUnit = todayCardsUnit,
+                minutes = state.minutesToday,
+                isLoading = state.isLoading,
+                layout = rowLayout,
+            )
+            EffortRow(
+                label = stringResource(Res.string.stats_this_week_label),
+                cards = state.reviewsWeek,
+                cardsUnit = weekCardsUnit,
+                minutes = state.minutesWeek,
+                isLoading = state.isLoading,
+                layout = rowLayout,
             )
         }
     }
 }
 
+@Composable
+private fun EffortRow(
+    label: String,
+    cards: Int,
+    cardsUnit: String,
+    minutes: Int,
+    isLoading: Boolean,
+    layout: EffortRowLayout,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontFamily = MaterialTheme.serifFontFamily,
+                fontStyle = FontStyle.Italic,
+                fontSize = 13.5.sp,
+                lineHeight = 18.sp,
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 12.dp),
+        )
+        CountText(
+            text = formatCount(cards, isLoading),
+            style = effortNumberTextStyle(),
+            color = loadingAwareContentColor(isLoading),
+            textAlign = TextAlign.End,
+            modifier = Modifier.width(layout.cardsNumberWidth),
+        )
+        Text(
+            text = cardsUnit,
+            style = effortUnitTextStyle(),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier
+                .width(layout.cardsUnitWidth)
+                .padding(start = 4.dp),
+        )
+        Text(
+            text = "·",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 14.sp,
+                lineHeight = 18.sp,
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(24.dp),
+        )
+        DurationText(
+            minutes = minutes,
+            isLoading = isLoading,
+            modifier = Modifier.width(layout.durationWidth),
+        )
+    }
+}
+
+private data class EffortRowLayout(
+    val cardsNumberWidth: Dp,
+    val cardsUnitWidth: Dp,
+    val durationWidth: Dp,
+)
+
+@Composable
+private fun rememberEffortRowLayout(
+    cardsCounts: List<String>,
+    cardsUnits: List<String>,
+    durations: List<String>,
+): EffortRowLayout {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val numberStyle = effortNumberTextStyle()
+    val unitStyle = effortUnitTextStyle()
+    return remember(
+        cardsCounts,
+        cardsUnits,
+        durations,
+        numberStyle,
+        unitStyle,
+        density.density,
+        density.fontScale,
+        textMeasurer,
+    ) {
+        val cardsNumberWidth = measuredLabelWidth(
+            labels = cardsCounts,
+            style = numberStyle,
+            textMeasurer = textMeasurer,
+            density = density,
+        ).plus(2.dp).coerceIn(38.dp, 64.dp)
+        val cardsUnitWidth = measuredLabelWidth(
+            labels = cardsUnits,
+            style = unitStyle,
+            textMeasurer = textMeasurer,
+            density = density,
+        ).plus(8.dp).coerceIn(43.dp, 84.dp)
+        val durationWidth = measuredLabelWidth(
+            labels = durations,
+            style = numberStyle,
+            textMeasurer = textMeasurer,
+            density = density,
+        ).plus(4.dp).coerceIn(54.dp, 108.dp)
+        EffortRowLayout(
+            cardsNumberWidth = cardsNumberWidth,
+            cardsUnitWidth = cardsUnitWidth,
+            durationWidth = durationWidth,
+        )
+    }
+}
+
+@Composable
+private fun effortNumberTextStyle(): TextStyle =
+    MaterialTheme.typography.bodyMedium.copy(
+        fontFamily = MaterialTheme.serifFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 18.sp,
+        lineHeight = 18.sp,
+        letterSpacing = (-0.3).sp,
+    )
+
+@Composable
+private fun effortUnitTextStyle(): TextStyle =
+    MaterialTheme.typography.bodySmall.copy(
+        fontFamily = MaterialTheme.serifFontFamily,
+        fontStyle = FontStyle.Italic,
+        fontSize = 12.5.sp,
+        lineHeight = 16.sp,
+    )
+
+@Composable
+private fun DurationText(
+    minutes: Int,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val numberColor = loadingAwareContentColor(isLoading)
+    val unitColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val parts = durationParts(minutes, isLoading)
+    val unitStyle = SpanStyle(
+        fontFamily = MaterialTheme.serifFontFamily,
+        fontStyle = FontStyle.Italic,
+        fontSize = 12.5.sp,
+        color = unitColor,
+    )
+    val text = buildAnnotatedString {
+        if (parts.isEmpty()) {
+            append("--")
+            return@buildAnnotatedString
+        }
+        parts.forEachIndexed { index, part ->
+            if (index > 0) append(" ")
+            appendDurationPart(part, unitStyle)
+        }
+    }
+    Text(
+        text = text,
+        style = effortNumberTextStyle(),
+        color = numberColor,
+        textAlign = TextAlign.End,
+        maxLines = 1,
+        softWrap = false,
+        modifier = modifier,
+    )
+}
+
+private data class DurationPart(
+    val value: Int,
+    val unit: String,
+)
+
+@Composable
+private fun durationParts(minutes: Int, isLoading: Boolean): List<DurationPart> {
+    if (isLoading) return emptyList()
+    val minuteUnit = stringResource(Res.string.stats_duration_minutes_unit)
+    val hourUnit = stringResource(Res.string.stats_duration_hours_unit)
+    val hours = minutes / 60
+    val remainder = minutes % 60
+    return when {
+        hours <= 0 -> listOf(DurationPart(minutes, minuteUnit))
+        remainder == 0 -> listOf(DurationPart(hours, hourUnit))
+        else -> listOf(
+            DurationPart(hours, hourUnit),
+            DurationPart(remainder, minuteUnit),
+        )
+    }
+}
+
+@Composable
+private fun durationPlainText(minutes: Int, isLoading: Boolean): String {
+    val parts = durationParts(minutes, isLoading)
+    return if (parts.isEmpty()) {
+        "--"
+    } else {
+        parts.joinToString(" ") { "${it.value} ${it.unit}" }
+    }
+}
+
+private fun androidx.compose.ui.text.AnnotatedString.Builder.appendDurationPart(
+    part: DurationPart,
+    unitStyle: SpanStyle,
+) {
+    append(part.value.toString())
+    append(" ")
+    withStyle(unitStyle) {
+        append(part.unit)
+    }
+}
 @Composable
 private fun LibraryCard(state: StatsUiState) {
     StatsCard(
@@ -846,6 +1116,7 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
         36.dp
     }
     val rows = pipeline.map { stage -> stage to stageLabel(stage.id).uppercase() }
+    val labelLayout = rememberPipelineLabelLayout(rows.map { (_, label) -> label })
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         rows.forEach { (stage, label) ->
             val pct = if (isLoading) {
@@ -872,7 +1143,7 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                PipelineStageLabel(label)
+                PipelineStageLabel(label = label, layout = labelLayout)
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -907,23 +1178,87 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
 }
 
 @Composable
-private fun PipelineStageLabel(label: String) {
+private fun PipelineStageLabel(label: String, layout: PipelineLabelLayout) {
     Text(
         text = label,
-        style = MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 0.4.sp,
-        ),
+        style = layout.style,
         color = MaterialTheme.colorScheme.onSurface,
         maxLines = 1,
         softWrap = false,
-        autoSize = TextAutoSize.StepBased(
-            minFontSize = 9.sp,
-            maxFontSize = 11.sp,
-            stepSize = 0.2.sp,
-        ),
-        modifier = Modifier.width(72.dp),
+        modifier = Modifier.width(layout.width),
     )
+}
+
+private data class PipelineLabelLayout(
+    val style: TextStyle,
+    val width: Dp,
+)
+
+@Composable
+private fun rememberPipelineLabelLayout(labels: List<String>): PipelineLabelLayout {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val baseLabelStyle = pipelineLabelTextStyle(11.sp)
+    val compactLabelStyle = pipelineLabelTextStyle(10.sp)
+    val minLabelWidth = 72.dp
+    val maxLabelWidth = 104.dp
+    val labelPadding = 2.dp
+    return remember(
+        labels,
+        baseLabelStyle,
+        compactLabelStyle,
+        density.density,
+        density.fontScale,
+        textMeasurer,
+    ) {
+        val baseRequiredWidth = measuredLabelWidth(
+            labels = labels,
+            style = baseLabelStyle,
+            textMeasurer = textMeasurer,
+            density = density,
+        ) + labelPadding
+        val labelStyle = if (baseRequiredWidth > maxLabelWidth) compactLabelStyle else baseLabelStyle
+        val measuredWidth = if (labelStyle == baseLabelStyle) {
+            baseRequiredWidth
+        } else {
+            measuredLabelWidth(
+                labels = labels,
+                style = labelStyle,
+                textMeasurer = textMeasurer,
+                density = density,
+            ) + labelPadding
+        }
+        PipelineLabelLayout(
+            style = labelStyle,
+            width = measuredWidth.coerceIn(minLabelWidth, maxLabelWidth),
+        )
+    }
+}
+
+@Composable
+private fun pipelineLabelTextStyle(fontSize: androidx.compose.ui.unit.TextUnit): TextStyle =
+    MaterialTheme.typography.labelSmall.copy(
+        fontWeight = FontWeight.Bold,
+        fontSize = fontSize,
+        lineHeight = 13.sp,
+        letterSpacing = 0.4.sp,
+    )
+
+private fun measuredLabelWidth(
+    labels: List<String>,
+    style: TextStyle,
+    textMeasurer: androidx.compose.ui.text.TextMeasurer,
+    density: androidx.compose.ui.unit.Density,
+): Dp {
+    val maxWidthPx = labels.maxOfOrNull { label ->
+        textMeasurer.measure(
+            text = label,
+            style = style,
+            maxLines = 1,
+            softWrap = false,
+        ).size.width
+    } ?: 0
+    return with(density) { maxWidthPx.toDp() }
 }
 
 @Composable
@@ -1014,22 +1349,6 @@ private fun StatsCard(
 }
 
 @Composable
-private fun statsMonthName(month: Int): String = when (month) {
-    0 -> stringResource(Res.string.stats_month_january)
-    1 -> stringResource(Res.string.stats_month_february)
-    2 -> stringResource(Res.string.stats_month_march)
-    3 -> stringResource(Res.string.stats_month_april)
-    4 -> stringResource(Res.string.stats_month_may)
-    5 -> stringResource(Res.string.stats_month_june)
-    6 -> stringResource(Res.string.stats_month_july)
-    7 -> stringResource(Res.string.stats_month_august)
-    8 -> stringResource(Res.string.stats_month_september)
-    9 -> stringResource(Res.string.stats_month_october)
-    10 -> stringResource(Res.string.stats_month_november)
-    else -> stringResource(Res.string.stats_month_december)
-}
-
-@Composable
 private fun stageLabel(stage: StatsPipelineStageId): String = when (stage) {
     StatsPipelineStageId.QUEUE -> stringResource(Res.string.stats_stage_queue)
     StatsPipelineStageId.NEW -> stringResource(Res.string.stats_stage_new)
@@ -1101,9 +1420,12 @@ private fun initialStatsState(
         viewMonth = StatsYearMonth(today.year, today.month.ordinal),
         isLoading = true,
         streakDays = 0,
+        activeDaysTotal = 0,
         practiceLog = emptySet(),
         reviewsToday = 0,
         reviewsWeek = 0,
+        minutesToday = 0,
+        minutesWeek = 0,
         wordsTotal = 0,
         pipeline = StatsPipelineStageId.entries.map { StatsPipelineStage(it, 0) },
     )
@@ -1125,9 +1447,12 @@ private fun previewStatsState(languages: List<Language>, today: LocalDate): Stat
         viewMonth = viewMonth,
         isLoading = false,
         streakDays = 12 + variant,
+        activeDaysTotal = 247 + variant * 13,
         practiceLog = previewPracticeLog(today),
         reviewsToday = 28 + variant * 3,
         reviewsWeek = 184 + variant * 11,
+        minutesToday = 12 + variant * 4,
+        minutesWeek = 45 + variant * 37,
         wordsTotal = 3_008 + variant * 19,
         pipeline = previewPipeline(variant),
     )
@@ -1241,13 +1566,14 @@ private fun PipelineStageLabelAutoSizePreview(
     )
     ThemedPreview(darkTheme = isDark) {
         Surface {
+            val labelLayout = rememberPipelineLabelLayout(samples)
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 samples.forEach { label ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        PipelineStageLabel(label)
+                        PipelineStageLabel(label = label, layout = labelLayout)
                         Box(
                             modifier = Modifier
                                 .padding(start = 10.dp)

@@ -42,13 +42,16 @@
     <string name="stats_legend_today">dziś</string>
     <string name="stats_legend_practiced">ćwiczone</string>
     <string name="stats_legend_missed">pominięte</string>
-    <string name="stats_reviews_section">Powtórki w tym tygodniu</string>
+    <string name="stats_active_days_all_time">wszystkie aktywne dni</string>
+    <string name="stats_effort_section">Aktywność w tym tygodniu</string>
     <plurals name="stats_cards_unit">
         <item quantity="one">karta</item>
         <item quantity="few">karty</item>
         <item quantity="many">kart</item>
         <item quantity="other">kart</item>
     </plurals>
+    <string name="stats_duration_minutes_unit">min</string>
+    <string name="stats_duration_hours_unit">godz.</string>
     <string name="stats_today_label">dziś</string>
     <string name="stats_this_week_label">w tym tygodniu</string>
     <string name="stats_library_section">Moje słownictwo</string>

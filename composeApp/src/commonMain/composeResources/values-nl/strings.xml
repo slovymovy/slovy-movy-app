@@ -42,13 +42,16 @@
     <string name="stats_legend_today">vandaag</string>
     <string name="stats_legend_practiced">geoefend</string>
     <string name="stats_legend_missed">gemist</string>
-    <string name="stats_reviews_section">Herhalingen deze week</string>
+    <string name="stats_active_days_all_time">totaal dagen actief</string>
+    <string name="stats_effort_section">Activiteit deze week</string>
     <plurals name="stats_cards_unit">
         <item quantity="one">kaart</item>
         <item quantity="few">kaarten</item>
         <item quantity="many">kaarten</item>
         <item quantity="other">kaarten</item>
     </plurals>
+    <string name="stats_duration_minutes_unit">min</string>
+    <string name="stats_duration_hours_unit">u</string>
     <string name="stats_today_label">vandaag</string>
     <string name="stats_this_week_label">deze week</string>
     <string name="stats_library_section">Mijn woordenschat</string>

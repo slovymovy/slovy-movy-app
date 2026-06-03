@@ -16,6 +16,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.*
 import kotlin.math.pow
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -27,7 +29,6 @@ class StatsService(
     @OptIn(ExperimentalTime::class)
     fun statsScreenData(
         langCode: String,
-        viewMonth: StatsYearMonth,
         today: LocalDate,
         timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): StatsScreenData = PerformanceMonitoring.startTrace("stats_screen_data").use { trace ->
@@ -42,10 +43,25 @@ class StatsService(
             start_inclusive = todayStartMs,
             end_exclusive = tomorrowStartMs,
         ).executeAsOne().toInt()
-        val reviewsWeek = learning.countReviewsSince(
+        val reviewsWeek = learning.countReviewsBetween(
             lang_code = langCode,
-            since = weekStartMs,
+            start_inclusive = weekStartMs,
+            end_exclusive = tomorrowStartMs,
         ).executeAsOne().toInt()
+        val minutesToday = durationMsToDisplayMinutes(
+            learning.sumReviewDurationBetween(
+                lang_code = langCode,
+                start_inclusive = todayStartMs,
+                end_exclusive = tomorrowStartMs,
+            ).executeAsOne(),
+        )
+        val minutesWeek = durationMsToDisplayMinutes(
+            learning.sumReviewDurationBetween(
+                lang_code = langCode,
+                start_inclusive = weekStartMs,
+                end_exclusive = tomorrowStartMs,
+            ).executeAsOne(),
+        )
 
         val practicedDays = learning
             .selectReviewTimestampsSince(langCode, since = 0L)
@@ -54,22 +70,10 @@ class StatsService(
             .map { Instant.fromEpochMilliseconds(it).toLocalDateTime(timeZone).date }
             .toSet()
         val streakDays = computeStreak(today = today, practicedDays = practicedDays)
+        val activeDaysTotal = practicedDays.size
 
-        val monthStart = LocalDate(viewMonth.year, viewMonth.monthZeroBased + 1, 1)
-        val monthEnd = if (viewMonth.monthZeroBased == 11) {
-            LocalDate(viewMonth.year + 1, 1, 1)
-        } else {
-            LocalDate(viewMonth.year, viewMonth.monthZeroBased + 2, 1)
-        }
-        val practiceLog = learning
-            .selectReviewTimestampsBetween(
-                lang_code = langCode,
-                start_inclusive = monthStart.atStartOfDayIn(timeZone).toEpochMilliseconds(),
-                end_exclusive = monthEnd.atStartOfDayIn(timeZone).toEpochMilliseconds(),
-            )
-            .executeAsList()
+        val practiceLog = practicedDays
             .asSequence()
-            .map { Instant.fromEpochMilliseconds(it).toLocalDateTime(timeZone).date }
             .map { StatsPracticeDay(it.year, it.month.number - 1, it.day) }
             .toSet()
 
@@ -96,9 +100,12 @@ class StatsService(
         trace.putMetric("delayed_due_lemmas", delayedDueLemmaCount.toLong())
         StatsScreenData(
             streakDays = streakDays,
+            activeDaysTotal = activeDaysTotal,
             practiceLog = practiceLog,
             reviewsToday = reviewsToday,
             reviewsWeek = reviewsWeek,
+            minutesToday = minutesToday,
+            minutesWeek = minutesWeek,
             wordsTotal = wordsTotal,
             pipeline = pipeline,
             delayedDueLemmaCount = delayedDueLemmaCount,
@@ -198,6 +205,14 @@ class StatsService(
         )
     }
 
+}
+
+private fun durationMsToDisplayMinutes(durationMs: Long): Int {
+    if (durationMs <= 0L) return 0
+    val duration = durationMs.milliseconds
+    val wholeMinutes = duration.inWholeMinutes
+    val roundedUp = if (duration == wholeMinutes.minutes) wholeMinutes else wholeMinutes + 1
+    return roundedUp.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
 }
 
 fun retrievability(
