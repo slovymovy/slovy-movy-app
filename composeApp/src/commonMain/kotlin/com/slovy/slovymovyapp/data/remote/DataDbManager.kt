@@ -680,6 +680,7 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun getDatabasePath(name: String): Path
     fun ensureDatabasesDir()
     fun fileExists(path: Path): Boolean
+    fun openInput(sourcePath: Path): PlatformFileInput
     fun openOutput(destPath: Path): PlatformFileOutput
     fun copyFile(from: Path, to: Path): Boolean
     fun deleteFile(path: Path)
@@ -724,6 +725,7 @@ interface ProcessKeepAlive {
  * Convenience wrapper that acquires a keep-alive for the duration of [block]. The release runs in
  * a finally block so it survives cancellation of [block].
  */
+@Suppress("unused")
 suspend fun PlatformDbSupport.runWithProcessKeepAlive(block: suspend () -> Unit) {
     val handle = acquireProcessKeepAlive()
     try {
@@ -731,6 +733,11 @@ suspend fun PlatformDbSupport.runWithProcessKeepAlive(block: suspend () -> Unit)
     } finally {
         handle.release()
     }
+}
+
+interface PlatformFileInput {
+    fun read(buffer: ByteArray, offset: Int, length: Int): Int
+    fun close()
 }
 
 interface PlatformFileOutput {

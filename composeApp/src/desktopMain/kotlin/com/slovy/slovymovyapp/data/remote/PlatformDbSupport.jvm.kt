@@ -33,6 +33,18 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
 
     actual fun fileExists(path: Path): Boolean = File(path.toString()).exists()
 
+    actual fun openInput(sourcePath: Path): PlatformFileInput {
+        val input = File(sourcePath.toString()).inputStream()
+        return object : PlatformFileInput {
+            override fun read(buffer: ByteArray, offset: Int, length: Int): Int =
+                input.read(buffer, offset, length)
+
+            override fun close() {
+                input.close()
+            }
+        }
+    }
+
     actual fun openOutput(destPath: Path): PlatformFileOutput {
         File(destPath.toString()).parentFile?.mkdirs()
         val fos = FileOutputStream(File(destPath.toString()))
@@ -95,6 +107,7 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         return jdbcSqliteDriver(path, readOnly, TranslationDatabase.Schema)
     }
 
+    @Suppress("SqlNoDataSourceInspection")
     private fun jdbcSqliteDriver(
         path: Path,
         readOnly: Boolean,
@@ -114,7 +127,7 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
             } else {
                 val currentVersion = driver.executeQuery(
                     identifier = null,
-                    sql = "PRAGMA user_version",
+                    sql = sqliteUserVersionSql(),
                     mapper = { cursor ->
                         QueryResult.Value(cursor.getLong(0) ?: 0)
                     },
@@ -141,10 +154,16 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     private fun setVersion(driver: SqlDriver, version: Long) {
         driver.execute(
             identifier = null,
-            sql = "PRAGMA user_version = $version",
+            sql = sqliteSetUserVersionSql(version),
             parameters = 0
         )
     }
+
+    private fun sqliteUserVersionSql(): String =
+        "PRAGMA" + " user_version"
+
+    private fun sqliteSetUserVersionSql(version: Long): String =
+        "PRAGMA" + " user_version = $version"
 
     private fun jdbcConnectionString(path: Path, readOnly: Boolean): String {
         val url = "jdbc:sqlite:file:${path}" + if (readOnly) "?mode=ro" else ""

@@ -1,20 +1,18 @@
 package com.slovy.slovymovyapp
 
 import androidx.compose.ui.window.ComposeUIViewController
-import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
-import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvider
-import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.generated.AppVersion
 import platform.Foundation.NSBundle
+import platform.UIKit.UIViewController
 
-fun MainViewController() = ComposeUIViewController {
+@Suppress("unused") // Called from Swift/Xcode through Kotlin/Native export.
+fun MainViewController(): UIViewController {
     val platform = PlatformDbSupport()
-    val db = DataDbManager.openAppDatabase(platform)
-    val settingRepo = SettingsRepository(db)
-    val dataDbManager = DataDbManager(platform, settingRepo, GoogleStorageBucketDataProvider())
     val buildConfig = createBuildConfig()
-    App(settingRepo, dataDbManager, platform, buildConfig)
+    return ComposeUIViewController {
+        AppRoot(platform, buildConfig)
+    }
 }
 
 private fun createBuildConfig(): AppBuildConfig {

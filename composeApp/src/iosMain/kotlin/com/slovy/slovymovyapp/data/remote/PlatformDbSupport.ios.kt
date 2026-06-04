@@ -41,6 +41,31 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     actual fun fileExists(path: Path): Boolean = NSFileManager.defaultManager.fileExistsAtPath(path.toString())
 
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+    actual fun openInput(sourcePath: Path): PlatformFileInput {
+        val handle = NSFileHandle.fileHandleForReadingAtPath(sourcePath.toString())
+            ?: error("Unable to open file for reading")
+        return object : PlatformFileInput {
+            override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
+                val data = handle.readDataOfLength(length.toULong())
+                val bytesRead = data.length.toInt()
+                if (bytesRead == 0) return -1
+                buffer.usePinned { pinned ->
+                    platform.posix.memcpy(
+                        pinned.addressOf(offset),
+                        data.bytes,
+                        bytesRead.toULong()
+                    )
+                }
+                return bytesRead
+            }
+
+            override fun close() {
+                handle.closeFile()
+            }
+        }
+    }
+
+    @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     actual fun openOutput(destPath: Path): PlatformFileOutput {
         val fileManager = NSFileManager.defaultManager
         val parent = destPath.parent?.toString() ?: error("Invalid path: $destPath")

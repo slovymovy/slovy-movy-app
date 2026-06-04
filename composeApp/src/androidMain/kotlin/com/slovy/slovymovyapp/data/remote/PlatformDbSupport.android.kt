@@ -44,6 +44,18 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
 
     actual fun fileExists(path: Path): Boolean = File(path.toString()).exists()
 
+    actual fun openInput(sourcePath: Path): PlatformFileInput {
+        val input = File(sourcePath.toString()).inputStream()
+        return object : PlatformFileInput {
+            override fun read(buffer: ByteArray, offset: Int, length: Int): Int =
+                input.read(buffer, offset, length)
+
+            override fun close() {
+                input.close()
+            }
+        }
+    }
+
     actual fun openOutput(destPath: Path): PlatformFileOutput {
         // Ensure parent dir exists
         File(destPath.toString()).parentFile?.mkdirs()

@@ -21,6 +21,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.DeveloperMode
+import androidx.compose.material.icons.outlined.UploadFile
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -58,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.export.AppDataImporter
 import com.slovy.slovymovyapp.data.favorites.CardFamilyDebugCount
 import com.slovy.slovymovyapp.data.favorites.CardScheduleDebugStats
 import com.slovy.slovymovyapp.data.favorites.CardTableDebugRow
@@ -143,6 +145,7 @@ data class DeveloperUiState(
     val cardTablePage: DeveloperCardTablePageInfo = DeveloperCardTablePageInfo(),
     val isTableLoading: Boolean = false,
     val tableErrorLabel: String? = null,
+    val isAppDataImportSupported: Boolean = false,
 )
 
 data class DeveloperScheduleStats(
@@ -189,6 +192,7 @@ class DeveloperViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val intake: LearningIntake,
     private val learningLanguagesProvider: suspend () -> List<Language>,
+    private val appDataImporter: AppDataImporter,
 ) : ViewModel() {
 
     private val previousDeveloperLogger = AppLogger.developerLogger
@@ -200,7 +204,11 @@ class DeveloperViewModel(
         }
     }
 
-    var state by mutableStateOf(DeveloperUiState())
+    var state by mutableStateOf(
+        DeveloperUiState(
+            isAppDataImportSupported = appDataImporter.isSupported,
+        )
+    )
         private set
 
     val scrollState = LazyListState()
@@ -249,6 +257,13 @@ class DeveloperViewModel(
         runAction(actionName = "Remove all learning cards") {
             val removed = favoritesRepository.removeAllLearningCards()
             "Removed $removed learning cards"
+        }
+    }
+
+    fun stageAppDataImport() {
+        runAction(actionName = "Stage data import") {
+            val result = appDataImporter.stageAppDataImport()
+            "Import staged from ${result.artifactName}. Restart the app to apply it."
         }
     }
 
@@ -555,6 +570,7 @@ fun DeveloperScreen(
         onRunIntake = viewModel::runIntake,
         onRemoveSuspendedCards = viewModel::removeSuspendedLearningCards,
         onRemoveAllLearningCards = viewModel::removeAllLearningCards,
+        onStageAppDataImport = viewModel::stageAppDataImport,
         onClearTerminalLogs = viewModel::clearTerminalLogs,
         onPreviousCardTablePage = viewModel::previousCardTablePage,
         onNextCardTablePage = viewModel::nextCardTablePage,
@@ -577,6 +593,7 @@ fun DeveloperScreenContent(
     onRunIntake: (IntakeRunMode) -> Unit = {},
     onRemoveSuspendedCards: () -> Unit = {},
     onRemoveAllLearningCards: () -> Unit = {},
+    onStageAppDataImport: () -> Unit = {},
     onClearTerminalLogs: () -> Unit = {},
     onPreviousCardTablePage: () -> Unit = {},
     onNextCardTablePage: () -> Unit = {},
@@ -664,8 +681,10 @@ fun DeveloperScreenContent(
                     DeveloperDangerCard(
                         isDebugBuild = isDebugBuild,
                         isBusy = state.isBusy,
+                        isImportSupported = state.isAppDataImportSupported,
                         onRemoveSuspendedCards = onRemoveSuspendedCards,
                         onRemoveAllLearningCards = onRemoveAllLearningCards,
+                        onStageAppDataImport = onStageAppDataImport,
                     )
                 }
 
@@ -927,8 +946,10 @@ private fun IntakeCard(
 private fun DeveloperDangerCard(
     isDebugBuild: Boolean,
     isBusy: Boolean,
+    isImportSupported: Boolean,
     onRemoveSuspendedCards: () -> Unit,
     onRemoveAllLearningCards: () -> Unit,
+    onStageAppDataImport: () -> Unit,
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -961,6 +982,33 @@ private fun DeveloperDangerCard(
                 enabled = !isBusy && isDebugBuild,
                 modifier = Modifier.fillMaxWidth(),
             )
+            FilledTonalButton(
+                onClick = onStageAppDataImport,
+                enabled = !isBusy && isImportSupported,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                ),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.UploadFile,
+                        contentDescription = null,
+                    )
+                    Text(stringResource(Res.string.developer_import_app_data))
+                }
+            }
+            if (!isImportSupported) {
+                Text(
+                    text = stringResource(Res.string.developer_import_app_data_unavailable),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

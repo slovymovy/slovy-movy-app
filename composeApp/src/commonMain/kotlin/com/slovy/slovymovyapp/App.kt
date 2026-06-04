@@ -4,7 +4,9 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -16,6 +18,8 @@ import androidx.navigation.toRoute
 import com.slovy.slovymovyapp.analytics.*
 import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.export.AppDataImportApplier
+import com.slovy.slovymovyapp.data.export.AppDataImporter
 import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
@@ -28,6 +32,7 @@ import com.slovy.slovymovyapp.data.learning.stats.ReviewQueueStats
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvider
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.logging.AppLogger
@@ -48,6 +53,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.download_title_downloading
+import slovymovyapp.composeapp.generated.resources.startup_import_error
 import kotlin.concurrent.Volatile
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
@@ -264,6 +270,76 @@ private sealed interface AppDestination {
 
 @OptIn(ExperimentalTime::class)
 @Composable
+fun AppRoot(
+    platform: PlatformDbSupport,
+    appBuildConfig: AppBuildConfig,
+    androidContext: Any? = null,
+) {
+    var startupImportChecked by remember(platform) { mutableStateOf(false) }
+    var startupImportError by remember(platform) { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(platform) {
+        try {
+            val result = AppDataImportApplier.applyStagedImportIfPresent(platform)
+            if (result != null) {
+                AppLogger.info(
+                    tag = "AppDataImport",
+                    message = "Applied staged import: ${result.importedFiles.joinToString()}",
+                    throwable = null,
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            startupImportError = e.message ?: e::class.simpleName ?: "Unknown error"
+            AppLogger.error("AppDataImport", "Failed to apply staged import", e)
+        } finally {
+            startupImportChecked = true
+        }
+    }
+
+    if (!startupImportChecked) {
+        AppTheme {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        return
+    }
+
+    val importError = startupImportError
+    if (importError != null) {
+        AppTheme {
+            ErrorScreenContent(
+                state = ErrorViewModel(stringResource(Res.string.startup_import_error, importError))
+            )
+        }
+        return
+    }
+
+    val settingsDatabase = remember(platform) {
+        DataDbManager.openAppDatabase(platform)
+    }
+    val settingsRepository = remember(settingsDatabase) {
+        SettingsRepository(settingsDatabase)
+    }
+    val dataManager = remember(platform, settingsRepository) {
+        DataDbManager(platform, settingsRepository, GoogleStorageBucketDataProvider())
+    }
+    App(
+        settingsRepository = settingsRepository,
+        dataManager = dataManager,
+        platform = platform,
+        appBuildConfig = appBuildConfig,
+        androidContext = androidContext,
+    )
+}
+
+@OptIn(ExperimentalTime::class)
+@Composable
 fun App(
     settingsRepository: SettingsRepository,
     dataManager: DataDbManager,
@@ -337,6 +413,7 @@ fun App(
     val downloadCoordinator = remember { DownloadCoordinator() }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
     val appDataExporter = remember(androidContext) { AppDataExporter(androidContext) }
+    val appDataImporter = remember(androidContext) { AppDataImporter(androidContext) }
     val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
 
     val navController = rememberNavController()
@@ -961,6 +1038,7 @@ fun App(
                                     .filterIsInstance<DatabaseFileInfo.Dictionary>()
                                     .map { it.language }
                             },
+                            appDataImporter = appDataImporter,
                         )
                     }
                     DeveloperScreen(
