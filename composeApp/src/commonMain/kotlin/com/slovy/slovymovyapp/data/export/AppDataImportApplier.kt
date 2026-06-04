@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.data.export
 
 import app.cash.sqldelight.db.QueryResult
+import app.cash.sqldelight.db.SqlDriver
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
@@ -10,6 +11,9 @@ import com.slovy.slovymovyapp.data.remote.standardAppDataDatabaseFileNames
 import com.slovy.slovymovyapp.data.remote.standardAppDataFileNamesWithSidecars
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.db.AppDatabase
+import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
+import com.slovy.slovymovyapp.translation.TranslationDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -97,27 +101,84 @@ object AppDataImportApplier {
         extracted: Map<String, Path>,
     ) {
         extracted.forEach { (name, path) ->
-            val driver = when (name) {
-                "app.db" -> platform.createAppDataDriver(path)
-                LocalDbManager.LOCAL_DICTIONARY_FILENAME -> platform.createDictionaryDataDriver(path, readOnly = false)
-                LocalDbManager.LOCAL_TRANSLATION_FILENAME -> platform.createTranslationDataDriver(path, readOnly = false)
+            val validation = when (name) {
+                "app.db" -> ImportedDatabaseValidation(
+                    driver = platform.createAppDataDriver(path, readOnly = true),
+                    maxSchemaVersion = AppDatabase.Schema.version,
+                    requiredTables = listOf("settings", "favorites", "card", "review_log"),
+                )
+                LocalDbManager.LOCAL_DICTIONARY_FILENAME -> ImportedDatabaseValidation(
+                    driver = platform.createDictionaryDataDriver(path, readOnly = true),
+                    maxSchemaVersion = DictionaryDatabase.Schema.version,
+                    requiredTables = listOf("lemma", "sense"),
+                )
+                LocalDbManager.LOCAL_TRANSLATION_FILENAME -> ImportedDatabaseValidation(
+                    driver = platform.createTranslationDataDriver(path, readOnly = true),
+                    maxSchemaVersion = TranslationDatabase.Schema.version,
+                    requiredTables = listOf("sense_translation"),
+                )
                 else -> error("Unsupported imported database: $name")
             }
             try {
-                val integrity = driver.executeQuery(
-                    identifier = null,
-                    sql = sqliteIntegrityCheckSql(),
-                    mapper = { cursor ->
-                        cursor.next()
-                        QueryResult.Value(cursor.getString(0) ?: "")
-                    },
-                    parameters = 0,
-                ).value
-                require(integrity == "ok") { "Imported $name failed SQLite integrity check: $integrity" }
+                validateSqliteDatabase(name, validation)
             } finally {
-                driver.close()
+                validation.driver.close()
             }
         }
+    }
+
+    private fun validateSqliteDatabase(
+        name: String,
+        validation: ImportedDatabaseValidation,
+    ) {
+        val driver = validation.driver
+        val integrity = driver.executeQuery(
+            identifier = null,
+            sql = sqliteIntegrityCheckSql(),
+            mapper = { cursor ->
+                cursor.next()
+                QueryResult.Value(cursor.getString(0) ?: "")
+            },
+            parameters = 0,
+        ).value
+        require(integrity == "ok") { "Imported $name failed SQLite integrity check: $integrity" }
+
+        val schemaVersion = driver.executeQuery(
+            identifier = null,
+            sql = sqliteUserVersionSql(),
+            mapper = { cursor ->
+                cursor.next()
+                QueryResult.Value(cursor.getLong(0) ?: 0L)
+            },
+            parameters = 0,
+        ).value
+        require(schemaVersion in 1..validation.maxSchemaVersion) {
+            "Imported $name has unsupported schema version $schemaVersion."
+        }
+
+        validation.requiredTables.forEach { table ->
+            require(driver.hasTable(table)) { "Imported $name is missing required table: $table" }
+        }
+    }
+
+    private fun SqlDriver.hasTable(table: String): Boolean {
+        var hasTable = false
+        executeQuery(
+            identifier = null,
+            sql = sqliteTableExistsSql(),
+            mapper = { cursor ->
+                val nextResult = cursor.next()
+                val hasRow = when (nextResult) {
+                    is QueryResult.Value -> nextResult.value
+                    else -> nextResult.value
+                }
+                hasTable = hasRow
+                QueryResult.Value(hasRow)
+            },
+            parameters = 1,
+            binders = { bindString(0, table) },
+        )
+        return hasTable
     }
 
     private fun replaceAppDataFiles(
@@ -251,6 +312,18 @@ object AppDataImportApplier {
 
     private fun sqliteIntegrityCheckSql(): String =
         "PRAGMA" + " integrity_check"
+
+    private fun sqliteUserVersionSql(): String =
+        "PRAGMA" + " user_version"
+
+    private fun sqliteTableExistsSql(): String =
+        "SELECT 1 FROM " + "sqlite_master WHERE type='table' AND name=? LIMIT 1"
+
+    private data class ImportedDatabaseValidation(
+        val driver: SqlDriver,
+        val maxSchemaVersion: Long,
+        val requiredTables: List<String>,
+    )
 
     private const val TAR_BLOCK_SIZE = 512
     private const val COPY_BUFFER_SIZE = 8 * 1024

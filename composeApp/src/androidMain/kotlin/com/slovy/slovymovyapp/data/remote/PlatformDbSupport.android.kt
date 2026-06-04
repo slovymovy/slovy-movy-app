@@ -110,7 +110,11 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     actual fun createAppDataDriver(path: Path): SqlDriver {
-        return androidSqliteDriver(path, AppDatabase.Schema, false)
+        return createAppDataDriver(path, readOnly = false)
+    }
+
+    actual fun createAppDataDriver(path: Path, readOnly: Boolean): SqlDriver {
+        return androidSqliteDriver(path, AppDatabase.Schema, readOnly)
     }
 
     actual fun createDictionaryDataDriver(path: Path, readOnly: Boolean): SqlDriver {

@@ -687,6 +687,7 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun moveFile(from: Path, to: Path): Boolean
     fun markNoBackup(path: Path)
     fun createAppDataDriver(path: Path): SqlDriver
+    fun createAppDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createDictionaryDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createTranslationDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createHttpClient(): HttpClient
