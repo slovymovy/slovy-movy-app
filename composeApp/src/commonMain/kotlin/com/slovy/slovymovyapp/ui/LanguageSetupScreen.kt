@@ -48,7 +48,9 @@ import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
@@ -75,7 +77,6 @@ class LanguageSetupViewModel(
     initialNativeLanguages: Set<Language> = emptySet()
 ) : ViewModel() {
     private var languageRequestJob: Job? = null
-    private var languageRequestGeneration = 0
 
     var state by mutableStateOf(
         LanguageSetupUiState(
@@ -146,7 +147,7 @@ class LanguageSetupViewModel(
 
     fun openLanguageRequestDialog() {
         Analytics.logEvent(AnalyticsEvent.LANGUAGE_REQUEST_OPEN)
-        languageRequestGeneration += 1
+        cancelLanguageRequestJob()
         state = state.copy(
             languageRequestDialogVisible = true,
             languageRequestComment = "",
@@ -158,9 +159,7 @@ class LanguageSetupViewModel(
     }
 
     fun dismissLanguageRequestDialog() {
-        languageRequestGeneration += 1
-        languageRequestJob?.cancel()
-        languageRequestJob = null
+        cancelLanguageRequestJob()
         state = state.copy(
             languageRequestDialogVisible = false,
             languageRequestComment = "",
@@ -188,16 +187,16 @@ class LanguageSetupViewModel(
             return
         }
 
+        val email = state.languageRequestEmail.trim().takeIf { it.isNotBlank() }
         state = state.copy(languageRequestSubmitting = true, languageRequestError = null)
-        languageRequestJob?.cancel()
-        val generation = languageRequestGeneration
-        languageRequestJob = viewModelScope.launch {
+        cancelLanguageRequestJob()
+        val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
             try {
                 val response = dictionaryClient.sendGeneralFeedback(
                     comment = comment,
-                    email = state.languageRequestEmail.trim().takeIf { it.isNotBlank() }
+                    email = email
                 )
-                if (generation == languageRequestGeneration && state.languageRequestDialogVisible) {
+                if (isCurrentLanguageRequestJob() && state.languageRequestDialogVisible) {
                     state = state.copy(
                         languageRequestSubmitting = false,
                         languageRequestError = null,
@@ -207,19 +206,28 @@ class LanguageSetupViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                if (generation == languageRequestGeneration && state.languageRequestDialogVisible) {
+                if (isCurrentLanguageRequestJob() && state.languageRequestDialogVisible) {
                     state = state.copy(
                         languageRequestSubmitting = false,
                         languageRequestError = UiText.Plain(NetworkErrorClassifier.userMessage(e))
                     )
                 }
             } finally {
-                if (generation == languageRequestGeneration) {
+                if (isCurrentLanguageRequestJob()) {
                     languageRequestJob = null
                 }
             }
         }
+        languageRequestJob = job
+        job.start()
     }
+
+    private fun cancelLanguageRequestJob() {
+        languageRequestJob?.cancel()
+        languageRequestJob = null
+    }
+
+    private suspend fun isCurrentLanguageRequestJob(): Boolean = languageRequestJob == currentCoroutineContext()[Job]
 
     fun retry() {
         loadAvailableLanguages()
