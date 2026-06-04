@@ -30,6 +30,8 @@ object AppDataImportApplier {
 
             val extracted = mutableMapOf<String, Path>()
             val backups = mutableMapOf<String, Path>()
+            val restoredBackups = mutableSetOf<Path>()
+            var importSucceeded = false
             try {
                 extractArchive(platform, archivePath, extracted)
                 require("app.db" in extracted) { "Import archive is missing app.db." }
@@ -37,14 +39,16 @@ object AppDataImportApplier {
                 replaceAppDataFiles(platform, extracted, backups)
                 writePostImportSettings(platform)
                 platform.deleteFile(archivePath)
+                importSucceeded = true
                 AppDataImportApplyResult(importedFiles = extracted.keys.sorted())
             } catch (t: Throwable) {
-                restoreBackups(platform, backups)
+                restoredBackups += restoreBackups(platform, backups)
                 platform.deleteFile(archivePath)
                 throw t
             } finally {
                 extracted.values.forEach { platform.deleteFile(it) }
-                backups.values.forEach { platform.deleteFile(it) }
+                val backupsSafeToDelete = if (importSucceeded) backups.values else restoredBackups
+                backupsSafeToDelete.forEach { platform.deleteFile(it) }
             }
         }
 
@@ -172,7 +176,8 @@ object AppDataImportApplier {
     private fun restoreBackups(
         platform: PlatformDbSupport,
         backups: Map<String, Path>,
-    ) {
+    ): Set<Path> {
+        val restored = mutableSetOf<Path>()
         standardAppDataFileNamesWithSidecars.forEach { fileName ->
             val destination = platform.getDatabasePath(fileName)
             if (platform.fileExists(destination)) {
@@ -182,9 +187,12 @@ object AppDataImportApplier {
         backups.forEach { (fileName, backupPath) ->
             val destination = platform.getDatabasePath(fileName)
             if (platform.fileExists(backupPath)) {
-                platform.moveFile(backupPath, destination)
+                if (platform.moveFile(backupPath, destination)) {
+                    restored += backupPath
+                }
             }
         }
+        return restored
     }
 
     private fun PlatformFileInput.readFullyOrEnd(buffer: ByteArray): Int {
