@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -137,7 +138,6 @@ import slovymovyapp.composeapp.generated.resources.study_error_title
 import slovymovyapp.composeapp.generated.resources.study_chip_fill_in
 import slovymovyapp.composeapp.generated.resources.study_chip_listen
 import slovymovyapp.composeapp.generated.resources.study_cant_listen_now
-import slovymovyapp.composeapp.generated.resources.study_listen_prompt
 import slovymovyapp.composeapp.generated.resources.study_listening_postponed_message
 import slovymovyapp.composeapp.generated.resources.study_loading
 import slovymovyapp.composeapp.generated.resources.study_multi_sense_front_hint
@@ -163,6 +163,7 @@ import slovymovyapp.composeapp.generated.resources.study_tap_to_check
 import slovymovyapp.composeapp.generated.resources.study_tap_to_flip
 
 private val MultiSenseFrontHintTopSpacing = 20.dp
+private val ListeningFrontStackGap = 28.dp
 
 @Composable
 fun StudySessionScreen(
@@ -849,8 +850,11 @@ private fun StudySessionOverflowSheet(
                         Switch(
                             checked = autoplayEnabled,
                             onCheckedChange = { onToggleAutoplay() },
+                            modifier = Modifier.clearAndSetSemantics {},
                         )
                     },
+                    role = Role.Switch,
+                    toggleValue = autoplayEnabled,
                     onClick = onToggleAutoplay,
                 )
                 StudyOverflowMenuItem(
@@ -931,6 +935,8 @@ private fun StudyOverflowMenuItem(
     supporting: String? = null,
     trailing: (@Composable () -> Unit)? = null,
     destructive: Boolean = false,
+    role: Role = Role.Button,
+    toggleValue: Boolean? = null,
 ) {
     val contentColor = if (destructive) {
         MaterialTheme.colorScheme.error
@@ -942,39 +948,58 @@ private fun StudyOverflowMenuItem(
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
+    val itemModifier = Modifier
+        .fillMaxWidth()
+        .heightIn(min = 56.dp)
+        .let { base ->
+            if (toggleValue != null) {
+                base.toggleable(
+                    value = toggleValue,
+                    role = role,
+                    onValueChange = { onClick() },
+                )
+            } else {
+                base.clickable(role = role, onClick = onClick)
+            }
+        }
+        .padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm)
+
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm),
+        modifier = itemModifier,
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier.size(24.dp),
-            contentAlignment = Alignment.Center,
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = AppSpacing.xs),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            CompositionLocalProviderForIconTint(contentColor) {
-                icon()
+            Box(
+                modifier = Modifier.size(24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                CompositionLocalProviderForIconTint(contentColor) {
+                    icon()
+                }
             }
-        }
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = contentColor,
-            )
-            supporting?.let { text ->
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
                 Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = supportingColor,
+                    text = label,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = contentColor,
                 )
+                supporting?.let { text ->
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = supportingColor,
+                    )
+                }
             }
         }
         trailing?.invoke()
@@ -1265,6 +1290,7 @@ private fun StudyCardFront(
 
         is StudyCardUiState.Cloze -> ClozeFront(
             card = card,
+            onRevealFirstLetterHint = onRevealFirstLetterHint,
             onRevealTranslationHint = onRevealTranslationHint,
             modifier = modifier,
         )
@@ -1381,6 +1407,7 @@ private fun ProductionFront(
 @Composable
 private fun ClozeFront(
     card: StudyCardUiState.Cloze,
+    onRevealFirstLetterHint: () -> Unit,
     onRevealTranslationHint: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -1404,6 +1431,14 @@ private fun ClozeFront(
                     fontFamily = MaterialTheme.serifFontFamily,
                 ),
             )
+            card.firstLetterHint?.let { hint ->
+                FirstLetterHintView(
+                    hint = hint,
+                    revealed = card.firstLetterHintRevealed,
+                    onReveal = onRevealFirstLetterHint,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                )
+            }
             card.translationHint?.let { hint ->
                 if (card.translationHintRevealed) {
                     StudyTranslationHintBlock(cloze = hint)
@@ -1435,7 +1470,7 @@ private fun ListeningFront(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.xl),
+            verticalArrangement = Arrangement.spacedBy(ListeningFrontStackGap),
         ) {
             Surface(
                 modifier = Modifier
@@ -1468,24 +1503,7 @@ private fun ListeningFront(
                     }
                 }
             }
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(
-                    text = stringResource(Res.string.study_listen_prompt),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontFamily = MaterialTheme.serifFontFamily,
-                        fontSize = 13.5.sp,
-                        fontWeight = FontWeight.Medium,
-                        fontStyle = FontStyle.Normal,
-                        lineHeight = 19.sp,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-                ListeningMultiSenseByline(card = card)
-            }
+            ListeningMultiSenseByline(card = card)
             CantListenNowButton(onClick = onPostponeListeningCards)
         }
     }
@@ -1496,28 +1514,26 @@ private fun CantListenNowButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = modifier,
-        shape = CircleShape,
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.18f)),
-        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp),
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(6.dp))
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         Icon(
             imageVector = SpeakerOffVector,
             contentDescription = null,
             modifier = Modifier.size(15.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
         )
-        Spacer(Modifier.width(8.dp))
         Text(
             text = stringResource(Res.string.study_cant_listen_now),
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 0.1.sp,
+            letterSpacing = 0.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
         )
     }
 }
@@ -2335,10 +2351,7 @@ private fun clozeCard() = StudyCardUiState.Cloze(
         text = "Het was zo gezellig bij jullie thuis.",
         answerRanges = listOf(11..18),
     ),
-    translationHint = StudyClozeTextUiState(
-        text = "It was so lovely at your place.",
-        answerRanges = listOf(10..15),
-    ),
+    firstLetterHint = FirstLetterHint(letter = 'g', letterCount = 8, dotCount = 7),
     back = StudyCardBackUiState(
         headline = "gezellig",
         secondary = "cosy, sociable",
@@ -2617,7 +2630,7 @@ private fun StudySessionClozeFrontHintRevealedPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(
-                clozeCard().copy(translationHintRevealed = true),
+                clozeCard().copy(firstLetterHintRevealed = true),
                 StudyCardSide.FRONT,
                 current = 6,
             ),
