@@ -122,34 +122,37 @@ object AppDataImportApplier {
         backups: MutableMap<String, Path>,
     ) {
         platform.ensureDatabasesDir()
-        standardAppDataFileNamesWithSidecars
-            .filterNot { it in standardAppDataDatabaseFileNames }
-            .forEach { fileName ->
-                platform.deleteFile(platform.getDatabasePath(fileName))
-            }
+        backupExistingAppDataFiles(platform, backups)
 
         standardAppDataDatabaseFileNames.forEach { fileName ->
             val destination = platform.getDatabasePath(fileName)
             val extractedPath = extracted[fileName]
             if (extractedPath == null) {
-                platform.deleteFile(destination)
                 return@forEach
-            }
-
-            if (platform.fileExists(destination)) {
-                val backupPath = platform.getDatabasePath("slovymovy-import-backup-$fileName")
-                if (platform.fileExists(backupPath)) {
-                    platform.deleteFile(backupPath)
-                }
-                if (!platform.moveFile(destination, backupPath)) {
-                    error("Failed to back up existing $fileName.")
-                }
-                backups[fileName] = backupPath
             }
 
             if (!platform.moveFile(extractedPath, destination)) {
                 error("Failed to install imported $fileName.")
             }
+        }
+    }
+
+    private fun backupExistingAppDataFiles(
+        platform: PlatformDbSupport,
+        backups: MutableMap<String, Path>,
+    ) {
+        standardAppDataFileNamesWithSidecars.forEach { fileName ->
+            val sourcePath = platform.getDatabasePath(fileName)
+            if (!platform.fileExists(sourcePath)) return@forEach
+
+            val backupPath = platform.getDatabasePath("slovymovy-import-backup-$fileName")
+            if (platform.fileExists(backupPath)) {
+                platform.deleteFile(backupPath)
+            }
+            if (!platform.moveFile(sourcePath, backupPath)) {
+                error("Failed to back up existing $fileName.")
+            }
+            backups[fileName] = backupPath
         }
     }
 
@@ -170,11 +173,14 @@ object AppDataImportApplier {
         platform: PlatformDbSupport,
         backups: Map<String, Path>,
     ) {
-        backups.forEach { (fileName, backupPath) ->
+        standardAppDataFileNamesWithSidecars.forEach { fileName ->
             val destination = platform.getDatabasePath(fileName)
             if (platform.fileExists(destination)) {
                 platform.deleteFile(destination)
             }
+        }
+        backups.forEach { (fileName, backupPath) ->
+            val destination = platform.getDatabasePath(fileName)
             if (platform.fileExists(backupPath)) {
                 platform.moveFile(backupPath, destination)
             }
