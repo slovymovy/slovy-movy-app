@@ -21,6 +21,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.uuid.Uuid
 
 private const val PrimarySenseId = "00000000-0000-0000-0000-000000000101"
@@ -208,9 +209,11 @@ class StudySessionMapperTest {
 
         assertEquals("Het was zo gezellig.", mapped.prompt.text)
         assertEquals(listOf(11..18), mapped.prompt.answerRanges)
-        val hint = assertNotNull(mapped.translationHint)
-        assertEquals("It was so cosy.", hint.text)
-        assertEquals(emptyList(), hint.answerRanges)
+        val hint = assertNotNull(mapped.firstLetterHint)
+        assertEquals('g', hint.letter)
+        assertEquals(8, hint.letterCount)
+        assertEquals(7, hint.dotCount)
+        assertNull(mapped.translationHint)
         assertNotNull(mapped.back.cloze)
         assertEquals("gezellig", mapped.back.headline)
     }
@@ -248,6 +251,10 @@ class StudySessionMapperTest {
 
         assertEquals("Vergeet niet om je paspoort mee te nemen.", mapped.prompt.text)
         assertEquals(listOf(28..30, 35..39), mapped.prompt.answerRanges)
+        val hint = assertNotNull(mapped.firstLetterHint)
+        assertEquals('m', hint.letter)
+        assertEquals(3, hint.letterCount)
+        assertEquals(2, hint.dotCount)
         assertNotNull(mapped.back.cloze)
         assertEquals(listOf(28..30, 35..39), mapped.back.cloze.answerRanges)
     }
