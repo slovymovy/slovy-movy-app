@@ -639,7 +639,6 @@
     <string name="study_hint_show">Подсказка</string>
     <string name="study_hint_show_description">Показать подсказку с первой буквой</string>
     <string name="study_hint_show_translation_description">Показать подсказку с переводом</string>
-    <string name="study_listen_prompt">Нажмите для воспроизведения. Какое слово вы слышите?</string>
     <string name="study_cant_listen_now">Не могу сейчас слушать</string>
     <string name="study_listening_postponed_message">Карточки на аудирование отложены до следующего повторения</string>
     <plurals name="study_hint_starts_with">
