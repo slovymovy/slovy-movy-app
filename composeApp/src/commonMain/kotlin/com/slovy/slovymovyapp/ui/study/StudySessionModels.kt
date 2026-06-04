@@ -90,6 +90,8 @@ sealed interface StudyCardUiState {
         override val id: String,
         override val chipLabel: UiText,
         val prompt: StudyClozeTextUiState,
+        val firstLetterHint: FirstLetterHint? = null,
+        val firstLetterHintRevealed: Boolean = false,
         val translationHint: StudyClozeTextUiState? = null,
         val translationHintRevealed: Boolean = false,
         override val senses: List<StudyCardSenseUiState> = emptyList(),
