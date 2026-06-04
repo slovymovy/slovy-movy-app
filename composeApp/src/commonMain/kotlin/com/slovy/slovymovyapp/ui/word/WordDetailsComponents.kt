@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.slovy.slovymovyapp.data.favorites.FavoriteLemmaLookup
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import org.jetbrains.compose.resources.stringResource
@@ -116,6 +117,7 @@ internal fun EntryList(
     chipSpacing: Dp = 6.dp
 ) {
     if (values.isEmpty()) return
+    val favoriteLemmaLookup = FavoriteLemmaLookup.fromLemmas(favoriteLemmas)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionLabel(label)
         FlowRow(
@@ -134,7 +136,7 @@ internal fun EntryList(
                     shape = chipShape,
                     isClickable = isClickable,
                     isOnline = matchingKey?.let { relatedWords[it]?.online },
-                    isFavorite = favoriteLemmas.any { it.equals(resolvedLemma, ignoreCase = true) },
+                    isFavorite = favoriteLemmaLookup.contains(resolvedLemma),
                     border = chipBorder ?: if (isClickable) BorderStroke(0.5.dp, contentColor.copy(alpha = 0.18f)) else null,
                     onClick = if (isClickable) {
                         { onWordClick(resolvedLemma) }

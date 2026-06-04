@@ -16,6 +16,7 @@ import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
+import com.slovy.slovymovyapp.data.favorites.FavoriteLemmaLookup
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
@@ -76,7 +77,6 @@ class StudySessionViewModel(
     private var pendingRemovalFavorite: Favorite? = null
     private var isPreparingRemoval: Boolean = false
     private var postponeListeningCardsForSession: Boolean = false
-    private var favoriteLemmaCache: Set<String>? = null
     private val snackbarMutex = Mutex()
 
     init {
@@ -587,7 +587,7 @@ class StudySessionViewModel(
 
     private suspend fun showLoadedCard(sessionCard: SessionCard) {
         currentCard = sessionCard
-        val uiCard = sessionCard.toStudyCardUiState(loadFavoriteLemmas())
+        val uiCard = sessionCard.toStudyCardUiState(loadFavoriteLemmaLookup())
         if (uiCard == null) {
             state = StudySessionUiState.Error(
                 message = UiText.Resource(Res.string.study_error_card_data_missing),
@@ -610,21 +610,19 @@ class StudySessionViewModel(
         }
     }
 
-    private suspend fun loadFavoriteLemmas(): Set<String> {
-        val lang = language ?: return emptySet()
-        favoriteLemmaCache?.let { return it }
+    private suspend fun loadFavoriteLemmaLookup(): FavoriteLemmaLookup {
+        val lang = language ?: return FavoriteLemmaLookup.empty()
         return try {
-            favoritesRepository.getDistinctLemmasByLang(lang).also { favoriteLemmaCache = it }
+            favoritesRepository.getFavoriteLemmaLookup(lang)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             AppLogger.warn(TAG, "Unable to load favorite lemmas for study synonyms lang=$langCode", e)
-            emptySet()
+            FavoriteLemmaLookup.empty()
         }
     }
 
     private fun notifyFavoriteChanged(lang: Language) {
-        if (lang == language) favoriteLemmaCache = null
         onFavoriteChanged(lang)
     }
 

@@ -46,6 +46,8 @@ data class CardFamilyDebugCount(
 
 class FavoritesRepository(private val db: AppDatabase) {
 
+    private val distinctLemmasByLangCache = mutableMapOf<Language, Set<String>>()
+
     @OptIn(ExperimentalTime::class)
     suspend fun add(senseId: String, language: Language, lemma: String) = withContext(Dispatchers.IO) {
         addFavorite(
@@ -90,6 +92,7 @@ class FavoritesRepository(private val db: AppDatabase) {
             )
             db.favoritesQueries.applyCardScheduleSnapshots(snapshot.cards)
         }
+        invalidateDistinctLemmaCache(snapshot.language)
     }
 
     suspend fun remove(senseId: String, language: Language): RemovedFavoriteSnapshot? =
@@ -118,6 +121,7 @@ class FavoritesRepository(private val db: AppDatabase) {
                     sense_id = senseId,
                     lang_code = language.code,
                 )
+                invalidateDistinctLemmaCache(language)
                 RemovedFavoriteSnapshot(
                     senseId = senseId,
                     language = language,
@@ -195,10 +199,14 @@ class FavoritesRepository(private val db: AppDatabase) {
     }
 
     suspend fun getDistinctLemmasByLang(language: Language): Set<String> = withContext(Dispatchers.IO) {
-        db.favoritesQueries.selectDistinctLemmasByLang(lang_code = language.code)
+        distinctLemmasByLangCache[language] ?: db.favoritesQueries.selectDistinctLemmasByLang(lang_code = language.code)
             .executeAsList()
             .toSet()
+            .also { distinctLemmasByLangCache[language] = it }
     }
+
+    suspend fun getFavoriteLemmaLookup(language: Language): FavoriteLemmaLookup =
+        FavoriteLemmaLookup.fromLemmas(getDistinctLemmasByLang(language))
 
     suspend fun getCardScheduleDebugStats(language: Language, nowEpochMs: Long): CardScheduleDebugStats =
         withContext(Dispatchers.IO) {
@@ -337,5 +345,10 @@ class FavoritesRepository(private val db: AppDatabase) {
                 )
             }
         }
+        invalidateDistinctLemmaCache(language)
+    }
+
+    private fun invalidateDistinctLemmaCache(language: Language) {
+        distinctLemmasByLangCache.remove(language)
     }
 }
