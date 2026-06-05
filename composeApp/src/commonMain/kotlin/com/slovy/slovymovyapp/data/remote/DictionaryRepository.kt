@@ -324,6 +324,16 @@ class DictionaryRepository(
         return result
     }
 
+    private fun Collection<String>.filterSelfReferences(
+        lemma: String,
+        relatedWords: Map<String, RelatedWord>
+    ): List<String> = filterNot { word ->
+        if (word.equals(lemma, ignoreCase = true)) return@filterNot true
+        val matchingKey = relatedWords.keys.firstOrNull { key -> key.equals(word, ignoreCase = true) }
+            ?: return@filterNot false
+        relatedWords[matchingKey]?.lemma?.equals(lemma, ignoreCase = true) == true
+    }
+
     private fun DictionaryQueries.resolveRelatedForm(
         language: Language,
         form: String
@@ -994,12 +1004,13 @@ class DictionaryRepository(
         if (entries.isEmpty()) return null
 
         // Fetch word family from all databases (union)
-        val wordFamily = q.selectWordFamilyByLemmaId(lemmaId).executeAsList().toSet()
+        val rawWordFamily = q.selectWordFamilyByLemmaId(lemmaId).executeAsList().toSet()
         // Load related words from all databases (later databases take precedence)
         val relatedWordsMap = loadRelatedWords(
             dictDatabases, language,
-            collectAllRelatedWords(entries, wordFamily, lemma)
+            collectAllRelatedWords(entries, rawWordFamily, lemma)
         )
+        val wordFamily = rawWordFamily.filterSelfReferences(lemma, relatedWordsMap)
 
         // Keep related words alongside each cached sense so lightweight sense loads
         // (e.g. Favorites) can still render clickable related terms.
@@ -1020,7 +1031,7 @@ class DictionaryRepository(
             entries = entries,
             lemma = lemma,
             zipfFrequency = zipfFrequency,
-            wordFamily = wordFamily.toList(),
+            wordFamily = wordFamily,
             relatedWords = relatedWordsMap,
             online = onlineOnly,
         )

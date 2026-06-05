@@ -949,6 +949,10 @@ class DictionaryRepositoryTest : BaseTest() {
             val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
             val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "vergiet") }
             assertNotNull(card, "Card should be built for 'vergiet'")
+            assertTrue(
+                card.wordFamily.any { it.equals("vergieten", ignoreCase = true) },
+                "Standalone lemma 'vergieten' must stay visible in the word family even when it is also a form"
+            )
 
             val resolved = card.relatedWords["vergieten"]
             assertNotNull(resolved, "'vergieten' must be present in relatedWords of 'vergiet'")
@@ -1084,6 +1088,78 @@ class DictionaryRepositoryTest : BaseTest() {
             assertEquals(
                 "buigen", resolved.lemma,
                 "RelatedWord.lemma for form chip must point to the parent lemma so navigation lands correctly"
+            )
+        } finally {
+            runBlocking { localMgr.closeAll() }
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
+        }
+    }
+
+    @Test
+    fun getLanguageCard_filters_word_family_entries_that_resolve_to_current_lemma() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking { mgr.deleteDictionary(Language.DUTCH) }
+
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+
+        try {
+            val q = localMgr.openLocalDictionary().dictionaryQueries
+
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            q.insertLemma(lemmaId, "nl", "buigen", "buigen", 5.0, false)
+            q.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.VERB)
+            q.insertSense(
+                sense_id = Uuid.random(),
+                lemma_pos_id = lemmaPosId,
+                sense_definition = "to bend",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.MIDDLE,
+                semantic_group_id = "group1",
+                name_type = null
+            )
+            q.insertForm(Uuid.random(), lemmaPosId, "gebogen", "gebogen", FormSource.NATIVE)
+            q.insertLemmaWordFamily(lemmaId, "Buigen")
+            q.insertLemmaWordFamily(lemmaId, "Gebogen")
+            q.insertLemmaWordFamily(lemmaId, "buiging")
+
+            val relativeId = Uuid.random()
+            val relativePosId = Uuid.random()
+            q.insertLemma(relativeId, "nl", "buiging", "buiging", 3.0, false)
+            q.insertLemmaPos(relativePosId, relativeId, DictionaryPos.NOUN)
+            q.insertSense(
+                sense_id = Uuid.random(),
+                lemma_pos_id = relativePosId,
+                sense_definition = "bend",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.LOW,
+                semantic_group_id = "group2",
+                name_type = null
+            )
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+            val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "buigen") }
+            assertNotNull(card, "Card should be built for 'buigen'")
+
+            assertFalse(
+                card.wordFamily.any { it.equals("Buigen", ignoreCase = true) },
+                "Word family must not include the current lemma"
+            )
+            assertFalse(
+                card.wordFamily.any { it.equals("Gebogen", ignoreCase = true) },
+                "Word family must not include forms that navigate back to the current lemma"
+            )
+            assertTrue(
+                card.wordFamily.any { it.equals("buiging", ignoreCase = true) },
+                "Word family must keep real related lemmas"
             )
         } finally {
             runBlocking { localMgr.closeAll() }
