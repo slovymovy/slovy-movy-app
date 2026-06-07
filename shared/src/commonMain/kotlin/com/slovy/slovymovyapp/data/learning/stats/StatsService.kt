@@ -10,6 +10,7 @@ import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.db.FavoritesQueries
 import com.slovy.slovymovyapp.db.SelectCardSchedulingByLang
 import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
+import com.slovy.slovymovyapp.util.roundUpToWholeMinutes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -17,7 +18,6 @@ import kotlinx.datetime.*
 import kotlin.math.pow
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -207,13 +207,11 @@ class StatsService(
 
 }
 
-private fun durationMsToDisplayMinutes(durationMs: Long): Int {
-    if (durationMs <= 0L) return 0
-    val duration = durationMs.milliseconds
-    val wholeMinutes = duration.inWholeMinutes
-    val roundedUp = if (duration == wholeMinutes.minutes) wholeMinutes else wholeMinutes + 1
-    return roundedUp.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-}
+private fun durationMsToDisplayMinutes(durationMs: Long): Int = durationMs
+    .milliseconds
+    .roundUpToWholeMinutes()
+    .coerceAtMost(Int.MAX_VALUE.toLong())
+    .toInt()
 
 fun retrievability(
     stabilityDays: Double,

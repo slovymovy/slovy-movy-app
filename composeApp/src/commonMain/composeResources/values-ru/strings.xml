@@ -52,6 +52,9 @@
     </plurals>
     <string name="stats_duration_minutes_unit">мин</string>
     <string name="stats_duration_hours_unit">ч</string>
+    <string name="duration_short_minutes">%1$d мин</string>
+    <string name="duration_short_hours">%1$d ч</string>
+    <string name="duration_short_hours_minutes">%1$d ч %2$d мин</string>
     <string name="stats_today_label">сегодня</string>
     <string name="stats_this_week_label">за неделю</string>
     <string name="stats_library_section">Мой словарь</string>

@@ -72,6 +72,7 @@ import com.slovy.slovymovyapp.ui.word.LoadingPlaceholder
 import com.slovy.slovymovyapp.ui.word.SenseCard
 import com.slovy.slovymovyapp.ui.word.SenseCardData
 import com.slovy.slovymovyapp.ui.word.SenseUiState
+import com.slovy.slovymovyapp.util.roundUpToWholeMinutes
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.serialization.json.JsonPrimitive
@@ -81,7 +82,6 @@ import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 import kotlin.uuid.Uuid
 
 data class FavoriteSenseItem(
@@ -107,7 +107,7 @@ data class FavoritesStudyUiState(
 
 data class FavoritesStudyDoneUiState(
     val language: Language,
-    val nextReviewLabel: String,
+    val nextReviewLabel: UiText,
     val nextReviewAccessibilityValue: UiText,
     val action: FavoritesStudyDoneAction?,
     val nextReviewAtEpochMs: Long,
@@ -483,13 +483,15 @@ class FavoritesViewModel(
         val delay = (nextReviewAtEpochMs - clock.now().toEpochMilliseconds())
             .coerceAtLeast(0L)
             .milliseconds
-        val minuteMillis = 1.minutes.inWholeMilliseconds
-        val totalMinutes = ((delay.inWholeMilliseconds + minuteMillis - 1) / minuteMillis).coerceAtLeast(1)
+        val totalMinutes = delay.roundUpToWholeMinutes(minimumMinutes = 1)
         val hours = (totalMinutes / 60).toInt()
         val minutes = (totalMinutes % 60).toInt()
         return when {
             hours == 0 -> ReviewTimeLabel(
-                label = "$minutes min",
+                label = UiText.Resource(
+                    Res.string.duration_short_minutes,
+                    args = listOf(minutes),
+                ),
                 accessibilityValue = UiText.Plural(
                     Res.plurals.favorites_study_done_duration_minutes,
                     quantity = minutes,
@@ -498,7 +500,10 @@ class FavoritesViewModel(
             )
 
             minutes == 0 -> ReviewTimeLabel(
-                label = "$hours h",
+                label = UiText.Resource(
+                    Res.string.duration_short_hours,
+                    args = listOf(hours),
+                ),
                 accessibilityValue = UiText.Plural(
                     Res.plurals.favorites_study_done_duration_hours,
                     quantity = hours,
@@ -507,7 +512,10 @@ class FavoritesViewModel(
             )
 
             else -> ReviewTimeLabel(
-                label = "$hours h $minutes min",
+                label = UiText.Resource(
+                    Res.string.duration_short_hours_minutes,
+                    args = listOf(hours, minutes),
+                ),
                 accessibilityValue = UiText.Resource(
                     Res.string.favorites_study_done_duration_hours_minutes,
                     args = listOf(hours, minutes),
@@ -517,7 +525,7 @@ class FavoritesViewModel(
     }
 
     private data class ReviewTimeLabel(
-        val label: String,
+        val label: UiText,
         val accessibilityValue: UiText,
     )
 
@@ -1341,7 +1349,7 @@ private fun StudyDoneCard(
                         verticalAlignment = Alignment.Bottom,
                     ) {
                         Text(
-                            text = studyDone.nextReviewLabel,
+                            text = studyDone.nextReviewLabel.resolve(),
                             fontFamily = MaterialTheme.serifFontFamily,
                             fontSize = 26.sp,
                             fontWeight = FontWeight.Medium,
@@ -1631,7 +1639,7 @@ fun PreviewFavoritesScreenStudyDone(
             selectedLanguage = Language.DUTCH,
             studyDone = FavoritesStudyDoneUiState(
                 language = Language.DUTCH,
-                nextReviewLabel = "4 h",
+                nextReviewLabel = UiText.Resource(Res.string.duration_short_hours, args = listOf(4)),
                 nextReviewAccessibilityValue = UiText.Plural(
                     Res.plurals.favorites_study_done_duration_hours,
                     quantity = 4,

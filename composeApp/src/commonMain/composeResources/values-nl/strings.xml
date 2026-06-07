@@ -52,6 +52,9 @@
     </plurals>
     <string name="stats_duration_minutes_unit">min</string>
     <string name="stats_duration_hours_unit">u</string>
+    <string name="duration_short_minutes">%1$d min</string>
+    <string name="duration_short_hours">%1$d u</string>
+    <string name="duration_short_hours_minutes">%1$d u %2$d min</string>
     <string name="stats_today_label">vandaag</string>
     <string name="stats_this_week_label">deze week</string>
     <string name="stats_library_section">Mijn woordenschat</string>

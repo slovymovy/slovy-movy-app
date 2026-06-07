@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -1032,7 +1033,7 @@ private fun durationPlainText(minutes: Int, isLoading: Boolean): String {
     }
 }
 
-private fun androidx.compose.ui.text.AnnotatedString.Builder.appendDurationPart(
+private fun AnnotatedString.Builder.appendDurationPart(
     part: DurationPart,
     unitStyle: SpanStyle,
 ) {
