@@ -644,7 +644,6 @@
     <string name="study_hint_show">Podpowiedź</string>
     <string name="study_hint_show_description">Pokaż podpowiedź z pierwszą literą</string>
     <string name="study_hint_show_translation_description">Pokaż podpowiedź z tłumaczeniem</string>
-    <string name="study_listen_prompt">Dotknij, aby odtworzyć. Jakie słowo słyszysz?</string>
     <string name="study_cant_listen_now">Nie mogę teraz słuchać</string>
     <string name="study_listening_postponed_message">Karty ze słuchania odłożone do następnej powtórki</string>
     <plurals name="study_hint_starts_with">
