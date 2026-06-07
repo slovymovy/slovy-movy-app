@@ -9,7 +9,6 @@ import com.slovy.slovymovyapp.data.learning.session.ExamplePair
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
 import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
-import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.data.util.parseClozeFromTaggedText
 import com.slovy.slovymovyapp.i18n.UiText
 import slovymovyapp.composeapp.generated.resources.*
@@ -162,11 +161,7 @@ fun SessionCard.toStudyCardUiState(favoriteLemmaLookup: FavoriteLemmaLookup = Fa
                 id = card.id.toString(),
                 chipLabel = UiText.Resource(Res.string.study_chip_fill_in),
                 prompt = cloze,
-                translationHint = sense.examples
-                    .firstOrNull { HtmlTagParser.plainText(it.text) == example.text }
-                    ?.targetLangTranslations
-                    ?.get(target)
-                    ?.let { toTranslationHintCloze(it) },
+                firstLetterHint = cloze.firstAnswerText().firstLetterHint(),
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,
@@ -387,6 +382,13 @@ private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
 private fun toTranslationHintCloze(text: String): StudyClozeTextUiState? {
     val parsed = parseClozeFromTaggedText(text) ?: return null
     return StudyClozeTextUiState(text = parsed.plainText, answerRanges = parsed.answerRanges)
+}
+
+private fun StudyClozeTextUiState.firstAnswerText(): String {
+    val range = answerRanges.firstOrNull() ?: return ""
+    val start = range.first.coerceIn(0, text.length)
+    val endExclusive = (range.last + 1).coerceIn(start, text.length)
+    return text.substring(start, endExclusive)
 }
 
 internal fun String.firstLetterHint(): FirstLetterHint? {

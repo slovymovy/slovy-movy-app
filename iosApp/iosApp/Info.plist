@@ -4,6 +4,13 @@
     <dict>
         <key>CFBundleDisplayName</key>
         <string>OpenWords</string>
+        <key>CFBundleLocalizations</key>
+        <array>
+            <string>en</string>
+            <string>nl</string>
+            <string>pl</string>
+            <string>ru</string>
+        </array>
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
 
