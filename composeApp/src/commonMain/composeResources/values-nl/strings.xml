@@ -638,7 +638,7 @@
     <string name="study_chip_listen">Luisteren</string>
     <string name="study_prompt_recall_word">Bedenk het woord</string>
     <string name="study_prompt_translate_to">Vertaal naar %1$s</string>
-    <string name="study_chip_recall">Wat betekent %1$s?</string>
+    <string name="study_chip_recall">Herinner %1$s</string>
     <string name="guess_by_context">Raad op basis van de context</string>
     <string name="study_play_word_audio">Speel woord af</string>
     <string name="study_play_prompt_audio">Speel opdracht af</string>
@@ -646,7 +646,6 @@
     <string name="study_hint_show">Hint</string>
     <string name="study_hint_show_description">Toon eerste-letterhint</string>
     <string name="study_hint_show_translation_description">Toon vertaalhint</string>
-    <string name="study_listen_prompt">Tik om af te spelen. Welk woord hoor je?</string>
     <string name="study_cant_listen_now">Nu even niet luisteren</string>
     <string name="study_listening_postponed_message">Luisterkaarten uitgesteld tot je volgende herhaling</string>
     <plurals name="study_hint_starts_with">

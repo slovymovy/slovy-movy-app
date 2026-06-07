@@ -651,7 +651,6 @@
         <item quantity="many">Hint: starts with %1$s, %2$d letters</item>
         <item quantity="other">Hint: starts with %1$s, %2$d letters</item>
     </plurals>
-    <string name="study_listen_prompt">Tap to play. What word do you hear?</string>
     <string name="study_cant_listen_now">Can&apos;t listen right now</string>
     <string name="study_listening_postponed_message">Listening cards paused until your next review</string>
     <string name="study_rating_prompt">How well did you remember this?</string>
