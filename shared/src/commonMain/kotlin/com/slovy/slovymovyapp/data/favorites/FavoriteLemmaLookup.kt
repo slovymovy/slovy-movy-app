@@ -9,9 +9,10 @@ class FavoriteLemmaLookup private constructor(private val normalizedLemmas: Set<
 
         fun empty(): FavoriteLemmaLookup = Empty
 
-        fun fromLemmas(lemmas: Set<String>): FavoriteLemmaLookup {
-            if (lemmas.isEmpty()) return Empty
-            return FavoriteLemmaLookup(lemmas.mapTo(HashSet()) { normalizedKey(it) })
+        fun fromLemmas(lemmas: Iterable<String>): FavoriteLemmaLookup {
+            val normalized = lemmas.mapTo(HashSet()) { normalizedKey(it) }
+            if (normalized.isEmpty()) return Empty
+            return FavoriteLemmaLookup(normalized)
         }
 
         fun normalizedKey(lemma: String): String = lemma.trim().lowercase()

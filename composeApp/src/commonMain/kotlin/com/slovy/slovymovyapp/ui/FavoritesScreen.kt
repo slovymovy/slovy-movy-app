@@ -56,6 +56,7 @@ import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
+import com.slovy.slovymovyapp.data.favorites.FavoriteLemmaLookup
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
@@ -1266,7 +1267,7 @@ private fun FavoriteSenseCard(
         onViewFullDetails = onViewFullDetails,
         relatedWords = item.relatedWords,
         onWordClick = onWordClick,
-        favoriteLemmas = favoriteLemmas
+        favoriteLemmaLookup = FavoriteLemmaLookup.fromLemmas(favoriteLemmas)
     )
 }
 

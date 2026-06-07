@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.data.favorites.FavoriteLemmaLookup
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
@@ -59,7 +60,7 @@ internal fun SenseCard(
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
     onViewFullDetails: (() -> Unit)? = null,
-    favoriteLemmas: Set<String> = emptySet()
+    favoriteLemmaLookup: FavoriteLemmaLookup = FavoriteLemmaLookup.empty()
 ) {
     val sense = data.sense
     val translationBasedHeader = remember(data.senseId, sense?.translations) { sense?.translationsHeader() }
@@ -253,7 +254,7 @@ internal fun SenseCard(
                                 MaterialTheme.colorScheme.onPrimaryContainer,
                                 relatedWords = relatedWords,
                                 onWordClick = onWordClick,
-                                favoriteLemmas = favoriteLemmas
+                                favoriteLemmaLookup = favoriteLemmaLookup
                             )
                             val (synonymBg, synonymText) = colorsForSynonyms()
                             EntryList(
@@ -263,7 +264,7 @@ internal fun SenseCard(
                                 synonymText,
                                 relatedWords = relatedWords,
                                 onWordClick = onWordClick,
-                                favoriteLemmas = favoriteLemmas
+                                favoriteLemmaLookup = favoriteLemmaLookup
                             )
                             val (antonymBg, antonymText) = colorsForAntonyms()
                             EntryList(
@@ -273,7 +274,7 @@ internal fun SenseCard(
                                 antonymText,
                                 relatedWords = relatedWords,
                                 onWordClick = onWordClick,
-                                favoriteLemmas = favoriteLemmas
+                                favoriteLemmaLookup = favoriteLemmaLookup
                             )
                         }
                     }

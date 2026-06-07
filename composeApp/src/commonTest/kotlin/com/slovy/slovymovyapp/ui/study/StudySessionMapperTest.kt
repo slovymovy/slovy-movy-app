@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.study
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.favorites.FavoriteLemmaLookup
 import com.slovy.slovymovyapp.data.learning.Card
 import com.slovy.slovymovyapp.data.learning.CardKind
 import com.slovy.slovymovyapp.data.learning.CardScheduling
@@ -141,7 +142,7 @@ class StudySessionMapperTest {
         )
 
         val mapped = assertIs<StudyCardUiState.Recognition>(
-            sessionCard.toStudyCardUiState(favoriteLemmas = setOf("Knus", "prettig")),
+            sessionCard.toStudyCardUiState(FavoriteLemmaLookup.fromLemmas(listOf("Knus", "prettig"))),
         )
 
         assertEquals(

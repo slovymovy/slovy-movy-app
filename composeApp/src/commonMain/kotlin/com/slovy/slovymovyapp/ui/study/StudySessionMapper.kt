@@ -19,9 +19,6 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
-fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiState? =
-    toStudyCardUiState(FavoriteLemmaLookup.fromLemmas(favoriteLemmas))
-
 fun SessionCard.toStudyCardUiState(favoriteLemmaLookup: FavoriteLemmaLookup = FavoriteLemmaLookup.empty()): StudyCardUiState? {
     if (loadState() != SessionCardLoadState.READY) return null
 

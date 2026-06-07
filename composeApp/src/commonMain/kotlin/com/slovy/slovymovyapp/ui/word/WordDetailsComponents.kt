@@ -111,13 +111,12 @@ internal fun EntryList(
     contentColor: Color,
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
-    favoriteLemmas: Set<String> = emptySet(),
+    favoriteLemmaLookup: FavoriteLemmaLookup = FavoriteLemmaLookup.empty(),
     chipShape: Shape = RoundedCornerShape(14.dp),
     chipBorder: BorderStroke? = null,
     chipSpacing: Dp = 6.dp
 ) {
     if (values.isEmpty()) return
-    val favoriteLemmaLookup = FavoriteLemmaLookup.fromLemmas(favoriteLemmas)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionLabel(label)
         FlowRow(
