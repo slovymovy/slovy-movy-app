@@ -17,10 +17,11 @@ import com.slovy.slovymovyapp.server.ai.enhancer.DbExtractEnhancerUtils.targetLa
 import com.slovy.slovymovyapp.server.cloudrun.CloudTasksAuthVerifier
 import com.slovy.slovymovyapp.server.github.GitHubClient
 import com.slovy.slovymovyapp.server.github.WordDataMerger
-import com.slovy.slovymovyapp.server.lists.LanguageListsCache
+import com.slovy.slovymovyapp.server.lists.LanguageListsBundle
 import com.slovy.slovymovyapp.server.lists.LanguageListsLoader
 import com.slovy.slovymovyapp.server.lists.LanguageListsResponse
 import com.slovy.slovymovyapp.server.lists.ListsVersionResponse
+import com.slovy.slovymovyapp.server.lists.TtlCache
 import com.slovy.slovymovyapp.server.tasks.RepoUpdateTaskClient
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -82,7 +83,9 @@ fun Application.module() {
 
     val db: AppDatabase = ServerDbManager(Files.createTempDirectory("openwords").toFile()).openApp()
     val repo = SettingsRepository(db)
-    val listsCache = LanguageListsCache(loader = LanguageListsLoader()::load)
+    val listsLoader = LanguageListsLoader()
+    val bundleCache = TtlCache<LanguageListsBundle>(loader = listsLoader::load)
+    val versionCache = TtlCache<String>(loader = listsLoader::loadVersion)
 
     install(CallLogging) {
         level = Level.INFO
@@ -116,9 +119,12 @@ fun Application.module() {
             }
             val json = Json { ignoreUnknownKeys = true }
             try {
-                val bundle = listsCache.get(lang)
+                // Prefer a fresh bundle's version (zero extra GitHub calls). Fall back to the
+                // dedicated version cache, which only does the cheap tree-walk and is unaffected
+                // by malformed list JSON or icon download failures.
+                val version = bundleCache.peekFresh(lang)?.version ?: versionCache.get(lang)
                 call.respondText(
-                    json.encodeToString(ListsVersionResponse.serializer(), ListsVersionResponse(bundle.version)),
+                    json.encodeToString(ListsVersionResponse.serializer(), ListsVersionResponse(version)),
                     ContentType.Application.Json
                 )
             } catch (_: GHFileNotFoundException) {
@@ -141,7 +147,7 @@ fun Application.module() {
             }
             val json = Json { ignoreUnknownKeys = true }
             try {
-                val bundle = listsCache.get(lang)
+                val bundle = bundleCache.get(lang)
                 val response = LanguageListsResponse(version = bundle.version, lists = bundle.lists)
                 call.respondText(
                     json.encodeToString(LanguageListsResponse.serializer(), response),

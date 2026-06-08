@@ -23,6 +23,15 @@ private val ICON_EXTENSIONS = mapOf(
 
 class LanguageListsLoader {
 
+    /**
+     * Fetches just the tree SHA of `lists/{lang}/` without downloading any list
+     * JSON or icon bytes. Used by the version endpoint so a cold cache or a
+     * malformed list file doesn't make a version check expensive or fail.
+     */
+    suspend fun loadVersion(lang: String): String = withContext(Dispatchers.IO) {
+        GitHubClient.loadLanguageListsTreeSha(lang)
+    }
+
     suspend fun load(lang: String): LanguageListsBundle = withContext(Dispatchers.IO) {
         val treeSha = GitHubClient.loadLanguageListsTreeSha(lang)
         val entries = GitHubClient.listLanguageListsFolder(lang)

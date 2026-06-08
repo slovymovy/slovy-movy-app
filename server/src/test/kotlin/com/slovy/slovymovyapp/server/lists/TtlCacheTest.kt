@@ -10,21 +10,20 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 
-class LanguageListsCacheTest {
-
-    private fun bundle(version: String) = LanguageListsBundle(version = version, lists = emptyList())
+class TtlCacheTest {
 
     @Test
     fun firstCall_invokesLoader() = runBlocking {
         val calls = AtomicInteger(0)
-        val cache = LanguageListsCache(
-            loader = { calls.incrementAndGet(); bundle("v1") },
+        val cache = TtlCache<String>(
+            loader = { calls.incrementAndGet(); "v1" },
             now = { Instant.fromEpochMilliseconds(0) },
         )
-        assertEquals("v1", cache.get("en").version)
+        assertEquals("v1", cache.get("en"))
         assertEquals(1, calls.get())
     }
 
@@ -32,8 +31,8 @@ class LanguageListsCacheTest {
     fun withinTtl_returnsCached() = runBlocking {
         val calls = AtomicInteger(0)
         var clock = Instant.fromEpochMilliseconds(0)
-        val cache = LanguageListsCache(
-            loader = { calls.incrementAndGet(); bundle("v1") },
+        val cache = TtlCache<String>(
+            loader = { calls.incrementAndGet(); "v1" },
             now = { clock },
         )
         cache.get("en")
@@ -46,65 +45,65 @@ class LanguageListsCacheTest {
     fun afterTtl_refetches() = runBlocking {
         val calls = AtomicInteger(0)
         var clock = Instant.fromEpochMilliseconds(0)
-        val cache = LanguageListsCache(
-            loader = { bundle("v${calls.incrementAndGet()}") },
+        val cache = TtlCache<String>(
+            loader = { "v${calls.incrementAndGet()}" },
             now = { clock },
         )
         cache.get("en")
         clock = Instant.fromEpochMilliseconds(25.hours.inWholeMilliseconds)
         val second = cache.get("en")
         assertEquals(2, calls.get(), "Loader must be re-invoked after TTL")
-        assertEquals("v2", second.version)
+        assertEquals("v2", second)
     }
 
     @Test
-    fun concurrentCalls_sameLang_coalesceToOneLoad() = runBlocking {
+    fun concurrentCalls_sameKey_coalesceToOneLoad() = runBlocking {
         val calls = AtomicInteger(0)
-        val cache = LanguageListsCache(
+        val cache = TtlCache<String>(
             loader = {
                 calls.incrementAndGet()
                 delay(50)
-                bundle("v1")
+                "v1"
             },
             now = { Instant.fromEpochMilliseconds(0) },
         )
         coroutineScope {
             repeat(10) { launch { cache.get("en") } }
         }
-        assertEquals(1, calls.get(), "Concurrent callers for the same language must coalesce into one upstream load")
+        assertEquals(1, calls.get(), "Concurrent callers for the same key must coalesce into one upstream load")
     }
 
     @Test
     fun failedLoad_isNotCached() = runBlocking {
         val calls = AtomicInteger(0)
-        val cache = LanguageListsCache(
+        val cache = TtlCache<String>(
             loader = {
                 if (calls.incrementAndGet() == 1) throw IllegalStateException("boom")
-                bundle("v-ok")
+                "v-ok"
             },
             now = { Instant.fromEpochMilliseconds(0) },
         )
         assertFailsWith<IllegalStateException> { cache.get("en") }
-        assertEquals("v-ok", cache.get("en").version)
+        assertEquals("v-ok", cache.get("en"))
         assertEquals(2, calls.get(), "Failure must not be cached")
     }
 
     @Test
     fun repeatedFailedProbes_doNotAccumulateLocks() = runBlocking {
-        val cache = LanguageListsCache(
+        val cache = TtlCache<String>(
             loader = { throw IllegalStateException("not found") },
             now = { Instant.fromEpochMilliseconds(0) },
         )
         repeat(100) { i ->
             assertFailsWith<IllegalStateException> { cache.get("bogus-$i") }
         }
-        assertEquals(0, cache.lockCount(), "Failed loads must not pin Mutex instances per language")
+        assertEquals(0, cache.lockCount(), "Failed loads must not pin Mutex instances per key")
     }
 
     @Test
     fun successfulLoad_retainsLockForFutureRefreshes() = runBlocking {
-        val cache = LanguageListsCache(
-            loader = { bundle("v1") },
+        val cache = TtlCache<String>(
+            loader = { "v1" },
             now = { Instant.fromEpochMilliseconds(0) },
         )
         cache.get("en")
@@ -112,20 +111,64 @@ class LanguageListsCacheTest {
     }
 
     @Test
-    fun differentLanguages_doNotBlockEachOther() = runBlocking {
-        val cache = LanguageListsCache(
-            loader = { lang ->
-                if (lang == "en") delay(100)
-                bundle("v-$lang")
+    fun differentKeys_doNotBlockEachOther() = runBlocking {
+        val cache = TtlCache<String>(
+            loader = { key ->
+                if (key == "en") delay(100)
+                "v-$key"
             },
             now = { Instant.fromEpochMilliseconds(0) },
         )
-        val (en, ru) = coroutineScope {
+        val results = coroutineScope {
             val enJob = async { cache.get("en") }
             val ruJob = async { cache.get("ru") }
             listOf(enJob, ruJob).awaitAll()
-        }.let { it[0] to it[1] }
-        assertEquals("v-en", en.version)
-        assertEquals("v-ru", ru.version)
+        }
+        assertEquals("v-en", results[0])
+        assertEquals("v-ru", results[1])
+    }
+
+    @Test
+    fun peekFresh_returnsNullWhenAbsent() = runBlocking {
+        val cache = TtlCache<String>(
+            loader = { "v1" },
+            now = { Instant.fromEpochMilliseconds(0) },
+        )
+        assertNull(cache.peekFresh("en"), "peekFresh must return null when no entry is cached")
+    }
+
+    @Test
+    fun peekFresh_returnsValueWhenFresh() = runBlocking {
+        val cache = TtlCache<String>(
+            loader = { "v1" },
+            now = { Instant.fromEpochMilliseconds(0) },
+        )
+        cache.get("en")
+        assertEquals("v1", cache.peekFresh("en"))
+    }
+
+    @Test
+    fun peekFresh_returnsNullWhenStale() = runBlocking {
+        var clock = Instant.fromEpochMilliseconds(0)
+        val cache = TtlCache<String>(
+            loader = { "v1" },
+            now = { clock },
+        )
+        cache.get("en")
+        clock = Instant.fromEpochMilliseconds(25.hours.inWholeMilliseconds)
+        assertNull(cache.peekFresh("en"), "peekFresh must return null once the entry is past TTL")
+    }
+
+    @Test
+    fun peekFresh_doesNotTriggerLoader() = runBlocking {
+        val calls = AtomicInteger(0)
+        val cache = TtlCache<String>(
+            loader = { calls.incrementAndGet(); "v1" },
+            now = { Instant.fromEpochMilliseconds(0) },
+        )
+        cache.peekFresh("en")
+        cache.peekFresh("en")
+        cache.peekFresh("en")
+        assertEquals(0, calls.get(), "peekFresh must never invoke the loader")
     }
 }
