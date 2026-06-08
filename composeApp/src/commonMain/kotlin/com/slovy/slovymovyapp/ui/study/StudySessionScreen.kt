@@ -2,7 +2,6 @@ package com.slovy.slovymovyapp.ui.study
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -105,8 +104,6 @@ import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.SpeakerOffVector
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
-import com.slovy.slovymovyapp.ui.icons.ImageOtterSessionComplete
-import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
@@ -115,7 +112,6 @@ import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.guess_by_context
 import slovymovyapp.composeapp.generated.resources.study_action_close
-import slovymovyapp.composeapp.generated.resources.study_action_done_for_now
 import slovymovyapp.composeapp.generated.resources.study_action_retry
 import slovymovyapp.composeapp.generated.resources.study_actions_autoplay
 import slovymovyapp.composeapp.generated.resources.study_actions_autoplay_description
@@ -124,8 +120,6 @@ import slovymovyapp.composeapp.generated.resources.study_actions_menu
 import slovymovyapp.composeapp.generated.resources.study_actions_remove
 import slovymovyapp.composeapp.generated.resources.study_actions_suspend
 import slovymovyapp.composeapp.generated.resources.study_actions_suspend_description
-import slovymovyapp.composeapp.generated.resources.study_complete_description
-import slovymovyapp.composeapp.generated.resources.study_complete_supporting
 import slovymovyapp.composeapp.generated.resources.study_remove_cancel
 import slovymovyapp.composeapp.generated.resources.study_remove_confirm
 import slovymovyapp.composeapp.generated.resources.study_remove_message
