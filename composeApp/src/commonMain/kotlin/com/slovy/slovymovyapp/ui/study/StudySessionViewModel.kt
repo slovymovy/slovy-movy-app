@@ -672,7 +672,7 @@ class StudySessionViewModel(
             minutes = (clock.now() - sessionStartedAt).inWholeMinutes.toInt().coerceAtLeast(1),
             streakDays = streakDays,
             message = randomCompletionMessage(language),
-            hero = if (snapshot == null) {
+            hero = if (snapshot == null || reviewedCount == 0) {
                 StudySessionCompleteHero.None
             } else {
                 resolveStudySessionCompleteHero(
