@@ -148,7 +148,7 @@ private fun MilestoneConfetti(
         ConfettiPiece(0.46f, 0.96f, ConfettiShape.TICK, primary, 6f, -12f),
     )
     Canvas(modifier = modifier) {
-        pieces.forEachIndexed { index, piece ->
+        pieces.forEach { piece ->
             val alpha = 0.55f
             val center = Offset(piece.x * size.width, piece.y * size.height)
             rotate(degrees = piece.rotation, pivot = center) {

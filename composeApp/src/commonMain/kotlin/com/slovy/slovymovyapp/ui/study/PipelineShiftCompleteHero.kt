@@ -66,7 +66,7 @@ internal fun PipelineShiftCompleteHero(
                 modifier = Modifier.fillMaxWidth(),
             )
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                stages.forEachIndexed { index, stage ->
+                stages.forEach { stage ->
                     PipelineShiftRow(
                         stage = stage,
                         maxValue = maxValue,

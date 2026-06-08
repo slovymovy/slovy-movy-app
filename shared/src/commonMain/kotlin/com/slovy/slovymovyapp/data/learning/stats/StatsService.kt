@@ -30,7 +30,7 @@ class StatsService(
         timeZone: TimeZone = TimeZone.currentSystemDefault(),
         today: LocalDate = clock.now().toLocalDateTime(timeZone).date,
     ): StatsRewardSnapshot {
-        val practicedDays = practicedDays(langCode = langCode, since = 0L, timeZone = timeZone)
+        val practicedDays = practicedDays(langCode = langCode, timeZone = timeZone)
         return StatsRewardSnapshot(
             streakDays = computeStreak(today = today, practicedDays = practicedDays),
             pipeline = pipelineSnapshot(langCode),
@@ -66,7 +66,7 @@ class StatsService(
             since = weekStartMs,
         ).executeAsOne().toInt()
 
-        val practicedDays = practicedDays(langCode = langCode, since = 0L, timeZone = timeZone)
+        val practicedDays = practicedDays(langCode = langCode, timeZone = timeZone)
         val streakDays = computeStreak(today = today, practicedDays = practicedDays)
 
         val monthStart = LocalDate(viewMonth.year, viewMonth.monthZeroBased + 1, 1)
@@ -137,10 +137,9 @@ class StatsService(
 
     private fun practicedDays(
         langCode: String,
-        since: Long,
         timeZone: TimeZone,
     ): Set<LocalDate> = learning
-        .selectReviewTimestampsSince(langCode, since = since)
+        .selectReviewTimestampsSince(langCode, since = 0L)
         .executeAsList()
         .asSequence()
         .map { Instant.fromEpochMilliseconds(it).toLocalDateTime(timeZone).date }
