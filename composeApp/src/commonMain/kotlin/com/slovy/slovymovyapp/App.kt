@@ -34,6 +34,10 @@ import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.*
+import com.slovy.slovymovyapp.data.remote.ListsClient
+import com.slovy.slovymovyapp.data.remote.RemoteList
+import com.slovy.slovymovyapp.ui.ListDetailScreen
+import com.slovy.slovymovyapp.ui.ListDetailViewModel
 import com.slovy.slovymovyapp.ui.study.StudySessionScreen
 import com.slovy.slovymovyapp.ui.study.StudySessionViewModel
 import com.slovy.slovymovyapp.ui.theme.AppTheme
@@ -260,6 +264,9 @@ private sealed interface AppDestination {
 
     @Serializable
     data object DataVersionMismatch : AppDestination
+
+    @Serializable
+    data class ListDetail(val languageCode: String) : AppDestination
 }
 
 @OptIn(ExperimentalTime::class)
@@ -288,6 +295,7 @@ fun App(
     val dictionaryClient = remember(platform, dictionaryRepository, localDbManager, dataManager) {
         DictionaryClient(platform, dictionaryRepository, localDbManager, dataManager)
     }
+    val listsClient = remember(platform) { ListsClient(platform) }
     val wordFetchManager = remember(dictionaryClient) {
         WordFetchManager(dictionaryClient)
     }
@@ -343,6 +351,7 @@ fun App(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
+    var selectedList by remember { mutableStateOf<RemoteList?>(null) }
     val appCoroutineScope = rememberCoroutineScope()
     var hasFavoritesToReview by remember { mutableStateOf(false) }
     val favoritesReviewCoordinator = remember { FavoritesReviewCoordinator() }
@@ -747,7 +756,7 @@ fun App(
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
-                        SearchViewModel(dictionaryRepository, settingsRepository)
+                        SearchViewModel(dictionaryRepository, settingsRepository, listsClient)
                     }
 
                     LaunchedEffect(pendingSearchQuery) {
@@ -792,7 +801,41 @@ fun App(
                                 navController.navigate(AppDestination.Settings)
                         },
                         hasFavoritesToReview = hasFavoritesToReview,
+                        onListClick = { list ->
+                            val lang = viewModel.state.selectedLanguage
+                            if (lang != null) {
+                                selectedList = list
+                                navController.navigate(AppDestination.ListDetail(lang.code))
+                            }
+                        },
                     )
+                }
+                composable<AppDestination.ListDetail> { backStackEntry ->
+                    val args = backStackEntry.toRoute<AppDestination.ListDetail>()
+                    val lang = Language.fromCodeOrNull(args.languageCode)
+                    val list = selectedList
+                    if (lang != null && list != null) {
+                        val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
+                            ListDetailViewModel(list, lang, dictionaryRepository, favoritesRepository)
+                        }
+                        ListDetailScreen(
+                            viewModel = viewModel,
+                            onBack = { navController.popBackStack() },
+                            onNavigateToWordDetail = { language, lemma, senseId ->
+                                val translationCodes = nativeLanguages
+                                    .filter { it != language }
+                                    .map { it.code }
+                                navController.navigate(
+                                    AppDestination.WordDetail(
+                                        dictionaryLanguageCode = language.code,
+                                        lemma = lemma,
+                                        targetSenseId = senseId,
+                                        translationLanguageCodes = translationCodes,
+                                    )
+                                )
+                            },
+                        )
+                    }
                 }
                 composable<AppDestination.Favorites> {
                     FavoritesScreen(

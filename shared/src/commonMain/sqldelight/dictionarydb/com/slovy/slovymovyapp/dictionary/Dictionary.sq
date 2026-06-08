@@ -396,3 +396,10 @@ SELECT sense_id, lemma_pos_id FROM lemma_pos_sense_hint WHERE sense_id IN ?;
 
 selectLemmaPosHintsByLemmaPosId:
 SELECT sense_id, lemma_pos_id FROM lemma_pos_sense_hint WHERE lemma_pos_id = ?;
+
+selectSensesForList:
+SELECT s.sense_id, l.lemma, s.sense_definition, s.learner_level, s.frequency
+FROM sense s
+JOIN lemma_pos lp ON lp.id = s.lemma_pos_id
+JOIN lemma l ON l.id = lp.lemma_id
+WHERE s.sense_id IN ?;

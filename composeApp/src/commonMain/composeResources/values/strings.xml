@@ -23,6 +23,7 @@
     <string name="search_section_explore">Explore</string>
     <string name="search_pull_to_refresh_hint">Pull down for new words</string>
     <string name="search_section_recently_saved">Recently saved</string>
+    <string name="search_section_lists_for_you">Lists for you</string>
     <string name="search_empty_start_typing">Start typing to search</string>
     <string name="search_no_dictionary_title">No dictionary downloaded</string>
     <string name="search_no_dictionary_description">Download a dictionary to start searching for words</string>
@@ -52,6 +53,12 @@
     <string name="stats_today_label">today</string>
     <string name="stats_this_week_label">this week</string>
     <string name="stats_library_section">My vocabulary</string>
+    <plurals name="search_list_word_count">
+        <item quantity="one">%1$d word</item>
+        <item quantity="few">%1$d words</item>
+        <item quantity="many">%1$d words</item>
+        <item quantity="other">%1$d words</item>
+    </plurals>
     <plurals name="stats_words_label">
         <item quantity="one">word</item>
         <item quantity="few">words</item>

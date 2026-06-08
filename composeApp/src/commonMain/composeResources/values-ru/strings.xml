@@ -23,6 +23,7 @@
     <string name="search_section_explore">Узнайте новое</string>
     <string name="search_pull_to_refresh_hint">Потяните, чтобы обновить</string>
     <string name="search_section_recently_saved">Недавно сохраненные</string>
+    <string name="search_section_lists_for_you">Списки для вас</string>
     <string name="search_empty_start_typing">Введите слово для поиска</string>
     <string name="search_no_dictionary_title">Словарь не скачан</string>
     <string name="search_no_dictionary_description">Скачайте словарь, чтобы начать поиск слов</string>
@@ -52,6 +53,12 @@
     <string name="stats_today_label">сегодня</string>
     <string name="stats_this_week_label">за неделю</string>
     <string name="stats_library_section">Мой словарь</string>
+    <plurals name="search_list_word_count">
+        <item quantity="one">%1$d слово</item>
+        <item quantity="few">%1$d слова</item>
+        <item quantity="many">%1$d слов</item>
+        <item quantity="other">%1$d слова</item>
+    </plurals>
     <plurals name="stats_words_label">
         <item quantity="one">слово</item>
         <item quantity="few">слова</item>

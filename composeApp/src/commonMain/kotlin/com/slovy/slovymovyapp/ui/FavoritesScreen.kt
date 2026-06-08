@@ -705,7 +705,7 @@ class FavoritesViewModel(
     }
 }
 
-private fun DictionaryRepository.FavoriteSenseMissingReason.toFavoriteSenseLoadError(language: Language): UiText {
+internal fun DictionaryRepository.FavoriteSenseMissingReason.toFavoriteSenseLoadError(language: Language): UiText {
     return when (this) {
         DictionaryRepository.FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED ->
             UiText.Resource(

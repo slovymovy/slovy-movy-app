@@ -157,6 +157,14 @@ class DictionaryRepository(
         ONLINE_ONLY,
     }
 
+    data class ListSenseItem(
+        val senseId: String,
+        val lemma: String,
+        val definition: String,
+        val learnerLevel: LearnerLevel,
+        val frequency: SenseFrequency,
+    )
+
     // Cache for loaded senses - reusable across the app
     private val senseCache = linkedMapOf<String, SenseWithPos>()
 
@@ -1127,6 +1135,29 @@ class DictionaryRepository(
         val recentFavorites = getRecentFavoriteLemmas(language, favorites = allFavorites)
         return suggestions to recentFavorites
     }
+
+    suspend fun getListSenses(language: Language, senseIds: List<String>): List<ListSenseItem> =
+        withContext(Dispatchers.IO) {
+            dataDbManager.withDictionaryReadOnlyIfExists(language) { db ->
+                if (db == null) return@withDictionaryReadOnlyIfExists emptyList()
+                val uuids = senseIds.mapNotNull { runCatching { Uuid.parse(it) }.getOrNull() }
+                if (uuids.isEmpty()) return@withDictionaryReadOnlyIfExists emptyList()
+                val byId = uuids.chunked(999).flatMap { chunk ->
+                    db.dictionaryQueries.selectSensesForList(chunk).executeAsList()
+                }.associateBy { it.sense_id.toString() }
+                senseIds.mapNotNull { id ->
+                    byId[id]?.let { row ->
+                        ListSenseItem(
+                            senseId = id,
+                            lemma = row.lemma,
+                            definition = row.sense_definition,
+                            learnerLevel = LearnerLevel.valueOf(row.learner_level.name),
+                            frequency = SenseFrequency.valueOf(row.frequency.name),
+                        )
+                    }
+                }
+            } ?: emptyList()
+        }
 
     /**
      * Gets recent favorite lemmas for the given language, most recent first.

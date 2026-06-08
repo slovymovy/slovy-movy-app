@@ -1,7 +1,9 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -26,16 +28,29 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.slovy.slovymovyapp.data.remote.ListsClient
+import com.slovy.slovymovyapp.data.remote.RemoteList
 import com.slovy.slovymovyapp.ui.word.DownloadVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
@@ -66,6 +81,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.uuid.Uuid
@@ -81,12 +97,14 @@ data class SearchUiState(
     val isLanguageDropdownExpanded: Boolean = false,
     val isSuggestionsRefreshing: Boolean = false,
     val wordSuggestions: List<String> = emptyList(),
-    val favoriteLemmas: List<String> = emptyList()
+    val favoriteLemmas: List<String> = emptyList(),
+    val curatedLists: List<RemoteList> = emptyList()
 )
 
 class SearchViewModel(
     private val repository: DictionaryRepository,
     private val settingsRepository: SettingsRepository,
+    private val listsClient: ListsClient,
 ) : ViewModel() {
 
     data class Search(
@@ -208,6 +226,13 @@ class SearchViewModel(
         }
     }
 
+    fun refreshLists() {
+        viewModelScope.launch {
+            val language = state.selectedLanguage ?: return@launch
+            state = state.copy(curatedLists = listsClient.getLists(language))
+        }
+    }
+
     fun updateQuery(newQuery: String) {
         val normalized = newQuery.trim()
         // Update UI state immediately for responsive typing
@@ -277,11 +302,10 @@ class SearchViewModel(
                 resetFocus = langChanged
             )
         }
-        // Load suggestions for new language
+        // Load suggestions and lists for new language
         if (langChanged) {
-            viewModelScope.launch {
-                loadSuggestionsForCurrentLanguage()
-            }
+            viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
+            refreshLists()
         }
     }
 
@@ -304,16 +328,18 @@ fun SearchScreen(
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
+    onListClick: (RemoteList) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
 
-    // Refresh language indicators, recent favorites, and search results when screen is opened
+    // Refresh language indicators, recent favorites, search results, and lists when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
         viewModel.refreshRecentFavorites()
         viewModel.refreshResults()
+        viewModel.refreshLists()
     }
 
     LaunchedEffect(savedQuery) {
@@ -359,6 +385,7 @@ fun SearchScreen(
         },
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onRefreshSuggestions = { viewModel.refreshSuggestionsFromPull() },
+        onListClick = onListClick,
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
         onNavigateToSettings = onNavigateToSettings,
@@ -377,6 +404,7 @@ fun SearchScreenContent(
     onLanguageSelected: (Language?) -> Unit = {},
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onRefreshSuggestions: () -> Unit = {},
+    onListClick: (RemoteList) -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
@@ -510,7 +538,9 @@ fun SearchScreenContent(
                                 EmptySearchState(
                                     wordSuggestions = state.wordSuggestions,
                                     favoriteLemmas = state.favoriteLemmas,
-                                    onWordClick = onSuggestionSelected
+                                    curatedLists = state.curatedLists,
+                                    onWordClick = onSuggestionSelected,
+                                    onListClick = onListClick
                                 )
                             }
                         }
@@ -614,8 +644,11 @@ private fun SearchResultCard(
 private fun EmptySearchState(
     wordSuggestions: List<String>,
     favoriteLemmas: List<String>,
-    onWordClick: (String) -> Unit
+    curatedLists: List<RemoteList>,
+    onWordClick: (String) -> Unit,
+    onListClick: (RemoteList) -> Unit
 ) {
+    val isDark = LocalIsDarkTheme.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -661,7 +694,28 @@ private fun EmptySearchState(
             }
         }
 
-        if (favoriteLemmas.isNotEmpty()) {
+        if (curatedLists.isNotEmpty()) {
+            Text(
+                text = stringResource(Res.string.search_section_lists_for_you).uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.2.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(
+                    top = if (wordSuggestions.isNotEmpty()) 12.dp else 8.dp,
+                    bottom = 2.dp
+                )
+            )
+            curatedLists.forEachIndexed { index, list ->
+                ListCard(
+                    list = list,
+                    featured = index == 0,
+                    isDark = isDark,
+                    onClick = { onListClick(list) }
+                )
+            }
+        } else if (favoriteLemmas.isNotEmpty()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -689,7 +743,7 @@ private fun EmptySearchState(
             }
         }
 
-        if (wordSuggestions.isEmpty() && favoriteLemmas.isEmpty()) {
+        if (wordSuggestions.isEmpty() && curatedLists.isEmpty() && favoriteLemmas.isEmpty()) {
             Text(
                 text = stringResource(Res.string.search_empty_start_typing),
                 style = MaterialTheme.typography.bodyMedium,
@@ -701,6 +755,169 @@ private fun EmptySearchState(
             )
         }
     }
+}
+
+@Composable
+private fun ListCard(
+    list: RemoteList,
+    featured: Boolean,
+    isDark: Boolean,
+    onClick: () -> Unit
+) {
+    val localeCode = Locale.current.language
+    val title = list.title[localeCode] ?: list.title["en"] ?: list.id
+    val subtitle = list.subtitle[localeCode] ?: list.subtitle["en"] ?: ""
+    val badge = list.labels[localeCode]?.firstOrNull() ?: list.labels["en"]?.firstOrNull()
+    val wordCount = list.senseIds.size
+    val (bgColor, fgColor) = vibrantColorsForList(list.id, isDark)
+
+    val cardHeight = if (featured) 104.dp else 90.dp
+    val motifColumnWidth = if (featured) 108.dp else 90.dp
+    val motifSize = if (featured) 72.dp else 62.dp
+    val horizontalBodyPadding = if (featured) 18.dp else 16.dp
+    val verticalBodyPadding = if (featured) 16.dp else 13.dp
+    val titleFontSize = if (featured) 20.sp else 18.sp
+    val shadowColor = if (isDark) Color.Black.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.13f)
+    val shadowElevation = if (isDark) 3.dp else 4.dp
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(cardHeight)
+            .shadow(
+                elevation = shadowElevation,
+                shape = RoundedCornerShape(12.dp),
+                ambientColor = shadowColor,
+                spotColor = shadowColor
+            )
+            .background(bgColor)
+            .clickable(
+                onClickLabel = title,
+                onClick = onClick
+            )
+    ) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(
+                        start = horizontalBodyPadding,
+                        top = verticalBodyPadding,
+                        bottom = verticalBodyPadding
+                    ),
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    if (badge != null) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color.White.copy(alpha = 0.18f))
+                                .padding(horizontal = 7.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = badge.uppercase(),
+                                fontSize = 8.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.4.sp,
+                                color = fgColor.copy(alpha = 0.82f)
+                            )
+                        }
+                        Spacer(Modifier.height(3.dp))
+                    }
+                    Text(
+                        text = title,
+                        fontSize = titleFontSize,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.3).sp,
+                        lineHeight = (titleFontSize.value * 1.1).sp,
+                        color = fgColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = subtitle,
+                        fontSize = 12.sp,
+                        fontStyle = FontStyle.Italic,
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        lineHeight = 15.6.sp,
+                        color = fgColor.copy(alpha = 0.72f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Text(
+                    text = pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = fgColor.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .width(motifColumnWidth)
+                    .fillMaxHeight()
+                    .background(
+                        Brush.linearGradient(
+                            colorStops = arrayOf(
+                                0f to fgColor.copy(alpha = 0.12f),
+                                0.6f to Color.Transparent
+                            ),
+                            start = Offset.Zero,
+                            end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(
+                    modifier = Modifier
+                        .size(motifSize)
+                        .alpha(0.92f)
+                ) {
+                    val scale = size.width / 96f
+                    val strokeWidth = 2f * scale
+                    listOf(
+                        Triple(16f, 62f, 64f),
+                        Triple(16f, 44f, 42f),
+                        Triple(16f, 26f, 26f)
+                    ).forEach { (x, y, w) ->
+                        drawRoundRect(
+                            color = fgColor,
+                            topLeft = Offset(x * scale, y * scale),
+                            size = Size(w * scale, 14f * scale),
+                            cornerRadius = CornerRadius(7f * scale),
+                            style = Stroke(width = strokeWidth)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+internal fun vibrantColorsForList(id: String, isDark: Boolean): Pair<Color, Color> {
+    var h = 0L
+    for (i in id.indices) {
+        h = (h + id[i].code.toLong() * (i + 1)) and 0xFFFFFFFFL
+    }
+    // light (bg, fg) to dark (bg, fg) — 8 slots from the design palette
+    val slots = listOf(
+        Pair(Color(0xFFC46A3D), Color(0xFFFFF6EE)) to Pair(Color(0xFFA55530), Color(0xFFFFF6EE)), // 0 Terracotta
+        Pair(Color(0xFFD4A03A), Color(0xFF2A1F08)) to Pair(Color(0xFFA87A1E), Color(0xFFFFF6DC)), // 1 Mustard
+        Pair(Color(0xFF3D7A7A), Color(0xFFF0FAFA)) to Pair(Color(0xFF2E5E5E), Color(0xFFE8F4F4)), // 2 Teal
+        Pair(Color(0xFF7A4A6E), Color(0xFFFBF0F6)) to Pair(Color(0xFF5C3854), Color(0xFFF4E4EC)), // 3 Plum
+        Pair(Color(0xFF6E7C3D), Color(0xFFF8FBE8)) to Pair(Color(0xFF525C2E), Color(0xFFEEF4D6)), // 4 Olive
+        Pair(Color(0xFFA04A28), Color(0xFFFFF1E8)) to Pair(Color(0xFF7A3A20), Color(0xFFFFE6D6)), // 5 Rust
+        Pair(Color(0xFF8B6E7C), Color(0xFFFBF4F8)) to Pair(Color(0xFF6A5360), Color(0xFFF2E2EA)), // 6 Mauve
+        Pair(Color(0xFF3A4A5C), Color(0xFFEEF4FA)) to Pair(Color(0xFF2A3848), Color(0xFFE0EAF4)), // 7 Ink
+    )
+    val (light, dark) = slots[(h % 8L).toInt()]
+    return if (isDark) dark else light
 }
 
 @Composable
@@ -867,6 +1084,34 @@ private fun SearchScreenPreviewEmptyQuery(
                 selectedLanguage = Language.ENGLISH,
                 wordSuggestions = listOf("the", "be", "to", "of", "and"),
                 favoriteLemmas = listOf("world", "time", "love")
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewWithLists(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                query = "",
+                results = emptyList(),
+                showNoResults = false,
+                availableLanguages = listOf(Language.DUTCH),
+                selectedLanguage = Language.DUTCH,
+                wordSuggestions = listOf("de", "het", "een", "zijn", "hebben"),
+                curatedLists = listOf(
+                    RemoteList(
+                        id = "nl_a1_basic",
+                        title = mapOf("en" to "500 first Dutch words", "nl" to "500 eerste Nederlandse woorden"),
+                        subtitle = mapOf("en" to "This is where your journey begins", "nl" to "Hier begint jouw reis"),
+                        labels = mapOf("en" to listOf("A1", "Basic"), "nl" to listOf("A1", "Basis")),
+                        senseIds = List(500) { it.toString() }
+                    )
+                )
             ),
         )
     }
