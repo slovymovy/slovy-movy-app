@@ -22,6 +22,7 @@ dependencies {
     implementation(libs.ktor.serverNetty)
     implementation(libs.ktor.serverCallLogging)
     implementation(libs.kotlinx.serializationJson)
+    implementation(libs.kotlinx.datetime)
     implementation(libs.sqldelight.sqliteDriver)
     implementation(libs.commons.text)
     implementation(libs.google.cloud.logging.logback)
