@@ -44,6 +44,54 @@ class ApplicationTest {
     }
 
     @Test
+    fun testListsVersion_returnsNotFoundForUnknownLanguage() = testApplication {
+        if (!GitHubClient.isAvailable()) return@testApplication
+
+        application {
+            module()
+        }
+        val response = client.get("/lists/zz-nonexistent/version")
+        assertEquals(HttpStatusCode.NotFound, response.status)
+    }
+
+    @Test
+    fun testListsVersion_returnsVersionWhenLanguagePresent() = testApplication {
+        if (!GitHubClient.isAvailable()) return@testApplication
+
+        application {
+            module()
+        }
+        val response = client.get("/lists/en/version")
+        if (response.status == HttpStatusCode.NotFound) return@testApplication
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
+        val json = Json { ignoreUnknownKeys = true }
+        val version = json.parseToJsonElement(response.bodyAsText())
+            .jsonObject["version"]?.jsonPrimitive?.content
+        assertNotNull(version, "Response must contain 'version'")
+        assertEquals(40, version.length, "Version must be a 40-char tree SHA")
+    }
+
+    @Test
+    fun testLists_returnsBundleWhenLanguagePresent() = testApplication {
+        if (!GitHubClient.isAvailable()) return@testApplication
+
+        application {
+            module()
+        }
+        val response = client.get("/lists/en")
+        if (response.status == HttpStatusCode.NotFound) return@testApplication
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
+        val json = Json { ignoreUnknownKeys = true }
+        val body = json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val version = body["version"]?.jsonPrimitive?.content
+        assertNotNull(version, "Response must contain 'version'")
+        assertEquals(40, version.length)
+        assertNotNull(body["lists"]?.jsonArray, "Response must contain 'lists' array")
+    }
+
+    @Test
     fun testExtract_returnsNotFoundForNonExistentWord() = testApplication {
         if (!GitHubClient.isAvailable()) return@testApplication
 
