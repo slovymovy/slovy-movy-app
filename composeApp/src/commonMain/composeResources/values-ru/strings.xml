@@ -266,6 +266,8 @@
     <string name="settings_developer_options_subtitle">Машина времени, таблицы, отладочная статистика</string>
     <string name="developer_non_debug_warning">Неотладочная сборка: разрушительные инструменты разработчика рискованны, а полное удаление учебных карточек отключено.</string>
     <string name="developer_non_debug_warning_icon">Предупреждение</string>
+    <string name="developer_completion_gallery_title">Состояния завершения учёбы</string>
+    <string name="developer_completion_gallery_description">Открывайте тестовые экраны награды без изменения учебных данных и ожидания реальных серий.</string>
     <string name="developer_time_machine_title">Машина времени</string>
     <string name="developer_time_machine_description">Сдвинуть все временные метки обучения назад, чтобы имитировать прошедшее время.</string>
     <string name="developer_intake_title">Активация</string>
@@ -609,6 +611,37 @@
         <item quantity="other">Пройдено %1$d карточки.</item>
     </plurals>
     <string name="study_complete_supporting">Вот так слова и запоминаются.</string>
+    <string name="study_complete_shift_title">Куда продвинулись слова</string>
+    <plurals name="study_complete_micro_cards_reviewed">
+        <item quantity="one">%1$d карточка</item>
+        <item quantity="few">%1$d карточки</item>
+        <item quantity="many">%1$d карточек</item>
+        <item quantity="other">%1$d карточки</item>
+    </plurals>
+    <plurals name="study_complete_micro_minutes">
+        <item quantity="one">%1$d мин</item>
+        <item quantity="few">%1$d мин</item>
+        <item quantity="many">%1$d мин</item>
+        <item quantity="other">%1$d мин</item>
+    </plurals>
+    <plurals name="study_complete_micro_streak">
+        <item quantity="one">%1$d день подряд</item>
+        <item quantity="few">%1$d дня подряд</item>
+        <item quantity="many">%1$d дней подряд</item>
+        <item quantity="other">%1$d дня подряд</item>
+    </plurals>
+    <string name="study_complete_milestone_title_7">Целая неделя!</string>
+    <string name="study_complete_milestone_title_14">Две недели без перерыва!</string>
+    <string name="study_complete_milestone_title_30">Целый месяц!</string>
+    <string name="study_complete_milestone_title_50">Пятьдесят дней!</string>
+    <string name="study_complete_milestone_title_100">Сто дней!</string>
+    <string name="study_complete_milestone_title_generic">%1$d дней подряд!</string>
+    <string name="study_complete_milestone_subtitle_7">Семь дней подряд. Отличный старт.</string>
+    <string name="study_complete_milestone_subtitle_14">Уже четырнадцать дней подряд. Привычка закрепляется.</string>
+    <string name="study_complete_milestone_subtitle_30">Тридцать дней подряд. Настоящая регулярность.</string>
+    <string name="study_complete_milestone_subtitle_50">Пятьдесят дней без единого пропуска. Отличная дисциплина.</string>
+    <string name="study_complete_milestone_subtitle_100">Сто дней без перерыва. Невероятное достижение.</string>
+    <string name="study_complete_milestone_subtitle_generic">%1$d дней без пропусков. Продолжайте в том же духе.</string>
     <string name="study_action_done_for_now">На сегодня хватит</string>
     <string name="study_progress_count">%1$d из %2$d</string>
     <string name="study_tap_to_flip">Нажмите, чтобы перевернуть</string>

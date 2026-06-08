@@ -81,6 +81,26 @@ class StatsScreenDataTest : BaseTest() {
     }
 
     @Test
+    fun reward_snapshot_returns_streak_and_pipeline() {
+        val cardId = Uuid.random()
+        insertCard(
+            senseId = Uuid.random(),
+            lemmaId = Uuid.random(),
+            state = CardState.REVIEW,
+            stability = 7.0,
+            cardId = cardId,
+        )
+        insertReviewLog(cardId, today.atStartOfDayIn(tz) + 8.hours)
+        insertReviewLog(cardId, today.atStartOfDayIn(tz) - 1.days + 8.hours)
+
+        val snapshot = newService().rewardSnapshot("en", timeZone = tz, today = today)
+        val counts = snapshot.pipeline.associate { it.id to it.count }
+
+        assertEquals(2, snapshot.streakDays)
+        assertEquals(1, counts[StatsPipelineStageId.MIDDLE])
+    }
+
+    @Test
     fun words_total_counts_distinct_lemmas() {
         val lemmaA = Uuid.random()
         val lemmaB = Uuid.random()

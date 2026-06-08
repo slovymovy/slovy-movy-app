@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -69,6 +70,9 @@ import com.slovy.slovymovyapp.logging.AppLogLevel
 import com.slovy.slovymovyapp.logging.AppLogSink
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.logging.NoOpAppLogSink
+import com.slovy.slovymovyapp.ui.study.StudySessionCompleteContent
+import com.slovy.slovymovyapp.ui.study.StudySessionCompletePreviewCase
+import com.slovy.slovymovyapp.ui.study.StudySessionCompletePreviewData
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.CancellationException
@@ -583,6 +587,16 @@ fun DeveloperScreenContent(
     onBack: () -> Unit = {},
 ) {
     val backLabel = stringResource(Res.string.common_back)
+    var selectedCompletionPreview by remember { mutableStateOf<StudySessionCompletePreviewCase?>(null) }
+    selectedCompletionPreview?.let { preview ->
+        StudySessionCompleteContent(
+            reward = preview.reward,
+            scrollState = rememberScrollState(),
+            onClose = { selectedCompletionPreview = null },
+            snackbarHostState = remember { SnackbarHostState() },
+        )
+        return
+    }
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
@@ -628,6 +642,19 @@ fun DeveloperScreenContent(
                         terminalRevision = state.terminalRevision,
                         scrollState = terminalScrollState,
                         onClear = onClearTerminalLogs,
+                    )
+                }
+
+                item {
+                    SectionHeader(
+                        title = stringResource(Res.string.developer_completion_gallery_title),
+                        modifier = Modifier.padding(top = AppSpacing.sm),
+                    )
+                }
+                item {
+                    CompletionGalleryCard(
+                        cases = StudySessionCompletePreviewData.cases,
+                        onOpen = { selectedCompletionPreview = it },
                     )
                 }
 
@@ -863,6 +890,58 @@ private fun DeveloperTerminalCard(
                             text = line,
                             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                             color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CompletionGalleryCard(
+    cases: List<StudySessionCompletePreviewCase>,
+    onOpen: (StudySessionCompletePreviewCase) -> Unit,
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+        ) {
+            Text(
+                text = stringResource(Res.string.developer_completion_gallery_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            cases.forEach { preview ->
+                FilledTonalButton(
+                    onClick = { onOpen(preview) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.Start,
+                    ) {
+                        Text(
+                            text = preview.label,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = preview.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.78f),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }

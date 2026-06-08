@@ -312,8 +312,7 @@ fun StudySessionScreenContent(
         )
 
         is StudySessionUiState.Complete -> StudySessionCompleteContent(
-            completedCount = state.completedCount,
-            message = state.message,
+            reward = state.reward,
             scrollState = completeScrollState,
             onClose = onEnd,
             snackbarHostState = snackbarHostState,
@@ -375,103 +374,6 @@ private fun StudySessionLoadingContent(
                 }
             }
             Spacer(Modifier.height(AppSpacing.lg))
-        }
-    }
-}
-
-@Composable
-private fun StudySessionCompleteContent(
-    completedCount: Int,
-    message: String,
-    scrollState: ScrollState,
-    onClose: () -> Unit,
-    snackbarHostState: SnackbarHostState,
-    modifier: Modifier = Modifier,
-) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { StudySessionSnackbarHost(hostState = snackbarHostState) },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
-        ) {
-            StudySessionTopBar(
-                progress = null,
-                onClose = onClose,
-                isAutoplayEnabled = false,
-                onOpenActions = null,
-            )
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                        .verticalScroll(scrollState)
-                        .padding(horizontal = AppSpacing.xl, vertical = AppSpacing.md),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(
-                        imageVector = with(SlovyIcons) { ImageOtterSessionComplete },
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth(0.58f)
-                            .heightIn(max = 280.dp),
-                    )
-                    Spacer(Modifier.height(AppSpacing.xxl))
-                    Text(
-                        text = message,
-                        style = MaterialTheme.typography.displaySmall,
-                        fontFamily = MaterialTheme.serifFontFamily,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center,
-                    )
-                    Spacer(Modifier.height(AppSpacing.md))
-                    Text(
-                        text = pluralStringResource(
-                            Res.plurals.study_complete_description,
-                            completedCount,
-                            completedCount,
-                        ),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontFamily = MaterialTheme.serifFontFamily,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                    Spacer(Modifier.height(AppSpacing.xs))
-                    Text(
-                        text = stringResource(Res.string.study_complete_supporting),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontFamily = MaterialTheme.serifFontFamily,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-            Button(
-                onClick = onClose,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = MaterialTheme.shapes.extraLarge,
-                contentPadding = PaddingValues(horizontal = AppSpacing.lg),
-            ) {
-                Text(
-                    text =stringResource(Res.string.study_action_done_for_now),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
         }
     }
 }
@@ -651,7 +553,7 @@ private fun StudyCardUiState.studyWord(): String =
     }
 
 @Composable
-private fun StudySessionSnackbarHost(
+internal fun StudySessionSnackbarHost(
     hostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
@@ -727,7 +629,7 @@ private fun StudySessionSnackbar(
 }
 
 @Composable
-private fun StudySessionTopBar(
+internal fun StudySessionTopBar(
     progress: StudySessionProgressUiState?,
     onClose: () -> Unit,
     isAutoplayEnabled: Boolean,
@@ -2766,7 +2668,15 @@ private fun StudySessionCompletePreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
-            state = StudySessionUiState.Complete(completedCount = 12, message = "Goed gedaan!"),
+            state = StudySessionUiState.Complete(
+                StudySessionCompleteUiState(
+                    cardsReviewed = 12,
+                    minutes = 6,
+                    streakDays = 1,
+                    message = "Goed gedaan!",
+                    hero = StudySessionCompleteHero.None,
+                )
+            ),
             onCancel = {},
             onEnd = {},
         )

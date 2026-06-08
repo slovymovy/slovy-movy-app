@@ -266,6 +266,8 @@
     <string name="settings_developer_options_subtitle">Time machine, tables, debug stats</string>
     <string name="developer_non_debug_warning">Non-debug build: destructive developer tools are risky, and the full learning-card wipe is disabled.</string>
     <string name="developer_non_debug_warning_icon">Warning</string>
+    <string name="developer_completion_gallery_title">Study completion states</string>
+    <string name="developer_completion_gallery_description">Open fake reward states without changing learning data or waiting for real streaks.</string>
     <string name="developer_time_machine_title">Time machine</string>
     <string name="developer_time_machine_description">Move every learning timestamp backwards to simulate elapsed time.</string>
     <string name="developer_intake_title">Intake</string>
@@ -609,6 +611,37 @@
         <item quantity="other">%1$d cards completed.</item>
     </plurals>
     <string name="study_complete_supporting">That’s how words stick.</string>
+    <string name="study_complete_shift_title">Where your words moved</string>
+    <plurals name="study_complete_micro_cards_reviewed">
+        <item quantity="one">%1$d card</item>
+        <item quantity="few">%1$d cards</item>
+        <item quantity="many">%1$d cards</item>
+        <item quantity="other">%1$d cards</item>
+    </plurals>
+    <plurals name="study_complete_micro_minutes">
+        <item quantity="one">%1$d min</item>
+        <item quantity="few">%1$d min</item>
+        <item quantity="many">%1$d min</item>
+        <item quantity="other">%1$d min</item>
+    </plurals>
+    <plurals name="study_complete_micro_streak">
+        <item quantity="one">%1$d day streak</item>
+        <item quantity="few">%1$d day streak</item>
+        <item quantity="many">%1$d day streak</item>
+        <item quantity="other">%1$d day streak</item>
+    </plurals>
+    <string name="study_complete_milestone_title_7">A full week!</string>
+    <string name="study_complete_milestone_title_14">Two weeks straight!</string>
+    <string name="study_complete_milestone_title_30">A whole month!</string>
+    <string name="study_complete_milestone_title_50">Fifty days!</string>
+    <string name="study_complete_milestone_title_100">One hundred days!</string>
+    <string name="study_complete_milestone_title_generic">%1$d days in a row!</string>
+    <string name="study_complete_milestone_subtitle_7">Seven consecutive days. Great momentum.</string>
+    <string name="study_complete_milestone_subtitle_14">Fourteen consecutive days. An excellent habit built.</string>
+    <string name="study_complete_milestone_subtitle_30">Thirty consecutive days. Outstanding consistency.</string>
+    <string name="study_complete_milestone_subtitle_50">Fifty days unbroken. Dedicated and consistent.</string>
+    <string name="study_complete_milestone_subtitle_100">One hundred days unbroken. An incredible milestone.</string>
+    <string name="study_complete_milestone_subtitle_generic">%1$d days unbroken. Keep the streak going.</string>
     <string name="study_action_done_for_now">Done for now</string>
     <string name="study_progress_count">%1$d of %2$d</string>
     <string name="study_tap_to_flip">Tap to flip</string>
