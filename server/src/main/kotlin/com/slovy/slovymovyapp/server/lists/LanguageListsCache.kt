@@ -29,13 +29,29 @@ class LanguageListsCache(
     suspend fun get(lang: String): LanguageListsBundle {
         entries[lang]?.let { if (isFresh(it)) return it.bundle }
         val lock = locks.computeIfAbsent(lang) { Mutex() }
-        return lock.withLock {
-            entries[lang]?.let { if (isFresh(it)) return@withLock it.bundle }
-            val bundle = loader(lang)
-            entries[lang] = Entry(bundle, now())
-            bundle
+        var cached = false
+        try {
+            return lock.withLock {
+                entries[lang]?.let {
+                    if (isFresh(it)) {
+                        cached = true
+                        return@withLock it.bundle
+                    }
+                }
+                val bundle = loader(lang)
+                entries[lang] = Entry(bundle, now())
+                cached = true
+                bundle
+            }
+        } finally {
+            // Loader failures leave no entry behind. The route accepts arbitrary
+            // language strings, so without this an attacker hitting /lists/<random>
+            // could grow the locks map unboundedly for the process lifetime.
+            if (!cached) locks.remove(lang, lock)
         }
     }
+
+    internal fun lockCount(): Int = locks.size
 
     private fun isFresh(entry: Entry): Boolean = now() - entry.fetchedAt < ttl
 }

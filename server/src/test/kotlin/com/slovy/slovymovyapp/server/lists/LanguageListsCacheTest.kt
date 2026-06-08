@@ -90,6 +90,28 @@ class LanguageListsCacheTest {
     }
 
     @Test
+    fun repeatedFailedProbes_doNotAccumulateLocks() = runBlocking {
+        val cache = LanguageListsCache(
+            loader = { throw IllegalStateException("not found") },
+            now = { Instant.fromEpochMilliseconds(0) },
+        )
+        repeat(100) { i ->
+            assertFailsWith<IllegalStateException> { cache.get("bogus-$i") }
+        }
+        assertEquals(0, cache.lockCount(), "Failed loads must not pin Mutex instances per language")
+    }
+
+    @Test
+    fun successfulLoad_retainsLockForFutureRefreshes() = runBlocking {
+        val cache = LanguageListsCache(
+            loader = { bundle("v1") },
+            now = { Instant.fromEpochMilliseconds(0) },
+        )
+        cache.get("en")
+        assertEquals(1, cache.lockCount(), "Successful load must keep its Mutex so refreshes coalesce")
+    }
+
+    @Test
     fun differentLanguages_doNotBlockEachOther() = runBlocking {
         val cache = LanguageListsCache(
             loader = { lang ->
