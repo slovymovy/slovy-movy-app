@@ -56,7 +56,7 @@ import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
-import com.slovy.slovymovyapp.data.favorites.FavoriteLemmaLookup
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository.Companion.normalizeLemma
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
@@ -411,7 +411,7 @@ class FavoritesViewModel(
             senses = senses,
             query = query,
             hasAnyFavorites = hasAnyFavorites,
-            favoriteLemmas = langFiltered.map { it.lemma }.toSet(),
+            favoriteLemmas = langFiltered.mapTo(HashSet()) { normalizeLemma(it.lemma) },
             availableLanguages = availableLanguages,
             selectedLanguage = selectedLanguage,
             isLanguageDropdownExpanded = if (availableLanguages.size > 1)
@@ -1267,7 +1267,7 @@ private fun FavoriteSenseCard(
         onViewFullDetails = onViewFullDetails,
         relatedWords = item.relatedWords,
         onWordClick = onWordClick,
-        favoriteLemmaLookup = FavoriteLemmaLookup.fromLemmas(favoriteLemmas)
+        favoriteLemmas = favoriteLemmas
     )
 }
 

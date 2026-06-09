@@ -48,8 +48,12 @@ data class CardFamilyDebugCount(
 
 class FavoritesRepository(private val db: AppDatabase) {
 
-    private val distinctLemmasByLangCache = mutableMapOf<Language, FavoriteLemmaLookup>()
+    private val distinctLemmasByLangCache = mutableMapOf<Language, Set<String>>()
     private val distinctLemmaCacheMutex = Mutex()
+
+    companion object {
+        fun normalizeLemma(lemma: String): String = lemma.trim().lowercase()
+    }
 
     @OptIn(ExperimentalTime::class)
     suspend fun add(senseId: String, language: Language, lemma: String) = withContext(Dispatchers.IO) {
@@ -202,13 +206,13 @@ class FavoritesRepository(private val db: AppDatabase) {
             }
     }
 
-    suspend fun getFavoriteLemmaLookup(language: Language): FavoriteLemmaLookup = withContext(Dispatchers.IO) {
+    /** Distinct favorite lemmas for [language], keyed by [normalizeLemma]. Cached until favorites change. */
+    suspend fun getFavoriteLemmas(language: Language): Set<String> = withContext(Dispatchers.IO) {
         distinctLemmaCacheMutex.withLock {
-            distinctLemmasByLangCache[language] ?: FavoriteLemmaLookup.fromLemmas(
+            distinctLemmasByLangCache.getOrPut(language) {
                 db.favoritesQueries.selectDistinctLemmasByLang(lang_code = language.code)
-                    .executeAsList(),
-            ).also { lookup ->
-                distinctLemmasByLangCache[language] = lookup
+                    .executeAsList()
+                    .mapTo(HashSet()) { normalizeLemma(it) }
             }
         }
     }
@@ -301,6 +305,9 @@ class FavoritesRepository(private val db: AppDatabase) {
         db.favoritesQueries.transaction {
             db.favoritesQueries.suspendAllCards()
             db.favoritesQueries.deleteAll()
+        }
+        distinctLemmaCacheMutex.withLock {
+            distinctLemmasByLangCache.clear()
         }
     }
 

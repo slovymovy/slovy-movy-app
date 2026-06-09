@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.slovy.slovymovyapp.data.favorites.FavoriteLemmaLookup
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository.Companion.normalizeLemma
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import org.jetbrains.compose.resources.stringResource
@@ -111,7 +111,7 @@ internal fun EntryList(
     contentColor: Color,
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
-    favoriteLemmaLookup: FavoriteLemmaLookup = FavoriteLemmaLookup.empty(),
+    favoriteLemmas: Set<String> = emptySet(),
     chipShape: Shape = RoundedCornerShape(14.dp),
     chipBorder: BorderStroke? = null,
     chipSpacing: Dp = 6.dp
@@ -135,7 +135,7 @@ internal fun EntryList(
                     shape = chipShape,
                     isClickable = isClickable,
                     isOnline = matchingKey?.let { relatedWords[it]?.online },
-                    isFavorite = favoriteLemmaLookup.contains(resolvedLemma),
+                    isFavorite = normalizeLemma(resolvedLemma) in favoriteLemmas,
                     border = chipBorder ?: if (isClickable) BorderStroke(0.5.dp, contentColor.copy(alpha = 0.18f)) else null,
                     onClick = if (isClickable) {
                         { onWordClick(resolvedLemma) }

@@ -16,7 +16,6 @@ import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
-import com.slovy.slovymovyapp.data.favorites.FavoriteLemmaLookup
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
@@ -326,7 +325,7 @@ class StudySessionViewModel(
                 AnalyticsEvent.FAVORITES_REMOVE,
                 mapOf("lang" to favorite.language.code, "source" to "study"),
             )
-            notifyFavoriteChanged(favorite.language)
+            onFavoriteChanged(favorite.language)
             skippedCount += 1
             currentCard = null
             currentOutcomes = emptyList()
@@ -353,7 +352,7 @@ class StudySessionViewModel(
                 AnalyticsEvent.FAVORITES_SAVE,
                 mapOf("lang" to favorite.language.code, "source" to "study_undo"),
             )
-            notifyFavoriteChanged(favorite.language)
+            onFavoriteChanged(favorite.language)
             skippedCount = (skippedCount - 1).coerceAtLeast(0)
             val activeAfterUndo = state as? StudySessionUiState.Active
             if (activeAfterUndo == null || currentCard == null) {
@@ -596,7 +595,7 @@ class StudySessionViewModel(
 
     private suspend fun showLoadedCard(sessionCard: SessionCard) {
         currentCard = sessionCard
-        val uiCard = sessionCard.toStudyCardUiState(loadFavoriteLemmaLookup())
+        val uiCard = sessionCard.toStudyCardUiState(loadFavoriteLemmas())
         if (uiCard == null) {
             state = StudySessionUiState.Error(
                 message = UiText.Resource(Res.string.study_error_card_data_missing),
@@ -619,20 +618,16 @@ class StudySessionViewModel(
         }
     }
 
-    private suspend fun loadFavoriteLemmaLookup(): FavoriteLemmaLookup {
-        val lang = language ?: return FavoriteLemmaLookup.empty()
+    private suspend fun loadFavoriteLemmas(): Set<String> {
+        val lang = language ?: return emptySet()
         return try {
-            favoritesRepository.getFavoriteLemmaLookup(lang)
+            favoritesRepository.getFavoriteLemmas(lang)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             AppLogger.warn(TAG, "Unable to load favorite lemmas for study synonyms lang=$langCode", e)
-            FavoriteLemmaLookup.empty()
+            emptySet()
         }
-    }
-
-    private fun notifyFavoriteChanged(lang: Language) {
-        onFavoriteChanged(lang)
     }
 
     private fun autoplayFrontAudioText(card: StudyCardUiState): String? =

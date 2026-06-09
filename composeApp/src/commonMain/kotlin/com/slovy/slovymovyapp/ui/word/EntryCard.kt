@@ -24,7 +24,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.slovy.slovymovyapp.data.favorites.FavoriteLemmaLookup
 import com.slovy.slovymovyapp.data.forms.GridCell
 import com.slovy.slovymovyapp.data.forms.TagMapping
 import com.slovy.slovymovyapp.data.remote.FormsSchemeView
@@ -516,7 +515,7 @@ internal fun EntryCard(
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
     lemma: String,
-    favoriteLemmaLookup: FavoriteLemmaLookup = FavoriteLemmaLookup.empty()
+    favoriteLemmas: Set<String> = emptySet()
 ) {
     val showContent = !cardLoading && cardError == null
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -621,7 +620,7 @@ internal fun EntryCard(
                         onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
                         relatedWords = relatedWords,
                         onWordClick = onWordClick,
-                        favoriteLemmaLookup = favoriteLemmaLookup
+                        favoriteLemmas = favoriteLemmas
                     )
                 }
             }

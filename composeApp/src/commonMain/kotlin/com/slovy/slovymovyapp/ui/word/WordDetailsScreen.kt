@@ -45,7 +45,6 @@ import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.favorites.FavoriteLemmaLookup
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.logging.AppLogger
@@ -298,7 +297,7 @@ class WordDetailViewModel(
     var favoriteSenses by mutableStateOf<Set<String>>(emptySet())
         private set
 
-    var favoriteLemmaLookup by mutableStateOf(FavoriteLemmaLookup.empty())
+    var favoriteLemmas by mutableStateOf<Set<String>>(emptySet())
         private set
 
     var isPlaying by mutableStateOf(false)
@@ -495,7 +494,7 @@ class WordDetailViewModel(
             }
 
             favoriteSenses = favoriteSenseIds
-            favoriteLemmaLookup = favoritesRepository.getFavoriteLemmaLookup(dictionaryLanguage)
+            favoriteLemmas = favoritesRepository.getFavoriteLemmas(dictionaryLanguage)
             val current = state
             if (current is WordDetailUiState.Content) {
                 state = current.reloadFavorite(::isSenseFavorite)
@@ -833,7 +832,7 @@ fun WordDetailScreen(
         isPlaying = viewModel.isPlaying,
         isPreparing = viewModel.isPreparing,
         canPlay = viewModel.availableVoices.isNotEmpty(),
-        favoriteLemmaLookup = viewModel.favoriteLemmaLookup,
+        favoriteLemmas = viewModel.favoriteLemmas,
         onRefresh = { viewModel.refreshFromPull() },
         onBack = onBack,
         onNavigateToSearch = onNavigateToSearch,
@@ -876,7 +875,7 @@ fun WordDetailScreenContent(
     isPlaying: Boolean = false,
     isPreparing: Boolean = false,
     canPlay: Boolean = false,
-    favoriteLemmaLookup: FavoriteLemmaLookup = FavoriteLemmaLookup.empty(),
+    favoriteLemmas: Set<String> = emptySet(),
     onRefresh: () -> Unit = {},
     onBack: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
@@ -1030,7 +1029,7 @@ fun WordDetailScreenContent(
                         isSenseFavorite = isSenseFavorite,
                         onSenseFavoriteToggle = onSenseFavoriteToggle,
                         onWordClick = onWordClick,
-                        favoriteLemmaLookup = favoriteLemmaLookup,
+                        favoriteLemmas = favoriteLemmas,
                         onOpenFeedback = onOpenFeedback,
                         onHeroMeasured = { heroThresholdPx.value = it }
                     )
@@ -1111,7 +1110,7 @@ private fun WordDetailContent(
     isSenseFavorite: (String) -> Boolean = { false },
     onSenseFavoriteToggle: (String) -> Unit = {},
     onWordClick: (String) -> Unit = {},
-    favoriteLemmaLookup: FavoriteLemmaLookup = FavoriteLemmaLookup.empty(),
+    favoriteLemmas: Set<String> = emptySet(),
     onOpenFeedback: () -> Unit = {},
     onHeroMeasured: (Float) -> Unit = {}
 ) {
@@ -1209,7 +1208,7 @@ private fun WordDetailContent(
                         onSenseFavoriteToggle = onSenseFavoriteToggle,
                         relatedWords = card.relatedWords,
                         onWordClick = onWordClick,
-                        favoriteLemmaLookup = favoriteLemmaLookup
+                        favoriteLemmas = favoriteLemmas
                     )
                 }
             }
@@ -1228,7 +1227,7 @@ private fun WordDetailContent(
                         contentColor = MaterialTheme.colorScheme.onSurface,
                         relatedWords = card.relatedWords,
                         onWordClick = onWordClick,
-                        favoriteLemmaLookup = favoriteLemmaLookup,
+                        favoriteLemmas = favoriteLemmas,
                         chipShape = RoundedCornerShape(50),
                         chipBorder = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                         chipSpacing = 8.dp

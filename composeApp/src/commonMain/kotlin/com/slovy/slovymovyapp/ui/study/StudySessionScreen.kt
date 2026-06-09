@@ -2436,6 +2436,11 @@ private fun productionCard() = StudyCardUiState.Production(
                 translation = "It's always cosy at Marja's.",
             ),
         ),
+        synonyms = listOf(
+            StudySynonymUiState("knus", known = true),
+            StudySynonymUiState("behaaglijk"),
+            StudySynonymUiState("aangenaam"),
+        ),
     ),
 )
 
@@ -2455,6 +2460,10 @@ private fun clozeCard() = StudyCardUiState.Cloze(
             text = "Het was zo gezellig bij jullie thuis.",
             answerRanges = listOf(11..18),
             filled = true,
+        ),
+        synonyms = listOf(
+            StudySynonymUiState("knus", known = true),
+            StudySynonymUiState("aangenaam"),
         ),
     ),
 )
@@ -2498,6 +2507,10 @@ private fun listeningCard() = StudyCardUiState.Listening(
                 text = "Het was zo <w>gezellig</w> bij jullie thuis.",
                 translation = "It was so lovely at your place.",
             ),
+        ),
+        synonyms = listOf(
+            StudySynonymUiState("knus", known = true),
+            StudySynonymUiState("aangenaam"),
         ),
     ),
 )
