@@ -33,6 +33,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
+import com.slovy.slovymovyapp.data.remote.ListsClient
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.remote.RemoteList
@@ -69,19 +70,29 @@ data class ListDetailUiState(
 )
 
 class ListDetailViewModel(
-    val list: RemoteList,
+    val listId: String,
     val language: Language,
     private val repository: DictionaryRepository,
     private val favoritesRepository: FavoritesRepository,
+    private val listsClient: ListsClient,
+    initialList: RemoteList? = null,
     private val onFavoriteChanged: (added: Boolean) -> Unit = {},
 ) : ViewModel() {
+    var list by mutableStateOf(initialList)
+        private set
     var state by mutableStateOf(ListDetailUiState())
         private set
     val scrollState = LazyListState()
 
     init {
         viewModelScope.launch {
-            val senses = repository.getListSenses(language, list.senseIds)
+            val resolvedList = list ?: listsClient.getLists(language).find { it.id == listId }
+            if (resolvedList == null) {
+                state = state.copy(isLoading = false)
+                return@launch
+            }
+            list = resolvedList
+            val senses = repository.getListSenses(language, resolvedList.senseIds)
             val allFavorites = favoritesRepository.getAll().filter { it.language == language }
             val favoritedIds = allFavorites.map { it.senseId }.toSet()
             val favoriteLemmas = allFavorites.map { it.lemma }.toSet()
@@ -97,7 +108,6 @@ class ListDetailViewModel(
                 isLoading = false,
                 favoriteLemmas = favoriteLemmas,
             )
-            items.forEach { item -> launch { loadSense(item) } }
         }
     }
 
@@ -191,8 +201,13 @@ fun ListDetailScreen(
             viewModel.reloadFavorites()
         }
     }
+    val list = viewModel.list
+    if (list == null) {
+        ListDetailLoadingScreen(onBack = onBack)
+        return
+    }
     ListDetailContent(
-        list = viewModel.list,
+        list = list,
         state = viewModel.state,
         scrollState = viewModel.scrollState,
         onBack = onBack,
@@ -200,6 +215,30 @@ fun ListDetailScreen(
         onFavoriteToggle = viewModel::toggleFavorite,
         onNavigateToWordDetail = { lemma, senseId -> onNavigateToWordDetail(viewModel.language, lemma, senseId) },
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ListDetailLoadingScreen(onBack: () -> Unit) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            contentAlignment = Alignment.Center,
+        ) { CircularProgressIndicator() }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

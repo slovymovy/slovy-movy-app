@@ -266,7 +266,7 @@ private sealed interface AppDestination {
     data object DataVersionMismatch : AppDestination
 
     @Serializable
-    data class ListDetail(val languageCode: String) : AppDestination
+    data class ListDetail(val languageCode: String, val listId: String) : AppDestination
 }
 
 @OptIn(ExperimentalTime::class)
@@ -351,7 +351,7 @@ fun App(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
-    var selectedList by remember { mutableStateOf<RemoteList?>(null) }
+    val listsCache = remember { mutableStateMapOf<String, RemoteList>() }
     val appCoroutineScope = rememberCoroutineScope()
     var hasFavoritesToReview by remember { mutableStateOf(false) }
     val favoritesReviewCoordinator = remember { FavoritesReviewCoordinator() }
@@ -804,8 +804,8 @@ fun App(
                         onListClick = { list ->
                             val lang = viewModel.state.selectedLanguage
                             if (lang != null) {
-                                selectedList = list
-                                navController.navigate(AppDestination.ListDetail(lang.code))
+                                listsCache[list.id] = list
+                                navController.navigate(AppDestination.ListDetail(lang.code, list.id))
                             }
                         },
                     )
@@ -813,14 +813,18 @@ fun App(
                 composable<AppDestination.ListDetail> { backStackEntry ->
                     val args = backStackEntry.toRoute<AppDestination.ListDetail>()
                     val lang = Language.fromCodeOrNull(args.languageCode)
-                    val list = selectedList
-                    if (lang == null || list == null) {
+                    if (lang == null) {
                         LaunchedEffect(Unit) { navController.popBackStack() }
                         return@composable
                     }
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
                         ListDetailViewModel(
-                            list, lang, dictionaryRepository, favoritesRepository,
+                            listId = args.listId,
+                            language = lang,
+                            repository = dictionaryRepository,
+                            favoritesRepository = favoritesRepository,
+                            listsClient = listsClient,
+                            initialList = listsCache[args.listId],
                             onFavoriteChanged = { _ ->
                                 favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
                                 appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
