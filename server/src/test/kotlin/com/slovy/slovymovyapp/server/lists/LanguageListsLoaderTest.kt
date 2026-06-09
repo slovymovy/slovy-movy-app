@@ -40,7 +40,9 @@ class LanguageListsLoaderTest {
         )
         bundle.lists.forEach { list ->
             assertTrue(list.id.isNotBlank(), "List id must not be blank")
-            assertTrue(list.title.isNotBlank(), "List '${list.id}' title must not be blank")
+            val enTitle = list.title["en"]
+            assertNotNull(enTitle, "List '${list.id}' must provide an 'en' title")
+            assertTrue(enTitle.isNotBlank(), "List '${list.id}' 'en' title must not be blank")
             list.icon?.let { icon ->
                 assertNotNull(icon.mimeType, "Icon for '${list.id}' must have mimeType")
                 assertTrue(icon.data.isNotBlank(), "Icon for '${list.id}' must have base64 data")
