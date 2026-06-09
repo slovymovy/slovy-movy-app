@@ -567,6 +567,7 @@ fun App(
                     ) {
                         LanguageSetupViewModel(
                             dataManager,
+                            dictionaryClient,
                             initialLearningLanguage = dictionaryLanguage,
                             initialNativeLanguages = nativeLanguages.toSet()
                         )

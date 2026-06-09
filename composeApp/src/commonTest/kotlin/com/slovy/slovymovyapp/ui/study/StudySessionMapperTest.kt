@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.study
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository.Companion.normalizeLemma
 import com.slovy.slovymovyapp.data.learning.Card
 import com.slovy.slovymovyapp.data.learning.CardKind
 import com.slovy.slovymovyapp.data.learning.CardScheduling
@@ -34,7 +35,7 @@ class StudySessionMapperTest {
             variant = CardVariant(CardKind.WORD_TO_TRANSLATION, targetLang = Language.ENGLISH.code),
         )
 
-        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState())
+        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState(emptySet()))
 
         assertEquals("gezellig", mapped.promptWord)
         assertEquals(StudyRecognitionMode.BILINGUAL, mapped.mode)
@@ -69,7 +70,7 @@ class StudySessionMapperTest {
             ),
         )
 
-        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState())
+        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState(emptySet()))
 
         assertEquals(studiedSenseId, mapped.activeSenseId)
         assertEquals(listOf(studiedSenseId, otherSenseId), mapped.senses.map { it.id })
@@ -106,7 +107,7 @@ class StudySessionMapperTest {
             ),
         )
 
-        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState())
+        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState(emptySet()))
 
         assertEquals(StudyRecognitionMode.MONOLINGUAL, mapped.mode)
         assertEquals(studiedSenseId, mapped.activeSenseId)
@@ -124,7 +125,7 @@ class StudySessionMapperTest {
             variant = CardVariant(CardKind.LISTENING_TRANSLATION, targetLang = Language.ENGLISH.code),
         )
 
-        val mapped = assertIs<StudyCardUiState.Listening>(sessionCard.toStudyCardUiState())
+        val mapped = assertIs<StudyCardUiState.Listening>(sessionCard.toStudyCardUiState(emptySet()))
 
         assertEquals("gezellig", mapped.promptAudioText)
         assertEquals("gezellig", mapped.back.headline)
@@ -132,6 +133,27 @@ class StudySessionMapperTest {
         assertEquals("a feeling of warmth", mapped.back.definition)
         assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
         assertEquals("It was so cosy.", mapped.back.examples.single().translation)
+    }
+
+    @Test
+    fun mapsSynonymsWithLibraryAwareness() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.WORD_TO_TRANSLATION, targetLang = Language.ENGLISH.code),
+            synonyms = listOf("knus", "aangenaam", "prettig"),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Recognition>(
+            sessionCard.toStudyCardUiState(setOf(normalizeLemma("Knus"), normalizeLemma("prettig"))),
+        )
+
+        assertEquals(
+            listOf(
+                StudySynonymUiState("knus", known = true),
+                StudySynonymUiState("prettig", known = true),
+                StudySynonymUiState("aangenaam", known = false),
+            ),
+            mapped.back.synonyms,
+        )
     }
 
     @Test
@@ -152,7 +174,7 @@ class StudySessionMapperTest {
             ),
         )
 
-        val mapped = assertIs<StudyCardUiState.Listening>(sessionCard.toStudyCardUiState())
+        val mapped = assertIs<StudyCardUiState.Listening>(sessionCard.toStudyCardUiState(emptySet()))
 
         assertEquals(studiedSenseId, mapped.activeSenseId)
         assertEquals(listOf(studiedSenseId, otherSenseId), mapped.senses.map { it.id })
@@ -185,7 +207,7 @@ class StudySessionMapperTest {
             ),
         )
 
-        val mapped = assertIs<StudyCardUiState.Production>(sessionCard.toStudyCardUiState())
+        val mapped = assertIs<StudyCardUiState.Production>(sessionCard.toStudyCardUiState(emptySet()))
 
         assertEquals(studiedSenseId, mapped.activeSenseId)
         assertEquals(listOf(studiedSenseId, otherSenseId), mapped.senses.map { it.id })
@@ -205,7 +227,7 @@ class StudySessionMapperTest {
             ),
         )
 
-        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState())
+        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
 
         assertEquals("Het was zo gezellig.", mapped.prompt.text)
         assertEquals(listOf(11..18), mapped.prompt.answerRanges)
@@ -229,7 +251,7 @@ class StudySessionMapperTest {
             ),
         )
 
-        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState())
+        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
 
         val hint = assertNotNull(mapped.translationHint)
         assertEquals("Het was zo gezellig.", hint.text)
@@ -247,7 +269,7 @@ class StudySessionMapperTest {
             ),
         )
 
-        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState())
+        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
 
         assertEquals("Vergeet niet om je paspoort mee te nemen.", mapped.prompt.text)
         assertEquals(listOf(28..30, 35..39), mapped.prompt.answerRanges)
@@ -318,6 +340,7 @@ class StudySessionMapperTest {
         example: ExamplePair? = null,
         studiedSenseIds: Set<String> = emptySet(),
         extraSenses: List<LanguageCardResponseSense> = emptyList(),
+        synonyms: List<String> = emptyList(),
     ): SessionCard {
         return SessionCard(
             card = Card(
@@ -341,7 +364,7 @@ class StudySessionMapperTest {
                 ),
             ),
             variant = variant,
-            wordResult = WordResult(card = languageCard(extraSenses)),
+            wordResult = WordResult(card = languageCard(extraSenses, synonyms)),
             senseId = PrimarySenseId,
             example = example,
             studiedSenseIds = studiedSenseIds,
@@ -350,6 +373,7 @@ class StudySessionMapperTest {
 
     private fun languageCard(
         extraSenses: List<LanguageCardResponseSense>,
+        synonyms: List<String>,
     ): LanguageCard =
         LanguageCard(
             lemma = "gezellig",
@@ -372,6 +396,7 @@ class StudySessionMapperTest {
                                 ),
                             ),
                             targetLangDefinitions = mapOf(Language.ENGLISH to "a feeling of warmth"),
+                            synonyms = synonyms,
                             translations = mapOf(
                                 Language.ENGLISH to listOf(
                                     LanguageCardTranslation(targetLangWord = "cosy"),

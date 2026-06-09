@@ -120,6 +120,7 @@ data class StudyCardBackUiState(
     val secondary: String? = null,
     val definition: String? = null,
     val examples: List<StudyExampleUiState> = emptyList(),
+    val synonyms: List<StudySynonymUiState> = emptyList(),
     val cloze: StudyClozeTextUiState? = null,
     val audioText: String? = headline,
 )
@@ -133,6 +134,11 @@ data class StudyCardSenseUiState(
 data class StudyExampleUiState(
     val text: String,
     val translation: String? = null,
+)
+
+data class StudySynonymUiState(
+    val word: String,
+    val known: Boolean = false,
 )
 
 data class StudyClozeTextUiState(
