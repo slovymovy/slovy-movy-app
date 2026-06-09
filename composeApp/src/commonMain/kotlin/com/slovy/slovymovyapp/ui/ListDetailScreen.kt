@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -169,7 +168,6 @@ fun ListDetailScreen(
 ) {
     ListDetailContent(
         list = viewModel.list,
-        language = viewModel.language,
         state = viewModel.state,
         scrollState = viewModel.scrollState,
         onBack = onBack,
@@ -183,7 +181,6 @@ fun ListDetailScreen(
 @Composable
 fun ListDetailContent(
     list: RemoteList,
-    language: Language,
     state: ListDetailUiState,
     scrollState: LazyListState = LazyListState(),
     onBack: () -> Unit = {},

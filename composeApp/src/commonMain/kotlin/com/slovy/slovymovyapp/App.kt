@@ -814,28 +814,30 @@ fun App(
                     val args = backStackEntry.toRoute<AppDestination.ListDetail>()
                     val lang = Language.fromCodeOrNull(args.languageCode)
                     val list = selectedList
-                    if (lang != null && list != null) {
-                        val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
-                            ListDetailViewModel(list, lang, dictionaryRepository, favoritesRepository)
-                        }
-                        ListDetailScreen(
-                            viewModel = viewModel,
-                            onBack = { navController.popBackStack() },
-                            onNavigateToWordDetail = { language, lemma, senseId ->
-                                val translationCodes = nativeLanguages
-                                    .filter { it != language }
-                                    .map { it.code }
-                                navController.navigate(
-                                    AppDestination.WordDetail(
-                                        dictionaryLanguageCode = language.code,
-                                        lemma = lemma,
-                                        targetSenseId = senseId,
-                                        translationLanguageCodes = translationCodes,
-                                    )
-                                )
-                            },
-                        )
+                    if (lang == null || list == null) {
+                        LaunchedEffect(Unit) { navController.popBackStack() }
+                        return@composable
                     }
+                    val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
+                        ListDetailViewModel(list, lang, dictionaryRepository, favoritesRepository)
+                    }
+                    ListDetailScreen(
+                        viewModel = viewModel,
+                        onBack = { navController.popBackStack() },
+                        onNavigateToWordDetail = { language, lemma, senseId ->
+                            val translationCodes = nativeLanguages
+                                .filter { it != language }
+                                .map { it.code }
+                            navController.navigate(
+                                AppDestination.WordDetail(
+                                    dictionaryLanguageCode = language.code,
+                                    lemma = lemma,
+                                    targetSenseId = senseId,
+                                    translationLanguageCodes = translationCodes,
+                                )
+                            )
+                        },
+                    )
                 }
                 composable<AppDestination.Favorites> {
                     FavoritesScreen(

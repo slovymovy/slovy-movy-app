@@ -1156,7 +1156,7 @@ class DictionaryRepository(
                         )
                     }
                 }
-            } ?: emptyList()
+            }
         }
 
     /**
@@ -1217,7 +1217,7 @@ class DictionaryRepository(
                 // Sample non-favorite rows with gaps, then fill remaining from unused candidates.
                 val candidates = batch.filter { it.lemma.lowercase() !in favoriteLemmas }
                 if (candidates.isNotEmpty()) {
-                    val startIndex = (0 until candidates.size).random()
+                    val startIndex = candidates.indices.random()
                     var index = startIndex
                     val step = (2..50).random()
                     while (suggestions.size < count && index < candidates.size) {
@@ -1389,15 +1389,11 @@ class DictionaryRepository(
         val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
         if (onlineOnlyIds.isNotEmpty()) {
             val localLemmaIds: Set<Uuid> = localDbManager.withLocalDictionaryIfExists { localDb ->
-                if (localDb == null) {
-                    emptySet()
-                } else {
-                    localDb.dictionaryQueries
-                        .selectLemmasByIds(onlineOnlyIds)
-                        .executeAsList()
-                        .map { it.id }
-                        .toSet()
-                }
+                localDb?.dictionaryQueries
+                    ?.selectLemmasByIds(onlineOnlyIds)
+                    ?.executeAsList()
+                    ?.map { it.id }
+                    ?.toSet() ?: emptySet()
             }
 
             result = result.map { item ->
