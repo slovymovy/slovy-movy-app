@@ -324,14 +324,25 @@ class DictionaryRepository(
         return result
     }
 
-    private fun Collection<String>.filterSelfReferences(
+    // Drops entries whose resolved lemma is the card's own lemma (form fallback can point
+    // e.g. "Gebogen" back at "buigen"). Applied to the map itself so no consumer — word
+    // family, synonyms, antonyms, highlighted words, cached senses — renders such entries
+    // as clickable or shows the current word's favorite state on them.
+    private fun removeSelfReferences(
+        relatedWords: Map<String, RelatedWord>,
+        lemma: String
+    ): Map<String, RelatedWord> = relatedWords.filterValues { related ->
+        !related.lemma.equals(lemma, ignoreCase = true)
+    }
+
+    private fun resolvesToCurrentLemma(
+        word: String,
         lemma: String,
         relatedWords: Map<String, RelatedWord>
-    ): List<String> = filterNot { word ->
-        if (word.equals(lemma, ignoreCase = true)) return@filterNot true
-        val matchingKey = relatedWords.keys.firstOrNull { key -> key.equals(word, ignoreCase = true) }
-            ?: return@filterNot false
-        relatedWords[matchingKey]?.lemma?.equals(lemma, ignoreCase = true) == true
+    ): Boolean {
+        if (word.equals(lemma, ignoreCase = true)) return true
+        // Map keys are always lowercase: direct hits use DB lemmas, fallbacks use lowercased lookups.
+        return relatedWords[word.lowercase()]?.lemma?.equals(lemma, ignoreCase = true) == true
     }
 
     private fun DictionaryQueries.resolveRelatedForm(
@@ -1006,11 +1017,17 @@ class DictionaryRepository(
         // Fetch word family from all databases (union)
         val rawWordFamily = q.selectWordFamilyByLemmaId(lemmaId).executeAsList().toSet()
         // Load related words from all databases (later databases take precedence)
-        val relatedWordsMap = loadRelatedWords(
+        val allRelatedWords = loadRelatedWords(
             dictDatabases, language,
             collectAllRelatedWords(entries, rawWordFamily, lemma)
         )
-        val wordFamily = rawWordFamily.filterSelfReferences(lemma, relatedWordsMap)
+        val relatedWordsMap = removeSelfReferences(allRelatedWords, lemma)
+        // The word family additionally hides self-resolving entries entirely — such chips
+        // would only repeat the current card. The check runs against the unfiltered map,
+        // since entries absent from the filtered map could also just be unresolvable.
+        val wordFamily = rawWordFamily.filterNot { word ->
+            resolvesToCurrentLemma(word, lemma, allRelatedWords)
+        }
 
         // Keep related words alongside each cached sense so lightweight sense loads
         // (e.g. Favorites) can still render clickable related terms.

@@ -1073,13 +1073,29 @@ class DictionaryRepositoryTest : BaseTest() {
             )
             // "gebogen" is an inflected form, not a standalone lemma
             q.insertForm(formId, lemmaPosId, "gebogen", "gebogen", FormSource.NATIVE)
+
+            // A second lemma references that form in its word family; resolution must point
+            // at the form's parent lemma ("buigen"), not at the card being loaded.
+            val relativeId = Uuid.random()
+            val relativePosId = Uuid.random()
+            q.insertLemma(relativeId, "nl", "buiging", "buiging", 3.0, false)
+            q.insertLemmaPos(relativePosId, relativeId, DictionaryPos.NOUN)
+            q.insertSense(
+                sense_id = Uuid.random(),
+                lemma_pos_id = relativePosId,
+                sense_definition = "bend",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.LOW,
+                semantic_group_id = "group2",
+                name_type = null
+            )
             // Word family stores original JSON casing — may be capitalised
-            q.insertLemmaWordFamily(lemmaId, "Gebogen")
+            q.insertLemmaWordFamily(relativeId, "Gebogen")
 
             val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
 
-            val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "buigen") }
-            assertNotNull(card, "Card should be built for 'buigen'")
+            val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "buiging") }
+            assertNotNull(card, "Card should be built for 'buiging'")
 
             // The form "gebogen" is not a lemma, so the form-fallback in loadRelatedWords must
             // resolve it to its parent lemma "buigen" — enabling chip navigation without a 404.
@@ -1098,7 +1114,7 @@ class DictionaryRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun getLanguageCard_filters_word_family_entries_that_resolve_to_current_lemma() {
+    fun getLanguageCard_filters_related_entries_that_resolve_to_current_lemma() {
         val platform = testPlatformDbSupport()
         val mgr = testDataDbManager()
         val localMgr = testLocalDbManager()
@@ -1115,10 +1131,11 @@ class DictionaryRepositoryTest : BaseTest() {
 
             val lemmaId = Uuid.random()
             val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
             q.insertLemma(lemmaId, "nl", "buigen", "buigen", 5.0, false)
             q.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.VERB)
             q.insertSense(
-                sense_id = Uuid.random(),
+                sense_id = senseId,
                 lemma_pos_id = lemmaPosId,
                 sense_definition = "to bend",
                 learner_level = LearnerLevel.B1,
@@ -1127,6 +1144,8 @@ class DictionaryRepositoryTest : BaseTest() {
                 name_type = null
             )
             q.insertForm(Uuid.random(), lemmaPosId, "gebogen", "gebogen", FormSource.NATIVE)
+            q.insertSenseSynonym(sense_id = senseId, synonym = "gebogen")
+            q.insertSenseAntonym(sense_id = senseId, antonym = "Buigen")
             q.insertLemmaWordFamily(lemmaId, "Buigen")
             q.insertLemmaWordFamily(lemmaId, "Gebogen")
             q.insertLemmaWordFamily(lemmaId, "buiging")
@@ -1160,6 +1179,28 @@ class DictionaryRepositoryTest : BaseTest() {
             assertTrue(
                 card.wordFamily.any { it.equals("buiging", ignoreCase = true) },
                 "Word family must keep real related lemmas"
+            )
+
+            // Centralized filtering: relatedWords itself must not carry self-resolving
+            // entries, so synonym/antonym chips ("gebogen", "Buigen") render non-clickable
+            // and never inherit the current word's favorite state.
+            assertFalse(
+                card.relatedWords.keys.any { it.equals("gebogen", ignoreCase = true) },
+                "relatedWords must not contain entries that resolve back to the current lemma"
+            )
+            assertTrue(
+                card.relatedWords.keys.any { it.equals("buiging", ignoreCase = true) },
+                "relatedWords must keep real related lemmas clickable"
+            )
+
+            val sense = card.entries.single().senses.single()
+            assertTrue(
+                sense.synonyms.contains("gebogen"),
+                "Self-resolving synonyms stay in the sense content; only their link is removed"
+            )
+            assertTrue(
+                sense.antonyms.contains("Buigen"),
+                "Self-resolving antonyms stay in the sense content; only their link is removed"
             )
         } finally {
             runBlocking { localMgr.closeAll() }
@@ -1203,13 +1244,29 @@ class DictionaryRepositoryTest : BaseTest() {
             )
             // Form stored with accent; form_normalized strips it to "lody"
             q.insertForm(formId, lemmaPosId, "łody", "lody", FormSource.NATIVE)
+
+            // A second lemma references the accented form; the normalized fallback must
+            // resolve it to the form's parent lemma ("loden"), not the card being loaded.
+            val relativeId = Uuid.random()
+            val relativePosId = Uuid.random()
+            q.insertLemma(relativeId, "nl", "lood", "lood", 3.0, false)
+            q.insertLemmaPos(relativePosId, relativeId, DictionaryPos.NOUN)
+            q.insertSense(
+                sense_id = Uuid.random(),
+                lemma_pos_id = relativePosId,
+                sense_definition = "lead (metal)",
+                learner_level = LearnerLevel.B1,
+                frequency = SenseFrequency.LOW,
+                semantic_group_id = "group2",
+                name_type = null
+            )
             // Word family entry with original JSON casing
-            q.insertLemmaWordFamily(lemmaId, "Łody")
+            q.insertLemmaWordFamily(relativeId, "Łody")
 
             val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
 
-            val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "loden") }
-            assertNotNull(card, "Card should be built for 'loden'")
+            val card = runBlocking { repo.getLanguageCard(Language.DUTCH, "lood") }
+            assertNotNull(card, "Card should be built for 'lood'")
 
             // "łody" exact-form lookup may miss if collation is case-sensitive;
             // the normalized fallback must resolve it via form_normalized = "lody".
