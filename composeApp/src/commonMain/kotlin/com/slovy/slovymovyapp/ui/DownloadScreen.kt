@@ -420,11 +420,13 @@ fun DownloadScreenContent(
 
             Text(
                 text = title,
+                modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontFamily = FontFamily.Default,
                     fontWeight = FontWeight.Bold
                 ),
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center
             )
 
             Spacer(Modifier.height(AppSpacing.sm))

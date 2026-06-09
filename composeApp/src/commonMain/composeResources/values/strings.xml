@@ -156,6 +156,16 @@
     <string name="language_setup_choose_learning_first">Choose a learning language first</string>
     <string name="language_setup_step_completed">Step %1$d completed</string>
     <string name="language_setup_update_anytime">Update anytime in Settings</string>
+    <string name="language_setup_no_translation_title">No translation needed</string>
+    <string name="language_setup_no_translation_subtitle">Keep everything in the language I'm learning</string>
+    <string name="language_setup_no_translation_accessibility">No translation needed. Keep everything in the language I'm learning. Selecting this clears selected translation languages.</string>
+    <string name="language_setup_request_language_before">Can't find your language?</string>
+    <string name="language_setup_request_language_link">Let us know</string>
+    <string name="language_setup_request_language_after">&#32;so we can add it.</string>
+    <string name="language_setup_request_language_title">Request a language</string>
+    <string name="language_setup_request_language_placeholder">Which language would you like to add?</string>
+    <string name="language_setup_request_language_sent_title">Request sent</string>
+    <string name="language_setup_request_language_sent_message">Thank you! We have received your language request. You can follow its progress on GitHub.</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_section_languages_i_learn">Languages I learn</string>
@@ -217,9 +227,7 @@
     <string name="common_status_online_only">Online only</string>
 
     <string name="feedback_dialog_sent_title">Feedback sent</string>
-    <string name="feedback_dialog_sent_message">Thank you! We have created a tracking issue for your feedback. You can
-        follow its progress on GitHub.
-    </string>
+    <string name="feedback_dialog_sent_message">Thank you! We have received your feedback. You can follow its progress on GitHub.</string>
     <string name="feedback_dialog_track_on_github">Track on GitHub</string>
     <string name="feedback_dialog_comment_label">Comment</string>
     <string name="feedback_dialog_email_label">Email (optional)</string>
