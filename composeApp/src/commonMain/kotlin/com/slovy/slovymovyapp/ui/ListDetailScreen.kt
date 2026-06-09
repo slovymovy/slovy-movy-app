@@ -24,7 +24,10 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
@@ -70,6 +73,7 @@ class ListDetailViewModel(
     val language: Language,
     private val repository: DictionaryRepository,
     private val favoritesRepository: FavoritesRepository,
+    private val onFavoriteChanged: (added: Boolean) -> Unit = {},
 ) : ViewModel() {
     var state by mutableStateOf(ListDetailUiState())
         private set
@@ -147,15 +151,30 @@ class ListDetailViewModel(
     fun toggleFavorite(senseId: String) {
         val item = findItem(senseId) ?: return
         viewModelScope.launch {
-            if (item.isFavorited) {
+            val added = if (item.isFavorited) {
                 favoritesRepository.remove(senseId, language)
                 updateItem(senseId) { it.copy(isFavorited = false) }
                 state = state.copy(favoriteLemmas = state.favoriteLemmas - item.lemma)
+                false
             } else {
                 favoritesRepository.add(senseId, language, item.lemma)
                 updateItem(senseId) { it.copy(isFavorited = true) }
                 state = state.copy(favoriteLemmas = state.favoriteLemmas + item.lemma)
+                true
             }
+            onFavoriteChanged(added)
+        }
+    }
+
+    fun reloadFavorites() {
+        viewModelScope.launch {
+            val allFavorites = favoritesRepository.getAll().filter { it.language == language }
+            val favoritedIds = allFavorites.map { it.senseId }.toSet()
+            val favoriteLemmas = allFavorites.map { it.lemma }.toSet()
+            state = state.copy(
+                items = state.items.map { it.copy(isFavorited = it.senseId in favoritedIds) },
+                favoriteLemmas = favoriteLemmas,
+            )
         }
     }
 }
@@ -166,6 +185,12 @@ fun ListDetailScreen(
     onBack: () -> Unit,
     onNavigateToWordDetail: (language: Language, lemma: String, senseId: String?) -> Unit,
 ) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(lifecycle) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewModel.reloadFavorites()
+        }
+    }
     ListDetailContent(
         list = viewModel.list,
         state = viewModel.state,

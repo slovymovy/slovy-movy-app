@@ -77,6 +77,7 @@ import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -131,6 +132,7 @@ class SearchViewModel(
     val noDictionaryScrollState = ScrollState(0)
     private var suggestionsInitialized = false
     private var savedSearchLanguage: Language? = null
+    private var listsJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -226,9 +228,13 @@ class SearchViewModel(
     }
 
     fun refreshLists() {
-        viewModelScope.launch {
+        listsJob?.cancel()
+        listsJob = viewModelScope.launch {
             val language = state.selectedLanguage ?: return@launch
-            state = state.copy(curatedLists = listsClient.getLists(language))
+            val lists = listsClient.getLists(language)
+            if (state.selectedLanguage == language) {
+                state = state.copy(curatedLists = lists)
+            }
         }
     }
 

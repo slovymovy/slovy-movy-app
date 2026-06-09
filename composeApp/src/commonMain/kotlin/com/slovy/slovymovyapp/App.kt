@@ -819,7 +819,13 @@ fun App(
                         return@composable
                     }
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
-                        ListDetailViewModel(list, lang, dictionaryRepository, favoritesRepository)
+                        ListDetailViewModel(
+                            list, lang, dictionaryRepository, favoritesRepository,
+                            onFavoriteChanged = { _ ->
+                                favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
+                                appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
+                            },
+                        )
                     }
                     ListDetailScreen(
                         viewModel = viewModel,
