@@ -4,6 +4,7 @@ import com.slovy.slovymovyapp.data.Language
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -34,6 +35,8 @@ class ListsClient(
         val response = httpClient.get("$serverBaseUrl/lists/${language.code}")
         if (!response.status.isSuccess()) return emptyList()
         json.decodeFromString(RemoteListsResponse.serializer(), response.bodyAsText()).lists
+    } catch (e: CancellationException) {
+        throw e
     } catch (_: Exception) {
         emptyList()
     }
