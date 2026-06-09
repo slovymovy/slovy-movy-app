@@ -50,11 +50,8 @@
         <item quantity="many">cards</item>
         <item quantity="other">cards</item>
     </plurals>
-    <string name="stats_duration_minutes_unit">min</string>
-    <string name="stats_duration_hours_unit">h</string>
-    <string name="duration_short_minutes">%1$d min</string>
-    <string name="duration_short_hours">%1$d h</string>
-    <string name="duration_short_hours_minutes">%1$d h %2$d min</string>
+    <string name="duration_unit_minutes">min</string>
+    <string name="duration_unit_hours">h</string>
     <string name="stats_today_label">today</string>
     <string name="stats_this_week_label">this week</string>
     <string name="stats_library_section">My vocabulary</string>

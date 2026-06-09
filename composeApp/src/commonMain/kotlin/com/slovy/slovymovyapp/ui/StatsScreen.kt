@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -26,7 +27,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -42,6 +45,7 @@ import com.slovy.slovymovyapp.data.learning.stats.StatsYearMonth
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.NumberFormatter
+import com.slovy.slovymovyapp.i18n.ShortDuration
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
@@ -1001,25 +1005,16 @@ private fun DurationText(
     )
 }
 
-private data class DurationPart(
+private data class ResolvedDurationPart(
     val value: Int,
     val unit: String,
 )
 
 @Composable
-private fun durationParts(minutes: Int, isLoading: Boolean): List<DurationPart> {
+private fun durationParts(minutes: Int, isLoading: Boolean): List<ResolvedDurationPart> {
     if (isLoading) return emptyList()
-    val minuteUnit = stringResource(Res.string.stats_duration_minutes_unit)
-    val hourUnit = stringResource(Res.string.stats_duration_hours_unit)
-    val hours = minutes / 60
-    val remainder = minutes % 60
-    return when {
-        hours <= 0 -> listOf(DurationPart(minutes, minuteUnit))
-        remainder == 0 -> listOf(DurationPart(hours, hourUnit))
-        else -> listOf(
-            DurationPart(hours, hourUnit),
-            DurationPart(remainder, minuteUnit),
-        )
+    return ShortDuration.parts(minutes).map { part ->
+        ResolvedDurationPart(value = part.value, unit = stringResource(part.unit))
     }
 }
 
@@ -1034,7 +1029,7 @@ private fun durationPlainText(minutes: Int, isLoading: Boolean): String {
 }
 
 private fun AnnotatedString.Builder.appendDurationPart(
-    part: DurationPart,
+    part: ResolvedDurationPart,
     unitStyle: SpanStyle,
 ) {
     append(part.value.toString())
@@ -1043,6 +1038,7 @@ private fun AnnotatedString.Builder.appendDurationPart(
         append(part.unit)
     }
 }
+
 @Composable
 private fun LibraryCard(state: StatsUiState) {
     StatsCard(
@@ -1237,7 +1233,7 @@ private fun rememberPipelineLabelLayout(labels: List<String>): PipelineLabelLayo
 }
 
 @Composable
-private fun pipelineLabelTextStyle(fontSize: androidx.compose.ui.unit.TextUnit): TextStyle =
+private fun pipelineLabelTextStyle(fontSize: TextUnit): TextStyle =
     MaterialTheme.typography.labelSmall.copy(
         fontWeight = FontWeight.Bold,
         fontSize = fontSize,
@@ -1248,8 +1244,8 @@ private fun pipelineLabelTextStyle(fontSize: androidx.compose.ui.unit.TextUnit):
 private fun measuredLabelWidth(
     labels: List<String>,
     style: TextStyle,
-    textMeasurer: androidx.compose.ui.text.TextMeasurer,
-    density: androidx.compose.ui.unit.Density,
+    textMeasurer: TextMeasurer,
+    density: Density,
 ): Dp {
     val maxWidthPx = labels.maxOfOrNull { label ->
         textMeasurer.measure(

@@ -50,11 +50,8 @@
         <item quantity="many">kart</item>
         <item quantity="other">kart</item>
     </plurals>
-    <string name="stats_duration_minutes_unit">min</string>
-    <string name="stats_duration_hours_unit">godz.</string>
-    <string name="duration_short_minutes">%1$d min</string>
-    <string name="duration_short_hours">%1$d godz.</string>
-    <string name="duration_short_hours_minutes">%1$d godz. %2$d min</string>
+    <string name="duration_unit_minutes">min</string>
+    <string name="duration_unit_hours">godz.</string>
     <string name="stats_today_label">dziś</string>
     <string name="stats_this_week_label">w tym tygodniu</string>
     <string name="stats_library_section">Moje słownictwo</string>

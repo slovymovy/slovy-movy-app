@@ -60,6 +60,7 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.i18n.ShortDuration
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
@@ -483,45 +484,31 @@ class FavoritesViewModel(
         val delay = (nextReviewAtEpochMs - clock.now().toEpochMilliseconds())
             .coerceAtLeast(0L)
             .milliseconds
-        val totalMinutes = delay.roundUpToWholeMinutes(minimumMinutes = 1)
-        val hours = (totalMinutes / 60).toInt()
-        val minutes = (totalMinutes % 60).toInt()
-        return when {
-            hours == 0 -> ReviewTimeLabel(
-                label = UiText.Resource(
-                    Res.string.duration_short_minutes,
-                    args = listOf(minutes),
-                ),
-                accessibilityValue = UiText.Plural(
-                    Res.plurals.favorites_study_done_duration_minutes,
-                    quantity = minutes,
-                    args = listOf(minutes),
-                ),
+        val totalMinutes = delay.roundUpToWholeMinutes(minimumMinutes = 1).toInt()
+        val hours = totalMinutes / 60
+        val minutes = totalMinutes % 60
+        val accessibilityValue = when {
+            hours == 0 -> UiText.Plural(
+                Res.plurals.favorites_study_done_duration_minutes,
+                quantity = minutes,
+                args = listOf(minutes),
             )
 
-            minutes == 0 -> ReviewTimeLabel(
-                label = UiText.Resource(
-                    Res.string.duration_short_hours,
-                    args = listOf(hours),
-                ),
-                accessibilityValue = UiText.Plural(
-                    Res.plurals.favorites_study_done_duration_hours,
-                    quantity = hours,
-                    args = listOf(hours),
-                ),
+            minutes == 0 -> UiText.Plural(
+                Res.plurals.favorites_study_done_duration_hours,
+                quantity = hours,
+                args = listOf(hours),
             )
 
-            else -> ReviewTimeLabel(
-                label = UiText.Resource(
-                    Res.string.duration_short_hours_minutes,
-                    args = listOf(hours, minutes),
-                ),
-                accessibilityValue = UiText.Resource(
-                    Res.string.favorites_study_done_duration_hours_minutes,
-                    args = listOf(hours, minutes),
-                ),
+            else -> UiText.Resource(
+                Res.string.favorites_study_done_duration_hours_minutes,
+                args = listOf(hours, minutes),
             )
         }
+        return ReviewTimeLabel(
+            label = ShortDuration.uiText(totalMinutes),
+            accessibilityValue = accessibilityValue,
+        )
     }
 
     private data class ReviewTimeLabel(
@@ -1639,7 +1626,7 @@ fun PreviewFavoritesScreenStudyDone(
             selectedLanguage = Language.DUTCH,
             studyDone = FavoritesStudyDoneUiState(
                 language = Language.DUTCH,
-                nextReviewLabel = UiText.Resource(Res.string.duration_short_hours, args = listOf(4)),
+                nextReviewLabel = ShortDuration.uiText(totalMinutes = 4 * 60),
                 nextReviewAccessibilityValue = UiText.Plural(
                     Res.plurals.favorites_study_done_duration_hours,
                     quantity = 4,

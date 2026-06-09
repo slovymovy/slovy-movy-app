@@ -14,4 +14,8 @@ sealed interface UiText {
         val quantity: Int,
         val args: List<Any> = emptyList()
     ) : UiText
+    data class Joined(
+        val items: List<UiText>,
+        val separator: String
+    ) : UiText
 }
