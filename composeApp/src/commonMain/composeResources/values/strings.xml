@@ -127,6 +127,7 @@
     <string name="download_content_desc_loading_info">Loading download information</string>
     <string name="download_content_desc_preparing">Preparing download</string>
     <string name="download_finalizing_recovering_progress">Refreshing favorites (%1$d/%2$d)</string>
+    <string name="download_finalizing_updating_lists">Updating word lists…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
         <item quantity="one">Refreshing favorites (%1$d/%2$d, %3$d failed)</item>
         <item quantity="few">Refreshing favorites (%1$d/%2$d, %3$d failed)</item>

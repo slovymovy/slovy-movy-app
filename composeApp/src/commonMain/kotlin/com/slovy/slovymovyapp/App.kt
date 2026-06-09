@@ -659,9 +659,14 @@ fun App(
                                         )
                                     }
                                 },
-                                finalize = { onRecoveryProgress ->
+                                finalize = { onRecoveryProgress, onWordListsSync ->
                                     favoritesReviewCoordinator.invalidateAllIntakeCache()
                                     dictionaryRepository.clearSenseCache()
+                                    // Bring the curated lists for the freshly downloaded language
+                                    // up to date while the finalizing screen is visible.
+                                    onWordListsSync(true)
+                                    listsService.sync(dictLang)
+                                    onWordListsSync(false)
                                     val recoveryJob = favoriteRecoveryController.ensureStarted()
                                     coroutineScope {
                                         val observerJob = launch {
