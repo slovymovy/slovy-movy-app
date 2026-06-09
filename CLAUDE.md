@@ -491,6 +491,10 @@ if (GitHubClient.isAvailable()) {
 
 - Avoid adding free-standing helper methods (top-level functions or private extensions) in unrelated files. Place new
   methods on the actual class/service that owns the behaviour, in the file where that class is implemented.
+- Do not declare extension functions on stdlib/runtime types you don't own (`String`, `Collection`, `List`, `Map`,
+  etc.) — a helper like `Collection<String>.filterSelfReferences(...)` reads as general-purpose API while encoding
+  class-specific logic. Write a regular function and pass the data as a parameter. Extensions on project-owned or
+  generated types (e.g. `DictionaryQueries.resolveRelatedForm`) are fine.
 - Avoid default parameter values if possible. Prefer explicit call sites so behaviour is obvious at the call and
   refactors don't silently change semantics for existing callers. Use defaults only when omission has a single,
   obvious meaning that all callers genuinely share.
