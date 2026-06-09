@@ -42,13 +42,16 @@
     <string name="stats_legend_today">сегодня</string>
     <string name="stats_legend_practiced">занятие</string>
     <string name="stats_legend_missed">пропуск</string>
-    <string name="stats_reviews_section">Повторы за неделю</string>
+    <string name="stats_active_days_all_time">всего активных дней</string>
+    <string name="stats_effort_section">Активность за неделю</string>
     <plurals name="stats_cards_unit">
         <item quantity="one">карточка</item>
         <item quantity="few">карточки</item>
         <item quantity="many">карточек</item>
         <item quantity="other">карточки</item>
     </plurals>
+    <string name="duration_unit_minutes">мин</string>
+    <string name="duration_unit_hours">ч</string>
     <string name="stats_today_label">сегодня</string>
     <string name="stats_this_week_label">за неделю</string>
     <string name="stats_library_section">Мой словарь</string>
@@ -64,12 +67,12 @@
         <item quantity="many">значений</item>
         <item quantity="other">значения</item>
     </plurals>
-    <string name="stats_stage_queue">В очереди</string>
+    <string name="stats_stage_queue">Не начатые</string>
     <string name="stats_stage_new">Новые</string>
-    <string name="stats_stage_fresh">Недавние</string>
-    <string name="stats_stage_middle">Повторение</string>
-    <string name="stats_stage_strong">Закреплено</string>
-    <string name="stats_stage_learned">Выучено</string>
+    <string name="stats_stage_fresh">Слабые</string>
+    <string name="stats_stage_middle">Знакомые</string>
+    <string name="stats_stage_strong">Усвоенные</string>
+    <string name="stats_stage_learned">Выученные</string>
     <string name="stats_caption_learned">Значения опускаются ниже по списку, если вы стабильно их вспоминаете, и возвращаются наверх, если вы их забыли. Статус «%1$s» означает, что карточка освоена и исключена из активного цикла повторений.</string>
     <string name="stats_month_january">Январь</string>
     <string name="stats_month_february">Февраль</string>

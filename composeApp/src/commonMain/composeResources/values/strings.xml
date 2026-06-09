@@ -42,13 +42,16 @@
     <string name="stats_legend_today">today</string>
     <string name="stats_legend_practiced">practiced</string>
     <string name="stats_legend_missed">missed</string>
-    <string name="stats_reviews_section">This week's reviews</string>
+    <string name="stats_active_days_all_time">all-time active days</string>
+    <string name="stats_effort_section">This week's activity</string>
     <plurals name="stats_cards_unit">
         <item quantity="one">card</item>
         <item quantity="few">cards</item>
         <item quantity="many">cards</item>
         <item quantity="other">cards</item>
     </plurals>
+    <string name="duration_unit_minutes">min</string>
+    <string name="duration_unit_hours">h</string>
     <string name="stats_today_label">today</string>
     <string name="stats_this_week_label">this week</string>
     <string name="stats_library_section">My vocabulary</string>

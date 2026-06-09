@@ -10,6 +10,9 @@ import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.test.runTest
+import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.duration_unit_hours
+import slovymovyapp.composeapp.generated.resources.duration_unit_minutes
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -471,7 +474,18 @@ open class FavoritesViewModelTest : BaseTest() {
 
         val studyDone = assertNotNull(contentState(vm).studyDone)
         assertEquals(Language.ENGLISH, studyDone.language)
-        assertEquals("1 h 15 min", studyDone.nextReviewLabel)
+        assertEquals(
+            UiText.Joined(
+                items = listOf(
+                    UiText.Plain("1"),
+                    UiText.Resource(Res.string.duration_unit_hours),
+                    UiText.Plain("15"),
+                    UiText.Resource(Res.string.duration_unit_minutes),
+                ),
+                separator = " ",
+            ),
+            studyDone.nextReviewLabel,
+        )
         assertNull(studyDone.action)
         assertFalse(studyDone.canContinueNow)
     }
@@ -496,7 +510,16 @@ open class FavoritesViewModelTest : BaseTest() {
         vm.loadAndApplyState("")
 
         val delayedStudyDone = assertNotNull(contentState(vm).studyDone)
-        assertEquals("12 min", delayedStudyDone.nextReviewLabel)
+        assertEquals(
+            UiText.Joined(
+                items = listOf(
+                    UiText.Plain("12"),
+                    UiText.Resource(Res.string.duration_unit_minutes),
+                ),
+                separator = " ",
+            ),
+            delayedStudyDone.nextReviewLabel,
+        )
         assertEquals(FavoritesStudyDoneAction.REVIEW_MORE, delayedStudyDone.action)
         assertTrue(delayedStudyDone.canContinueNow)
 
