@@ -15,6 +15,9 @@ private val log = LoggerFactory.getLogger("LanguageListsLoader")
 
 private val json = Json { ignoreUnknownKeys = true }
 
+/** UI locale every list should provide; clients fall back to it for unknown locales. */
+private const val BASE_LOCALE = "en"
+
 private val ICON_EXTENSIONS = mapOf(
     "svg" to "image/svg+xml",
     "png" to "image/png",
@@ -78,6 +81,12 @@ class LanguageListsLoader {
         val iconPayload = raw.icon?.let { iconsByName[it] }
         if (raw.icon != null && iconPayload == null) {
             log.warn("List '{}' in lists/{}/ references missing icon '{}'", id, lang, raw.icon)
+        }
+        if (!raw.title.containsKey(BASE_LOCALE) || !raw.subtitle.containsKey(BASE_LOCALE)) {
+            log.warn(
+                "List '{}' in lists/{}/ is missing the '{}' base locale for title/subtitle; clients fall back to it",
+                id, lang, BASE_LOCALE,
+            )
         }
         return ListContent(
             id = id,
