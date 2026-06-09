@@ -15,6 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration
@@ -171,6 +172,44 @@ open class FavoritesRepositoryTest : BaseTest() {
             assertEquals("bonjour", results[2].lemma)
             assertEquals(Language.RUSSIAN, results[3].language)
             assertEquals("monde", results[3].lemma)
+        }
+    }
+
+    @Test
+    fun getFavoriteLemmas_returns_normalized_lemmas_and_invalidates_on_changes() = runBlocking {
+        withRepository { repo ->
+            repo.deleteAll()
+
+            repo.add(sense1, Language.ENGLISH, " Hello ")
+            assertEquals(setOf("hello"), repo.getFavoriteLemmas(Language.ENGLISH))
+
+            repo.add(sense2, Language.ENGLISH, "World")
+            assertEquals(
+                setOf("hello", "world"),
+                repo.getFavoriteLemmas(Language.ENGLISH),
+                "lemma cache should be invalidated by add",
+            )
+
+            val snapshot = assertNotNull(repo.remove(sense2, Language.ENGLISH))
+            assertEquals(
+                setOf("hello"),
+                repo.getFavoriteLemmas(Language.ENGLISH),
+                "lemma cache should be invalidated by remove",
+            )
+
+            repo.restoreForUndo(snapshot)
+            assertEquals(
+                setOf("hello", "world"),
+                repo.getFavoriteLemmas(Language.ENGLISH),
+                "lemma cache should be invalidated by restoreForUndo",
+            )
+
+            repo.deleteAll()
+            assertEquals(
+                emptySet(),
+                repo.getFavoriteLemmas(Language.ENGLISH),
+                "lemma cache should be cleared by deleteAll",
+            )
         }
     }
 

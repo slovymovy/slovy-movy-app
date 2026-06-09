@@ -494,7 +494,7 @@ class WordDetailViewModel(
             }
 
             favoriteSenses = favoriteSenseIds
-            favoriteLemmas = favoritesRepository.getDistinctLemmasByLang(dictionaryLanguage)
+            favoriteLemmas = favoritesRepository.getFavoriteLemmas(dictionaryLanguage)
             val current = state
             if (current is WordDetailUiState.Content) {
                 state = current.reloadFavorite(::isSenseFavorite)
