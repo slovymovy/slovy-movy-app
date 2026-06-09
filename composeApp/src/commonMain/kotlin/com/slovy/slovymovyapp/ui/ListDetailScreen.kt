@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -236,6 +237,7 @@ fun ListDetailContent(
                     wordCount = wordCount,
                     bgColor = bgColor,
                     fgColor = fgColor,
+                    isDark = isDark,
                 )
             }
 
@@ -289,7 +291,7 @@ private fun ListWordSenseCard(
             examplesExpanded = false,
             languageExpanded = emptyMap(),
             favorite = item.isFavorited,
-            showFavoriteToggle = item.expanded,
+            showFavoriteToggle = true,
             pos = item.pos,
         ),
         onToggle = onToggle,
@@ -308,21 +310,31 @@ private fun ListDetailHeader(
     wordCount: Int,
     bgColor: Color,
     fgColor: Color,
+    isDark: Boolean,
 ) {
+    val shadowColor = if (isDark) Color.Black.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.12f)
+    val shadowElevation = if (isDark) 3.dp else 4.dp
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 4.dp, bottom = 12.dp),
+            .padding(top = 4.dp, bottom = 4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
+        // Emblem — same vibrant color as the feed card, with matching shadow
         Box(
             modifier = Modifier
-                .size(52.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .size(64.dp)
+                .shadow(
+                    elevation = shadowElevation,
+                    shape = RoundedCornerShape(16.dp),
+                    ambientColor = shadowColor,
+                    spotColor = shadowColor,
+                )
                 .background(bgColor),
             contentAlignment = Alignment.Center,
         ) {
-            Canvas(modifier = Modifier.size(36.dp).alpha(0.92f)) {
+            Canvas(modifier = Modifier.size(48.dp).alpha(0.82f)) {
                 val scale = size.width / 96f
                 val strokeWidth = 2f * scale
                 listOf(
@@ -341,30 +353,39 @@ private fun ListDetailHeader(
             }
         }
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(6.dp))
 
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.4).sp,
+                fontWeight = FontWeight.Medium,
+                fontSize = 24.sp,
+                letterSpacing = (-0.3).sp,
             ),
         )
         if (subtitle.isNotEmpty()) {
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontStyle = FontStyle.Italic,
-                    fontFamily = MaterialTheme.serifFontFamily,
-                ),
+                fontSize = 13.5.sp,
+                fontStyle = FontStyle.Italic,
+                fontFamily = MaterialTheme.serifFontFamily,
+                lineHeight = (13.5f * 1.38f).sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Text(
             text = pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            modifier = Modifier.padding(top = 2.dp),
+        )
+
+        Spacer(Modifier.height(12.dp))
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
         )
     }
 }

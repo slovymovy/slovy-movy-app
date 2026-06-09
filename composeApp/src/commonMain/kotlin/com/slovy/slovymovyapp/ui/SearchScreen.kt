@@ -662,9 +662,10 @@ private fun EmptySearchState(
                 text = stringResource(Res.string.search_section_explore).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.2.sp
+                    letterSpacing = 1.6.sp,
+                    fontSize = 10.5.sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
             )
             wordSuggestions.forEach { lemma ->
@@ -699,9 +700,10 @@ private fun EmptySearchState(
                 text = stringResource(Res.string.search_section_lists_for_you).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.2.sp
+                    letterSpacing = 1.6.sp,
+                    fontSize = 10.5.sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(
                     top = if (wordSuggestions.isNotEmpty()) 12.dp else 8.dp,
                     bottom = 2.dp
@@ -770,130 +772,97 @@ private fun ListCard(
     val badge = list.labels[localeCode]?.firstOrNull() ?: list.labels["en"]?.firstOrNull()
     val wordCount = list.senseIds.size
     val (bgColor, fgColor) = vibrantColorsForList(list.id, isDark)
-
-    val cardHeight = if (featured) 104.dp else 90.dp
-    val motifColumnWidth = if (featured) 108.dp else 90.dp
-    val motifSize = if (featured) 72.dp else 62.dp
-    val horizontalBodyPadding = if (featured) 18.dp else 16.dp
-    val verticalBodyPadding = if (featured) 16.dp else 13.dp
-    val titleFontSize = if (featured) 20.sp else 18.sp
-    val shadowColor = if (isDark) Color.Black.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.13f)
+    val titleFontSize = if (featured) 19.sp else 18.sp
+    val shadowColor = if (isDark) Color.Black.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.12f)
     val shadowElevation = if (isDark) 3.dp else 4.dp
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(cardHeight)
             .shadow(
                 elevation = shadowElevation,
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 ambientColor = shadowColor,
-                spotColor = shadowColor
+                spotColor = shadowColor,
             )
             .background(bgColor)
-            .clickable(
-                onClickLabel = title,
-                onClick = onClick
-            )
+            .clickable(onClickLabel = title, onClick = onClick)
     ) {
-        Row(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(
-                        start = horizontalBodyPadding,
-                        top = verticalBodyPadding,
-                        bottom = verticalBodyPadding
-                    ),
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    if (badge != null) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(Color.White.copy(alpha = 0.18f))
-                                .padding(horizontal = 7.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = badge.uppercase(),
-                                fontSize = 8.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.4.sp,
-                                color = fgColor.copy(alpha = 0.82f)
-                            )
-                        }
-                        Spacer(Modifier.height(3.dp))
+                if (badge != null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(fgColor.copy(alpha = 0.15f))
+                            .padding(horizontal = 9.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = badge.uppercase(),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.4.sp,
+                            color = fgColor,
+                        )
                     }
-                    Text(
-                        text = title,
-                        fontSize = titleFontSize,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.3).sp,
-                        lineHeight = (titleFontSize.value * 1.1).sp,
-                        color = fgColor,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                }
+                Text(
+                    text = title,
+                    fontSize = titleFontSize,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.3).sp,
+                    lineHeight = (titleFontSize.value * 1.2f).sp,
+                    color = fgColor,
+                )
+                if (subtitle.isNotEmpty()) {
                     Text(
                         text = subtitle,
-                        fontSize = 12.sp,
+                        fontSize = 13.5.sp,
                         fontStyle = FontStyle.Italic,
                         fontFamily = MaterialTheme.serifFontFamily,
-                        lineHeight = 15.6.sp,
-                        color = fgColor.copy(alpha = 0.72f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        lineHeight = (13.5f * 1.38f).sp,
+                        color = fgColor.copy(alpha = 0.76f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
                 Text(
                     text = pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount),
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = fgColor.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(top = 4.dp)
+                    color = fgColor.copy(alpha = 0.62f),
+                    modifier = Modifier.padding(top = 2.dp),
                 )
             }
 
-            Box(
+            Canvas(
                 modifier = Modifier
-                    .width(motifColumnWidth)
-                    .fillMaxHeight()
-                    .background(
-                        Brush.linearGradient(
-                            colorStops = arrayOf(
-                                0f to fgColor.copy(alpha = 0.12f),
-                                0.6f to Color.Transparent
-                            ),
-                            start = Offset.Zero,
-                            end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-                        )
-                    ),
-                contentAlignment = Alignment.Center
+                    .size(48.dp)
+                    .alpha(0.82f)
             ) {
-                Canvas(
-                    modifier = Modifier
-                        .size(motifSize)
-                        .alpha(0.92f)
-                ) {
-                    val scale = size.width / 96f
-                    val strokeWidth = 2f * scale
-                    listOf(
-                        Triple(16f, 62f, 64f),
-                        Triple(16f, 44f, 42f),
-                        Triple(16f, 26f, 26f)
-                    ).forEach { (x, y, w) ->
-                        drawRoundRect(
-                            color = fgColor,
-                            topLeft = Offset(x * scale, y * scale),
-                            size = Size(w * scale, 14f * scale),
-                            cornerRadius = CornerRadius(7f * scale),
-                            style = Stroke(width = strokeWidth)
-                        )
-                    }
+                val scale = size.width / 96f
+                val strokeWidth = 2f * scale
+                listOf(
+                    Triple(16f, 62f, 64f),
+                    Triple(16f, 44f, 42f),
+                    Triple(16f, 26f, 26f),
+                ).forEach { (x, y, w) ->
+                    drawRoundRect(
+                        color = fgColor,
+                        topLeft = Offset(x * scale, y * scale),
+                        size = Size(w * scale, 14f * scale),
+                        cornerRadius = CornerRadius(7f * scale),
+                        style = Stroke(width = strokeWidth),
+                    )
                 }
             }
         }
@@ -907,14 +876,14 @@ internal fun vibrantColorsForList(id: String, isDark: Boolean): Pair<Color, Colo
     }
     // light (bg, fg) to dark (bg, fg) — 8 slots from the design palette
     val slots = listOf(
-        Pair(Color(0xFFC46A3D), Color(0xFFFFF6EE)) to Pair(Color(0xFFA55530), Color(0xFFFFF6EE)), // 0 Terracotta
-        Pair(Color(0xFFD4A03A), Color(0xFF2A1F08)) to Pair(Color(0xFFA87A1E), Color(0xFFFFF6DC)), // 1 Mustard
-        Pair(Color(0xFF3D7A7A), Color(0xFFF0FAFA)) to Pair(Color(0xFF2E5E5E), Color(0xFFE8F4F4)), // 2 Teal
-        Pair(Color(0xFF7A4A6E), Color(0xFFFBF0F6)) to Pair(Color(0xFF5C3854), Color(0xFFF4E4EC)), // 3 Plum
-        Pair(Color(0xFF6E7C3D), Color(0xFFF8FBE8)) to Pair(Color(0xFF525C2E), Color(0xFFEEF4D6)), // 4 Olive
-        Pair(Color(0xFFA04A28), Color(0xFFFFF1E8)) to Pair(Color(0xFF7A3A20), Color(0xFFFFE6D6)), // 5 Rust
+        Pair(Color(0xFFC46A3D), Color(0xFFFFF0E8)) to Pair(Color(0xFFA55530), Color(0xFFFFE4D4)), // 0 Terracotta
+        Pair(Color(0xFFD4A03A), Color(0xFFFFF6EE)) to Pair(Color(0xFFA87A1E), Color(0xFFFFF0DC)), // 1 Mustard
+        Pair(Color(0xFF3D7A7A), Color(0xFFE8F5F5)) to Pair(Color(0xFF2E5E5E), Color(0xFFD0ECEC)), // 2 Teal
+        Pair(Color(0xFF7A4A6E), Color(0xFFF5E8F2)) to Pair(Color(0xFF5C3854), Color(0xFFEDD6E8)), // 3 Plum
+        Pair(Color(0xFF6E7C3D), Color(0xFFF0F5E0)) to Pair(Color(0xFF525C2E), Color(0xFFE4EED0)), // 4 Olive
+        Pair(Color(0xFFA04A28), Color(0xFFFFF1E8)) to Pair(Color(0xFF7A3A20), Color(0xFFFFE4D4)), // 5 Rust
         Pair(Color(0xFF8B6E7C), Color(0xFFFBF4F8)) to Pair(Color(0xFF6A5360), Color(0xFFF2E2EA)), // 6 Mauve
-        Pair(Color(0xFF3A4A5C), Color(0xFFEEF4FA)) to Pair(Color(0xFF2A3848), Color(0xFFE0EAF4)), // 7 Ink
+        Pair(Color(0xFF3A4A5C), Color(0xFFE8EEF5)) to Pair(Color(0xFF2A3848), Color(0xFFD4DCE8)), // 7 Ink
     )
     val (light, dark) = slots[(h % 8L).toInt()]
     return if (isDark) dark else light
