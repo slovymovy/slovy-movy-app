@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -82,6 +83,9 @@ class LanguageSetupViewModel(
         LanguageSetupUiState(
             learningLanguage = initialLearningLanguage,
             nativeLanguages = initialNativeLanguages - setOfNotNull(initialLearningLanguage),
+            // Routing only reaches setup with a learning language after LANGUAGE was persisted,
+            // so an empty set here means a saved "no translation" choice (LANGUAGE=[]), not a
+            // fresh user who skipped the step.
             noTranslationSelected = initialLearningLanguage != null && initialNativeLanguages.isEmpty()
         )
     )
@@ -182,7 +186,7 @@ class LanguageSetupViewModel(
         if (state.languageRequestSubmitting) return
 
         val comment = state.languageRequestComment.trim()
-        if (comment.isBlank()) {
+        if (comment.isEmpty()) {
             state = state.copy(languageRequestError = UiText.Resource(Res.string.settings_feedback_comment_required))
             return
         }
@@ -193,7 +197,7 @@ class LanguageSetupViewModel(
         val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
             try {
                 val response = dictionaryClient.sendGeneralFeedback(
-                    comment = comment,
+                    comment = "$LANGUAGE_REQUEST_PREFIX $comment",
                     email = email
                 )
                 if (isCurrentLanguageRequestJob() && state.languageRequestDialogVisible) {
@@ -231,6 +235,12 @@ class LanguageSetupViewModel(
 
     fun retry() {
         loadAvailableLanguages()
+    }
+
+    private companion object {
+        // Language requests share the generic /feedback endpoint; the prefix is what lets
+        // maintainers tell them apart from general feedback in the GitHub Feedback category.
+        const val LANGUAGE_REQUEST_PREFIX = "[Language request]"
     }
 }
 
@@ -621,7 +631,7 @@ private fun LanguageSetupRow(
                     if (selected) {
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                     } else {
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0f)
+                        Color.Transparent
                     }
                 )
                 .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
@@ -705,21 +715,16 @@ private fun LanguageSetupOptionRow(
                     role = Role.Checkbox,
                     onValueChange = onCheckedChange
                 )
-                .semantics(mergeDescendants = true) {}
-                .then(
+                .semantics(mergeDescendants = true) {
                     if (accessibilityDescription != null) {
-                        Modifier.semantics {
-                            contentDescription = accessibilityDescription
-                        }
-                    } else {
-                        Modifier
+                        contentDescription = accessibilityDescription
                     }
-                )
+                }
                 .background(
                     if (selected) {
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                     } else {
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0f)
+                        Color.Transparent
                     }
                 )
                 .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),

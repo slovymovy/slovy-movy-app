@@ -1077,6 +1077,8 @@ fun WordDetailScreenContent(
             title = stringResource(Res.string.word_details_feedback_title),
             commentPlaceholder = stringResource(Res.string.word_details_feedback_placeholder),
             commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
+            successCopy = null,
+            allowDismissWhileSending = false,
             comment = state.feedbackComment,
             email = state.feedbackEmail,
             isSending = state.feedbackSubmitting,
