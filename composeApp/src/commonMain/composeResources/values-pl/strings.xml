@@ -53,6 +53,8 @@
     <string name="stats_today_label">dziś</string>
     <string name="stats_this_week_label">w tym tygodniu</string>
     <string name="stats_library_section">Moje słownictwo</string>
+    <string name="list_detail_load_error">Nie udało się wczytać listy. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="list_detail_empty">Słowa z tej listy nie są dostępne w pobranym słowniku.</string>
     <plurals name="search_list_word_count">
         <item quantity="one">%1$d słowo</item>
         <item quantity="few">%1$d słowa</item>

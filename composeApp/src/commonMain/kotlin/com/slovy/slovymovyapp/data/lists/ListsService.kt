@@ -1,0 +1,48 @@
+package com.slovy.slovymovyapp.data.lists
+
+import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.remote.ListsClient
+import com.slovy.slovymovyapp.data.remote.RemoteList
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+/**
+ * Serves curated word lists from the app DB and keeps the stored copy in sync with the
+ * server. Reads never touch the network; [sync] compares the stored bundle version with
+ * `/lists/{lang}/version` and refetches only on mismatch, so screens can call it freely.
+ */
+class ListsService(
+    private val repository: WordListsRepository,
+    private val client: ListsClient,
+) {
+    private val syncMutex = Mutex()
+
+    suspend fun getLists(language: Language): List<WordList> = repository.getLists(language)
+
+    suspend fun getList(language: Language, listId: String): WordList? =
+        repository.getList(language, listId)
+
+    /**
+     * Brings the stored lists for [language] up to date with the server. Returns true
+     * when new content was written. Network failures leave the stored rows untouched.
+     */
+    suspend fun sync(language: Language): Boolean = syncMutex.withLock {
+        val remoteVersion = client.getListsVersion(language) ?: return false
+        if (remoteVersion == repository.getVersion(language)) return false
+        val response = client.getLists(language) ?: return false
+        repository.replaceLists(
+            language = language,
+            version = response.version,
+            lists = response.lists.map { it.toWordList() },
+        )
+        true
+    }
+
+    private fun RemoteList.toWordList() = WordList(
+        id = id,
+        title = title,
+        subtitle = subtitle,
+        labels = labels,
+        senseIds = senseIds,
+    )
+}

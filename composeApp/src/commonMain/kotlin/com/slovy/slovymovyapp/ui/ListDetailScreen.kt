@@ -22,6 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -31,12 +34,14 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.lists.ListsService
+import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
-import com.slovy.slovymovyapp.data.remote.ListsClient
+import com.slovy.slovymovyapp.data.remote.LearnerLevel
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.data.remote.RelatedWord
-import com.slovy.slovymovyapp.data.remote.RemoteList
+import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
@@ -44,16 +49,24 @@ import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.SenseCard
 import com.slovy.slovymovyapp.ui.word.SenseCardData
 import com.slovy.slovymovyapp.ui.word.SenseUiState
+import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.common_retry
 import slovymovyapp.composeapp.generated.resources.favorites_error_meaning_not_found
+import slovymovyapp.composeapp.generated.resources.list_detail_empty
+import slovymovyapp.composeapp.generated.resources.list_detail_load_error
 import slovymovyapp.composeapp.generated.resources.search_list_word_count
 
 data class ListWordItem(
     val senseId: String,
     val lemma: String,
+    val definition: String? = null,
+    val learnerLevel: LearnerLevel? = null,
+    val frequency: SenseFrequency? = null,
     val sense: LanguageCardResponseSense? = null,
     val relatedWords: Map<String, RelatedWord> = emptyMap(),
     val pos: PartOfSpeech? = null,
@@ -66,6 +79,7 @@ data class ListWordItem(
 data class ListDetailUiState(
     val items: List<ListWordItem> = emptyList(),
     val isLoading: Boolean = true,
+    val loadFailed: Boolean = false,
     val favoriteLemmas: Set<String> = emptySet(),
 )
 
@@ -74,21 +88,37 @@ class ListDetailViewModel(
     val language: Language,
     private val repository: DictionaryRepository,
     private val favoritesRepository: FavoritesRepository,
-    private val listsClient: ListsClient,
-    initialList: RemoteList? = null,
-    private val onFavoriteChanged: (added: Boolean) -> Unit = {},
+    private val listsService: ListsService,
+    private val onFavoriteChanged: (added: Boolean) -> Unit,
 ) : ViewModel() {
-    var list by mutableStateOf(initialList)
+    var list by mutableStateOf<WordList?>(null)
         private set
     var state by mutableStateOf(ListDetailUiState())
         private set
     val scrollState = LazyListState()
+    private var loadJob: Job? = null
 
     init {
-        viewModelScope.launch {
-            val resolvedList = list ?: listsClient.getLists(language).find { it.id == listId }
+        load()
+    }
+
+    fun retry() {
+        load()
+    }
+
+    private fun load() {
+        loadJob?.cancel()
+        state = state.copy(isLoading = true, loadFailed = false)
+        loadJob = viewModelScope.launch {
+            // Lists are served from the DB; fall back to a server sync when the id is
+            // not stored yet (e.g. the stored feed predates this list).
+            val resolvedList = listsService.getList(language, listId)
+                ?: run {
+                    listsService.sync(language)
+                    listsService.getList(language, listId)
+                }
             if (resolvedList == null) {
-                state = state.copy(isLoading = false)
+                state = state.copy(isLoading = false, loadFailed = true)
                 return@launch
             }
             list = resolvedList
@@ -100,6 +130,9 @@ class ListDetailViewModel(
                 ListWordItem(
                     senseId = sense.senseId,
                     lemma = sense.lemma,
+                    definition = sense.definition,
+                    learnerLevel = sense.learnerLevel,
+                    frequency = sense.frequency,
                     isFavorited = sense.senseId in favoritedIds,
                 )
             }
@@ -147,6 +180,8 @@ class ListDetailViewModel(
                     error = error,
                 )
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Throwable) {
             updateItem(item.senseId) {
                 it.copy(
@@ -202,24 +237,64 @@ fun ListDetailScreen(
         }
     }
     val list = viewModel.list
-    if (list == null) {
-        ListDetailLoadingScreen(onBack = onBack)
-        return
+    when {
+        list != null -> ListDetailContent(
+            list = list,
+            state = viewModel.state,
+            scrollState = viewModel.scrollState,
+            onBack = onBack,
+            onSenseToggle = viewModel::toggleSense,
+            onFavoriteToggle = viewModel::toggleFavorite,
+            onNavigateToWordDetail = { lemma, senseId ->
+                onNavigateToWordDetail(viewModel.language, lemma, senseId)
+            },
+        )
+
+        viewModel.state.isLoading -> ListDetailLoadingScreen(onBack = onBack)
+
+        else -> ListDetailErrorScreen(onBack = onBack, onRetry = viewModel::retry)
     }
-    ListDetailContent(
-        list = list,
-        state = viewModel.state,
-        scrollState = viewModel.scrollState,
-        onBack = onBack,
-        onSenseToggle = viewModel::toggleSense,
-        onFavoriteToggle = viewModel::toggleFavorite,
-        onNavigateToWordDetail = { lemma, senseId -> onNavigateToWordDetail(viewModel.language, lemma, senseId) },
-    )
+}
+
+@Composable
+private fun ListDetailLoadingScreen(onBack: () -> Unit) {
+    ListDetailScaffold(onBack = onBack) { innerPadding ->
+        Box(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            contentAlignment = Alignment.Center,
+        ) { CircularProgressIndicator() }
+    }
+}
+
+@Composable
+private fun ListDetailErrorScreen(onBack: () -> Unit, onRetry: () -> Unit) {
+    ListDetailScaffold(onBack = onBack) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(Res.string.list_detail_load_error),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+            )
+            Button(onClick = onRetry) {
+                Text(stringResource(Res.string.common_retry))
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ListDetailLoadingScreen(onBack: () -> Unit) {
+private fun ListDetailScaffold(
+    onBack: () -> Unit,
+    content: @Composable (PaddingValues) -> Unit,
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -233,18 +308,14 @@ private fun ListDetailLoadingScreen(onBack: () -> Unit) {
             )
         },
         containerColor = MaterialTheme.colorScheme.surface,
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentAlignment = Alignment.Center,
-        ) { CircularProgressIndicator() }
-    }
+        content = content,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListDetailContent(
-    list: RemoteList,
+    list: WordList,
     state: ListDetailUiState,
     scrollState: LazyListState = LazyListState(),
     onBack: () -> Unit = {},
@@ -256,28 +327,12 @@ fun ListDetailContent(
     val localeCode = androidx.compose.ui.text.intl.Locale.current.language
     val title = list.title[localeCode] ?: list.title["en"] ?: list.id
     val subtitle = list.subtitle[localeCode] ?: list.subtitle["en"] ?: ""
-    val wordCount = list.senseIds.size
+    // Show the count of words actually available locally once they are loaded; sense ids
+    // missing from the downloaded dictionary are dropped by getListSenses.
+    val wordCount = if (state.isLoading) list.senseIds.size else state.items.size
     val (bgColor, fgColor) = vibrantColorsForList(list.id, isDark)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.surface,
-    ) { innerPadding ->
+    ListDetailScaffold(onBack = onBack) { innerPadding ->
         LazyColumn(
             state = scrollState,
             contentPadding = PaddingValues(
@@ -310,6 +365,16 @@ fun ListDetailContent(
                     ) {
                         CircularProgressIndicator()
                     }
+                }
+            } else if (state.items.isEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(Res.string.list_detail_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(top = 32.dp, start = 16.dp, end = 16.dp),
+                    )
                 }
             } else {
                 items(state.items, key = { it.senseId }) { item ->
@@ -345,6 +410,9 @@ private fun ListWordSenseCard(
             pos = item.pos,
             loading = item.loading,
             error = item.error?.resolve(),
+            collapsedDefinition = item.definition,
+            collapsedLearnerLevel = item.learnerLevel,
+            collapsedFrequency = item.frequency,
         ),
         state = SenseUiState(
             senseId = item.senseId,
@@ -395,23 +463,7 @@ private fun ListDetailHeader(
                 .background(bgColor),
             contentAlignment = Alignment.Center,
         ) {
-            Canvas(modifier = Modifier.size(48.dp).alpha(0.82f)) {
-                val scale = size.width / 96f
-                val strokeWidth = 2f * scale
-                listOf(
-                    Triple(16f, 62f, 64f),
-                    Triple(16f, 44f, 42f),
-                    Triple(16f, 26f, 26f),
-                ).forEach { (x, y, w) ->
-                    drawRoundRect(
-                        color = fgColor,
-                        topLeft = Offset(x * scale, y * scale),
-                        size = Size(w * scale, 14f * scale),
-                        cornerRadius = CornerRadius(7f * scale),
-                        style = Stroke(width = strokeWidth),
-                    )
-                }
-            }
+            WordListEmblem(fgColor = fgColor, modifier = Modifier.size(48.dp).alpha(0.82f))
         }
 
         Spacer(Modifier.height(6.dp))
@@ -448,5 +500,110 @@ private fun ListDetailHeader(
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
         )
+    }
+}
+
+// Hand-drawn stack-of-rows emblem shared by the feed tiles and the detail header.
+@Composable
+internal fun WordListEmblem(fgColor: Color, modifier: Modifier) {
+    Canvas(modifier = modifier) {
+        val scale = size.width / 96f
+        val strokeWidth = 2f * scale
+        listOf(
+            Triple(16f, 62f, 64f),
+            Triple(16f, 44f, 42f),
+            Triple(16f, 26f, 26f),
+        ).forEach { (x, y, w) ->
+            drawRoundRect(
+                color = fgColor,
+                topLeft = Offset(x * scale, y * scale),
+                size = Size(w * scale, 14f * scale),
+                cornerRadius = CornerRadius(7f * scale),
+                style = Stroke(width = strokeWidth),
+            )
+        }
+    }
+}
+
+private fun previewWordList() = WordList(
+    id = "nl_a1_basic",
+    title = mapOf("en" to "500 first Dutch words"),
+    subtitle = mapOf("en" to "This is where your journey begins"),
+    labels = mapOf("en" to listOf("A1", "Basic")),
+    senseIds = List(3) { it.toString() },
+)
+
+@Preview
+@Composable
+private fun ListDetailPreviewContent(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        ListDetailContent(
+            list = previewWordList(),
+            state = ListDetailUiState(
+                items = listOf(
+                    ListWordItem(
+                        senseId = "1",
+                        lemma = "huis",
+                        definition = "a building where people live",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.HIGH,
+                        isFavorited = true,
+                    ),
+                    ListWordItem(
+                        senseId = "2",
+                        lemma = "fiets",
+                        definition = "a vehicle with two wheels that you ride by pushing pedals",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.MIDDLE,
+                    ),
+                    ListWordItem(
+                        senseId = "3",
+                        lemma = "gezellig",
+                        expanded = true,
+                        loading = true,
+                    ),
+                ),
+                isLoading = false,
+                favoriteLemmas = setOf("huis"),
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ListDetailPreviewLoading(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        ListDetailContent(
+            list = previewWordList(),
+            state = ListDetailUiState(isLoading = true),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ListDetailPreviewEmpty(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        ListDetailContent(
+            list = previewWordList(),
+            state = ListDetailUiState(isLoading = false),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ListDetailPreviewError(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        ListDetailErrorScreen(onBack = {}, onRetry = {})
     }
 }

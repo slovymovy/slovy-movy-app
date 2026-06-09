@@ -1,0 +1,38 @@
+CREATE TABLE word_list (
+  lang_code TEXT NOT NULL,
+  list_id TEXT NOT NULL,
+  position INTEGER NOT NULL,
+  PRIMARY KEY (lang_code, list_id)
+);
+
+CREATE TABLE word_list_text (
+  lang_code TEXT NOT NULL,
+  list_id TEXT NOT NULL,
+  locale TEXT NOT NULL,
+  title TEXT,
+  subtitle TEXT,
+  PRIMARY KEY (lang_code, list_id, locale)
+);
+
+CREATE TABLE word_list_label (
+  lang_code TEXT NOT NULL,
+  list_id TEXT NOT NULL,
+  locale TEXT NOT NULL,
+  position INTEGER NOT NULL,
+  label TEXT NOT NULL,
+  PRIMARY KEY (lang_code, list_id, locale, position)
+);
+
+CREATE TABLE word_list_sense (
+  lang_code TEXT NOT NULL,
+  list_id TEXT NOT NULL,
+  position INTEGER NOT NULL,
+  sense_id TEXT NOT NULL,
+  PRIMARY KEY (lang_code, list_id, position)
+);
+
+CREATE TABLE word_list_meta (
+  lang_code TEXT NOT NULL PRIMARY KEY,
+  version TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+);

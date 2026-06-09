@@ -53,6 +53,8 @@
     <string name="stats_today_label">vandaag</string>
     <string name="stats_this_week_label">deze week</string>
     <string name="stats_library_section">Mijn woordenschat</string>
+    <string name="list_detail_load_error">Kan deze lijst niet laden. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="list_detail_empty">Geen woorden uit deze lijst beschikbaar in het gedownloade woordenboek.</string>
     <plurals name="search_list_word_count">
         <item quantity="one">%1$d woord</item>
         <item quantity="few">%1$d woorden</item>

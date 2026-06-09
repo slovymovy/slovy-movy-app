@@ -34,10 +34,8 @@ import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.*
-import com.slovy.slovymovyapp.data.remote.ListsClient
-import com.slovy.slovymovyapp.data.remote.RemoteList
-import com.slovy.slovymovyapp.ui.ListDetailScreen
-import com.slovy.slovymovyapp.ui.ListDetailViewModel
+import com.slovy.slovymovyapp.data.lists.ListsService
+import com.slovy.slovymovyapp.data.lists.WordListsRepository
 import com.slovy.slovymovyapp.ui.study.StudySessionScreen
 import com.slovy.slovymovyapp.ui.study.StudySessionViewModel
 import com.slovy.slovymovyapp.ui.theme.AppTheme
@@ -296,6 +294,10 @@ fun App(
         DictionaryClient(platform, dictionaryRepository, localDbManager, dataManager)
     }
     val listsClient = remember(platform) { ListsClient(platform) }
+    val wordListsRepository = remember(appDatabase) { WordListsRepository(appDatabase) }
+    val listsService = remember(wordListsRepository, listsClient) {
+        ListsService(wordListsRepository, listsClient)
+    }
     val wordFetchManager = remember(dictionaryClient) {
         WordFetchManager(dictionaryClient)
     }
@@ -351,7 +353,6 @@ fun App(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     var startDestination by remember { mutableStateOf<AppDestination?>(null) }
     val wordDetailViewModels = remember { linkedMapOf<AppDestination.WordDetail, WordDetailViewModel>() }
-    val listsCache = remember { mutableStateMapOf<String, RemoteList>() }
     val appCoroutineScope = rememberCoroutineScope()
     var hasFavoritesToReview by remember { mutableStateOf(false) }
     val favoritesReviewCoordinator = remember { FavoritesReviewCoordinator() }
@@ -756,7 +757,7 @@ fun App(
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
-                        SearchViewModel(dictionaryRepository, settingsRepository, listsClient)
+                        SearchViewModel(dictionaryRepository, settingsRepository, listsService)
                     }
 
                     LaunchedEffect(pendingSearchQuery) {
@@ -804,7 +805,6 @@ fun App(
                         onListClick = { list ->
                             val lang = viewModel.state.selectedLanguage
                             if (lang != null) {
-                                listsCache[list.id] = list
                                 navController.navigate(AppDestination.ListDetail(lang.code, list.id))
                             }
                         },
@@ -823,8 +823,7 @@ fun App(
                             language = lang,
                             repository = dictionaryRepository,
                             favoritesRepository = favoritesRepository,
-                            listsClient = listsClient,
-                            initialList = listsCache[args.listId],
+                            listsService = listsService,
                             onFavoriteChanged = { _ ->
                                 favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
                                 appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }

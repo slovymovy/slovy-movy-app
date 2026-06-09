@@ -1,7 +1,6 @@
 package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,10 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
@@ -48,8 +43,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import com.slovy.slovymovyapp.data.remote.ListsClient
-import com.slovy.slovymovyapp.data.remote.RemoteList
+import com.slovy.slovymovyapp.data.lists.ListsService
+import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.ui.word.DownloadVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
@@ -98,13 +93,13 @@ data class SearchUiState(
     val isSuggestionsRefreshing: Boolean = false,
     val wordSuggestions: List<String> = emptyList(),
     val favoriteLemmas: List<String> = emptyList(),
-    val curatedLists: List<RemoteList> = emptyList()
+    val curatedLists: List<WordList> = emptyList()
 )
 
 class SearchViewModel(
     private val repository: DictionaryRepository,
     private val settingsRepository: SettingsRepository,
-    private val listsClient: ListsClient,
+    private val listsService: ListsService,
 ) : ViewModel() {
 
     data class Search(
@@ -231,9 +226,17 @@ class SearchViewModel(
         listsJob?.cancel()
         listsJob = viewModelScope.launch {
             val language = state.selectedLanguage ?: return@launch
-            val lists = listsClient.getLists(language)
+            // Serve whatever the DB already holds, then sync with the server and
+            // re-read only when new content was actually stored.
+            val cached = listsService.getLists(language)
             if (state.selectedLanguage == language) {
-                state = state.copy(curatedLists = lists)
+                state = state.copy(curatedLists = cached)
+            }
+            if (listsService.sync(language)) {
+                val updated = listsService.getLists(language)
+                if (state.selectedLanguage == language) {
+                    state = state.copy(curatedLists = updated)
+                }
             }
         }
     }
@@ -334,7 +337,7 @@ fun SearchScreen(
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
-    onListClick: (RemoteList) -> Unit = {},
+    onListClick: (WordList) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     // restore after process death
@@ -410,7 +413,7 @@ fun SearchScreenContent(
     onLanguageSelected: (Language?) -> Unit = {},
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onRefreshSuggestions: () -> Unit = {},
-    onListClick: (RemoteList) -> Unit = {},
+    onListClick: (WordList) -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
@@ -650,9 +653,9 @@ private fun SearchResultCard(
 private fun EmptySearchState(
     wordSuggestions: List<String>,
     favoriteLemmas: List<String>,
-    curatedLists: List<RemoteList>,
+    curatedLists: List<WordList>,
     onWordClick: (String) -> Unit,
-    onListClick: (RemoteList) -> Unit
+    onListClick: (WordList) -> Unit
 ) {
     val isDark = LocalIsDarkTheme.current
     Column(
@@ -767,7 +770,7 @@ private fun EmptySearchState(
 
 @Composable
 private fun ListCard(
-    list: RemoteList,
+    list: WordList,
     featured: Boolean,
     isDark: Boolean,
     onClick: () -> Unit
@@ -850,27 +853,12 @@ private fun ListCard(
                 )
             }
 
-            Canvas(
+            WordListEmblem(
+                fgColor = fgColor,
                 modifier = Modifier
                     .size(48.dp)
-                    .alpha(0.82f)
-            ) {
-                val scale = size.width / 96f
-                val strokeWidth = 2f * scale
-                listOf(
-                    Triple(16f, 62f, 64f),
-                    Triple(16f, 44f, 42f),
-                    Triple(16f, 26f, 26f),
-                ).forEach { (x, y, w) ->
-                    drawRoundRect(
-                        color = fgColor,
-                        topLeft = Offset(x * scale, y * scale),
-                        size = Size(w * scale, 14f * scale),
-                        cornerRadius = CornerRadius(7f * scale),
-                        style = Stroke(width = strokeWidth),
-                    )
-                }
-            }
+                    .alpha(0.82f),
+            )
         }
     }
 }
@@ -1079,7 +1067,7 @@ private fun SearchScreenPreviewWithLists(
                 selectedLanguage = Language.DUTCH,
                 wordSuggestions = listOf("de", "het", "een", "zijn", "hebben"),
                 curatedLists = listOf(
-                    RemoteList(
+                    WordList(
                         id = "nl_a1_basic",
                         title = mapOf("en" to "500 first Dutch words", "nl" to "500 eerste Nederlandse woorden"),
                         subtitle = mapOf("en" to "This is where your journey begins", "nl" to "Hier begint jouw reis"),

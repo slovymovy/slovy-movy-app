@@ -105,59 +105,62 @@ fun Application.module() {
 
         if (isTestMode()) {
             testDataEndpoints()
-        }
+            // Replaces the GitHub-backed /lists/{lang} endpoints below with an
+            // in-memory store that tests populate via PUT /test/lists/{lang}.
+            testListsEndpoints()
+        } else {
+            get("/lists/{lang}/version") {
+                val lang = call.parameters["lang"]?.trim()
+                if (lang.isNullOrBlank()) {
+                    call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
+                    return@get
+                }
+                if (!GitHubClient.isAvailable()) {
+                    call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+                    return@get
+                }
+                val json = Json { ignoreUnknownKeys = true }
+                try {
+                    // Prefer a fresh bundle's version (zero extra GitHub calls). Fall back to the
+                    // dedicated version cache, which only does the cheap tree-walk and is unaffected
+                    // by malformed list JSON or icon download failures.
+                    val version = bundleCache.peekFresh(lang)?.version ?: versionCache.get(lang)
+                    call.respondText(
+                        json.encodeToString(ListsVersionResponse.serializer(), ListsVersionResponse(version)),
+                        ContentType.Application.Json
+                    )
+                } catch (_: GHFileNotFoundException) {
+                    call.respond(HttpStatusCode.NotFound, "Lists for language '$lang' not found")
+                } catch (e: Exception) {
+                    call.application.environment.log.error("Failed to fetch lists version for $lang: ${e.message}", e)
+                    call.respond(HttpStatusCode.InternalServerError, "Failed to fetch lists version: ${e.message}")
+                }
+            }
 
-        get("/lists/{lang}/version") {
-            val lang = call.parameters["lang"]?.trim()
-            if (lang.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
-                return@get
-            }
-            if (!GitHubClient.isAvailable()) {
-                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
-                return@get
-            }
-            val json = Json { ignoreUnknownKeys = true }
-            try {
-                // Prefer a fresh bundle's version (zero extra GitHub calls). Fall back to the
-                // dedicated version cache, which only does the cheap tree-walk and is unaffected
-                // by malformed list JSON or icon download failures.
-                val version = bundleCache.peekFresh(lang)?.version ?: versionCache.get(lang)
-                call.respondText(
-                    json.encodeToString(ListsVersionResponse.serializer(), ListsVersionResponse(version)),
-                    ContentType.Application.Json
-                )
-            } catch (_: GHFileNotFoundException) {
-                call.respond(HttpStatusCode.NotFound, "Lists for language '$lang' not found")
-            } catch (e: Exception) {
-                call.application.environment.log.error("Failed to fetch lists version for $lang: ${e.message}", e)
-                call.respond(HttpStatusCode.InternalServerError, "Failed to fetch lists version: ${e.message}")
-            }
-        }
-
-        get("/lists/{lang}") {
-            val lang = call.parameters["lang"]?.trim()
-            if (lang.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
-                return@get
-            }
-            if (!GitHubClient.isAvailable()) {
-                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
-                return@get
-            }
-            val json = Json { ignoreUnknownKeys = true }
-            try {
-                val bundle = bundleCache.get(lang)
-                val response = LanguageListsResponse(version = bundle.version, lists = bundle.lists)
-                call.respondText(
-                    json.encodeToString(LanguageListsResponse.serializer(), response),
-                    ContentType.Application.Json
-                )
-            } catch (_: GHFileNotFoundException) {
-                call.respond(HttpStatusCode.NotFound, "Lists for language '$lang' not found")
-            } catch (e: Exception) {
-                call.application.environment.log.error("Failed to fetch lists for $lang: ${e.message}", e)
-                call.respond(HttpStatusCode.InternalServerError, "Failed to fetch lists: ${e.message}")
+            get("/lists/{lang}") {
+                val lang = call.parameters["lang"]?.trim()
+                if (lang.isNullOrBlank()) {
+                    call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
+                    return@get
+                }
+                if (!GitHubClient.isAvailable()) {
+                    call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+                    return@get
+                }
+                val json = Json { ignoreUnknownKeys = true }
+                try {
+                    val bundle = bundleCache.get(lang)
+                    val response = LanguageListsResponse(version = bundle.version, lists = bundle.lists)
+                    call.respondText(
+                        json.encodeToString(LanguageListsResponse.serializer(), response),
+                        ContentType.Application.Json
+                    )
+                } catch (_: GHFileNotFoundException) {
+                    call.respond(HttpStatusCode.NotFound, "Lists for language '$lang' not found")
+                } catch (e: Exception) {
+                    call.application.environment.log.error("Failed to fetch lists for $lang: ${e.message}", e)
+                    call.respond(HttpStatusCode.InternalServerError, "Failed to fetch lists: ${e.message}")
+                }
             }
         }
 

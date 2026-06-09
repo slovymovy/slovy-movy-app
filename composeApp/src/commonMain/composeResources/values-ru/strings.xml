@@ -53,6 +53,8 @@
     <string name="stats_today_label">сегодня</string>
     <string name="stats_this_week_label">за неделю</string>
     <string name="stats_library_section">Мой словарь</string>
+    <string name="list_detail_load_error">Не удалось загрузить список. Проверьте подключение и попробуйте снова.</string>
+    <string name="list_detail_empty">Слова из этого списка недоступны в скачанном словаре.</string>
     <plurals name="search_list_word_count">
         <item quantity="one">%1$d слово</item>
         <item quantity="few">%1$d слова</item>

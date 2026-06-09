@@ -277,54 +277,6 @@ The app drives study via an FSRS-backed pipeline. Domain types live in `shared` 
   sites stay symbolic; the logger lowercases the enum name when forwarding.
 - `Analytics.setUserProperty` is used for stable per-user dimensions: `ui_lang`, `learning_lang`, `data_version`.
 
-### App Check
-
-Firebase App Check filters non-genuine traffic (bots, scrapers, emulator spam) out of Analytics/Crashlytics/Performance.
-
-- **Android wiring**: `FirebaseAppCheckInstaller.install(isDebug)` in
-  `composeApp/src/androidMain/kotlin/com/slovy/slovymovyapp/analytics/` installs `PlayIntegrityAppCheckProviderFactory`
-  for release and `DebugAppCheckProviderFactory` for debug. Called from `MainActivity.onCreate` **before** the other
-  Firebase wrappers (`Analytics.logger = ...`, etc.) so the first analytics calls already carry a token.
-- **iOS wiring**: `iOSApp.init()` sets `SlovyAppCheckProviderFactory` (returns `AppAttestProvider` for
-  release — matching the Firebase Console provider config) and `AppCheckDebugProviderFactory` for debug
-  builds, **before** `FirebaseApp.configure()`. The `FirebaseAppCheck` SPM product is added under
-  `iosApp.xcodeproj`. iOS deployment target is 14.0, so App Attest is always available at the OS level.
-- **iOS App Attest entitlement (required for release)**: `AppAttestProvider` constructs successfully but
-  fails to mint tokens at runtime unless the target carries the
-  `com.apple.developer.devicecheck.appattest-environment` entitlement. To wire it up:
-    1. Apple Developer portal → Identifiers → your app ID → enable **App Attest** capability.
-    2. Xcode → iosApp target → **Signing & Capabilities** → `+ Capability` → **App Attest**. This creates
-       (or updates) `iosApp/iosApp/iosApp.entitlements` with key
-       `com.apple.developer.devicecheck.appattest-environment` (use `production` for release,
-       `development` for ad-hoc / TestFlight as needed).
-    3. Make sure `CODE_SIGN_ENTITLEMENTS` points at the entitlements file for both Debug and Release in
-       `iosApp.xcodeproj`.
-    4. Regenerate provisioning profiles to include App Attest.
-    5. Firebase Console → App Check → iOS app → confirm the **App Attest** provider is selected (no key
-       upload needed for App Attest — Firebase validates with Apple directly).
-  Without these steps, release iOS clients will be rejected once enforcement is enabled.
-- **Why a wrapper on Android**: the Firebase App Check classes live in `composeApp/androidMain`; `MainActivity` is in
-  the `androidApp` module and can't see them transitively (`implementation` doesn't leak). All Firebase-touching code
-  is wrapped inside composeApp following the same pattern as `FirebaseAnalyticsLogger`, `FirebasePerformanceMonitor`,
-  `FirebaseCrashlyticsAppLogSink`.
-- **Library coordinates** (`gradle/libs.versions.toml`, versions from `firebase-bom`):
-  `firebase-appcheck-playintegrity` (always shipped) + `firebase-appcheck-debug` (always shipped, only instantiated
-  when `BuildConfig.DEBUG`). R8 strips the unused provider class in release.
-- **Debug tokens**: first debug launch on a device logs a UUID via `DebugAppCheckProvider` (Android Logcat) or the
-  Firebase iOS SDK (Xcode console). Each device's UUID must be allowlisted in Firebase Console → App Check → app →
-  ⋮ → Manage debug tokens, or that debug build fails attestation once enforcement is on. Wiping app data rotates the
-  UUID.
-- **SHA-256 fingerprints**: the Firebase Android app needs both the **debug** SHA (from
-  `./gradlew :androidApp:signingReport`, variant `debug`) and the **Play App Signing** SHA (Play Console → Test and
-  release → Setup → App integrity → App signing key certificate). Without these registered under Project Settings →
-  General → Android app → SHA certificate fingerprints, Play Integrity attestation cannot succeed.
-- **Rollout sequence**: enforcement is server-side in Firebase Console. Pre-App-Check releases have no SDK and
-  therefore no token — enforcing too early drops legitimate users on old versions. Sit in unenforced (monitor) mode
-  until App Check → Metrics shows the verified count tracking your active user count (typically 1–2 weeks for Play /
-  App Store updates to propagate), then flip enforcement per product (start with Analytics).
-- **Bot traffic, not enforcement, is the goal**: the "Unverified" delta in monitor-mode metrics is what will be
-  blocked. If that delta is roughly your bot traffic estimate, enforcement is safe.
-
 ### Logging
 
 - `AppLogger` is `expect object` with `debug/info/warn/error(tag, message, throwable)`. Avoid `println` outside tools;
@@ -353,15 +305,21 @@ Firebase App Check filters non-genuine traffic (bots, scrapers, emulator spam) o
 ### Schema Locations
 
 - App DB schema (`appdb`): `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/`
-    - Files: `Settings.sq` (key/value JSON store), `Favorites.sq` (`favorites`, `card`, `review_log` tables).
+    - Files: `Settings.sq` (key/value JSON store), `Favorites.sq` (`favorites`, `card`, `review_log` tables),
+      `WordLists.sq` (`word_list`, `word_list_text`, `word_list_label`, `word_list_sense`, `word_list_meta` —
+      relational cache of server-curated word lists plus per-language bundle version).
     - Migrations: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/migrations/`
-    - Verification DBs: `1.db` … `5.db` alongside the schema files
+    - Verification DBs: `1.db` … `7.db` alongside the schema files; regenerate the newest one with
+      `gradlew :shared:generateCommonMainAppDatabaseSchema` after schema changes
 - Dictionary DB schema: `shared/src/commonMain/sqldelight/dictionarydb/com/slovy/slovymovyapp/dictionary/`
     - Includes `lemma`, `lemma_pos`, `lemma_pos_sense_hint` (routes senses to the correct cluster — adapter wired in
       `DatabaseProvider`), `lemma_word_family`, `sense`, `form`, `form_tag`, and per-sense detail tables.
 - Translation DB schema: `shared/src/commonMain/sqldelight/translationdb/com/slovy/slovymovyapp/translation/`
 - Repository pattern: `SettingsRepository` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/settings/`,
-  `FavoritesRepository` in `shared/.../data/favorites/`. `Setting.Name` is the canonical list of setting keys
+  `FavoritesRepository` in `shared/.../data/favorites/`, `WordListsRepository` in `shared/.../data/lists/`.
+  Curated word lists are served from the DB via `ListsService` (`composeApp/.../data/lists/`), which syncs against
+  `/lists/{lang}/version` and refetches the bundle only on version mismatch (`ListsClient` is the HTTP layer).
+  `Setting.Name` is the canonical list of setting keys
   (LANGUAGE, DICTIONARY, DATA_VERSION, ENABLED_VOICES, VOICE_SETUP_SHOWN, WELCOME_COMPLETED, plus per-screen language
   persistence: SEARCH_LANGUAGE, FAVORITES_LANGUAGE, STATS_LANGUAGE).
 - Database bootstrap: `DatabaseProvider` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/db/` —
@@ -527,6 +485,10 @@ if (GitHubClient.isAvailable()) {
   `GET /test/db/list` enumerates DB files in `TEST_DB_DIR` (defaulting to `.test-db-files`) and `GET /test/db/file/{name}`
   serves them. `TestServerDataProvider` in `commonTest` is the client side of this API and replaces
   `GoogleStorageBucketDataProvider` for tests.
+- Test mode also mounts `Routing.testListsEndpoints()` and skips the GitHub-backed `/lists/{lang}` routes:
+  `PUT /test/lists/{lang}` stages a `LanguageListsResponse` JSON bundle in an in-memory store,
+  `DELETE /test/lists/{lang}` removes it, and `GET /lists/{lang}` + `GET /lists/{lang}/version` serve from that store.
+  `ListsServiceServerTest` in `commonTest` uses this to exercise the full client → server → DB sync path.
 
 ### Server Test Patterns
 
