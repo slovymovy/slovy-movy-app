@@ -309,6 +309,7 @@ class SearchViewModel(
         }
         // Load suggestions and lists for new language
         if (langChanged) {
+            state = state.copy(curatedLists = emptyList())
             viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
             refreshLists()
         }
