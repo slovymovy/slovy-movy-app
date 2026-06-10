@@ -23,6 +23,7 @@
     <string name="search_section_explore">Explore</string>
     <string name="search_pull_to_refresh_hint">Pull down for new words</string>
     <string name="search_section_recently_saved">Recently saved</string>
+    <string name="search_section_lists_for_you">Lists for you</string>
     <string name="search_empty_start_typing">Start typing to search</string>
     <string name="search_no_dictionary_title">No dictionary downloaded</string>
     <string name="search_no_dictionary_description">Download a dictionary to start searching for words</string>
@@ -42,16 +43,27 @@
     <string name="stats_legend_today">today</string>
     <string name="stats_legend_practiced">practiced</string>
     <string name="stats_legend_missed">missed</string>
-    <string name="stats_reviews_section">This week's reviews</string>
+    <string name="stats_active_days_all_time">all-time active days</string>
+    <string name="stats_effort_section">This week's activity</string>
     <plurals name="stats_cards_unit">
         <item quantity="one">card</item>
         <item quantity="few">cards</item>
         <item quantity="many">cards</item>
         <item quantity="other">cards</item>
     </plurals>
+    <string name="duration_unit_minutes">min</string>
+    <string name="duration_unit_hours">h</string>
     <string name="stats_today_label">today</string>
     <string name="stats_this_week_label">this week</string>
     <string name="stats_library_section">My vocabulary</string>
+    <string name="list_detail_load_error">Couldn't load this list. Check your connection and try again.</string>
+    <string name="list_detail_empty">No words from this list are available in the downloaded dictionary.</string>
+    <plurals name="search_list_word_count">
+        <item quantity="one">%1$d word</item>
+        <item quantity="few">%1$d words</item>
+        <item quantity="many">%1$d words</item>
+        <item quantity="other">%1$d words</item>
+    </plurals>
     <plurals name="stats_words_label">
         <item quantity="one">word</item>
         <item quantity="few">words</item>
@@ -118,6 +130,7 @@
     <string name="download_content_desc_loading_info">Loading download information</string>
     <string name="download_content_desc_preparing">Preparing download</string>
     <string name="download_finalizing_recovering_progress">Refreshing favorites (%1$d/%2$d)</string>
+    <string name="download_finalizing_updating_lists">Updating word lists…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
         <item quantity="one">Refreshing favorites (%1$d/%2$d, %3$d failed)</item>
         <item quantity="few">Refreshing favorites (%1$d/%2$d, %3$d failed)</item>
@@ -156,6 +169,16 @@
     <string name="language_setup_choose_learning_first">Choose a learning language first</string>
     <string name="language_setup_step_completed">Step %1$d completed</string>
     <string name="language_setup_update_anytime">Update anytime in Settings</string>
+    <string name="language_setup_no_translation_title">No translation needed</string>
+    <string name="language_setup_no_translation_subtitle">Keep everything in the language I'm learning</string>
+    <string name="language_setup_no_translation_accessibility">No translation needed. Keep everything in the language I'm learning. Selecting this clears selected translation languages.</string>
+    <string name="language_setup_request_language_before">Can't find your language?</string>
+    <string name="language_setup_request_language_link">Let us know</string>
+    <string name="language_setup_request_language_after">&#32;so we can add it.</string>
+    <string name="language_setup_request_language_title">Request a language</string>
+    <string name="language_setup_request_language_placeholder">Which language would you like to add?</string>
+    <string name="language_setup_request_language_sent_title">Request sent</string>
+    <string name="language_setup_request_language_sent_message">Thank you! We have received your language request. You can follow its progress on GitHub.</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_section_languages_i_learn">Languages I learn</string>
@@ -218,9 +241,7 @@
     <string name="common_status_online_only">Online only</string>
 
     <string name="feedback_dialog_sent_title">Feedback sent</string>
-    <string name="feedback_dialog_sent_message">Thank you! We have created a tracking issue for your feedback. You can
-        follow its progress on GitHub.
-    </string>
+    <string name="feedback_dialog_sent_message">Thank you! We have received your feedback. You can follow its progress on GitHub.</string>
     <string name="feedback_dialog_track_on_github">Track on GitHub</string>
     <string name="feedback_dialog_comment_label">Comment</string>
     <string name="feedback_dialog_email_label">Email (optional)</string>

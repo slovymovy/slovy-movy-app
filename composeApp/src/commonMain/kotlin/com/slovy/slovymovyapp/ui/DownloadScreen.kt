@@ -52,7 +52,10 @@ class DownloadViewModel(
     private val downloadCoordinator: DownloadCoordinator,
     private val downloadKey: String,
     private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
-    private val finalize: suspend (onRecoveryProgress: (FavoriteRecoveryProgress) -> Unit) -> Unit = {},
+    private val finalize: suspend (
+        onRecoveryProgress: (FavoriteRecoveryProgress) -> Unit,
+        onWordListsSync: (Boolean) -> Unit,
+    ) -> Unit = { _, _ -> },
     private val onSuccess: suspend () -> Unit,
     private val onCancel: () -> Unit,
     private val onError: (Throwable) -> Unit,
@@ -180,7 +183,7 @@ class DownloadViewModel(
                             )
                             try {
                                 state = DownloadUiState.Finalizing()
-                                finalize(::updateRecoveryProgress)
+                                finalize(::updateRecoveryProgress, ::updateWordListsSyncing)
                                 for (i in 3 downTo 1) {
                                     state = DownloadUiState.Done(countdown = i)
                                     delay(1_000.milliseconds)
@@ -230,8 +233,16 @@ class DownloadViewModel(
 
     fun updateRecoveryProgress(progress: FavoriteRecoveryProgress) {
         // Late controller emissions can arrive after finalization has moved to a terminal state.
-        if (state is DownloadUiState.Finalizing) {
-            state = DownloadUiState.Finalizing(progress)
+        val current = state
+        if (current is DownloadUiState.Finalizing) {
+            state = current.copy(recovery = progress)
+        }
+    }
+
+    fun updateWordListsSyncing(active: Boolean) {
+        val current = state
+        if (current is DownloadUiState.Finalizing) {
+            state = current.copy(updatingWordLists = active)
         }
     }
 
@@ -420,11 +431,13 @@ fun DownloadScreenContent(
 
             Text(
                 text = title,
+                modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontFamily = FontFamily.Default,
                     fontWeight = FontWeight.Bold
                 ),
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center
             )
 
             Spacer(Modifier.height(AppSpacing.sm))
@@ -531,6 +544,15 @@ fun DownloadScreenContent(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    if ((state as? DownloadUiState.Finalizing)?.updatingWordLists == true) {
+                        Spacer(Modifier.height(AppSpacing.sm))
+                        Text(
+                            text = stringResource(Res.string.download_finalizing_updating_lists),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                     val recovery = (state as? DownloadUiState.Finalizing)?.recovery
                     if (recovery != null && recovery.total > 0) {
                         Spacer(Modifier.height(AppSpacing.sm))
@@ -637,7 +659,10 @@ sealed interface DownloadUiState {
     data class ReadyToDownload(val items: List<DownloadItem>) : DownloadUiState
     data object Idle : DownloadUiState
     data class Running(val percent: Int, val total: Long?, val currentFile: String? = null) : DownloadUiState
-    data class Finalizing(val recovery: FavoriteRecoveryProgress? = null) : DownloadUiState
+    data class Finalizing(
+        val recovery: FavoriteRecoveryProgress? = null,
+        val updatingWordLists: Boolean = false,
+    ) : DownloadUiState
     data class Failed(val error: Throwable) : DownloadUiState
     data object Cancelled : DownloadUiState
     data class Done(val countdown: Int) : DownloadUiState
@@ -701,6 +726,18 @@ private fun DownloadScreenPreviewFinalizing(
             state = DownloadUiState.Finalizing(
                 FavoriteRecoveryProgress(currentLemma = "test", completed = 1, total = 3, failed = 0)
             )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DownloadScreenPreviewFinalizingWordLists(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DownloadScreenContent(
+            state = DownloadUiState.Finalizing(updatingWordLists = true)
         )
     }
 }

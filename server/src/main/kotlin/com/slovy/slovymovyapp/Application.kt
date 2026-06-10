@@ -17,6 +17,11 @@ import com.slovy.slovymovyapp.server.ai.enhancer.DbExtractEnhancerUtils.targetLa
 import com.slovy.slovymovyapp.server.cloudrun.CloudTasksAuthVerifier
 import com.slovy.slovymovyapp.server.github.GitHubClient
 import com.slovy.slovymovyapp.server.github.WordDataMerger
+import com.slovy.slovymovyapp.server.lists.LanguageListsBundle
+import com.slovy.slovymovyapp.server.lists.LanguageListsLoader
+import com.slovy.slovymovyapp.server.lists.LanguageListsResponse
+import com.slovy.slovymovyapp.server.lists.ListsVersionResponse
+import com.slovy.slovymovyapp.server.lists.TtlCache
 import com.slovy.slovymovyapp.server.tasks.RepoUpdateTaskClient
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -78,6 +83,9 @@ fun Application.module() {
 
     val db: AppDatabase = ServerDbManager(Files.createTempDirectory("openwords").toFile()).openApp()
     val repo = SettingsRepository(db)
+    val listsLoader = LanguageListsLoader()
+    val bundleCache = TtlCache<LanguageListsBundle>(loader = listsLoader::load)
+    val versionCache = TtlCache<String>(loader = listsLoader::loadVersion)
 
     install(CallLogging) {
         level = Level.INFO
@@ -97,6 +105,63 @@ fun Application.module() {
 
         if (isTestMode()) {
             testDataEndpoints()
+            // Replaces the GitHub-backed /lists/{lang} endpoints below with an
+            // in-memory store that tests populate via PUT /test/lists/{lang}.
+            testListsEndpoints()
+        } else {
+            get("/lists/{lang}/version") {
+                val lang = call.parameters["lang"]?.trim()
+                if (lang.isNullOrBlank()) {
+                    call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
+                    return@get
+                }
+                if (!GitHubClient.isAvailable()) {
+                    call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+                    return@get
+                }
+                val json = Json { ignoreUnknownKeys = true }
+                try {
+                    // Prefer a fresh bundle's version (zero extra GitHub calls). Fall back to the
+                    // dedicated version cache, which only does the cheap tree-walk and is unaffected
+                    // by malformed list JSON or icon download failures.
+                    val version = bundleCache.peekFresh(lang)?.version ?: versionCache.get(lang)
+                    call.respondText(
+                        json.encodeToString(ListsVersionResponse.serializer(), ListsVersionResponse(version)),
+                        ContentType.Application.Json
+                    )
+                } catch (_: GHFileNotFoundException) {
+                    call.respond(HttpStatusCode.NotFound, "Lists for language '$lang' not found")
+                } catch (e: Exception) {
+                    call.application.environment.log.error("Failed to fetch lists version for $lang: ${e.message}", e)
+                    call.respond(HttpStatusCode.InternalServerError, "Failed to fetch lists version: ${e.message}")
+                }
+            }
+
+            get("/lists/{lang}") {
+                val lang = call.parameters["lang"]?.trim()
+                if (lang.isNullOrBlank()) {
+                    call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
+                    return@get
+                }
+                if (!GitHubClient.isAvailable()) {
+                    call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+                    return@get
+                }
+                val json = Json { ignoreUnknownKeys = true }
+                try {
+                    val bundle = bundleCache.get(lang)
+                    val response = LanguageListsResponse(version = bundle.version, lists = bundle.lists)
+                    call.respondText(
+                        json.encodeToString(LanguageListsResponse.serializer(), response),
+                        ContentType.Application.Json
+                    )
+                } catch (_: GHFileNotFoundException) {
+                    call.respond(HttpStatusCode.NotFound, "Lists for language '$lang' not found")
+                } catch (e: Exception) {
+                    call.application.environment.log.error("Failed to fetch lists for $lang: ${e.message}", e)
+                    call.respond(HttpStatusCode.InternalServerError, "Failed to fetch lists: ${e.message}")
+                }
+            }
         }
 
         get("/extract/{lang}/{word}") {

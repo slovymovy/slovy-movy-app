@@ -586,6 +586,14 @@ WHERE c.lang_code = :lang_code
   AND r.reviewed_at >= :start_inclusive
   AND r.reviewed_at < :end_exclusive;
 
+sumReviewDurationBetween:
+SELECT COALESCE(SUM(r.duration_ms), 0)
+FROM review_log r INDEXED BY idx_review_log_recent
+JOIN card c ON c.id = r.card_id
+WHERE c.lang_code = :lang_code
+  AND r.reviewed_at >= :start_inclusive
+  AND r.reviewed_at < :end_exclusive;
+
 selectReviewTimestampsSince:
 SELECT r.reviewed_at
 FROM review_log r INDEXED BY idx_review_log_recent
@@ -593,14 +601,6 @@ JOIN card c ON c.id = r.card_id
 WHERE c.lang_code = :lang_code
   AND r.reviewed_at >= :since
 ORDER BY r.reviewed_at ASC;
-
-selectReviewTimestampsBetween:
-SELECT r.reviewed_at
-FROM review_log r INDEXED BY idx_review_log_recent
-JOIN card c ON c.id = r.card_id
-WHERE c.lang_code = :lang_code
-  AND r.reviewed_at >= :start_inclusive
-  AND r.reviewed_at < :end_exclusive;
 
 selectCardSchedulingByLang:
 SELECT sense_id, lemma_id, state, stability

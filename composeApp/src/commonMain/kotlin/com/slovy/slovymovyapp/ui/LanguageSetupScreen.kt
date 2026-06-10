@@ -12,18 +12,28 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -33,9 +43,15 @@ import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.data.remote.DictionaryClient
 import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
+import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
@@ -45,18 +61,32 @@ data class LanguageSetupUiState(
     val availableLanguages: List<Language> = emptyList(),
     val learningLanguage: Language? = null,
     val nativeLanguages: Set<Language> = emptySet(),
-    val errorMessage: String? = null
+    val noTranslationSelected: Boolean = false,
+    val errorMessage: String? = null,
+    val languageRequestDialogVisible: Boolean = false,
+    val languageRequestComment: String = "",
+    val languageRequestEmail: String = "",
+    val languageRequestSubmitting: Boolean = false,
+    val languageRequestError: UiText? = null,
+    val languageRequestDiscussionUrl: String? = null
 )
 
 class LanguageSetupViewModel(
     private val dataDbManager: DataDbManager,
+    private val dictionaryClient: DictionaryClient,
     initialLearningLanguage: Language? = null,
     initialNativeLanguages: Set<Language> = emptySet()
 ) : ViewModel() {
+    private var languageRequestJob: Job? = null
+
     var state by mutableStateOf(
         LanguageSetupUiState(
             learningLanguage = initialLearningLanguage,
-            nativeLanguages = initialNativeLanguages - setOfNotNull(initialLearningLanguage)
+            nativeLanguages = initialNativeLanguages - setOfNotNull(initialLearningLanguage),
+            // Routing only reaches setup with a learning language after LANGUAGE was persisted,
+            // so an empty set here means a saved "no translation" choice (LANGUAGE=[]), not a
+            // fresh user who skipped the step.
+            noTranslationSelected = initialLearningLanguage != null && initialNativeLanguages.isEmpty()
         )
     )
         private set
@@ -91,9 +121,11 @@ class LanguageSetupViewModel(
     }
 
     fun selectLearningLanguage(language: Language) {
+        if (state.learningLanguage == language) return
         state = state.copy(
             learningLanguage = language,
-            nativeLanguages = state.nativeLanguages.filter { it != language }.toSet()
+            nativeLanguages = state.nativeLanguages.filter { it != language }.toSet(),
+            noTranslationSelected = false
         )
     }
 
@@ -104,12 +136,111 @@ class LanguageSetupViewModel(
                 current - language
             } else {
                 current + language
-            }
+            },
+            noTranslationSelected = false
         )
     }
 
+    fun setNoTranslationSelected(selected: Boolean) {
+        state = if (selected) {
+            state.copy(nativeLanguages = emptySet(), noTranslationSelected = true)
+        } else {
+            state.copy(noTranslationSelected = false)
+        }
+    }
+
+    fun openLanguageRequestDialog() {
+        Analytics.logEvent(AnalyticsEvent.LANGUAGE_REQUEST_OPEN)
+        cancelLanguageRequestJob()
+        state = state.copy(
+            languageRequestDialogVisible = true,
+            languageRequestComment = "",
+            languageRequestEmail = "",
+            languageRequestSubmitting = false,
+            languageRequestError = null,
+            languageRequestDiscussionUrl = null
+        )
+    }
+
+    fun dismissLanguageRequestDialog() {
+        cancelLanguageRequestJob()
+        state = state.copy(
+            languageRequestDialogVisible = false,
+            languageRequestComment = "",
+            languageRequestEmail = "",
+            languageRequestSubmitting = false,
+            languageRequestError = null,
+            languageRequestDiscussionUrl = null
+        )
+    }
+
+    fun updateLanguageRequestComment(comment: String) {
+        state = state.copy(languageRequestComment = comment, languageRequestError = null)
+    }
+
+    fun updateLanguageRequestEmail(email: String) {
+        state = state.copy(languageRequestEmail = email)
+    }
+
+    fun submitLanguageRequest() {
+        if (state.languageRequestSubmitting) return
+
+        val comment = state.languageRequestComment.trim()
+        if (comment.isEmpty()) {
+            state = state.copy(languageRequestError = UiText.Resource(Res.string.settings_feedback_comment_required))
+            return
+        }
+
+        val email = state.languageRequestEmail.trim().takeIf { it.isNotBlank() }
+        state = state.copy(languageRequestSubmitting = true, languageRequestError = null)
+        cancelLanguageRequestJob()
+        val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
+            try {
+                val response = dictionaryClient.sendGeneralFeedback(
+                    comment = "$LANGUAGE_REQUEST_PREFIX $comment",
+                    email = email
+                )
+                if (isCurrentLanguageRequestJob() && state.languageRequestDialogVisible) {
+                    state = state.copy(
+                        languageRequestSubmitting = false,
+                        languageRequestError = null,
+                        languageRequestDiscussionUrl = response.discussionUrl
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (isCurrentLanguageRequestJob() && state.languageRequestDialogVisible) {
+                    state = state.copy(
+                        languageRequestSubmitting = false,
+                        languageRequestError = UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                    )
+                }
+            } finally {
+                if (isCurrentLanguageRequestJob()) {
+                    languageRequestJob = null
+                }
+            }
+        }
+        languageRequestJob = job
+        job.start()
+    }
+
+    private fun cancelLanguageRequestJob() {
+        languageRequestJob?.cancel()
+        languageRequestJob = null
+    }
+
+    private suspend fun isCurrentLanguageRequestJob(): Boolean = languageRequestJob == currentCoroutineContext()[Job]
+
     fun retry() {
         loadAvailableLanguages()
+    }
+
+    private companion object {
+        // Language requests share the generic /feedback endpoint; the prefix is what lets
+        // maintainers tell them apart from general feedback in the GitHub Feedback category.
+        const val LANGUAGE_REQUEST_PREFIX = "[Language request]"
     }
 }
 
@@ -123,13 +254,22 @@ fun LanguageSetupScreen(
         scrollState = viewModel.scrollState,
         onLearningLanguageSelected = viewModel::selectLearningLanguage,
         onNativeLanguageToggled = viewModel::toggleNativeLanguage,
+        onNoTranslationChanged = viewModel::setNoTranslationSelected,
+        onOpenLanguageRequest = viewModel::openLanguageRequestDialog,
+        onDismissLanguageRequest = viewModel::dismissLanguageRequestDialog,
+        onLanguageRequestCommentChange = viewModel::updateLanguageRequestComment,
+        onLanguageRequestEmailChange = viewModel::updateLanguageRequestEmail,
+        onSubmitLanguageRequest = viewModel::submitLanguageRequest,
         onNext = {
             val learning = viewModel.state.learningLanguage
             val native = viewModel.state.nativeLanguages.sortedBy { it.selfName }
             when {
-                learning != null && native.isNotEmpty() -> {
+                learning != null && (native.isNotEmpty() || viewModel.state.noTranslationSelected) -> {
                     native.forEach { language ->
                         Analytics.logEvent(AnalyticsEvent.LANG_TO_TRANSLATE_SELECTED, mapOf("lang" to language.code))
+                    }
+                    if (viewModel.state.noTranslationSelected) {
+                        Analytics.logEvent(AnalyticsEvent.LANG_TO_TRANSLATE_SELECTED, mapOf("lang" to "none"))
                     }
                     onNext(learning, native)
                     Analytics.logEvent(AnalyticsEvent.LANG_TO_LEARN_SELECTED, mapOf("lang" to learning.code))
@@ -150,10 +290,16 @@ fun LanguageSetupScreenContent(
     scrollState: ScrollState = ScrollState(0),
     onLearningLanguageSelected: (Language) -> Unit = {},
     onNativeLanguageToggled: (Language) -> Unit = {},
+    onNoTranslationChanged: (Boolean) -> Unit = {},
+    onOpenLanguageRequest: () -> Unit = {},
+    onDismissLanguageRequest: () -> Unit = {},
+    onLanguageRequestCommentChange: (String) -> Unit = {},
+    onLanguageRequestEmailChange: (String) -> Unit = {},
+    onSubmitLanguageRequest: () -> Unit = {},
     onNext: () -> Unit = {},
     onRetry: () -> Unit = {}
 ) {
-    val canGoNext = state.learningLanguage != null && state.nativeLanguages.isNotEmpty()
+    val canGoNext = state.learningLanguage != null && (state.nativeLanguages.isNotEmpty() || state.noTranslationSelected)
     val translateIntoEnabled = state.learningLanguage != null
     val translationLanguages = Language.entries
         .filter { it != state.learningLanguage }
@@ -223,7 +369,7 @@ fun LanguageSetupScreenContent(
                         label = stringResource(Res.string.language_setup_translate_into),
                         state = when {
                             !translateIntoEnabled -> SectionVisualState.Locked
-                            state.nativeLanguages.isEmpty() -> SectionVisualState.Active
+                            state.nativeLanguages.isEmpty() && !state.noTranslationSelected -> SectionVisualState.Active
                             else -> SectionVisualState.Done
                         },
                         lockedHint = if (translateIntoEnabled) {
@@ -243,8 +389,16 @@ fun LanguageSetupScreenContent(
                                     onClick = { onNativeLanguageToggled(language) }
                                 )
                             }
+                            LanguageSetupNoTranslationRow(
+                                selected = translateIntoEnabled && state.noTranslationSelected,
+                                enabled = translateIntoEnabled,
+                                showDivider = translationLanguages.isNotEmpty(),
+                                onCheckedChange = onNoTranslationChanged
+                            )
                         }
                     }
+
+                    LanguageRequestLink(onClick = onOpenLanguageRequest)
                 }
 
                 Spacer(Modifier.height(AppSpacing.lg))
@@ -279,6 +433,30 @@ fun LanguageSetupScreenContent(
 
                 Spacer(Modifier.height(AppSpacing.xxl))
             }
+        }
+
+        if (state.languageRequestDialogVisible) {
+            val sentTitle = stringResource(Res.string.language_setup_request_language_sent_title)
+            val sentMessage = stringResource(Res.string.language_setup_request_language_sent_message)
+            val languageRequestSuccessCopy = remember(sentTitle, sentMessage) {
+                FeedbackSuccessCopy(title = sentTitle, message = sentMessage)
+            }
+            FeedbackDialog(
+                title = stringResource(Res.string.language_setup_request_language_title),
+                commentPlaceholder = stringResource(Res.string.language_setup_request_language_placeholder),
+                commentLabel = null,
+                successCopy = languageRequestSuccessCopy,
+                allowDismissWhileSending = true,
+                comment = state.languageRequestComment,
+                email = state.languageRequestEmail,
+                isSending = state.languageRequestSubmitting,
+                error = state.languageRequestError?.resolve(),
+                resultUrl = state.languageRequestDiscussionUrl,
+                onCommentChange = onLanguageRequestCommentChange,
+                onEmailChange = onLanguageRequestEmailChange,
+                onDismiss = onDismissLanguageRequest,
+                onSend = onSubmitLanguageRequest
+            )
         }
     }
 }
@@ -453,7 +631,7 @@ private fun LanguageSetupRow(
                     if (selected) {
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                     } else {
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0f)
+                        Color.Transparent
                     }
                 )
                 .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
@@ -488,6 +666,155 @@ private fun LanguageSetupRow(
             )
         }
     }
+}
+
+@Composable
+private fun LanguageSetupNoTranslationRow(
+    selected: Boolean,
+    enabled: Boolean,
+    showDivider: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    LanguageSetupOptionRow(
+        title = stringResource(Res.string.language_setup_no_translation_title),
+        subtitle = stringResource(Res.string.language_setup_no_translation_subtitle),
+        accessibilityDescription = stringResource(Res.string.language_setup_no_translation_accessibility),
+        leadingIcon = Icons.Outlined.Public,
+        selected = selected,
+        enabled = enabled,
+        showDivider = showDivider,
+        onCheckedChange = onCheckedChange
+    )
+}
+
+@Composable
+private fun LanguageSetupOptionRow(
+    title: String,
+    subtitle: String?,
+    accessibilityDescription: String?,
+    leadingIcon: ImageVector,
+    selected: Boolean,
+    enabled: Boolean,
+    showDivider: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (showDivider) {
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .toggleable(
+                    value = selected,
+                    enabled = enabled,
+                    role = Role.Checkbox,
+                    onValueChange = onCheckedChange
+                )
+                .semantics(mergeDescendants = true) {
+                    if (accessibilityDescription != null) {
+                        contentDescription = accessibilityDescription
+                    }
+                }
+                .background(
+                    if (selected) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                    } else {
+                        Color.Transparent
+                    }
+                )
+                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier.width(28.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Spacer(Modifier.width(AppSpacing.md))
+
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (subtitle != null) {
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontFamily = MaterialTheme.serifFontFamily,
+                                fontStyle = FontStyle.Italic
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            SelectionIndicator(
+                selected = selected,
+                multiSelect = true,
+                enabled = enabled
+            )
+        }
+    }
+}
+
+@Composable
+private fun LanguageRequestLink(onClick: () -> Unit) {
+    val linkTag = "language_request"
+    val beforeText = stringResource(Res.string.language_setup_request_language_before)
+    val linkText = stringResource(Res.string.language_setup_request_language_link)
+    val afterText = stringResource(Res.string.language_setup_request_language_after)
+    val accentColor = MaterialTheme.colorScheme.primary
+    val textColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val currentOnClick by rememberUpdatedState(onClick)
+    val text = remember(beforeText, linkText, afterText, accentColor) {
+        buildAnnotatedString {
+            append(beforeText)
+            append(" ")
+            val link = LinkAnnotation.Clickable(
+                tag = linkTag,
+                linkInteractionListener = { currentOnClick() }
+            )
+            withLink(link) {
+                withStyle(SpanStyle(color = accentColor, textDecoration = TextDecoration.Underline)) {
+                    append(linkText)
+                }
+            }
+            append(afterText)
+        }
+    }
+
+    Text(
+        text = text,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xs),
+        style = MaterialTheme.typography.bodyMedium.copy(
+            color = textColor,
+            fontFamily = MaterialTheme.serifFontFamily,
+            fontStyle = FontStyle.Italic,
+            textAlign = TextAlign.Center
+        )
+    )
 }
 
 @Composable
@@ -583,6 +910,23 @@ private fun LanguageSetupScreenSelectedPreview(
                 availableLanguages = Language.entries,
                 learningLanguage = Language.DUTCH,
                 nativeLanguages = setOf(Language.ENGLISH)
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LanguageSetupScreenNoTranslationPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        LanguageSetupScreenContent(
+            state = LanguageSetupUiState(
+                isLoading = false,
+                availableLanguages = Language.entries,
+                learningLanguage = Language.DUTCH,
+                noTranslationSelected = true
             )
         )
     }

@@ -23,6 +23,7 @@
     <string name="search_section_explore">Odkrywaj</string>
     <string name="search_pull_to_refresh_hint">Pociągnij w dół, aby zobaczyć nowe słowa</string>
     <string name="search_section_recently_saved">Ostatnio zapisane</string>
+    <string name="search_section_lists_for_you">Listy dla ciebie</string>
     <string name="search_empty_start_typing">Zacznij pisać, aby wyszukać</string>
     <string name="search_no_dictionary_title">Brak pobranego słownika</string>
     <string name="search_no_dictionary_description">Pobierz słownik, aby zacząć szukać słów</string>
@@ -42,16 +43,27 @@
     <string name="stats_legend_today">dziś</string>
     <string name="stats_legend_practiced">ćwiczone</string>
     <string name="stats_legend_missed">pominięte</string>
-    <string name="stats_reviews_section">Powtórki w tym tygodniu</string>
+    <string name="stats_active_days_all_time">wszystkie aktywne dni</string>
+    <string name="stats_effort_section">Aktywność w tym tygodniu</string>
     <plurals name="stats_cards_unit">
         <item quantity="one">karta</item>
         <item quantity="few">karty</item>
         <item quantity="many">kart</item>
         <item quantity="other">kart</item>
     </plurals>
+    <string name="duration_unit_minutes">min</string>
+    <string name="duration_unit_hours">godz.</string>
     <string name="stats_today_label">dziś</string>
     <string name="stats_this_week_label">w tym tygodniu</string>
     <string name="stats_library_section">Moje słownictwo</string>
+    <string name="list_detail_load_error">Nie udało się wczytać listy. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="list_detail_empty">Słowa z tej listy nie są dostępne w pobranym słowniku.</string>
+    <plurals name="search_list_word_count">
+        <item quantity="one">%1$d słowo</item>
+        <item quantity="few">%1$d słowa</item>
+        <item quantity="many">%1$d słów</item>
+        <item quantity="other">%1$d słów</item>
+    </plurals>
     <plurals name="stats_words_label">
         <item quantity="one">słowo</item>
         <item quantity="few">słowa</item>
@@ -117,6 +129,7 @@
     <string name="download_content_desc_loading_info">Ładowanie informacji o pobieraniu</string>
     <string name="download_content_desc_preparing">Przygotowywanie pobierania</string>
     <string name="download_finalizing_recovering_progress">Odświeżanie ulubionych (%1$d/%2$d)</string>
+    <string name="download_finalizing_updating_lists">Aktualizowanie list słów…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
         <item quantity="one">Odświeżanie ulubionych (%1$d/%2$d, błędów: %3$d)</item>
         <item quantity="few">Odświeżanie ulubionych (%1$d/%2$d, błędów: %3$d)</item>
@@ -155,6 +168,16 @@
     <string name="language_setup_choose_learning_first">Najpierw wybierz język nauki</string>
     <string name="language_setup_step_completed">Krok %1$d ukończony</string>
     <string name="language_setup_update_anytime">Możesz to zmienić w Ustawieniach</string>
+    <string name="language_setup_no_translation_title">Tłumaczenie niepotrzebne</string>
+    <string name="language_setup_no_translation_subtitle">Zachowaj wszystko w języku, którego się uczysz</string>
+    <string name="language_setup_no_translation_accessibility">Tłumaczenie niepotrzebne. Zachowaj wszystko w języku, którego się uczysz. Wybranie tej opcji wyczyści wybrane języki tłumaczenia.</string>
+    <string name="language_setup_request_language_before">Nie możesz znaleźć swojego języka?</string>
+    <string name="language_setup_request_language_link">Daj nam znać</string>
+    <string name="language_setup_request_language_after">, abyśmy mogli go dodać.</string>
+    <string name="language_setup_request_language_title">Poproś o język</string>
+    <string name="language_setup_request_language_placeholder">Jaki język chcesz dodać?</string>
+    <string name="language_setup_request_language_sent_title">Prośba wysłana</string>
+    <string name="language_setup_request_language_sent_message">Dziękujemy! Otrzymaliśmy Twoją prośbę o dodanie języka. Możesz śledzić postępy na GitHubie.</string>
 
     <string name="settings_title">Ustawienia</string>
     <string name="settings_section_languages_i_learn">Języki, których się uczę</string>
@@ -217,9 +240,7 @@
     <string name="common_status_online_only">Tylko online</string>
 
     <string name="feedback_dialog_sent_title">Opinia wysłana!</string>
-    <string name="feedback_dialog_sent_message">Dziękujemy! Utworzyliśmy zgłoszenie na GitHubie, aby śledzić Twoją
-        opinię. Możesz tam sprawdzać postępy.
-    </string>
+    <string name="feedback_dialog_sent_message">Dziękujemy! Otrzymaliśmy Twoją opinię. Możesz śledzić postępy na GitHubie.</string>
     <string name="feedback_dialog_track_on_github">Śledź na GitHubie</string>
     <string name="feedback_dialog_comment_label">Twój komentarz</string>
     <string name="feedback_dialog_email_label">E-mail (opcjonalnie)</string>

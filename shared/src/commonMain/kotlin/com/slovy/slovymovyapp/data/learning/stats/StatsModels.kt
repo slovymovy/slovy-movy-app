@@ -44,9 +44,12 @@ data class StatsPracticeDay(
 
 data class StatsScreenData(
     val streakDays: Int,
+    val activeDaysTotal: Int,
     val practiceLog: Set<StatsPracticeDay>,
     val reviewsToday: Int,
     val reviewsWeek: Int,
+    val minutesToday: Int,
+    val minutesWeek: Int,
     val wordsTotal: Int,
     val pipeline: List<StatsPipelineStage>,
     val delayedDueLemmaCount: Int,

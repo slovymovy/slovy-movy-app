@@ -46,7 +46,11 @@ data class SenseCardData(
     val translationLoading: Boolean = false,
     val translationError: String? = null,
     val diagnosticInfoOnError: String? = null,
-    val ambiguousTranslations: Set<String> = emptySet()
+    val ambiguousTranslations: Set<String> = emptySet(),
+    // Summary shown while the full sense is not loaded (e.g. list rows before expansion).
+    val collapsedDefinition: String? = null,
+    val collapsedLearnerLevel: LearnerLevel? = null,
+    val collapsedFrequency: SenseFrequency? = null,
 )
 
 @Composable
@@ -139,6 +143,20 @@ internal fun SenseCard(
                                 level = sense.learnerLevel,
                                 frequency = sense.frequency,
                                 nameType = sense.nameType,
+                            )
+                        }
+                    } else if (data.error == null && data.collapsedDefinition != null) {
+                        HighlightedText(
+                            text = data.collapsedDefinition,
+                            style = MaterialTheme.typography.titleMedium,
+                            clickableWords = relatedWords.keys,
+                            onWordClick = onWordClick
+                        )
+                        if (data.collapsedLearnerLevel != null && data.collapsedFrequency != null) {
+                            LevelAndFrequencyRow(
+                                level = data.collapsedLearnerLevel,
+                                frequency = data.collapsedFrequency,
+                                nameType = null,
                             )
                         }
                     } else if (data.error == null && !data.loading) {

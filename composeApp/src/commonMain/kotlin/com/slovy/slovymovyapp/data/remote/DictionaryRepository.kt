@@ -157,6 +157,14 @@ class DictionaryRepository(
         ONLINE_ONLY,
     }
 
+    data class ListSenseItem(
+        val senseId: String,
+        val lemma: String,
+        val definition: String,
+        val learnerLevel: LearnerLevel,
+        val frequency: SenseFrequency,
+    )
+
     // Cache for loaded senses - reusable across the app
     private val senseCache = linkedMapOf<String, SenseWithPos>()
 
@@ -322,6 +330,27 @@ class DictionaryRepository(
             }
         }
         return result
+    }
+
+    // Drops entries whose resolved lemma is the card's own lemma (form fallback can point
+    // e.g. "Gebogen" back at "buigen"). Applied to the map itself so no consumer — word
+    // family, synonyms, antonyms, highlighted words, cached senses — renders such entries
+    // as clickable or shows the current word's favorite state on them.
+    private fun removeSelfReferences(
+        relatedWords: Map<String, RelatedWord>,
+        lemma: String
+    ): Map<String, RelatedWord> = relatedWords.filterValues { related ->
+        !related.lemma.equals(lemma, ignoreCase = true)
+    }
+
+    private fun resolvesToCurrentLemma(
+        word: String,
+        lemma: String,
+        relatedWords: Map<String, RelatedWord>
+    ): Boolean {
+        if (word.equals(lemma, ignoreCase = true)) return true
+        // Map keys are always lowercase: direct hits use DB lemmas, fallbacks use lowercased lookups.
+        return relatedWords[word.lowercase()]?.lemma?.equals(lemma, ignoreCase = true) == true
     }
 
     private fun DictionaryQueries.resolveRelatedForm(
@@ -994,12 +1023,19 @@ class DictionaryRepository(
         if (entries.isEmpty()) return null
 
         // Fetch word family from all databases (union)
-        val wordFamily = q.selectWordFamilyByLemmaId(lemmaId).executeAsList().toSet()
+        val rawWordFamily = q.selectWordFamilyByLemmaId(lemmaId).executeAsList().toSet()
         // Load related words from all databases (later databases take precedence)
-        val relatedWordsMap = loadRelatedWords(
+        val allRelatedWords = loadRelatedWords(
             dictDatabases, language,
-            collectAllRelatedWords(entries, wordFamily, lemma)
+            collectAllRelatedWords(entries, rawWordFamily, lemma)
         )
+        val relatedWordsMap = removeSelfReferences(allRelatedWords, lemma)
+        // The word family additionally hides self-resolving entries entirely — such chips
+        // would only repeat the current card. The check runs against the unfiltered map,
+        // since entries absent from the filtered map could also just be unresolvable.
+        val wordFamily = rawWordFamily.filterNot { word ->
+            resolvesToCurrentLemma(word, lemma, allRelatedWords)
+        }
 
         // Keep related words alongside each cached sense so lightweight sense loads
         // (e.g. Favorites) can still render clickable related terms.
@@ -1020,7 +1056,7 @@ class DictionaryRepository(
             entries = entries,
             lemma = lemma,
             zipfFrequency = zipfFrequency,
-            wordFamily = wordFamily.toList(),
+            wordFamily = wordFamily,
             relatedWords = relatedWordsMap,
             online = onlineOnly,
         )
@@ -1128,6 +1164,29 @@ class DictionaryRepository(
         return suggestions to recentFavorites
     }
 
+    suspend fun getListSenses(language: Language, senseIds: List<String>): List<ListSenseItem> =
+        withContext(Dispatchers.IO) {
+            dataDbManager.withDictionaryReadOnlyIfExists(language) { db ->
+                if (db == null) return@withDictionaryReadOnlyIfExists emptyList()
+                val uuids = senseIds.mapNotNull { runCatching { Uuid.parse(it) }.getOrNull() }
+                if (uuids.isEmpty()) return@withDictionaryReadOnlyIfExists emptyList()
+                val byId = uuids.chunked(999).flatMap { chunk ->
+                    db.dictionaryQueries.selectSensesForList(chunk).executeAsList()
+                }.associateBy { it.sense_id.toString() }
+                senseIds.mapNotNull { id ->
+                    byId[id]?.let { row ->
+                        ListSenseItem(
+                            senseId = id,
+                            lemma = row.lemma,
+                            definition = row.sense_definition,
+                            learnerLevel = LearnerLevel.valueOf(row.learner_level.name),
+                            frequency = SenseFrequency.valueOf(row.frequency.name),
+                        )
+                    }
+                }
+            }
+        }
+
     /**
      * Gets recent favorite lemmas for the given language, most recent first.
      * Accepts pre-fetched [favorites] to avoid redundant DB reads when the caller
@@ -1186,7 +1245,7 @@ class DictionaryRepository(
                 // Sample non-favorite rows with gaps, then fill remaining from unused candidates.
                 val candidates = batch.filter { it.lemma.lowercase() !in favoriteLemmas }
                 if (candidates.isNotEmpty()) {
-                    val startIndex = (0 until candidates.size).random()
+                    val startIndex = candidates.indices.random()
                     var index = startIndex
                     val step = (2..50).random()
                     while (suggestions.size < count && index < candidates.size) {
@@ -1358,15 +1417,11 @@ class DictionaryRepository(
         val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
         if (onlineOnlyIds.isNotEmpty()) {
             val localLemmaIds: Set<Uuid> = localDbManager.withLocalDictionaryIfExists { localDb ->
-                if (localDb == null) {
-                    emptySet()
-                } else {
-                    localDb.dictionaryQueries
-                        .selectLemmasByIds(onlineOnlyIds)
-                        .executeAsList()
-                        .map { it.id }
-                        .toSet()
-                }
+                localDb?.dictionaryQueries
+                    ?.selectLemmasByIds(onlineOnlyIds)
+                    ?.executeAsList()
+                    ?.map { it.id }
+                    ?.toSet() ?: emptySet()
             }
 
             result = result.map { item ->

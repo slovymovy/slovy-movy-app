@@ -595,7 +595,7 @@ class StudySessionViewModel(
 
     private suspend fun showLoadedCard(sessionCard: SessionCard) {
         currentCard = sessionCard
-        val uiCard = sessionCard.toStudyCardUiState()
+        val uiCard = sessionCard.toStudyCardUiState(loadFavoriteLemmas())
         if (uiCard == null) {
             state = StudySessionUiState.Error(
                 message = UiText.Resource(Res.string.study_error_card_data_missing),
@@ -615,6 +615,18 @@ class StudySessionViewModel(
         )
         if (autoplayEnabled) {
             autoplayFrontAudioText(uiCard)?.let { playAudio(text = it, logClick = false) }
+        }
+    }
+
+    private suspend fun loadFavoriteLemmas(): Set<String> {
+        val lang = language ?: return emptySet()
+        return try {
+            favoritesRepository.getFavoriteLemmas(lang)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to load favorite lemmas for study synonyms lang=$langCode", e)
+            emptySet()
         }
     }
 

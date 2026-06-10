@@ -964,6 +964,7 @@ class SettingsViewModel(
         is UiText.Plain -> text.value
         is UiText.Resource -> getString(text.key, *text.args.toTypedArray())
         is UiText.Plural -> getPluralString(text.key, text.quantity, *text.args.toTypedArray())
+        is UiText.Joined -> text.items.map { resolveUiText(it) }.joinToString(text.separator)
     }
 
     private suspend fun showSnackbar(
@@ -1422,6 +1423,9 @@ fun SettingsScreenContent(
             FeedbackDialog(
                 title = stringResource(Res.string.feedback_dialog_title),
                 commentPlaceholder = stringResource(Res.string.feedback_dialog_placeholder),
+                commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
+                successCopy = null,
+                allowDismissWhileSending = false,
                 comment = state.feedbackComment,
                 email = state.feedbackEmail,
                 isSending = state.feedbackSubmitting,

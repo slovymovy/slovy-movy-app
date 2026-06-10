@@ -28,6 +28,7 @@ object GitHubClient {
     private const val REPO_NAME = "words"
     private const val BASE_PATH = "db-extract"
     private const val WORDS_PATH = "words"
+    private const val LISTS_PATH = "lists"
     private const val DEFAULT_BRANCH = "main"
     private const val PUSH_BRANCH = "push"
     private const val FEEDBACK_LABEL = "feedback"
@@ -98,6 +99,45 @@ object GitHubClient {
         val path = "$BASE_PATH/$folder/$file"
         return loadFileContent(REPO_OWNER, REPO_NAME, path, DEFAULT_BRANCH)
     }
+
+    /**
+     * Resolves the git tree SHA of `lists/{lang}/` on the default branch.
+     *
+     * Walks the tree two levels: root -> `lists` -> `{lang}`. The returned SHA changes
+     * iff any file inside the folder changes, so it is suitable as a single
+     * language-level version for caching.
+     *
+     * @throws org.kohsuke.github.GHFileNotFoundException if the folder is missing.
+     */
+    fun loadLanguageListsTreeSha(lang: String): String {
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        val rootTree = repository.getTree(DEFAULT_BRANCH)
+        val listsEntry = rootTree.tree.firstOrNull { it.path == LISTS_PATH && it.type == "tree" }
+            ?: throw GHFileNotFoundException("Folder '$LISTS_PATH' not found on $DEFAULT_BRANCH")
+        val listsTree = repository.getTree(listsEntry.sha)
+        val langEntry = listsTree.tree.firstOrNull { it.path == lang && it.type == "tree" }
+            ?: throw GHFileNotFoundException("Folder '$LISTS_PATH/$lang' not found on $DEFAULT_BRANCH")
+        return langEntry.sha
+    }
+
+    /**
+     * Lists the immediate children of `lists/{lang}/` on the default branch.
+     */
+    fun listLanguageListsFolder(lang: String): List<GHContent> {
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        return repository.getDirectoryContent("$LISTS_PATH/$lang", DEFAULT_BRANCH)
+    }
+
+    /**
+     * Reads the text content of a GitHub file entry. Handles large files that GitHub
+     * returns with `encoding == "none"` by falling back to the raw download URL.
+     */
+    fun readText(content: GHContent): String = readContentText(content)
+
+    /**
+     * Reads the raw bytes of a GitHub file entry. Used for binary assets like list icons.
+     */
+    fun readBytes(content: GHContent): ByteArray = readContentBinary(content)
 
     /**
      * Loads pre-processed word content from the words repository.
@@ -589,5 +629,22 @@ object GitHubClient {
             }
         }
         return content.read().bufferedReader().use { it.readText() }
+    }
+
+    private fun readContentBinary(content: GHContent): ByteArray {
+        val encoding = content.encoding
+        if (encoding == null || encoding == "none") {
+            val downloadUrl = content.downloadUrl
+                ?: throw IllegalStateException("Missing download URL for content with encoding '$encoding'")
+            val safeUrl = encodeUrl(downloadUrl)
+            return runBlocking {
+                val response = httpClient.get(safeUrl)
+                if (!response.status.isSuccess()) {
+                    throw IllegalStateException("Failed to download $safeUrl: HTTP ${response.status.value}")
+                }
+                response.readRawBytes()
+            }
+        }
+        return content.read().use { it.readBytes() }
     }
 }

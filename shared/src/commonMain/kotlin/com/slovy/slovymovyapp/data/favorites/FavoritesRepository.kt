@@ -7,6 +7,8 @@ import com.slovy.slovymovyapp.db.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -45,6 +47,13 @@ data class CardFamilyDebugCount(
 )
 
 class FavoritesRepository(private val db: AppDatabase) {
+
+    private val distinctLemmasByLangCache = mutableMapOf<Language, Set<String>>()
+    private val distinctLemmaCacheMutex = Mutex()
+
+    companion object {
+        fun normalizeLemma(lemma: String): String = lemma.trim().lowercase()
+    }
 
     @OptIn(ExperimentalTime::class)
     suspend fun add(senseId: String, language: Language, lemma: String) = withContext(Dispatchers.IO) {
@@ -90,6 +99,7 @@ class FavoritesRepository(private val db: AppDatabase) {
             )
             db.favoritesQueries.applyCardScheduleSnapshots(snapshot.cards)
         }
+        invalidateDistinctLemmaCache(snapshot.language)
     }
 
     suspend fun remove(senseId: String, language: Language): RemovedFavoriteSnapshot? =
@@ -125,6 +135,8 @@ class FavoritesRepository(private val db: AppDatabase) {
                     createdAt = favorite.created_at,
                     cards = cards,
                 )
+            }.also { snapshot ->
+                if (snapshot != null) invalidateDistinctLemmaCache(language)
             }
         }
 
@@ -194,10 +206,15 @@ class FavoritesRepository(private val db: AppDatabase) {
             }
     }
 
-    suspend fun getDistinctLemmasByLang(language: Language): Set<String> = withContext(Dispatchers.IO) {
-        db.favoritesQueries.selectDistinctLemmasByLang(lang_code = language.code)
-            .executeAsList()
-            .toSet()
+    /** Distinct favorite lemmas for [language], keyed by [normalizeLemma]. Cached until favorites change. */
+    suspend fun getFavoriteLemmas(language: Language): Set<String> = withContext(Dispatchers.IO) {
+        distinctLemmaCacheMutex.withLock {
+            distinctLemmasByLangCache.getOrPut(language) {
+                db.favoritesQueries.selectDistinctLemmasByLang(lang_code = language.code)
+                    .executeAsList()
+                    .mapTo(HashSet()) { normalizeLemma(it) }
+            }
+        }
     }
 
     suspend fun getCardScheduleDebugStats(language: Language, nowEpochMs: Long): CardScheduleDebugStats =
@@ -289,6 +306,9 @@ class FavoritesRepository(private val db: AppDatabase) {
             db.favoritesQueries.suspendAllCards()
             db.favoritesQueries.deleteAll()
         }
+        distinctLemmaCacheMutex.withLock {
+            distinctLemmasByLangCache.clear()
+        }
     }
 
     // Simulates `shift` of elapsed wall-clock time by moving every stored learning timestamp
@@ -305,7 +325,7 @@ class FavoritesRepository(private val db: AppDatabase) {
     }
 
     @OptIn(ExperimentalTime::class)
-    private fun addFavorite(
+    private suspend fun addFavorite(
         senseId: String,
         language: Language,
         lemma: String,
@@ -336,6 +356,13 @@ class FavoritesRepository(private val db: AppDatabase) {
                     lang_code = language.code,
                 )
             }
+        }
+        invalidateDistinctLemmaCache(language)
+    }
+
+    private suspend fun invalidateDistinctLemmaCache(language: Language) {
+        distinctLemmaCacheMutex.withLock {
+            distinctLemmasByLangCache.remove(language)
         }
     }
 }

@@ -39,6 +39,8 @@ import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.*
+import com.slovy.slovymovyapp.data.lists.ListsService
+import com.slovy.slovymovyapp.data.lists.WordListsRepository
 import com.slovy.slovymovyapp.ui.study.StudySessionScreen
 import com.slovy.slovymovyapp.ui.study.StudySessionViewModel
 import com.slovy.slovymovyapp.ui.theme.AppTheme
@@ -266,6 +268,9 @@ private sealed interface AppDestination {
 
     @Serializable
     data object DataVersionMismatch : AppDestination
+
+    @Serializable
+    data class ListDetail(val languageCode: String, val listId: String) : AppDestination
 }
 
 @OptIn(ExperimentalTime::class)
@@ -363,6 +368,11 @@ fun App(
         }
     val dictionaryClient = remember(platform, dictionaryRepository, localDbManager, dataManager) {
         DictionaryClient(platform, dictionaryRepository, localDbManager, dataManager)
+    }
+    val listsClient = remember(platform) { ListsClient(platform) }
+    val wordListsRepository = remember(appDatabase) { WordListsRepository(appDatabase) }
+    val listsService = remember(wordListsRepository, listsClient) {
+        ListsService(wordListsRepository, listsClient)
     }
     val wordFetchManager = remember(dictionaryClient) {
         WordFetchManager(dictionaryClient)
@@ -644,6 +654,7 @@ fun App(
                     ) {
                         LanguageSetupViewModel(
                             dataManager,
+                            dictionaryClient,
                             initialLearningLanguage = dictionaryLanguage,
                             initialNativeLanguages = nativeLanguages.toSet()
                         )
@@ -726,9 +737,14 @@ fun App(
                                         )
                                     }
                                 },
-                                finalize = { onRecoveryProgress ->
+                                finalize = { onRecoveryProgress, onWordListsSync ->
                                     favoritesReviewCoordinator.invalidateAllIntakeCache()
                                     dictionaryRepository.clearSenseCache()
+                                    // Bring the curated lists for the freshly downloaded language
+                                    // up to date while the finalizing screen is visible.
+                                    onWordListsSync(true)
+                                    listsService.sync(dictLang)
+                                    onWordListsSync(false)
                                     val recoveryJob = favoriteRecoveryController.ensureStarted()
                                     coroutineScope {
                                         val observerJob = launch {
@@ -824,7 +840,7 @@ fun App(
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
-                        SearchViewModel(dictionaryRepository, settingsRepository)
+                        SearchViewModel(dictionaryRepository, settingsRepository, listsService)
                     }
 
                     LaunchedEffect(pendingSearchQuery) {
@@ -869,6 +885,50 @@ fun App(
                                 navController.navigate(AppDestination.Settings)
                         },
                         hasFavoritesToReview = hasFavoritesToReview,
+                        onListClick = { list ->
+                            val lang = viewModel.state.selectedLanguage
+                            if (lang != null) {
+                                navController.navigate(AppDestination.ListDetail(lang.code, list.id))
+                            }
+                        },
+                    )
+                }
+                composable<AppDestination.ListDetail> { backStackEntry ->
+                    val args = backStackEntry.toRoute<AppDestination.ListDetail>()
+                    val lang = Language.fromCodeOrNull(args.languageCode)
+                    if (lang == null) {
+                        LaunchedEffect(Unit) { navController.popBackStack() }
+                        return@composable
+                    }
+                    val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
+                        ListDetailViewModel(
+                            listId = args.listId,
+                            language = lang,
+                            repository = dictionaryRepository,
+                            favoritesRepository = favoritesRepository,
+                            listsService = listsService,
+                            onFavoriteChanged = { _ ->
+                                favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
+                                appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
+                            },
+                        )
+                    }
+                    ListDetailScreen(
+                        viewModel = viewModel,
+                        onBack = { navController.popBackStack() },
+                        onNavigateToWordDetail = { language, lemma, senseId ->
+                            val translationCodes = nativeLanguages
+                                .filter { it != language }
+                                .map { it.code }
+                            navController.navigate(
+                                AppDestination.WordDetail(
+                                    dictionaryLanguageCode = language.code,
+                                    lemma = lemma,
+                                    targetSenseId = senseId,
+                                    translationLanguageCodes = translationCodes,
+                                )
+                            )
+                        },
                     )
                 }
                 composable<AppDestination.Favorites> {

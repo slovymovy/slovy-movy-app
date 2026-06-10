@@ -23,6 +23,7 @@
     <string name="search_section_explore">Ontdekken</string>
     <string name="search_pull_to_refresh_hint">Sleep omlaag voor nieuwe woorden</string>
     <string name="search_section_recently_saved">Onlangs opgeslagen</string>
+    <string name="search_section_lists_for_you">Lijsten voor jou</string>
     <string name="search_empty_start_typing">Begin met typen om te zoeken</string>
     <string name="search_no_dictionary_title">Geen woordenboek gedownload</string>
     <string name="search_no_dictionary_description">Download een woordenboek om te beginnen met zoeken</string>
@@ -42,16 +43,27 @@
     <string name="stats_legend_today">vandaag</string>
     <string name="stats_legend_practiced">geoefend</string>
     <string name="stats_legend_missed">gemist</string>
-    <string name="stats_reviews_section">Herhalingen deze week</string>
+    <string name="stats_active_days_all_time">totaal dagen actief</string>
+    <string name="stats_effort_section">Activiteit deze week</string>
     <plurals name="stats_cards_unit">
         <item quantity="one">kaart</item>
         <item quantity="few">kaarten</item>
         <item quantity="many">kaarten</item>
         <item quantity="other">kaarten</item>
     </plurals>
+    <string name="duration_unit_minutes">min</string>
+    <string name="duration_unit_hours">u</string>
     <string name="stats_today_label">vandaag</string>
     <string name="stats_this_week_label">deze week</string>
     <string name="stats_library_section">Mijn woordenschat</string>
+    <string name="list_detail_load_error">Kan deze lijst niet laden. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="list_detail_empty">Geen woorden uit deze lijst beschikbaar in het gedownloade woordenboek.</string>
+    <plurals name="search_list_word_count">
+        <item quantity="one">%1$d woord</item>
+        <item quantity="few">%1$d woorden</item>
+        <item quantity="many">%1$d woorden</item>
+        <item quantity="other">%1$d woorden</item>
+    </plurals>
     <plurals name="stats_words_label">
         <item quantity="one">woord</item>
         <item quantity="few">woorden</item>
@@ -118,6 +130,7 @@
     <string name="download_content_desc_loading_info">Downloadinformatie laden</string>
     <string name="download_content_desc_preparing">Download voorbereiden</string>
     <string name="download_finalizing_recovering_progress">Favorieten bijwerken (%1$d/%2$d)</string>
+    <string name="download_finalizing_updating_lists">Woordenlijsten bijwerken…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
         <item quantity="one">Favorieten bijwerken (%1$d/%2$d, %3$d mislukt)</item>
         <item quantity="few">Favorieten bijwerken (%1$d/%2$d, %3$d mislukt)</item>
@@ -156,6 +169,16 @@
     <string name="language_setup_choose_learning_first">Kies eerst een leertaal</string>
     <string name="language_setup_step_completed">Stap %1$d voltooid</string>
     <string name="language_setup_update_anytime">Altijd aan te passen via Instellingen</string>
+    <string name="language_setup_no_translation_title">Geen vertaling nodig</string>
+    <string name="language_setup_no_translation_subtitle">Houd alles in de taal die je leert</string>
+    <string name="language_setup_no_translation_accessibility">Geen vertaling nodig. Houd alles in de taal die je leert. Als je dit selecteert, worden gekozen vertaaltalen gewist.</string>
+    <string name="language_setup_request_language_before">Taal niet gevonden?</string>
+    <string name="language_setup_request_language_link">Laat het ons weten</string>
+    <string name="language_setup_request_language_after">, dan voegen we deze toe.</string>
+    <string name="language_setup_request_language_title">Taal aanvragen</string>
+    <string name="language_setup_request_language_placeholder">Welke taal wil je toevoegen?</string>
+    <string name="language_setup_request_language_sent_title">Verzoek verzonden</string>
+    <string name="language_setup_request_language_sent_message">Bedankt! We hebben je taalverzoek ontvangen. Je kunt de voortgang op GitHub volgen.</string>
 
     <string name="settings_title">Instellingen</string>
     <string name="settings_section_languages_i_learn">Talen die ik leer</string>
@@ -218,9 +241,7 @@
     <string name="common_status_online_only">Alleen online</string>
 
     <string name="feedback_dialog_sent_title">Feedback verzonden</string>
-    <string name="feedback_dialog_sent_message">Bedankt! We hebben een tracking-issue voor je feedback aangemaakt. Je
-        kunt de voortgang op GitHub volgen.
-    </string>
+    <string name="feedback_dialog_sent_message">Bedankt! We hebben je feedback ontvangen. Je kunt de voortgang op GitHub volgen.</string>
     <string name="feedback_dialog_track_on_github">Volg op GitHub</string>
     <string name="feedback_dialog_comment_label">Opmerking</string>
     <string name="feedback_dialog_email_label">E-mail (optioneel)</string>
