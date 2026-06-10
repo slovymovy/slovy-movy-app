@@ -10,6 +10,7 @@ import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.uuid.Uuid
 
@@ -114,6 +115,21 @@ open class WordListsRepositoryTest : BaseTest() {
 
             val stored = repo.getList(Language.DUTCH, manySenses.id)
             assertEquals(manySenses.senseIds, stored?.senseIds, "sense ids must keep server order")
+        }
+    }
+
+    @Test
+    fun replace_rejects_duplicate_sense_ids_within_a_list() = runBlocking {
+        withRepository { repo ->
+            repo.replaceLists(Language.DUTCH, "v1", listOf(basicList))
+
+            val duplicated = travelList.copy(senseIds = listOf("sense-9", "sense-9"))
+            assertFailsWith<Exception>("a duplicate sense id within a list must violate the unique index") {
+                repo.replaceLists(Language.DUTCH, "v2", listOf(basicList, duplicated))
+            }
+
+            assertEquals("v1", repo.getVersion(Language.DUTCH), "failed replace must roll back the version")
+            assertEquals(listOf(basicList), repo.getLists(Language.DUTCH), "failed replace must roll back the lists")
         }
     }
 

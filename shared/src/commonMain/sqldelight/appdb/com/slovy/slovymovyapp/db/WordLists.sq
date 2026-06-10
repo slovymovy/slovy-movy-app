@@ -39,6 +39,11 @@ CREATE TABLE word_list_sense (
   PRIMARY KEY (lang_code, list_id, position)
 );
 
+-- A sense may appear only once per list; the list detail screen keys its rows by
+-- sense_id, so a duplicate from a malformed server bundle must fail the replace
+-- transaction instead of reaching the UI.
+CREATE UNIQUE INDEX idx_word_list_sense_unique ON word_list_sense(lang_code, list_id, sense_id);
+
 CREATE TABLE word_list_meta (
   lang_code TEXT NOT NULL PRIMARY KEY,
   version TEXT NOT NULL,

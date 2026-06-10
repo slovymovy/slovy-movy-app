@@ -3,6 +3,8 @@ package com.slovy.slovymovyapp.data.lists
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.ListsClient
 import com.slovy.slovymovyapp.data.remote.RemoteList
+import com.slovy.slovymovyapp.logging.AppLogger
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -24,18 +26,26 @@ class ListsService(
 
     /**
      * Brings the stored lists for [language] up to date with the server. Returns true
-     * when new content was written. Network failures leave the stored rows untouched.
+     * when new content was written. Network failures and bundles rejected by the DB
+     * (e.g. a duplicate sense id within a list) leave the stored rows untouched.
      */
     suspend fun sync(language: Language): Boolean = syncMutex.withLock {
         val remoteVersion = client.getListsVersion(language) ?: return false
         if (remoteVersion == repository.getVersion(language)) return false
         val response = client.getLists(language) ?: return false
-        repository.replaceLists(
-            language = language,
-            version = response.version,
-            lists = response.lists.map { it.toWordList() },
-        )
-        true
+        try {
+            repository.replaceLists(
+                language = language,
+                version = response.version,
+                lists = response.lists.map { it.toWordList() },
+            )
+            true
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Storing lists for ${language.code} failed", e)
+            false
+        }
     }
 
     private fun RemoteList.toWordList() = WordList(
@@ -45,4 +55,8 @@ class ListsService(
         labels = labels,
         senseIds = senseIds,
     )
+
+    private companion object {
+        const val TAG = "ListsService"
+    }
 }

@@ -31,6 +31,8 @@ CREATE TABLE word_list_sense (
   PRIMARY KEY (lang_code, list_id, position)
 );
 
+CREATE UNIQUE INDEX idx_word_list_sense_unique ON word_list_sense(lang_code, list_id, sense_id);
+
 CREATE TABLE word_list_meta (
   lang_code TEXT NOT NULL PRIMARY KEY,
   version TEXT NOT NULL,

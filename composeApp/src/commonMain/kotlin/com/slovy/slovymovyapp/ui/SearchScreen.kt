@@ -186,8 +186,12 @@ class SearchViewModel(
             val savedLang = savedCode?.let { Language.fromCodeOrNull(it) }
             savedSearchLanguage = savedLang
             if (savedLang != null && savedLang in state.availableLanguages && savedLang != state.selectedLanguage) {
-                state = state.copy(selectedLanguage = savedLang)
+                // This bypasses setSelectedLanguage (the preference must not be re-saved),
+                // so drop anything the screen-open refresh loaded for the pre-restore
+                // language and reload lists for the restored one.
+                state = state.copy(selectedLanguage = savedLang, curatedLists = emptyList())
                 queryFlow.value = queryFlow.value.copy(language = savedLang)
+                refreshLists()
             }
             loadSuggestionsForCurrentLanguage()
             suggestionsInitialized = true
